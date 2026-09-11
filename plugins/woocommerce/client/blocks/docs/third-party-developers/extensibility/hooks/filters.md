@@ -25,6 +25,7 @@
 - [woocommerce_apply_with_individual_use_coupon](#woocommerce_apply_with_individual_use_coupon)
 - [woocommerce_blocks_hook_compatibility_additional_data](#woocommerce_blocks_hook_compatibility_additional_data)
 - [woocommerce_blocks_pre_get_routes_from_namespace](#woocommerce_blocks_pre_get_routes_from_namespace)
+- [woocommerce_blocks_product_categories_query_args](#woocommerce_blocks_product_categories_query_args)
 - [woocommerce_blocks_product_filters_selected_items](#woocommerce_blocks_product_filters_selected_items)
 - [woocommerce_blocks_product_grid_add_to_cart_attributes](#woocommerce_blocks_product_grid_add_to_cart_attributes)
 - [woocommerce_blocks_product_grid_is_cacheable](#woocommerce_blocks_product_grid_is_cacheable)
@@ -618,6 +619,32 @@ apply_filters( 'woocommerce_blocks_pre_get_routes_from_namespace', array $routes
 ### Source
 
 - [Blocks/BlockTypes/AbstractBlock.php](../../../../../../src/Blocks/BlockTypes/AbstractBlock.php)
+
+---
+
+## woocommerce_blocks_product_categories_query_args
+
+
+Filters the `get_terms()` arguments used by the Product Categories List block.
+
+```php
+apply_filters( 'woocommerce_blocks_product_categories_query_args', array $args, array $attributes )
+```
+
+### Description
+
+Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output. The `taxonomy` and `fields` arguments are reset after filtering, and a non-array return value is ignored.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $args | array | Arguments passed to `get_terms()`. |
+| $attributes | array | Block attributes. |
+
+### Source
+
+- [Blocks/BlockTypes/ProductCategories.php](../../../../../../src/Blocks/BlockTypes/ProductCategories.php)
 
 ---
 

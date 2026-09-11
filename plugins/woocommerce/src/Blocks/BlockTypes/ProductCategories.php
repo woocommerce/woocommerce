@@ -135,27 +135,38 @@ class ProductCategories extends AbstractDynamicBlock {
 		$hierarchical  = wc_string_to_bool( $attributes['isHierarchical'] );
 		$children_only = wc_string_to_bool( $attributes['showChildrenOnly'] ) && is_product_category();
 
+		$args = [
+			'taxonomy'     => 'product_cat',
+			'hide_empty'   => ! $attributes['hasEmpty'],
+			'pad_counts'   => true,
+			'hierarchical' => true,
+		];
+
 		if ( $children_only ) {
-			$term_id    = get_queried_object_id();
-			$categories = get_terms(
-				'product_cat',
-				[
-					'hide_empty'   => ! $attributes['hasEmpty'],
-					'pad_counts'   => true,
-					'hierarchical' => true,
-					'child_of'     => $term_id,
-				]
-			);
-		} else {
-			$categories = get_terms(
-				'product_cat',
-				[
-					'hide_empty'   => ! $attributes['hasEmpty'],
-					'pad_counts'   => true,
-					'hierarchical' => true,
-				]
-			);
+			$args['child_of'] = get_queried_object_id();
 		}
+
+		/**
+		 * Filters the `get_terms()` arguments used by the Product Categories List block.
+		 * Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output.
+		 * The `taxonomy` and `fields` arguments are reset after filtering, and a non-array return value is ignored.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array $args       Arguments passed to `get_terms()`.
+		 * @param array $attributes Block attributes.
+		 */
+		$filtered_args = apply_filters( 'woocommerce_blocks_product_categories_query_args', $args, $attributes );
+
+		if ( is_array( $filtered_args ) ) {
+			$args = $filtered_args;
+		}
+
+		// The renderer builds product_cat links and reads term objects, so neither is overridable.
+		$args['taxonomy'] = 'product_cat';
+		$args['fields']   = 'all';
+
+		$categories = get_terms( $args );
 
 		if ( ! is_array( $categories ) || empty( $categories ) ) {
 			return [];
@@ -190,17 +201,18 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return array
 	 */
 	protected function build_category_tree( $categories, $children_only ) {
-		$categories_by_parent = [];
+		$parent_id = $children_only ? get_queried_object_id() : 0;
+		$term_ids  = array_flip( array_column( $categories, 'term_id' ) );
 
+		$categories_by_parent = [];
 		foreach ( $categories as $category ) {
-			if ( ! isset( $categories_by_parent[ 'cat-' . $category->parent ] ) ) {
-				$categories_by_parent[ 'cat-' . $category->parent ] = [];
-			}
-			$categories_by_parent[ 'cat-' . $category->parent ][] = $category;
+			// A filter can drop a parent but keep its children. Like core's Walker, show those orphans at the top level.
+			$parent = isset( $term_ids[ $category->parent ] ) ? $category->parent : $parent_id;
+
+			$categories_by_parent[ 'cat-' . $parent ][] = $category;
 		}
 
-		$parent_id = $children_only ? get_queried_object_id() : 0;
-		$tree      = $categories_by_parent[ 'cat-' . $parent_id ]; // these are top level categories. So all parents.
+		$tree = $categories_by_parent[ 'cat-' . $parent_id ] ?? [];
 		unset( $categories_by_parent[ 'cat-' . $parent_id ] );
 
 		foreach ( $tree as $category ) {
