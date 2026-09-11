@@ -55,7 +55,7 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 	public function handle_wp_logout_capture(): void {
 		$this->captured_cart = null;
 
-		if ( ! $this->cart_should_be_preserved() ) {
+		if ( ! $this->should_cart_be_preserved() ) {
 			return;
 		}
 
@@ -173,7 +173,7 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 	 *
 	 * @return bool True if the cart should be preserved, false if it should be emptied.
 	 */
-	private function cart_should_be_preserved(): bool {
+	private function should_cart_be_preserved(): bool {
 		$behavior = get_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
 
 		return CartBehaviorOnLogout::PRESERVE === $behavior;
