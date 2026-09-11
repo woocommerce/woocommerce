@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Tests\Helpers\ImageAttachmentTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -11,12 +12,7 @@ use WC_Unit_Test_Case;
  */
 class ProductCategoriesTest extends WC_Unit_Test_Case {
 
-	/**
-	 * Term ID of the top level "Clothing" category, which has no products of its own.
-	 *
-	 * @var int
-	 */
-	private int $clothing_id;
+	use ImageAttachmentTrait;
 
 	/**
 	 * Term ID of "Hoodies", a child of "Clothing" with one product.
@@ -24,13 +20,6 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	 * @var int
 	 */
 	private int $hoodies_id;
-
-	/**
-	 * Term ID of the top level "Music" category, which has one product.
-	 *
-	 * @var int
-	 */
-	private int $music_id;
 
 	/**
 	 * Build the category tree the tests assert against.
@@ -42,13 +31,21 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->clothing_id = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
-		$this->hoodies_id  = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $this->clothing_id ) )['term_id'];
-		$this->music_id    = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
+		$clothing_id      = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
+		$this->hoodies_id = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $clothing_id ) )['term_id'];
+		$music_id         = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
 		wp_insert_term( 'Empty', 'product_cat' );
 
 		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $this->hoodies_id ), 'product_cat' );
-		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $this->music_id ), 'product_cat' );
+		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $music_id ), 'product_cat' );
+	}
+
+	/**
+	 * Remove the image files create_image_attachment() wrote into the uploads directory.
+	 */
+	public function tearDown(): void {
+		$this->remove_added_uploads();
+		parent::tearDown();
 	}
 
 	/**
@@ -102,24 +99,7 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	 * @testdox Should render a category image when hasImage is true, falling back to a placeholder.
 	 */
 	public function test_has_image_true(): void {
-		$attachment_id = $this->factory->attachment->create_object(
-			'hoodie.jpg',
-			0,
-			array(
-				'post_mime_type' => 'image/jpeg',
-				'post_type'      => 'attachment',
-			)
-		);
-		wp_update_attachment_metadata(
-			$attachment_id,
-			array(
-				'file'   => 'hoodie.jpg',
-				'width'  => 100,
-				'height' => 100,
-				'sizes'  => array(),
-			)
-		);
-		update_term_meta( $this->hoodies_id, 'thumbnail_id', $attachment_id );
+		update_term_meta( $this->hoodies_id, 'thumbnail_id', $this->create_image_attachment( 100, 100, 'hoodie.jpg' ) );
 
 		$markup = $this->render_product_categories( '{"hasImage":true}' );
 
