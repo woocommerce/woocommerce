@@ -67321,12 +67321,6 @@ parameters:
 			path: src/StoreApi/Legacy.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Legacy.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -67383,24 +67377,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_status\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url_raw expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept array\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept default value of type array\.$#'
-			identifier: property.defaultValue
 			count: 1
 			path: src/StoreApi/Payments/PaymentResult.php
 
@@ -68119,12 +68095,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68319,12 +68289,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:validate_billing_email_matches_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
@@ -68937,12 +68901,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:validate_additional_fields\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
-
-		-
-			message: '#^Parameter \#1 \$payment_details of method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:prepare_payment_details_for_response\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
 
