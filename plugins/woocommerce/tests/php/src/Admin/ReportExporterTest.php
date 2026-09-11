@@ -701,6 +701,24 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cap is the store's local time on a store set to a manual UTC offset.
+	 */
+	public function test_report_period_cap_uses_the_store_utc_offset(): void {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', 10 );
+
+		$capped = ReportExporter::freeze_report_period( 'orders', array( 'after' => '2020-01-01T00:00:00' ) );
+
+		$this->assertStringEndsWith( '+10:00', $capped['before'], 'The cap should spell out the store offset.' );
+		$this->assertEqualsWithDelta(
+			time(),
+			( new \DateTime( $capped['before'], new \DateTimeZone( wc_timezone_string() ) ) )->getTimestamp(),
+			5,
+			'Read as the report data store reads it, the cap should be the request time, not the UTC clock.'
+		);
+	}
+
+	/**
 	 * @testdox A failed batch is logged and emailed as a failure instead of being silently dropped.
 	 */
 	public function test_failed_batch_is_reported(): void {

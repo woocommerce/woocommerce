@@ -9,7 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
@@ -180,12 +179,7 @@ class ReportExporter {
 			return $report_args;
 		}
 
-		/**
-		 * The request time, in the store timezone.
-		 *
-		 * @var \WC_DateTime $now
-		 */
-		$now = TimeInterval::default_before();
+		$now = time();
 
 		if ( ! empty( $report_args['before'] ) && is_string( $report_args['before'] ) ) {
 			try {
@@ -196,12 +190,15 @@ class ReportExporter {
 				return $report_args;
 			}
 
-			if ( $before->getTimestamp() <= $now->getTimestamp() ) {
+			if ( $before->getTimestamp() <= $now ) {
 				return $report_args;
 			}
 		}
 
-		$report_args['before'] = $now->format( 'Y-m-d\TH:i:s' );
+		// Local wall time with its offset spelled out. The data store reads a bare time as local, and on a
+		// store set to a manual UTC offset the only local clock available is wp_date(): WC_DateTime keeps
+		// that offset out of format(). The offset also pins down the repeated hour when DST ends.
+		$report_args['before'] = wp_date( 'Y-m-d\TH:i:sP', $now );
 
 		return $report_args;
 	}
