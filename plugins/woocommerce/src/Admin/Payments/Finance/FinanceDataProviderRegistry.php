@@ -62,8 +62,6 @@ final class FinanceDataProviderRegistry {
 			return false;
 		}
 
-		// TODO: Validate that the payment gateway is permitted to provide finance data.
-
 		if ( $this->is_registered( $gateway_id ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,

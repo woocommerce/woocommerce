@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * ReportExporter Class.
@@ -146,7 +147,7 @@ class ReportExporter {
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
-				$email_action_args = array( get_current_user_id(), $export_id, $report_type );
+				$email_action_args = array( get_current_user_id(), $export_id, $report_type, $report_args );
 				self::schedule_action( 'email_report_download_link', $email_action_args );
 			}
 		}
@@ -167,7 +168,7 @@ class ReportExporter {
 		$report_args['page'] = $page_number;
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
-		$exporter->set_filename( "wc-{$report_type}-report-export-{$export_id}" );
+		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 		$exporter->generate_file();
 
 		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
@@ -220,30 +221,168 @@ class ReportExporter {
 	}
 
 	/**
-	 * Serve the export file.
+	 * Get the name a report export is stored under.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return string
 	 */
-	public static function download_export_file() {
-		/*
-		 * A read-only download of a report the requesting user is already allowed to view, gated on
-		 * the view_woocommerce_reports capability, so a nonce would only prevent nuisance CSRF. The
-		 * action is compared verbatim against a fixed name, and set_filename() applies
-		 * sanitize_file_name(), which keeps the path inside the reports directory. A nonce is not an
-		 * option here either: nonces last 24 hours, and this link is emailed and kept for a week.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	private static function get_export_filename( $report_type, $export_id ) {
+		return "wc-{$report_type}-report-export-{$export_id}";
+	}
+
+	/**
+	 * Get the URL a finished report export is downloaded from.
+	 *
+	 * @since 11.2.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @param array  $report_args Optional. Report parameters the export was queued with. When they name
+	 *                            a date range, the link carries it so the download is named after it.
+	 * @return string
+	 */
+	public static function get_download_url( $report_type, $export_id, $report_args = array() ) {
+		$query_args = array(
+			'action'   => self::DOWNLOAD_EXPORT_ACTION,
+			'filename' => self::get_export_filename( $report_type, $export_id ),
+		);
+
+		$date_range = self::get_export_date_range( $report_args );
+		if ( $date_range ) {
+			$query_args['date_range'] = $date_range['after'] . '-to-' . $date_range['before'];
+		}
+
+		return add_query_arg( $query_args, admin_url() );
+	}
+
+	/**
+	 * Get the date range a report export covers.
+	 *
+	 * Reports are not all limited to a period. Stock, for one, has no date range at all.
+	 *
+	 * @since 11.2.0
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return string[] The range's `after` and `before` dates as `Y-m-d`, or an empty array when the report has no range.
+	 */
+	public static function get_export_date_range( $report_args ) {
+		if ( ! is_array( $report_args ) ) {
+			return array();
+		}
+
+		$date_range = array();
+
+		foreach ( array( 'after', 'before' ) as $bound ) {
+			// Report args arrive from a REST request, so they hold whatever the caller sent. Take the
+			// date as written rather than converting it: the report reads these as store local time.
+			// The shape alone is not enough, since a date like 2025-06-31 would roll over to July 1.
+			if (
+				empty( $report_args[ $bound ] ) ||
+				! is_string( $report_args[ $bound ] ) ||
+				! preg_match( '/^(\d{4}-\d{2}-\d{2})/', $report_args[ $bound ], $matches ) ||
+				! TimeUtil::is_valid_date( $matches[1], 'Y-m-d' )
+			) {
+				return array();
+			}
+
+			$date_range[ $bound ] = $matches[1];
+		}
+
+		return $date_range;
+	}
+
+	/**
+	 * Get the date range a report export covers, formatted for display.
+	 *
+	 * @since 11.2.0
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return string Date range in the site's date format, or an empty string when the report has no range.
+	 */
+	public static function get_export_date_range_label( $report_args ) {
+		$date_range = self::get_export_date_range( $report_args );
+
+		if ( ! $date_range ) {
+			return '';
+		}
+
+		$after  = self::format_date_range_bound( $date_range['after'] );
+		$before = self::format_date_range_bound( $date_range['before'] );
+
+		if ( '' === $after || '' === $before ) {
+			return '';
+		}
+
+		if ( $after === $before ) {
+			return $after;
+		}
+
+		/* translators: 1: first day of the period a report covers, 2: last day of that period. */
+		return sprintf( _x( '%1$s - %2$s', 'Report date range: from-to', 'woocommerce' ), $after, $before );
+	}
+
+	/**
+	 * Format one end of a report's date range for display.
+	 *
+	 * @param string $date Date as `Y-m-d`.
+	 * @return string The date in the store's date format, or an empty string when it cannot be read.
+	 */
+	private static function format_date_range_bound( $date ) {
+		// Read in the store's own timezone, so the date reads back as the merchant picked it and a
+		// date format that names the timezone names theirs rather than UTC. Midday is a safe anchor.
+		$parsed = \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $date . ' 12:00:00', wp_timezone() );
+
+		if ( false === $parsed ) {
+			return '';
+		}
+
+		return (string) wp_date( wc_date_format(), $parsed->getTimestamp() );
+	}
+
+	/**
+	 * Build the exporter a download request is asking for.
+	 *
+	 * A read-only download of a report the requesting user is already allowed to view, gated on
+	 * the view_woocommerce_reports capability, so a nonce would only prevent nuisance CSRF. The
+	 * action is compared verbatim against a fixed name, and set_filename() applies
+	 * sanitize_file_name(), which keeps the path inside the reports directory. A nonce is not an
+	 * option here either: nonces last 24 hours, and this link is emailed and kept for a week.
+	 *
+	 * @param array $request Unslashed request parameters, expected to be `$_GET`.
+	 * @return ReportCSVExporter|null The exporter for the requested export, or null when the request asks for no export.
+	 */
+	private static function get_requested_export( $request ) {
 		if (
-			! isset( $_GET['action'] ) ||
-			self::DOWNLOAD_EXPORT_ACTION !== wp_unslash( $_GET['action'] ) ||
-			empty( $_GET['filename'] ) ||
-			! is_string( $_GET['filename'] ) ||
+			! is_array( $request ) ||
+			! isset( $request['action'] ) ||
+			self::DOWNLOAD_EXPORT_ACTION !== $request['action'] ||
+			empty( $request['filename'] ) ||
+			! is_string( $request['filename'] ) ||
 			! current_user_can( 'view_woocommerce_reports' )
 		) {
-			return;
+			return null;
 		}
 
 		$exporter = new ReportCSVExporter();
-		$exporter->set_filename( wp_unslash( $_GET['filename'] ) );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$exporter->set_filename( $request['filename'] );
+
+		// The stored name only identifies the export, so the emailed link carries the report's date
+		// range to name the download after the period it covers. It never reaches the file path.
+		if ( ! empty( $request['date_range'] ) && is_string( $request['date_range'] ) ) {
+			$exporter->set_download_suffix( $request['date_range'] );
+		}
+
+		return $exporter;
+	}
+
+	/**
+	 * Serve the export file.
+	 */
+	public static function download_export_file() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read in get_requested_export(), which documents why there is no nonce and validates every value it reads.
+		$exporter = self::get_requested_export( wp_unslash( $_GET ) );
+
+		if ( ! $exporter ) {
+			return;
+		}
 
 		// Say so rather than serving an empty CSV: the exporter creates a blank file for a path
 		// that no longer exists, which reads as a report with no results.
@@ -272,20 +411,19 @@ class ReportExporter {
 	 * @param int    $user_id User ID that requested the email.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param array  $report_args Optional. Report parameters the export was queued with. Exports queued
+	 *                            before WooCommerce 11.2.0 run without them.
 	 * @return void
 	 */
-	public static function email_report_download_link( $user_id, $export_id, $report_type ) {
+	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
 		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( 100 === $percent_complete ) {
-			$query_args   = array(
-				'action'   => self::DOWNLOAD_EXPORT_ACTION,
-				'filename' => "wc-{$report_type}-report-export-{$export_id}",
-			);
-			$download_url = add_query_arg( $query_args, admin_url() );
+			$download_url = self::get_download_url( $report_type, $export_id, $report_args );
 
 			\WC_Emails::instance();
 			$email = new ReportCSVEmail();
+			$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
 			$email->trigger( $user_id, $report_type, $download_url );
 		}
 	}

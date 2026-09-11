@@ -72,17 +72,26 @@ class FakeFinanceDataProvider implements FinanceDataProviderInterface, BalancePr
 	public ?FinanceDataQuery $last_query = null;
 
 	/**
+	 * The title of the payment provider.
+	 *
+	 * @var string
+	 */
+	public string $title;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string     $gateway_id           The payment gateway id.
 	 * @param array|null $supported_data_types The declared data types, or null for balance and payouts at version 1.
+	 * @param string     $title                The title of the payment provider.
 	 */
-	public function __construct( string $gateway_id = 'mock', ?array $supported_data_types = null ) {
+	public function __construct( string $gateway_id = 'mock', ?array $supported_data_types = null, string $title = 'Mock' ) {
 		$this->gateway_id           = $gateway_id;
 		$this->supported_data_types = $supported_data_types ?? array(
 			FinanceDataSource::BALANCE => 1,
 			FinanceDataSource::PAYOUTS => 1,
 		);
+		$this->title                = $title;
 	}
 
 	/**
@@ -92,6 +101,15 @@ class FakeFinanceDataProvider implements FinanceDataProviderInterface, BalancePr
 	 */
 	public function get_payment_gateway_id(): string {
 		return $this->gateway_id;
+	}
+
+	/**
+	 * Get the title of the payment provider.
+	 *
+	 * @return string
+	 */
+	public function get_title(): string {
+		return $this->title;
 	}
 
 	/**

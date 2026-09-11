@@ -25,14 +25,23 @@ class FakeBaseFinanceDataProvider implements FinanceDataProviderInterface {
 	private array $supported_data_types;
 
 	/**
+	 * The title of the payment provider.
+	 *
+	 * @var string
+	 */
+	private string $title;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $gateway_id           The payment gateway id.
 	 * @param array  $supported_data_types The declared data types.
+	 * @param string $title                The title of the payment provider.
 	 */
-	public function __construct( string $gateway_id, array $supported_data_types ) {
+	public function __construct( string $gateway_id, array $supported_data_types, string $title ) {
 		$this->gateway_id           = $gateway_id;
 		$this->supported_data_types = $supported_data_types;
+		$this->title                = $title;
 	}
 
 	/**
@@ -60,5 +69,14 @@ class FakeBaseFinanceDataProvider implements FinanceDataProviderInterface {
 	 */
 	public function get_icon_url(): string {
 		return '';
+	}
+
+	/**
+	 * Get the title of the payment provider.
+	 *
+	 * @return string
+	 */
+	public function get_title(): string {
+		return $this->title;
 	}
 }
