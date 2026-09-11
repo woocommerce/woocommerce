@@ -244,6 +244,8 @@ class ProductPageIntegration {
 			'single-product/back-in-stock-form.php',
 			array(
 				'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
+				// Kept so template overrides that still read it don't raise an undefined-variable warning.
+				'show_checkbox'    => false,
 				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
 				'button_class'     => $button_class,
 				'is_visible'       => $is_visible,

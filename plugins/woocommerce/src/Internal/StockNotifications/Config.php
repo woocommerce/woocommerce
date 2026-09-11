@@ -162,6 +162,20 @@ class Config {
 	}
 
 	/**
+	 * Whether an account is created on signup.
+	 *
+	 * Guest sign-ups no longer create accounts, so this always returns false.
+	 *
+	 * @deprecated 11.2.0 Account creation on sign-up was removed.
+	 *
+	 * @return bool
+	 */
+	public static function creates_account_on_signup(): bool {
+		wc_deprecated_function( __METHOD__, '11.2.0' );
+		return false;
+	}
+
+	/**
 	 * How long to keep pending notifications before deleting them (in days).
 	 *
 	 * @return int
