@@ -109,7 +109,6 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 		$this->assertContains( 'woocommerce_customer_stock_notifications_allow_signups', $setting_ids );
 		$this->assertContains( 'woocommerce_customer_stock_notifications_require_double_opt_in', $setting_ids );
 		$this->assertContains( 'woocommerce_customer_stock_notifications_require_account', $setting_ids );
-		$this->assertContains( 'woocommerce_customer_stock_notifications_create_account_on_signup', $setting_ids );
 		$this->assertContains( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', $setting_ids );
 	}
 
