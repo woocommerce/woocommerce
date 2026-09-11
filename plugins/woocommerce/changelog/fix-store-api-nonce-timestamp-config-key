@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix the Store API nonce bootstrap timestamp config key so the nonce middleware can compare nonce freshness correctly on cached pages.
+Fix the Store API nonce bootstrap timestamp config key so nonce freshness is compared correctly on cached pages, and always trust nonces returned in Store API response headers over a stored nonce whose timestamp is ahead of the server's.
