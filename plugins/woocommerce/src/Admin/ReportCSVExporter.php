@@ -195,19 +195,21 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Create the empty export body, unless it is already there.
+	 * Start the export from a clean, empty body with no completion mark.
 	 *
 	 * Called once when the export is queued, so the pages can append in whatever order the queue
 	 * runs them. The parent creates the body on page 1 only, and a page that ran earlier wrote nothing.
+	 * An export ID can be reused through the `woocommerce_admin_export_id` filter, so a previous
+	 * export's rows and its `.headers` mark must not carry over.
 	 *
 	 * @since 11.2.0
 	 * @return bool Whether the body exists.
 	 */
 	public function create_export_file() {
-		if ( ! file_exists( $this->get_file_path() ) ) {
-			@file_put_contents( $this->get_file_path(), '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			@chmod( $this->get_file_path(), 0664 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
-		}
+		wp_delete_file( $this->get_headers_row_file_path() );
+
+		@file_put_contents( $this->get_file_path(), '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		@chmod( $this->get_file_path(), 0664 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 
 		return file_exists( $this->get_file_path() );
 	}

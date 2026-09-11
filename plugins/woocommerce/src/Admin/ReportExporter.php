@@ -140,6 +140,8 @@ class ReportExporter {
 	 * @return int Number of items to export.
 	 */
 	public static function queue_report_export( $export_id, $report_type, $report_args = array(), $send_email = false ) {
+		// Progress is read back from the queue by the JSON-quoted ID, which an int would not match.
+		$export_id   = (string) $export_id;
 		$report_args = self::freeze_report_period( $report_type, $report_args );
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );

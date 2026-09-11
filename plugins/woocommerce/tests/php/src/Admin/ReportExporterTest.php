@@ -1066,6 +1066,63 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An export queued under a reused ID starts from a clean file.
+	 */
+	public function test_reused_export_id_starts_from_a_clean_file(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The first export completed.' );
+		$this->assertCount( 3, file( $path ), 'The first export holds its three rows.' );
+
+		// A filter that hands out a constant ID queues the next export under the same name.
+		$this->create_reported_orders( 1 );
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'The previous export must not be served as the new one.' );
+		$this->assertSame( '', file_get_contents( $path ), 'The previous export\'s rows must not carry over.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The new export completed.' );
+		$this->assertCount( 4, file( $path ), 'The new export holds its own rows and nothing else.' );
+	}
+
+	/**
+	 * @testdox An export ID given as a number is tracked in the queue like one given as a string.
+	 */
+	public function test_export_id_is_stored_as_a_string(): void {
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$progress = ReportExporter::get_export_progress( (string) $export_id );
+
+		$this->assertNotNull( $progress, 'The queued pages should be found under the export ID.' );
+		$this->assertSame( 2, $progress['pages'], 'Three orders at two per batch should queue two pages.' );
+	}
+
+	/**
 	 * @testdox The email waits for pages that a queued chunk has not scheduled yet.
 	 */
 	public function test_email_waits_for_pages_a_chunk_has_yet_to_queue(): void {
