@@ -92,6 +92,21 @@ describe( 'Store API nonce middleware', () => {
 		} );
 	} );
 
+	it( 'refreshes a wrong stored timestamp when a trusted response carries the same nonce', () => {
+		storeNonce( 'same-nonce', 999999 );
+
+		const apiFetch = loadMiddleware( 'same-nonce', 100 );
+		apiFetch.setNonce( {
+			Nonce: 'same-nonce',
+			'Nonce-Timestamp': '300',
+		} );
+
+		expect( getStoredNonce() ).toEqual( {
+			nonce: 'same-nonce',
+			timestamp: 300,
+		} );
+	} );
+
 	it( 'accepts nonces from a plain headers object', () => {
 		const apiFetch = loadMiddleware( 'page-nonce', 100 );
 		apiFetch.setNonce( {

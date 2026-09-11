@@ -41,8 +41,11 @@ export const isStoreApiRequest = ( options ) => {
  *                                  that may have been served from a cache.
  */
 const updateNonce = ( nonce, timestamp, trusted = false ) => {
-	// If the "new" nonce matches the current nonce, we don't need to update.
-	if ( nonce === currentNonce ) {
+	// If the "new" nonce matches the current nonce, we don't need to update,
+	// unless it comes from a live server response: the stored timestamp may
+	// be wrong (e.g. ahead of server time) and must be refreshed even when
+	// the nonce itself has not rotated.
+	if ( nonce === currentNonce && ! trusted ) {
 		return;
 	}
 
