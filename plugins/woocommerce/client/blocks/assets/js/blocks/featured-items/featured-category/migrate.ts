@@ -22,7 +22,6 @@ export function migrateToCover(
 		align,
 		ariaLabel,
 		categoryId,
-		source,
 		metadata,
 		lock,
 		anchor,
@@ -60,14 +59,9 @@ export function migrateToCover(
 		( ! align || align === 'none' ) && ( attributes.height || 500 ) <= 800
 			? 'large'
 			: 'full';
-	const imageBinding = {
-		source: 'woocommerce/term-image',
-		args: {
-			size,
-			noPlaceholder: true,
-			...( customImage ? { attachmentId: attributes.mediaId } : {} ),
-		},
-	};
+	const imageUrl =
+		attributes.mediaSrc ||
+		getSetting< string >( 'placeholderImgSrcFullSize', '' );
 	const cover = createBlock(
 		'core/cover',
 		{
@@ -81,9 +75,7 @@ export function migrateToCover(
 				.join( ' ' ),
 			backgroundType: 'image',
 			id: attributes.mediaId || undefined,
-			url:
-				attributes.mediaSrc ||
-				getSetting< string >( 'placeholderImgSrcFullSize', '' ),
+			url: imageUrl,
 			alt: attributes.alt || '',
 			contentPosition: `center ${ attributes.contentAlign || 'center' }`,
 			dimRatio: attributes.dimRatio ?? 50,
@@ -119,7 +111,15 @@ export function migrateToCover(
 				? {}
 				: {
 						metadata: {
-							bindings: { id: imageBinding, url: imageBinding },
+							'woocommerce/featured-category-image': {
+								id: attributes.mediaId || 0,
+								url: imageUrl,
+								size,
+								noPlaceholder: true,
+								...( customImage
+									? { attachmentId: attributes.mediaId }
+									: {} ),
+							},
 						},
 				  } ),
 		},
@@ -141,7 +141,6 @@ export function migrateToCover(
 			align,
 			ariaLabel,
 			categoryId,
-			source: source || ( categoryId ? 'selected' : 'context' ),
 			metadata,
 			lock,
 			anchor,

@@ -3,12 +3,12 @@
  */
 import {
 	createBlock,
+	getBlockType,
 	parse,
 	registerBlockType,
 	serialize,
 } from '@wordpress/blocks';
 import { registerCoreBlocks } from '@wordpress/block-library';
-import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -16,6 +16,8 @@ import { InnerBlocks } from '@wordpress/block-editor';
 import metadata from '../block.json';
 import deprecated from '../deprecated';
 import { migrateToCover } from '../migrate';
+import { register } from '../../register';
+import productMetadata from '../../featured-product/block.json';
 
 beforeAll( () => {
 	registerCoreBlocks();
@@ -36,15 +38,48 @@ beforeAll( () => {
 			save: () => null,
 		} );
 	}
-	registerBlockType( metadata.name, {
-		...metadata,
-		category: 'text',
+	register( () => null, { attributes: {} }, metadata, {
 		deprecated,
-		save: () => <InnerBlocks.Content />,
+		category: 'text',
+	} );
+	register( () => null, { attributes: {} }, productMetadata, {
+		category: 'text',
 	} );
 } );
 
 describe( 'Featured Category automatic migration', () => {
+	it( 'uses metadata supports without restoring parent styling controls', () => {
+		const category = getBlockType( metadata.name );
+		expect( category.supports ).toMatchObject( metadata.supports );
+		for ( const support of [
+			'color',
+			'spacing',
+			'filter',
+			'__experimentalBorder',
+		] ) {
+			expect( category.supports[ support ] ).toBeUndefined();
+		}
+		expect( getBlockType( productMetadata.name ).supports ).toMatchObject(
+			productMetadata.supports
+		);
+	} );
+
+	it( 'parses legacy styling through the frozen deprecation supports', () => {
+		const block = parse(
+			'<!-- wp:woocommerce/featured-category {"categoryId":42,"backgroundColor":"cyan-bluish-gray","textColor":"white","borderColor":"vivid-red","style":{"spacing":{"padding":"12px"},"border":{"radius":"8px"}}} --><!-- wp:woocommerce/category-title /--><!-- /wp:woocommerce/featured-category -->'
+		)[ 0 ];
+		expect( block.isValid ).toBe( true );
+		expect( block.innerBlocks[ 0 ].attributes ).toMatchObject( {
+			backgroundColor: 'cyan-bluish-gray',
+			textColor: 'white',
+			borderColor: 'vivid-red',
+			style: {
+				spacing: { padding: '12px' },
+				border: { radius: '8px' },
+			},
+		} );
+	} );
+
 	it.each( [ 'left', 'center', 'right' ] )(
 		'preserves %s positioning, natural image sizing and appearance',
 		( position ) => {
@@ -85,7 +120,12 @@ describe( 'Featured Category automatic migration', () => {
 				},
 			} );
 			expect( cover.attributes.className ).toContain( 'natural-image' );
-			expect( cover.attributes.metadata.bindings.url.args ).toEqual( {
+			expect( cover.attributes.metadata.bindings ).toBeUndefined();
+			expect(
+				cover.attributes.metadata[
+					'woocommerce/featured-category-image'
+				]
+			).toMatchObject( {
 				size: 'large',
 				noPlaceholder: true,
 			} );
@@ -104,19 +144,23 @@ describe( 'Featured Category automatic migration', () => {
 		}
 	);
 
-	it.each( [ true, false ] )(
+	it.each( [ true, false, undefined ] )(
 		'migrates the oldest format directly, with showDesc=%s',
 		( showDesc ) => {
 			const saved =
-				'<!-- wp:woocommerce/featured-category {"categoryId":42,"editMode":false,"showDesc":' +
-				showDesc +
-				'} --><!-- wp:paragraph --><p>Custom content</p><!-- /wp:paragraph --><!-- /wp:woocommerce/featured-category -->';
+				'<!-- wp:woocommerce/featured-category ' +
+				JSON.stringify( {
+					categoryId: 42,
+					editMode: false,
+					showDesc,
+				} ) +
+				' --><!-- wp:paragraph --><p>Custom content</p><!-- /wp:paragraph --><!-- /wp:woocommerce/featured-category -->';
 			const block = parse( saved )[ 0 ];
 			expect( block.attributes.layout ).toBe( 'cover' );
 			const cover = block.innerBlocks[ 0 ];
 			expect( cover.name ).toBe( 'core/cover' );
 			expect( cover.innerBlocks.map( ( child ) => child.name ) ).toEqual(
-				showDesc
+				showDesc !== false
 					? [
 							'woocommerce/category-title',
 							'woocommerce/category-description',
@@ -147,7 +191,9 @@ describe( 'Featured Category automatic migration', () => {
 			{ categoryId: 42, mediaId: 99, align: 'wide', imageFit: 'cover' },
 			[]
 		);
-		expect( cover.attributes.metadata.bindings.url.args ).toEqual( {
+		expect(
+			cover.attributes.metadata[ 'woocommerce/featured-category-image' ]
+		).toMatchObject( {
 			attachmentId: 99,
 			size: 'full',
 			noPlaceholder: true,

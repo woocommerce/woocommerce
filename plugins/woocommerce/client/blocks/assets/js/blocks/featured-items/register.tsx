@@ -1,6 +1,3 @@
-// Disabling because of `__experimental` property names.
-/* eslint-disable @typescript-eslint/naming-convention */
-
 /**
  * External dependencies
  */
@@ -15,38 +12,10 @@ import type { BlockConfiguration } from '@wordpress/blocks';
  */
 import { Edit } from './edit';
 
-type CSSDirections = 'top' | 'right' | 'bottom' | 'left';
-
-interface ExtendedBlockSupports {
-	supports: {
-		color?: {
-			background: string;
-			gradients: boolean;
-			link: boolean;
-			text: string;
-		};
-		spacing?: {
-			margin: boolean | CSSDirections[];
-			padding: boolean | CSSDirections[];
-			__experimentalDefaultControls?: {
-				margin?: boolean;
-				padding?: boolean;
-			};
-			__experimentalSkipSerialization?: boolean;
-		};
-		__experimentalBorder?: {
-			color: boolean;
-			radius: boolean;
-			width: boolean;
-			__experimentalSkipSerialization?: boolean;
-		};
-	};
-}
-
 export function register(
 	Block: FunctionComponent,
 	example: { attributes: Record< string, unknown > },
-	metadata: BlockConfiguration & ExtendedBlockSupports,
+	metadata: BlockConfiguration,
 	settings: Partial< BlockConfiguration >
 ): void {
 	const DEFAULT_SETTINGS = {
@@ -66,25 +35,7 @@ export function register(
 				default: getSetting( 'defaultHeight', 500 ),
 			},
 		},
-		supports: {
-			...metadata.supports,
-			color: {
-				background: metadata.supports?.color?.background,
-				text: metadata.supports?.color?.text,
-			},
-			spacing: {
-				padding: metadata.supports?.spacing?.padding,
-
-				__experimentalDefaultControls: {
-					padding:
-						metadata.supports?.spacing
-							?.__experimentalDefaultControls,
-				},
-				__experimentalSkipSerialization:
-					metadata.supports?.spacing?.__experimentalSkipSerialization,
-			},
-			__experimentalBorder: metadata?.supports?.__experimentalBorder,
-		},
+		supports: metadata.supports,
 	};
 
 	const DEFAULT_EXAMPLE = {

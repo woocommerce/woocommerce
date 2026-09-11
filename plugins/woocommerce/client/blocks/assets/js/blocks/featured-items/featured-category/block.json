@@ -10,32 +10,7 @@
 		},
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
-		"color": {
-			"background": true,
-			"text": true
-		},
-		"html": false,
-		"filter": {
-			"duotone": true
-		},
-		"spacing": {
-			"padding": true,
-			"__experimentalDefaultControls": {
-				"padding": true
-			},
-			"__experimentalSkipSerialization": true
-		},
-		"__experimentalBorder": {
-			"color": true,
-			"radius": true,
-			"width": true,
-			"__experimentalDefaultControls": {
-				"color": true,
-				"radius": true,
-				"width": true
-			},
-			"__experimentalSkipSerialization": true
-		}
+		"html": false
 	},
 	"attributes": {
 		"alt": {
@@ -91,9 +66,6 @@
 		"layout": {
 			"type": "string"
 		},
-		"source": {
-			"type": "string"
-		},
 		"termTaxonomy": {
 			"type": "string"
 		},
@@ -109,18 +81,12 @@
 			"default": null
 		}
 	},
-	"selectors": {
-		"filter": {
-			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
-		}
-	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"usesContext": [ "termId", "termTaxonomy", "taxonomy" ],
+	"usesContext": [ "termId", "termTaxonomy" ],
 	"providesContext": {
 		"termId": "categoryId",
-		"termTaxonomy": "termTaxonomy",
-		"taxonomy": "termTaxonomy"
+		"termTaxonomy": "termTaxonomy"
 	}
 }

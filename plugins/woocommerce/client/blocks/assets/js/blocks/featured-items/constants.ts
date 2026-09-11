@@ -49,14 +49,6 @@ const FEATURED_CATEGORY_CONTENT_TEMPLATE = (
 				{
 					text: __( 'Shop now', 'woocommerce' ),
 					url: category.permalink,
-					metadata: {
-						bindings: {
-							url: {
-								source: 'core/term-data',
-								args: { field: 'link' },
-							},
-						},
-					},
 				},
 			],
 		],
@@ -86,9 +78,9 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 				minHeightUnit: 'px',
 				contentPosition: 'center center',
 				metadata: {
-					bindings: {
-						id: { source: 'woocommerce/term-image' },
-						url: { source: 'woocommerce/term-image' },
+					'woocommerce/featured-category-image': {
+						id: imageId || 0,
+						url: imageUrl,
 					},
 				},
 			},

@@ -14,79 +14,6 @@ class FeaturedCategory extends FeaturedItem {
 	protected $block_name = 'featured-category';
 
 	/**
-	 * Initialize the block and its term image binding.
-	 *
-	 * @since 11.2.0
-	 */
-	protected function initialize(): void {
-		parent::initialize();
-
-		add_filter( 'block_bindings_supported_attributes_core/cover', array( $this, 'handle_cover_supported_binding_attributes' ) );
-
-		if ( function_exists( 'register_block_bindings_source' ) ) {
-			register_block_bindings_source(
-				'woocommerce/term-image',
-				array(
-					'label'              => __( 'Product category image', 'woocommerce' ),
-					'uses_context'       => array( 'termId', 'termTaxonomy', 'taxonomy' ),
-					'get_value_callback' => array( $this, 'get_term_image_binding_value' ),
-				)
-			);
-		}
-	}
-
-	/**
-	 * Allow Cover image attributes to use block bindings.
-	 *
-	 * @internal
-	 *
-	 * @param string[] $attributes Supported attribute names.
-	 * @return string[]
-	 */
-	public function handle_cover_supported_binding_attributes( $attributes ) {
-		$attributes[] = 'id';
-		$attributes[] = 'url';
-
-		return array_values( array_unique( $attributes ) );
-	}
-
-	/**
-	 * Resolve a product category image for a bound Cover attribute.
-	 *
-	 * @internal
-	 *
-	 * @param array     $source_args    Binding source arguments.
-	 * @param \WP_Block $block_instance Bound block instance.
-	 * @param string    $attribute_name Bound attribute name.
-	 * @return int|string|null
-	 */
-	public function get_term_image_binding_value( $source_args, $block_instance, $attribute_name ) {
-		$term_id  = absint( $block_instance->context['termId'] ?? 0 );
-		$taxonomy = $block_instance->context['termTaxonomy'] ?? $block_instance->context['taxonomy'] ?? '';
-
-		$attachment_id = absint( $source_args['attachmentId'] ?? 0 );
-		if ( ! $attachment_id && ( ! $term_id || 'product_cat' !== $taxonomy ) ) {
-			return null;
-		}
-
-		$image_id = $attachment_id ? $attachment_id : absint( get_term_meta( $term_id, 'thumbnail_id', true ) );
-		$size     = is_string( $source_args['size'] ?? null ) ? $source_args['size'] : 'full';
-		if ( 'id' === $attribute_name ) {
-			return $image_id ? $image_id : null;
-		}
-
-		if ( 'url' === $attribute_name ) {
-			if ( ! $image_id && ! empty( $source_args['noPlaceholder'] ) ) {
-				return '';
-			}
-			$image_url = $image_id ? wp_get_attachment_image_url( $image_id, $size ) : wc_placeholder_img_src();
-			return $image_url ? $image_url : null;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Get block attributes.
 	 *
 	 * @return array
@@ -121,26 +48,6 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
-	 * Adds the category inherited from block context when none is selected.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param array     $attributes Block attributes.
-	 * @param \WP_Block $block      Block instance.
-	 * @return array
-	 */
-	private function resolve_context_attributes( $attributes, $block ) {
-		if ( empty( $attributes['categoryId'] ) && 'selected' !== ( $attributes['source'] ?? '' ) ) {
-			$taxonomy = $block->context['termTaxonomy'] ?? $block->context['taxonomy'] ?? '';
-			if ( 'product_cat' === $taxonomy ) {
-				$attributes['categoryId'] = absint( $block->context['termId'] ?? 0 );
-			}
-		}
-
-		return $attributes;
-	}
-
-	/**
 	 * Render all Featured Category versions using Cover markup.
 	 *
 	 * @since 11.2.0
@@ -151,8 +58,6 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$attributes = $this->resolve_context_attributes( $attributes, $block );
-
 		$category = $this->get_item( $attributes );
 		if ( ! $category ) {
 			return '';
@@ -165,9 +70,10 @@ class FeaturedCategory extends FeaturedItem {
 		wp_enqueue_style( 'wp-block-cover' );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
-		$cover     = $this->find_bound_cover( $block->parsed_block['innerBlocks'] ?? array() );
+		$cover     = $this->find_managed_cover( $block->parsed_block['innerBlocks'] ?? array() );
 		if ( $cover && $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__cover' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
-			$this->update_cover_image_markup( $processor, $category, $cover['attrs']['metadata']['bindings']['url']['args'] ?? array(), strpos( $cover['attrs']['className'] ?? '', 'wc-block-featured-category__natural-image' ) !== false );
+			$image = $cover['attrs']['metadata']['woocommerce/featured-category-image'] ?? $cover['attrs']['metadata']['bindings']['url']['args'] ?? array();
+			$this->update_cover_image_markup( $processor, $category, $image, strpos( $cover['attrs']['className'] ?? '', 'wc-block-featured-category__natural-image' ) !== false );
 		}
 
 		$content = $processor->get_updated_html();
@@ -255,7 +161,12 @@ class FeaturedCategory extends FeaturedItem {
 		$overlay            = ! empty( $attributes['overlayGradient'] ) ? 'background:' . $attributes['overlayGradient'] : 'background-color:' . ( $attributes['overlayColor'] ?? '#000000' );
 		$overlay            = '<span aria-hidden="true" class="wp-block-cover__background has-background-dim" style="' . esc_attr( $overlay . ';opacity:' . $dim / 100 ) . '"></span>';
 		$historical_content = $this->render_attributes( $category, $attributes );
-		$markup             = '<div class="' . esc_attr( trim( $classes ) ) . '" style="' . esc_attr( $styles ) . '">' . $image . $overlay . '<div class="wp-block-cover__inner-container">' . $historical_content . '<div class="wp-block-group wc-block-featured-category__inner-blocks" style="padding:0 48px 16px">' . $content . '</div></div></div>';
+		// Core uses the first HTML chunk to locate the inner wrapper for layout spacing.
+		$inner_content = array(
+			'<div class="' . esc_attr( trim( $classes ) ) . '" style="' . esc_attr( $styles ) . '">' . $image . $overlay . '<div class="wp-block-cover__inner-container">',
+			$historical_content . '<div class="wp-block-group wc-block-featured-category__inner-blocks" style="padding:0 48px 16px">' . $content . '</div>',
+			'</div></div>',
+		);
 
 		// Cover's PHP callback expects saved HTML; attributes alone cannot create it.
 		return render_block(
@@ -267,41 +178,51 @@ class FeaturedCategory extends FeaturedItem {
 					'style'            => $attributes['style'] ?? array(),
 				),
 				'innerBlocks'  => array(),
-				'innerHTML'    => $markup,
-				'innerContent' => array( $markup ),
+				'innerHTML'    => implode( '', $inner_content ),
+				'innerContent' => $inner_content,
 			)
 		);
 	}
 
 	/**
-	 * Find the marked Cover using the term image binding.
+	 * Find the direct Cover whose image is still managed by Featured Category.
 	 *
 	 * @param array[] $blocks Parsed blocks.
 	 * @return array|null
 	 */
-	private function find_bound_cover( $blocks ) {
+	private static function find_managed_cover( $blocks ) {
 		foreach ( $blocks as $block ) {
-			$source  = $block['attrs']['metadata']['bindings']['url']['source'] ?? '';
-			$classes = explode( ' ', $block['attrs']['className'] ?? '' );
-			if ( 'core/cover' === ( $block['blockName'] ?? '' ) && 'woocommerce/term-image' === $source && in_array( 'wc-block-featured-category__cover', $classes, true ) ) {
-				return $block;
+			if ( 'core/cover' !== ( $block['blockName'] ?? '' ) ) {
+				continue;
 			}
-
-			$bound_cover = $this->find_bound_cover( $block['innerBlocks'] ?? array() );
-			if ( null !== $bound_cover ) {
-				return $bound_cover;
+			$attributes = $block['attrs'] ?? array();
+			$bindings   = $attributes['metadata']['bindings'] ?? array();
+			$image      = $attributes['metadata']['woocommerce/featured-category-image'] ?? null;
+			$classes    = explode( ' ', $attributes['className'] ?? '' );
+			if ( ! in_array( 'wc-block-featured-category__cover', $classes, true ) || ! empty( $attributes['useFeaturedImage'] ) || 'image' !== ( $attributes['backgroundType'] ?? 'image' ) || isset( $bindings['__default'] ) ) {
+				return null;
 			}
+			foreach ( array( 'id', 'url' ) as $attribute ) {
+				if ( isset( $bindings[ $attribute ] ) && 'woocommerce/term-image' !== ( $bindings[ $attribute ]['source'] ?? '' ) ) {
+					return null;
+				}
+			}
+			if ( is_array( $image ) ) {
+				return ( $attributes['id'] ?? 0 ) === ( $image['id'] ?? 0 ) && ( $attributes['url'] ?? '' ) === ( $image['url'] ?? '' ) ? $block : null;
+			}
+			// Read previews saved by the binding-based implementation without registering a global source.
+			return 'woocommerce/term-image' === ( $bindings['url']['source'] ?? '' ) ? $block : null;
 		}
 
 		return null;
 	}
 
 	/**
-	 * Update a bound Cover image with the current category thumbnail.
+	 * Update the managed Cover image with the current category thumbnail.
 	 *
 	 * @param \WP_HTML_Tag_Processor $processor HTML processor positioned on the image.
 	 * @param \WP_Term               $category  Product category.
-	 * @param array                  $args Image binding arguments.
+	 * @param array                  $args Managed image settings.
 	 * @param bool                   $natural Whether to retain natural image dimensions.
 	 */
 	private function update_cover_image_markup( $processor, $category, $args = array(), $natural = false ): void {
