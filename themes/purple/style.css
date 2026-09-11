@@ -357,11 +357,6 @@ a.wc-block-components-product-name:hover {
 	}
 }
 
-.wp-block-woocommerce-product-review-content p {
-	margin-top: var(--wp--preset--spacing--20);
-	margin-bottom: 0;
-}
-
 .wp-block-woocommerce-product-gallery-large-image-next-previous-is-layout-flex {
 	gap: 0;
 }

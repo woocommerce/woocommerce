@@ -110,8 +110,8 @@
 <div class="wp-block-woocommerce-product-reviews"><!-- wp:woocommerce/product-reviews-title {"showProductTitle":false,"showReviewsCount":false,"level":3,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"fontSize":"x-large"} /-->
 
 <!-- wp:woocommerce/product-review-template -->
-<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"var:preset|spacing|20"},"margin":{"top":"0","bottom":"var:preset|spacing|90"}}}} -->
-<div class="wp-block-columns" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--90)"><!-- wp:column {"width":"100px"} -->
+<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"var:preset|spacing|20"},"margin":{"top":"0","bottom":"var:preset|spacing|70"}}}} -->
+<div class="wp-block-columns" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--70)"><!-- wp:column {"width":"100px"} -->
 <div class="wp-block-column" style="flex-basis:100px"><!-- wp:woocommerce/product-review-author-name {"isLink":false,"style":{"spacing":{"padding":{"bottom":"0","top":"0.25em"}}}} /--></div>
 <!-- /wp:column -->
 
@@ -137,6 +137,6 @@
 <!-- wp:woocommerce/product-reviews-pagination-next /-->
 <!-- /wp:woocommerce/product-reviews-pagination -->
 
-<!-- wp:woocommerce/product-review-form {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} /--></div>
+<!-- wp:woocommerce/product-review-form {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} /--></div>
 <!-- /wp:woocommerce/product-reviews --></div>
 <!-- /wp:group -->
