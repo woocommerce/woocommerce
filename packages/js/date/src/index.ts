@@ -890,18 +890,18 @@ export const getDateDifferenceInDays = (
 /**
  * Get the previous date for either the previous period of year.
  *
- * @param {string}                 date     - Base date
- * @param {string}                 date1    - primary start
- * @param {string}                 date2    - secondary start
+ * @param {moment.MomentInput}     date     - Base date
+ * @param {moment.MomentInput}     date1    - primary start
+ * @param {moment.MomentInput}     date2    - secondary start
  * @param {string}                 compare  - `previous_period`  or `previous_year`
  * @param {moment.unitOfTime.Diff} interval - interval
  * @param {SecondaryShift}         [shift]  - how the secondary range was derived, see `DataPickerOptions.shift`. Takes precedence over `compare` when given.
  * @return {Object}  - Calculated date
  */
 export const getPreviousDate = (
-	date: string,
-	date1: string,
-	date2: string,
+	date: moment.MomentInput,
+	date1: moment.MomentInput,
+	date2: moment.MomentInput,
 	compare = 'previous_year',
 	interval: moment.unitOfTime.Diff | moment.DurationInputArg2,
 	shift?: SecondaryShift
