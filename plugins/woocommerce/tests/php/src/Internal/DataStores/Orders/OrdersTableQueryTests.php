@@ -843,6 +843,39 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries support the "$status" special status.
+	 *
+	 * @dataProvider cpt_special_status_provider
+	 * @param string $status Special status value.
+	 */
+	public function test_cpt_order_queries_support_special_status_values( string $status ): void {
+		$this->toggle_cot_feature_and_usage( false );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => $status,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids );
+	}
+
+	/**
+	 * Provides special status values supported by CPT order queries.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function cpt_special_status_provider(): array {
+		return array(
+			'any' => array( 'any' ),
+			'all' => array( 'all' ),
+		);
+	}
+
+	/**
 	 * Provides order storage configurations.
 	 *
 	 * @return array<string, array{bool}>
