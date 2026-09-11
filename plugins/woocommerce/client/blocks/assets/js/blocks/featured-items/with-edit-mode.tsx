@@ -45,6 +45,7 @@ type EditModeRequiredAttributes = {
 interface EditModeRequiredProps< T > {
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
 	clientId: string;
+	effectiveCategoryId?: number;
 	debouncedSpeak: ( label: string ) => void;
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
@@ -61,6 +62,7 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
+			effectiveCategoryId,
 			debouncedSpeak,
 			name,
 			setAttributes,
@@ -78,7 +80,8 @@ export const withEditMode =
 
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
-			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
+			( name === BLOCK_NAMES.featuredCategory &&
+				( attributes.categoryId || effectiveCategoryId ) );
 
 		// Only show edit mode for newly inserted blocks without existing selection
 		const [ editMode, setEditMode ] = useState< boolean >(
@@ -96,7 +99,7 @@ export const withEditMode =
 		const itemId =
 			name === BLOCK_NAMES.featuredProduct
 				? attributes?.productId
-				: attributes?.categoryId;
+				: attributes?.categoryId || effectiveCategoryId;
 
 		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
 			itemId,

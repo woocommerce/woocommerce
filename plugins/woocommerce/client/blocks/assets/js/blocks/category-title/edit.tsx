@@ -38,6 +38,7 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
+		taxonomy?: string;
 	};
 }
 
@@ -64,25 +65,28 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		level === 0 ? 'p' : `h${ level }`
 	) as keyof JSX.IntrinsicElements;
 
-	const { termId, termTaxonomy } = context;
+	const { termId, termTaxonomy, taxonomy } = context;
+	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
 		( select ) => {
-			if ( ! termId ) return false;
+			if ( ! termId ) {
+				return false;
+			}
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
+				name: effectiveTaxonomy,
 				id: termId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
-		termTaxonomy || 'product_cat',
+		effectiveTaxonomy,
 		'name',
 		termId ? String( termId ) : undefined
 	);
@@ -108,18 +112,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	const link = useSelect(
 		( select ) => {
-			if ( ! termId ) return undefined;
+			if ( ! termId ) {
+				return undefined;
+			}
 			const record = select(
 				coreStore
 			).getEntityRecord< WP_REST_API_Category >(
 				'taxonomy',
-				termTaxonomy || 'product_cat',
+				effectiveTaxonomy,
 				termId
 			);
 
 			return record?.link;
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const blockProps = useBlockProps( {
