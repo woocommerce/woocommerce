@@ -27,7 +27,9 @@ class RefundDoubleCountToolNoticeTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_applicable_before_the_tool_has_run(): void {
 		$this->assertTrue( RefundDoubleCountToolNotice::is_applicable() );
-		$this->assertInstanceOf( Note::class, RefundDoubleCountToolNotice::get_note() );
+		$note = RefundDoubleCountToolNotice::get_note();
+		$this->assertInstanceOf( Note::class, $note );
+		$this->assertStringEndsWith( '#tool_' . Analytics::REFUND_DOUBLE_COUNT_TOOL_ID, $note->get_actions()[0]->query, 'The action should scroll to the tool row' );
 	}
 
 	/**
