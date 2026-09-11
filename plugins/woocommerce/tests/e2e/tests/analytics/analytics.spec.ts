@@ -483,6 +483,58 @@ test(
 );
 
 test(
+	'set custom date range on revenue report',
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+	},
+	async ( { page } ) => {
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
+		);
+
+		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
+
+		// A range that predates every spec's orders keeps the totals at a stable
+		// zero whatever else the shared serial store holds, while still driving
+		// the custom-range UI end to end.
+		await page.getByRole( 'button', { name: 'Month to date' } ).click();
+		await page.getByText( 'Custom', { exact: true } ).click();
+		await page
+			.getByPlaceholder( 'mm/dd/yyyy' )
+			.first()
+			.fill( '01/01/2022' );
+		await page.getByPlaceholder( 'mm/dd/yyyy' ).last().fill( '01/30/2022' );
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Custom (Jan 1 - 30, 2022) vs. Previous year (Jan 1 - 30, 2021)',
+			} )
+		).toBeVisible();
+		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
+	}
+);
+
+test(
+	'scope orders report via advanced product filter',
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+	},
+	async ( { page } ) => {
+		// Every one of this spec's ten orders contains productIds[ 0 ] and no
+		// other order in the shared store does, so these totals are isolated.
+		await page.goto(
+			`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders&filter=advanced&product_includes=${ productIds[ 0 ] }`
+		);
+
+		await expect( summaryTile( page, 'Orders', '10' ) ).toBeVisible();
+		await expect(
+			summaryTile( page, 'Net sales', '$1,229.30' )
+		).toBeVisible();
+	}
+);
+
+test(
 	'use filter by single product on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
@@ -575,5 +627,55 @@ test(
 				.getByText( 'Your settings have been successfully saved.' )
 				.first()
 		).toBeVisible();
+	}
+);
+
+test(
+	'shows the import status bar and its manual trigger in scheduled mode',
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+	},
+	async ( { page, request, restApi } ) => {
+		// Scheduled mode is the only mode that offers the manual trigger. The
+		// beforeAll forced immediate mode so the report data would import per order.
+		await restApi.post(
+			'wc-analytics/settings/wc_admin/woocommerce_analytics_scheduled_import',
+			{ value: 'yes' }
+		);
+
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+		);
+
+		// Turning scheduled mode on schedules a recurring batch import that is due
+		// immediately, and wp-env has no cron to run it. Until it runs, the status
+		// bar renders its busy state instead of the trigger. So drain the Action
+		// Scheduler queue through the same `process-waiting-actions` mu-plugin this
+		// spec's data setup uses, then re-read the page. The reload races the drain,
+		// which is why this polls rather than reading once. Both inner assertions
+		// are short: a long one would spend the whole budget on a single attempt
+		// instead of draining the queue again.
+		await expect( async () => {
+			await request.get( '?process-waiting-actions' );
+			await page.reload();
+			await expect( page.getByText( 'Data status' ) ).toBeVisible( {
+				timeout: 2_000,
+			} );
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Manually trigger analytics data import',
+				} )
+			).toBeVisible( { timeout: 2_000 } );
+		} ).toPass( {
+			timeout: 30_000,
+			intervals: [ 1_000, 2_000, 3_000 ],
+		} );
+
+		// Leave the option as this file's beforeAll set it. The afterAll restores
+		// the install default either way; this is for whatever is appended here next.
+		await restApi.post(
+			'wc-analytics/settings/wc_admin/woocommerce_analytics_scheduled_import',
+			{ value: 'no' }
+		);
 	}
 );
