@@ -53,7 +53,9 @@ Additional module requests on top of WordPress [Dependency Extraction Webpack Pl
 
 ### `@woocommerce/settings`
 
-The `@woocommerce/settings` request is not the [`@woocommerce/settings` npm package](https://www.npmjs.com/package/@woocommerce/settings). That package is deprecated and should not be installed. The plugin maps the request to the `wc.wcSettings` global and adds `wc-settings` to your script dependencies; WooCommerce core loads that script, and the data it exposes, whenever a script depends on the `wc-settings` handle. The source lives in [`plugins/woocommerce/client/blocks/packages/public-api/settings`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/settings).
+The `@woocommerce/settings` request is not the [`@woocommerce/settings` npm package](https://www.npmjs.com/package/@woocommerce/settings). That package is deprecated and should not be installed. The plugin maps the request to the `wc.wcSettings` module and adds `wc-settings` to your script dependencies; WooCommerce core loads that script whenever a script depends on the `wc-settings` handle, and prints the data it reads into the `wcSettings` global right before it. The source lives in [`plugins/woocommerce/client/blocks/packages/public-api/settings`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/settings).
+
+Register scripts that depend on `wc-settings` in the footer. The settings data is collected during the request, so a script running in the header would read it before it is complete. WooCommerce moves such scripts to the footer for you and logs a console warning.
 
 Use `getSetting` to read data that WooCommerce, or your own PHP code, registered on the server. See [Data flow: server to client](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/reference/overview-of-data-flow.md#server-php-to-client-javascript) for how to register that data.
 

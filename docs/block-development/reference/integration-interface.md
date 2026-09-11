@@ -193,7 +193,7 @@ Now, when we load a page containing either block, we should see the scripts we r
 
 We associated some data with the extension in the `get_script_data` method of our interface, we need to know how to get this!
 
-On the client, read it with `getSetting` from the `wc.wcSettings` global, which the `wc-settings` script provides. Make sure your script lists `wc-settings` as a dependency, otherwise the global is not available. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
+On the client, read it with `getSetting` from the `wc.wcSettings` global, which the `wc-settings` script provides. Make sure your script lists `wc-settings` as a dependency and loads in the footer, as the example above does with the last `wp_register_script` argument; WooCommerce moves header scripts that depend on `wc-settings` to the footer and logs a console warning. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
 
 ```js
 const { getSetting } = window.wc.wcSettings;
