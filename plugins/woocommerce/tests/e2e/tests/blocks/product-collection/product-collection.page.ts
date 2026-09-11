@@ -832,6 +832,17 @@ class ProductCollectionPage {
 		}
 	}
 
+	async getProductPermalinkPaths(): Promise< string[] > {
+		return this.productTitles
+			.getByRole( 'link' )
+			.evaluateAll( ( links ) =>
+				links.map(
+					( link ) =>
+						new URL( ( link as HTMLAnchorElement ).href ).pathname
+				)
+			);
+	}
+
 	private async initializeLocatorsForEditor() {
 		this.productTemplate = this.editor.canvas.locator(
 			SELECTORS.productTemplate
