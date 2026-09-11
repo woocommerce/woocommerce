@@ -96,8 +96,14 @@ test.describe( 'Shopper → Extensibility', () => {
 							const response = await fetch(
 								'/wp-json/wc/store/v1/cart'
 							);
+							if ( ! response.ok ) {
+								return null;
+							}
 							const cart = await response.json();
-							return cart.shipping_address.postcode;
+							const postcode = cart?.shipping_address?.postcode;
+							return typeof postcode === 'string'
+								? postcode
+								: null;
 						} ),
 					{ timeout: 15000 }
 				)
