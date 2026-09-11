@@ -85,7 +85,8 @@ trait CheckoutTrait {
 	 * Fires an action hook instructing active payment gateways to process the payment for an order and provide a result.
 	 *
 	 * @throws RouteException If the order is missing, or on payment error.
-	 * @throws \Throwable If a gateway raised an Error rather than an Exception, and no payment was taken.
+	 * @throws \Throwable If a gateway raised an Error before payment was taken. It is rethrown as it was before this
+	 *                    method caught it: an Error message is not written for the shopper.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -145,7 +146,6 @@ trait CheckoutTrait {
 				return;
 			}
 
-			// Errors are not part of the gateway contract, so let them surface as they did before.
 			if ( ! $e instanceof \Exception ) {
 				throw $e;
 			}
