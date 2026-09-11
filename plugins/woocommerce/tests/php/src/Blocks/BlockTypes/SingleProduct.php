@@ -11,6 +11,169 @@ use WC_Helper_Product;
  */
 class SingleProduct extends \WP_UnitTestCase {
 	/**
+	 * @testdox Query results and the following Single Product title retain their own products.
+	 * @testWith ["woocommerce/product-collection", "woocommerce/product-template"]
+	 *           ["core/query", "core/post-template"]
+	 * @param string $query_block Query block name.
+	 * @param string $template_block Template block name.
+	 */
+	public function test_nested_query_context( string $query_block, string $template_block ): void {
+		$selected = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Selected product' ) );
+		$first    = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Query first' ) );
+		$second   = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Query second' ) );
+		$page_id  = self::factory()->post->create( array( 'post_title' => 'Containing page' ) );
+		$this->go_to( get_permalink( $page_id ) );
+		$previous_post = $GLOBALS['post'];
+		$location      = null;
+		add_filter(
+			'render_block_woocommerce/product-template',
+			static function ( $content, $parsed_block, $instance ) use ( &$location ) {
+				$location = $instance->context['productCollectionLocation'] ?? null;
+				return $content;
+			},
+			10,
+			3
+		);
+		$query = wp_json_encode(
+			array(
+				'query' => array(
+					'isProductCollectionBlock'      => 'woocommerce/product-collection' === $query_block,
+					'woocommerceHandPickedProducts' => array( $first->get_id(), $second->get_id() ),
+					'postType'                      => 'product',
+					'perPage'                       => 2,
+					'pages'                         => 0,
+					'offset'                        => 0,
+					'order'                         => 'asc',
+					'orderBy'                       => 'id',
+					'inherit'                       => false,
+					'include'                       => array( $first->get_id(), $second->get_id() ),
+					'exclude'                       => array( $selected->get_id() ),
+				),
+			)
+		);
+		$html  = do_blocks(
+			sprintf(
+				'<!-- wp:group --><div><!-- wp:woocommerce/single-product {"productId":%1$d} --><div>
+				<!-- wp:%2$s %3$s --><div><!-- wp:%4$s --><!-- wp:post-title {"isLink":true} /--><!-- /wp:%4$s --></div><!-- /wp:%2$s -->
+				<!-- wp:post-title /--></div><!-- /wp:woocommerce/single-product --></div><!-- /wp:group --><!-- wp:post-title /-->',
+				$selected->get_id(),
+				$query_block,
+				$query,
+				$template_block
+			)
+		);
+		$this->assertSame( array( 'Query first', 'Query second', 'Selected product', 'Containing page' ), $this->get_element_texts( $html, array( 'tag_name' => 'H2' ) ), 'Each title should use the nearest product/query context.' );
+		$this->assertSame( $previous_post, $GLOBALS['post'], 'Rendering must restore the containing post.' );
+		if ( 'woocommerce/product-collection' === $query_block ) {
+			$this->assertSame( 'product', $location['type'] ?? null, 'The collection must recognize its enclosing Single Product.' );
+			$this->assertSame( $selected->get_id(), $location['sourceData']['productId'] ?? null, 'Collection filters must use the selected product as their source.' );
+		}
+	}
+
+	/**
+	 * @testdox Nested and consecutive Single Product blocks restore their enclosing context.
+	 */
+	public function test_nested_single_product_context(): void {
+		$outer = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Outer product' ) );
+		$inner = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Inner product' ) );
+		$page  = self::factory()->post->create( array( 'post_title' => 'Containing page' ) );
+		$this->go_to( get_permalink( $page ) );
+		$previous_post = $GLOBALS['post'];
+		$html          = do_blocks(
+			sprintf(
+				'<!-- wp:group --><div><!-- wp:woocommerce/single-product {"productId":%1$d} --><div>
+				<!-- wp:post-title /--><!-- wp:woocommerce/single-product {"productId":%2$d} --><div><!-- wp:post-title /--></div><!-- /wp:woocommerce/single-product -->
+				<!-- wp:post-title /--></div><!-- /wp:woocommerce/single-product -->
+				<!-- wp:woocommerce/single-product {"productId":%2$d} --><div><!-- wp:post-title /--></div><!-- /wp:woocommerce/single-product -->
+				<!-- wp:post-title /--></div><!-- /wp:group -->',
+				$outer->get_id(),
+				$inner->get_id()
+			)
+		);
+		$this->assertSame( array( 'Outer product', 'Inner product', 'Outer product', 'Inner product', 'Containing page' ), $this->get_element_texts( $html, array( 'tag_name' => 'H2' ) ), 'Nested selections must not replace their enclosing product.' );
+		$this->assertSame( $previous_post, $GLOBALS['post'], 'Rendering must restore the containing post.' );
+	}
+
+	/**
+	 * @testdox A short-circuited title leaves the enclosing post and product unchanged.
+	 */
+	public function test_short_circuited_title_preserves_globals(): void {
+		$selected = WC_Helper_Product::create_simple_product();
+		$page_id  = self::factory()->post->create();
+		$this->go_to( get_permalink( $page_id ) );
+		$previous_post    = $GLOBALS['post'];
+		$previous_product = $GLOBALS['product'] ?? null;
+		add_filter(
+			'pre_render_block',
+			static function ( $content, $block ) {
+				return 'core/post-title' === $block['blockName'] ? '<h2>Cached title</h2>' : $content;
+			},
+			10,
+			2
+		);
+		$html = do_blocks( sprintf( '<!-- wp:woocommerce/single-product {"productId":%d} --><div><!-- wp:post-title /--></div><!-- /wp:woocommerce/single-product -->', $selected->get_id() ) );
+		$this->assertStringContainsString( '<h2>Cached title</h2>', $html );
+		$this->assertSame( $previous_post, $GLOBALS['post'] );
+		$this->assertSame( $previous_product, $GLOBALS['product'] ?? null );
+	}
+
+	/**
+	 * @testdox Product excerpts use their own context and preserve the enclosing globals.
+	 */
+	public function test_post_excerpt_preserves_globals(): void {
+		$selected = WC_Helper_Product::create_simple_product( true, array( 'short_description' => 'Selected excerpt' ) );
+		$outer    = WC_Helper_Product::create_simple_product( true, array( 'short_description' => 'Outer excerpt' ) );
+		$this->go_to( get_permalink( $outer->get_id() ) );
+		$GLOBALS['wp_query']->the_post();
+		$previous_post    = $GLOBALS['post'];
+		$previous_product = $GLOBALS['product'];
+
+		$html = do_blocks(
+			sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%d} --><div><!-- wp:post-excerpt /--></div><!-- /wp:woocommerce/single-product --><!-- wp:post-excerpt /-->',
+				$selected->get_id()
+			)
+		);
+
+		$excerpts = $this->get_element_texts(
+			$html,
+			array(
+				'tag_name'   => 'P',
+				'class_name' => 'wp-block-post-excerpt__excerpt',
+			)
+		);
+		$this->assertSame( array( 'Selected excerpt', 'Outer excerpt' ), $excerpts );
+		$this->assertSame( $previous_post, $GLOBALS['post'] );
+		$this->assertSame( $previous_product, $GLOBALS['product'] );
+	}
+
+	/**
+	 * Collect text from matching headings or excerpt paragraphs, including inline markup.
+	 *
+	 * @param string $html Rendered blocks.
+	 * @param array  $query Tag processor query.
+	 * @return string[] Element texts in document order.
+	 */
+	private function get_element_texts( string $html, array $query ): array {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$texts     = array();
+		while ( $processor->next_tag( $query ) ) {
+			$tag  = $processor->get_tag();
+			$text = '';
+			while ( $processor->next_token() ) {
+				if ( $processor->is_tag_closer() && $tag === $processor->get_tag() ) {
+					break;
+				}
+				if ( '#text' === $processor->get_token_type() ) {
+					$text .= $processor->get_modifiable_text();
+				}
+			}
+			$texts[] = trim( $text );
+		}
+		return $texts;
+	}
+
+	/**
 	 * Creates a simple product with a featured image and gallery images.
 	 *
 	 * @param int   $gallery_count Number of gallery-only attachments (in addition to the featured image).
