@@ -236,7 +236,7 @@ class ReportExporter {
 			// The pages ran inline, in order, in this one process, so the row count reaching 100 on a page means
 			// every later page is empty. Nothing else marks an inline export complete, so it is done here.
 			if ( 100 === $exporter->get_percent_complete() ) {
-				self::finalize_export( $report_type, $export_id );
+				self::finalize_or_fail( $report_type, $export_id );
 			} else {
 				self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
 			}
@@ -246,7 +246,7 @@ class ReportExporter {
 		// This page is still "in progress" in the queue while it runs, so count it as done here.
 		$pages_done = $progress['complete'] + 1;
 		if ( $pages_done >= $progress['pages'] && 0 === $progress['failed'] ) {
-			self::finalize_export( $report_type, $export_id );
+			self::finalize_or_fail( $report_type, $export_id );
 			return;
 		}
 
@@ -336,18 +336,43 @@ class ReportExporter {
 	/**
 	 * Mark an export as complete once every queued page has been written.
 	 *
+	 * The mark is a file. Reporting 100 without it would email a link the download route refuses.
+	 *
 	 * @internal
 	 * @since 11.2.0
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return void
+	 * @return bool Whether the export is marked complete.
 	 */
 	public static function finalize_export( $report_type, $export_id ) {
 		$exporter = new ReportCSVExporter( $report_type );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-		$exporter->write_headers_row_file();
+
+		if ( ! $exporter->write_headers_row_file() ) {
+			wc_get_logger()->error(
+				sprintf( '%1$s report export %2$s could not be marked complete: %3$s could not be written.', $report_type, $export_id, $exporter->get_filename() . '.headers' ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			return false;
+		}
 
 		self::update_export_percentage_complete( $report_type, $export_id, 100 );
+
+		return true;
+	}
+
+	/**
+	 * Mark an export as complete from within a page action, failing the action when the mark cannot be written.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @throws \RuntimeException When the completion mark could not be written, so the page fails like a page that was lost.
+	 * @return void
+	 */
+	private static function finalize_or_fail( $report_type, $export_id ) {
+		if ( ! self::finalize_export( $report_type, $export_id ) ) {
+			throw new \RuntimeException( sprintf( 'Export %s could not be marked complete.', esc_html( $export_id ) ) );
+		}
 	}
 
 	/**
@@ -370,9 +395,7 @@ class ReportExporter {
 			return false;
 		}
 
-		self::finalize_export( $report_type, $export_id );
-
-		return true;
+		return self::finalize_export( $report_type, $export_id );
 	}
 
 	/**
@@ -684,7 +707,10 @@ class ReportExporter {
 		}
 
 		if ( null !== $progress ) {
-			self::finalize_export( $report_type, $export_id );
+			if ( ! self::finalize_export( $report_type, $export_id ) ) {
+				$email->trigger_failed( $user_id, $report_type );
+				return;
+			}
 		} elseif ( 100 !== self::get_export_percentage_complete( $report_type, $export_id ) ) {
 			// Batches ran synchronously, so the only record is the percentage they left behind.
 			wc_get_logger()->error(

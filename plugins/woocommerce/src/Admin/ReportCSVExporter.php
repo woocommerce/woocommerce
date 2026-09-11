@@ -191,7 +191,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return bool
 	 */
 	public function export_file_exists() {
-		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
+		return is_file( $this->get_file_path() ) && is_file( $this->get_headers_row_file_path() );
 	}
 
 	/**
@@ -244,16 +244,18 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * changed while it ran never does. The exporter that confirms every page was written calls this.
 	 *
 	 * @since 11.2.0
-	 * @return void
+	 * @return bool Whether the companion is on disk after the call.
 	 */
 	public function write_headers_row_file() {
-		if ( file_exists( $this->get_headers_row_file_path() ) ) {
-			return;
+		if ( is_file( $this->get_headers_row_file_path() ) ) {
+			return true;
 		}
 
 		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
 		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		return is_file( $this->get_headers_row_file_path() );
 	}
 
 	/**

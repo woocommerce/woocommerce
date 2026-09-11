@@ -1121,6 +1121,32 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An export whose completion mark cannot be written is reported as failed, not as ready.
+	 */
+	public function test_export_whose_completion_mark_cannot_be_written_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$headers   = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv.headers";
+
+		// Something else holds the path, so the mark cannot be written there.
+		mkdir( $headers ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+		rmdir( $headers ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export without its mark must not be served.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'An export without its mark must not report complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that could not be marked complete.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertNotEmpty( preg_grep( '/could not be marked complete/', $logger->errors ), 'The log should say the mark could not be written.' );
+	}
+
+	/**
 	 * @testdox The email waits for pages that a queued chunk has not scheduled yet.
 	 */
 	public function test_email_waits_for_pages_a_chunk_has_yet_to_queue(): void {
