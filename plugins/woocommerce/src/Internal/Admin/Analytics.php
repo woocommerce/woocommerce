@@ -429,7 +429,9 @@ class Analytics {
 	 * @return array Tool state, as get_refund_double_count_state() returns it.
 	 */
 	private static function get_fresh_refund_double_count_state(): array {
+		// Clear 'notoptions' too, or a request that cached the option as missing never sees it once created.
 		wp_cache_delete( self::REFUND_DOUBLE_COUNT_OPTION, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 
 		return self::get_refund_double_count_state();
 	}
@@ -698,8 +700,8 @@ class Analytics {
 		$stats_table = $wpdb->prefix . 'wc_order_stats';
 		$limit_sql   = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
 		// Half the smallest currency unit absorbs floating-point noise but still catches a double-counted
-		// one-cent refund. Capped at 5 decimals so the %f placeholder (6 decimals) never rounds it to zero.
-		$tolerance_sql = $wpdb->prepare( '%f', 0.5 / ( 10 ** min( wc_get_price_decimals(), 5 ) ) );
+		// smallest-unit refund. Capped at 8 decimals, beyond which DOUBLE sums get too noisy to compare.
+		$tolerance_sql = sprintf( '%.10F', 0.5 / ( 10 ** min( wc_get_price_decimals(), 8 ) ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table and column names are hardcoded; the condition is prepared by the caller.
 		$parent_ids = $wpdb->get_col(
