@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent an undefined array key warning from the [products] shortcode when it renders without a global post, such as in AJAX or REST requests, and restore the prior post state correctly.

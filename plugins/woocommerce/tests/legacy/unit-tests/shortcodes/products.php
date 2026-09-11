@@ -644,6 +644,22 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_content() restores the global post when there was none.
+	 *
+	 * Regression for #30073: product_loop() read $GLOBALS['post'] without a guard, so in a
+	 * context with no global post (an AJAX or REST request) it raised an undefined-key warning
+	 * and left $GLOBALS['post'] set to null instead of restoring the prior unset state.
+	 */
+	public function test_get_content_without_global_post() {
+		unset( $GLOBALS['post'] );
+
+		$shortcode = new WC_Shortcode_Products();
+		$shortcode->get_content();
+
+		$this->assertArrayNotHasKey( 'post', $GLOBALS, 'The global post should be restored to its prior unset state.' );
+	}
+
+	/**
 	 * Test: WC_Shortcode_Products::set_product_as_visible.
 	 */
 	public function test_set_product_as_visible() {
