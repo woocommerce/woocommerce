@@ -205,6 +205,75 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order-pay keeps a usage-limited coupon when the only tentative hold belongs to this order.
+	 */
+	public function test_validate_existing_order_before_payment_keeps_coupon_with_own_global_hold() {
+		$coupon = CouponHelper::create_coupon( 'own-hold-limit1', 'publish', array( 'usage_limit' => 1 ) );
+		$order  = $this->create_pending_order_with_coupon( $coupon );
+		$this->hold_coupon_for_order( $order, $coupon );
+
+		$this->assertSame( 1, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+		$this->assertEquals( array( 'own-hold-limit1' ), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox Order-pay still rejects a coupon when another checkout's hold consumes the last remaining use.
+	 */
+	public function test_validate_existing_order_before_payment_strips_coupon_when_other_hold_exists() {
+		$coupon = CouponHelper::create_coupon( 'other-hold-limit1', 'publish', array( 'usage_limit' => 1 ) );
+		$order  = $this->create_pending_order_with_coupon( $coupon );
+
+		$other_hold = $coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		$this->assertNotEmpty( $other_hold );
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException when another order holds the last coupon use.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox An expired or released hold recorded on the order is not subtracted from the tentative count.
+	 */
+	public function test_validate_existing_order_before_payment_does_not_subtract_released_hold() {
+		$coupon = CouponHelper::create_coupon( 'released-hold-limit1', 'publish', array( 'usage_limit' => 1 ) );
+		$order  = $this->create_pending_order_with_coupon( $coupon );
+
+		$active_other_hold = $coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		$this->assertNotEmpty( $active_other_hold );
+
+		$released_key = '_coupon_held_' . ( time() + HOUR_IN_SECONDS ) . '_dead01';
+		$order->get_data_store()->set_coupon_held_keys( $order, array( $coupon->get_id() => $released_key ), array() );
+		$order->save();
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException; a missing recorded hold must not hide another active hold.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox Order-pay keeps a per-user limited coupon when the only tentative hold belongs to this order.
+	 */
+	public function test_validate_existing_order_before_payment_keeps_coupon_with_own_per_user_hold() {
+		$coupon = CouponHelper::create_coupon( 'own-user-limit1', 'publish', array( 'usage_limit_per_user' => 1 ) );
+		$order  = $this->create_pending_order_with_coupon( $coupon );
+		$this->hold_coupon_for_user_on_order( $order, $coupon );
+
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+		$this->assertEquals( array( 'own-user-limit1' ), $order->get_coupon_codes() );
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_email.
 	 */
 	public function test_validate_order_before_payment_invalid_email() {
@@ -434,6 +503,52 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			has_filter( $hook ),
 			'create_order_from_cart() must remove its woocommerce_default_order_status filter; the chain must not grow across repeated calls.'
 		);
+	}
+
+	/**
+	 * Create a pending order that looks like classic checkout: coupon applied, usage not recorded.
+	 *
+	 * @param \WC_Coupon $coupon Coupon to attach.
+	 * @return \WC_Order
+	 */
+	private function create_pending_order_with_coupon( \WC_Coupon $coupon ): \WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$item = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::PENDING );
+		$order->set_recorded_coupon_usage_counts( false );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Place a global tentative hold and record it on the order, matching WC_Checkout::hold_applied_coupons().
+	 *
+	 * @param \WC_Order  $order  Order object.
+	 * @param \WC_Coupon $coupon Coupon object.
+	 */
+	private function hold_coupon_for_order( \WC_Order $order, \WC_Coupon $coupon ): void {
+		$held_key = $coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		$this->assertNotEmpty( $held_key, 'Expected check_and_hold_coupon() to reserve a global hold.' );
+		$order->get_data_store()->set_coupon_held_keys( $order, array( $coupon->get_id() => $held_key ), array() );
+		$order->save();
+	}
+
+	/**
+	 * Place a per-user tentative hold and record it on the order.
+	 *
+	 * @param \WC_Order  $order  Order object.
+	 * @param \WC_Coupon $coupon Coupon object.
+	 */
+	private function hold_coupon_for_user_on_order( \WC_Order $order, \WC_Coupon $coupon ): void {
+		$email    = $order->get_billing_email();
+		$held_key = $coupon->get_data_store()->check_and_hold_coupon_for_user( $coupon, array( $email ), $email );
+		$this->assertNotEmpty( $held_key, 'Expected check_and_hold_coupon_for_user() to reserve a per-user hold.' );
+		$order->get_data_store()->set_coupon_held_keys( $order, array(), array( $coupon->get_id() => $held_key ) );
+		$order->save();
 	}
 
 	/**
