@@ -349,9 +349,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		/**
 		 * Filters whether or not the product grid is cacheable.
 		 *
-		 * @param boolean $is_cacheable The list of script dependencies.
+		 * @param boolean $is_cacheable Whether the product grid is cacheable. True to enable cache, false to disable.
 		 * @param array $query_args Query args for the products query passed to BlocksWpQuery.
-		 * @return array True to enable cache, false to disable cache.
+		 * @return boolean True to enable cache, false to disable cache.
 		 *
 		 * @since 2.5.0
 		 */
@@ -546,7 +546,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		);
 
 		if ( $product->get_image_id() ) {
-			$image_alt = get_post_meta( $product->get_image_id(), '_wp_attachment_image_alt', true );
+			$image_alt = get_post_meta( (int) $product->get_image_id(), '_wp_attachment_image_alt', true );
 			$attr      = array(
 				'alt' => ( $image_alt ? $image_alt : $product->get_name() ),
 			);

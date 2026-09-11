@@ -204,7 +204,7 @@ class WC_Structured_Data {
 		$shop_url  = home_url();
 		$currency  = get_woocommerce_currency();
 		$permalink = get_permalink( $product->get_id() );
-		$image     = wp_get_attachment_url( $product->get_image_id() );
+		$image     = wp_get_attachment_url( (int) $product->get_image_id() );
 
 		$markup = array(
 			'@type'       => 'Product',
@@ -672,7 +672,7 @@ class WC_Structured_Data {
 					'@type' => 'Product',
 					'name'  => wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible ) ),
 					'sku'   => $product_exists ? $product->get_sku() : '',
-					'image' => $product_exists ? wp_get_attachment_image_url( $product->get_image_id() ) : '',
+					'image' => $product_exists ? wp_get_attachment_image_url( (int) $product->get_image_id() ) : '',
 					'url'   => $is_visible ? get_permalink( $product->get_id() ) : get_home_url(),
 				),
 				'seller'             => array(

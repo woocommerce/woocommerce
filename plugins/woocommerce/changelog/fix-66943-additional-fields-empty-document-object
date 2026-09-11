@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix conditional checkout fields when dependency values are missing, contain punctuation, or come from a saved order during payment retries.

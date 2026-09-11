@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass product image IDs to WordPress attachment functions as integers.
