@@ -5,6 +5,7 @@ import { expect, request, tags } from '../../fixtures/fixtures';
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
+	BIS_FEATURE_OPTION,
 	bisConsentCheckbox,
 	bisEmailSubject,
 	bisFormLocator,
@@ -20,13 +21,19 @@ import {
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { clearFilters, setFilterValue } from '../../utils/filters';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SERVICES ] },
 	() => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
 		} );
 
 		test.describe( 'Signups disabled', () => {

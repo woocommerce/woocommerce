@@ -20,6 +20,8 @@ Covers the scenarios from the original plugin test plan that have a target in co
   emails, the back-in-stock email linking back to a fixed-value variation
   pre-selected, and the parent-level signup opt-out removing the form from the
   whole variable product page.
+- `feature-disabled.spec.ts` — with the feature flag off: no signup form on an
+  out-of-stock PDP, no "Customer stock notifications" settings section.
 
 ## Variation notes
 
@@ -81,10 +83,11 @@ respective feature tickets:
 ## Prerequisites
 
 - BIS is gated by the `customer_stock_notifications` feature toggle (WooCommerce
-  → Settings → Advanced → Features → Experimental), enabled for the tests env
-  via `plugins/woocommerce/tests/e2e/bin/test-env-setup.sh`. If you bring
-  the env up manually, set `woocommerce_feature_customer_stock_notifications_enabled`
-  to `'yes'`.
+  → Settings → Advanced → Features → Experimental), off by default. Each spec
+  file enables it itself in a top-level `beforeAll` and resets it to `'no'` in
+  `afterAll`, through `setOption()` (never `deleteOption()` — that skips the
+  `updated_option` hook the feature's teardown relies on). That toggling is
+  safe only because these specs run serially, single worker — see below.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via the `.wp-env.e2e.json` plugins list).
 - `woocommerce-e2e-test-helper` zeroes
