@@ -970,6 +970,47 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A polled export whose last two pages ran at the same time still reaches 100.
+	 */
+	public function test_status_completes_an_export_whose_last_pages_overlapped(): void {
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+		$last_page = array_key_last( $batches );
+
+		// Run the last page inside the first, after the first has counted progress, so each sees the other unfinished.
+		add_action(
+			ReportExporter::get_action( 'export_report' ),
+			function ( $page ) use ( $last_page ) {
+				if ( 1 === (int) $page ) {
+					$this->run_action( $last_page );
+				}
+			},
+			20
+		);
+		$this->run_action( array_key_first( $batches ) );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertSame( 0, ReportExporter::get_export_progress( $export_id )['unfinished'], 'Both pages ran.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Neither page finalized, because each saw the other still running.' );
+
+		// The REST server outlives the test that built it, and the analytics routes load lazily through a
+		// filter that does not. Start a server here, with the namespace loaded up front.
+		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
+		$GLOBALS['wp_rest_server'] = null;
+		$request                   = new \WP_REST_Request( 'GET', "/wc-analytics/reports/orders/export/{$export_id}/status" );
+		$response                  = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 100, $response->get_data()['percent_complete'], 'The status endpoint should finish an export every page of which has been written.' );
+		$this->assertArrayHasKey( 'download_url', $response->get_data(), 'A finished export should offer its download.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The header row should be written once the status endpoint finished the export.' );
+	}
+
+	/**
 	 * @testdox The email waits for pages that a queued chunk has not scheduled yet.
 	 */
 	public function test_email_waits_for_pages_a_chunk_has_yet_to_queue(): void {

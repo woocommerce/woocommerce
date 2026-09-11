@@ -349,6 +349,31 @@ class ReportExporter {
 	}
 
 	/**
+	 * Mark the export complete if every queued page has been written, and say whether it is.
+	 *
+	 * Two pages that run at the same time each see the other as unfinished, so neither finalizes.
+	 * The email action does that for emailed exports. A caller polling the status endpoint has no
+	 * such action, so the status endpoint finalizes here.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return bool Whether every queued page has been written.
+	 */
+	public static function finalize_if_complete( $report_type, $export_id ) {
+		$progress = self::get_export_progress( $export_id );
+
+		if ( null === $progress || $progress['unfinished'] > 0 || $progress['failed'] > 0 ) {
+			return false;
+		}
+
+		self::finalize_export( $report_type, $export_id );
+
+		return true;
+	}
+
+	/**
 	 * Generate a key to reference an export status.
 	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
