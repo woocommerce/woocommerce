@@ -7,3 +7,23 @@
 .wc-block-featured-category {
 	@include wc-block-featured-item();
 }
+
+.wc-block-featured-category__cover.wc-block-featured-category__legacy {
+	.wc-block-featured-category__title,
+	.wc-block-featured-category__description {
+		box-sizing: border-box;
+	}
+}
+
+.wc-block-featured-category__cover.wc-block-featured-category__natural-image {
+	> .wp-block-cover__image-background {
+		object-fit: none;
+		background-size: auto;
+	}
+}
+
+.editor-styles-wrapper
+	.wc-block-featured-category__no-image
+	> .wp-block-cover__image-background {
+	visibility: hidden;
+}

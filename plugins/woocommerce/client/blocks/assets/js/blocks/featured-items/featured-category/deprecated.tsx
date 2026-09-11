@@ -8,6 +8,7 @@ import { InnerBlocks } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import metadata from './block.json';
+import { migrateToCover } from './migrate';
 
 interface BlockAttributes {
 	showDesc?: boolean;
@@ -68,4 +69,67 @@ const v1 = {
 	},
 };
 
-export default [ v1 ];
+// Both pre-Cover formats share the same saved markup. Migrate them directly;
+// Gutenberg does not chain v1's migration into this one.
+const v2 = {
+	attributes: {
+		...v1.attributes,
+		editMode: { type: 'boolean' },
+		height: { type: 'number' },
+		style: { type: 'object' },
+		textColor: { type: 'string' },
+		fontSize: { type: 'string' },
+		lineHeight: { type: 'string' },
+	},
+	supports: {
+		interactivity: {
+			clientNavigation: true,
+		},
+		align: [ 'wide', 'full' ],
+		ariaLabel: true,
+		color: {
+			background: true,
+			text: true,
+		},
+		html: false,
+		filter: {
+			duotone: true,
+		},
+		spacing: {
+			padding: true,
+			__experimentalDefaultControls: {
+				padding: true,
+			},
+			__experimentalSkipSerialization: true,
+		},
+		__experimentalBorder: {
+			color: true,
+			radius: true,
+			width: true,
+			__experimentalDefaultControls: {
+				color: true,
+				radius: true,
+				width: true,
+			},
+			__experimentalSkipSerialization: true,
+		},
+	},
+	save: v1.save,
+	isEligible: ( attributes: Record< string, unknown > ) =>
+		attributes.layout !== 'cover',
+	migrate: migrateToCover,
+};
+
+export default [
+	v2,
+	{
+		...v1,
+		// The parser can check older eligible versions after v2 has migrated.
+		isEligible: (
+			attributes: BlockAttributes,
+			innerBlocks: BlockInstance[]
+		) =>
+			! innerBlocks.some( ( block ) => block.name === 'core/cover' ) &&
+			v1.isEligible( attributes ),
+	},
+];
