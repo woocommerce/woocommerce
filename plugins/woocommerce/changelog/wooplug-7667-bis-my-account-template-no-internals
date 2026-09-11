@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Stop the My Account stock notifications template from calling the internal MyAccountEndpoint class; template data is now prepared by MyAccountView. The pending table's date column header now reads "Date signed up", matching the active table.
+Comment: Prepare the My Account stock notifications template data in MyAccountView instead of calling MyAccountEndpoint from the template. The feature is unreleased, so there is no user-facing change.
