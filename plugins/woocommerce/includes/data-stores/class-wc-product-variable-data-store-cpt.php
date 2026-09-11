@@ -1107,7 +1107,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	public function sync_stock_status( &$product ) {
-		// Performance note: direct DB fetch would be faster, but child_is_in_stock/child_is_on_backorder are overridable — keep delegation.
+		// The first two checks delegate to child_is_in_stock()/child_is_on_backorder() even though a direct DB fetch
+		// would be faster, because both are overridable. The custom-status branch below queries directly instead:
+		// child_has_stock_status() stops at the first match, so it answers "does any child have this status" rather
+		// than "do all children agree", and no overridable child check expresses what that branch needs.
 		if ( $product->child_is_in_stock() ) {
 			$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		} elseif ( $product->child_is_on_backorder() ) {
