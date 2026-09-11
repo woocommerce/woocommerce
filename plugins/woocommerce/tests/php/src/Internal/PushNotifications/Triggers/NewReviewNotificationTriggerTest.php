@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Triggers;
 
-use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -15,6 +15,9 @@ use WC_Unit_Test_Case;
  * Tests for the NewReviewNotificationTrigger class.
  */
 class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
+
+	use PushNotificationsTestTrait;
+
 	/**
 	 * An instance of NewReviewNotificationTrigger.
 	 *
@@ -174,18 +177,5 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 			'comment_approved' => 1,
 			'comment_type'     => 'review',
 		);
-	}
-
-	/**
-	 * Creates a push tokens data store whose has_tokens() returns $has_tokens.
-	 *
-	 * @param bool $has_tokens What has_tokens() should report.
-	 * @return PushTokensDataStore
-	 */
-	private function create_data_store_with_tokens( bool $has_tokens ): PushTokensDataStore {
-		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'has_tokens' )->willReturn( $has_tokens );
-
-		return $data_store;
 	}
 }
