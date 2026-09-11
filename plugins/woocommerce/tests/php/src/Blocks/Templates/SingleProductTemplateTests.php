@@ -209,6 +209,109 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the Single Product template installs the current product body classes.
+	 *
+	 * @dataProvider product_type_provider
+	 *
+	 * @param string $product_type Product type to create.
+	 * @param string $type_class   Expected product type class.
+	 */
+	public function test_update_single_product_content_adds_product_body_classes( $product_type, $type_class ) {
+		global $wp_filter;
+
+		$body_class_filter_existed = isset( $wp_filter['body_class'] );
+		$body_class_filter         = $body_class_filter_existed ? clone $wp_filter['body_class'] : null;
+		$product_global_existed    = array_key_exists( 'product', $GLOBALS );
+		$product_global            = $product_global_existed ? $GLOBALS['product'] : null;
+		$post_global_existed       = array_key_exists( 'post', $GLOBALS );
+		$post_global               = $post_global_existed ? $GLOBALS['post'] : null;
+		$loop_global_existed       = array_key_exists( 'woocommerce_loop', $GLOBALS );
+		$loop_global               = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
+		$product                   = null;
+		$variation_ids             = array();
+
+		try {
+			remove_all_filters( 'body_class' );
+
+			$product = 'variable' === $product_type
+				? \WC_Helper_Product::create_variation_product()
+				: \WC_Helper_Product::create_simple_product();
+			if ( $product instanceof \WC_Product_Variable ) {
+				$variation_ids = $product->get_children();
+			}
+
+			$GLOBALS['product'] = $product;
+			$GLOBALS['post']    = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; finally restores the exact prior value.
+
+			$template          = new \WP_Block_Template();
+			$template->slug    = 'single-product';
+			$template->title   = 'Single Product';
+			$template->content = '<!-- wp:woocommerce/product-price /-->';
+			$template->type    = 'wp_template';
+
+			$seed_classes = array( 'existing-body-class' );
+			wc_reset_loop();
+			$product_classes = wc_get_product_class( '', $product );
+			wc_reset_loop();
+
+			$single_product_template = new SingleProductTemplate();
+			$single_product_template->update_single_product_content( array( $template ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
+			$filtered_classes = apply_filters( 'body_class', $seed_classes );
+
+			$this->assertSame( array_merge( $seed_classes, $product_classes ), $filtered_classes );
+			$this->assertContains( 'product', $filtered_classes );
+			$this->assertContains( $type_class, $filtered_classes );
+		} finally {
+			remove_all_filters( 'body_class' );
+			if ( $body_class_filter_existed ) {
+				$wp_filter['body_class'] = $body_class_filter; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact hook stack captured before the test.
+			} else {
+				unset( $wp_filter['body_class'] );
+			}
+
+			foreach ( array_reverse( $variation_ids ) as $variation_id ) {
+				\WC_Helper_Product::delete_product( $variation_id );
+			}
+
+			if ( $product instanceof \WC_Product ) {
+				\WC_Helper_Product::delete_product( $product->get_id() );
+			}
+
+			if ( $product_global_existed ) {
+				$GLOBALS['product'] = $product_global;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+
+			if ( $post_global_existed ) {
+				$GLOBALS['post'] = $post_global; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact frontend global captured before the test.
+			} else {
+				unset( $GLOBALS['post'] );
+			}
+
+			if ( $loop_global_existed ) {
+				$GLOBALS['woocommerce_loop'] = $loop_global;
+			} else {
+				unset( $GLOBALS['woocommerce_loop'] );
+			}
+		}
+	}
+
+	/**
+	 * Product types for the Single Product body class contract.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_type_provider() {
+		return array(
+			'simple product'   => array( 'simple', 'product-type-simple' ),
+			'variable product' => array( 'variable', 'product-type-variable' ),
+		);
+	}
+
+	/**
 	 * Test that the password form isn't added to the Single Product Template.
 	 *
 	 */
