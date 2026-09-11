@@ -482,6 +482,14 @@ describe( 'buildChartData across every date range shape', () => {
 		[ '2016-01-01', '2019-12-31' ],
 	];
 	const compares = [ 'previous_period', 'previous_year' ];
+	// Zones on both hemispheres, so a preset crosses a DST change in some
+	// clock whichever direction the clocks move. A store without a zone keeps
+	// the plain browser time path covered.
+	const storeTimeZones = [
+		undefined,
+		'America/New_York',
+		'Australia/Sydney',
+	];
 
 	function pickerFor( start, end, shift ) {
 		return {
@@ -582,30 +590,41 @@ describe( 'buildChartData across every date range shape', () => {
 		return problems;
 	}
 
+	const originalSettings = global.window.wcSettings;
+
 	afterEach( () => {
 		jest.useRealTimers();
+		global.window.wcSettings = originalSettings;
 	} );
 
-	test( 'every preset at every clock shows each comparison value under its own date', () => {
+	test( 'every preset at every clock and store time zone shows each comparison value under its own date', () => {
 		const problems = [];
 
-		clocks.forEach( ( clock ) => {
-			jest.useFakeTimers().setSystemTime( new Date( clock ) );
-			Object.entries( builders ).forEach( ( [ preset, build ] ) => {
-				compares.forEach( ( compare ) => {
-					const range = build( compare );
-					problems.push(
-						...problemsFor(
-							`${ preset }/${ compare } at ${ clock }`,
-							pickerFor( range.primaryStart, range.primaryEnd ),
-							pickerFor(
-								range.secondaryStart,
-								range.secondaryEnd,
-								range.secondaryShift
-							),
-							compare
-						)
-					);
+		storeTimeZones.forEach( ( timeZone ) => {
+			global.window.wcSettings = { ...originalSettings, timeZone };
+			clocks.forEach( ( clock ) => {
+				jest.useFakeTimers().setSystemTime( new Date( clock ) );
+				Object.entries( builders ).forEach( ( [ preset, build ] ) => {
+					compares.forEach( ( compare ) => {
+						const range = build( compare );
+						problems.push(
+							...problemsFor(
+								`${ preset }/${ compare } at ${ clock } in ${
+									timeZone || 'browser time'
+								}`,
+								pickerFor(
+									range.primaryStart,
+									range.primaryEnd
+								),
+								pickerFor(
+									range.secondaryStart,
+									range.secondaryEnd,
+									range.secondaryShift
+								),
+								compare
+							)
+						);
+					} );
 				} );
 			} );
 		} );

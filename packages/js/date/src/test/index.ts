@@ -1604,6 +1604,49 @@ describe( 'getPreviousDate', () => {
 		);
 		expect( offset.format( isoDateFormat ) ).toBe( '2024-02-29' );
 	} );
+	it( 'should shift by calendar dates when the range starts sit on different sides of a DST change', () => {
+		// Last quarter (Q2) against the previous period on a New York store:
+		// April starts in EDT, the last day of December in EST.
+		const primaryStart = moment( '2026-04-01T00:00:00-04:00' ).utcOffset(
+			-240,
+			true
+		);
+		const secondaryStart = moment( '2025-12-31T00:00:00-05:00' ).utcOffset(
+			-300,
+			true
+		);
+
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'day',
+				'offset'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'week'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+
+		// Quarter to date against the previous period: April against January.
+		expect(
+			getPreviousDate(
+				'2026-05-01 00:00:00',
+				primaryStart,
+				moment( '2026-01-01T00:00:00-05:00' ).utcOffset( -300, true ),
+				'previous_period',
+				'month'
+			).format( isoDateFormat )
+		).toBe( '2026-02-01' );
+	} );
 	it( 'should return valid date for previous period by days', () => {
 		const date = '2018-08-21';
 		const primaryStart = '2018-08-25';

@@ -913,11 +913,19 @@ export const getPreviousDate = (
 		return dateMoment.clone().subtract( 1, 'years' );
 	}
 
-	const _date1 = moment( date1 );
-	const _date2 = moment( date2 );
-	const difference = _date1.diff( _date2, interval );
+	// Range boundaries are anchored to their own UTC offset, so two starts on
+	// different sides of a DST change differ by an hour as instants and the
+	// diff floors to one interval short. Compare and shift the wall-clock
+	// dates instead, then return a local moment like the year shift does.
+	const wallClock = ( value: moment.MomentInput ) =>
+		moment.utc( moment( value ).format( defaultDateTimeFormat ) );
+	const difference = wallClock( date1 ).diff( wallClock( date2 ), interval );
 
-	return dateMoment.clone().subtract( difference, interval );
+	return moment(
+		wallClock( date )
+			.subtract( difference, interval )
+			.format( defaultDateTimeFormat )
+	);
 };
 
 /**
