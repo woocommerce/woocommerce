@@ -51,6 +51,14 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $download_suffix = '';
 
 	/**
+	 * Pages run in any order, and the row total moves under them, so the last page to run is not the
+	 * end of the export. ReportExporter::finalize_export() marks it complete once every page is in.
+	 *
+	 * @var bool
+	 */
+	protected $completes_by_row_count = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.

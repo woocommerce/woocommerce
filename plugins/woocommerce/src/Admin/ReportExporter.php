@@ -237,7 +237,13 @@ class ReportExporter {
 		// batch, so an order changing status mid-export would otherwise leave the export short of 100.
 		$progress = self::get_export_progress( $export_id );
 		if ( null === $progress ) {
-			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+			// The pages ran inline, in order, in this one process, so the row count reaching 100 on a page means
+			// every later page is empty. Nothing else marks an inline export complete, so it is done here.
+			if ( 100 === $exporter->get_percent_complete() ) {
+				self::finalize_export( $report_type, $export_id );
+			} else {
+				self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+			}
 			return;
 		}
 

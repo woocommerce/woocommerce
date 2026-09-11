@@ -816,13 +816,16 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( 3, $batches, 'Five orders at two per batch should queue three pages.' );
 
-		// Another runner picked the last page first.
-		$this->run_action( array_key_last( $batches ) );
-		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
-
 		$exporter = new ReportCSVExporter();
 		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
 		$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+
+		// Another runner picked the last page first.
+		$this->run_action( array_key_last( $batches ) );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'The last page by number is not the last page to run, so it must not mark the export complete.' );
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
 
 		$this->assertTrue( $exporter->export_file_exists(), 'Every page ran, so the export is complete.' );
 		$this->assertCount( 5, file( $path ), 'The page that ran first must be in the file.' );
@@ -996,6 +999,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, ReportExporter::get_export_progress( $export_id )['unfinished'], 'Both pages ran.' );
 		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Neither page finalized, because each saw the other still running.' );
+		$this->assertFalse( $exporter->export_file_exists(), 'Nothing but finalize_export() may mark the export complete.' );
 
 		// The REST server outlives the test that built it, and the analytics routes load lazily through a
 		// filter that does not. Start a server here, with the namespace loaded up front.
@@ -1008,6 +1012,57 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertSame( 100, $response->get_data()['percent_complete'], 'The status endpoint should finish an export every page of which has been written.' );
 		$this->assertArrayHasKey( 'download_url', $response->get_data(), 'A finished export should offer its download.' );
 		$this->assertTrue( $exporter->export_file_exists(), 'The header row should be written once the status endpoint finished the export.' );
+	}
+
+	/**
+	 * @testdox An export whose pages run inline, with the queue turned off, is emailed a working link.
+	 */
+	public function test_export_run_without_the_queue_is_emailed(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), true );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertNull( ReportExporter::get_export_progress( $export_id ), 'Nothing was queued.' );
+		$this->assertCount( 3, file( $path ), 'Every page ran inline.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The export should be marked complete before the link goes out.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'The export should report complete.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox An export whose pages run inline, with the queue turned off and no email, is marked complete.
+	 */
+	public function test_export_run_without_the_queue_is_marked_complete(): void {
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertCount( 3, file( $path ), 'Every page ran inline.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The last page to run inline should mark the export complete.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'The export should report complete.' );
 	}
 
 	/**
