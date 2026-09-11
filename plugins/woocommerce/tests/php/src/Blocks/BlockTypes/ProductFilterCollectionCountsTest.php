@@ -91,11 +91,10 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 
 		$builder    = new QueryBuilder();
 		$query_vars = $builder->get_final_frontend_query( array( 'name' => '' ), $saved_query );
-		if ( in_array( $context_type, array( 'inherited', 'standalone' ), true ) ) {
-			$query_vars[ $own_param ]          = $has_selection ? 'shopper-selection' : '';
-			$query_vars['query_type_material'] = $query_type;
-			$query_vars['tags']                = 'other-facet';
-		}
+
+		$query_vars[ $own_param ]          = $has_selection ? 'shopper-selection' : '';
+		$query_vars['query_type_material'] = $query_type;
+		$query_vars['tags']                = 'other-facet';
 
 		$initial_clauses = self::get_taxonomy_clauses( $query_vars['tax_query'], $taxonomy );
 		$this->assertCount( $has_selection ? 2 : 1, $initial_clauses, 'Fixture must combine distinct saved and shopper constraints.' );
@@ -159,7 +158,7 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 		$other_clauses = self::get_taxonomy_clauses( $captured_query['tax_query'], 'product_tag' );
 		$this->assertCount( 1, $other_clauses, 'The other facet selection must remain applied.' );
 		$this->assertSame( array( 'other-facet' ), $other_clauses[0]['terms'] );
-		if ( $is_attribute && 'and' === $query_type && 'local' !== $context_type ) {
+		if ( $is_attribute && 'and' === strtolower( $query_type ) ) {
 			$this->assertSame( 'shopper-selection', $captured_query[ $own_param ], 'AND selections must still constrain counts through QueryClauses.' );
 		} else {
 			$this->assertArrayNotHasKey( $own_param, $captured_query, 'OR counts must exclude the current shopper selection.' );
