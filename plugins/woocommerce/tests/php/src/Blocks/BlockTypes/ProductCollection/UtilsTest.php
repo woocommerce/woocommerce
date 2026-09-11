@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use WC_Unit_Test_Case;
+use WP_Block;
 
 /**
  * Tests for Product Collection query utilities.
@@ -135,5 +136,36 @@ class UtilsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result[0]['rating_filter'] );
 		$this->assertArrayHasKey( 'rating_filter', $result[2] );
 		$this->assertSame( 0, $result[2]['rating_filter'] );
+	}
+
+	/**
+	 * @testdox Should build query vars from the block unless the collection inherits the global query.
+	 * @testWith [{"postType": "product", "inherit": false}, "block"]
+	 *           [{"postType": "product"}, "block"]
+	 *           [{"postType": "product", "inherit": true}, "global"]
+	 *           [null, "global"]
+	 *
+	 * @param array|null $query_context   Query block context, or null when the block has none.
+	 * @param string     $expected_source Which query the vars must come from.
+	 */
+	public function test_get_query_vars_uses_global_query_only_when_inherited( ?array $query_context, string $expected_source ): void {
+		global $wp_query;
+		$wp_query->query_vars = array( 'source' => 'global' );
+		add_filter(
+			'query_loop_block_query_vars',
+			static function () {
+				return array( 'source' => 'block' );
+			},
+			PHP_INT_MAX
+		);
+
+		$block = new WP_Block(
+			array( 'blockName' => 'core/post-template' ),
+			null === $query_context ? array() : array( 'query' => $query_context )
+		);
+
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		$this->assertSame( $expected_source, $query_vars['source'] ?? null );
 	}
 }

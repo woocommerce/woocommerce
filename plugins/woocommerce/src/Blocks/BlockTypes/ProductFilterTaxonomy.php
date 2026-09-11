@@ -398,7 +398,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		$is_local_collection = true === ( $block_context['query']['isProductCollectionBlock'] ?? false )
-			&& false === ( $block_context['query']['inherit'] ?? null );
+			&& empty( $block_context['query']['inherit'] );
 
 		if ( ! empty( $query_vars['tax_query'] ) ) {
 			$removal_key = $is_local_collection ? 'filter_taxonomy' : 'taxonomy';

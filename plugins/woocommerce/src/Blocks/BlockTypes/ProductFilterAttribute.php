@@ -296,7 +296,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$is_local_collection = true === ( $block_context['query']['isProductCollectionBlock'] ?? false )
-			&& false === ( $block_context['query']['inherit'] ?? null );
+			&& empty( $block_context['query']['inherit'] );
 
 		if ( ! empty( $query_vars['tax_query'] ) && ( ! $is_local_collection || 'and' !== strtolower( $query_type ) ) ) {
 			$removal_key = $is_local_collection ? 'filter_taxonomy' : 'taxonomy';

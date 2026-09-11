@@ -69,7 +69,7 @@ class Utils {
 	 * @return array Returns the constructed WP_Query arguments.
 	 */
 	public static function get_query_vars( $block, $page ) {
-		if ( ! empty( $block->context['query'] ) && ! $block->context['query']['inherit'] ) {
+		if ( ! empty( $block->context['query'] ) && empty( $block->context['query']['inherit'] ) ) {
 			return build_query_vars_from_query_block( $block, $page );
 		}
 

@@ -26,6 +26,7 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 	 * @testdox Should retain saved taxonomy constraints only for explicitly local Product Collections.
 	 * @testWith ["product_cat", "local", "or", true, 1]
 	 *           ["product_cat", "local", "or", false, 1]
+	 *           ["product_cat", "local-without-inherit", "or", true, 1]
 	 *           ["product_cat", "inherited", "or", true, 0]
 	 *           ["product_cat", "standalone", "or", true, 0]
 	 *           ["product_cat", "generic", "or", true, 0]
@@ -34,6 +35,8 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 	 *           ["pa_material", "local", "or", false, 1]
 	 *           ["pa_material", "local", "and", true, 2]
 	 *           ["pa_material", "local", "AND", true, 2]
+	 *           ["pa_material", "local-without-inherit", "or", true, 1]
+	 *           ["pa_material", "local-without-inherit", "and", true, 2]
 	 *           ["pa_material", "inherited", "or", true, 0]
 	 *           ["pa_material", "standalone", "and", true, 0]
 	 *           ["pa_material", "generic", "or", true, 0]
@@ -47,6 +50,7 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_count_query_preserves_local_collection_boundary( string $taxonomy, string $context_type, string $query_type, bool $has_selection, int $expected_clause_count ): void {
 		$is_attribute = 'pa_material' === $taxonomy;
+		$is_local     = in_array( $context_type, array( 'local', 'local-without-inherit' ), true );
 		$attributes   = array(
 			'taxonomy'  => $taxonomy,
 			'sortOrder' => 'name-asc',
@@ -108,6 +112,9 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 		if ( 'generic-without-marker' === $context_type ) {
 			unset( $query_context['isProductCollectionBlock'] );
 		}
+		if ( 'local-without-inherit' === $context_type ) {
+			unset( $query_context['inherit'] );
+		}
 		$context = array( 'filterParams' => array() );
 		if ( 'standalone' !== $context_type ) {
 			$context['query'] = $query_context;
@@ -152,7 +159,7 @@ class ProductFilterCollectionCountsTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $captured_query, 'Rendering must reach the actual count provider.' );
 		$own_clauses = self::get_taxonomy_clauses( $captured_query['tax_query'], $taxonomy );
 		$this->assertCount( $expected_clause_count, $own_clauses, 'Local counts retain saved constraints, plus shopper AND selections.' );
-		if ( 'local' === $context_type ) {
+		if ( $is_local ) {
 			$this->assertContains( $saved_clause, $own_clauses, 'The retained clause must be the saved boundary, not the shopper selection.' );
 		}
 		$other_clauses = self::get_taxonomy_clauses( $captured_query['tax_query'], 'product_tag' );
