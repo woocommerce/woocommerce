@@ -95,8 +95,11 @@ export async function checkCartContent(
 	tax: any
 ) {
 	if ( products.length === 0 ) {
+		const emptyCartMessage = isClassicCart
+			? 'Your cart is currently empty.'
+			: 'Your cart is empty';
 		await expect(
-			page.locator( 'main' ).getByText( 'Your cart is currently empty' )
+			page.locator( 'main' ).getByText( emptyCartMessage )
 		).toBeVisible();
 		return;
 	}

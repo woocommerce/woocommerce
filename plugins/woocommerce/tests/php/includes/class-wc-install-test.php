@@ -745,7 +745,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
 		);
 		$this->assertStringNotContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$content,
 			'The empty cart title must not be frozen into the page content in the install-time locale.'
 		);
@@ -757,7 +757,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
+	 * @testdox Should render the empty cart title, the Return to shop button, and the New in store heading from the referenced patterns.
 	 */
 	public function test_empty_cart_message_patterns_render_expected_markup(): void {
 		$registry = WP_Block_Patterns_Registry::get_instance();
@@ -775,7 +775,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertStringContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$rendered,
 			'The cart-empty-message pattern should render the empty cart title.'
 		);
@@ -784,15 +784,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$rendered,
 			'The rendered empty cart title should keep the markup the installer previously inlined.'
 		);
+		$this->assertStringNotContainsString(
+			'with-empty-cart-icon',
+			$rendered,
+			'The empty cart heading must not carry the class that used to inject the icon via CSS (WOOPLUG-2240).'
+		);
 		$this->assertStringContainsString(
 			'New in store',
 			$rendered,
 			'The cart-new-in-store-message pattern should render the "New in store" heading.'
 		);
 		$this->assertStringContainsString(
-			'Browse store',
+			'Return to shop',
 			$rendered,
-			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+			'The cart-empty-message pattern should render the Return to shop button that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
+		$this->assertStringContainsString(
+			'wp-block-button__link',
+			$rendered,
+			'The Return to shop link should render as a core button, matching the empty Mini-Cart.'
 		);
 	}
 }
