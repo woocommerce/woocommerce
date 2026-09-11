@@ -21,6 +21,11 @@
 		margin-right: $grid-unit-10;
 	}
 
+	&__menu-external-icon {
+		flex-shrink: 0;
+		margin-inline-start: $grid-unit-05;
+	}
+
 	&__menu-text {
 		display: flex;
 		flex-direction: column;
@@ -91,7 +96,7 @@
 			align-items: center;
 			gap: $grid-unit-10;
 			border: 1px solid $gutenberg-gray-300;
-			margin: -6px; // accomodate for being placed in a button
+			margin: -6px; // accommodate for being placed in a button
 			height: 40px;
 			padding-left: $grid-unit-10;
 			padding-right: $grid-unit-10;

@@ -44,6 +44,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $controller;
 
 	/**
+	 * Detail appended to the name the export is downloaded as.
+	 *
+	 * @var string
+	 */
+	protected $download_suffix = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -114,6 +121,98 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 */
 	protected function get_file_path() {
 		return self::get_reports_directory() . $this->get_filename();
+	}
+
+	/**
+	 * Get the name the export is downloaded as.
+	 *
+	 * The stored file keeps get_filename(), which only has to identify the export.
+	 *
+	 * @since 11.2.0
+	 * @return string
+	 */
+	public function get_download_filename() {
+		$filename = $this->get_filename();
+
+		if ( '' === $this->download_suffix ) {
+			return $filename;
+		}
+
+		// Stripped and restored the way set_filename() does it, so the name keeps a single .csv.
+		return sanitize_file_name( str_replace( '.csv', '', $filename ) . '-' . $this->download_suffix . '.csv' );
+	}
+
+	/**
+	 * Set the export headers.
+	 *
+	 * Re-sends the parent's Content-Disposition so the download is named after what the report
+	 * covers, leaving the stored file's name alone.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function send_headers() {
+		parent::send_headers();
+
+		if ( '' !== $this->download_suffix ) {
+			header( 'Content-Disposition: attachment; filename=' . $this->get_download_filename() );
+		}
+	}
+
+	/**
+	 * Add detail to the name the export is downloaded as, leaving the stored file's name alone.
+	 *
+	 * Lets a download say what the report covers, such as the date range, when the stored name
+	 * only identifies the export.
+	 *
+	 * @since 11.2.0
+	 * @param string $suffix Detail to append to the download's name, e.g. a date range.
+	 * @return void
+	 */
+	public function set_download_suffix( $suffix ) {
+		$this->download_suffix = sanitize_file_name( $suffix );
+	}
+
+	/**
+	 * Check whether a complete generated export is still on disk.
+	 *
+	 * The `.headers` companion is only written once the export reaches 100%, so a body without one
+	 * is an export that never finished and must not be served.
+	 *
+	 * @since 11.2.0
+	 * @return bool
+	 */
+	public function export_file_exists() {
+		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
+	}
+
+	/**
+	 * Write the export to the output, leaving the file in place. Send the download headers first.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function stream_export_file() {
+		$this->send_content( $this->get_headers_row_file() );
+
+		// Stream the body instead of reading it into memory. Exports are emailed precisely when the
+		// report is too large to return in one request, so it can be far larger than the memory limit.
+		readfile( $this->get_file_path() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile, WordPress.Security.EscapeOutput.OutputNotEscaped -- Streaming a generated CSV download.
+	}
+
+	/**
+	 * Serve the export file.
+	 *
+	 * Unlike the parent, this keeps the file so that the download link WooCommerce emails to the
+	 * merchant works more than once. ReportExporter::delete_expired_exports() removes it later.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function export() {
+		$this->send_headers();
+		$this->stream_export_file();
+		die();
 	}
 
 

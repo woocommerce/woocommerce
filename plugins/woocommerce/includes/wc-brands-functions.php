@@ -77,7 +77,7 @@ function wc_get_brand_thumbnail_image( $brand, $size = '' ) {
  * Retrieves product's brands.
  *
  * @param  int    $post_id Post ID (default: 0).
- * @param  string $sep     Seperator (default: ').
+ * @param  string $sep     Separator (default: ').
  * @param  string $before  Before item (default: '').
  * @param  string $after   After item (default: '').
  * @return array  List of terms
@@ -130,7 +130,7 @@ if ( ! function_exists( 'get_brands' ) ) {
 	 * Polyfill for get_brands.
 	 *
 	 * @param  int    $post_id Post ID (default: 0).
-	 * @param  string $sep     Seperator (default: ').
+	 * @param  string $sep     Separator (default: ').
 	 * @param  string $before  Before item (default: '').
 	 * @param  string $after   After item (default: '').
 	 * @return array  List of terms

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * Privacy eraser for WooCommerce Customer Stock Notifications.
@@ -54,6 +55,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'messages'       => array(),
 			'done'           => true,
 		);
+
+		$email_address = EmailNormalizer::normalize( $email_address );
 
 		$notifications = NotificationQuery::get_notifications(
 			array(

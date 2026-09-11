@@ -17,8 +17,8 @@ import { useProduct } from '@woocommerce/entities';
 import Block from './block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
-type UnsupportedAligments = 'wide' | 'full';
-type AllowedAlignments = Exclude< BlockAlignment, UnsupportedAligments >;
+type UnsupportedAlignments = 'wide' | 'full';
+type AllowedAlignments = Exclude< BlockAlignment, UnsupportedAlignments >;
 
 interface BlockAttributes {
 	textAlign?: AllowedAlignments;
