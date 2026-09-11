@@ -40536,7 +40536,7 @@ parameters:
 		-
 			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\.$#'
 			identifier: class.notFound
-			count: 4
+			count: 7
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
 
 		-
@@ -42996,7 +42996,7 @@ parameters:
 		-
 			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\.$#'
 			identifier: class.notFound
-			count: 4
+			count: 7
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
 
 		-
@@ -43662,7 +43662,7 @@ parameters:
 		-
 			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\.$#'
 			identifier: class.notFound
-			count: 4
+			count: 7
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
 
 		-

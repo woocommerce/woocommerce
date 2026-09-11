@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Label a summary number's comparison as unavailable when its change cannot be calculated, instead of reporting no change.
