@@ -19,9 +19,7 @@ jest.mock( '../../base/utils/errors', () => ( {
 } ) );
 
 const mockCategory = { name: 'Clothing' };
-const attributes = /** @type {Record<string, unknown>} */ ( {
-	categoryId: 1,
-} );
+const attributes = { categoryId: 1 };
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
@@ -107,40 +105,6 @@ describe( 'withCategory Component', () => {
 				...mockCategory,
 				id: attributes.categoryId,
 			} );
-		} );
-
-		it( 'loads the category inherited from product category context', async () => {
-			const { getCategory } = mockUtils;
-			await renderComponent( {
-				attributes: { source: 'context' },
-				context: { termId: 42, taxonomy: 'product_cat' },
-			} );
-
-			expect( getCategory ).toHaveBeenLastCalledWith( 42 );
-			expect( lastProps.category ).toEqual( {
-				...mockCategory,
-				id: 42,
-			} );
-		} );
-
-		it( 'prefers an explicitly selected category over term context', async () => {
-			const { getCategory } = mockUtils;
-			await renderComponent( {
-				attributes: { categoryId: 7, source: 'context' },
-				context: { termId: 42, taxonomy: 'product_cat' },
-			} );
-
-			expect( getCategory ).toHaveBeenLastCalledWith( 7 );
-		} );
-
-		it( 'does not load a product category from a different taxonomy', async () => {
-			mockUtils.getCategory.mockClear();
-			await renderComponent( {
-				attributes: { source: 'context' },
-				context: { termId: 42, taxonomy: 'category' },
-			} );
-			expect( mockUtils.getCategory ).not.toHaveBeenCalled();
-			expect( lastProps.category ).toBeNull();
 		} );
 	} );
 

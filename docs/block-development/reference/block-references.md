@@ -851,8 +851,8 @@ Visually highlight a product category and encourage prompt action.
 
 - **Name:** woocommerce/featured-category
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
-- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, layout, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, source, termTaxonomy
+- **Supports:** align (full, wide), ariaLabel, interactivity (clientNavigation), ~~html~~
+- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, layout, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, termTaxonomy
 
 ## Featured Product - woocommerce/featured-product
 

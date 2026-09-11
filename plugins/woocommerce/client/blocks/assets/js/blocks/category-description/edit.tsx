@@ -22,19 +22,12 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
-		taxonomy?: string;
-	} & Record< string, number | string | undefined >;
+	};
 }
 
 export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const { textAlign } = attributes;
-	const termId =
-		context[ 'woocommerce/featuredCategoryTermId' ] || context.termId;
-	const effectiveTaxonomy =
-		context[ 'woocommerce/featuredCategoryTaxonomy' ] ||
-		context.termTaxonomy ||
-		context.taxonomy ||
-		'product_cat';
+	const { termId, termTaxonomy } = context;
 
 	const userCanEdit = useSelect(
 		( select ) => {
@@ -42,17 +35,17 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: effectiveTaxonomy,
+				name: termTaxonomy || 'product_cat',
 				id: termId,
 			} );
 		},
-		[ termId, effectiveTaxonomy ]
+		[ termId, termTaxonomy ]
 	);
 
 	const [ rawDescription = '', setDescription, fullDescription ] =
 		useEntityProp(
 			'taxonomy',
-			effectiveTaxonomy,
+			termTaxonomy || 'product_cat',
 			'description',
 			String( termId )
 		);
