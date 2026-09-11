@@ -62335,12 +62335,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/Filterer.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\Filterer\:\:\$data_store is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Internal/ProductAttributesLookup/Filterer.php
-
-		-
 			message: '#^Call to an undefined method object\:\:schedule_single\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -62462,12 +62456,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:unset_regeneration_in_progress_flag\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:update_stock_status_for\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php

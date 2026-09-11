@@ -10,6 +10,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Tests for the LookupDataStore class.
@@ -1261,6 +1262,237 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		sort( $expected );
 		sort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' regenerates the data for a variation when its status changes and the "direct updates" option is on.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_on_variation_status_changed_regenerates_data( bool $use_optimized_db_access ) {
+		if ( $use_optimized_db_access ) {
+			update_option( 'woocommerce_attribute_lookup_optimized_updates', 'yes' );
+			$this->sut = new LookupDataStore();
+		}
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $variation, array( 'status' => ProductStatus::PUBLISH ) );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' ignores a status change of a product that is not a variation.
+	 */
+	public function test_on_product_status_changed_does_nothing() {
+		$this->set_direct_update_option( true );
+
+		list( $product ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $product, array( 'status' => ProductStatus::DRAFT ) );
+
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates no entries for variations that are not published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_variable_product_skips_unpublished_variations( bool $use_optimized_db_access ) {
+		list( $product, $published_variation ) = $this->create_variable_product_with_one_variation();
+
+		$disabled_variation = new \WC_Product_Variation();
+		$disabled_variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_2' ) );
+		$disabled_variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$disabled_variation->set_parent_id( $product->get_id() );
+		$disabled_variation->set_status( ProductStatus::PRIVATE );
+		$disabled_variation->save();
+
+		$product->set_children( array( $published_variation->get_id(), $disabled_variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product, $use_optimized_db_access );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $published_variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates no entries for a variation that is not published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_unpublished_variation_creates_nothing( bool $use_optimized_db_access ) {
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		$this->empty_lookup_table();
+		$this->insert_lookup_table_data( $variation->get_id(), $product->get_id(), self::$attributes[1]['name'], self::$attributes[1]['term_ids'][0], true, true );
+
+		$this->sut->create_data_for_product( $variation, $use_optimized_db_access );
+
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Stale rows of an unpublished variation are removed and none are recreated.' );
+	}
+
+	/**
+	 * @testdox Disabling a variation removes its entries and re-enabling it recreates them, when the "direct updates" option is on.
+	 */
+	public function test_disabling_and_enabling_a_variation_updates_its_data() {
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$expected_row                = $this->variation_lookup_row( $product, $variation );
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Saving a published variation creates its row.' );
+
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Disabling the variation removes its row.' );
+
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Re-enabling the variation recreates its row.' );
+	}
+
+	/**
+	 * @testdox 'run_update_callback' fires 'woocommerce_product_attributes_lookup_updated' once the table has been updated.
+	 */
+	public function test_run_update_callback_fires_updated_action() {
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action, $this->get_lookup_table_data() );
+			},
+			10,
+			2
+		);
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+
+		$this->assertSame(
+			array( array( $variation->get_id(), LookupDataStore::ACTION_INSERT, array( $this->variation_lookup_row( $product, $variation ) ) ) ),
+			$received,
+			'The action fires once, with the product id and action, after the rows have been written.'
+		);
+	}
+
+	/**
+	 * @testdox 'run_update_callback' does not fire 'woocommerce_product_attributes_lookup_updated' for a stock update that changes no row.
+	 */
+	public function test_run_update_callback_does_not_fire_updated_action_when_stock_update_changes_no_row() {
+		$variation = $this->create_variable_product_with_one_variation()[1];
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action );
+			},
+			10,
+			2
+		);
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+		$this->assertSame( array(), $received, 'The variation is still in stock, so no row changed and nothing is announced.' );
+
+		$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$variation->save();
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+		$this->assertSame(
+			array( array( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK ) ),
+			$received,
+			'The in_stock flag changed, so the update is announced.'
+		);
+	}
+
+	/**
+	 * @testdox 'run_update_callback' invalidates the classic layered nav counts, which are derived from the table.
+	 */
+	public function test_run_update_callback_invalidates_layered_nav_counts() {
+		$variation = $this->create_variable_product_with_one_variation()[1];
+
+		// Saving the product queued its own invalidation, flush it so that only the lookup update is observed.
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$transient_name = 'wc_layered_nav_counts_' . self::$attributes[1]['name'];
+		set_transient( $transient_name, array( 'x' => 1 ) );
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$this->assertFalse( get_transient( $transient_name ), 'The counts cached for the attribute taxonomy are deleted.' );
+	}
+
+	/**
+	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
+	 * and one published, in-stock variation defined by the first term ('term_2_1').
+	 *
+	 * @return array The product and the variation: [ \WC_Product_Variable, \WC_Product_Variation ].
+	 */
+	private function create_variable_product_with_one_variation(): array {
+		$variation_attribute = self::$attributes[1];
+
+		$product = new \WC_Product_Variable();
+		$this->set_product_attributes(
+			$product,
+			array(
+				$variation_attribute['name'] => array(
+					'id'        => $variation_attribute['id'],
+					'options'   => $variation_attribute['term_ids'],
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_attributes( array( $variation_attribute['name'] => 'term_2_1' ) );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$product->set_children( array( $variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+
+		return array( $product, $variation );
+	}
+
+	/**
+	 * The lookup table row expected for a published, in-stock variation created by
+	 * create_variable_product_with_one_variation.
+	 *
+	 * @param \WC_Product_Variable  $product The parent product.
+	 * @param \WC_Product_Variation $variation The variation.
+	 * @return array Row in the format returned by get_lookup_table_data.
+	 */
+	private function variation_lookup_row( \WC_Product_Variable $product, \WC_Product_Variation $variation ): array {
+		return array(
+			'product_id'             => $variation->get_id(),
+			'product_or_parent_id'   => $product->get_id(),
+			'taxonomy'               => self::$attributes[1]['name'],
+			'term_id'                => self::$attributes[1]['term_ids'][0],
+			'is_variation_attribute' => 1,
+			'in_stock'               => 1,
+		);
 	}
 
 	/**

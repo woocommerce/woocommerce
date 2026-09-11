@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -39,6 +40,29 @@ class FilterData {
 	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
 		$this->query_clauses           = $query_clauses;
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+	}
+
+	/**
+	 * Whether out of stock items are hidden from the catalog.
+	 *
+	 * The attribute counts and the cached product ids depend on it, so the cache keys include it.
+	 *
+	 * The `in_stock` rule this drives mirrors QueryClauses::add_attribute_clauses(), and the two
+	 * have to stay in step, or the counts and the filtered results disagree.
+	 *
+	 * @return bool
+	 */
+	private function hide_out_of_stock_items(): bool {
+		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+	}
+
+	/**
+	 * Get the product attributes lookup data store.
+	 *
+	 * @return LookupDataStore
+	 */
+	private function lookup_data_store(): LookupDataStore {
+		return wc_get_container()->get( LookupDataStore::class );
 	}
 
 	/**
@@ -270,25 +294,21 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			// Optimization note: We evaluated using wc_product_attributes_lookup but decided against it, as removing
-			// the posts table join in the query below produced better benchmarking results and required minimal changes.
-			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
-				FROM {$wpdb->term_relationships} AS term_relationships
-				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-				WHERE term_relationships.object_id IN ( {$product_ids} )
-				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
-				GROUP BY terms.term_id
-			";
+			// The lookup table usage option is 'no' while a regeneration is running, after an aborted
+			// regeneration is cleaned up, and when an admin disabled the table. Its rows are incomplete
+			// in all of those states, so the counts come from the parent terms then. That matches the
+			// storefront's main product query, which filters through the table only when Filterer says
+			// usage is on. It does not match QueryClauses::add_attribute_clauses(), which always reads
+			// the table, so with usage off and an attribute filter applied the id set above is already
+			// empty and these counts come back empty too. The fallback only yields complete counts while
+			// no attribute filter is active.
+			//
+			// The two branches also differ on stock: only the lookup branch can honour
+			// 'woocommerce_hide_out_of_stock_items', because parent term relationships carry no stock.
+			$attribute_count_sql = $this->lookup_data_store()->usage_is_enabled()
+				? $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count )
+				: $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count );
 
-			/**
-			 * We can't use $wpdb->prepare() here because using %s with
-			 * $wpdb->prepare() for a subquery won't work as it will escape the
-			 * SQL query.
-			 * We're using the query as is, same as Core does.
-			 */
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = $wpdb->get_results( $attribute_count_sql );
 			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
@@ -304,6 +324,56 @@ class FilterData {
 		$this->set_cache( $transient_key, $results );
 
 		return $results;
+	}
+
+	/**
+	 * Build the attribute count query that reads the product attributes lookup table.
+	 *
+	 * @param string $product_ids        Comma separated list of product ids.
+	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @return string The SQL query.
+	 */
+	private function get_attribute_counts_sql_from_lookup_table( string $product_ids, string $attribute_to_count ): string {
+		global $wpdb;
+
+		$lookup_table_name = $this->lookup_data_store()->get_lookup_table_name();
+		$taxonomy_sql      = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
+		$in_stock_clause   = $this->hide_out_of_stock_items() ? 'AND in_stock = 1' : '';
+
+		// The lookup table only holds rows for published variations, so no join on the posts table is needed.
+		// $taxonomy_sql is already quoted by prepare(); $product_ids is a list the database returned.
+		return "
+			SELECT COUNT( DISTINCT product_or_parent_id ) as term_count, term_id as term_count_id
+			FROM {$lookup_table_name}
+			WHERE product_or_parent_id IN ( {$product_ids} )
+			AND taxonomy = {$taxonomy_sql}
+			{$in_stock_clause}
+			GROUP BY term_id
+		";
+	}
+
+	/**
+	 * Build the attribute count query that reads the terms assigned to the parent products.
+	 *
+	 * @param string $product_ids        Comma separated list of product ids.
+	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @return string The SQL query.
+	 */
+	private function get_attribute_counts_sql_from_term_relationships( string $product_ids, string $attribute_to_count ): string {
+		global $wpdb;
+
+		// $taxonomy_escaped is escaped by esc_sql(); $product_ids is a list the database returned.
+		$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+
+		return "
+			SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
+			FROM {$wpdb->term_relationships} AS term_relationships
+			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+			WHERE term_relationships.object_id IN ( {$product_ids} )
+			AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
+			GROUP BY terms.term_id
+		";
 	}
 
 	/**
@@ -485,9 +555,11 @@ class FilterData {
 			md5(
 				wp_json_encode(
 					array(
-						'query_vars'  => $this->normalize_query_vars( $query_vars ),
-						'extra'       => $extra,
-						'filter_type' => $filter_type,
+						'query_vars'              => $this->normalize_query_vars( $query_vars ),
+						'extra'                   => $extra,
+						'filter_type'             => $filter_type,
+						'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
+						'lookup_table_in_use'     => $this->lookup_data_store()->usage_is_enabled(),
 					)
 				)
 			)
@@ -637,7 +709,14 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $this->normalize_query_vars( $query_vars ) ) );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
+			wp_json_encode(
+				array(
+					'query_vars'              => $this->normalize_query_vars( $query_vars ),
+					'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
+				)
+			)
+		);
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {

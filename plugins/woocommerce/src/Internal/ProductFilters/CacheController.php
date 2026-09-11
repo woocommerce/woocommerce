@@ -52,6 +52,7 @@ class CacheController implements RegisterHooksInterface {
 
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
+		add_action( 'woocommerce_product_attributes_lookup_updated', array( $this, 'invalidate_filter_data_cache' ) );
 
 		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );

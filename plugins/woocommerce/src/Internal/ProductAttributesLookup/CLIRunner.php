@@ -58,7 +58,7 @@ class CLIRunner {
 	 */
 	private function enable_core( array $args, array $assoc_args ) {
 		$table_name = $this->lookup_data_store->get_lookup_table_name();
-		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+		if ( $this->lookup_data_store->usage_is_enabled() ) {
 			$this->warning( "The usage of the of the %W{$table_name}%n table is already enabled." );
 			return;
 		}
@@ -102,7 +102,7 @@ class CLIRunner {
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
 	private function disable_core( array $args, array $assoc_args ) {
-		if ( 'yes' !== get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+		if ( ! $this->lookup_data_store->usage_is_enabled() ) {
 			$table_name = $this->lookup_data_store->get_lookup_table_name();
 			$this->warning( "The usage of the of the %W{$table_name}%n table is already disabled." );
 			return;
@@ -146,7 +146,7 @@ class CLIRunner {
 		$use_db_optimization = ! array_key_exists( 'disable-db-optimization', $assoc_args );
 		$this->check_can_use_db_optimization( $use_db_optimization );
 		$start_time = microtime( true );
-		$this->lookup_data_store->create_data_for_product( $product_id, $use_db_optimization );
+		$this->data_regenerator->regenerate_for_product( $product_id, $use_db_optimization );
 
 		if ( $this->lookup_data_store->get_last_create_operation_failed() ) {
 			$this->error( "Lookup data regeneration failed.\nSee the WooCommerce logs (source is %9palt-updates%n) for details." );
@@ -186,7 +186,7 @@ class CLIRunner {
 	private function info_core( array $args, array $assoc_args ) {
 		global $wpdb;
 
-		$enabled = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+		$enabled = $this->lookup_data_store->usage_is_enabled();
 
 		$table_name = $this->lookup_data_store->get_lookup_table_name();
 		$info       = $this->get_lookup_table_info();
@@ -382,7 +382,7 @@ class CLIRunner {
 			throw new \Exception( 'batch_size must be a number bigger than 0' );
 		}
 
-		$was_enabled = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+		$was_enabled = $this->lookup_data_store->usage_is_enabled();
 
 		$products_count = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 		$products_count = ( $products_count[ ProductStatus::PUBLISH ] ?? 0 ) + ( $products_count[ ProductStatus::PENDING ] ?? 0 ) + ( $products_count[ ProductStatus::DRAFT ] ?? 0 );

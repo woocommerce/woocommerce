@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
@@ -140,7 +141,7 @@ class LookupDataStore {
 			return;
 		}
 
-		$action = $this->get_update_action( $changeset );
+		$action = $this->get_update_action( $changeset, $this->is_variation( $product ) );
 		if ( self::ACTION_NONE !== $action ) {
 			$this->maybe_schedule_update( $product->get_id(), $action );
 		}
@@ -212,21 +213,56 @@ class LookupDataStore {
 				}
 				break;
 			case self::ACTION_UPDATE_STOCK:
-				$this->update_stock_status_for( $product );
+				if ( 0 === $this->update_stock_status_for( $product ) ) {
+					return;
+				}
 				break;
 			case self::ACTION_DELETE:
 				$this->delete_data_for( $product_id );
 				break;
 		}
+
+		$this->announce_table_updated( $product_id, $action );
+	}
+
+	/**
+	 * Announce that the lookup table has been updated, so the data derived from it is invalidated.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int $product_id The product or variation the data was updated for, or 0 for the whole table.
+	 * @param int $action The update that was performed, one of the ACTION_ constants.
+	 *
+	 * @return void
+	 */
+	public function announce_table_updated( int $product_id, int $action ): void {
+		/**
+		 * Fires after the product attributes lookup table has been updated.
+		 *
+		 * Data derived from the lookup table (such as attribute filter counts) should be invalidated on this
+		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
+		 * in a scheduled action.
+		 *
+		 * It also fires after the whole table is regenerated or cleaned up, with a product id of 0. A stock
+		 * update that leaves every row unchanged is not announced; a regeneration that rewrites identical rows
+		 * still is, so listeners must not assume a row changed.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $product_id The product or variation id the data was updated for, or 0 when the whole table was regenerated or cleaned up.
+		 * @param int $action The update that was performed, one of the LookupDataStore::ACTION_ constants.
+		 */
+		do_action( 'woocommerce_product_attributes_lookup_updated', $product_id, $action );
 	}
 
 	/**
 	 * Determine the type of action to perform depending on the received changeset.
 	 *
 	 * @param array|null $changeset The changeset received by on_product_changed.
+	 * @param bool       $is_variation True if the changed product is a variation.
 	 * @return int One of the ACTION_ constants.
 	 */
-	private function get_update_action( $changeset ) {
+	private function get_update_action( $changeset, bool $is_variation ) {
 		if ( is_null( $changeset ) ) {
 			// No changeset at all means that the product is new.
 			return self::ACTION_INSERT;
@@ -237,6 +273,7 @@ class LookupDataStore {
 		// Order matters:
 		// - The change with the most precedence is a change in catalog visibility
 		// (which will result in all data being regenerated or deleted).
+		// - Then a status change of a variation (data regenerated: unpublished variations get no rows).
 		// - Then a change in attributes (all data will be regenerated).
 		// - And finally a change in stock status (existing data will be updated).
 		// Thus these conditions must be checked in that same order.
@@ -248,6 +285,12 @@ class LookupDataStore {
 			} else {
 				return self::ACTION_DELETE;
 			}
+		}
+
+		// The "Enabled" checkbox of a variation toggles its status between 'publish' and 'private'.
+		// A product's own status isn't stored in the table, so it doesn't trigger anything.
+		if ( $is_variation && in_array( 'status', $keys, true ) ) {
+			return self::ACTION_INSERT;
 		}
 
 		if ( in_array( 'attributes', $keys, true ) ) {
@@ -265,13 +308,14 @@ class LookupDataStore {
 	 * Update the stock status of the lookup table entries for a given product.
 	 *
 	 * @param \WC_Product $product The product to update the entries for.
+	 * @return int The number of rows whose in_stock flag changed.
 	 */
-	private function update_stock_status_for( \WC_Product $product ) {
+	private function update_stock_status_for( \WC_Product $product ): int {
 		global $wpdb;
 
 		$in_stock = $product->is_in_stock();
 
-		$wpdb->query(
+		return (int) $wpdb->query(
 			$wpdb->prepare(
 				'UPDATE %i SET in_stock = %d WHERE product_id = %d',
 				$this->lookup_table_name,
@@ -453,12 +497,16 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Create all the necessary lookup data for a given variation.
+	 * Create all the necessary lookup data for a given variation. Unpublished variations get none.
 	 *
 	 * @param \WC_Product_Variation $variation The variation to create entries for.
 	 * @throws \Exception Can't retrieve the details of the parent product.
 	 */
 	private function create_data_for_variation( \WC_Product_Variation $variation ) {
+		if ( ! $this->is_published_variation( $variation ) ) {
+			return;
+		}
+
 		$main_product = WC()->call_function( 'wc_get_product', $variation->get_parent_id() );
 		if ( false === $main_product ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -553,19 +601,33 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Get the variations of a given variable product.
+	 * Get the published variations of a given variable product.
+	 *
+	 * Unpublished (disabled) variations get no lookup data: they can't be bought, so they mustn't make
+	 * their parent match an attribute filter or count towards a term.
 	 *
 	 * @param \WC_Product_Variable $product The product to get the variations for.
-	 * @return array An array of WC_Product_Variation objects.
+	 * @return \WC_Product_Variation[]
 	 */
 	private function get_variations_of( \WC_Product_Variable $product ) {
-		$variation_ids = $product->get_children();
-		return array_map(
+		$variations = array_map(
 			function ( $id ) {
 				return WC()->call_function( 'wc_get_product', $id );
 			},
-			$variation_ids
+			$product->get_children()
 		);
+
+		return array_filter( $variations, array( $this, 'is_published_variation' ) );
+	}
+
+	/**
+	 * Check if a value is a published variation.
+	 *
+	 * @param mixed $product Product object, or false when the product couldn't be loaded.
+	 * @return bool
+	 */
+	private function is_published_variation( $product ): bool {
+		return $product instanceof \WC_Product_Variation && ProductStatus::PUBLISH === $product->get_status( 'edit' );
 	}
 
 	/**
@@ -817,6 +879,19 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Whether reading the lookup table is enabled (the "Enable table usage" tool, option 'woocommerce_attribute_lookup_enabled').
+	 *
+	 * It's off while a regeneration runs, after an aborted regeneration is cleaned up, and when an admin disabled it.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public function usage_is_enabled(): bool {
+		return 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+	}
+
+	/**
 	 * Check if the optimized database access setting is enabled.
 	 *
 	 * @return bool True if the optimized database access setting is enabled.
@@ -873,7 +948,7 @@ class LookupDataStore {
 			)
 		);
 
-		// * Obtain list of product variations, together with stock statuses; also get the product type.
+		// * Obtain list of published product variations, together with stock statuses; also get the product type.
 		// For a variation this will return just one entry, with type 'variation'.
 		// Output: $product_ids_with_stock_status = associative array where 'id' is the key and values are the stock status (1 for "in stock", 0 otherwise).
 		// $variation_ids = raw list of variation ids.
@@ -896,7 +971,7 @@ class LookupDataStore {
 			(select p.ID as id, p.post_parent as parent, m.meta_value as stock_status, 'variation' as product_type from {$wpdb->posts} p
 			left join {$wpdb->postmeta} m on p.id=m.post_id and m.meta_key='_stock_status'
 			where p.post_type = 'product_variation'
-			and p.post_status in ('publish', 'draft', 'pending', 'private')
+			and p.post_status = 'publish'
 			and (p.ID=%d or p.post_parent=%d));
 		",
 			$product_id,
@@ -907,8 +982,8 @@ class LookupDataStore {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
 		if ( empty( $product_ids_with_stock_status ) ) {
-			// The product has been deleted. The DELETE above only covers rows keyed by parent id,
-			// delete_data_for also removes the rows of a deleted variation (keyed by product_id).
+			// The product has been deleted, or it's a variation that is no longer published. The DELETE above
+			// only covers rows keyed by parent id, delete_data_for also removes the rows keyed by product_id.
 			$this->delete_data_for( $product_id );
 			return;
 		}
@@ -1004,15 +1079,19 @@ class LookupDataStore {
 		if ( ! $is_variation && ( ! $is_variable_product || empty( $variation_ids ) ) ) {
 			$variations_defined = array();
 		} else {
+			// The first query already selected the published variations, so the ids are reused here
+			// instead of deriving the same set again with a subquery on the posts table.
+			$variation_ids_list = implode( ',', array_map( 'intval', $variation_ids ) );
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $variation_ids_list holds the integer ids this method computed.
 			$sql = $wpdb->prepare(
 				"select post_id as variation_id, substr(meta_key,11) as attribute, meta_value as slug from {$wpdb->postmeta}
-				where post_id in (select ID from {$wpdb->posts} where (id=%d or post_parent=%d) and post_type = 'product_variation')
+				where post_id in ({$variation_ids_list})
 				and meta_key like %s
 				and meta_value != ''",
-				$product_id,
-				$product_id,
 				'attribute_pa_%'
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$variations_defined = $wpdb->get_results( $sql, ARRAY_A );
 			$variations_defined = ArrayUtil::group_by_column( $variations_defined, 'variation_id' );

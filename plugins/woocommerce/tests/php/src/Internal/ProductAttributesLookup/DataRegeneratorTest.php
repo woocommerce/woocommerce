@@ -296,6 +296,52 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Finalizing the regeneration announces the update, since it writes rows without going through the update callback.
+	 */
+	public function test_finalize_regeneration_fires_the_lookup_updated_action() {
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action );
+			},
+			10,
+			2
+		);
+
+		$this->sut->finalize_regeneration( true );
+
+		$this->assertSame(
+			array( array( 0, LookupDataStore::ACTION_INSERT ) ),
+			$received,
+			'The action fires once, with product id 0 because the whole table was regenerated.'
+		);
+	}
+
+	/**
+	 * @testdox Regenerating the data for a single product announces the update once the data has been created.
+	 */
+	public function test_regenerate_for_product_fires_the_lookup_updated_action_after_creating_the_data() {
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action, $this->lookup_data_store->passed_products );
+			},
+			10,
+			2
+		);
+
+		$this->sut->regenerate_for_product( 123, false );
+
+		$this->assertSame(
+			array( array( 123, LookupDataStore::ACTION_INSERT, array( 123 ) ) ),
+			$received,
+			'The action fires once, with the product id, after the data for it has been created.'
+		);
+	}
+
+	/**
 	 * @testdox After WooCommerce is installed the table usage is enabled only if it hadn't been explicitly disabled by an admin.
 	 *
 	 * @testWith [null, "yes"]
