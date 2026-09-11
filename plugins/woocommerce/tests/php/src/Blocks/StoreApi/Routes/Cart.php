@@ -819,7 +819,7 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Adding custom variations preserves percent escapes in cart storage and the API response.
+	 * @testdox Adding custom variations preserves percent escapes in cart storage and decodes them in the API display value.
 	 * @testWith ["attribute_finish", "Black%20White"]
 	 *           ["Finish", "Black%20White"]
 	 *           ["finish", "Black%20White"]
@@ -877,7 +877,7 @@ class Cart extends ControllerTestCase {
 		$this->assertSame( 201, $response->get_status(), 'A matching custom attribute must be accepted.' );
 		$data = $response->get_data();
 		$this->assertCount( 1, $data['items'], 'The response should contain the added variation.' );
-		$this->assertSame( 'Black%20White', $data['items'][0]['variation'][0]['value'], 'The response must preserve literal percent escapes.' );
+		$this->assertSame( 'Black White', $data['items'][0]['variation'][0]['value'], 'The display value must be decoded so Blocks matches the classic cart.' );
 		$cart = WC()->cart->get_cart();
 		$item = reset( $cart );
 		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The cart must contain the selected variation.' );
