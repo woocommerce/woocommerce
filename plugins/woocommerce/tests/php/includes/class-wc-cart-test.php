@@ -687,7 +687,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Ordering again preserves percent escapes and the selected variation.
+	 * @testdox Completing an order and ordering again preserves percent escapes and the selected variation.
 	 * @testWith ["Black%20White"]
 	 *           [""]
 	 * @param string $variation_value Fixed value or an Any variation.
@@ -713,11 +713,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertContains( 'Black%20White', wc_get_product( $product->get_id() )->get_variation_attributes()['Finish'], 'The ordered option must be available on the product.' );
 
-		// Add the item after the status transition to isolate reordering from email display formatting.
 		$order = wc_create_order( array( 'customer_id' => $user_id ) );
+		$order->add_product( $variation, 1, array( 'variation' => array( 'finish' => 'Black%20White' ) ) );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
-		$order->add_product( $variation, 1, array( 'variation' => array( 'finish' => 'Black%20White' ) ) );
 
 		$order_items = wc_get_order( $order->get_id() )->get_items();
 		$order_item  = reset( $order_items );

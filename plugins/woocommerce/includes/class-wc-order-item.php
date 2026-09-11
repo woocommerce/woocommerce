@@ -333,8 +333,13 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
-		$formatted_meta    = array();
+		/**
+		 * Metadata objects owned by the order item.
+		 *
+		 * @var WC_Meta_Data[] $meta_data
+		 */
 		$meta_data         = $this->get_meta_data();
+		$formatted_meta    = array();
 		$hideprefix_length = ! empty( $hideprefix ) ? strlen( $hideprefix ) : 0;
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 		$order_item_name   = $this->get_name();
@@ -348,6 +353,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				continue;
 			}
 
+			// Decode a copy so display formatting cannot change metadata saved with the order item.
+			$meta          = clone $meta;
 			$meta->key     = rawurldecode( (string) $meta->key );
 			$meta->value   = rawurldecode( (string) $meta->value );
 			$attribute_key = str_replace( 'attribute_', '', $meta->key );
