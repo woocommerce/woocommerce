@@ -805,6 +805,53 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Pages that run out of order are all in the export.
+	 */
+	public function test_pages_run_out_of_order_are_all_exported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->assertCount( 3, $batches, 'Five orders at two per batch should queue three pages.' );
+
+		// Another runner picked the last page first.
+		$this->run_action( array_key_last( $batches ) );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+		$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+
+		$this->assertTrue( $exporter->export_file_exists(), 'Every page ran, so the export is complete.' );
+		$this->assertCount( 5, file( $path ), 'The page that ran first must be in the file.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox A page whose export file is gone fails instead of completing with nothing written.
+	 */
+	public function test_page_without_an_export_file_fails(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		wp_delete_file( ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv" );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'Nothing was written, so nothing must be served.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertStringContainsString( 'is missing', $logger->errors[0], 'The log should say the file was gone.' );
+	}
+
+	/**
 	 * @testdox The email waits for a batch that another runner is still executing.
 	 */
 	public function test_email_waits_for_a_running_batch(): void {

@@ -187,6 +187,44 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Create the empty export body, unless it is already there.
+	 *
+	 * Called once when the export is queued, so the pages can append in whatever order the queue
+	 * runs them. The parent creates the body on page 1 only, and a page that ran earlier wrote nothing.
+	 *
+	 * @since 11.2.0
+	 * @return bool Whether the body exists.
+	 */
+	public function create_export_file() {
+		if ( ! file_exists( $this->get_file_path() ) ) {
+			@file_put_contents( $this->get_file_path(), '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			@chmod( $this->get_file_path(), 0664 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		}
+
+		return file_exists( $this->get_file_path() );
+	}
+
+	/**
+	 * Append this page to the export body, or throw.
+	 *
+	 * The parent would recreate the body on page 1, throwing away pages that ran before it, and write
+	 * nothing for a page that ran earlier. Here a lost page fails the queued action, which is how the
+	 * export learns it is incomplete.
+	 *
+	 * @since 11.2.0
+	 * @throws \RuntimeException When the body is missing.
+	 * @return void
+	 */
+	public function generate_file() {
+		if ( ! file_exists( $this->get_file_path() ) ) {
+			throw new \RuntimeException( sprintf( 'Export file %1$s is missing, so page %2$d could not be written.', esc_html( $this->get_filename() ), (int) $this->get_page() ) );
+		}
+
+		$this->prepare_data_to_export();
+		$this->write_csv_data( $this->get_csv_data() );
+	}
+
+	/**
 	 * Write the `.headers` companion that marks the export as complete, unless it is already there.
 	 *
 	 * The parent writes it only when its own row count reaches 100%, which an export whose row total

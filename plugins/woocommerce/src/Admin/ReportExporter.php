@@ -146,6 +146,10 @@ class ReportExporter {
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
 		if ( 0 < $num_batches ) {
+			// The body exists before any page runs, so the queue may run the pages in any order.
+			$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+			$exporter->create_export_file();
+
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
