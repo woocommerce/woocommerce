@@ -133,7 +133,6 @@ test.describe( 'Shopper → Extensibility', () => {
 			);
 			await expect( postcode ).toHaveValue( '90210' );
 
-			// Overwriting is possible now, but the address did push, so it is unchanged.
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
