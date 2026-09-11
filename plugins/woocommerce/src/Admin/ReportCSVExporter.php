@@ -207,12 +207,12 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Append this page to the export body, or throw.
 	 *
-	 * The parent would recreate the body on page 1, throwing away pages that ran before it, and write
-	 * nothing for a page that ran earlier. Here a lost page fails the queued action, which is how the
-	 * export learns it is incomplete.
+	 * The parent would recreate the body on page 1, throwing away pages that ran before it, and log a
+	 * page it could not write while reporting nothing. Here a lost page fails the queued action, which
+	 * is how the export learns it is incomplete.
 	 *
 	 * @since 11.2.0
-	 * @throws \RuntimeException When the body is missing.
+	 * @throws \RuntimeException When the body is missing or the page could not be written to it.
 	 * @return void
 	 */
 	public function generate_file() {
@@ -221,7 +221,10 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		}
 
 		$this->prepare_data_to_export();
-		$this->write_csv_data( $this->get_csv_data() );
+
+		if ( false === $this->write_csv_data( $this->get_csv_data() ) ) {
+			throw new \RuntimeException( sprintf( 'Page %2$d of export %1$s could not be written.', esc_html( $this->get_filename() ), (int) $this->get_page() ) );
+		}
 	}
 
 	/**

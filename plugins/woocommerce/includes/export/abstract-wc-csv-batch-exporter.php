@@ -125,6 +125,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 * @param string $data Data.
+	 * @return void|false False when the data could not be written, so a caller can tell a written page from a lost one.
 	 */
 	protected function write_csv_data( $data ) {
 
@@ -171,6 +172,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 					),
 					$log_context
 				);
+				return false;
 			}
 		} else {
 			// fopen() raises a warning when it fails, so the last PHP error usually explains why (permissions, an
@@ -187,6 +189,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 				),
 				$log_context
 			);
+			return false;
 		}
 
 		// Add all columns when finished.

@@ -852,6 +852,41 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A page that could not be written to the export file fails instead of completing.
+	 */
+	public function test_page_that_cannot_be_written_fails(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		// A stream that opens but refuses to append, as a read-only wrapper would.
+		add_filter( 'woocommerce_csv_exporter_fopen_mode', array( $this, 'read_only_mode' ) );
+		// fwrite() raises a notice on such a stream, which the test runner would turn into an exception of its own.
+		set_error_handler( '__return_true', E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+		restore_error_handler();
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'A page that was not written must not leave the export served as complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertNotEmpty( preg_grep( '/could not be written/', $logger->errors ), 'The log should say the page was lost.' );
+	}
+
+	/**
+	 * Open the export file read-only, so writes fail.
+	 *
+	 * @return string
+	 */
+	public function read_only_mode(): string {
+		return 'r';
+	}
+
+	/**
 	 * @testdox The email waits for a batch that another runner is still executing.
 	 */
 	public function test_email_waits_for_a_running_batch(): void {
