@@ -286,12 +286,10 @@ class ReportExporter {
 			'errors' => array(),
 		);
 
-		/**
-		 * The queue.
-		 *
-		 * @var \WC_Queue_Interface $queue
-		 */
-		$queue = self::queue();
+		// Straight to the Action Scheduler store rather than through the queue interface: the statuses,
+		// the log lookup and the JSON-quoted search are all its own, and counting is cheaper than
+		// materializing IDs when an export runs to thousands of pages and every page counts them again.
+		$store = \ActionScheduler::store();
 
 		foreach ( $outcomes as $outcome => $statuses ) {
 			$progress[ $outcome ] = 0;
@@ -301,23 +299,20 @@ class ReportExporter {
 					continue;
 				}
 
-				// IDs only: an export can run to thousands of pages, and every page counts them again.
-				$action_ids = $queue->search(
-					array(
-						'hook'     => $hook,
-						'group'    => self::$group,
-						'status'   => $statuses,
-						// The quoted JSON form, so a longer export ID or an action ID cannot match.
-						'search'   => '"' . $export_id . '"',
-						'per_page' => -1,
-					),
-					'ids'
+				$query = array(
+					'hook'     => $hook,
+					'group'    => self::$group,
+					'status'   => $statuses,
+					// The quoted JSON form, so a longer export ID or an action ID cannot match.
+					'search'   => '"' . $export_id . '"',
+					'per_page' => -1,
 				);
 
-				$progress[ $outcome ] += count( $action_ids );
-				$progress['pages']    += count( $action_ids );
-
+				// Failed actions are fetched by ID because the failure is read from their logs.
 				if ( 'failed' === $outcome ) {
+					$action_ids = $store->query_actions( $query );
+					$count      = count( $action_ids );
+
 					foreach ( $action_ids as $action_id ) {
 						// The failure is the last thing the queue logs for an action.
 						$log_entries = \ActionScheduler::logger()->get_logs( $action_id );
@@ -326,7 +321,12 @@ class ReportExporter {
 							$progress['errors'][] = $log_entry->get_message();
 						}
 					}
+				} else {
+					$count = (int) $store->query_actions( $query, 'count' );
 				}
+
+				$progress[ $outcome ] += $count;
+				$progress['pages']    += $count;
 			}
 		}
 
