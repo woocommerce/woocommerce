@@ -132,4 +132,57 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 		$this->assertEquals( 'US', $geolocation['country'], 'The country code from the API response should be returned' );
 		$this->assertStringStartsWith( 'https://', $requested_url, 'The geolocation request must be made over HTTPS' );
 	}
+
+	/**
+	 * @testdox Geolocating via the API should be skipped for private, reserved, and otherwise non-public IP addresses.
+	 * @dataProvider non_public_ip_address_provider
+	 * @param string $ip_address A private, reserved, loopback, or invalid IP address.
+	 */
+	public function test_geolocate_via_api_skips_non_public_ip_addresses( $ip_address ) {
+		$request_made = false;
+
+		delete_transient( 'geoip_' . $ip_address );
+
+		// Force the database lookup to return nothing so the API fallback runs.
+		$force_empty_geolocation = function ( $data ) {
+			$data['country'] = '';
+			return $data;
+		};
+		add_filter( 'woocommerce_get_geolocation', $force_empty_geolocation, 999 );
+
+		$intercept_request = function () use ( &$request_made ) {
+			$request_made = true;
+			return array(
+				'body'     => wp_json_encode( array( 'country' => 'US' ) ),
+				'response' => array( 'code' => 200 ),
+			);
+		};
+		add_filter( 'pre_http_request', $intercept_request );
+
+		$geolocation = WC_Geolocation::geolocate_ip( $ip_address, false, true );
+
+		remove_filter( 'pre_http_request', $intercept_request, 10 );
+		remove_filter( 'woocommerce_get_geolocation', $force_empty_geolocation, 999 );
+		delete_transient( 'geoip_' . $ip_address );
+
+		$this->assertFalse( $request_made, "No geolocation API request should be made for non-public IP address {$ip_address}" );
+		$this->assertSame( '', $geolocation['country'], "No country should be returned for non-public IP address {$ip_address}" );
+	}
+
+	/**
+	 * Data provider of private, reserved, loopback, and invalid IP addresses.
+	 *
+	 * @return array
+	 */
+	public function non_public_ip_address_provider() {
+		return array(
+			'IPv4 unspecified'         => array( '0.0.0.0' ),
+			'IPv4 loopback'            => array( '127.0.0.1' ),
+			'IPv4 link-local'          => array( '169.254.1.1' ),
+			'IPv4 private (class A)'   => array( '10.0.0.5' ),
+			'IPv4 private (class C)'   => array( '192.168.0.1' ),
+			'IPv6 loopback'            => array( '::1' ),
+			'Not an IP address at all' => array( 'not-an-ip' ),
+		);
+	}
 }
