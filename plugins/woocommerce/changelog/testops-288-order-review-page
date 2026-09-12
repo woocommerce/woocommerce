@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move Review Order page states below E2E; three page-state titles move to PHPUnit and jsdom.
+
