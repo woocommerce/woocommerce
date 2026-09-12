@@ -266,7 +266,7 @@ class NotificationProcessor {
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
-	 * @param array  $extra       Optional subclass-specific extras (e.g. event_type, stock_quantity_at_trigger).
+	 * @param array  $extra       Identity fields from {@see Notification::get_identity_data()}.
 	 *                            Empty for notification types whose state is fully described by type + resource_id.
 	 * @return void
 	 *
