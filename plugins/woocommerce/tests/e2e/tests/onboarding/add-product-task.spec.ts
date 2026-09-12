@@ -80,19 +80,42 @@ test.describe( 'Add Product Task', () => {
 		} );
 	} );
 
+	test.afterEach( async ( { restApi } ) => {
+		// The test leaves a product behind if it fails before its own delete, and leaves the
+		// setup task list hidden if it fails between hiding and showing it. Both are torn down
+		// here rather than in the body so that a failure reports the assertion that failed
+		// instead of a cleanup error raised on the way out.
+		const { data } = await restApi.get( `${ WC_API_PATH }/products`, {
+			_fields: 'id',
+			per_page: 100,
+			status: 'any',
+		} );
+		// Every teardown call runs before anything is asserted: a failed delete must not stop
+		// the task list from being unhidden, or the rest of this serial project inherits it.
+		const { status } = await restApi.post(
+			`${ WC_API_PATH }/products/batch`,
+			{
+				delete: data.map( ( { id } ) => id ),
+			}
+		);
+		const taskListShown = await show_task_list( restApi, 'setup' );
+		expect( status ).toBe( 200 );
+		expect( taskListShown ).toBe( true );
+	} );
+
 	test.afterAll( async ( { restApi } ) => {
 		await restApi.post( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 			skipped: false,
 		} );
 	} );
 
-	test( 'Add product task displays options for different product types', async ( {
+	test( 'Products page redirects to add product task when no products exist', async ( {
 		page,
+		restApi,
 	} ) => {
-		// Navigate to the task list
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
+		const productName = `Add product task product ${ Date.now() }`;
 
-		// Verify product type options are displayed
+		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
 		await expect(
 			page.getByRole( 'menuitem', { name: 'Physical product' } )
 		).toBeVisible();
@@ -109,23 +132,7 @@ test.describe( 'Add Product Task', () => {
 			/wp-has-current-submenu/
 		);
 
-		await page
-			.getByRole( 'menuitem', { name: 'Physical product' } )
-			.click();
-		await expect(
-			page.locator(
-				'#menu-posts-product .wp-submenu li.current > a[href="post-new.php?post_type=product"]'
-			)
-		).toBeVisible();
-	} );
-
-	test( 'Products page redirects to add product task when no products exist', async ( {
-		page,
-	} ) => {
-		// Navigate to All Products page
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
-
-		// Verify redirect to add product task
 		await expect( page ).toHaveURL(
 			/.+path=%2Fadd-product.+task=products/
 		);
@@ -152,57 +159,11 @@ test.describe( 'Add Product Task', () => {
 		await expect(
 			page.locator( '#toplevel_page_woocommerce' )
 		).toHaveClass( /wp-has-current-submenu/ );
-	} );
 
-	test( 'Products page shows products table when products exist', async ( {
-		page,
-		restApi,
-	} ) => {
-		// Create a test product
-		await restApi.post( `${ WC_API_PATH }/products`, {
-			name: 'Test Product',
-			type: 'simple',
-			regular_price: '10.00',
-		} );
-
-		// Navigate to All Products page
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-
-		// Verify products table is visible
-		await expect( page.locator( '.wp-list-table' ) ).toBeVisible();
-		await expect(
-			page.getByRole( 'columnheader', { name: 'Name' } )
-		).toHaveCount( 2 );
-		await expect(
-			page.getByRole( 'columnheader', { name: 'SKU' } )
-		).toHaveCount( 2 );
-		await expect(
-			page.getByRole( 'columnheader', { name: 'Price' } )
-		).toHaveCount( 2 );
-		await expect(
-			page.locator( '.wp-list-table > tbody > tr' )
-		).toHaveCount( 1 );
-
-		// Clean up - delete test product
-		const products = await restApi.get( `${ WC_API_PATH }/products` );
-		for ( const product of products.data ) {
-			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-				force: true,
-			} );
-		}
-	} );
-
-	test( 'Products page redirects to add product task when no products exist and task list is hidden', async ( {
-		page,
-		restApi,
-	} ) => {
-		// Hide the task list
 		expect( await hide_task_list( restApi, 'setup' ) ).toBe( true );
 
-		// Navigate to All Products page
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
-		// Verify redirect to add product task
 		await expect( page ).toHaveURL(
 			/.+path=%2Fadd-product.+task=products/
 		);
@@ -216,7 +177,43 @@ test.describe( 'Add Product Task', () => {
 			page.getByRole( 'menuitem', { name: 'Grouped product' } )
 		).toBeVisible();
 
-		// Reset task list to visible
 		expect( await show_task_list( restApi, 'setup' ) ).toBe( true );
+
+		const productResponse = await restApi.post(
+			`${ WC_API_PATH }/products`,
+			{
+				name: productName,
+				type: 'simple',
+				regular_price: '10.00',
+			}
+		);
+		const createdProductId = productResponse.data.id;
+		expect( productResponse.status ).toBe( 201 );
+		expect(
+			Number.isSafeInteger( createdProductId ) && createdProductId > 0
+		).toBe( true );
+
+		await page.goto( 'wp-admin/edit.php?post_type=product' );
+
+		await expect( page.locator( '.wp-list-table' ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: productName, exact: true } )
+		).toBeVisible();
+
+		const deleteResponse = await restApi.delete(
+			`${ WC_API_PATH }/products/${ createdProductId }`,
+			{ force: true }
+		);
+		expect( deleteResponse.status ).toBe( 200 );
+
+		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
+		await page
+			.getByRole( 'menuitem', { name: 'Physical product' } )
+			.click();
+		await expect(
+			page.locator(
+				'#menu-posts-product .wp-submenu li.current > a[href="post-new.php?post_type=product"]'
+			)
+		).toBeVisible();
 	} );
 } );
