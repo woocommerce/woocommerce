@@ -13,6 +13,7 @@ use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
+use Automattic\Woocommerce_Analytics\WC_Analytics_Visitor;
 use Composer\InstalledVersions;
 
 /**
@@ -202,10 +203,13 @@ class Woocommerce_Analytics {
 	/**
 	 * Register REST API routes.
 	 *
-	 * A site that has never used proxy tracking does not get the endpoint. It stays
-	 * registered after being disabled, so cached pages receive a visible 403.
+	 * The visitor endpoint is always registered. The tracking proxy only exists on sites
+	 * that enabled it once, and stays registered after being disabled so cached pages
+	 * receive a visible 403.
 	 */
 	public static function register_rest_routes() {
+		( new WC_Analytics_Visitor() )->register_routes();
+
 		if ( 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			return;
 		}
