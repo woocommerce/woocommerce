@@ -2750,4 +2750,125 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
 	}
+
+	/**
+	 * @testdox Every product is processed when the backlog spans more than one batch.
+	 */
+	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
+		$ids = array();
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = $this->create_missed_sale_end_product();
+			$ids[]   = $product->get_id();
+		}
+
+		$before_payloads = array();
+		$after_payloads  = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $hook_ids ) use ( &$before_payloads ) {
+				$before_payloads[] = $hook_ids;
+			}
+		);
+		add_action(
+			'wc_after_products_ending_sales',
+			function ( $hook_ids ) use ( &$after_payloads ) {
+				$after_payloads[] = $hook_ids;
+			}
+		);
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id} was not processed, so a batch boundary dropped it."
+			);
+		}
+
+		$this->assertCount( 1, $before_payloads, 'The before hook must fire once, not once per batch.' );
+		$this->assertCount( 1, $after_payloads, 'The after hook must fire once, not once per batch.' );
+
+		$expected_ids = array_map( 'intval', $ids );
+		$before_ids   = array_map( 'intval', $before_payloads[0] );
+		$after_ids    = array_map( 'intval', $after_payloads[0] );
+
+		$this->assertEqualsCanonicalizing( $expected_ids, $before_ids, 'The before hook must receive the whole backlog.' );
+		$this->assertEqualsCanonicalizing( $expected_ids, $after_ids, 'The after hook must receive the whole backlog.' );
+		$this->assertSame( $before_payloads[0], $after_payloads[0], 'The hook payload must not change while batches are processed.' );
+	}
+
+	/**
+	 * @testdox Priming happens per batch, not once for the whole backlog.
+	 */
+	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
+		$ids = array();
+
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = $this->create_missed_sale_end_product();
+			$ids[]   = $product->get_id();
+		}
+
+		$queued = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			static function ( $product_ids ) use ( &$queued ) {
+				$queued = $product_ids;
+			}
+		);
+
+		$cache_state_during_first_save = null;
+		add_action(
+			'woocommerce_update_product',
+			static function () use ( &$queued, &$cache_state_during_first_save ) {
+				if ( null !== $cache_state_during_first_save || count( $queued ) < 51 ) {
+					return;
+				}
+
+				$cache_state_during_first_save = array(
+					'first_batch_peer'      => false !== wp_cache_get( (int) $queued[1], 'posts' ),
+					'first_batch_peer_meta' => false !== wp_cache_get( (int) $queued[1], 'post_meta' ),
+					'next_batch'            => false !== wp_cache_get( (int) end( $queued ), 'posts' ),
+				);
+			}
+		);
+
+		// Fixture creation warms the cache; emulate a fresh cron request.
+		wp_cache_flush();
+
+		wc_scheduled_sales();
+
+		$this->assertCount( 51, $queued, 'Fixture precondition: the backlog must exceed one batch.' );
+		$this->assertIsArray( $cache_state_during_first_save, 'The cache state should be captured during the first save.' );
+		$this->assertTrue(
+			$cache_state_during_first_save['first_batch_peer'],
+			'A product in the first batch should already be primed during the first save.'
+		);
+		$this->assertTrue(
+			$cache_state_during_first_save['first_batch_peer_meta'],
+			'A product meta in the first batch should already be primed during the first save.'
+		);
+		$this->assertFalse(
+			$cache_state_during_first_save['next_batch'],
+			'The next batch must not be primed while the first batch is processing.'
+		);
+	}
+
+	/**
+	 * Create a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return WC_Product
+	 */
+	private function create_missed_sale_end_product(): WC_Product {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		return $product;
+	}
 }
