@@ -20,5 +20,5 @@ if ( embeddedRoot ) {
 	const hydrateUser = getAdminSetting( 'currentUserData' );
 
 	renderEmbeddedLayout( embeddedRoot, hydrateUser, settingsGroup );
-	renderCustomerEffortScoreTracks( embeddedRoot );
+	renderCustomerEffortScoreTracks( embeddedRoot, hydrateUser );
 }

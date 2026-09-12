@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent limited-capability WooCommerce Admin users from triggering merchant-only options, Woo Home Activity Panel, promotion, and analytics import requests.

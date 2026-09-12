@@ -178,7 +178,9 @@ Leaderboards.propTypes = {
 };
 
 export default ( ownProps ) => {
-	const { leaderboards } = getAdminSetting( 'dataEndpoints', {
+	// The binding default also covers a present dataEndpoints object that is
+	// missing this key, e.g. when the server-side preload was skipped.
+	const { leaderboards = [] } = getAdminSetting( 'dataEndpoints', {
 		leaderboards: [],
 	} );
 	return <Leaderboards { ...ownProps } allLeaderboards={ leaderboards } />;
