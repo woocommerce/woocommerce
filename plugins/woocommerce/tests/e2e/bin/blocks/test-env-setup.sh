@@ -7,6 +7,25 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+###################################################################################################
+# TEMPORARY SABOTAGE -- DO NOT MERGE. Delete this block before this branch goes anywhere.
+###################################################################################################
+# Forces the job's first `wp-env start` to fail here, after the containers are
+# already running, which is the one condition the retry in ci.yml could not
+# recover from. The marker lives in the runner's temp directory and survives
+# between attempts within the job, so attempt 2 gets past this block and the job
+# then shows whether the retry recovers. The message is the real seed guard's,
+# so the workflow's reason= classifier is exercised as well.
+forced_failure_marker="${RUNNER_TEMP:-/tmp}/wp-env-forced-first-failure"
+if [ ! -f "$forced_failure_marker" ]; then
+	: > "$forced_failure_marker"
+	echo "Missing gallery attachment; the sample-data image import did not complete." >&2
+	exit 1
+fi
+###################################################################################################
+# END TEMPORARY SABOTAGE
+###################################################################################################
+
 # Command prefix for running wp-cli against the single-container E2E environment
 # (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
 wp_cli="wp-env --config .wp-env.e2e.json run cli"
