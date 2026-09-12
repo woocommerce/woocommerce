@@ -166,7 +166,8 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 *
-	 * @param int $item_id Order item ID to get.
+	 * @param int|string|object $item_id Order item ID, numeric string ID, or item object to get.
+	 * @phpstan-param int|string|WC_Order_Item|object{order_item_id: int|string, order_item_type: string} $item_id
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {
