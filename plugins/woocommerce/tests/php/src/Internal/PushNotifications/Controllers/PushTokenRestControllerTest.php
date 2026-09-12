@@ -1404,9 +1404,33 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject WPCOM tokens endpoint when push notifications are disabled.
+	 * @testdox Should allow the WPCOM tokens endpoint when push notifications are disabled,
+	 * so a store that has been switched off can still be inspected.
 	 */
-	public function test_authorize_as_from_wpcom_returns_false_when_disabled(): void {
+	public function test_authorize_as_from_wpcom_allows_blog_token_when_disabled(): void {
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$controller = new class() extends PushTokenRestController {
+			/**
+			 * Stands in for a request WPCOM signed with the Jetpack blog token.
+			 *
+			 * @return bool
+			 */
+			protected function is_signed_with_blog_token(): bool {
+				return true;
+			}
+		};
+
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$this->assertTrue( $controller->authorize_as_from_wpcom( $request ) );
+	}
+
+	/**
+	 * @testdox Should reject the WPCOM tokens endpoint without a blog token when push
+	 * notifications are disabled.
+	 */
+	public function test_authorize_as_from_wpcom_rejects_without_blog_token_when_disabled(): void {
 		$this->mock_jetpack_connection_manager_is_connected( false );
 
 		$controller = new PushTokenRestController();
@@ -1414,7 +1438,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 
 		$result = $controller->authorize_as_from_wpcom( $request );
 
-		$this->assertFalse( $result );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_cannot_view', $result->get_error_code() );
 	}
 
 	/**

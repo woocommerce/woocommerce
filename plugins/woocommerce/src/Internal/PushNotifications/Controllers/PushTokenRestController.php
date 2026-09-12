@@ -295,32 +295,6 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Validates that the request is signed with a Jetpack blog token,
-	 * ensuring only WPCOM can access this endpoint.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 */
-	public function authorize_as_from_wpcom( WP_REST_Request $request ) {
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
-		}
-
-		if ( $this->is_signed_with_blog_token() ) {
-			return true;
-		}
-
-		return new WP_Error(
-			'woocommerce_rest_cannot_view',
-			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-			array( 'status' => rest_authorization_required_code() )
-		);
-	}
-
-	/**
 	 * Get the accepted arguments for the POST request.
 	 *
 	 * @since 10.6.0
