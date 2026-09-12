@@ -71,36 +71,6 @@ const test = baseTest.extend( {
 
 test.describe( 'Product Reviews', () => {
 	test.describe( 'Merchant manages reviews', () => {
-		test( 'can view products reviews list', async ( { page, reviews } ) => {
-			await page.goto(
-				`wp-admin/edit.php?post_type=product&page=product-reviews`
-			);
-
-			for ( const review of reviews ) {
-				const reviewRow = page.locator( `#comment-${ review.id }` );
-
-				await expect(
-					reviewRow.locator( '[data-colname="Author"]' )
-				).toContainText( review.reviewer_email );
-				await expect(
-					reviewRow
-						.locator( '[data-colname="Rating"]' )
-						.getByLabel( `${ review.rating } out of 5` )
-				).toBeVisible();
-				await expect(
-					reviewRow.locator( '[data-colname="Review"]' )
-				).toContainText( review.review );
-				await expect(
-					reviewRow
-						.locator( '[data-colname="Product"]' )
-						.getByRole( 'link' )
-						.first()
-				).toContainText( review.product_name );
-			}
-
-			expect( reviews.length ).toBeGreaterThan( 0 );
-		} );
-
 		test( 'can filter the reviews by product', async ( {
 			page,
 			reviews,
@@ -126,12 +96,24 @@ test.describe( 'Product Reviews', () => {
 				1
 			);
 
+			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await expect(
-				page
+				reviewRow.locator( '[data-colname="Author"]' )
+			).toContainText( review.reviewer_email );
+			await expect(
+				reviewRow
+					.locator( '[data-colname="Rating"]' )
+					.getByLabel( `${ review.rating } out of 5` )
+			).toBeVisible();
+			await expect(
+				reviewRow.locator( '[data-colname="Review"]' )
+			).toContainText( review.review );
+			await expect(
+				reviewRow
 					.locator( '[data-colname="Product"]' )
 					.getByRole( 'link' )
-					.filter( { hasText: review.product_name } )
-			).toBeVisible();
+					.first()
+			).toContainText( review.product_name );
 		} );
 
 		test( 'can quick edit a product review', async ( {
@@ -143,7 +125,6 @@ test.describe( 'Product Reviews', () => {
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);
-
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
 			await reviewRow
@@ -163,6 +144,50 @@ test.describe( 'Product Reviews', () => {
 			await expect(
 				reviewRow.getByText( updatedQuickReview )
 			).toBeVisible();
+		} );
+
+		test( 'can reply to a product review', async ( { page, reviews } ) => {
+			const review = reviews[ 0 ];
+
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product-reviews'
+			);
+
+			// Handle notice if present
+			await page.addLocatorHandler(
+				page.getByRole( 'link', { name: 'Dismiss' } ),
+				async () => {
+					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
+				}
+			);
+
+			const reviewRow = page.locator( `#comment-${ review.id }` );
+			await reviewRow.hover();
+			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
+			const replyTextArea = page.locator( 'textarea#replycontent' );
+
+			await expect( replyTextArea ).toBeVisible();
+
+			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
+			await replyTextArea.fill( replyText );
+
+			await page
+				.getByRole( 'cell', { name: 'Reply to Comment' } )
+				.getByRole( 'button', { name: 'Reply', exact: true } )
+				.click();
+
+			await expect( replyTextArea ).toBeHidden();
+
+			const productLink = await reviewRow
+				.locator( 'a.comments-view-item-link' )
+				.getAttribute( 'href' );
+			await page.goto( productLink );
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
+
+			const replyReviews = page.locator(
+				`div.comment_container:has-text("${ replyText }")`
+			);
+			await expect( replyReviews ).toBeVisible();
 		} );
 
 		test( 'can edit a product review', async ( { page, reviews } ) => {
@@ -214,163 +239,6 @@ test.describe( 'Product Reviews', () => {
 			).toContainText( updatedReview );
 			await expect(
 				page.getByLabel( `${ updatedRating } out of 5` )
-			).toBeVisible();
-		} );
-
-		test( 'can approve a product review', async ( { page, reviews } ) => {
-			const review = reviews[ 0 ]; // Select the first review for approval
-
-			await page.goto(
-				`wp-admin/edit.php?post_type=product&page=product-reviews`
-			);
-
-			const reviewRow = page.locator( `#comment-${ review.id }` );
-
-			const approveButton = reviewRow.getByRole( 'button', {
-				name: 'Approve',
-			} );
-
-			await reviewRow.hover();
-			await approveButton.click();
-			const unapproveButton = reviewRow.getByRole( 'button', {
-				name: 'Unapprove',
-			} );
-			await expect( unapproveButton ).toBeVisible();
-		} );
-
-		test( 'can mark a product review as spam', async ( {
-			page,
-			reviews,
-		} ) => {
-			const review = reviews[ 0 ];
-
-			await page.goto(
-				`wp-admin/edit.php?post_type=product&page=product-reviews`
-			);
-
-			const reviewRow = page.locator( `#comment-${ review.id }` );
-			await reviewRow.hover();
-
-			await reviewRow.getByRole( 'button', { name: 'Spam' } ).click();
-
-			await expect(
-				page.locator( `#comment-${ review.id }` )
-			).toBeHidden();
-
-			await page.click( 'a[href*="comment_status=spam"]' );
-
-			await expect(
-				page.locator( `#comment-${ review.id }` )
-			).toBeVisible();
-		} );
-
-		test( 'can reply to a product review', async ( { page, reviews } ) => {
-			const review = reviews[ 0 ];
-
-			await page.goto(
-				'wp-admin/edit.php?post_type=product&page=product-reviews'
-			);
-
-			// Handle notice if present
-			await page.addLocatorHandler(
-				page.getByRole( 'link', { name: 'Dismiss' } ),
-				async () => {
-					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
-				}
-			);
-
-			const reviewRow = page.locator( `#comment-${ review.id }` );
-			await reviewRow.hover();
-			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
-			const replyTextArea = page.locator( 'textarea#replycontent' );
-
-			await expect( replyTextArea ).toBeVisible();
-
-			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
-			await replyTextArea.fill( replyText );
-
-			await page
-				.getByRole( 'cell', { name: 'Reply to Comment' } )
-				.getByRole( 'button', { name: 'Reply', exact: true } )
-				.click();
-
-			await expect( replyTextArea ).toBeHidden();
-
-			const productLink = await reviewRow
-				.locator( 'a.comments-view-item-link' )
-				.getAttribute( 'href' );
-			await page.goto( productLink );
-			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
-
-			const replyReviews = page.locator(
-				`div.comment_container:has-text("${ replyText }")`
-			);
-			await expect( replyReviews ).toBeVisible();
-		} );
-
-		test( 'can delete a product review', async ( { page, reviews } ) => {
-			const review = reviews[ 0 ];
-
-			await page.goto(
-				`wp-admin/edit.php?post_type=product&page=product-reviews`
-			);
-			const reviewRow = page.locator( `#comment-${ review.id }` );
-			await reviewRow.hover();
-
-			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
-			// WordPress wptexturize may convert straight apostrophes (') to
-			// smart quotes (\u2019) in the reviewer name, so check for both.
-			const trashMessage = `Comment by ${ review.reviewer } moved to the Trash`;
-			const trashMessageSmart = trashMessage.replace( /'/g, '\u2019' );
-			const trashNotice = page.locator( '.trash-undo-inside' ).first();
-			const trashNoticeText = await trashNotice.textContent();
-			expect(
-				trashNoticeText?.includes( trashMessage ) ||
-					trashNoticeText?.includes( trashMessageSmart )
-			).toBeTruthy();
-			await page.getByRole( 'button', { name: 'Undo' } ).click();
-
-			// WordPress 7.1 renders primary list-table cells as row headers.
-			await expect(
-				reviewRow.getByRole( 'cell', { name: review.review } ).or(
-					reviewRow.getByRole( 'rowheader', {
-						name: review.review,
-					} )
-				)
-			).toBeVisible();
-
-			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
-
-			const trashNotice2 = page.locator( '.trash-undo-inside' ).first();
-			const trashNoticeText2 = await trashNotice2.textContent();
-			expect(
-				trashNoticeText2?.includes( trashMessage ) ||
-					trashNoticeText2?.includes( trashMessageSmart )
-			).toBeTruthy();
-
-			// The trash notice renders optimistically, before the trash AJAX
-			// commits. Wait for the row to actually leave the approved list so
-			// navigating to the Trash view does not abort the in-flight request.
-			await expect( reviewRow ).toBeHidden();
-
-			await page.click( 'a[href*="comment_status=trash"]' );
-
-			// WordPress 7.1 renders primary list-table cells as row headers.
-			await expect(
-				reviewRow.getByRole( 'cell', { name: review.review } ).or(
-					reviewRow.getByRole( 'rowheader', {
-						name: review.review,
-					} )
-				)
-			).toBeVisible();
-
-			await page.goto(
-				`wp-admin/comment.php?action=editcomment&c=${ review.id }`
-			);
-			await expect(
-				page.getByText(
-					`This comment is in the Trash. Please move it out of the Trash if you want to edit it.`
-				)
 			).toBeVisible();
 		} );
 	} );

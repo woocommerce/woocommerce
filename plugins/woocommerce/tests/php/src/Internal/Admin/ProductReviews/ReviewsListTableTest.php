@@ -1,8 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
@@ -53,39 +58,96 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_single_row(): void {
-		$post_id = $this->factory()->post->create();
-		$review  = $this->factory()->comment->create_and_get(
-			array(
-				'comment_post_ID' => $post_id,
-			)
-		);
+		$original_user_id = get_current_user_id();
+		$product          = null;
+		$review           = null;
 
-		$reviews_list_table = $this->get_reviews_list_table();
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( 'Exact Review Row Product' );
+			$product->save();
+			wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		ob_start();
+			$review = $this->factory()->comment->create_and_get(
+				array(
+					'comment_post_ID'      => $product->get_id(),
+					'comment_author'       => 'Exact Review Author',
+					'comment_author_email' => 'row-reviewer@example.com',
+					'comment_content'      => 'Exact review row content',
+					'comment_approved'     => '1',
+					'comment_type'         => 'review',
+				)
+			);
+			update_comment_meta( $review->comment_ID, 'rating', 4 );
 
-		$reviews_list_table->single_row( $review );
+			$reviews_list_table = $this->get_reviews_list_table();
 
-		$row_output = trim( ob_get_clean() );
+			ob_start();
+			$reviews_list_table->single_row( $review );
+			$row_output = trim( ob_get_clean() );
 
-		$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
+			$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
 
-		foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
-			if ( 'cb' !== $column_id ) {
-				$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
-			} else {
-				// WordPress 7.1 changed the list table check column cell from <th> to <td>.
-				// Accept either element; the backreference requires the closing tag to
-				// match the captured opening tag.
-				$this->assertMatchesRegularExpression(
-					'~<(?<cell_tag>th|td)[^>]*\bclass="check-column"></\k<cell_tag>>~',
-					$row_output,
-					'The row should contain an empty check-column cell.'
-				);
+			foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
+				if ( 'cb' !== $column_id ) {
+					$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
+				} else {
+					$this->assertMatchesRegularExpression(
+						'~<(?<cell_tag>th|td)[^>]*\bclass="check-column"[^>]*>.*?</\k<cell_tag>>~s',
+						$row_output,
+						'The row should contain the standard review checkbox cell.'
+					);
+				}
 			}
-		}
 
-		$this->assertStringEndsWith( '</tr>', $row_output );
+			$document = new DOMDocument();
+			$errors   = libxml_use_internal_errors( true );
+			$document->loadHTML( '<!doctype html><html><body><table>' . $row_output . '</table></body></html>' );
+			libxml_clear_errors();
+			libxml_use_internal_errors( $errors );
+
+			$xpath        = new DOMXPath( $document );
+			$author_cells = $xpath->query(
+				'//td[contains(concat(" ", normalize-space(@class), " "), " author ") and contains(concat(" ", normalize-space(@class), " "), " column-author ")]'
+			);
+			if ( false === $author_cells ) {
+				throw new \RuntimeException( 'Unable to query the author cell.' );
+			}
+
+			$author_cell = $author_cells->item( 0 );
+			$this->assertInstanceOf( DOMElement::class, $author_cell );
+			if ( ! $author_cell instanceof DOMElement ) {
+				throw new \RuntimeException( 'The author cell was not found.' );
+			}
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
+			$this->assertStringContainsString( 'Exact Review Author', $author_cell->textContent );
+
+			$email_links = $xpath->query( './/a[normalize-space(text())="row-reviewer@example.com"]', $author_cell );
+			if ( false === $email_links ) {
+				throw new \RuntimeException( 'Unable to query the author email link.' );
+			}
+
+			$email_link = $email_links->item( 0 );
+			$this->assertInstanceOf( DOMElement::class, $email_link );
+			if ( ! $email_link instanceof DOMElement ) {
+				throw new \RuntimeException( 'The author email link was not found.' );
+			}
+			$this->assertSame( 'mailto:row-reviewer@example.com', $email_link->getAttribute( 'href' ) );
+			$this->assertStringContainsString( 'aria-label="4 out of 5"', $row_output );
+			$this->assertStringContainsString( 'Exact review row content', $row_output );
+			$this->assertStringContainsString( 'Exact Review Row Product', $row_output );
+			$this->assertStringContainsString( 'comments-edit-item-link', $row_output );
+			$this->assertStringContainsString( 'comments-view-item-link', $row_output );
+			$this->assertStringEndsWith( '</tr>', $row_output );
+		} finally {
+			if ( $review ) {
+				wp_delete_comment( $review->comment_ID, true );
+			}
+			if ( $product ) {
+				$product->delete( true );
+			}
+			wp_set_current_user( $original_user_id );
+		}
 	}
 
 	/**
@@ -153,7 +215,72 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 			// Should not contain any tags with _only_ a pipe separator, but no label.
 			$this->assertStringNotContainsString( '> | </span>', $actions );
+			$this->assert_row_action_contracts( $actions, (int) $review->comment_ID, $review_status );
 		}
+	}
+
+	/**
+	 * Assert exact URL, nonce, and `data-wp-lists` contracts for status actions.
+	 *
+	 * @param string $actions       Rendered row actions.
+	 * @param int    $review_id     Review ID.
+	 * @param string $review_status Normalized review status.
+	 */
+	private function assert_row_action_contracts( string $actions, int $review_id, string $review_status ): void {
+		$expected = array(
+			'approved'   => array(
+				'unapprovecomment' => "delete:the-comment-list:comment-{$review_id}:e7e7d3:action=dim-comment&new=unapproved",
+				'spamcomment'      => "delete:the-comment-list:comment-{$review_id}::spam=1",
+				'trashcomment'     => "delete:the-comment-list:comment-{$review_id}::trash=1",
+			),
+			'unapproved' => array(
+				'approvecomment' => "delete:the-comment-list:comment-{$review_id}:e7e7d3:action=dim-comment&new=approved",
+				'spamcomment'    => "delete:the-comment-list:comment-{$review_id}::spam=1",
+				'trashcomment'   => "delete:the-comment-list:comment-{$review_id}::trash=1",
+			),
+			'spam'       => array(
+				'unspamcomment' => "delete:the-comment-list:comment-{$review_id}:66cc66:unspam=1",
+				'deletecomment' => "delete:the-comment-list:comment-{$review_id}::delete=1",
+			),
+			'trash'      => array(
+				'spamcomment'    => "delete:the-comment-list:comment-{$review_id}::spam=1",
+				'untrashcomment' => "delete:the-comment-list:comment-{$review_id}:66cc66:untrash=1",
+				'deletecomment'  => "delete:the-comment-list:comment-{$review_id}::delete=1",
+			),
+		);
+
+		$document = new DOMDocument();
+		$errors   = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!doctype html><html><body>' . $actions . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $errors );
+
+		$actual = array();
+		foreach ( $document->getElementsByTagName( 'a' ) as $link ) {
+			if ( ! $link->hasAttribute( 'data-wp-lists' ) ) {
+				continue;
+			}
+
+			$query = array();
+			parse_str( (string) wp_parse_url( $link->getAttribute( 'href' ), PHP_URL_QUERY ), $query );
+			$action = $query['action'] ?? '';
+
+			$this->assertSame( (string) $review_id, $query['c'] ?? '' );
+			$this->assertArrayHasKey( '_wpnonce', $query );
+			$this->assertSame(
+				1,
+				wp_verify_nonce(
+					$query['_wpnonce'],
+					in_array( $action, array( 'approvecomment', 'unapprovecomment' ), true )
+						? "approve-comment_{$review_id}"
+						: "delete-comment_{$review_id}"
+				)
+			);
+
+			$actual[ $action ] = $link->getAttribute( 'data-wp-lists' );
+		}
+
+		$this->assertSame( $expected[ $review_status ], $actual );
 	}
 
 	/** @see test_handle_row_actions */
@@ -1936,7 +2063,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->invoke( $list_table, $product_id, $pending_review_count );
 		$actual_html = ob_get_clean();
 
-		$this->assertSame( str_replace( 'PRODUCT_ID', $product_id, $expected_html ), $actual_html );
+		$this->assertSame( str_replace( 'PRODUCT_ID', (string) $product_id, $expected_html ), $actual_html );
 	}
 
 	/** @see test_comments_bubble */
