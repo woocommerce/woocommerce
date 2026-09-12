@@ -1,3 +1,9 @@
 .wc-block-components-formatted-money-amount {
 	white-space: nowrap;
 }
+
+.wc-block-components-formatted-money-amount__currency-symbol {
+	// `dir` only isolates through the UA rule `[dir] { unicode-bidi: isolate }`,
+	// which a theme reset can undo. Pin it so the symbol stays in place.
+	unicode-bidi: isolate;
+}

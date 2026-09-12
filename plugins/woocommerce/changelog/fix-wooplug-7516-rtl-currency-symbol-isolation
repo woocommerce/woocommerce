@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix RTL currency symbols not respecting the currency position setting in the Checkout blocks

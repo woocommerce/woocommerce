@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, Fragment } from '@wordpress/element';
 import {
 	FormattedMonetaryAmount,
 	TotalsItem,
@@ -22,7 +22,6 @@ import {
 	Currency,
 	LooselyMustHave,
 } from '@woocommerce/types';
-import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
@@ -111,19 +110,31 @@ const TotalsFooterItem = ( {
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
 
+	// Each amount is a component rather than a formatted string so that the
+	// currency symbol keeps its isolation; a flat string lets the bidi
+	// algorithm move an RTL symbol to the wrong side of the amount.
+	const taxLinesList = (
+		<>
+			{ taxLines?.map( ( { name, price, rate }, index ) => (
+				<Fragment key={ `${ name }-${ rate }` }>
+					{ index > 0 && ', ' }
+					<FormattedMonetaryAmount
+						className="wc-block-components-totals-footer-item-tax-value"
+						currency={ currency }
+						value={ price }
+					/>
+					{ ` ${ name }` }
+				</Fragment>
+			) ) }
+		</>
+	);
+
 	const description =
 		taxLines && taxLines.length > 0
 			? sprintf(
 					/* translators: %s is a list of tax rates */
 					__( 'Including %s', 'woocommerce' ),
-					taxLines
-						.map( ( { name, price } ) => {
-							return `${ formatPrice(
-								price,
-								currency
-							) } ${ name }`;
-						} )
-						.join( ', ' )
+					'<TaxLines/>'
 			  )
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
@@ -167,6 +178,7 @@ const TotalsFooterItem = ( {
 												value={ parsedTaxValue }
 											/>
 										),
+										TaxLines: taxLinesList,
 									} ) }
 								</>
 							</DelayedContentWithSkeleton>

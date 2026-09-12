@@ -2,7 +2,7 @@
  * External dependencies
  */
 import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
@@ -104,8 +104,15 @@ describe( 'Product block', () => {
 		);
 		expect( productDescription ).toBeInTheDocument();
 
-		const productPrice = await screen.findByText( '20,00 €' );
-		expect( productPrice ).toBeInTheDocument();
+		// The currency symbol sits in its own element, so the whole price is
+		// read at once.
+		await waitFor( () =>
+			expect(
+				document.querySelector(
+					'.wc-block-components-product-price bdi'
+				)?.textContent
+			).toBe( '20,00 €' )
+		);
 
 		// wp-6.8: MSW warns about unhandled OPTIONS preflight requests from
 		// @wordpress/core-data in jsdom where there's no real network layer.
@@ -129,7 +136,14 @@ describe( 'Product block', () => {
 		);
 		expect( productDescription ).toBeInTheDocument();
 
-		const productPrice = await screen.findByText( '20,00 €' );
-		expect( productPrice ).toBeInTheDocument();
+		// The currency symbol sits in its own element, so the whole price is
+		// read at once.
+		await waitFor( () =>
+			expect(
+				document.querySelector(
+					'.wc-block-components-product-price bdi'
+				)?.textContent
+			).toBe( '20,00 €' )
+		);
 	} );
 } );
