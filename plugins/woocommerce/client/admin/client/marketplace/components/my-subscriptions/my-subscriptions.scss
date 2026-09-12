@@ -206,6 +206,11 @@
 	white-space: nowrap;
 	font-size: 12px;
 
+	svg {
+		fill: currentColor;
+		margin-inline-end: $grid-unit-05;
+	}
+
 	&--error {
 		color: var(--wp-red-red-70, #8a2424);
 		background: var(--wp-red-red-0, #fcf0f1);
@@ -228,6 +233,24 @@
 		a {
 			text-decoration: none;
 		}
+
+		p {
+			margin: 0 0 $grid-unit-10;
+		}
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__auto-update-blockers {
+	list-style: disc;
+	margin: 0;
+	padding-inline-start: $grid-unit-20;
+
+	li {
+		margin-bottom: $grid-unit-05;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 }
 
@@ -238,9 +261,41 @@
 .woocommerce-marketplace__my-subscriptions-version {
 	padding: 6px 12px;
 }
-.woocommerce-marketplace__my-subscriptions__table__header--version > span {
+.woocommerce-marketplace__my-subscriptions__table__header--version > span,
+.woocommerce-marketplace__my-subscriptions__table__header--auto-updates > span {
 	display: inline-block;
 	padding: 0 12px;
+}
+
+// Lines up with the link button, which carries its own 6px 12px padding.
+.woocommerce-marketplace__my-subscriptions__auto-updates {
+	.woocommerce-marketplace__my-subscriptions__product-status {
+		margin: 6px 12px;
+	}
+
+	// A disabled link button greys out; the saving state is progress, not a dead control.
+	.components-button.is-link:disabled,
+	.components-button.is-link[aria-disabled="true"] {
+		color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		opacity: 1;
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__auto-updates-saving-icon {
+	width: 16px;
+	height: 16px;
+	margin-inline-end: $grid-unit-05;
+	animation: woocommerce-marketplace-auto-updates-spin 1s linear infinite;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+@keyframes woocommerce-marketplace-auto-updates-spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions {
