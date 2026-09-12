@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Cut the product export E2E spec from 4 titles to 1; the export screen's rendering and the exporter's row scoping now covered by WC_Admin_Product_Export_View_Test and WC_Product_CSV_Exporter_Test.
+
