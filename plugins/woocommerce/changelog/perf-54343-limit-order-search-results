@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit order search result sets consistently across HPOS and legacy storage to avoid loading excessive matching order IDs.
