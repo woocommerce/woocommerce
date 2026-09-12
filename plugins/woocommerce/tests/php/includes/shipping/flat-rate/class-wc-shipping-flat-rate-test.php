@@ -248,4 +248,54 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			'alphanumeric'                  => array( '10abc', '.', ',' ),
 		);
 	}
+
+	/**
+	 * @testDox sanitize_cost() delocalises a plain thousand-separated cost so it is never evaluated as free shipping.
+	 *
+	 * Regression guard for #47864: a flat rate entered with a thousand separator (for
+	 * example "1,234.56") must be delocalised to a clean numeric value, not silently
+	 * collapsed to a wrong or zero amount. The delocalisation runs through
+	 * NumberUtil::sanitize_cost_in_current_locale(); this asserts the flat-rate wiring
+	 * to it, and that the sanitized value then evaluates to the expected cost.
+	 *
+	 * @dataProvider provider_thousand_separated_costs
+	 *
+	 * @param string $value        Raw cost as a merchant would enter it.
+	 * @param string $decimal_sep  Decimal separator for the locale.
+	 * @param string $thousand_sep Thousand separator for the locale.
+	 * @param string $expected     Delocalised cost sanitize_cost() should return.
+	 * @param float  $evaluated    Amount evaluate_cost() should yield for the sanitized cost.
+	 */
+	public function test_sanitize_cost_delocalises_thousand_separated_value( string $value, string $decimal_sep, string $thousand_sep, string $expected, float $evaluated ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$sanitized = $this->call_sanitize_cost->call( $this->sut, $value );
+		$this->assertEquals( $expected, trim( $sanitized ) );
+
+		$result = $this->call_evaluate_cost->call(
+			$this->sut,
+			$sanitized,
+			array(
+				'qty'  => 1,
+				'cost' => 1,
+			)
+		);
+		$this->assertEquals( $evaluated, $result );
+	}
+
+	/**
+	 * Plain (non-expression) thousand-separated costs across locales.
+	 *
+	 * Format: [ value, decimal_separator, thousand_separator, expected_sanitized, expected_evaluated ]
+	 */
+	public function provider_thousand_separated_costs(): array {
+		return array(
+			// period decimal, comma thousand (US).
+			'US thousand separator' => array( '1,234.56', '.', ',', '1234.56', 1234.56 ),
+
+			// comma decimal, period thousand (EU).
+			'EU thousand separator' => array( '1.234,56', ',', '.', '1234.56', 1234.56 ),
+		);
+	}
 }
