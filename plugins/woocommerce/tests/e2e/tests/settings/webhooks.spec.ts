@@ -72,4 +72,61 @@ test.describe( 'Manage webhooks', () => {
 			).toBeHidden( { timeout: 1 } );
 		}
 	);
+
+	test(
+		'Webhooks can be activated, paused, and deactivated in bulk',
+		async ( { page, restApi } ) => {
+			const response = await restApi.post( `${ WC_API_PATH }/webhooks`, {
+				name: 'Bulk status webhook',
+				status: 'disabled',
+				topic: 'order.created',
+				delivery_url: 'https://example.com/webhook',
+			} );
+
+			await page.goto( WEBHOOKS_SCREEN_URI );
+
+			const row = page.getByRole( 'row', {
+				name: 'Bulk status webhook',
+			} );
+			await row.getByRole( 'checkbox' ).check();
+
+			await page.locator( 'select[name="action"]' ).selectOption( 'activate' );
+			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
+
+			await expect(
+				page.getByText( '1 webhook activated.' )
+			).toBeVisible();
+			await expect( row.getByText( 'Active' ) ).toBeVisible();
+			const activeWebhook = await restApi.get(
+				`${ WC_API_PATH }/webhooks/${ response.data.id }`
+			);
+			expect( activeWebhook.data.status ).toBe( 'active' );
+
+			await row.getByRole( 'checkbox' ).check();
+			await page.locator( 'select[name="action"]' ).selectOption( 'pause' );
+			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
+
+			await expect(
+				page.getByText( '1 webhook paused.' )
+			).toBeVisible();
+			await expect( row.getByText( 'Paused' ) ).toBeVisible();
+			const pausedWebhook = await restApi.get(
+				`${ WC_API_PATH }/webhooks/${ response.data.id }`
+			);
+			expect( pausedWebhook.data.status ).toBe( 'paused' );
+
+			await row.getByRole( 'checkbox' ).check();
+			await page.locator( 'select[name="action"]' ).selectOption( 'deactivate' );
+			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
+
+			await expect(
+				page.getByText( '1 webhook deactivated.' )
+			).toBeVisible();
+			await expect( row.getByText( 'Disabled' ) ).toBeVisible();
+			const disabledWebhook = await restApi.get(
+				`${ WC_API_PATH }/webhooks/${ response.data.id }`
+			);
+			expect( disabledWebhook.data.status ).toBe( 'disabled' );
+		}
+	);
 } );
