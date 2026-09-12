@@ -87,6 +87,76 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches return a partial title match.
+	 */
+	public function test_product_search_returns_partial_title_match(): void {
+		$target_token = wp_generate_password( 16, false );
+		$search_term  = substr( $target_token, 4, 8 );
+		$target_name  = 'Slice target ' . $target_token;
+		$control_name = 'Unrelated fixture';
+		$target       = null;
+		$control      = null;
+
+		$this->assertFalse(
+			false !== stripos( $control_name, $search_term ),
+			'The control title must not contain the target search substring.'
+		);
+
+		try {
+			$target = WC_Helper_Product::create_simple_product();
+			$target->set_name( $target_name );
+			$target->set_status( 'publish' );
+			$target->set_date_created( '2024-01-02 00:00:00' );
+			$target->save();
+
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( $control_name );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array( $target->get_id() ),
+				$this->get_search_results( $search_term ),
+				'A strict interior title substring should return only its matching product.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+
+			if ( $target instanceof WC_Product ) {
+				$target->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product searches return no results for a missing term.
+	 */
+	public function test_product_search_returns_no_results_for_missing_term(): void {
+		$control = null;
+
+		try {
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( 'Product Search Control ' . wp_generate_password( 8, false ) );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array(),
+				$this->get_search_results( 'Missing Product Search ' . wp_generate_password( 8, false ) ),
+				'A missing product search term should not admit unrelated published products.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Product searches prioritize titles that match parsed search terms.
 	 * @dataProvider parsed_search_term_provider
 	 *

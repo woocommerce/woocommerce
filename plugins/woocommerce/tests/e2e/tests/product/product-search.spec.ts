@@ -30,8 +30,9 @@ test.describe( 'Products > Search and View a product', () => {
 		} );
 	} );
 
-	test( 'can do a partial search for a product', async ( { page } ) => {
-		// create a partial search string
+	test( 'can find and open a product from a partial search', async ( {
+		page,
+	} ) => {
 		const searchString = testProduct.name.substring(
 			0,
 			testProduct.name.length / 2
@@ -43,45 +44,33 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.locator( '#post-search-input' ).fill( searchString );
 		await page.locator( '#search-submit' ).click();
 
-		// A partial search can match products that parallel workers create from
-		// this same spec, so scope the assertion to this test's product instead
-		// of asserting on every `.row-title` match.
+		const productLink = page.getByRole( 'link', {
+			name: testProduct.name,
+			exact: true,
+		} );
+		const productRow = page.locator( '#the-list tr' ).filter( {
+			has: productLink,
+		} );
+		await expect( productRow ).toHaveCount( 1 );
 		await expect(
-			page.locator( '.row-title', { hasText: testProduct.name } )
-		).toBeVisible();
-	} );
-
-	test( "can view a product's details after search", async ( { page } ) => {
-		const productIdInURL = new RegExp( `post=${ productId }` );
-
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-
-		await page.locator( '#post-search-input' ).fill( testProduct.name );
-		await page.locator( '#search-submit' ).click();
-
-		await page
-			.locator( '.row-title', { hasText: testProduct.name } )
+			productRow.getByRole( 'link', {
+				name: testProduct.name,
+				exact: true,
+			} )
+		).toHaveCount( 1 );
+		await productRow
+			.getByRole( 'link', { name: testProduct.name, exact: true } )
 			.click();
 
-		await expect( page ).toHaveURL( productIdInURL );
+		await expect( page ).toHaveURL( /wp-admin\/post\.php/ );
+		expect( new URL( page.url() ).searchParams.get( 'post' ) ).toBe(
+			String( productId )
+		);
 		await expect( page.locator( '#title' ) ).toHaveValue(
 			testProduct.name
 		);
 		await expect( page.locator( '#_regular_price' ) ).toHaveValue(
 			testProduct.regular_price
-		);
-	} );
-
-	test( 'returns no results for non-existent product search', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-
-		await page.locator( '#post-search-input' ).fill( 'abcd1234' );
-		await page.locator( '#search-submit' ).click();
-
-		await expect( page.locator( '.no-items' ) ).toContainText(
-			'No products found'
 		);
 	} );
 } );
