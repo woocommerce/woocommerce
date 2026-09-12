@@ -373,6 +373,8 @@ jobs:
             if grep -qF 'curl error 28' "$log"; then reason=packagist
             elif grep -qE 'registry-1\.docker\.io|context deadline exceeded|failed to receive status: rpc error|connection reset by peer' "$log"; then reason=dockerhub
             elif grep -qE 'ETIMEDOUT|socket hang up|ECONNRESET' "$log"; then reason=wordpress
+            elif grep -qF 'the sample-data image import did not complete' "$log"; then reason=blocks-seed
+            elif grep -qE 'EACCES: permission denied, rmdir' "$log"; then reason=stale-mount
             else reason=unknown
             fi
             if [ "$attempt" -ge "$max_attempts" ]; then
@@ -385,6 +387,14 @@ jobs:
             # a repeat failure then records every connect attempt with its address and errno.
             # Healthy first attempts stay untraced, so this costs nothing on a green job.
             export NODE_DEBUG=net
+            # An attempt that got as far as running containers leaves wp-env's mapped
+            # directories owned by root, because the container writes into them as root.
+            # `wp-env start` removes a mapping's directory before re-creating it, so those
+            # leftovers make every later attempt fail with "EACCES: permission denied,
+            # rmdir" no matter what the original failure was -- the retry can never
+            # recover. Hand the tree back to the runner user first. Only retries pay this
+            # cost; a green first attempt never reaches it.
+            sudo chown -R "$(id -u):$(id -g)" "${WP_ENV_HOME:-$HOME/wp-env}" 2>/dev/null || true
             sleep "$((attempt * 15))"
             attempt=$((attempt + 1))
           done
