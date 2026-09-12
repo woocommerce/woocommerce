@@ -17,7 +17,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version 3.5.0
  */
-class WC_Action_Queue implements WC_Queue_Interface {
+class WC_Action_Queue implements WC_Queue_Priority_Interface {
+
+	/**
+	 * Priority the scheduling methods below hand to Action Scheduler. Only ever set for the
+	 * duration of a single *_with_priority() call, so that those methods can go through the
+	 * long-standing overridable methods instead of around them.
+	 *
+	 * @since 11.2.0
+	 * @var int
+	 */
+	protected $priority = 10;
 
 	/**
 	 * Enqueue an action to run one time, as soon as possible
@@ -41,7 +51,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		return as_schedule_single_action( $timestamp, $hook, $args, $group );
+		return as_schedule_single_action( $timestamp, $hook, $args, $group, false, $this->priority );
 	}
 
 	/**
@@ -55,7 +65,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
-		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, false, $this->priority );
 	}
 
 	/**
@@ -79,7 +89,117 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @return int The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
-		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, false, $this->priority );
+	}
+
+	/**
+	 * Enqueue an action to run one time, as soon as possible, at a given priority.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
+	 * @return int The action ID.
+	 */
+	public function add_with_priority( $hook, $args = array(), $group = '', $priority = 10 ) {
+		return $this->at_priority(
+			$priority,
+			function () use ( $hook, $args, $group ) {
+				return $this->add( $hook, $args, $group );
+			}
+		);
+	}
+
+	/**
+	 * Schedule an action to run once at some time in the future, at a given priority.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $timestamp When the job will run.
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
+	 * @return int The action ID.
+	 */
+	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), $group = '', $priority = 10 ) {
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $hook, $args, $group ) {
+				return $this->schedule_single( $timestamp, $hook, $args, $group );
+			}
+		);
+	}
+
+	/**
+	 * Schedule a recurring action at a given priority.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $timestamp When the first instance of the job will run.
+	 * @param int    $interval_in_seconds How long to wait between runs.
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
+	 * @return int The action ID.
+	 */
+	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $priority = 10 ) {
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $interval_in_seconds, $hook, $args, $group ) {
+				return $this->schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args, $group );
+			}
+		);
+	}
+
+	/**
+	 * Schedule an action that recurs on a cron-like schedule, at a given priority.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $timestamp The schedule will start on or after this time.
+	 * @param string $cron_schedule A cron-like schedule string.
+	 * @see http://en.wikipedia.org/wiki/Cron
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
+	 * @return int The action ID.
+	 */
+	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $priority = 10 ) {
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $cron_schedule, $hook, $args, $group ) {
+				return $this->schedule_cron( $timestamp, $cron_schedule, $hook, $args, $group );
+			}
+		);
+	}
+
+	/**
+	 * Run a scheduling callback with the given priority in effect.
+	 *
+	 * Going through the callback, rather than calling Action Scheduler directly, keeps the
+	 * priority methods routed through add(), schedule_single(), schedule_recurring() and
+	 * schedule_cron() - which subclasses override.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int      $priority Lower values take precedence over higher values.
+	 * @param callable $schedule Callback that schedules the action.
+	 * @return int The action ID.
+	 */
+	private function at_priority( $priority, callable $schedule ) {
+		$previous_priority = $this->priority;
+		$this->priority    = $priority;
+
+		try {
+			return $schedule();
+		} finally {
+			$this->priority = $previous_priority;
+		}
 	}
 
 	/**
