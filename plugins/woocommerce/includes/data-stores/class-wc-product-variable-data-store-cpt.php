@@ -1107,13 +1107,61 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	public function sync_stock_status( &$product ) {
-		// Performance note: direct DB fetch would be faster, but child_is_in_stock/child_is_on_backorder are overridable — keep delegation.
+		// The first two checks delegate to child_is_in_stock()/child_is_on_backorder() even though a direct DB fetch
+		// would be faster, because both are overridable. The custom-status branch below queries directly instead:
+		// child_has_stock_status() stops at the first match, so it answers "does any child have this status" rather
+		// than "do all children agree", and no overridable child check expresses what that branch needs.
 		if ( $product->child_is_in_stock() ) {
 			$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		} elseif ( $product->child_is_on_backorder() ) {
 			$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		} else {
-			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$stock_status                = ProductStockStatus::OUT_OF_STOCK;
+			$core_stock_statuses         = array(
+				ProductStockStatus::IN_STOCK     => true,
+				ProductStockStatus::OUT_OF_STOCK => true,
+				ProductStockStatus::ON_BACKORDER => true,
+			);
+			$custom_stock_status_options = array_diff_key( wc_get_product_stock_status_options(), $core_stock_statuses );
+
+			if ( $custom_stock_status_options ) {
+				$children = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
+
+				if ( $children ) {
+					global $wpdb;
+
+					$format                  = array_fill( 0, count( $children ), '%d' );
+					$query_in                = '(' . implode( ',', $format ) . ')';
+					$expected_children_count = count( $children );
+					$query_args              = array_merge( $children, array( $expected_children_count, $expected_children_count ) );
+
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+					// CAST( ... AS BINARY ) rather than the BINARY operator: the operator is deprecated as of MySQL
+					// 8.0.27 and subject to removal, and its loss here would be silent — the query would error,
+					// get_var() would return null, and the status would fall back to out of stock.
+					if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+						$query = "SELECT MIN( CAST( meta_value AS BINARY ) ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND post_id IN {$query_in} HAVING COUNT( DISTINCT CAST( meta_value AS BINARY ) ) = 1 AND COUNT( meta_value ) = COUNT( * ) AND COUNT( DISTINCT post_id ) = %d AND COUNT( * ) = %d";
+					} else {
+						$query = "SELECT MIN( CAST( stock_status AS BINARY ) ) FROM {$wpdb->wc_product_meta_lookup} WHERE product_id IN {$query_in} HAVING COUNT( DISTINCT CAST( stock_status AS BINARY ) ) = 1 AND COUNT( stock_status ) = COUNT( * ) AND COUNT( DISTINCT product_id ) = %d AND COUNT( * ) = %d";
+					}
+
+					$children_stock_status = $wpdb->get_var( $wpdb->prepare( $query, $query_args ) );
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+					if ( is_string( $children_stock_status ) && array_key_exists( $children_stock_status, $custom_stock_status_options ) ) {
+						$stock_status = $children_stock_status;
+					}
+				}
+			}
+
+			if ( ProductStockStatus::OUT_OF_STOCK !== $stock_status && ! array_key_exists( $stock_status, wc_get_product_stock_status_options() ) ) {
+				$stock_status = ProductStockStatus::OUT_OF_STOCK;
+			}
+
+			$product->set_stock_status( $stock_status );
+			if ( ProductStockStatus::OUT_OF_STOCK !== $stock_status && $stock_status !== $product->get_stock_status( 'edit' ) ) {
+				$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			}
 		}
 	}
 

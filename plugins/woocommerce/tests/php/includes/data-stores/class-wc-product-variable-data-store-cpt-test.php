@@ -98,6 +98,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
+		delete_option( 'woocommerce_hide_out_of_stock_items' );
 		parent::tearDown();
 	}
 
@@ -112,6 +113,410 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'lookup table available'                      => array( false ),
 			'lookup table generating (postmeta fallback)' => array( true ),
 		);
+	}
+
+	/**
+	 * Create a variable product with children using the supplied stock statuses.
+	 *
+	 * @param string[] $stock_statuses Child stock statuses.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_product_with_child_stock_statuses( array $stock_statuses ): WC_Product_Variable {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product for stock status sync' );
+		$product->save();
+
+		$child_ids = array();
+		foreach ( $stock_statuses as $stock_status ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_stock_status( $stock_status );
+			$child_ids[] = $variation->save();
+		}
+
+		$product->set_children( $child_ids );
+
+		return $product;
+	}
+
+	/**
+	 * Register custom stock statuses for the current test.
+	 *
+	 * @param string[] $custom_stock_statuses Custom stock status keys.
+	 * @return Closure Removable registration callback.
+	 */
+	private function register_custom_stock_statuses( array $custom_stock_statuses ): Closure {
+		$register = static function ( $stock_statuses ) use ( $custom_stock_statuses ) {
+			return array_merge( $stock_statuses, array_fill_keys( $custom_stock_statuses, 'Custom status' ) );
+		};
+		add_filter( 'woocommerce_product_stock_status_options', $register );
+
+		return $register;
+	}
+
+	/**
+	 * Named stock status sync scenarios for lookup and postmeta storage.
+	 *
+	 * @return array<string, array{bool, string[], string}>
+	 */
+	public static function stock_status_sync_data(): array {
+		$scenarios = array(
+			'unanimous custom status' => array( array( 'custom_status_a', 'custom_status_a' ), 'custom_status_a' ),
+			'mixed custom statuses'   => array( array( 'custom_status_a', 'custom_status_b' ), ProductStockStatus::OUT_OF_STOCK ),
+			'custom and out of stock' => array( array( 'custom_status_a', ProductStockStatus::OUT_OF_STOCK ), ProductStockStatus::OUT_OF_STOCK ),
+			'custom and in stock'     => array( array( 'custom_status_a', ProductStockStatus::IN_STOCK ), ProductStockStatus::IN_STOCK ),
+			'custom and on backorder' => array( array( 'custom_status_a', ProductStockStatus::ON_BACKORDER ), ProductStockStatus::ON_BACKORDER ),
+			'no children'             => array( array(), ProductStockStatus::OUT_OF_STOCK ),
+		);
+		$data      = array();
+
+		foreach ( array( false, true ) as $lookup_table_is_generating ) {
+			$storage_name = $lookup_table_is_generating ? 'postmeta' : 'lookup table';
+			foreach ( $scenarios as $scenario_name => $scenario ) {
+				$data[ "$storage_name: $scenario_name" ] = array( $lookup_table_is_generating, $scenario[0], $scenario[1] );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @testdox sync_stock_status() derives the parent status from its children.
+	 * @dataProvider stock_status_sync_data
+	 *
+	 * @param bool     $lookup_table_is_generating Whether lookup table generation is active.
+	 * @param string[] $child_stock_statuses Child stock statuses.
+	 * @param string   $expected_stock_status Expected parent stock status.
+	 */
+	public function test_sync_stock_status_derives_parent_status_from_children( bool $lookup_table_is_generating, array $child_stock_statuses, string $expected_stock_status ): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a', 'custom_status_b' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+
+		$product    = $this->create_variable_product_with_child_stock_statuses( $child_stock_statuses );
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( $expected_stock_status, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() uses unique nonzero children supplied by the children filter.
+	 * @dataProvider provider_lookup_table_generating
+	 *
+	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 */
+	public function test_sync_stock_status_normalizes_filtered_children( bool $lookup_table_is_generating ): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+		$product = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		add_filter(
+			'woocommerce_get_children',
+			static function ( $children ) {
+				return array_merge( $children, array( (string) $children[0], 0 ) );
+			}
+		);
+
+		$sut = new WC_Product_Variable_Data_Store_CPT();
+		$sut->sync_stock_status( $product );
+
+		$this->assertSame( 'custom_status_a', $product->get_stock_status( 'edit' ) );
+	}
+
+	/**
+	 * @testdox sync_stock_status() rejects a stale stored custom status when another custom status remains registered.
+	 * @dataProvider provider_lookup_table_generating
+	 *
+	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 */
+	public function test_sync_stock_status_rejects_stale_stored_custom_status_when_another_custom_status_is_registered( bool $lookup_table_is_generating ): void {
+		$register_stored_statuses = $this->register_custom_stock_statuses( array( 'custom_status_a', 'custom_status_b' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+
+		$product = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_b', 'custom_status_b' ) );
+		remove_filter( 'woocommerce_product_stock_status_options', $register_stored_statuses );
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() rejects a custom status when a child storage row is missing.
+	 * @dataProvider provider_lookup_table_generating
+	 *
+	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 */
+	public function test_sync_stock_status_rejects_custom_status_when_child_storage_row_is_missing( bool $lookup_table_is_generating ): void {
+		global $wpdb;
+
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+
+		$product          = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$missing_child_id = $product->get_children()[0];
+
+		if ( $lookup_table_is_generating ) {
+			delete_post_meta( $missing_child_id, '_stock_status' );
+		} else {
+			$wpdb->delete( $wpdb->wc_product_meta_lookup, array( 'product_id' => $missing_child_id ), array( '%d' ) );
+		}
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() rejects duplicate postmeta even when its row count masks a missing child.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $missing_child Whether another child's stock status is missing.
+	 */
+	public function test_sync_stock_status_rejects_custom_status_when_child_has_duplicate_identical_postmeta_rows( bool $missing_child ): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', true );
+
+		$product             = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$duplicated_child_id = $product->get_children()[0];
+		add_post_meta( $duplicated_child_id, '_stock_status', 'custom_status_a' );
+		if ( $missing_child ) {
+			delete_post_meta( $product->get_children()[1], '_stock_status' );
+		}
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() rejects a custom status when child storage contains a NULL status value.
+	 * @dataProvider provider_lookup_table_generating
+	 *
+	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 */
+	public function test_sync_stock_status_rejects_custom_status_when_child_storage_contains_null( bool $lookup_table_is_generating ): void {
+		global $wpdb;
+
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+
+		$product        = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$affected_child = $product->get_children()[0];
+
+		if ( $lookup_table_is_generating ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES ( %d, %s, NULL )",
+					$affected_child,
+					'_stock_status'
+				)
+			);
+		} else {
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->wc_product_meta_lookup} SET stock_status = NULL WHERE product_id = %d",
+					$affected_child
+				)
+			);
+		}
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() compares child statuses byte-for-byte in each storage mode.
+	 * @dataProvider provider_lookup_table_generating
+	 *
+	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 */
+	public function test_sync_stock_status_compares_child_statuses_byte_for_byte( bool $lookup_table_is_generating ): void {
+		global $wpdb;
+
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
+
+		$product          = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$mutated_child_id = $product->get_children()[1];
+
+		if ( $lookup_table_is_generating ) {
+			$wpdb->update(
+				$wpdb->postmeta,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Direct mutation is required to create malformed storage.
+				array( 'meta_value' => 'CUSTOM_STATUS_A' ),
+				array(
+					'post_id'  => $mutated_child_id,
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Direct mutation is required to create malformed storage.
+					'meta_key' => '_stock_status',
+				),
+				array( '%s' ),
+				array( '%d', '%s' )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->wc_product_meta_lookup,
+				array( 'stock_status' => 'CUSTOM_STATUS_A' ),
+				array( 'product_id' => $mutated_child_id ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		}
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+	}
+
+	/**
+	 * Stateful custom status registration scenarios.
+	 *
+	 * @return array<string, array{int, string, array<string, string>}>
+	 */
+	public static function stateful_custom_status_registration_data(): array {
+		return array(
+			'registration disappears before setter' => array(
+				1,
+				ProductStockStatus::OUT_OF_STOCK,
+				array(),
+			),
+			'registration disappears inside setter' => array(
+				2,
+				ProductStockStatus::IN_STOCK,
+				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox sync_stock_status() falls back to out of stock when custom status registration changes during sync.
+	 * @dataProvider stateful_custom_status_registration_data
+	 *
+	 * @param int                  $registered_invocations Number of filter invocations that register the custom status.
+	 * @param string               $baseline_stock_status Baseline parent stock status.
+	 * @param array<string,string> $expected_changes Expected pending product changes.
+	 */
+	public function test_sync_stock_status_falls_back_when_custom_status_registration_changes_during_sync( int $registered_invocations, string $baseline_stock_status, array $expected_changes ): void {
+		$register_status_temporarily = static function ( $stock_statuses ) use ( $registered_invocations ) {
+			static $invocation_count = 0;
+
+			++$invocation_count;
+			if ( $invocation_count <= $registered_invocations ) {
+				$stock_statuses['custom_status_a'] = 'Custom status A';
+			}
+
+			return $stock_statuses;
+		};
+
+		$register_stable_status = $this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', false );
+
+		$product = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$product->set_stock_status( $baseline_stock_status );
+		$product->apply_changes();
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		remove_filter( 'woocommerce_product_stock_status_options', $register_stable_status );
+		add_filter( 'woocommerce_product_stock_status_options', $register_status_temporarily );
+
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+		$this->assertSame( $expected_changes, $product->get_changes() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() leaves a clean product unchanged when it already has the unanimous custom status.
+	 */
+	public function test_sync_stock_status_does_not_change_clean_product_with_unanimous_custom_status(): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', false );
+
+		$product = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
+		$product->set_stock_status( 'custom_status_a' );
+		$product->save();
+
+		$product    = new WC_Product_Variable( $product->get_id() );
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( 'custom_status_a', $product->get_stock_status( 'edit' ) );
+		$this->assertSame( array(), $product->get_changes() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() preserves variable product child stock delegation.
+	 */
+	public function test_sync_stock_status_preserves_variable_product_child_stock_delegation(): void {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		$product = new class() extends WC_Product_Variable {
+			public function child_is_in_stock() {
+				return false;
+			}
+
+			public function child_is_on_backorder() {
+				return true;
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox A parent inheriting a custom stock status drops the out of stock visibility term and stays in the catalog.
+	 */
+	public function test_inherited_custom_stock_status_changes_catalog_visibility(): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		$out_of_stock_product = $this->create_variable_product_with_child_stock_statuses(
+			array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::OUT_OF_STOCK )
+		);
+		$data_store->sync_stock_status( $out_of_stock_product );
+		$out_of_stock_product->save();
+
+		$custom_status_product = $this->create_variable_product_with_child_stock_statuses(
+			array( 'custom_status_a', 'custom_status_a' )
+		);
+		$data_store->sync_stock_status( $custom_status_product );
+		$custom_status_product->save();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $out_of_stock_product->get_stock_status() );
+		$this->assertSame( 'custom_status_a', $custom_status_product->get_stock_status() );
+
+		$out_of_stock_terms  = wp_get_object_terms( $out_of_stock_product->get_id(), 'product_visibility', array( 'fields' => 'slugs' ) );
+		$custom_status_terms = wp_get_object_terms( $custom_status_product->get_id(), 'product_visibility', array( 'fields' => 'slugs' ) );
+
+		$this->assertContains( ProductStockStatus::OUT_OF_STOCK, $out_of_stock_terms, 'A parent stored as out of stock carries the outofstock visibility term.' );
+		$this->assertNotContains( ProductStockStatus::OUT_OF_STOCK, $custom_status_terms, 'A parent holding a custom status carries no outofstock visibility term.' );
+
+		// Assert through the real catalog query rather than is_visible(), which routes through is_in_stock() and so
+		// returns the same answer before and after this change once a store filters woocommerce_product_is_in_stock.
+		$visible_ids = ( new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => ProductStatus::PUBLISH,
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'tax_query'      => WC()->query->get_tax_query(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		) )->posts;
+
+		$this->assertNotContains( $out_of_stock_product->get_id(), $visible_ids, 'Hide out of stock items excludes the out of stock parent.' );
+		$this->assertContains( $custom_status_product->get_id(), $visible_ids, 'The parent holding a custom status is no longer excluded, matching a simple product with the same status.' );
 	}
 
 	/**
