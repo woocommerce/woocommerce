@@ -61,10 +61,12 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		/**
 		 * Fires when a refund is deleted.
 		 *
-		 * @param int $id The refund ID.
 		 * @since 3.0.0
+		 * @since 11.2.0 Added the parent order ID parameter.
+		 * @param int $id              The refund ID.
+		 * @param int $parent_order_id The parent order ID.
 		 */
-		do_action( 'woocommerce_delete_order_refund', $id );
+		do_action( 'woocommerce_delete_order_refund', $id, $parent_order_id );
 	}
 
 	/**

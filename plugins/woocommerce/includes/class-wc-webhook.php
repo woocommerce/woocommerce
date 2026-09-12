@@ -98,9 +98,27 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		if ( is_array( $hooks ) && ! empty( $url ) ) {
 			foreach ( $hooks as $hook ) {
-				add_action( $hook, array( $this, 'process' ) );
+				if ( 'order.updated' === $this->get_topic() && 'woocommerce_delete_order_refund' === $hook ) {
+					add_action( $hook, array( $this, 'process_refund_deleted' ), 10, 2 );
+				} else {
+					add_action( $hook, array( $this, 'process' ) );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Process a refund deletion as an update to its parent order.
+	 *
+	 * @since 11.2.0
+	 * @param int $refund_id Deleted refund ID.
+	 * @param int $order_id  Parent order ID.
+	 * @return mixed Parent order ID when processed.
+	 */
+	public function process_refund_deleted( $refund_id, $order_id ) {
+		unset( $refund_id );
+
+		return $this->process( $order_id );
 	}
 
 	/**
@@ -1023,6 +1041,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'order.updated'     => array(
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
+				'woocommerce_delete_order_refund',
 			),
 			'order.deleted'     => array(
 				'wp_trash_post',
