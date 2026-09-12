@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Gateways;
 
 use Automattic\Jetpack\Constants;
+use WC_Cache_Helper;
 use WC_Shipping_Zone;
 use WC_Shipping_Zones;
 
@@ -190,16 +191,34 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Get all of the shipping method options for the enable_for_methods field, grouped by shipping method.
 	 *
-	 * Unlike `load_shipping_method_options()`, this always queries the shipping zones, so
-	 * only call it when the options are actually needed.
+	 * Unlike `load_shipping_method_options()`, this always returns the options, so
+	 * only call it when they are actually needed. The zone lookup is expensive, so
+	 * the result is cached for the rest of the request and shared by every gateway
+	 * using this trait; saving a shipping zone or method invalidates it.
 	 *
 	 * @since 11.2.0
 	 *
 	 * @return array Options keyed by shipping method title, each an array of rate id => option label.
 	 */
 	public function get_shipping_method_options() {
+		$cache_group = 'wc_shipping_method_options';
+		$cache_key   = 'options_' . WC_Cache_Helper::get_transient_version( 'shipping' ) . '_' . get_locale();
+
+		wp_cache_add_non_persistent_groups( array( $cache_group ) );
+
+		$options = wp_cache_get( $cache_key, $cache_group );
+		if ( is_array( $options ) ) {
+			return $options;
+		}
+
 		$zones   = WC_Shipping_Zones::get_shipping_zones();
 		$zones[] = new WC_Shipping_Zone( 0 );
+
+		// Load each zone's method instances once, since the loop below runs per registered method.
+		$zone_instances = array();
+		foreach ( $zones as $zone ) {
+			$zone_instances[] = array( $zone, $zone->get_shipping_methods() );
+		}
 
 		$options = array();
 		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
@@ -209,9 +228,7 @@ trait ShippingMethodRestrictionsTrait {
 			// Translators: %1$s shipping method name.
 			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
 
-			foreach ( $zones as $zone ) {
-
-				$shipping_method_instances = $zone->get_shipping_methods();
+			foreach ( $zone_instances as list( $zone, $shipping_method_instances ) ) {
 
 				foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
 
@@ -231,6 +248,8 @@ trait ShippingMethodRestrictionsTrait {
 				}
 			}
 		}
+
+		wp_cache_set( $cache_key, $options, $cache_group );
 
 		return $options;
 	}

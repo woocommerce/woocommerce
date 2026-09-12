@@ -8,6 +8,7 @@ use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Payment_Gateway;
 use WC_Shipping_Rate;
+use WC_Shipping_Zone;
 use WC_Unit_Test_Case;
 
 /**
@@ -185,6 +186,41 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertNotEmpty( $options, 'Options should be loaded on the gateway settings page' );
+	}
+
+	/**
+	 * @testdox Should share the shipping method options between gateways for the rest of the request and refresh them when a zone changes.
+	 */
+	public function test_shipping_method_options_are_cached_per_request_and_invalidated_on_zone_change(): void {
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Cached zone' );
+		$zone->save();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$cod_options = ( new WC_Gateway_COD() )->get_shipping_method_options();
+		$this->assertArrayHasKey( 'flat_rate:' . $instance_id, $cod_options['Flat rate'] );
+
+		$zone_query_count = 0;
+		$count_queries    = function ( $query ) use ( &$zone_query_count ) {
+			if ( false !== strpos( $query, 'woocommerce_shipping_zone_methods' ) ) {
+				++$zone_query_count;
+			}
+			return $query;
+		};
+		add_filter( 'query', $count_queries );
+
+		try {
+			$bacs_options = ( new WC_Gateway_BACS() )->get_shipping_method_options();
+		} finally {
+			remove_filter( 'query', $count_queries );
+		}
+
+		$this->assertSame( $cod_options, $bacs_options );
+		$this->assertSame( 0, $zone_query_count, 'Another gateway should reuse the options loaded earlier in the request' );
+
+		$new_instance_id = $zone->add_shipping_method( 'free_shipping' );
+
+		$this->assertArrayHasKey( 'free_shipping:' . $new_instance_id, ( new WC_Gateway_Cheque() )->get_shipping_method_options()['Free shipping'], 'Changing a zone should refresh the options' );
 	}
 
 	/**
