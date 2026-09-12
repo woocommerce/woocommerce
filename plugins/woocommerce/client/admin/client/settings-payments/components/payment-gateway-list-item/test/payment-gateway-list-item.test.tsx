@@ -31,13 +31,15 @@ jest.mock( '~/lib/sanitize-html', () => ( {
 jest.mock( '~/settings-payments/components/status-badge', () => ( {
 	StatusBadge: ( {
 		status,
+		message,
 		popoverContent,
 	}: {
 		status: string;
+		message?: string;
 		popoverContent?: React.ReactNode;
 	} ) => (
 		<div data-testid="status-badge" data-status={ status }>
-			StatusBadge-{ status }
+			{ message || `StatusBadge-${ status }` }
 			{ popoverContent && (
 				<div data-testid="status-badge-popover">{ popoverContent }</div>
 			) }
@@ -46,37 +48,34 @@ jest.mock( '~/settings-payments/components/status-badge', () => ( {
 } ) );
 
 jest.mock( '~/settings-payments/components/ellipsis-menu-content', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	EllipsisMenuWrapper: ( { provider }: { provider: { id: string } } ) => (
 		<div data-testid="ellipsis-menu">EllipsisMenu-{ provider.id }</div>
 	),
 } ) );
 
 jest.mock( '~/settings-payments/components/sortable', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	DefaultDragHandle: () => <div data-testid="drag-handle">DragHandle</div>,
 } ) );
 
 jest.mock( '~/settings-payments/components/buttons', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	ActivatePaymentsButton: ( { incentive }: { incentive?: unknown } ) => (
 		<button data-testid="activate-payments-button">
 			ActivatePayments{ incentive ? '-with-incentive' : '' }
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	CompleteSetupButton: ( { disabled }: { disabled?: boolean } ) => (
 		<button data-testid="complete-setup-button" disabled={ disabled }>
 			CompleteSetup
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	EnableGatewayButton: ( { incentive }: { incentive?: unknown } ) => (
 		<button data-testid="enable-gateway-button">
 			Enable{ incentive ? '-with-incentive' : '' }
 		</button>
 	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+
 	SettingsButton: () => (
 		<button data-testid="settings-button">Settings</button>
 	),
@@ -85,7 +84,6 @@ jest.mock( '~/settings-payments/components/buttons', () => ( {
 jest.mock(
 	'~/settings-payments/components/buttons/reactivate-live-payments-button',
 	() => ( {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 		ReactivateLivePaymentsButton: () => (
 			<button data-testid="reactivate-live-payments-button">
 				ReactivateLivePayments
@@ -95,14 +93,12 @@ jest.mock(
 );
 
 jest.mock( '~/settings-payments/components/incentive-status-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	IncentiveStatusBadge: ( { incentive }: { incentive: { id: string } } ) => (
 		<div data-testid="incentive-badge">Incentive-{ incentive.id }</div>
 	),
 } ) );
 
 jest.mock( '~/settings-payments/components/official-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
 	OfficialBadge: ( { suggestionId }: { suggestionId: string } ) => (
 		<div data-testid="official-badge">Official-{ suggestionId }</div>
 	),
@@ -112,6 +108,13 @@ jest.mock( '@wordpress/components', () => ( {
 	Tooltip: ( { children }: { children: React.ReactNode } ) => (
 		<div>{ children }</div>
 	),
+	ExternalLink: ( {
+		href,
+		children,
+	}: {
+		href: string;
+		children: React.ReactNode;
+	} ) => <a href={ href }>{ children }</a>,
 } ) );
 
 jest.mock( '~/utils/admin-settings', () => ( {
@@ -620,6 +623,152 @@ describe( 'PaymentGatewayListItem', () => {
 
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute( 'data-status', 'inactive' );
+		} );
+	} );
+
+	describe( 'Checkout Block Incompatibility Badge', () => {
+		const enabledGatewayState = {
+			enabled: true,
+			account_connected: true,
+			needs_setup: false,
+			test_mode: false,
+			dev_mode: false,
+		};
+
+		const onboardedGateway = {
+			state: {
+				supported: true,
+				started: true,
+				completed: true,
+				test_mode: false,
+			},
+			messages: {},
+			_links: {
+				onboard: { href: '/onboard' },
+				reset: { href: '/reset' },
+			},
+			recommended_payment_methods: [],
+			type: 'standard',
+		};
+
+		const setIncompatibleGatewayIds = ( ids: string[] ) => {
+			window.wcSettings.admin.woocommerce_payments_checkout_block_compatibility =
+				{
+					incompatible_gateway_ids: ids,
+				};
+		};
+
+		afterEach( () => {
+			delete window.wcSettings.admin
+				.woocommerce_payments_checkout_block_compatibility;
+		} );
+
+		it( 'shows the badge when an enabled gateway is incompatible', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+				onboarding: onboardedGateway,
+			} );
+			const { getByText, getAllByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect( getByText( 'Limited compatibility' ) ).toBeInTheDocument();
+			expect(
+				getAllByTestId( 'status-badge' ).map( ( badge ) =>
+					badge.getAttribute( 'data-status' )
+				)
+			).toEqual( [ 'active', 'not_supported' ] );
+		} );
+
+		it( 'explains the incompatibility in the badge popover', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { getByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect( getByTestId( 'status-badge-popover' ) ).toHaveTextContent(
+				'Payment methods from this provider will only appear on classic checkout.'
+			);
+		} );
+
+		it( 'links to the incompatible extensions documentation from the popover', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { getByRole } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				getByRole( 'link', { name: /Learn more/ } )
+			).toHaveAttribute(
+				'href',
+				'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions'
+			);
+		} );
+
+		it( 'does not show the badge when the gateway is not incompatible', () => {
+			setIncompatibleGatewayIds( [ 'another-gateway' ] );
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Limited compatibility' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'does not show the badge when the incompatible gateway is disabled', () => {
+			setIncompatibleGatewayIds( [ 'test-gateway' ] );
+			const gateway = createMockGateway( {
+				state: { ...enabledGatewayState, enabled: false },
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Limited compatibility' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'does not show the badge when no compatibility data is preloaded', () => {
+			const gateway = createMockGateway( {
+				state: enabledGatewayState,
+			} );
+			const { queryByText } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			expect(
+				queryByText( 'Limited compatibility' )
+			).not.toBeInTheDocument();
 		} );
 	} );
 

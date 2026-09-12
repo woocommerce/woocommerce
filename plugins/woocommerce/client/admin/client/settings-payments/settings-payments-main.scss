@@ -614,6 +614,12 @@ $payments-header-row-height: 38px;
 	}
 }
 
+.woocommerce-status-badge-popover {
+	.components-popover__content a.components-external-link {
+		text-decoration: none;
+	}
+}
+
 .settings-payment-gateways__header-select-container--indicator-popover {
 	.components-popover__content-container {
 		width: 236px;
