@@ -30,6 +30,26 @@ test.describe( 'Products > Search and View a product', () => {
 		} );
 	} );
 
+	// Canary for the admin product list's empty state. The PHPUnit coverage this
+	// batch adds asserts the search *results*, as IDs, so nothing below the browser
+	// asserts the `No products found` markup, and nothing else in the suite does
+	// either.
+	test( 'shows the empty state when a search matches no products', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/edit.php?post_type=product' );
+
+		await expect( page.locator( '#post-search-input' ) ).toBeVisible();
+		await page
+			.locator( '#post-search-input' )
+			.fill( `no-such-product-${ Date.now() }` );
+		await page.locator( '#search-submit' ).click();
+
+		await expect( page.locator( '.no-items' ) ).toContainText(
+			'No products found'
+		);
+	} );
+
 	test( 'can find and open a product from a partial search', async ( {
 		page,
 	} ) => {
