@@ -58,9 +58,12 @@ class CSVUploadHelperTest extends WC_Unit_Test_Case {
 		$wp_upload_dir = wp_upload_dir();
 		$expected_dir  = trailingslashit( $wp_upload_dir['basedir'] ) . 'wc-imports';
 
+		$this->assertDirectoryDoesNotExist( $expected_dir, 'wc-imports directory should not exist prior to invocation' );
+
 		$actual_dir = $this->sut->get_import_dir( false );
 
 		$this->assertSame( $expected_dir, $actual_dir, 'get_import_dir should match expected upload subdirectory path' );
+		$this->assertDirectoryDoesNotExist( $actual_dir, 'get_import_dir(false) should not create directory on disk' );
 	}
 
 	/**
