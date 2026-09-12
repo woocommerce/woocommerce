@@ -667,6 +667,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
+					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),
 					'remove_item_meta'                                => __( 'Remove this item meta?', 'woocommerce' ),
 					'name_label'                                      => __( 'Name', 'woocommerce' ),
 					'remove_label'                                    => __( 'Remove', 'woocommerce' ),

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize locale-formatted coupon minimum/maximum spend amounts before validating and storing them in WC_Coupon::set_minimum_amount() and WC_Coupon::set_maximum_amount().

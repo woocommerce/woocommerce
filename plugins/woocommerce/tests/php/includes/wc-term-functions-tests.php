@@ -87,6 +87,35 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honor the attribute's Term ID default without overriding explicit query ordering.
+	 */
+	public function test_attribute_term_id_ordering(): void {
+		global $wc_product_attributes;
+
+		$original_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_attribute( 'id_sort_test', array( 'Zebra', 'Apple', 'Mango' ) );
+		$taxonomy            = $attribute['attribute_taxonomy'];
+		try {
+			wc_update_attribute( $attribute['attribute_id'], array( 'order_by' => 'id' ) );
+			$product_id = $this->products['product1']->get_id();
+			wp_set_object_terms( $product_id, $attribute['term_ids'], $taxonomy );
+
+			$args = array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'names',
+			);
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), get_terms( $args ), 'Default queries should honor the saved Term ID setting.' );
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), wc_get_product_terms( $product_id, $taxonomy, array( 'fields' => 'names' ) ), 'Product term queries should use the same default ordering.' );
+			$this->assertSame( array( 'Apple', 'Mango', 'Zebra' ), get_terms( array_merge( $args, array( 'orderby' => 'name' ) ) ), 'An explicit ordering should override the attribute default.' );
+			$this->assertSame( array( 'Mango', 'Apple', 'Zebra' ), get_terms( array_merge( $args, array( 'order' => 'DESC' ) ) ), 'Descending order should use term IDs too.' );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $original_attributes;
+		}
+	}
+
+	/**
 	 * @testdox Term product counts with default settings.
 	 */
 	public function test_term_count_baseline(): void {

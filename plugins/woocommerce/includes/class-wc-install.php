@@ -354,10 +354,11 @@ class WC_Install {
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_delete_surface_cart_checkout_note',
-		),
-		'11.2.0-1' => array(
+			'wc_update_1120_cleanup_inherited_variation_images',
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
+			'wc_update_11202_reset_refund_returning_customer_markers',
+			'wc_update_11203_normalize_stock_notification_emails',
 		),
 	);
 
@@ -2111,6 +2112,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
+	taxable_amount double DEFAULT 0 NOT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
