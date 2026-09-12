@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -36,6 +37,13 @@ class PendingNotificationStore {
 	private InternalNotificationDispatcher $dispatcher;
 
 	/**
+	 * The push tokens data store.
+	 *
+	 * @var PushTokensDataStore
+	 */
+	private PushTokensDataStore $data_store;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -55,11 +63,13 @@ class PendingNotificationStore {
 	 * @internal
 	 *
 	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 * @param PushTokensDataStore            $data_store The push tokens data store.
 	 *
 	 * @since 10.7.0
 	 */
-	final public function init( InternalNotificationDispatcher $dispatcher ): void {
+	final public function init( InternalNotificationDispatcher $dispatcher, PushTokensDataStore $data_store ): void {
 		$this->dispatcher = $dispatcher;
+		$this->data_store = $data_store;
 	}
 
 	/**
@@ -82,6 +92,10 @@ class PendingNotificationStore {
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *
+	 * Notifications are dropped when no push token is registered, so neither
+	 * the safety net job nor the loopback request is created for a send that
+	 * has no recipient.
+	 *
 	 * @param Notification $notification The notification to add.
 	 * @return void
 	 *
@@ -89,6 +103,10 @@ class PendingNotificationStore {
 	 */
 	public function add( Notification $notification ): void {
 		if ( ! $this->enabled ) {
+			return;
+		}
+
+		if ( ! $this->data_store->has_tokens() ) {
 			return;
 		}
 

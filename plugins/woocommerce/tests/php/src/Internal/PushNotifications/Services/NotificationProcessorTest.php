@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProce
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -27,6 +28,7 @@ use WC_Unit_Test_Case;
 class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 	use LoggerSpyTrait;
+	use PushNotificationsTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -715,7 +717,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
 		$store = new PendingNotificationStore();
-		$store->init( $this->createMock( InternalNotificationDispatcher::class ) );
+		$store->init( $this->createMock( InternalNotificationDispatcher::class ), $this->create_data_store_with_tokens( true ) );
 
 		$method = new \ReflectionMethod( PendingNotificationStore::class, 'schedule_safety_net' );
 		$method->setAccessible( true );

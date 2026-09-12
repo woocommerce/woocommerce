@@ -32,6 +32,14 @@ class PushTokensDataStore {
 	 */
 	private array $tokens_by_roles_cache = array();
 
+	/**
+	 * Memoizes a positive has_tokens() result only. A stale true costs one
+	 * lookup; a stale false would drop a notification.
+	 *
+	 * @var bool
+	 */
+	private bool $has_tokens = false;
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -309,6 +317,31 @@ class PushTokensDataStore {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Determines whether any push token exists, ignoring roles and preferences
+	 * so callers can bail out before the cost of get_tokens_for_roles().
+	 *
+	 * @since 11.2.0
+	 * @return bool True if at least one push token exists.
+	 */
+	public function has_tokens(): bool {
+		if ( $this->has_tokens ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index.
+		$this->has_tokens = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' LIMIT 1",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->has_tokens;
 	}
 
 	/**
