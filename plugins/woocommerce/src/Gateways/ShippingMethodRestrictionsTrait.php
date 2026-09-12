@@ -89,7 +89,9 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Check If The Gateway Is Available For Use.
 	 *
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 * @since 10.7.0 Added early return when gateway is disabled.
+	 *
 	 * @return bool
 	 */
 	public function is_available() {
@@ -145,6 +147,8 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Checks to see whether or not the admin settings are being accessed by the current request.
 	 *
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 *
 	 * @return bool
 	 */
 	protected function is_accessing_settings() {
@@ -176,6 +180,8 @@ trait ShippingMethodRestrictionsTrait {
 
 	/**
 	 * Loads all of the shipping method options for the enable_for_methods field.
+	 *
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @return array
 	 */
@@ -257,7 +263,8 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Indicates whether a rate exists in an array of canonically-formatted rate IDs that activates this gateway.
 	 *
-	 * @since  3.4.0
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 * @since 3.4.0
 	 *
 	 * @param array $rate_ids Rate ids to check.
 	 * @return array
