@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Format discount and refund amounts as negative prices with localized markup.
