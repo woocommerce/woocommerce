@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Mini-Cart view script module from loading on the cart and checkout pages, and prevent the iAPI cart store from firing a malformed cart fetch retry loop when its interactivity state is not registered.
