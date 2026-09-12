@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move the email editor feature flag, preview send and REST failure coverage below E2E; the browser spec goes from six titles to four.
+
