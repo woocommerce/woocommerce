@@ -39,11 +39,15 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -3702,4 +3706,290 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 	}
 
 	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
+}
+
+/**
+ * Delete the retired Surface Cart and Checkout inbox note.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_delete_surface_cart_checkout_note(): void {
+	InboxNotifications::delete_surface_cart_checkout_blocks_notification();
+}
+
+/**
+ * Remove variation featured images that duplicate the parent product's featured image.
+ *
+ * The classic editor used to persist the inherited parent image onto variations on save,
+ * freezing dynamic inheritance. Removing values that still equal the parent's canonical
+ * thumbnail is display-neutral; diverged values may be deliberate and are kept. Skipped
+ * for stores upgrading from before 10.9.0, which predates the variation gallery.
+ * A database error stops the cleanup and is logged.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_1120_cleanup_inherited_variation_images() {
+	global $wpdb;
+
+	$state_option     = 'woocommerce_update_1120_cleanup_state';
+	$completed_option = 'woocommerce_update_1120_completed_at';
+	$batch_size       = 250;
+
+	// A manual db-version rollback replays all update callbacks; this one deletes data, so it must not run twice.
+	if ( get_option( $completed_option ) ) {
+		return false;
+	}
+
+	// Still the pre-update version here: the option is only bumped by the final update callback.
+	if ( version_compare( (string) get_option( 'woocommerce_db_version' ), '10.9.0', '<' ) ) {
+		return false;
+	}
+
+	$state = get_option( $state_option, array() );
+	$state = is_array( $state ) ? $state : array();
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names cannot be prepared.
+	$matching_variations = (array) $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT variation.ID AS variation_id,
+				variation.post_parent AS parent_id,
+				GROUP_CONCAT(DISTINCT variation_thumb.meta_value) AS inherited_image_ids
+			FROM {$wpdb->posts} AS variation
+			INNER JOIN {$wpdb->postmeta} AS variation_thumb
+				ON variation_thumb.post_id = variation.ID
+				AND variation_thumb.meta_key = '_thumbnail_id'
+			INNER JOIN {$wpdb->postmeta} AS parent_thumb
+				ON parent_thumb.post_id = variation.post_parent
+				AND parent_thumb.meta_key = '_thumbnail_id'
+			WHERE variation.ID > %d
+				AND variation.post_type = 'product_variation'
+				AND variation_thumb.meta_value <> ''
+				AND variation_thumb.meta_value = parent_thumb.meta_value
+			GROUP BY variation.ID
+			ORDER BY variation.ID ASC
+			LIMIT %d",
+			(int) ( $state['last_processed_id'] ?? 0 ),
+			$batch_size + 1
+		),
+		ARRAY_A
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped cleaning up inherited variation images: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1120_cleanup_inherited_variation_images' )
+		);
+		delete_option( $state_option );
+
+		return false;
+	}
+
+	$has_more            = count( $matching_variations ) > $batch_size;
+	$matching_variations = array_slice( $matching_variations, 0, $batch_size );
+
+	$cleaned_count = (int) ( $state['cleaned_count'] ?? 0 );
+
+	foreach ( $matching_variations as $matching_variation ) {
+		// The join matches any parent thumbnail row; only the canonical value is safe to delete.
+		$canonical_parent_thumbnail = (int) get_post_meta( (int) $matching_variation['parent_id'], '_thumbnail_id', true );
+		$deleted_any                = false;
+
+		foreach ( wp_parse_id_list( $matching_variation['inherited_image_ids'] ) as $inherited_image_id ) {
+			if ( $inherited_image_id === $canonical_parent_thumbnail && delete_post_meta( (int) $matching_variation['variation_id'], '_thumbnail_id', $inherited_image_id ) ) {
+				$deleted_any = true;
+			}
+		}
+
+		if ( $deleted_any ) {
+			++$cleaned_count;
+		}
+	}
+
+	if ( $has_more ) {
+		$last_processed = end( $matching_variations );
+		update_option(
+			$state_option,
+			array(
+				'last_processed_id' => (int) $last_processed['variation_id'],
+				'cleaned_count'     => $cleaned_count,
+			),
+			false
+		);
+
+		return true;
+	}
+
+	delete_option( $state_option );
+	update_option( $completed_option, time(), false );
+	VariationGalleryTelemetry::record_event(
+		VariationGalleryTelemetry::EVENT_INHERITED_IMAGE_CLEANUP_COMPLETED,
+		array( 'cleaned_count' => $cleaned_count )
+	);
+
+	return false;
+}
+
+/**
+ * Invalidate the Analytics report cache.
+ *
+ * Report responses are cached for a week and keyed on the query arguments alone, so a report
+ * run before the update keeps serving its pre-update answer. That hides the corrected result
+ * for category and product filters that have no product in common.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_invalidate_analytics_reports_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
+		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+	}
+}
+
+/**
+ * Reset stale returning-customer markers on refund rows.
+ *
+ * Refund rows in the order stats table are written with a NULL returning_customer, but earlier
+ * first-order recalculations could overwrite that marker and never restore it. Customer aggregates
+ * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
+ * and restores the Orders report fallback to the refunded order's value.
+ *
+ * Batches walk the table by order ID. A database error stops the migration and is logged instead
+ * of retried, because the report queries stay correct without the reset.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_11202_reset_refund_returning_customer_markers() {
+	global $wpdb;
+
+	$last_id_option    = 'woocommerce_update_11202_last_refund_order_id';
+	$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+	$orders_table      = OrderUtil::get_table_for_orders();
+	$hpos_enabled      = OrderUtil::custom_orders_table_usage_is_enabled();
+	$order_id_column   = $hpos_enabled ? 'id' : 'ID';
+	$order_type_column = $hpos_enabled ? 'type' : 'post_type';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+	$refund_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT stats.order_id FROM {$order_stats_table} AS stats
+			INNER JOIN {$orders_table} AS orders ON orders.{$order_id_column} = stats.order_id
+			WHERE stats.order_id > %d AND stats.returning_customer IS NOT NULL AND orders.{$order_type_column} = 'shop_order_refund'
+			ORDER BY stats.order_id ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' === $wpdb->last_error && ! empty( $refund_ids ) ) {
+		$refund_ids      = array_map( 'intval', $refund_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $refund_ids ), '%d' ) );
+		$updated         = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name cannot be prepared; placeholders are generated per ID.
+			$wpdb->prepare( "UPDATE {$order_stats_table} SET returning_customer = NULL WHERE order_id IN ( {$id_placeholders} )", $refund_ids )
+		);
+
+		if ( false !== $updated ) {
+			update_option( $last_id_option, end( $refund_ids ), false );
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped resetting refund returning-customer markers: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_11202_reset_refund_returning_customer_markers' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// Reports cached against half-migrated data would otherwise keep being served.
+	wc_update_11201_invalidate_analytics_reports_cache();
+
+	return false;
+}
+
+/**
+ * Rewrite stored Back in Stock customer emails in canonical form (trimmed, lowercased).
+ *
+ * Lookups on `user_email` use plain SQL equality, so rows written before emails were
+ * normalized would not match on a case-sensitive collation. Processes one batch per
+ * call and requeues itself while rows remain. A database error stops the migration
+ * and is logged instead of retried: an unnormalized row only keeps the pre-migration
+ * lookup behaviour, and the log names it for manual repair.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True when another batch remains, false when done.
+ */
+function wc_update_11203_normalize_stock_notification_emails() {
+	global $wpdb;
+
+	$last_id_option = 'woocommerce_update_11203_last_stock_notification_id';
+	$table          = $wpdb->prefix . 'wc_stock_notifications';
+	$batch_size     = 500;
+
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT id, user_email FROM {$table} WHERE id > %d ORDER BY id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			(int) get_option( $last_id_option, 0 ),
+			$batch_size
+		)
+	);
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped normalizing stock notification emails: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	// Normalize in PHP rather than with SQL LOWER()/TRIM() so stored values match exactly
+	// what EmailNormalizer produces at lookup time.
+	foreach ( $rows as $row ) {
+		$normalized = EmailNormalizer::normalize( (string) $row->user_email );
+		if ( $normalized === $row->user_email ) {
+			continue;
+		}
+
+		// Matching on the value read keeps a concurrent save (e.g. the privacy eraser) from being overwritten.
+		$updated = $wpdb->update(
+			$table,
+			array( 'user_email' => $normalized ),
+			array(
+				'id'         => (int) $row->id,
+				'user_email' => $row->user_email,
+			),
+			array( '%s' ),
+			array( '%d', '%s' )
+		);
+		if ( false === $updated ) {
+			wc_get_logger()->error(
+				sprintf( 'Stopped normalizing stock notification emails at notification #%d: %s', (int) $row->id, $wpdb->last_error ),
+				array( 'source' => 'wc-updater' )
+			);
+			delete_option( $last_id_option );
+			return false;
+		}
+	}
+
+	if ( count( $rows ) === $batch_size ) {
+		update_option( $last_id_option, (int) end( $rows )->id, false );
+		return true;
+	}
+
+	delete_option( $last_id_option );
+
+	return false;
 }

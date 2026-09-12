@@ -21,6 +21,34 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order structured data looks up the product image with an integer attachment ID.
+	 */
+	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product = wc_get_product( $product->save() );
+		$order   = WC_Helper_Order::create_order( 1, $product );
+
+		$received_id = null;
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( &$received_id ) {
+				if ( null === $received_id ) {
+					$received_id = $attachment_id;
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$this->structured_data->generate_order_data( $order );
+
+		$this->assertSame( $image_id, $received_id, 'The attachment ID passed to WordPress should be an integer.' );
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void

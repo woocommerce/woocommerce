@@ -435,7 +435,7 @@ class WC_REST_Authentication {
 
 		if ( function_exists( 'getallheaders' ) ) {
 			$headers = getallheaders();
-			// Check for the authoization header case-insensitively.
+			// Check for the authorization header case-insensitively.
 			foreach ( $headers as $key => $value ) {
 				if ( 'authorization' === strtolower( $key ) ) {
 					return $value;

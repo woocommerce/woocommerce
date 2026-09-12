@@ -4281,7 +4281,7 @@ function wc_display_product_attributes( $product ) {
 			foreach ( $attribute_values as $attribute_value ) {
 				$value_name = esc_html( $attribute_value->name );
 
-				if ( $attribute_taxonomy->attribute_public ) {
+				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
 					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
@@ -4791,7 +4791,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 		}
 	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
 		/*
-		 * When switching from a block theme to a clasic theme, check if we have set the option to
+		 * When switching from a block theme to a classic theme, check if we have set the option to
 		 * re-enable the store notice. If so, re-enable it.
 		 */
 		$enable_store_notice_in_classic_theme = wc_string_to_bool( get_option( $enable_store_notice_in_classic_theme_option, 'no' ) );

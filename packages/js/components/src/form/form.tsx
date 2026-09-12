@@ -18,6 +18,7 @@ import _get from 'lodash/get';
 import _clone from 'lodash/clone';
 import _toPath from 'lodash/toPath';
 import _isEqual from 'lodash/isEqual';
+import _isSymbol from 'lodash/isSymbol';
 import _omit from 'lodash/omit';
 
 /**
@@ -44,6 +45,36 @@ function isChangeEvent< T >(
 
 // Path segments lodash refuses to write through.
 const UNWRITABLE_KEYS = [ '__proto__', 'constructor', 'prototype' ];
+
+// Copied from lodash's private isKey(), the check setWith() uses to decide
+// whether a name is one literal key or a path to split. A name is a key when
+// it is not a dotted or balanced-bracket path, or when the object holds it.
+// The one deviation is the last term, which drops lodash's Object() wrapper
+// around the object, since the only caller always passes a plain object.
+const PLAIN_KEY = /^\w*$/;
+const DEEP_PATH = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
+
+function isKey( name: unknown, object: object ): boolean {
+	if ( Array.isArray( name ) ) {
+		return false;
+	}
+	const type = typeof name;
+	if (
+		type === 'number' ||
+		type === 'symbol' ||
+		type === 'boolean' ||
+		name === null ||
+		name === undefined ||
+		_isSymbol( name )
+	) {
+		return true;
+	}
+	return (
+		PLAIN_KEY.test( name as string ) ||
+		! DEEP_PATH.test( name as string ) ||
+		( name as PropertyKey ) in object
+	);
+}
 
 /**
  * A form component to handle form state and provide input helper props.
@@ -181,24 +212,20 @@ function FormComponent< Values extends Record< string, any > = any >(
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: keyof Values, value: any ) => {
-			// lodash writes an existing literal key such as 'a.b' in place rather
-			// than as a path, so only split a name the form does not already hold.
-			const path = Object.prototype.hasOwnProperty.call(
-				pendingValuesRef.current,
-				name
-			)
-				? [ String( name ) ]
+			const newValues = { ...pendingValuesRef.current };
+			// Resolve the name the way setWith() does. Wrapping a literal key in
+			// an array keeps toPath() from splitting it, and setWith() gets the
+			// same segments so the entry read below is the one the write landed on.
+			const segments = isKey( name, newValues )
+				? _toPath( [ name ] )
 				: _toPath( name );
 
-			// toPath() yields no segments for a name such as '' or null. Write
-			// those under the literal key instead, and hand setWith() the same
-			// segments so the entry read below is the one the write landed on.
-			const segments = path.length ? path : [ String( name ) ];
-
-			// lodash drops a write whose path steps through one of these keys.
-			// Drop it here too: otherwise the entry picked below reads an
-			// inherited value and setValues adds it to the form as an own key.
+			// lodash writes nothing for an empty path and drops a write whose
+			// path steps through one of these keys. Drop both here too, so
+			// setValues never adds a key the write did not make, such as an
+			// inherited value.
 			if (
+				! segments.length ||
 				segments.some( ( segment ) =>
 					UNWRITABLE_KEYS.includes( segment )
 				)
@@ -206,12 +233,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 				return;
 			}
 
-			const newValues = _setWith(
-				{ ...pendingValuesRef.current },
-				segments,
-				value,
-				_clone
-			);
+			_setWith( newValues, segments, value, _clone );
 			// Hand setValues only the entry this write touched so it reports one
 			// change: a literal key is its own only segment, and a path reports
 			// under its top-level key.

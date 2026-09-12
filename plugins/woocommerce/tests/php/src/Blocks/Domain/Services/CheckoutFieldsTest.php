@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use WP_UnitTestCase;
 
@@ -90,6 +91,20 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'label'    => __( 'Please leave my package on the porch if I\'m not home', 'woocommerce' ),
 				'location' => 'order',
 				'type'     => 'checkbox',
+			),
+			array(
+				'id'       => 'plugin-namespace/delivery-date',
+				'label'    => 'Preferred delivery date',
+				'location' => 'order',
+				'type'     => 'date',
+			),
+			array(
+				'id'       => 'plugin-namespace/appointment-date',
+				'label'    => 'Appointment date',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'P0D',
+				'max'      => 'P30D',
 			),
 			array(
 				'id'         => 'namespace/vat-number',
@@ -187,6 +202,113 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$fields = $this->controller->get_contextual_fields_for_location( 'address', $document_object );
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
+	}
+
+	/**
+	 * @testdox Date fields can be registered, with their constraints stored as registered.
+	 */
+	public function test_date_fields_can_be_registered() {
+		$fields = $this->controller->get_additional_fields();
+
+		$this->assertArrayHasKey( 'plugin-namespace/delivery-date', $fields, 'Date fields should be a supported field type.' );
+		$this->assertSame( 'date', $fields['plugin-namespace/delivery-date']['type'] );
+
+		// The constraint rules themselves are covered by DateFieldTypeTest; this only checks registration carries them through unresolved.
+		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
+		$this->assertSame( 'P30D', $fields['plugin-namespace/appointment-date']['max'] );
+	}
+
+	/**
+	 * @testdox Old order dates can be edited without the current checkout limits.
+	 */
+	public function test_order_editor_omits_date_constraints(): void {
+		$sut   = Package::container()->get( CheckoutFieldsAdmin::class );
+		$order = new \WC_Order();
+		$key   = '_wc_other/plugin-namespace/appointment-date';
+		$order->set_created_via( 'store-api' );
+		$order->update_meta_data( $key, '1900-01-01' );
+
+		$fields = $sut->admin_order_fields( array(), $order );
+		$field  = $fields['plugin-namespace/appointment-date'];
+
+		$this->assertSame( '1900-01-01', $field['value'] );
+		$this->assertArrayNotHasKey( 'min', $field['custom_attributes'] ?? array() );
+		$this->assertArrayNotHasKey( 'max', $field['custom_attributes'] ?? array() );
+
+		$sut->update_callback( $key, '1900-01-02', $order );
+		$this->assertSame( '1900-01-02', $order->get_meta( $key ) );
+	}
+
+	/**
+	 * @testdox Invalid dates still reach custom validation and both validation hooks.
+	 */
+	public function test_invalid_date_runs_custom_validation_and_hooks(): void {
+		$calls = array();
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$field['validate_callback'] = static function ( $value ) use ( &$calls ) {
+			$calls['callback'] = $value;
+			return new \WP_Error( 'custom_date_error', 'Custom validation error.' );
+		};
+
+		$hooks = array(
+			'__experimental_woocommerce_blocks_validate_additional_field',
+			'woocommerce_validate_additional_field',
+		);
+		$this->setExpectedDeprecated( $hooks[0] );
+
+		foreach ( $hooks as $hook ) {
+			add_action(
+				$hook,
+				static function ( $errors, $key, $value ) use ( &$calls, $hook ) {
+					$calls[ $hook ] = array( $key, $value, $errors->get_error_codes() );
+				},
+				10,
+				3
+			);
+		}
+
+		$errors = $this->controller->validate_field( $field, '2026-02-31' );
+
+		$this->assertSame( '2026-02-31', $calls['callback'] ?? null );
+		$this->assertContains( 'woocommerce_invalid_checkout_field', $errors->get_error_codes() );
+		$this->assertContains( 'custom_date_error', $errors->get_error_codes() );
+		foreach ( $hooks as $hook ) {
+			$this->assertArrayHasKey( $hook, $calls, 'Both validation hooks must run after a type error.' );
+			$this->assertSame( $field['id'], $calls[ $hook ][0] );
+			$this->assertSame( '2026-02-31', $calls[ $hook ][1] );
+			$this->assertContains( 'woocommerce_invalid_checkout_field', $calls[ $hook ][2] );
+			$this->assertContains( 'custom_date_error', $calls[ $hook ][2] );
+		}
+	}
+
+	/**
+	 * @testdox Date field validation is delegated to the date field type.
+	 */
+	public function test_date_field_validation_is_delegated() {
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$this->assertFalse( $this->controller->validate_field( $field, '2025-08-26' )->has_errors() );
+		$this->assertTrue( $this->controller->validate_field( $field, '2025-02-31' )->has_errors() );
+	}
+
+	/**
+	 * @testdox A date field whose constraints the date field type rejects is not registered.
+	 */
+	public function test_date_field_with_invalid_constraint_is_not_registered() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/invalid-constraint',
+				'label'    => 'Invalid constraint',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'not-a-date',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/invalid-constraint', $this->controller->get_additional_fields() );
 	}
 
 	/**

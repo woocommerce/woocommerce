@@ -790,6 +790,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'gallery_image_ids':
 					$value = implode( ',', $value );
 					break;
+				case 'image_id':
+					// An empty string makes update_or_delete_post_meta() remove the meta, as earlier versions did; integer zero would persist a "0" row.
+					$value = $value ? $value : '';
+					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':
 					$value = $value ? $value->getTimestamp() : '';
@@ -1420,6 +1424,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
 				AND lookup.global_unique_id = %s
+				ORDER BY posts.ID ASC
 				LIMIT 1
 				",
 				$global_unique_id

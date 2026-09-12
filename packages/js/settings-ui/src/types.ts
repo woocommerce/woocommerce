@@ -15,6 +15,7 @@ export type SettingsUISaveAdapter =
 export type SettingsUISaveSchema = {
 	adapter: SettingsUISaveAdapter;
 	name?: string;
+	initialValue?: string | string[];
 };
 
 export type SettingsUISaveStrategy =
@@ -39,24 +40,18 @@ export type SettingsUIField = {
 	placeholder?: string;
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
+	validation?: {
+		min?: number;
+		max?: number;
+	};
 	visibility?: SettingsUIVisibilityRule;
 	save?: SettingsUISaveSchema;
-};
-
-export type SettingsUIGroupAction = {
-	id: string;
-	label: string;
-	href: string;
-	variant?: 'primary' | 'secondary' | 'tertiary' | 'link' | string;
-	target?: string;
-	rel?: string;
 };
 
 export type SettingsUIGroup = {
 	id: string;
 	title?: string;
 	description?: string;
-	actions?: SettingsUIGroupAction[];
 	fields: SettingsUIField[];
 };
 
@@ -201,15 +196,3 @@ export type SettingsExtensionRegistration = {
 	saveHandlers?: Record< string, SettingsSaveHandler >;
 	regions?: Record< string, SettingsRegionComponent >;
 };
-
-export type SettingsUIRegistry = {
-	registerSettingsExtension: (
-		registration: SettingsExtensionRegistration
-	) => void;
-};
-
-declare global {
-	interface Window {
-		wcSettingsUI?: SettingsUIRegistry;
-	}
-}

@@ -714,7 +714,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testDox Test that order items are not mixed when order_id is zero.
 	 */
-	public function test_order_items_shouldnot_mix_with_zero_id() {
+	public function test_order_items_should_not_mix_with_zero_id() {
 		$order1 = new WC_Order();
 		$order2 = new WC_Order();
 
@@ -871,7 +871,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
 	 * @param WC_Order $order The target order.
 	 * @param float    $cogs_value The COGS value of the product.

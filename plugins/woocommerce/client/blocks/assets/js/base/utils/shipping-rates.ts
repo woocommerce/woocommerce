@@ -76,6 +76,18 @@ export const hasShippingRate = (
 	);
 };
 
+/**
+ * Get the rate a package should show as selected: the rate the store has
+ * selected, falling back to the first available one when it has none yet.
+ *
+ * The parent initializes packages with this rate and the rate list renders it,
+ * so both have to apply the same rule to agree on what is checked.
+ */
+export const getSelectedOrFirstRateId = (
+	rates: CartShippingPackageShippingRate[]
+): string | undefined =>
+	rates.find( ( rate ) => rate.selected )?.rate_id ?? rates[ 0 ]?.rate_id;
+
 export const hasSelectedShippingRate = (
 	shippingRates: CartShippingRate[]
 ): boolean => {

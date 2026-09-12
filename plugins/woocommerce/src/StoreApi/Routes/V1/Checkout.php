@@ -272,10 +272,11 @@ class Checkout extends AbstractCartRoute {
 		$invalid_details = [];
 		$is_partial      = in_array( $request->get_method(), [ 'PUT', 'PATCH' ], true );
 
+		$document_object = $this->get_document_object_from_rest_request( $request );
+
 		foreach ( $validate_contexts as $context => $context_data ) {
 			$errors = new \WP_Error();
 
-			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
@@ -676,9 +677,10 @@ class Checkout extends AbstractCartRoute {
 		// Order save-point: 2.
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -688,7 +690,7 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @example docs/examples/checkout-order-processed.md
-
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -914,9 +916,10 @@ class Checkout extends AbstractCartRoute {
 			],
 		];
 
+		$document_object = $this->get_document_object_from_rest_request( $request );
+
 		foreach ( $additional_field_contexts as $context => $context_data ) {
 
-			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
