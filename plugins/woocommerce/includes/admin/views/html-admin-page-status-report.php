@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +31,55 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
+
+$additional_tax_classes_limit     = 10;
+$additional_tax_classes           = $settings['additional_tax_classes'];
+$displayed_additional_tax_classes = array_slice( $additional_tax_classes, 0, $additional_tax_classes_limit );
+$remaining_additional_tax_classes = max( 0, count( $additional_tax_classes ) - $additional_tax_classes_limit );
+$additional_tax_classes_display   = implode( ', ', $displayed_additional_tax_classes );
+
+if ( $remaining_additional_tax_classes ) {
+	$additional_tax_classes_display .= ', ' . sprintf(
+		/* translators: %d: number of additional tax classes not shown. */
+		__( 'and %d more', 'woocommerce' ),
+		$remaining_additional_tax_classes
+	);
+}
+
+$countries                  = WC()->countries->get_countries();
+$store_base_country         = $settings['store_base_country'];
+$store_base_country_display = isset( $countries[ $store_base_country ] ) ? $countries[ $store_base_country ] . ' (' . $store_base_country . ')' : $store_base_country;
+
+$tax_based_on_labels  = array(
+	TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
+	TaxBasedOn::BILLING  => __( 'Customer billing address', 'woocommerce' ),
+	TaxBasedOn::BASE     => __( 'Shop base address', 'woocommerce' ),
+);
+$tax_based_on_display = $tax_based_on_labels[ $settings['tax_based_on'] ] ?? $settings['tax_based_on'];
+
+$shipping_tax_class_labels  = array( 'inherit' => __( 'Based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options();
+$shipping_tax_class_display = $shipping_tax_class_labels[ $settings['shipping_tax_class'] ] ?? $settings['shipping_tax_class'];
+
+$tax_display_labels = array(
+	TaxDisplayMode::INCLUSIVE => __( 'Inclusive', 'woocommerce' ),
+	TaxDisplayMode::EXCLUSIVE => __( 'Exclusive', 'woocommerce' ),
+);
+$tax_display_shop   = $tax_display_labels[ $settings['tax_display_shop'] ] ?? $settings['tax_display_shop'];
+$tax_display_cart   = $tax_display_labels[ $settings['tax_display_cart'] ] ?? $settings['tax_display_cart'];
+
+$tax_total_display_labels = array(
+	'single'   => __( 'Single total', 'woocommerce' ),
+	'itemized' => __( 'Itemized', 'woocommerce' ),
+);
+$tax_total_display        = $tax_total_display_labels[ $settings['tax_total_display'] ] ?? $settings['tax_total_display'];
+
+$default_customer_location_labels = array(
+	DefaultCustomerAddress::NO_DEFAULT       => __( 'No location by default', 'woocommerce' ),
+	DefaultCustomerAddress::BASE             => __( 'Shop country/region', 'woocommerce' ),
+	DefaultCustomerAddress::GEOLOCATION      => __( 'Geolocate', 'woocommerce' ),
+	DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+);
+$default_customer_location        = $default_customer_location_labels[ $settings['default_customer_location'] ] ?? $settings['default_customer_location'];
 
 // Include necessary WordPress file to use get_plugin_data().
 if ( ! function_exists( 'get_plugin_data' ) ) {
@@ -778,6 +828,80 @@ if ( 0 < $mu_plugins_count ) :
 			<td><?php echo esc_html( implode( ', ', $settings['enabled_features'] ) ); ?></td>
 		</tr>
 
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="Tax Settings"><h2><?php esc_html_e( 'Tax settings', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Enable tax rates and calculations"><?php esc_html_e( 'Enable tax rates and calculations', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are tax rates and calculations enabled?', 'woocommerce' ) ); ?></td>
+			<td><mark class="<?php echo esc_attr( $settings['taxes_enabled'] ? 'yes' : 'no' ); ?>"><?php echo $settings['taxes_enabled'] ? esc_html__( 'Enabled', 'woocommerce' ) : esc_html__( 'Disabled', 'woocommerce' ); ?></mark></td>
+		</tr>
+		<tr>
+			<td data-export-label="Prices entered with tax"><?php esc_html_e( 'Prices entered with tax', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are product prices entered inclusive of tax?', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['prices_include_tax'] ? esc_html__( 'Inclusive', 'woocommerce' ) : esc_html__( 'Exclusive', 'woocommerce' ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Calculate tax based on"><?php esc_html_e( 'Calculate tax based on', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The address type WooCommerce uses to calculate tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_based_on_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Shipping tax class"><?php esc_html_e( 'Shipping tax class', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The tax class WooCommerce uses for shipping.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $shipping_tax_class_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Rounding"><?php esc_html_e( 'Rounding', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether tax is rounded per line or at subtotal level.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['tax_round_at_subtotal'] ? esc_html__( 'At subtotal level', 'woocommerce' ) : esc_html__( 'Per line', 'woocommerce' ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Additional tax classes"><?php esc_html_e( 'Additional tax classes', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Additional tax classes configured for products. The list is truncated when more than 10 classes are configured.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $additional_tax_classes_display ? esc_html( $additional_tax_classes_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display prices in the shop"><?php esc_html_e( 'Display prices in the shop', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether shop prices are displayed including or excluding tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_display_shop ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display prices during cart and checkout"><?php esc_html_e( 'Display prices during cart and checkout', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether cart and checkout prices are displayed including or excluding tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_display_cart ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Price display suffix"><?php esc_html_e( 'Price display suffix', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Text displayed after product prices.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['price_display_suffix'] ? esc_html( $settings['price_display_suffix'] ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display tax totals"><?php esc_html_e( 'Display tax totals', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether tax totals are displayed as a single total or itemized.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_total_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Tax rates"><?php esc_html_e( 'Tax rates', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The number of configured tax rates.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( number_format_i18n( $settings['tax_rate_count'] ) ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base country"><?php esc_html_e( 'Store base country', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The country configured as the store base location.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $store_base_country_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Default customer location"><?php esc_html_e( 'Default customer location', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The location WooCommerce assumes for a customer before an address is provided.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $default_customer_location ); ?></td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
