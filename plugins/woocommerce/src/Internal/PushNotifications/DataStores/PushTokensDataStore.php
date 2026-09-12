@@ -196,6 +196,57 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Deletes every push token belonging to a user.
+	 *
+	 * A non-positive ID is refused rather than queried, so a caller that loses
+	 * the user ID cannot match the rows of every author-less token at once.
+	 *
+	 * @since 11.2.0
+	 * @param int $user_id The user whose tokens should be deleted.
+	 * @return int The number of tokens deleted.
+	 */
+	public function delete_for_user( int $user_id ): int {
+		if ( $user_id < 1 ) {
+			return 0;
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author'         => $user_id,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		/**
+		 * Typehint for PHPStan, specifies these are IDs and not instances of
+		 * WP_Post.
+		 *
+		 * @var int[] $post_ids
+		 */
+		$post_ids = $query->posts;
+
+		if ( empty( $post_ids ) ) {
+			return 0;
+		}
+
+		$deleted = 0;
+
+		foreach ( $post_ids as $post_id ) {
+			if ( wp_delete_post( (int) $post_id, true ) ) {
+				++$deleted;
+			}
+		}
+
+		// Anything read earlier in this request now includes deleted tokens.
+		$this->tokens_by_roles_cache = array();
+
+		return $deleted;
+	}
+
+	/**
 	 * Find tokens for this user and platform that match either the token
 	 * or device UUID. We check the token value to avoid creating a duplicate.
 	 * We check the device UUID value because only one token should be issued
