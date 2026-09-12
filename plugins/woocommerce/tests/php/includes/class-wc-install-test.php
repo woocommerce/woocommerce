@@ -795,4 +795,112 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
 		);
 	}
+
+	/**
+	 * @testdox Should reference a block pattern instead of baking the translated cross-sells heading into the Cart page content.
+	 */
+	public function test_cart_block_content_references_cross_sells_pattern(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->',
+			$content,
+			'The cross-sells heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$content,
+			'The cross-sells heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the cross-sells heading from the referenced pattern with the markup the installer used to inline.
+	 */
+	public function test_cart_cross_sells_message_pattern_renders_installer_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-cross-sells-message' ),
+			'The cart-cross-sells-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks( '<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->' );
+
+		// The literal ellipsis is the msgid the blocks JS defaults use, so every path that renders this
+		// heading shares one string. Asserting the exact spelling keeps that alignment deliberate: the
+		// classic template's '&hellip;' variant is a different msgid with different translation coverage.
+		$this->assertStringContainsString(
+			'You may be interested in…',
+			$rendered,
+			'The pattern should render the cross-sells heading with the literal-ellipsis msgid the blocks JS defaults use.'
+		);
+		// The pattern predates #60278, which restyled the heading in the installer without updating the
+		// pattern. These two assertions catch the styling drifting apart again and visibly changing the cart.
+		$this->assertStringContainsString(
+			'has-text-align-left',
+			$rendered,
+			'The rendered cross-sells heading should keep the alignment the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'margin-bottom:1rem',
+			$rendered,
+			'The rendered cross-sells heading should keep the bottom margin the installer previously inlined.'
+		);
+	}
+
+	/**
+	 * The point of the fix, asserted directly: the heading comes from the translation layer on each
+	 * request instead of the copy the installer used to freeze into post_content.
+	 *
+	 * The pattern resolves its own string when it registers, not when it renders, so a plain
+	 * switch_to_locale() here would prove nothing — the registry already holds the finished content.
+	 * Re-registering under the filter is what stands in for a request served in another language.
+	 *
+	 * @testdox Should take the cross-sells heading from the active translation rather than a frozen string.
+	 */
+	public function test_cart_cross_sells_heading_follows_the_active_translation(): void {
+		$slug      = 'woocommerce/cart-cross-sells-message';
+		$reference = '<!-- wp:pattern {"slug":"' . $slug . '"} /-->';
+		$sentinel  = 'PSEUDO_TRANSLATED_CROSS_SELLS_HEADING';
+
+		$translate = static function ( $translation, $text, $domain ) use ( $sentinel ) {
+			return ( 'woocommerce' === $domain && 'You may be interested in…' === $text ) ? $sentinel : $translation;
+		};
+
+		add_filter( 'gettext', $translate, 10, 3 );
+		$this->reregister_block_patterns();
+		$translated = do_blocks( $reference );
+		remove_filter( 'gettext', $translate, 10 );
+
+		// Leave the registry as this test found it, for anything that renders the pattern later.
+		$this->reregister_block_patterns();
+		$untranslated = do_blocks( $reference );
+
+		$this->assertStringContainsString(
+			$sentinel,
+			$translated,
+			'The heading should come from the translation layer, so a translated site renders translated copy.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$translated,
+			'The English copy must not survive alongside the translation; that would mean it is frozen somewhere.'
+		);
+		$this->assertStringContainsString(
+			'You may be interested in…',
+			$untranslated,
+			'Dropping the translation should fall back to the English source string.'
+		);
+	}
+
+	/**
+	 * Rebuilds the patterns through the real registration, so the test exercises the content
+	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
+	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
+	 */
+	private function reregister_block_patterns(): void {
+		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
+	}
 }
