@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pin date_paid on the Orders Stats report test fixtures so a run that crosses the top of the hour no longer drops orders out of the queried window.

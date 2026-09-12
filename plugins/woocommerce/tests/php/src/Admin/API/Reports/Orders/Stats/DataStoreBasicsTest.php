@@ -38,6 +38,9 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		$coupon->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
+		// Pin date_paid to date_created, which the window below is derived from; otherwise
+		// the two can land in different hours when the save crosses the top of the hour.
+		$order->set_date_paid( $order->get_date_created() );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->apply_coupon( $coupon );
@@ -319,14 +322,18 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
 		$order_time = (int) $order_datetime->format( 'U' );
 
+		// Both orders pin date_paid alongside date_created, because the report queries
+		// date_paid and the window below comes from date_created.
 		$customer_1_order = WC_Helper_Order::create_order( $customer_1->get_id() );
 		$customer_1_order->set_date_created( $order_time );
+		$customer_1_order->set_date_paid( $order_time );
 		$customer_1_order->set_status( OrderStatus::COMPLETED );
 		$customer_1_order->save();
 
 		// Offset by 1 second to keep both orders in the same hour but distinct.
 		$customer_2_order = WC_Helper_Order::create_order( $customer_2->get_id() );
 		$customer_2_order->set_date_created( $order_time + 1 );
+		$customer_2_order->set_date_paid( $order_time + 1 );
 		$customer_2_order->set_status( OrderStatus::COMPLETED );
 		$customer_2_order->save();
 
