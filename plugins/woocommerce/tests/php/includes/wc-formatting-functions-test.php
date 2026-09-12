@@ -106,4 +106,23 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 		$this->assertTrue( wc_is_stock_amount_integer(), 'Should return true when intval is applied to stock amount filter.' );
 	}
+
+	/**
+	 * @testdox Saving an unchanged hold stock value should preserve the pending cancellation action.
+	 */
+	public function test_unchanged_hold_stock_value_preserves_pending_cancellation_action(): void {
+		$scheduled_time = time() + ( 2 * HOUR_IN_SECONDS );
+
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		as_schedule_single_action( $scheduled_time, 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+
+		wc_format_option_hold_stock_minutes( '60', array(), '60' );
+
+		$this->assertSame(
+			$scheduled_time,
+			as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' ),
+			'An unchanged hold stock value should not delay the existing cancellation action.'
+		);
+	}
 }
