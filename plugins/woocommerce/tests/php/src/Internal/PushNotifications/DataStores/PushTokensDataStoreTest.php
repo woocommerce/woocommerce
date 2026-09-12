@@ -960,6 +960,50 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests reading a push token populates the registration and confirmation timestamps.
+	 */
+	public function test_read_populates_timestamps_from_the_post_record() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$post = get_post( $push_token->get_id() );
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( $post->post_date_gmt, $read->get_created_at_gmt() );
+		$this->assertSame( $post->post_modified_gmt, $read->get_last_confirmed_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests re-registering a device advances the confirmation timestamp past the registration one.
+	 */
+	public function test_read_reflects_a_re_registered_token_as_a_later_confirmation_time() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		/**
+		 * `post_modified_gmt` only advances once a second has elapsed, so the
+		 * original post date is backdated rather than waiting on the clock.
+		 */
+		wp_update_post(
+			array(
+				'ID'                => $push_token->get_id(),
+				'post_date_gmt'     => '2026-01-01 00:00:00',
+				'post_date'         => '2026-01-01 00:00:00',
+				'post_modified_gmt' => '2026-01-01 00:00:00',
+				'post_modified'     => '2026-01-01 00:00:00',
+			)
+		);
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$data_store->update( $push_token );
+
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( '2026-01-01 00:00:00', $read->get_created_at_gmt() );
+		$this->assertGreaterThan( $read->get_created_at_gmt(), $read->get_last_confirmed_at_gmt() );
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.

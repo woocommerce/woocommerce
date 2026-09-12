@@ -7,7 +7,10 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Entities;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
+use Automattic\WooCommerce\Utilities\TimeUtil;
+use stdClass;
 
 /**
  * Object representation of a push token.
@@ -25,6 +28,13 @@ class PushToken {
 	 * created before `device_locale` was added.
 	 */
 	const DEFAULT_DEVICE_LOCALE = 'en_US';
+
+	/**
+	 * The MySQL zero date, which WordPress writes when a date is unknown.
+	 *
+	 * @since 11.2.0
+	 */
+	const ZERO_DATETIME = '0000-00-00 00:00:00';
 
 	/**
 	 * Platform identifier for Apple devices.
@@ -108,7 +118,11 @@ class PushToken {
 	private ?string $token = null;
 
 	/**
-	 * The UUID of the device that generated the token.
+	 * An identifier the app generates for its own install, so a re-registration
+	 * matches the existing record after the OS issues a new token.
+	 *
+	 * Not derived from the device, not stable across reinstalls, and matched
+	 * only within one user. Browser tokens do not have one.
 	 *
 	 * @var string|null
 	 */
@@ -141,6 +155,30 @@ class PushToken {
 	 * @var array|null
 	 */
 	private ?array $metadata = null;
+
+	/**
+	 * The date the token was registered, as a GMT `Y-m-d H:i:s` string.
+	 *
+	 * Stored as WordPress stores it, so a value read back out can be set again.
+	 * {@see self::to_rest_datetime()} converts it for the response.
+	 *
+	 * @var string|null
+	 */
+	private ?string $created_at_gmt = null;
+
+	/**
+	 * The date the app last confirmed this token, as a GMT `Y-m-d H:i:s` string.
+	 *
+	 * The app re-sends the token periodically, not only when the token value
+	 * changes, and `post_modified_gmt` advances on each of those writes. This
+	 * records how recently the app read the token from the device and sent it
+	 * to us, which is what tells us how likely the token is to still be
+	 * current. It is not a confirmation from Apple or Google that the token is
+	 * deliverable, and it does not mean the token value changed.
+	 *
+	 * @var string|null
+	 */
+	private ?string $last_confirmed_at_gmt = null;
 
 	/**
 	 * Creates a new PushToken instance with the given data.
@@ -181,6 +219,14 @@ class PushToken {
 
 		if ( array_key_exists( 'metadata', $data ) ) {
 			$this->set_metadata( (array) $data['metadata'] );
+		}
+
+		if ( array_key_exists( 'created_at_gmt', $data ) ) {
+			$this->set_created_at_gmt( null === $data['created_at_gmt'] ? null : (string) $data['created_at_gmt'] );
+		}
+
+		if ( array_key_exists( 'last_confirmed_at_gmt', $data ) ) {
+			$this->set_last_confirmed_at_gmt( null === $data['last_confirmed_at_gmt'] ? null : (string) $data['last_confirmed_at_gmt'] );
 		}
 	}
 
@@ -247,7 +293,7 @@ class PushToken {
 	/**
 	 * Validates and sets the device UUID, normalize empty (non-null) values to null.
 	 *
-	 * @param string|null $device_uuid The UUID of the device that generated the token.
+	 * @param string|null $device_uuid The identifier the app generated for its own install.
 	 * @throws PushTokenInvalidDataException If device UUID is not valid.
 	 * @return void
 	 *
@@ -362,6 +408,80 @@ class PushToken {
 	}
 
 	/**
+	 * Sets the date the token was registered.
+	 *
+	 * Unlike the other setters this does not run through
+	 * {@see PushTokenValidator}. Timestamps are derived from the underlying
+	 * post record rather than supplied by an API client, so there is no
+	 * untrusted input to guard against.
+	 *
+	 * @param string|null $created_at_gmt A GMT `Y-m-d H:i:s` datetime, or null if unknown.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function set_created_at_gmt( ?string $created_at_gmt ): void {
+		$this->created_at_gmt = $this->validate_gmt_datetime( $created_at_gmt );
+	}
+
+	/**
+	 * Sets the date the app last confirmed this token.
+	 *
+	 * See {@see self::set_created_at_gmt()} for why this bypasses validation.
+	 *
+	 * @param string|null $last_confirmed_at_gmt A GMT `Y-m-d H:i:s` datetime, or null if unknown.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function set_last_confirmed_at_gmt( ?string $last_confirmed_at_gmt ): void {
+		$this->last_confirmed_at_gmt = $this->validate_gmt_datetime( $last_confirmed_at_gmt );
+	}
+
+	/**
+	 * Returns a GMT datetime as `Y-m-d H:i:s`, or null if it is not one.
+	 *
+	 * @param string|null $datetime The GMT datetime string.
+	 * @return string|null
+	 */
+	private function validate_gmt_datetime( ?string $datetime ): ?string {
+		$datetime = null === $datetime ? '' : trim( $datetime );
+
+		if ( '' === $datetime || self::ZERO_DATETIME === $datetime ) {
+			return null;
+		}
+
+		$normalized = str_replace( 'T', ' ', $datetime );
+
+		if ( ! TimeUtil::is_valid_date( $normalized ) ) {
+			wc_get_logger()->warning(
+				'Unparseable push token timestamp.',
+				array(
+					'source'   => PushNotifications::FEATURE_NAME,
+					'token_id' => $this->id,
+					'value'    => $datetime,
+				)
+			);
+
+			return null;
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Converts a GMT `Y-m-d H:i:s` datetime to `Y-m-d\TH:i:s`, the format
+	 * `wc_rest_prepare_date_response()` gives every other `_gmt` field in the
+	 * Woo REST API.
+	 *
+	 * @param string|null $datetime A datetime already through {@see self::validate_gmt_datetime()}.
+	 * @return string|null
+	 */
+	private function to_rest_datetime( ?string $datetime ): ?string {
+		return null === $datetime ? null : str_replace( ' ', 'T', $datetime );
+	}
+
+	/**
 	 * Gets the ID.
 	 *
 	 * @return int|null
@@ -450,6 +570,28 @@ class PushToken {
 	}
 
 	/**
+	 * Gets the date the token was registered, as a GMT `Y-m-d H:i:s` string.
+	 *
+	 * @return string|null
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_created_at_gmt(): ?string {
+		return $this->created_at_gmt;
+	}
+
+	/**
+	 * Gets the date the app last confirmed this token, as a GMT `Y-m-d H:i:s` string.
+	 *
+	 * @return string|null
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_last_confirmed_at_gmt(): ?string {
+		return $this->last_confirmed_at_gmt;
+	}
+
+	/**
 	 * Returns this token formatted for the WPCOM push notifications endpoint.
 	 *
 	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null}
@@ -462,6 +604,34 @@ class PushToken {
 			'token'         => $this->token,
 			'origin'        => $this->origin,
 			'device_locale' => $this->device_locale ?? self::DEFAULT_DEVICE_LOCALE,
+		);
+	}
+
+	/**
+	 * Returns this token formatted for the push tokens REST index response.
+	 *
+	 * Deliberately separate from {@see self::to_wpcom_format()}. That method is
+	 * also the per-token payload the dispatcher POSTs to the WPCOM send
+	 * endpoint, so adding fields to it would change every notification request.
+	 *
+	 * Metadata is cast to an object so that an empty value encodes as `{}` rather
+	 * than `[]`, matching the `object` type the schema declares for it.
+	 *
+	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null}
+	 *
+	 * @since 11.2.0
+	 */
+	public function to_rest_format(): array {
+		return array_merge(
+			$this->to_wpcom_format(),
+			array(
+				'id'                    => $this->id,
+				'device_uuid'           => $this->device_uuid,
+				'platform'              => $this->platform,
+				'metadata'              => (object) ( $this->metadata ?? array() ),
+				'created_at_gmt'        => $this->to_rest_datetime( $this->created_at_gmt ),
+				'last_confirmed_at_gmt' => $this->to_rest_datetime( $this->last_confirmed_at_gmt ),
+			)
 		);
 	}
 
