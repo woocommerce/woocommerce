@@ -116,6 +116,76 @@ test.describe( 'Product Reviews', () => {
 			).toContainText( review.product_name );
 		} );
 
+		// Canary for the moderation actions. This batch moved review edit and reply
+		// to ReviewsAjaxTest, but approve, spam and trash have no PHP coverage of
+		// their state transition: ReviewsListTableTest::test_handle_row_actions
+		// asserts only that the row renders those links. Nothing else in the suite
+		// moderates a review.
+		//
+		// Every step checks the review's new status by loading the matching
+		// filtered view rather than by looking at the row's own buttons. The list
+		// renders both Approve and Unapprove in the all view regardless of status,
+		// so asserting on them proves nothing -- an earlier version of this test
+		// did exactly that and survived two mutations of the approve path.
+		//
+		// Spam and trash use different rows on purpose: once a review is spammed
+		// its actions become Not Spam and Delete Permanently, so Trash is only
+		// reachable from the main list.
+		test( 'can approve, spam and trash a product review', async ( {
+			page,
+			reviews,
+		} ) => {
+			const reviewsUrl =
+				'wp-admin/edit.php?post_type=product&page=product-reviews';
+			const moderated = reviews[ 0 ];
+			const trashed = reviews[ 1 ];
+
+			const rowFor = ( id: number ) => page.locator( `#comment-${ id }` );
+
+			await test.step( 'unapprove, then approve again', async () => {
+				await page.goto( reviewsUrl );
+				await rowFor( moderated.id ).hover();
+				await rowFor( moderated.id )
+					.getByRole( 'button', { name: 'Unapprove' } )
+					.click();
+
+				await page.goto( `${ reviewsUrl }&comment_status=moderated` );
+				await expect( rowFor( moderated.id ) ).toBeVisible();
+
+				await rowFor( moderated.id ).hover();
+				await rowFor( moderated.id )
+					.getByRole( 'button', { name: 'Approve' } )
+					.click();
+
+				await page.goto( `${ reviewsUrl }&comment_status=approved` );
+				await expect( rowFor( moderated.id ) ).toBeVisible();
+			} );
+
+			await test.step( 'mark as spam', async () => {
+				await page.goto( reviewsUrl );
+				await rowFor( moderated.id ).hover();
+				await rowFor( moderated.id )
+					.getByRole( 'button', { name: 'Spam' } )
+					.click();
+				await expect( rowFor( moderated.id ) ).toBeHidden();
+
+				await page.goto( `${ reviewsUrl }&comment_status=spam` );
+				await expect( rowFor( moderated.id ) ).toBeVisible();
+			} );
+
+			await test.step( 'trash', async () => {
+				await page.goto( reviewsUrl );
+				await rowFor( trashed.id ).hover();
+				await rowFor( trashed.id )
+					.getByRole( 'button', { name: 'Trash' } )
+					.click();
+				await expect( rowFor( trashed.id ) ).toBeHidden();
+
+				await page.goto( `${ reviewsUrl }&comment_status=trash` );
+				await expect( rowFor( trashed.id ) ).toBeVisible();
+			} );
+		} );
+
 		test( 'can quick edit a product review', async ( {
 			page,
 			reviews,
