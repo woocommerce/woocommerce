@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Settings
  */
 
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -138,6 +139,133 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox save should persist the selected WooCommerce.com checkbox without enabling its peer.
+	 *
+	 * @dataProvider woocommerce_com_checkbox_options_provider
+	 *
+	 * @param string $selected_option_id Selected checkbox option ID.
+	 * @param string $peer_option_id     Peer checkbox option ID.
+	 */
+	public function test_save_persists_woocommerce_com_checkbox_options( $selected_option_id, $peer_option_id ): void {
+		$option_ids                  = array( $selected_option_id, $peer_option_id );
+		$original_options            = array();
+		$original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the test.
+		$had_current_section         = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section    = $had_current_section ? $GLOBALS['current_section'] : null;
+		$tracking_callback_methods   = array( 'get_tracking_history', 'handle_tracking_setting_change' );
+		$registered_tracking_methods = array();
+
+		global $wpdb;
+
+		foreach ( $option_ids as $option_id ) {
+			$row = $wpdb->get_row(
+				$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_id ),
+				ARRAY_A
+			);
+
+			$original_options[ $option_id ] = null === $row
+				? array(
+					'exists'   => false,
+					'value'    => null,
+					'autoload' => null,
+				)
+				: array(
+					'exists'   => true,
+					'value'    => $row['option_value'],
+					'autoload' => $row['autoload'],
+				);
+		}
+
+		foreach ( $tracking_callback_methods as $method ) {
+			$callback = array( WC(), $method );
+
+			if ( 10 === has_action( 'update_option_woocommerce_allow_tracking', $callback ) ) {
+				$registered_tracking_methods[] = $method;
+			}
+
+			remove_action( 'update_option_woocommerce_allow_tracking', $callback, 10 );
+		}
+
+		// Notes::possibly_delete_marketing_notes deletes every E_WC_ADMIN_NOTE_MARKETING note when
+		// this option changes, and no teardown can put those back. Detach it for the same window as
+		// the tracking callbacks so seeding and saving here cannot damage other tests.
+		$marketing_callback   = array( Notes::class, 'possibly_delete_marketing_notes' );
+		$marketing_registered = 10 === has_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback );
+
+		if ( $marketing_registered ) {
+			remove_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback, 10 );
+		}
+
+		try {
+			// The peer starts at 'yes' on purpose. Seeding both to 'no' would make the peer
+			// assertion below unfalsifiable: its expected post-state would equal its pre-state, so
+			// it would pass whether or not the save touched it. An unchecked box posts nothing and
+			// WC_Admin_Settings::save_fields writes 'no' for it, which is what is being asserted.
+			update_option( $selected_option_id, 'no' );
+			update_option( $peer_option_id, 'yes' );
+
+			$GLOBALS['current_section'] = 'woocommerce_com';
+			$_POST                      = array( $selected_option_id => 'yes' );
+
+			$sut = new WC_Settings_Advanced();
+			$sut->save();
+
+			wp_cache_delete( $selected_option_id, 'options' );
+			wp_cache_delete( $peer_option_id, 'options' );
+
+			$this->assertSame( 'yes', get_option( $selected_option_id ) );
+			$this->assertSame( 'no', get_option( $peer_option_id ) );
+		} finally {
+			if ( $marketing_registered ) {
+				add_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback, 10, 2 );
+			}
+
+			foreach ( $original_options as $option_id => $state ) {
+				if ( $state['exists'] ) {
+					$wpdb->update(
+						$wpdb->options,
+						array(
+							'option_value' => $state['value'],
+							'autoload'     => $state['autoload'],
+						),
+						array( 'option_name' => $option_id )
+					);
+				} else {
+					$wpdb->delete( $wpdb->options, array( 'option_name' => $option_id ) );
+				}
+
+				wp_cache_delete( $option_id, 'options' );
+			}
+
+			wp_cache_delete( 'alloptions', 'options' );
+
+			$_POST = $original_post;
+
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+
+			foreach ( $registered_tracking_methods as $method ) {
+				add_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10, 2 );
+			}
+		}
+	}
+
+	/**
+	 * Provides WooCommerce.com checkbox options and their peers.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function woocommerce_com_checkbox_options_provider(): array {
+		return array(
+			'analytics tracking'      => array( 'woocommerce_allow_tracking', 'woocommerce_show_marketplace_suggestions' ),
+			'marketplace suggestions' => array( 'woocommerce_show_marketplace_suggestions', 'woocommerce_allow_tracking' ),
+		);
 	}
 
 	/**
