@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move the grouped product cart removal E2E title to PHPUnit; WC_Cart_Test now covers removing grouped children through the real update-cart form handler.
+
