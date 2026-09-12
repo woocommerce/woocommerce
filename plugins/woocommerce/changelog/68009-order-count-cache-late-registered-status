@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flush the order count cache when a plugin is activated or deactivated, so custom order statuses registered by a just-activated plugin appear in the Orders screen filter row immediately instead of after cache expiry.
