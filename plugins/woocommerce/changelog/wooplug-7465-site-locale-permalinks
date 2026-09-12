@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store default product permalink bases in the configured site locale, and resolve the Default product base on the Permalinks screen in the same locale.
