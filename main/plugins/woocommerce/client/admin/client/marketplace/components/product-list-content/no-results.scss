@@ -1,0 +1,23 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__no-results__heading {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 400;
+}
+
+.woocommerce-marketplace__no-results__description {
+	margin: $grid-unit-10 0 0 0;
+	color: $gray-700;
+	line-height: 20px;
+}
+
+.woocommerce-marketplace__no-results__product-groups {
+	margin-top: $grid-unit-20;
+}
+
+.woocommerce-marketplace__no-results .woocommerce-marketplace__product-list-title {
+	font-size: 16px;
+	font-weight: 400;
+	margin: $grid-unit-40 0 0 0;
+}

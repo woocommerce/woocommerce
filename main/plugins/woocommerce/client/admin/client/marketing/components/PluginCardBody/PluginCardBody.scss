@@ -1,0 +1,46 @@
+$image-size: 36px;
+$gap-vertical: 2px;
+
+.woocommerce_marketing_plugin_card_body {
+	display: flex;
+	align-items: center;
+	gap: $gap;
+
+	&__icon {
+		flex-shrink: 0;
+
+		img {
+			display: block;
+			width: $image-size;
+			height: $image-size;
+			border-radius: $gap-smallest;
+		}
+	}
+
+	&__details {
+		flex-grow: 1;
+
+		&-name {
+			display: flex;
+			gap: $gap-vertical $gap-smaller;
+			flex-wrap: wrap;
+			align-items: center;
+			font-size: 14px;
+			font-weight: 600;
+			line-height: 20px;
+			margin-bottom: $gap-smallest;
+
+			.woocommerce-pill {
+				padding: $gap-vertical $gap-smaller;
+				color: $gray-700;
+			}
+		}
+
+		&-description {
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 16px;
+			color: $gray-700;
+		}
+	}
+}
