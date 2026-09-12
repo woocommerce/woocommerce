@@ -284,6 +284,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 	/**
 	 * Test an item limit for percent discounts.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_percent_discount_item_limit() {
 		// Create product.
