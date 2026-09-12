@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Validate product quantity stepping for order items in the admin order editor, showing the browser validation message instead of silently failing to update, allowing non-conforming existing quantities to stay editable, and validating step values in AJAX endpoints.

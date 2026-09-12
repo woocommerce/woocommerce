@@ -219,4 +219,170 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * @testdox get_quantity_input_step returns 1 for an item with an integer quantity and default product step.
+	 */
+	public function test_step_is_one_by_default_for_integer_quantity_item(): void {
+		$order = WC_Helper_Order::create_order();
+		$items = array_values( $order->get_items() );
+
+		$this->assertSame( '1', $this->sut->get_quantity_input_step( $items[0] ) );
+	}
+
+	/**
+	 * @testdox get_quantity_input_step defaults to any when the stored quantity does not align with the step.
+	 */
+	public function test_step_defaults_to_any_for_stored_decimal_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		try {
+			$order = WC_Helper_Order::create_order();
+			$items = array_values( $order->get_items() );
+			$item  = $items[0];
+			$item->set_quantity( 2.5 );
+			$item->save();
+
+			$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item ) );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox get_quantity_input_step applies the woocommerce_quantity_input_step_admin filter.
+	 */
+	public function test_step_is_filterable(): void {
+		$order = WC_Helper_Order::create_order();
+		$items = array_values( $order->get_items() );
+
+		$callback = function () {
+			return '0.5';
+		};
+		add_filter( 'woocommerce_quantity_input_step_admin', $callback );
+		$step = $this->sut->get_quantity_input_step( $items[0] );
+		remove_filter( 'woocommerce_quantity_input_step_admin', $callback );
+
+		$this->assertSame( '0.5', $step );
+	}
+
+	/**
+	 * @testdox get_quantity_input_step falls back to the default when the filter returns an invalid value.
+	 */
+	public function test_step_falls_back_on_invalid_filter_value(): void {
+		$order = WC_Helper_Order::create_order();
+		$items = array_values( $order->get_items() );
+
+		$callback = function () {
+			return array( 'not-a-step' );
+		};
+		add_filter( 'woocommerce_quantity_input_step_admin', $callback );
+		$step = $this->sut->get_quantity_input_step( $items[0] );
+		remove_filter( 'woocommerce_quantity_input_step_admin', $callback );
+
+		$this->assertSame( '1', $step );
+	}
+
+	/**
+	 * @testdox validate_new_item_quantity throws for a quantity that violates the step.
+	 */
+	public function test_validate_new_item_throws_for_step_mismatch(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$this->expectException( \Exception::class );
+		$this->sut->validate_new_item_quantity( 2.5, $product );
+	}
+
+	/**
+	 * @testdox validate_new_item_quantity accepts a quantity matching the product step.
+	 */
+	public function test_validate_new_item_accepts_valid_step_quantity(): void {
+		$this->expectNotToPerformAssertions();
+
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$this->sut->validate_new_item_quantity( 2.0, $product );
+	}
+
+	/**
+	 * @testdox validate_new_item_quantity runs the step filter with the add context and the product.
+	 */
+	public function test_validate_new_item_passes_add_context_to_step_filter(): void {
+		$product  = \WC_Helper_Product::create_simple_product();
+		$captured = array();
+
+		$callback = function ( $step, $filter_product, $context ) use ( &$captured ) {
+			$captured = array( $filter_product, $context );
+			return $step;
+		};
+		add_filter( 'woocommerce_quantity_input_step_admin', $callback, 10, 3 );
+		$this->sut->validate_new_item_quantity( 1.0, $product );
+		remove_filter( 'woocommerce_quantity_input_step_admin', $callback );
+
+		$this->assertSame( $product->get_id(), $captured[0]->get_id() );
+		$this->assertSame( 'add', $captured[1] );
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities throws when a posted quantity violates the step.
+	 */
+	public function test_validate_posted_throws_for_step_mismatch(): void {
+		$order = WC_Helper_Order::create_order();
+		$items = array_values( $order->get_items() );
+		$item  = $items[0];
+
+		$this->expectException( \Exception::class );
+		$this->sut->validate_posted_item_quantities(
+			$order,
+			array(
+				'order_item_qty' => array( $item->get_id() => '2.5' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities accepts a valid step multiple.
+	 */
+	public function test_validate_posted_accepts_valid_step_quantity(): void {
+		$this->expectNotToPerformAssertions();
+
+		$order = WC_Helper_Order::create_order();
+		$items = array_values( $order->get_items() );
+		$item  = $items[0];
+
+		$this->sut->validate_posted_item_quantities(
+			$order,
+			array(
+				'order_item_qty' => array( $item->get_id() => '3' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox validate_posted_item_quantities accepts an existing non-conforming decimal quantity.
+	 */
+	public function test_validate_posted_accepts_existing_decimal_quantity(): void {
+		$this->expectNotToPerformAssertions();
+
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		try {
+			$order = WC_Helper_Order::create_order();
+			$items = array_values( $order->get_items() );
+			$item  = $items[0];
+			$item->set_quantity( 2.5 );
+			$item->save();
+
+			$this->sut->validate_posted_item_quantities(
+				$order,
+				array(
+					'order_item_qty' => array( $item->get_id() => '2.5' ),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
 }

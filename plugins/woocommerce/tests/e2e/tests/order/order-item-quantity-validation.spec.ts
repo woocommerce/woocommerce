@@ -137,5 +137,62 @@ test.describe(
 			await expect( qtyInput ).toBeVisible();
 			await expect( qtyInput ).toBeFocused();
 		} );
+
+		test( 'the items panel Save button refuses an invalid step quantity', async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+
+			await page.locator( 'a.edit-order-item' ).first().click();
+			const qtyInput = page
+				.locator( 'input[name^="order_item_qty"]' )
+				.first();
+			await qtyInput.fill( '2.5' );
+
+			await page
+				.locator( '#woocommerce-order-items button.save-action' )
+				.click();
+
+			// The input reports its constraint violation instead of saving.
+			const message = await qtyInput.evaluate(
+				( input: HTMLInputElement ) => input.validationMessage
+			);
+			expect( message ).not.toBe( '' );
+
+			// The invalid quantity was not persisted.
+			await page.reload();
+			await expect(
+				page.locator( '#order_line_items td.quantity .view' ).first()
+			).toContainText( '2' );
+		} );
+
+		test( 'the add products modal blocks an invalid step quantity and stays open', async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+
+			await page.locator( 'button.add-line-item' ).click();
+			await page.locator( 'button.add-order-item' ).click();
+
+			const modal = page.locator( '.wc-backbone-modal-add-products' );
+			const modalContent = modal.locator( '.wc-backbone-modal-content' );
+			await expect( modalContent ).toBeVisible();
+
+			const qtyInput = modal.locator( 'input[name="item_qty"]' ).first();
+			await qtyInput.fill( '2.5' );
+			await modal.locator( '#btn-ok' ).click();
+
+			// With step validation, the modal stays open showing the browser message.
+			expect(
+				await qtyInput.evaluate(
+					( input: HTMLInputElement ) => input.validationMessage
+				)
+			).not.toBe( '' );
+			await expect( modalContent ).toBeVisible();
+		} );
 	}
 );
