@@ -10662,11 +10662,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-comments.php
 
-		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$countries\.$#'
-			identifier: property.notFound
-			count: 5
-			path: includes/class-wc-countries.php
 
 		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
@@ -19057,12 +19052,6 @@ parameters:
 			path: includes/export/abstract-wc-csv-exporter.php
 
 		-
-			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
 			message: '#^Argument of an invalid type array\|stdClass supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -24649,12 +24638,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
-
-		-
 			message: '#^Parameter \#1 \$title of function sanitize_title expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -26816,12 +26799,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
