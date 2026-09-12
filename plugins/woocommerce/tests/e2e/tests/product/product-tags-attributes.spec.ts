@@ -8,7 +8,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { tags, test, expect, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { getFakeProduct, getFakeAttribute } from '../../utils/data';
+import { getFakeProduct, getFakeAttribute, getFakeTag } from '../../utils/data';
 import { setOption } from '../../utils/options';
 
 // Both the attribute and its term must be unique: the attribute creates a
@@ -16,10 +16,14 @@ import { setOption } from '../../utils/options';
 // would collide across parallel workers.
 const productAttributeName = getFakeAttribute().name;
 const productAttributeTerm = getFakeAttribute().name;
+// The tag creates a global `product_tag` term, so a fixed name would collide
+// across parallel workers, exactly as the attribute names above would.
+const productTagName = getFakeTag().name;
 
 const productIds: number[] = [];
 let product1Slug = '';
 let attributeId = 0;
+let productTagId = 0;
 
 test.describe(
 	'Browse product tags and attributes from the product page',
@@ -50,10 +54,18 @@ test.describe(
 				}
 			);
 
+			// add product tag
+			const tagResponse = await restApi.post(
+				`${ WC_API_PATH }/products/tags`,
+				{ name: productTagName }
+			);
+			productTagId = tagResponse.data.id;
+
 			// add products
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product1,
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -69,6 +81,7 @@ test.describe(
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product2,
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -83,6 +96,7 @@ test.describe(
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product3,
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -121,12 +135,55 @@ test.describe(
 				}
 			}
 
+			if ( productTagId > 0 ) {
+				try {
+					await restApi.post(
+						`${ WC_API_PATH }/products/tags/batch`,
+						{
+							delete: [ productTagId ],
+						}
+					);
+				} catch ( error ) {
+					cleanupErrors.push( error );
+				}
+			}
+
 			if ( cleanupErrors.length > 0 ) {
 				throw new AggregateError(
 					cleanupErrors,
 					'Failed to clean up Product Tags and Attributes fixtures.'
 				);
 			}
+		} );
+
+		// Canary for the product tag archive. The titles this batch removed were
+		// the only browser coverage of `Products tagged <name>`, and the lower
+		// test that covers the tag route lives in another PR, so this keeps one
+		// real browser assertion on the archive a shopper actually reaches.
+		test( 'can navigate from a product tag to its archive', async ( {
+			page,
+		} ) => {
+			// Navigate straight to the product by slug. Going through the
+			// shared, date-sorted shop listing is parallel-fragile: other
+			// workers' products can push this one onto a later page where the
+			// click would fail.
+			await page.goto( `product/${ product1Slug }` );
+
+			await page
+				.getByRole( 'link', { name: productTagName, exact: true } )
+				.click();
+
+			await expect(
+				page.getByRole( 'heading', { name: productTagName } )
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					new RegExp( `Products tagged .*${ productTagName }.*` )
+				)
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Showing all 3 results' )
+			).toBeVisible();
 		} );
 
 		test( 'can navigate from a product attribute to its archive', async ( {
