@@ -15,6 +15,10 @@ trait ShippingRestrictionsSettingsTrait {
 	/**
 	 * Return enable_for_virtual option.
 	 *
+	 * The settings come straight from the saved option, so the key is missing on
+	 * gateways that never saved it. Fall back to `true` to match the `yes` default
+	 * of the gateway form field, which is what `is_available()` enforces server-side.
+	 *
 	 * @return boolean True if the store allows this payment method for orders containing only virtual products.
 	 */
 	private function get_enable_for_virtual() {
