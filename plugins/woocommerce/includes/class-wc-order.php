@@ -140,6 +140,19 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		// --- GUARDRAIL FOR ISSUE #62761 ---
+		// Invariant: Frontend checkout orders require an active session to complete payment.
+		// This prevents unauthenticated webhooks (e.g., IPN) from advancing order state.
+		if ( $this->is_missing_session_for_checkout() ) {
+			$this->add_order_note(
+				__( 'Payment blocked: session-less call for a checkout order.', 'woocommerce' ),
+				false,
+				false,
+				array( 'note_group' => OrderNoteGroup::ERROR )
+			);
+			return false;
+		}
+
 		try {
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
@@ -1907,6 +1920,64 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return 1 === absint( $needs_processing );
+	}
+
+	/**
+	 * Check if a session is missing for a frontend checkout order.
+	 *
+	 * Invariant: Orders created via the frontend checkout flow must possess an active
+	 * WooCommerce session when payment is completed. This prevents unauthenticated,
+	 * session-less requests (such as spoofed IPN webhooks) from mutating the ledger.
+	 *
+	 * Automated and backend contexts (WP-CLI, REST API, WP-Cron, Admin) are explicitly
+	 * exempt from this requirement to preserve legitimate programmatic workflows.
+	 *
+	 * @since 9.2.0
+	 * @return bool True if the session is missing in a context that requires it, false otherwise.
+	 */
+	private function is_missing_session_for_checkout() {
+		// Non-checkout origins (e.g., 'admin', 'subscription', 'rest-api') are exempt.
+		if ( 'checkout' !== $this->get_created_via() ) {
+			return false;
+		}
+
+		// Backend and automated execution contexts do not use frontend sessions.
+		$is_exempt_context = is_admin()
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
+			|| wp_doing_cron()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+
+		if ( $is_exempt_context ) {
+			return false;
+		}
+
+		// Frontend checkout context requires a valid, populated session.
+		// We verify actual session data (e.g., customer info) to prevent bypass via empty/spoofed cookies.
+		$has_session = WC()->session 
+			&& WC()->session->has_session() 
+			&& ! empty( WC()->session->get( 'customer' ) );
+
+		if ( $has_session ) {
+			return false;
+		}
+
+		/**
+		 * Filter to allow session-less payment completion for checkout orders.
+		 *
+		 * Gateways that perform their own cryptographic verification of asynchronous
+		 * webhooks/IPNs (e.g., PayPal IPN, Stripe Webhooks) can hook into this filter
+		 * to bypass the core session requirement, provided they have already validated the
+		 * request origin.
+		 *
+		 * @since 9.2.0
+		 * @param bool     $allow_bypass Whether to allow the session-less transition. Default false.
+		 * @param WC_Order $order        The order object.
+		 */
+		$allow_bypass = (bool) apply_filters( 'woocommerce_allow_sessionless_payment_complete', false, $this );
+
+		// If the filter allows the bypass, the session is NOT considered missing (return false).
+		// Otherwise, it IS missing and should be blocked (return true).
+		return ! $allow_bypass;
 	}
 
 	/*
