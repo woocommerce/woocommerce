@@ -33,7 +33,8 @@ $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugi
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
 
 $additional_tax_classes_limit     = 10;
-$additional_tax_classes           = $settings['additional_tax_classes'];
+$additional_tax_classes           = $settings['additional_tax_classes'] ?? array();
+$additional_tax_classes           = is_array( $additional_tax_classes ) ? array_values( array_filter( $additional_tax_classes, 'is_string' ) ) : array();
 $displayed_additional_tax_classes = array_slice( $additional_tax_classes, 0, $additional_tax_classes_limit );
 $remaining_additional_tax_classes = max( 0, count( $additional_tax_classes ) - $additional_tax_classes_limit );
 $additional_tax_classes_display   = implode( ', ', $displayed_additional_tax_classes );
