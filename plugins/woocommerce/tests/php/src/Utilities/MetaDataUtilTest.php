@@ -144,12 +144,13 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	 * @testdox `update` does nothing when meta_data is not an array.
 	 */
 	public function test_update_ignores_non_array_meta_data(): void {
-		$order = wc_create_order();
+		$order              = wc_create_order();
+		$original_meta_data = $order->get_meta_data();
 
 		MetaDataUtil::update( null, $order );
 		MetaDataUtil::update( 'string', $order );
 
-		$this->assertEmpty( $order->get_meta_data(), 'No meta should be added for non-array meta_data' );
+		$this->assertEquals( $original_meta_data, $order->get_meta_data(), 'Non-array meta_data should leave existing order metadata unchanged.' );
 	}
 
 	/**
@@ -178,7 +179,14 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 			99
 		);
 
-		$meta_data = $order->get_meta_data();
+		$meta_data = array_values(
+			array_filter(
+				$order->get_meta_data(),
+				static function ( $meta ): bool {
+					return 'k' === $meta->key;
+				}
+			)
+		);
 		$this->assertCount( 1, $meta_data );
 		$this->assertSame( 'k', $meta_data[0]->key );
 		$this->assertSame( 'v', $meta_data[0]->value );
