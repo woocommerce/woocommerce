@@ -2,25 +2,13 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import {
-	SearchListControl,
-	SearchListItem,
-} from '@woocommerce/editor-components/search-list-control';
-import { SelectControl } from '@wordpress/components';
 import { withSearchedCategories } from '@woocommerce/block-hocs';
-import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
-import clsx from 'clsx';
-import type { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
+import ProductTaxonomyControl from '@woocommerce/editor-components/product-taxonomy-control';
 import type {
 	ProductCategoryResponseItem,
 	WithInjectedSearchedCategories,
 } from '@woocommerce/types';
 import { convertProductCategoryResponseItemToSearchItem } from '@woocommerce/utils';
-
-/**
- * Internal dependencies
- */
-import './style.scss';
 
 interface ProductCategoryControlProps {
 	/**
@@ -61,78 +49,6 @@ const ProductCategoryControl = ( {
 	isSingle = false,
 	showReviewCount,
 }: ProductCategoryControlProps & WithInjectedSearchedCategories ) => {
-	const renderItem = (
-		args: RenderItemArgs< ProductCategoryResponseItem >
-	) => {
-		const { item, search, depth = 0 } = args;
-
-		const accessibleName = ! item.breadcrumbs.length
-			? item.name
-			: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
-
-		const listItemAriaLabel = showReviewCount
-			? sprintf(
-					/* translators: %1$s is the item name, %2$d is the count of reviews for the item. */
-					_n(
-						'%1$s, has %2$d review',
-						'%1$s, has %2$d reviews',
-						item.details?.review_count || 0,
-						'woocommerce'
-					),
-					accessibleName,
-					item.details?.review_count || 0
-			  )
-			: sprintf(
-					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
-					_n(
-						'%1$s, has %2$d product',
-						'%1$s, has %2$d products',
-						item.details?.count || 0,
-						'woocommerce'
-					),
-					accessibleName,
-					item.details?.count || 0
-			  );
-
-		const listItemCountLabel = showReviewCount
-			? sprintf(
-					/* translators: %d is the count of reviews. */
-					_n(
-						'%d review',
-						'%d reviews',
-						item.details?.review_count || 0,
-						'woocommerce'
-					),
-					item.details?.review_count || 0
-			  )
-			: sprintf(
-					/* translators: %d is the count of products. */
-					_n(
-						'%d product',
-						'%d products',
-						item.details?.count || 0,
-						'woocommerce'
-					),
-					item.details?.count || 0
-			  );
-
-		return (
-			<SearchListItem
-				className={ clsx(
-					'woocommerce-product-categories__item',
-					'has-count',
-					{
-						'is-searching': search.length > 0,
-						'is-skip-level': depth === 0 && item.parent !== 0,
-					}
-				) }
-				{ ...args }
-				countLabel={ listItemCountLabel }
-				aria-label={ listItemAriaLabel }
-			/>
-		);
-	};
-
 	const messages = {
 		clear: __( 'Clear all product categories', 'woocommerce' ),
 		list: __( 'Product Categories', 'woocommerce' ),
@@ -154,65 +70,52 @@ const ProductCategoryControl = ( {
 			),
 		updated: __( 'Category search results updated.', 'woocommerce' ),
 	};
-
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
-	}
-
-	const currentList = categories.map(
+	const list = categories.map(
 		convertProductCategoryResponseItemToSearchItem
 	);
 
 	return (
-		<>
-			<SearchListControl
-				className="woocommerce-product-categories"
-				list={ currentList }
-				isLoading={ isLoading }
-				selected={ currentList.filter( ( { id } ) =>
-					selected.includes( Number( id ) )
-				) }
-				onChange={ onChange }
-				renderItem={ renderItem }
-				messages={ messages }
-				isCompact={ isCompact }
-				isHierarchical
-				isSingle={ isSingle }
-			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
-					<SelectControl
-						className="woocommerce-product-categories__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
-							'Pick at least two categories to use this setting.',
-							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
-							{
-								label: __(
-									'Any selected categories',
-									'woocommerce'
-								),
-								value: 'any',
-							},
-							{
-								label: __(
+		<ProductTaxonomyControl< ProductCategoryResponseItem >
+			className="woocommerce-product-categories"
+			countType={ showReviewCount ? 'review' : 'product' }
+			error={ error }
+			isCompact={ isCompact }
+			isHierarchical
+			isLoading={ isLoading }
+			isSingle={ isSingle }
+			itemClassName="woocommerce-product-categories__item"
+			list={ list }
+			messages={ messages }
+			onChange={ onChange }
+			operator={
+				onOperatorChange
+					? {
+							className:
+								'woocommerce-product-categories__operator',
+							labels: {
+								all: __(
 									'All selected categories',
 									'woocommerce'
 								),
-								value: 'all',
+								any: __(
+									'Any selected categories',
+									'woocommerce'
+								),
+								help: __(
+									'Pick at least two categories to use this setting.',
+									'woocommerce'
+								),
 							},
-						] }
-					/>
-				</div>
+							onChange: onOperatorChange,
+							selectedCount: selected.length,
+							value: operator,
+					  }
+					: undefined
+			}
+			selected={ list.filter( ( { id } ) =>
+				selected.includes( Number( id ) )
 			) }
-		</>
+		/>
 	);
 };
 
