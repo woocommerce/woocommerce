@@ -6,10 +6,48 @@ import { resetGatewayOrder } from '../../../utils/payments-settings';
 
 const { BASE_URL } = process.env;
 
+/**
+ * Expected `enable_for_methods` setting for an offline gateway.
+ *
+ * The shared site setup attaches a free shipping method instance to zone 0,
+ * which adds a per-instance entry (free_shipping:<id>) alongside the base
+ * option. The instance ID is non-deterministic, so only assert the base
+ * option and tolerate the baseline instance.
+ *
+ * @param {string} methodTitle Gateway method title used in the field copy.
+ * @return {Object} Expected setting object.
+ */
+const enableForMethodsSetting = ( methodTitle ) => {
+	const description = `If ${ methodTitle } is only available for certain methods, set it up here. Leave blank to enable for all methods.`;
+
+	return {
+		id: 'enable_for_methods',
+		label: 'Enable for shipping methods',
+		description,
+		type: 'multiselect',
+		value: '',
+		default: '',
+		tip: description,
+		placeholder: '',
+		options: expect.objectContaining( {
+			'Flat rate': {
+				flat_rate: 'Any &quot;Flat rate&quot; method',
+			},
+			'Free shipping': expect.objectContaining( {
+				free_shipping: 'Any &quot;Free shipping&quot; method',
+			} ),
+			'Local pickup': {
+				pickup_location: 'Any &quot;Local pickup&quot; method',
+			},
+		} ),
+	};
+};
+
 test.describe( 'Payment Gateways API tests', () => {
 	test.beforeAll( async () => {
 		await resetGatewayOrder( BASE_URL );
 	} );
+
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
 		const response = await request.get(
@@ -56,6 +94,19 @@ test.describe( 'Payment Gateways API tests', () => {
 							tip: 'Instructions that will be added to the thank you page and emails.',
 							placeholder: '',
 						},
+						enable_for_methods: enableForMethodsSetting(
+							'Direct bank transfer'
+						),
+						enable_for_virtual: {
+							id: 'enable_for_virtual',
+							label: 'Accept Direct bank transfer if the order is virtual',
+							description: '',
+							type: 'checkbox',
+							value: 'yes',
+							default: 'yes',
+							tip: '',
+							placeholder: '',
+						},
 					},
 				} ),
 			] )
@@ -95,6 +146,18 @@ test.describe( 'Payment Gateways API tests', () => {
 							value: '',
 							default: '',
 							tip: 'Instructions that will be added to the thank you page and emails.',
+							placeholder: '',
+						},
+						enable_for_methods:
+							enableForMethodsSetting( 'Check payments' ),
+						enable_for_virtual: {
+							id: 'enable_for_virtual',
+							label: 'Accept Check payments if the order is virtual',
+							description: '',
+							type: 'checkbox',
+							value: 'yes',
+							default: 'yes',
+							tip: '',
 							placeholder: '',
 						},
 					},
@@ -147,38 +210,11 @@ test.describe( 'Payment Gateways API tests', () => {
 					tip: 'Instructions that will be added to the thank you page.',
 					placeholder: '',
 				},
-				enable_for_methods: {
-					id: 'enable_for_methods',
-					label: 'Enable for shipping methods',
-					description:
-						'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-					type: 'multiselect',
-					value: '',
-					default: '',
-					tip: 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-					placeholder: '',
-					options: expect.objectContaining( {
-						'Flat rate': {
-							flat_rate: 'Any &quot;Flat rate&quot; method',
-						},
-						// The shared site setup attaches a free shipping method
-						// instance to zone 0, which adds a per-instance entry
-						// (free_shipping:<id>) alongside the base option. The
-						// instance ID is non-deterministic, so only assert the
-						// base option and tolerate the baseline instance.
-						'Free shipping': expect.objectContaining( {
-							free_shipping:
-								'Any &quot;Free shipping&quot; method',
-						} ),
-						'Local pickup': {
-							pickup_location:
-								'Any &quot;Local pickup&quot; method',
-						},
-					} ),
-				},
+				enable_for_methods:
+					enableForMethodsSetting( 'Cash on delivery' ),
 				enable_for_virtual: {
 					id: 'enable_for_virtual',
-					label: 'Accept COD if the order is virtual',
+					label: 'Accept Cash on delivery if the order is virtual',
 					description: '',
 					type: 'checkbox',
 					value: 'yes',
@@ -233,6 +269,19 @@ test.describe( 'Payment Gateways API tests', () => {
 						value: '',
 						default: '',
 						tip: 'Instructions that will be added to the thank you page and emails.',
+						placeholder: '',
+					},
+					enable_for_methods: enableForMethodsSetting(
+						'Direct bank transfer'
+					),
+					enable_for_virtual: {
+						id: 'enable_for_virtual',
+						label: 'Accept Direct bank transfer if the order is virtual',
+						description: '',
+						type: 'checkbox',
+						value: 'yes',
+						default: 'yes',
+						tip: '',
 						placeholder: '',
 					},
 				},
