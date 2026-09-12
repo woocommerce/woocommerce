@@ -1552,4 +1552,206 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox Reading an order recovers the real value from the database when a corrupted cache entry leaves malformed postmeta.
+	 */
+	public function test_reading_order_self_heals_malformed_postmeta_cache(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $order_id, array( '_order_currency' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on malformed postmeta' );
+		$this->assertEquals( 'EUR', $read_order->get_currency(), 'The corrupted cache entry should be discarded and the real currency re-read from the database' );
+	}
+
+	/**
+	 * @testdox Reading a refund recovers the real value from the database when a corrupted cache entry leaves malformed postmeta.
+	 */
+	public function test_reading_refund_self_heals_malformed_postmeta_cache(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = new WC_Order_Refund();
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_amount( 10 );
+		$refund->set_reason( 'test' );
+		$refund->save();
+		$refund_id = $refund->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $refund_id, array( '_refund_amount' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_refund = wc_get_order( $refund_id );
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $read_refund, 'Refund should hydrate without fataling on malformed postmeta' );
+		$this->assertEquals( 10, $read_refund->get_amount(), 'The corrupted cache entry should be discarded and the real amount re-read from the database' );
+	}
+
+	/**
+	 * @testdox Reading an order falls back to defaults and logs a single warning when the postmeta is persistently malformed.
+	 */
+	public function test_reading_order_falls_back_and_logs_once_when_postmeta_is_persistently_malformed(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$fake_logger   = $this->create_fake_logger();
+		$logger_filter = function () use ( $fake_logger ) {
+			return $fake_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+
+		// Force every "read all postmeta" lookup to return a malformed entry, so the
+		// self-heal re-read also fails and the default fallback + warning path is taken.
+		$malformed_meta_filter = function ( $value, $object_id, $meta_key ) use ( $order_id ) {
+			if ( $order_id === $object_id && '' === $meta_key ) {
+				return array( '_order_currency' => (object) array( 'corrupt' ) );
+			}
+			return $value;
+		};
+		add_filter( 'get_post_metadata', $malformed_meta_filter, 10, 3 );
+
+		try {
+			$read_order = wc_get_order( $order_id );
+
+			$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on persistently malformed postmeta' );
+			$this->assertEquals( get_woocommerce_currency(), $read_order->get_currency(), 'Persistently malformed currency meta should fall back to the store currency' );
+
+			$warnings = array_filter(
+				$fake_logger->warning_calls,
+				function ( $call ) {
+					return 'woocommerce-order-data-store' === ( $call['context']['source'] ?? '' );
+				}
+			);
+			$this->assertCount( 1, $warnings, 'A single warning should be logged per hydration for malformed postmeta' );
+			$this->assertStringContainsString( '_order_currency', $warnings[ array_key_first( $warnings ) ]['message'] ?? '' );
+		} finally {
+			remove_filter( 'get_post_metadata', $malformed_meta_filter, 10 );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+		}
+	}
+
+	/**
+	 * @testdox Reusing an order data store reads updated metadata on each hydration.
+	 */
+	public function test_reading_order_refreshes_metadata_when_data_store_is_reused(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->set_billing_first_name( 'Alice' );
+		$order->save();
+
+		$sut = new WC_Order_Data_Store_CPT();
+		$sut->read( $order );
+		$this->assertSame( 'EUR', $order->get_currency(), 'The first read should load the stored currency' );
+		$this->assertSame( 'Alice', $order->get_billing_first_name(), 'The first read should load the stored billing name' );
+
+		update_post_meta( $order->get_id(), '_order_currency', 'GBP' );
+		update_post_meta( $order->get_id(), '_billing_first_name', 'Bob' );
+		$sut->read( $order );
+
+		$this->assertSame( 'GBP', $order->get_currency(), 'The second read should reload the shared order metadata' );
+		$this->assertSame( 'Bob', $order->get_billing_first_name(), 'The second read should reload the order-specific metadata' );
+	}
+
+	/**
+	 * @testdox Reusing a refund data store reads updated metadata on each hydration.
+	 */
+	public function test_reading_refund_refreshes_metadata_when_data_store_is_reused(): void {
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 10 );
+		$refund->save();
+
+		$sut = new WC_Order_Refund_Data_Store_CPT();
+		$sut->read( $refund );
+		$this->assertEquals( 10, $refund->get_amount(), 'The first read should load the stored refund amount' );
+
+		update_post_meta( $refund->get_id(), '_refund_amount', '20' );
+		$sut->read( $refund );
+
+		$this->assertEquals( 20, $refund->get_amount(), 'The second read should reload the refund metadata' );
+	}
+
+	/**
+	 * @testdox Reading a COGS-enabled order does not fatal when the COGS postmeta entry is malformed.
+	 */
+	public function test_reading_order_does_not_fatal_on_malformed_cogs_postmeta(): void {
+		$this->enable_cogs_feature();
+
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$order_id = $order->get_id();
+
+		wp_cache_flush();
+		wp_cache_set( $order_id, array( '_cogs_total_value' => (object) array( 'corrupt' ) ), 'post_meta' );
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on malformed COGS postmeta' );
+		$this->assertEquals( 0, $read_order->get_cogs_total_value(), 'Malformed COGS meta should fall back to zero' );
+	}
+
+	/**
+	 * Create a fake logger that records warning calls for assertion.
+	 *
+	 * @return WC_Logger_Interface Fake logger.
+	 */
+	// phpcs:disable Squiz.Commenting
+	private function create_fake_logger(): WC_Logger_Interface {
+		return new class() implements WC_Logger_Interface {
+			public $warning_calls = array();
+
+			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
+				unset( $handle, $message, $level ); // Avoid parameter not used PHPCS errors.
+				return true;
+			}
+
+			public function log( $level, $message, $context = array() ) {
+				unset( $level, $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function emergency( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function alert( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function critical( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function error( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function warning( $message, $context = array() ) {
+				$this->warning_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function notice( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function info( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function debug( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+		};
+	}
+	// phpcs:enable Squiz.Commenting
 }
