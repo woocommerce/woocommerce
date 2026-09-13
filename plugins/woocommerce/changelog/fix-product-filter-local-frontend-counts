@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve saved local Product Collection constraints when calculating frontend filter counts.
