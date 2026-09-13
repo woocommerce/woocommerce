@@ -475,8 +475,14 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$product_id = WC_Helper_Product::create_simple_product()->get_id();
 		add_post_meta( $product_id, '_original_id', '4242' );
 
-		$this->dispatch_import_request( '0' );
+		$response     = $this->dispatch_import_request( '0' );
+		$parent_id    = wc_get_product_id_by_sku( 'marker-parent' );
+		$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
 
+		$this->assertSame( 1, $response['data']['imported'] );
+		$this->assertSame( 1, $response['data']['imported_variations'] );
+		$this->assertNotSame( $product_id, $parent_id );
+		$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
 		$this->assertSame( array(), get_post_meta( $product_id, '_original_id', false ) );
 	}
 
@@ -492,12 +498,15 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			// A batch size of one leaves the second row for a resumed request.
 			$this->assertIsNumeric( $response['data']['position'] );
 
-			$product_id = WC_Helper_Product::create_simple_product()->get_id();
-			add_post_meta( $product_id, '_original_id', '4242' );
+			$parent_id = wc_get_product_id_by_sku( 'marker-parent' );
+			$this->assertSame( 1, $response['data']['imported'] );
+			$this->assertSame( '4242', get_post_meta( $parent_id, '_original_id', true ) );
 
-			$this->dispatch_import_request( (string) $response['data']['position'] );
+			$response     = $this->dispatch_import_request( (string) $response['data']['position'] );
+			$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
 
-			$this->assertSame( array( '4242' ), get_post_meta( $product_id, '_original_id', false ) );
+			$this->assertSame( 1, $response['data']['imported_variations'] );
+			$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
 		} finally {
 			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
 		}
@@ -515,21 +524,23 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	/**
 	 * Run one import request against the test CSV and return the decoded response.
 	 *
-	 * The importer answers with wp_send_json_success(), so the request is put in AJAX mode and its
-	 * wp_die() is turned into a throwable rather than the exit a test cannot come back from. It has
-	 * to be an Error: dispatch_ajax() catches Exception, and would answer a second time.
+	 * The AJAX wp_die() handler throws an Error because dispatch_ajax() catches Exception.
 	 *
 	 * @param string $position Import position to request.
 	 * @return array
 	 */
 	private function dispatch_import_request( string $position ): array {
 		$nonce = wp_create_nonce( 'wc-product-import' );
+		$file  = $this->write_import_csv();
 
 		$_REQUEST['security'] = $nonce;
 		$_POST['security']    = $nonce;
-		$_POST['file']        = $this->write_import_csv();
+		$_POST['file']        = $file;
 		$_POST['position']    = $position;
-		$_POST['mapping']     = array( 'name' );
+		$_POST['mapping']     = array(
+			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent' ),
+			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id' ),
+		);
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
@@ -546,10 +557,16 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_filter( 'wp_doing_ajax', '__return_true' );
 			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
 
+			wp_delete_file( $file );
 			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
 		}
 
-		return (array) json_decode( $response, true );
+		$decoded = json_decode( $response, true );
+		$this->assertIsArray( $decoded, $response );
+		$this->assertTrue( $decoded['success'], $response );
+		$this->assertSame( 0, $decoded['data']['failed'], $response );
+
+		return $decoded;
 	}
 
 	/**
@@ -572,9 +589,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$uploads = wp_upload_dir();
 		$path    = trailingslashit( $uploads['basedir'] ) . 'wc-product-import-marker-test.csv';
 
-		if ( ! file_exists( $path ) ) {
-			file_put_contents( $path, "Name\nMarker product one\nMarker product two\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
-		}
+		file_put_contents( $path, "ID,Type,SKU,Name,Parent\n4242,variable,marker-parent,Marker parent,\n4243,variation,marker-variation,Marker variation,id:4242\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
 
 		return $path;
 	}

@@ -449,13 +449,10 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Remove the markers that map a CSV `id:` reference to the product the importer created for it.
+	 * Remove temporary mappings between CSV IDs and imported products.
 	 *
-	 * The markers are only meaningful within the run that wrote them: get_product_id_by_original_id()
-	 * matches them site-wide, so a marker an abandoned run left behind would resolve a later run's
-	 * `id:` reference to the wrong product. Both ends of a run clear them for that reason, which also
-	 * means two imports cannot run at once - the same already holds for the placeholders themselves,
-	 * since cleanup deletes every one it finds rather than only its own.
+	 * Clear both ends of a run because abandoned imports can leave markers behind.
+	 * Concurrent imports are unsupported: markers and placeholder cleanup are shared site-wide.
 	 */
 	private static function delete_original_id_markers(): void {
 		global $wpdb;
@@ -566,10 +563,6 @@ class WC_Product_CSV_Importer_Controller {
 
 			if ( 0 === $params['start_pos'] ) {
 				self::release_stranded_cleanup_claims();
-
-				// Cleanup runs in requests the client drives, so a tab closed at 100% can leave the
-				// previous run's markers behind. Start from a clean slate rather than resolve this
-				// run's `id:` references against them.
 				self::delete_original_id_markers();
 			}
 
