@@ -1096,6 +1096,8 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 Allows extensions to attach their own name/value pairs to a cart item, which the Store API returns in the item's `item_data` field.
 
+Set `raw_key` so clients can find your entry without matching a translated label. Data you do not intend to display belongs in your `extensions` namespace.
+
 ### Parameters
 
 | Argument | Type | Description |

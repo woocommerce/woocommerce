@@ -27,6 +27,45 @@ wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
+/*
+ * WordPress deactivates a plugin before running its uninstall.php, so `plugins_loaded` has already
+ * fired without WooCommerce. When WooCommerce is the only plugin bundling Action Scheduler, nothing
+ * has loaded the library and the cleanup below would be skipped, leaving every pending action behind.
+ *
+ * Requiring the bundled bootstrap is enough to fully initialize it: the file self-initializes once
+ * `plugins_loaded` has fired (the same path it uses when loaded from a theme).
+ *
+ * That initialization fires `action_scheduler_init`, and WordPress does not deactivate WooCommerce
+ * extensions before deleting WooCommerce, so a still-active extension's callback runs here without
+ * WooCommerce loaded. Anything it throws is caught: leaving actions behind is the bug we are fixing,
+ * but aborting uninstall_plugin() would also stop WordPress from deleting the plugin's files.
+ */
+if ( ! class_exists( 'ActionScheduler', false ) ) {
+	$wc_action_scheduler_bootstrap = __DIR__ . '/packages/action-scheduler/action-scheduler.php';
+
+	if ( is_readable( $wc_action_scheduler_bootstrap ) ) {
+		try {
+			require_once $wc_action_scheduler_bootstrap;
+		} catch ( Throwable $e ) {
+			// Leave a trace; whether the cleanup below still runs depends on how far initialization got.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- No WooCommerce logger during uninstall.
+			error_log( 'WooCommerce: Action Scheduler threw while loading during uninstall: ' . $e->getMessage() );
+		} finally {
+			/*
+			 * WordPress deletes this plugin's files later in the same request, so the queue runner's
+			 * shutdown hook would autoload Action Scheduler classes that no longer exist and fatal.
+			 * The hook is registered before `action_scheduler_init` fires, so a throw from a callback on
+			 * that action still leaves it attached; is_initialized() is set at the same point.
+			 */
+			if ( class_exists( 'ActionScheduler', false ) && ActionScheduler::is_initialized() ) {
+				ActionScheduler::runner()->unhook_dispatch_async_request();
+			}
+		}
+	}
+
+	unset( $wc_action_scheduler_bootstrap );
+}
+
 if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized() && function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
 	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
@@ -39,6 +78,12 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'wc_admin_daily' );
 	as_unschedule_all_actions( 'generate_category_lookup_table' );
 	as_unschedule_all_actions( 'wc_admin_unsnooze_admin_notes' );
+
+	// WooCommerce::register_recurring_actions() schedules these four under wrapper hooks.
+	as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits_wrapper' );
+	as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
+	as_unschedule_all_actions( 'generate_category_lookup_table_wrapper' );
 }
 
 /*

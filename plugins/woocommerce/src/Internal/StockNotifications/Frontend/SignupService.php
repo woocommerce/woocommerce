@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * A class for handling the business logic of the signup process.
@@ -59,6 +60,20 @@ class SignupService {
 	private EmailManager $email_manager;
 
 	/**
+	 * Signup rate limiter.
+	 *
+	 * @var SignupRateLimiter
+	 */
+	private SignupRateLimiter $rate_limiter;
+
+	/**
+	 * The logger.
+	 *
+	 * @var \WC_Logger_Interface
+	 */
+	private $logger;
+
+	/**
 	 * Init the service.
 	 *
 	 * @internal
@@ -66,19 +81,27 @@ class SignupService {
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 * @param EmailManager                  $email_manager The email manager.
+	 * @param SignupRateLimiter             $rate_limiter The signup rate limiter.
 	 */
 	final public function init(
 		EligibilityService $eligibility_service,
 		NotificationManagementService $notification_management_service,
-		EmailManager $email_manager
+		EmailManager $email_manager,
+		SignupRateLimiter $rate_limiter
 	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
+		$this->rate_limiter                    = $rate_limiter;
+		$this->logger                          = \wc_get_logger();
 	}
 
 	/**
 	 * Signup.
+	 *
+	 * Fail-closed: once the rate limit window is claimed it is not released, so a failure or an
+	 * exception raised further down still holds the customer back until the window expires. A
+	 * window that cannot be claimed at all is the exception, and lets the sign-up through.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -87,6 +110,8 @@ class SignupService {
 	 * @return SignupResult|\WP_Error The signup result.
 	 */
 	public function signup( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		// Sanity checks.
 		if ( ! Config::allows_signups() ) {
@@ -114,6 +139,9 @@ class SignupService {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
+		// Attempts that only find an existing active or pending sign-up, or activate an existing
+		// pending one, create nothing new and send no verification mail, so they are answered
+		// before the rate limit is consulted or claimed.
 		$notification = $this->is_already_signed_up( $product_id, $user_id, $user_email, $posted_attributes );
 		if ( $notification instanceof Notification ) {
 			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
@@ -125,9 +153,12 @@ class SignupService {
 					return new SignupResult( self::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $notification );
 				}
 
-				// If the notification is pending and double opt-in is not required, skip and activate the notification.
+				// Double opt-in is not required, so activate the pending notification instead of creating one.
 				$notification->set_status( NotificationStatus::ACTIVE );
-				$notification->save();
+				$saved = $notification->save();
+				if ( \is_wp_error( $saved ) || ! $saved ) {
+					return new \WP_Error( self::ERROR_FAILED );
+				}
 
 				/**
 				 * Action: woocommerce_customer_stock_notifications_signup
@@ -139,6 +170,24 @@ class SignupService {
 				do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
 				return new SignupResult( self::SIGNUP_SUCCESS, $notification );
 			}
+		}
+
+		if ( $this->rate_limiter->is_rate_limited( $user_email ) ) {
+			return new \WP_Error( self::ERROR_RATE_LIMITED );
+		}
+
+		// Claim the rate limit window before creating an account, storing a notification or
+		// sending mail. This narrows the window in which two near-simultaneous requests both
+		// get through; it does not close it.
+		//
+		// A claim only fails when the rate limit table cannot be written to, which a shopper
+		// can neither cause nor resolve. Let the sign-up through rather than turn a broken
+		// limiter into a store-wide sign-up outage.
+		if ( ! $this->rate_limiter->apply( $user_email ) ) {
+			$this->logger->warning(
+				'Could not claim the stock notification sign-up rate limit window. Allowing the sign-up to proceed.',
+				array( 'source' => 'stock-notifications-signup-errors' )
+			);
 		}
 
 		$account_created = null;
@@ -162,7 +211,7 @@ class SignupService {
 		}
 
 		$saved = $notification->save();
-		if ( ! $saved ) {
+		if ( \is_wp_error( $saved ) || ! $saved ) {
 			return new \WP_Error( self::ERROR_FAILED );
 		}
 
@@ -200,6 +249,8 @@ class SignupService {
 	 * @return Notification|null The notification, or null if it doesn't exist.
 	 */
 	public function is_already_signed_up( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		if ( empty( $product_id ) ) {
 			return null;
@@ -344,20 +395,18 @@ class SignupService {
 		}
 
 		if ( ! $is_logged_in ) {
-			$email = isset( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : false;
-			if ( ! $email ) {
-				return new \WP_Error( self::ERROR_INVALID_EMAIL );
-			}
-
-			if ( ! is_email( $email ) ) {
+			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : '';
+			$email        = is_email( $posted_email ) ? EmailNormalizer::normalize( $posted_email ) : '';
+			if ( '' === $email ) {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}
 
 			$data['user_id']    = 0;
 			$data['user_email'] = $email;
 
-			// Check if user exists with this email.
-			$user = get_user_by( 'email', $email );
+			// Look up the account with the letter case as entered: `wp_users.user_email` is never
+			// normalized, so on a case-sensitive collation the lowercased form would miss it.
+			$user = get_user_by( 'email', $posted_email );
 			if ( $user ) {
 				$data['user_id'] = $user->ID;
 			}
@@ -368,7 +417,7 @@ class SignupService {
 			}
 
 			$data['user_id']    = $user->ID;
-			$data['user_email'] = $user->user_email;
+			$data['user_email'] = EmailNormalizer::normalize( $user->user_email );
 		}
 
 		return $data;
@@ -476,7 +525,7 @@ class SignupService {
 			case self::ERROR_INVALID_OPT_IN:
 				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			case self::ERROR_RATE_LIMITED:
-				return wp_kses_post( __( 'You have already signed up too many times. Please try again later.', 'woocommerce' ) );
+				return wp_kses_post( __( 'Please wait a moment before signing up again.', 'woocommerce' ) );
 			default:
 				return wp_kses_post( __( 'Failed to sign up. Please try again.', 'woocommerce' ) );
 		}
