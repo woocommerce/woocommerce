@@ -572,9 +572,9 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
-				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
-				// false when it's ready for an experimental preview.
-				'disable_ui'                   => true,
+				// POC branch keeps the flag visible in the Features UI for testing;
+				// trunk ships it hidden (disable_ui => true) until the feature is ready.
+				'disable_ui'                   => false,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
