@@ -57,6 +57,8 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 			)
 		);
 
+		$this->pin_refund_dates( $order, $order->get_date_created() );
+
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -150,6 +152,10 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 			$order->set_shipping_total( 0 );
 			$order->set_cart_tax( 0 );
 			$order->save();
+
+			// The refunded order's save creates a refund of its own, via
+			// wc_order_fully_refunded(); it needs the fixture's date like any other.
+			$this->pin_refund_dates( $order, $time );
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
