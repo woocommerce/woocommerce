@@ -148,8 +148,8 @@ class CSVUploadHelperTest extends WC_Unit_Test_Case {
 	 */
 	public function test_filter_woocommerce_check_filetype_for_csv_ignores_non_html_mime(): void {
 		$data  = array(
-			'ext'             => 'csv',
-			'type'            => 'text/csv',
+			'ext'             => false,
+			'type'            => false,
 			'proper_filename' => false,
 		);
 		$mimes = array(
@@ -161,11 +161,11 @@ class CSVUploadHelperTest extends WC_Unit_Test_Case {
 			'/tmp/test.csv',
 			'test.csv',
 			$mimes,
-			'text/csv'
+			'text/plain'
 		);
 
-		$this->assertSame( 'csv', $filtered['ext'], 'Extension should remain unchanged' );
-		$this->assertSame( 'text/csv', $filtered['type'], 'MIME type should remain unchanged' );
+		$this->assertFalse( $filtered['ext'], 'Extension should remain unchanged' );
+		$this->assertFalse( $filtered['type'], 'MIME type should remain unchanged' );
 	}
 
 	/**
