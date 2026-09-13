@@ -640,4 +640,114 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		return $variation_id;
 	}
+
+	/**
+	 * @testdox Migration rewrites stored stock notification emails in canonical form and leaves canonical rows alone.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_11203_normalize_stock_notification_emails', $db_updates['11.2.0'] );
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		foreach ( array( 'Legacy@Example.com', " padded@example.com\t", 'canonical@example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+		}
+
+		$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A table smaller than one batch should complete in a single run' );
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared on completion' );
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'legacy@example.com', 'padded@example.com', 'canonical@example.com' ), $emails );
+	}
+
+	/**
+	 * @testdox Migration resumes from the persisted cursor and leaves rows before it untouched.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_resumes_from_cursor(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		$ids   = array();
+		foreach ( array( 'Before@Example.com', 'After@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+			$ids[] = $wpdb->insert_id;
+		}
+
+		update_option( 'woocommerce_update_11203_last_stock_notification_id', $ids[0], false );
+
+		wc_update_11203_normalize_stock_notification_emails();
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'Before@Example.com', 'after@example.com' ), $emails );
+	}
+
+	/**
+	 * @testdox Migration stops at the first failed write, clears its cursor and does not request another run.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_stops_on_failed_write(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		foreach ( array( 'First@Example.com', 'Second@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+		}
+
+		$break_update = function ( $query ) use ( $table ) {
+			return 0 === strpos( $query, "UPDATE `{$table}` SET `user_email`" ) ? "UPDATE `{$table}` SET `no_such_column` = 1" : $query;
+		};
+		add_filter( 'query', $break_update );
+		$suppressed = $wpdb->suppress_errors();
+
+		try {
+			$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A failed write should not request another run' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_update );
+		}
+
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared after a failed write' );
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
+	}
 }
