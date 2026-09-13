@@ -416,6 +416,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 *
 	 * Analytics rows can contain an empty customer array when the customer record is missing, and guest
 	 * orders may include only a first or last name, so neither key is guaranteed.
+	 *
 	 * @param array $customer Customer from report row.
 	 * @return string
 	 */
