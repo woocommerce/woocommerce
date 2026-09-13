@@ -501,7 +501,28 @@ export function bisConsentCheckbox( page: Page ) {
 }
 
 /**
+ * Switch the sign-up rate limiter off for this page's context.
+ *
+ * Core locks a client and an e-mail address out for a while after each
+ * sign-up. The suite submits the form far more often than that from one
+ * customer and one IP, so it is disabled through the `e2e-filters`
+ * cookie the test helper plugin reads.
+ *
+ * @param {Page} page Playwright page whose context will submit the form.
+ */
+export async function disableSignupRateLimit( page: Page ): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+		{ enabled: false }
+	);
+}
+
+/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
+ *
+ * The rate limiter is switched off for the submitting context first, so
+ * back-to-back sign-ups within a spec are not refused.
  *
  * @param {Page}    page           Playwright page on the product detail.
  * @param {Object}  [opts]         Fill options.
@@ -515,6 +536,8 @@ export async function signUpOnProductPage(
 		consent?: boolean;
 	} = {}
 ): Promise< void > {
+	await disableSignupRateLimit( page );
+
 	if ( opts.email !== undefined ) {
 		await page
 			.getByRole( 'textbox', {

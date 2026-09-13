@@ -16,21 +16,69 @@
  * @package WooCommerce\Templates
  * @version 11.2.0
  *
- * @var array $notifications         Array of active Notification objects for the current user (one page).
- * @var array $pending_notifications Array of Notification objects awaiting email confirmation (capped, not paginated).
- * @var bool  $has_pending           Whether there are any pending notifications to render.
- * @var bool  $has_items             Whether there are any notifications (pending or active) to render.
- * @var int   $current_page          1-indexed current page number of the active table.
- * @var int   $total_pages           Total number of pages of active notifications.
- * @var int   $total_items           Total number of active notifications across all pages.
- * @var int   $per_page              Active notifications shown per page.
+ * @var array  $pending_rows      Rows awaiting email confirmation (capped, not paginated). See row keys below.
+ * @var array  $active_rows       Active rows for the current page. See row keys below.
+ * @var int    $current_page      1-indexed current page number of the active table.
+ * @var int    $total_pages       Total number of pages of active rows.
+ * @var int    $total_items       Total number of active rows across all pages.
+ * @var int    $per_page          Active rows shown per page.
+ * @var string $previous_page_url URL of the previous page of active rows, or an empty string on the first page.
+ * @var string $next_page_url     URL of the next page of active rows, or an empty string on the last page.
+ * @var string $shop_url          URL the empty-state "Browse products" button points at.
+ *
+ * Each row is an array with these keys:
+ *   - int    id           Notification id.
+ *   - string status       Notification status slug, used as a row class modifier.
+ *   - string product_name Product title, or an empty string when the product is gone.
+ *   - string product_url  Product permalink, or an empty string when the product is gone.
+ *   - string variation    Flat list of variation attributes, or an empty string for simple products.
+ *   - string date_iso     Sign-up date in ISO 8601, or an empty string when unknown.
+ *   - string date_display Sign-up date formatted for display, or an empty string when unknown.
+ *   - string resend_url   Nonce-protected URL that resends the verification email, or an empty string when the row cannot be resent.
+ *   - string resend_label Accessible label for the resend link.
+ *   - string cancel_url   Nonce-protected URL that cancels the notification, or an empty string when the row cannot be cancelled.
+ *   - string cancel_label Accessible label for the cancel link.
  */
-
-use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 
 defined( 'ABSPATH' ) || exit;
 
+$pending_rows      = isset( $pending_rows ) && is_array( $pending_rows ) ? $pending_rows : array();
+$active_rows       = isset( $active_rows ) && is_array( $active_rows ) ? $active_rows : array();
+$has_pending       = ! empty( $pending_rows );
+$has_items         = $has_pending || ! empty( $active_rows );
+$previous_page_url = isset( $previous_page_url ) ? (string) $previous_page_url : '';
+$next_page_url     = isset( $next_page_url ) ? (string) $next_page_url : '';
+$shop_url          = isset( $shop_url ) ? (string) $shop_url : wc_get_page_permalink( 'shop' );
+
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+
+$row_defaults = array(
+	'id'           => 0,
+	'status'       => '',
+	'product_name' => '',
+	'product_url'  => '',
+	'variation'    => '',
+	'date_iso'     => '',
+	'date_display' => '',
+	'resend_url'   => '',
+	'resend_label' => '',
+	'cancel_url'   => '',
+	'cancel_label' => '',
+);
+
+$tables = array(
+	'pending' => array(
+		'heading' => __( 'Awaiting confirmation', 'woocommerce' ),
+		'caption' => __( 'Stock notifications awaiting confirmation', 'woocommerce' ),
+		'rows'    => $pending_rows,
+	),
+	'active'  => array(
+		// A store without double opt-in only ever has one table, so the heading is redundant there.
+		'heading' => $has_pending ? __( 'Active', 'woocommerce' ) : '',
+		'caption' => __( 'Active stock notifications', 'woocommerce' ),
+		'rows'    => $active_rows,
+	),
+);
 
 /**
  * Fires before the back in stock notifications table is rendered on My Account.
@@ -42,98 +90,32 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items );
 ?>
 
-<?php if ( $has_pending ) : ?>
-
+<?php foreach ( $tables as $table_key => $table ) : ?>
 	<?php
-	/**
-	 * Fires before the pending (awaiting confirmation) stock notifications table is rendered on My Account.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param bool $has_pending Whether there are any pending notifications to render.
-	 */
-	do_action( 'woocommerce_before_account_customer_stock_notifications_pending', $has_pending );
+	if ( empty( $table['rows'] ) ) {
+		continue;
+	}
 	?>
 
-	<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--pending"><?php esc_html_e( 'Awaiting confirmation', 'woocommerce' ); ?></h2>
-
-	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--pending woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
-		<caption class="screen-reader-text"><?php esc_html_e( 'Stock notifications awaiting confirmation', 'woocommerce' ); ?></caption>
-		<thead>
-			<tr>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date', 'woocommerce' ); ?></span></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></span></th>
-			</tr>
-		</thead>
-		<tbody>
-		<?php foreach ( $pending_notifications as $notification ) : ?>
-			<?php
-			$product_name = MyAccountEndpoint::get_display_product_name( $notification );
-			$permalink    = $notification->get_product_permalink();
-			$variation    = $notification->get_product_formatted_variation_list( true );
-			$date_created = $notification->get_date_created();
-
-			$action_label_name = '' !== $product_name ? $product_name : __( 'an unavailable product', 'woocommerce' );
-			if ( '' !== $variation ) {
-				$action_label_name .= ' ' . $variation;
-			}
-			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
-			$resend_label = sprintf( __( 'Resend verification email for %s', 'woocommerce' ), $action_label_name );
-			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
-			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $action_label_name );
-			?>
-			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
-					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
-						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
-					<?php elseif ( '' !== $product_name ) : ?>
-						<?php echo esc_html( $product_name ); ?>
-					<?php else : ?>
-						<?php esc_html_e( 'Product unavailable', 'woocommerce' ); ?>
-					<?php endif; ?>
-
-					<?php if ( '' !== $variation ) : ?>
-						<div class="description"><?php echo esc_html( $variation ); ?></div>
-					<?php endif; ?>
-				</td>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>">
-					<?php if ( $date_created ) : ?>
-						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>
-					<?php else : ?>
-						&mdash;
-					<?php endif; ?>
-				</td>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend verification', 'woocommerce' ); ?></a>
-					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
-				</td>
-			</tr>
-		<?php endforeach; ?>
-		</tbody>
-	</table>
-
-	<?php
-	/**
-	 * Fires after the pending (awaiting confirmation) stock notifications table is rendered on My Account.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param bool $has_pending Whether there were any pending notifications rendered.
-	 */
-	do_action( 'woocommerce_after_account_customer_stock_notifications_pending', $has_pending );
-	?>
-
-<?php endif; ?>
-
-<?php if ( ! empty( $notifications ) ) : ?>
-
-	<?php if ( $has_pending ) : ?>
-		<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--active"><?php esc_html_e( 'Active', 'woocommerce' ); ?></h2>
+	<?php if ( 'pending' === $table_key ) : ?>
+		<?php
+		/**
+		 * Fires before the pending (awaiting confirmation) stock notifications table is rendered on My Account.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param bool $has_pending Whether there are any pending notifications to render.
+		 */
+		do_action( 'woocommerce_before_account_customer_stock_notifications_pending', $has_pending );
+		?>
 	<?php endif; ?>
 
-	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--active woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
-		<caption class="screen-reader-text"><?php esc_html_e( 'Active stock notifications', 'woocommerce' ); ?></caption>
+	<?php if ( '' !== $table['heading'] ) : ?>
+		<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--<?php echo esc_attr( $table_key ); ?>"><?php echo esc_html( $table['heading'] ); ?></h2>
+	<?php endif; ?>
+
+	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--<?php echo esc_attr( $table_key ); ?> woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
+		<caption class="screen-reader-text"><?php echo esc_html( $table['caption'] ); ?></caption>
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
@@ -142,21 +124,14 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 			</tr>
 		</thead>
 		<tbody>
-		<?php foreach ( $notifications as $notification ) : ?>
+		<?php foreach ( $table['rows'] as $row ) : ?>
 			<?php
-			$product_name = MyAccountEndpoint::get_display_product_name( $notification );
-			$permalink    = $notification->get_product_permalink();
-			$variation    = $notification->get_product_formatted_variation_list( true );
-			$date_created = $notification->get_date_created();
-
-			$cancel_label_name = '' !== $product_name ? $product_name : __( 'an unavailable product', 'woocommerce' );
-			if ( '' !== $variation ) {
-				$cancel_label_name .= ' ' . $variation;
+			if ( ! is_array( $row ) ) {
+				continue;
 			}
-			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
-			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $cancel_label_name );
+			$row = wp_parse_args( $row, $row_defaults );
 			?>
-			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
+			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( $row['status'] ); ?>">
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 					<?php
 					/*
@@ -164,29 +139,32 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					 * customer can see the sign-up exists and cancel it.
 					 */
 					?>
-					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
-						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
-					<?php elseif ( '' !== $product_name ) : ?>
-						<?php echo esc_html( $product_name ); ?>
+					<?php if ( '' !== $row['product_name'] && '' !== $row['product_url'] ) : ?>
+						<a href="<?php echo esc_url( $row['product_url'] ); ?>"><?php echo esc_html( $row['product_name'] ); ?></a>
+					<?php elseif ( '' !== $row['product_name'] ) : ?>
+						<?php echo esc_html( $row['product_name'] ); ?>
 					<?php else : ?>
 						<?php esc_html_e( 'Product unavailable', 'woocommerce' ); ?>
 					<?php endif; ?>
 
-					<?php if ( '' !== $variation ) : ?>
-						<div class="description"><?php echo esc_html( $variation ); ?></div>
+					<?php if ( '' !== $row['variation'] ) : ?>
+						<div class="description"><?php echo esc_html( $row['variation'] ); ?></div>
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
-					<?php if ( $date_created ) : ?>
-						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>
+					<?php if ( '' !== $row['date_iso'] ) : ?>
+						<time datetime="<?php echo esc_attr( $row['date_iso'] ); ?>"><?php echo esc_html( $row['date_display'] ); ?></time>
 					<?php else : ?>
 						&mdash;
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<?php if ( MyAccountEndpoint::is_cancellable( $notification ) ) : ?>
-						<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
-					<?php else : ?>
+					<?php if ( '' !== $row['resend_url'] ) : ?>
+						<a href="<?php echo esc_url( $row['resend_url'] ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $row['resend_label'] ); ?>"><?php esc_html_e( 'Resend verification', 'woocommerce' ); ?></a>
+					<?php endif; ?>
+					<?php if ( '' !== $row['cancel_url'] ) : ?>
+						<a href="<?php echo esc_url( $row['cancel_url'] ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $row['cancel_label'] ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+					<?php elseif ( '' === $row['resend_url'] ) : ?>
 						&mdash;
 					<?php endif; ?>
 				</td>
@@ -194,6 +172,22 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 		<?php endforeach; ?>
 		</tbody>
 	</table>
+
+	<?php if ( 'pending' === $table_key ) : ?>
+		<?php
+		/**
+		 * Fires after the pending (awaiting confirmation) stock notifications table is rendered on My Account.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param bool $has_pending Whether there were any pending notifications rendered.
+		 */
+		do_action( 'woocommerce_after_account_customer_stock_notifications_pending', $has_pending );
+		?>
+	<?php endif; ?>
+<?php endforeach; ?>
+
+<?php if ( ! empty( $active_rows ) ) : ?>
 
 	<?php
 	/**
@@ -204,14 +198,14 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	do_action( 'woocommerce_before_account_customer_stock_notifications_pagination' );
 	?>
 
-	<?php if ( $total_pages > 1 ) : ?>
+	<?php if ( '' !== $previous_page_url || '' !== $next_page_url ) : ?>
 		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination" role="navigation" aria-label="<?php esc_attr_e( 'Active stock notifications pagination', 'woocommerce' ); ?>">
-			<?php if ( 1 !== $current_page ) : ?>
-				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, (string) ( $current_page - 1 ), wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
+			<?php if ( '' !== $previous_page_url ) : ?>
+				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( $previous_page_url ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 
-			<?php if ( $total_pages !== $current_page ) : ?>
-				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, (string) ( $current_page + 1 ), wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
+			<?php if ( '' !== $next_page_url ) : ?>
+				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( $next_page_url ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</div>
 	<?php endif; ?>
@@ -220,7 +214,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 
 <?php if ( ! $has_items ) : ?>
 
-	<?php wc_print_notice( esc_html__( "You haven't signed up for any back-in-stock notifications yet.", 'woocommerce' ) . ' <a class="woocommerce-Button wc-forward button' . esc_attr( $wp_button_class ) . '" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . esc_html__( 'Browse products', 'woocommerce' ) . '</a>', 'notice' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+	<?php wc_print_notice( esc_html__( "You haven't signed up for any back-in-stock notifications yet.", 'woocommerce' ) . ' <a class="woocommerce-Button wc-forward button' . esc_attr( $wp_button_class ) . '" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', $shop_url ) ) . '">' . esc_html__( 'Browse products', 'woocommerce' ) . '</a>', 'notice' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 
 <?php endif; ?>
 
