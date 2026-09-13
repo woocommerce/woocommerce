@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure WooCommerce scheduled actions are removed on uninstall by bootstrapping Action Scheduler when no other plugin has loaded it.
