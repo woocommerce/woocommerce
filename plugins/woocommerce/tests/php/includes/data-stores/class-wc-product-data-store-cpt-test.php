@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -463,6 +464,105 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEmpty( $product->get_meta( 'test', true ) );
+	}
+
+	/**
+	 * @testdox Delete returns false when the product has no ID.
+	 */
+	public function test_delete_returns_false_for_product_without_id(): void {
+		$data_store = new WC_Product_Data_Store_CPT();
+		$product    = new WC_Product_Simple();
+
+		$this->assertFalse( $data_store->delete( $product ) );
+	}
+
+	/**
+	 * @testdox Delete returns true when the product is trashed.
+	 */
+	public function test_delete_returns_true_when_trashing_product(): void {
+		$data_store = new WC_Product_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		try {
+			$this->assertTrue( $data_store->delete( $product ) );
+			$this->assertSame( ProductStatus::TRASH, $product->get_status() );
+			$this->assertSame( 'trash', get_post_status( $product_id ) );
+		} finally {
+			wp_delete_post( $product_id, true );
+		}
+	}
+
+	/**
+	 * @testdox Delete returns true when the product is force deleted.
+	 */
+	public function test_delete_returns_true_when_force_deleting_product(): void {
+		$data_store = new WC_Product_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$this->assertTrue( $data_store->delete( $product, array( 'force_delete' => true ) ) );
+		$this->assertSame( 0, $product->get_id() );
+		$this->assertNull( get_post( $product_id ) );
+	}
+
+	/**
+	 * @testdox Delete returns false when trashing the product fails.
+	 */
+	public function test_delete_returns_false_when_trashing_product_fails(): void {
+		$data_store     = new WC_Product_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_simple_product();
+		$product_id     = $product->get_id();
+		$product_status = $product->get_status();
+		$trash_count    = 0;
+		$trash_tracker  = function () use ( &$trash_count ) {
+			++$trash_count;
+		};
+
+		add_action( 'woocommerce_trash_product', $trash_tracker );
+		wp_delete_post( $product_id, true );
+
+		try {
+			$this->assertFalse( $data_store->delete( $product ) );
+			$this->assertSame( $product_id, $product->get_id() );
+			$this->assertSame( $product_status, $product->get_status() );
+			$this->assertSame( 0, $trash_count );
+		} finally {
+			remove_action( 'woocommerce_trash_product', $trash_tracker );
+		}
+	}
+
+	/**
+	 * @testdox Delete returns false when force deleting the product fails.
+	 */
+	public function test_delete_returns_false_when_force_deleting_product_fails(): void {
+		$data_store          = new WC_Product_Data_Store_CPT();
+		$product             = WC_Helper_Product::create_simple_product();
+		$product_id          = $product->get_id();
+		$product_status      = $product->get_status();
+		$before_delete_count = 0;
+		$delete_count        = 0;
+		$before_tracker      = function () use ( &$before_delete_count ) {
+			++$before_delete_count;
+		};
+		$delete_tracker      = function () use ( &$delete_count ) {
+			++$delete_count;
+		};
+
+		add_action( 'woocommerce_before_delete_product', $before_tracker );
+		add_action( 'woocommerce_delete_product', $delete_tracker );
+		wp_delete_post( $product_id, true );
+
+		try {
+			$this->assertFalse( $data_store->delete( $product, array( 'force_delete' => true ) ) );
+			$this->assertSame( $product_id, $product->get_id() );
+			$this->assertSame( $product_status, $product->get_status() );
+			$this->assertSame( 1, $before_delete_count );
+			$this->assertSame( 0, $delete_count );
+		} finally {
+			remove_action( 'woocommerce_before_delete_product', $before_tracker );
+			remove_action( 'woocommerce_delete_product', $delete_tracker );
+		}
 	}
 
 	/**
