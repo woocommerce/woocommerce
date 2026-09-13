@@ -57,7 +57,8 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		update_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION, 'yes' );
 
-		// Ensure the WC_Email methods are loaded before isolated-process tests configure fixture mocks.
+		// Eagerly boot \WC_Emails so the \WC_Email class is autoloaded before any
+		// test reflects on it via getMockBuilder() / onlyMethods().
 		\WC_Emails::instance();
 
 		$this->fixtures_base = __DIR__ . '/fixtures/';
@@ -261,8 +262,6 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A real backfill should emit only one completion event through the production Integration hooks.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_backfill_records_only_completion_event_through_integration_hooks(): void {
 		$email_id = 'wc_test_tracker_backfill_integration';
