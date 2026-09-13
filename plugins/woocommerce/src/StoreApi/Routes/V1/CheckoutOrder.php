@@ -31,7 +31,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Holds the current order being processed.
 	 *
-	 * @var \WC_Order
+	 * @var \WC_Order|null
 	 */
 	private $order = null;
 
@@ -106,15 +106,16 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order instanceof \WC_Order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
@@ -198,6 +199,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function update_billing_address( \WP_REST_Request $request ) {
+		$order    = $this->get_order_or_throw();
 		$customer = wc()->customer;
 
 		// Billing address is a required field.
@@ -206,9 +208,9 @@ class CheckoutOrder extends AbstractCartRoute {
 		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
 		$shipping = $request['shipping_address'] ?? $billing;
 
-		$this->order->set_billing_address( $billing );
-		$this->order->set_shipping_address( $shipping );
-		$this->order_controller->validate_existing_order_before_update( $this->order );
+		$order->set_billing_address( $billing );
+		$order->set_shipping_address( $shipping );
+		$this->order_controller->validate_existing_order_before_update( $order );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -234,8 +236,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-		$this->order->save();
-		$this->order->calculate_totals();
+		$order->save();
+		$order->calculate_totals();
 	}
 
 	/**
@@ -249,7 +251,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $this->order->needs_payment() ) {
+			if ( $this->get_order_or_throw()->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -283,6 +285,6 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
-		$this->order_controller->sync_customer_data_with_order( $this->order );
+		$this->order_controller->sync_customer_data_with_order( $this->get_order_or_throw() );
 	}
 }
