@@ -257,6 +257,32 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toBe( 'A link.' );
 		} );
 
+		it( 'preserves disabled explanations as text alongside sanitized help', () => {
+			const settingsField: SettingsUIField = {
+				id: 'disabled',
+				label: 'Disabled',
+				type: 'text',
+				disabled: true,
+				description: 'Read <strong>this</strong>.',
+				customAttributes: {
+					'disabled-tooltip':
+						'<img src=x onerror=alert(1)> unavailable',
+				},
+			};
+			const field = buildDataFormField(
+				settingsField,
+				createOptions( [ settingsField ] )
+			);
+			const { container } = renderElement( <>{ field.description }</> );
+			expect( container.textContent ).toBe(
+				'Read this. <img src=x onerror=alert(1)> unavailable'
+			);
+			expect( container.querySelector( 'strong' )?.textContent ).toBe(
+				'this'
+			);
+			expect( container.querySelector( 'img' ) ).toBeNull();
+		} );
+
 		it( 'strips group descriptions to plain text', () => {
 			const schema: SettingsUISchema = {
 				id: 'test-page',
