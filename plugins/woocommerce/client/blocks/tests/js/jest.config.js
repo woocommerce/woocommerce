@@ -138,7 +138,8 @@ module.exports = {
 		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',
 	},
 	transformIgnorePatterns: [
-		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)',
+		// temporal-polyfill and its deps are ESM-only, so they need transforming too.
+		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js|\\.pnpm/temporal-|temporal-)',
 	],
 	verbose: true,
 	cacheDirectory: '<rootDir>/../../node_modules/.cache/jest',
