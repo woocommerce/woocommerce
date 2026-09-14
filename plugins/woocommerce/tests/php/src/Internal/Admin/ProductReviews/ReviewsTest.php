@@ -163,18 +163,14 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_set_reviews_per_page_option_filter(): void {
-		$reviews = new Reviews();
-		$hook    = 'set_screen_option_' . Reviews::PER_PAGE_USER_OPTION_KEY;
+		wc_get_container()->get( Reviews::class );
+		$hook = 'set_screen_option_' . Reviews::PER_PAGE_USER_OPTION_KEY;
 
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
-			$this->assertSame( 55, apply_filters( $hook, false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+		$this->assertSame( 55, apply_filters( $hook, false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
 
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
-			$this->assertFalse( apply_filters( $hook, 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
-		} finally {
-			remove_filter( $hook, array( $reviews, 'set_reviews_per_page_option' ) );
-		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+		$this->assertFalse( apply_filters( $hook, 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
 	}
 
 	/**
