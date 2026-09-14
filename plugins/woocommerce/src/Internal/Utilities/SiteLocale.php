@@ -71,7 +71,7 @@ class SiteLocale {
 	 * @return string|false Translated slug, or false when no translation exists.
 	 */
 	private static function load_and_translate_slug( string $slug, string $locale ) {
-		global $l10n, $wp_textdomain_registry;
+		global $l10n, $l10n_unloaded, $wp_textdomain_registry;
 
 		$translation_controller = WP_Translation_Controller::get_instance();
 
@@ -84,6 +84,7 @@ class SiteLocale {
 		$previous_controller_locale = $translation_controller->get_locale();
 		$had_previous_translations  = isset( $l10n['woocommerce'] );
 		$previous_translations      = $l10n['woocommerce'] ?? null;
+		$previous_unloaded          = $l10n_unloaded['woocommerce'] ?? null;
 
 		unset( $l10n['woocommerce'] );
 
@@ -102,6 +103,11 @@ class SiteLocale {
 				: $translation_controller->translate( $slug, 'slug', 'woocommerce', $locale );
 		} finally {
 			$translation_controller->set_locale( $previous_controller_locale );
+			if ( null === $previous_unloaded ) {
+				unset( $l10n_unloaded['woocommerce'] );
+			} else {
+				$l10n_unloaded['woocommerce'] = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request's just-in-time loading state.
+			}
 
 			if ( $had_previous_translations ) {
 				$l10n['woocommerce'] = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the translations isolated above.

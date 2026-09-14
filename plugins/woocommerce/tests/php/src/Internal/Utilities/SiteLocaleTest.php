@@ -20,11 +20,12 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 	 * @param string $hook Translation loading filter.
 	 */
 	public function test_permalink_defaults_honor_translation_loaders( string $hook ): void {
-		global $l10n, $wp_textdomain_registry;
+		global $l10n, $l10n_unloaded, $wp_textdomain_registry;
 
 		$locale                = 'wc_LOADER';
 		$previous_path         = $wp_textdomain_registry->get( 'woocommerce', $locale );
 		$previous_translations = $l10n['woocommerce'] ?? null;
+		$previous_unloaded     = $l10n_unloaded['woocommerce'] ?? null;
 		$previous_locale       = WP_Translation_Controller::get_instance()->get_locale();
 		$catalog               = new \MO();
 		$catalog->add_entry(
@@ -49,14 +50,21 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 			2
 		);
 		delete_option( 'woocommerce_permalinks' );
+		$l10n_unloaded['woocommerce'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Model a request that disabled just-in-time loading.
 
 		try {
 			wc_get_permalink_structure();
 			$this->assertSame( 'loader-product', get_option( 'woocommerce_permalinks' )['product_base'] );
 			$this->assertSame( $previous_translations, $l10n['woocommerce'] ?? null, 'Restore the request catalog.' );
 			$this->assertSame( $previous_locale, WP_Translation_Controller::get_instance()->get_locale() );
+			$this->assertTrue( $l10n_unloaded['woocommerce'] ?? false, 'Preserve the request decision to disable just-in-time loading.' );
 		} finally {
 			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+			if ( null === $previous_unloaded ) {
+				unset( $l10n_unloaded['woocommerce'] );
+			} else {
+				$l10n_unloaded['woocommerce'] = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original marker.
+			}
 		}
 	}
 
