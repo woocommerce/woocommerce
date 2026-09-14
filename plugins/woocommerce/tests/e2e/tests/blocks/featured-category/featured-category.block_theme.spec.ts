@@ -32,6 +32,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 	test( 'image can be edited', async ( { editor, admin, requestUtils } ) => {
 		let editedMediaId: number | undefined;
+		let productId: string | undefined;
+		let categoryId: string | undefined;
+		let originalCategoryIds: string[] = [];
 		const media = await requestUtils.uploadMedia(
 			path.resolve( __dirname, '../../../test-data/images/image-01.png' )
 		);
@@ -41,20 +44,27 @@ test.describe( `${ blockData.slug } Block`, () => {
 				const productCliOutput = await wpCLI(
 					`post list --post_type=product --title=Cap --field=ID`
 				);
-				const productId =
-					productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+				productId = productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
 				if ( ! productId ) {
 					throw new Error(
 						`Failed to find Cap product: ${ productCliOutput.stdout }`
 					);
 				}
 
+				// `wc product update --categories` replaces the list rather than
+				// appending to it, so Cap's own categories have to come back below.
+				const categoriesCliOutput = await wpCLI(
+					`eval 'echo implode( ",", wp_get_post_terms( ${ productId }, "product_cat", array( "fields" => "ids" ) ) );'`
+				);
+				originalCategoryIds = categoriesCliOutput.stdout
+					.trim()
+					.split( ',' )
+					.filter( Boolean );
+
 				const categoryCliOutput = await wpCLI(
 					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ media.id } }' --user=1`
 				);
-				const categoryId = categoryCliOutput.stdout
-					.match( /\d+/g )
-					?.pop();
+				categoryId = categoryCliOutput.stdout.match( /\d+/g )?.pop();
 				await wpCLI(
 					`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
 				);
@@ -93,11 +103,30 @@ test.describe( `${ blockData.slug } Block`, () => {
 			).toBeVisible();
 		} finally {
 			try {
-				if ( editedMediaId !== undefined ) {
-					await requestUtils.deleteMedia( editedMediaId );
+				if ( productId ) {
+					const categories = originalCategoryIds
+						.map( ( id ) => `{ "id": ${ id } }` )
+						.join( ', ' );
+					await wpCLI(
+						`wc product update ${ productId } --categories='[ ${ categories } ]' --user=1`
+					);
 				}
 			} finally {
-				await requestUtils.deleteMedia( media.id );
+				try {
+					if ( categoryId ) {
+						await wpCLI(
+							`wc product_cat delete ${ categoryId } --force=true --user=1`
+						);
+					}
+				} finally {
+					try {
+						if ( editedMediaId !== undefined ) {
+							await requestUtils.deleteMedia( editedMediaId );
+						}
+					} finally {
+						await requestUtils.deleteMedia( media.id );
+					}
+				}
 			}
 		}
 	} );

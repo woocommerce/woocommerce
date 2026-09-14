@@ -32,6 +32,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 	test( 'image can be edited', async ( { editor, admin, requestUtils } ) => {
 		let editedMediaId: number | undefined;
+		let productId: string | undefined;
+		let originalThumbnailId: string | undefined;
 		const media = await requestUtils.uploadMedia(
 			path.resolve( __dirname, '../../../test-data/images/image-01.png' )
 		);
@@ -40,12 +42,21 @@ test.describe( `${ blockData.slug } Block`, () => {
 			const productCliOutput = await wpCLI(
 				'post list --post_type=product --title=Album --field=ID'
 			);
-			const productId = productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+			productId = productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
 			if ( ! productId ) {
 				throw new Error(
 					`Failed to find Album product: ${ productCliOutput.stdout }`
 				);
 			}
+
+			// The uploaded media is deleted below, so Album's own thumbnail has to go
+			// back or the product is left pointing at an attachment that no longer
+			// exists. `get_post_thumbnail_id` returns 0 rather than erroring when the
+			// meta key is absent, unlike `wp post meta get`.
+			const thumbnailCliOutput = await wpCLI(
+				`eval 'echo (string) get_post_thumbnail_id( ${ productId } );'`
+			);
+			originalThumbnailId = thumbnailCliOutput.stdout.trim();
 
 			await wpCLI(
 				`post meta update ${ productId } _thumbnail_id ${ media.id }`
@@ -82,11 +93,25 @@ test.describe( `${ blockData.slug } Block`, () => {
 			).toBeVisible();
 		} finally {
 			try {
-				if ( editedMediaId !== undefined ) {
-					await requestUtils.deleteMedia( editedMediaId );
+				if ( productId && originalThumbnailId !== undefined ) {
+					const hadThumbnail =
+						originalThumbnailId !== '' &&
+						originalThumbnailId !== '0';
+
+					await wpCLI(
+						hadThumbnail
+							? `post meta update ${ productId } _thumbnail_id ${ originalThumbnailId }`
+							: `post meta delete ${ productId } _thumbnail_id`
+					);
 				}
 			} finally {
-				await requestUtils.deleteMedia( media.id );
+				try {
+					if ( editedMediaId !== undefined ) {
+						await requestUtils.deleteMedia( editedMediaId );
+					}
+				} finally {
+					await requestUtils.deleteMedia( media.id );
+				}
 			}
 		}
 	} );

@@ -119,17 +119,21 @@ test.describe( 'Shopper → Taxes', () => {
 			await expect( visibleTaxOnOrderConfirmation ).toBeVisible();
 		} finally {
 			// Restore the store-wide baseline: tax calculation on, and no
-			// standard-class rate for the specs that run after this one.
-			await requestUtils.rest( {
-				method: 'PUT',
-				path: 'wc/v3/settings/general/woocommerce_calc_taxes',
-				data: { value: 'yes' },
-			} );
-			await requestUtils.rest( {
-				method: 'DELETE',
-				path: `wc/v3/taxes/${ taxRateId }`,
-				params: { force: true },
-			} );
+			// standard-class rate for the specs that run after this one. Nested so a
+			// failed option write still reaches the rate delete.
+			try {
+				await requestUtils.rest( {
+					method: 'PUT',
+					path: 'wc/v3/settings/general/woocommerce_calc_taxes',
+					data: { value: 'yes' },
+				} );
+			} finally {
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `wc/v3/taxes/${ taxRateId }`,
+					params: { force: true },
+				} );
+			}
 		}
 	} );
 } );
