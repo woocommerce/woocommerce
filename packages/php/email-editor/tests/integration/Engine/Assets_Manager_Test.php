@@ -19,14 +19,14 @@ class Assets_Manager_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->swap_enqueue_registries();
+		$this->swapEnqueueRegistries();
 	}
 
 	/**
 	 * Tear down after each test
 	 */
 	public function tearDown(): void {
-		$this->restore_enqueue_registries();
+		$this->restoreEnqueueRegistries();
 		parent::tearDown();
 	}
 

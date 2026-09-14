@@ -27,7 +27,7 @@ class Settings_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		// get_settings() collects iframe assets from the global registries, which core reads without initializing them.
-		$this->swap_enqueue_registries();
+		$this->swapEnqueueRegistries();
 		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
 	}
 
@@ -35,7 +35,7 @@ class Settings_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	 * Tear down after each test
 	 */
 	public function tearDown(): void {
-		$this->restore_enqueue_registries();
+		$this->restoreEnqueueRegistries();
 		parent::tearDown();
 	}
 
