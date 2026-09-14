@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Register order withdrawal endpoint hooks only when the feature is enabled.

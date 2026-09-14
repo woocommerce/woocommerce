@@ -2392,6 +2392,50 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
 	}
 
+	/**
+	 * @testdox Session-status is scoped to the session recorded on the token.
+	 */
+	public function test_session_status_is_scoped_to_the_recorded_session(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data        = $this->dispatch_scan( $plaintext )->get_data();
+		$recorded_session = $scan_data['session_id'];
+
+		// A second session id can also resolve to the same token record, while
+		// the record itself still names the scanned session above.
+		$other_session = wp_generate_uuid4();
+		set_transient(
+			MobileAppQRLogin::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $other_session ),
+			$this->token_hash( $plaintext ),
+			MobileAppQRLogin::TOKEN_TTL
+		);
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame( 200, $this->dispatch_approve( $plaintext, $scan_data['real_number'] )->get_status() );
+		wp_set_current_user( 0 );
+
+		$other = $this->dispatch_session_status( $other_session, $plaintext );
+		$this->assertSame( 200, $other->get_status() );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_EXPIRED,
+			$other->get_data()['state'],
+			'State is only returned for the session recorded on the token.'
+		);
+		$this->assertArrayNotHasKey(
+			'exchange_grant',
+			$other->get_data(),
+			'The exchange grant is only returned for the session recorded on the token.'
+		);
+
+		$recorded = $this->dispatch_session_status( $recorded_session, $plaintext );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $recorded->get_data()['state'] );
+		$this->assertNotEmpty(
+			$recorded->get_data()['exchange_grant'],
+			'The recorded session receives its grant.'
+		);
+	}
+
 	// -----------------------------------------------------------------------
 	// Availability endpoint (`/qr-login-availability`).
 	// -----------------------------------------------------------------------

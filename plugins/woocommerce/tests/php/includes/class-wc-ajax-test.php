@@ -1729,6 +1729,41 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should set variation sale prices from their regular prices.
+	 * @testWith ["100", "10", "", "90"]
+	 *           ["100", "10%", "", "90"]
+	 *           ["100.55", "10.25", "", "90.3"]
+	 *           ["100.55", "10.5%", "", "89.99"]
+	 *           ["45", "23.5%", "", "34.43"]
+	 *           ["5", "10", "", "0"]
+	 *           ["", "10%", "", ""]
+	 *           ["100", "0", "25", ""]
+	 *           ["100", "0%", "25", ""]
+	 *           ["100", "", "25", "25"]
+	 *           ["100", "invalid", "25", "25"]
+	 *           ["100", "-10", "25", "25"]
+	 *
+	 * @param string $regular_price Regular price.
+	 * @param string $adjustment Price adjustment.
+	 * @param string $sale_price Existing sale price.
+	 * @param string $expected_sale_price Expected sale price.
+	 */
+	public function test_bulk_sale_price_from_regular_price( string $regular_price, string $adjustment, string $sale_price, string $expected_sale_price ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_price_from_regular_price' );
+		$method->setAccessible( true );
+		$method->invokeArgs( null, array( array( $variation->get_id() ), array( 'value' => $adjustment ) ) );
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $expected_sale_price, $variation->get_sale_price( 'edit' ), 'The sale price should be calculated from the regular price.' );
+	}
+
+	/**
 	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
 	 */
 	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
@@ -1759,6 +1794,195 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'::_ajax_nonce=',
 			(string) $this->_last_response,
 			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
+	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
+	 * @dataProvider update_order_review_notice_cases_provider
+	 *
+	 * @param array[] $notices                Notices to add during the checkout update.
+	 * @param string  $expected_result        Expected legacy AJAX result, which only reports whether a notice was rendered.
+	 * @param bool    $expected_has_errors    Expected error flag.
+	 * @param bool    $reload_checkout        Whether the callback requests a checkout reload.
+	 * @param bool    $suppress_notice_output Whether a filter empties `woocommerce_notice_types`, the way Funnel Builder does on AJAX requests.
+	 */
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, bool $suppress_notice_output = false ): void {
+		$product            = null;
+		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer  = clone WC()->customer;
+		$session_keys       = array( 'chosen_shipping_methods', 'chosen_payment_method', 'reload_checkout', 'refresh_totals', 'customer' );
+		$original_session   = array();
+		$captured_post_data = null;
+		$post_data          = 'payment_method=test-gateway';
+
+		foreach ( $session_keys as $session_key ) {
+			$original_session[ $session_key ] = array(
+				'exists' => isset( WC()->session->{$session_key} ),
+				'value'  => WC()->session->get( $session_key ),
+			);
+		}
+
+		try {
+			wc_clear_notices();
+			unset( WC()->session->reload_checkout, WC()->session->refresh_totals );
+			WC()->cart->empty_cart();
+
+			$product       = WC_Helper_Product::create_simple_product();
+			$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+			$this->assertNotFalse( $cart_item_key, 'The checkout update fixture product should be added to the cart.' );
+
+			$callback = static function ( $received_post_data ) use ( $notices, $reload_checkout, &$captured_post_data ) {
+				$captured_post_data = $received_post_data;
+				foreach ( $notices as $notice ) {
+					wc_add_notice( $notice['message'], $notice['type'] );
+				}
+				if ( $reload_checkout ) {
+					WC()->session->set( 'reload_checkout', true );
+				}
+			};
+			add_action( 'woocommerce_checkout_update_order_review', $callback, 10, 1 );
+
+			if ( $suppress_notice_output ) {
+				add_filter( 'woocommerce_notice_types', '__return_empty_array' );
+			}
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => $post_data,
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The checkout update should return a JSON array.' );
+			$this->assertSame( $post_data, $captured_post_data, 'The public update hook should receive the exact posted checkout data.' );
+			$this->assertSame( $expected_result, $response['result'], 'The legacy result should keep reporting whether any notice was rendered.' );
+			$this->assertSame( $expected_has_errors, $response['has_errors'], 'Only a response containing an error notice should report errors.' );
+			$this->assertSame( $reload_checkout, $response['reload'], 'The response should preserve the requested reload state.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
+
+			if ( $reload_checkout || $suppress_notice_output || empty( $notices ) ) {
+				$this->assertSame( '', $response['messages'], 'The response should carry no rendered notices.' );
+			} else {
+				foreach ( $notices as $notice ) {
+					$this->assertStringContainsString( $notice['message'], $response['messages'], 'The response should retain each rendered notice message.' );
+					$this->assertStringContainsString( $notice['class'], $response['messages'], 'The response should retain each rendered notice type.' );
+				}
+			}
+		} finally {
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			foreach ( $original_session as $session_key => $session_state ) {
+				if ( $session_state['exists'] ) {
+					WC()->session->set( $session_key, $session_state['value'] );
+				} else {
+					unset( WC()->session->{$session_key} );
+				}
+			}
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * Data provider for update order review notice classification.
+	 *
+	 * The legacy result stays `failure` whenever a notice was rendered, whatever its type, so only
+	 * the error flag tells a real failure apart from a success or info notice. Both report what
+	 * rendered, so a queued error that a filter keeps off the page counts for neither.
+	 *
+	 * @return array[]
+	 */
+	public static function update_order_review_notice_cases_provider(): array {
+		return array(
+			'no notices'                     => array(
+				array(),
+				'success',
+				false,
+				false,
+			),
+			'success notice'                 => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+				),
+				'failure',
+				false,
+				false,
+			),
+			'neutral notice'                 => array(
+				array(
+					array(
+						'type'    => 'notice',
+						'message' => 'Address details updated.',
+						'class'   => 'woocommerce-info',
+					),
+				),
+				'failure',
+				false,
+				false,
+			),
+			'error notice'                   => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+			),
+			'mixed notices with an error'    => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+			),
+			'error notice with reload'       => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'Payment method configuration changed.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'success',
+				false,
+				true,
+			),
+			'error notice kept off the page' => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'success',
+				false,
+				false,
+				true,
+			),
 		);
 	}
 
@@ -2383,6 +2607,47 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
 		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * The Grant access product search must honor the include/exclude parameters so
+	 * already-granted products do not reappear in the results.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68101
+	 */
+	public function test_json_search_downloadable_products_honors_include_and_exclude(): void {
+		$product_one = WC_Helper_Product::create_simple_product();
+		$product_one->set_name( 'Exclusit Download One' );
+		$product_one->set_downloadable( true );
+		$product_one->save();
+
+		$product_two = WC_Helper_Product::create_simple_product();
+		$product_two->set_name( 'Exclusit Download Two' );
+		$product_two->set_downloadable( true );
+		$product_two->save();
+
+		$this->_setRole( 'administrator' );
+
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['term']     = 'Exclusit Download';
+		$_GET['exclude']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The search should return a result set.' );
+		$this->assertArrayHasKey( $product_two->get_id(), $response, 'The non-excluded product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_one->get_id(), $response, 'An excluded (already granted) product must not reappear in the results.' );
+
+		// The include allowlist must be honored as well.
+		unset( $_GET['exclude'] );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['include']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The include search should return a result set.' );
+		$this->assertArrayHasKey( $product_one->get_id(), $response, 'The included product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_two->get_id(), $response, 'A product outside the include allowlist must not be part of the results.' );
 	}
 
 	/**

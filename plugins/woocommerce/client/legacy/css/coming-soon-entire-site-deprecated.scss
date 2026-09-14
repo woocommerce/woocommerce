@@ -44,6 +44,7 @@ body:has(.woocommerce-coming-soon-entire-site) {
 	}
 
 	.wp-container-core-group-is-layout-4 {
+
 		&.wp-container-core-group-is-layout-4 {
 			justify-content: space-between;
 		}
@@ -89,6 +90,7 @@ body:has(.woocommerce-coming-soon-entire-site) {
 	}
 
 	.coming-soon-cover {
+
 		.wp-block-cover__background {
 			background-color: var(--woocommerce-coming-soon-color) !important;
 		}
@@ -119,6 +121,7 @@ body:has(.woocommerce-coming-soon-entire-site) {
 		gap: 10px;
 		box-sizing: border-box;
 	}
+
 	.wp-block-loginout a {
 		color: #fff;
 		text-decoration: none;
@@ -131,4 +134,5 @@ body:has(.woocommerce-coming-soon-entire-site) {
 .woocommerce-coming-soon-entire-site .wp-block-loginout a {
 	text-decoration: none;
 }
+
 /* End of styles for the deprecated version of the coming soon block */

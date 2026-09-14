@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Check likely-purchasable variations first in WC_Product_Variable::has_purchasable_variations() so listings and Store API responses stop hydrating every variation of each variable product.
