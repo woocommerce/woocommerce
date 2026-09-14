@@ -192,6 +192,8 @@ abstract class AbstractFieldType {
 	/**
 	 * Converts a stored meta value into the type the rest of checkout works with.
 	 *
+	 * @since 11.2.0
+	 *
 	 * @param mixed $value The stored value.
 	 * @return mixed The converted value.
 	 */

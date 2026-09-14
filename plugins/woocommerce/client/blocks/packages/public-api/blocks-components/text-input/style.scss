@@ -57,7 +57,7 @@
 
 		height: 50px;
 
-		&:focus {
+		&:focus-within {
 			background-color: $input-background-light;
 			color: $input-text-light;
 			border: 1.5px solid currentColor;
@@ -68,7 +68,7 @@
 			border-color: $input-border-dark;
 			color: $input-text-dark;
 
-			&:focus {
+			&:focus-within {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
 				border: 1.5px solid currentColor;
@@ -78,7 +78,6 @@
 
 	&:not(.is-active) input[type="date"] {
 		// Hide browser default mask (dd/mm/YYYY) when a date field is not active (no value, not focused).
-		// Use text-indent here because using transparent would conflict with our calendar icon-hiding hack.
 		text-indent: -9999px;
 
 		&::-webkit-datetime-edit {
@@ -101,6 +100,11 @@
 
 	// Clean out chrome default padding on segments that makes the field visually off compared to other fields.
 	input[type="date"] {
+		// Chrome moves focus into the calendar button, so :focus no longer matches the input.
+		&:focus-within:not(:focus) {
+			outline: 1px auto -webkit-focus-ring-color;
+		}
+
 		&::-webkit-datetime-edit,
 		&::-webkit-datetime-edit-fields-wrapper {
 			padding: 0;
@@ -116,8 +120,7 @@
 		}
 	}
 
-	// Shared by the invisible native indicator (the click target) and the visible icon, which must
-	// sit exactly on top of each other.
+	// Keep the native calendar button and the custom icon aligned.
 	@mixin date-icon-position {
 		position: absolute;
 		top: 25px;
@@ -127,54 +130,24 @@
 		height: 24px;
 	}
 
-	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
-	// The visible icon is our own so that we can control its position freely.
+	// Hide only the native image so the calendar button keeps its focus ring.
 	input[type="date"]::-webkit-calendar-picker-indicator {
 		@include date-icon-position;
 		margin: 0;
 		padding: 0;
-		opacity: 0;
+		background-image: none;
 		cursor: pointer;
-	}
-
-	// Firefox paints its native calendar icon with currentColor and exposes no pseudo-element to hide it,
-	// so we make the color transparent (hiding the icon) and repaint the text via -webkit-text-fill-color.
-	// Both borders derive from currentColor too, so they get explicit colors instead.
-	@supports (-moz-appearance: none) {
-		input[type="date"] {
-			// $universal-border-strong is derived from currentColor, so the resting border needs its own
-			// explicit color. The dark variant already has one.
-			border-color: color-mix(in srgb, $input-text-light 80%, transparent);
-
-			&,
-			&:focus {
-				color: transparent;
-				-webkit-text-fill-color: $input-text-light;
-			}
-
-			&:focus {
-				border-color: $input-text-light;
-			}
-
-			.has-dark-controls & {
-				&,
-				&:focus {
-					color: transparent;
-					-webkit-text-fill-color: $input-text-dark;
-				}
-
-				&:focus {
-					border-color: $input-text-dark;
-				}
-			}
-		}
 	}
 
 	.wc-block-components-text-input__date-icon {
 		@include date-icon-position;
-		// The icon is decorative only, and clicks should pass through to the native hidden calendar button.
+		// Let clicks reach the native calendar button.
 		pointer-events: none;
 		color: $input-text-light;
+
+		@supports (-moz-appearance: none) {
+			display: none;
+		}
 
 		svg {
 			display: block;
@@ -207,7 +180,7 @@
 	&.is-active input[type="date"] {
 		padding: $gap-large $gap-smaller + 1px $gap-smaller;
 
-		&:focus {
+		&:focus-within {
 			padding-top: $gap-large;
 			padding-left: $gap-smaller + 0.5px;
 		}
@@ -223,22 +196,22 @@
 	&.has-error input {
 		&,
 		&:hover,
-		&:focus,
+		&:focus-within,
 		&:active {
 			border-color: $alert-red;
 		}
-		&:focus {
+		&:focus-within {
 			box-shadow: 0 0 0 0.5px $alert-red;
 		}
 
 		.has-dark-controls &,
 		.has-dark-controls &:hover,
-		.has-dark-controls &:focus,
+		.has-dark-controls &:focus-within,
 		.has-dark-controls &:active {
 			border-color: color.adjust($alert-red, $lightness: 30%);
 		}
 
-		.has-dark-controls &:focus {
+		.has-dark-controls &:focus-within {
 			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
 		}
 	}

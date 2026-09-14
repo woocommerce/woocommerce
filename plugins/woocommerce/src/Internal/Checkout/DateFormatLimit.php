@@ -85,8 +85,11 @@ final class DateFormatLimit implements Keyword {
 			case 'formatExclusiveMinimum':
 				$valid = $comparison > 0;
 				break;
-			default:
+			case 'formatExclusiveMaximum':
 				$valid = $comparison < 0;
+				break;
+			default:
+				return $this->error( $schema, $context, $this->keyword, 'Unsupported date comparison keyword.' );
 		}
 
 		return $valid ? null : $this->error(
