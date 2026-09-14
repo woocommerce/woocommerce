@@ -71,9 +71,21 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$order = new WC_Order();
 		$order->set_status( $status );
 		$order->set_billing_first_name( 'Jane' );
+		$order->set_total( '10.00' );
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Builds the `<wp:postmeta>` block the exporter emits for a key/value pair.
+	 *
+	 * @param string $key   Meta key.
+	 * @param string $value Meta value.
+	 * @return string
+	 */
+	private function postmeta_xml( string $key, string $value ): string {
+		return "<wp:meta_key><![CDATA[{$key}]]></wp:meta_key>\n\t\t\t\t<wp:meta_value><![CDATA[{$value}]]></wp:meta_value>";
 	}
 
 	/**
@@ -95,7 +107,81 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include trashed orders like the core exporter does.
+	 * @testdox Should emit the post fields the CPT data store would have written.
+	 */
+	public function test_exports_post_fields(): void {
+		update_option( 'timezone_string', 'America/New_York' );
+
+		$order = $this->create_order();
+		$order->set_date_created( 1705312800 );
+		$order->set_customer_note( 'Leave at the door' );
+		$order->save();
+
+		$xml = $this->export( 'shop_order' );
+
+		$this->assertStringContainsString( "<title><![CDATA[Order #{$order->get_id()}]]></title>", $xml );
+		$this->assertStringContainsString( '<wp:status><![CDATA[wc-processing]]></wp:status>', $xml );
+		$this->assertStringContainsString( '<wp:post_type><![CDATA[shop_order]]></wp:post_type>', $xml );
+		$this->assertStringContainsString( '<wp:post_date><![CDATA[2024-01-15 05:00:00]]></wp:post_date>', $xml, 'post_date is site-local time' );
+		$this->assertStringContainsString( '<wp:post_date_gmt><![CDATA[2024-01-15 10:00:00]]></wp:post_date_gmt>', $xml, 'post_date_gmt is UTC' );
+		$this->assertStringContainsString( '<excerpt:encoded><![CDATA[Leave at the door]]></excerpt:encoded>', $xml, 'Customer note lives in the excerpt' );
+		$this->assertStringContainsString( "<wp:post_password><![CDATA[{$order->get_order_key()}]]></wp:post_password>", $xml, 'Order key lives in the password' );
+		$this->assertStringContainsString( '<wp:post_parent>0</wp:post_parent>', $xml );
+	}
+
+	/**
+	 * @testdox Should emit the internal order meta the posts data store reads back.
+	 */
+	public function test_exports_internal_meta(): void {
+		$order = $this->create_order();
+		$order->set_customer_id( 7 );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_payment_method( 'cod' );
+		$order->set_date_paid( 1705312800 );
+		$order->set_prices_include_tax( true );
+		$order->save();
+
+		$xml = $this->export( 'shop_order' );
+
+		$this->assertStringContainsString( $this->postmeta_xml( '_customer_user', '7' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_billing_first_name', 'Jane' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_billing_last_name', 'Doe' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_payment_method', 'cod' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_order_total', '10.00' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_order_key', $order->get_order_key() ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_date_paid', '1705312800' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_prices_include_tax', 'yes' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_billing_address_index', implode( ' ', $order->get_address( 'billing' ) ) ), $xml );
+	}
+
+	/**
+	 * @testdox Should emit custom meta and honor the core wxr_export_skip_postmeta filter.
+	 */
+	public function test_exports_custom_meta_and_honors_skip_filter(): void {
+		$order = $this->create_order();
+		$order->add_meta_data( '_tracking_number', 'ABC123' );
+		$order->add_meta_data( 'gift_wrap', array( 'color' => 'red' ) );
+		$order->add_meta_data( '_edit_lock', 'skip me' );
+		$order->save();
+
+		add_filter(
+			'wxr_export_skip_postmeta',
+			function ( $skip, $meta_key ) {
+				return '_edit_lock' === $meta_key ? true : $skip;
+			},
+			10,
+			2
+		);
+
+		$xml = $this->export( 'shop_order' );
+
+		$this->assertStringContainsString( $this->postmeta_xml( '_tracking_number', 'ABC123' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( 'gift_wrap', serialize( array( 'color' => 'red' ) ) ), $xml ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$this->assertStringNotContainsString( '_edit_lock', $xml, 'Meta skipped by the filter must not be exported' );
+	}
+
+	/**
+	 * @testdox Should include trashed orders with the trash status like the core exporter does.
 	 */
 	public function test_exports_trashed_orders(): void {
 		$order    = $this->create_order();
@@ -105,6 +191,32 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$xml = $this->export( 'shop_order' );
 
 		$this->assertStringContainsString( "<wp:post_id>{$order_id}</wp:post_id>", $xml );
+		$this->assertStringContainsString( '<wp:status><![CDATA[trash]]></wp:status>', $xml );
+	}
+
+	/**
+	 * @testdox Should export refunds with their parent only when exporting all content.
+	 */
+	public function test_exports_refunds_only_with_all_content(): void {
+		$order  = $this->create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 4,
+				'reason'   => 'Damaged',
+			)
+		);
+		$this->assertNotWPError( $refund );
+
+		$orders_only = $this->export( 'shop_order' );
+		$all_content = $this->export( 'all' );
+
+		$this->assertSame( 1, substr_count( $orders_only, '<item>' ), 'Orders export must not include refunds' );
+		$this->assertSame( 2, substr_count( $all_content, '<item>' ), 'All content export includes the refund' );
+		$this->assertStringContainsString( '<wp:post_type><![CDATA[shop_order_refund]]></wp:post_type>', $all_content );
+		$this->assertStringContainsString( "<wp:post_parent>{$order->get_id()}</wp:post_parent>", $all_content );
+		$this->assertStringContainsString( '<excerpt:encoded><![CDATA[Damaged]]></excerpt:encoded>', $all_content );
+		$this->assertStringContainsString( $this->postmeta_xml( '_refund_amount', '4' ), $all_content );
 	}
 
 	/**
