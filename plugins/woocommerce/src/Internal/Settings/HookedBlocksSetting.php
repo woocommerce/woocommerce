@@ -42,6 +42,7 @@ class HookedBlocksSetting {
 	public function __construct() {
 		add_filter( 'woocommerce_general_settings', array( $this, 'handle_woocommerce_general_settings' ) );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_' . self::FIELD_ID, array( $this, 'handle_woocommerce_admin_settings_sanitize_option' ) );
+		add_filter( 'pre_option_' . self::FIELD_ID, array( $this, 'handle_pre_option_woocommerce_hooked_blocks_enabled' ) );
 	}
 
 	/**
@@ -120,6 +121,17 @@ class HookedBlocksSetting {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Report the virtual field's value from the hooked blocks option, so readers such as the settings REST API get the real state.
+	 *
+	 * @internal
+	 *
+	 * @return string "yes" or "no".
+	 */
+	public function handle_pre_option_woocommerce_hooked_blocks_enabled() {
+		return $this->is_enabled() ? 'yes' : 'no';
 	}
 
 	/**

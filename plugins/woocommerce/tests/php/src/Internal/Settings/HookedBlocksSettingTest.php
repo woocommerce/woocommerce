@@ -106,7 +106,7 @@ class HookedBlocksSettingTest extends WC_Unit_Test_Case {
 		WC_Admin_Settings::save_fields( $this->sut->handle_woocommerce_general_settings( array() ), $data );
 
 		$this->assertSame( 'stable' === $expected ? WC()->stable_version() : $expected, get_option( HookedBlocksSetting::OPTION_NAME ) );
-		$this->assertFalse( get_option( HookedBlocksSetting::FIELD_ID ), 'The virtual field should never be stored' );
+		$this->assertNull( $this->get_stored_field_value(), 'The virtual field should never be stored' );
 	}
 
 	/**
@@ -117,7 +117,17 @@ class HookedBlocksSettingTest extends WC_Unit_Test_Case {
 
 		( new \ReflectionMethod( \WC_Install::class, 'create_options' ) )->invoke( null );
 
-		$this->assertFalse( get_option( HookedBlocksSetting::FIELD_ID ), 'The virtual field should not get a default option on install' );
+		$this->assertNull( $this->get_stored_field_value(), 'The virtual field should not get a default option on install' );
+	}
+
+	/**
+	 * Read the virtual field's row straight from the options table, bypassing the pre_option filter.
+	 *
+	 * @return string|null Stored value, or null when no row exists.
+	 */
+	private function get_stored_field_value(): ?string {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", HookedBlocksSetting::FIELD_ID ) );
 	}
 
 	/**
