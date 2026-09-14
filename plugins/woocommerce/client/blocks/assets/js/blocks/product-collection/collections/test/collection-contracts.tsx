@@ -434,6 +434,23 @@ describe( 'Product Collection built-in collection contracts', () => {
 		}
 	);
 
+	// Every case above builds its expected query by spreading DEFAULT_QUERY, so the
+	// shared defaults are only ever compared against themselves: changing perPage
+	// from 9 leaves all of them green. The deleted "Items per page, offset & max
+	// page to show" and "sort products by title" E2E titles were the only thing
+	// holding these values, so pin them against literals here.
+	it( 'pins the query defaults every collection inherits', () => {
+		expect( DEFAULT_QUERY ).toMatchObject( {
+			perPage: 9,
+			pages: 0,
+			offset: 0,
+			postType: 'product',
+			order: 'asc',
+			orderBy: 'title',
+			inherit: false,
+		} );
+	} );
+
 	it( 'keeps the default no-results block in the catalog template', () => {
 		expect(
 			getRegisteredCollection( CoreCollectionNames.PRODUCT_CATALOG )
