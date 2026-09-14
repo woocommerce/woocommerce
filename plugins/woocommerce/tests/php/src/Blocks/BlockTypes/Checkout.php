@@ -214,7 +214,15 @@ class Checkout extends \WP_UnitTestCase {
 			// The zone, the method rows and both options are inside the transaction.
 			// The memo on the WC_Shipping singleton is not, and this class extends
 			// WP_UnitTestCase, so nothing else reloads it.
-			$this->flush_shipping_method_cache();
+			//
+			// Drop the memo rather than reloading it. A reload here runs before
+			// tear_down() rolls anything back, so it rebuilds the memo from option
+			// values this test is about to revert. That happens to read back clean
+			// today, because pickup_location is not among the methods registered in
+			// the test environment, but it stays clean by accident rather than by
+			// design. Nulling the memo lets the next reader load from whatever the
+			// database says once the transaction is gone.
+			WC()->shipping()->unregister_shipping_methods();
 		}
 	}
 
