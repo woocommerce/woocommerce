@@ -500,7 +500,7 @@ class WC_Meta_Box_Order_Data {
 								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
 								 */
 								?>
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', $found_users ) ) ) ) ); ?></option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', $found_users ) ) ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ); ?></option>
 								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
