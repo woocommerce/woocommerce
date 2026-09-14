@@ -18,9 +18,9 @@ import { folderStarred } from '@woocommerce/icons';
 import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withCategory } from '@woocommerce/block-hocs';
+import { getInnerBlockBy } from '@woocommerce/utils';
 import type { WP_REST_API_Category } from 'wp-types';
 import { useDispatch, useRegistry } from '@wordpress/data';
-import type { BlockInstance } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
@@ -66,26 +66,18 @@ const withCoverAttributes = ( Component: ComponentType< Props > ) =>
 			}
 			const oldUrl = previousUrl.current;
 			previousUrl.current = undefined;
-			const updateCategoryButton = (
-				children: BlockInstance[]
-			): boolean =>
-				children.some( ( child ) => {
-					if (
-						child.name === 'core/button' &&
-						! child.attributes.metadata?.bindings?.url &&
-						child.attributes.url === oldUrl &&
-						category.permalink
-					) {
-						void updateBlockAttributes( child.clientId, {
-							url: category.permalink,
-						} );
-						return true;
-					}
-					return updateCategoryButton( child.innerBlocks );
-				} );
-			updateCategoryButton(
-				registry.select( blockEditorStore ).getBlocks( clientId )
+			const button = getInnerBlockBy(
+				registry.select( blockEditorStore ).getBlock( clientId ),
+				( child ) =>
+					child.name === 'core/button' &&
+					! child.attributes.metadata?.bindings?.url &&
+					child.attributes.url === oldUrl
 			);
+			if ( button && category.permalink ) {
+				void updateBlockAttributes( button.clientId, {
+					url: category.permalink,
+				} );
+			}
 		}, [
 			attributes.categoryId,
 			category,
