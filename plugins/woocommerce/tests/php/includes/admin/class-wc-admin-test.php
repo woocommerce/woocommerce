@@ -20,25 +20,11 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	private WC_Admin $sut;
 
 	/**
-	 * Original $_GET.
-	 *
-	 * @var array<string,mixed>
-	 */
-	private array $original_get = array();
-
-	/**
 	 * Original $_SERVER.
 	 *
 	 * @var array<string,mixed>
 	 */
 	private array $original_server = array();
-
-	/**
-	 * Original current user ID.
-	 *
-	 * @var int
-	 */
-	private int $original_current_user_id = 0;
 
 	/**
 	 * The My Account page this test creates, so the redirect target is a real page.
@@ -48,26 +34,19 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	private int $myaccount_page_id = 0;
 
 	/**
-	 * The site's My Account page id before this test replaced it.
-	 *
-	 * @var mixed
-	 */
-	private $original_myaccount_page_id = null;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut                      = new WC_Admin();
-		$this->original_get             = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->original_server          = $_SERVER;
-		$this->original_current_user_id = get_current_user_id();
+		$this->sut = new WC_Admin();
+
+		// $_SERVER is the one request global the base class leaves alone: it only resets
+		// it for core's own suite, which never runs here.
+		$this->original_server = $_SERVER;
 
 		// Without a real My Account page, wc_get_page_permalink() falls back to the home URL and
 		// the redirect assertions cannot tell My Account from the site root.
-		$this->original_myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
-		$this->myaccount_page_id          = self::factory()->post->create(
+		$this->myaccount_page_id = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
 				'post_status' => 'publish',
@@ -84,12 +63,7 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
-		update_option( 'woocommerce_myaccount_page_id', $this->original_myaccount_page_id );
-		wp_delete_post( $this->myaccount_page_id, true );
-		$_GET    = $this->original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$_SERVER = $this->original_server;
-		wp_set_current_user( $this->original_current_user_id );
 		parent::tearDown();
 	}
 
