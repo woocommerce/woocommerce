@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Internal\Admin\SystemStatusReport;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -479,6 +480,8 @@ if ( file_exists( $plugin_path ) ) {
 				?>
 			</td>
 		</tr>
+
+		<?php SystemStatusReport::get_instance()->render_order_meta_health( $database ); ?>
 
 		<?php if ( ! empty( $database['database_size'] ) && ! empty( $database['database_tables'] ) ) : ?>
 			<tr>

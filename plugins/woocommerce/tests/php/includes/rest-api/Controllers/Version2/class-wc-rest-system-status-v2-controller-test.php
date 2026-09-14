@@ -61,4 +61,21 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			'Template overridden via wc_get_template filter should appear in overrides'
 		);
 	}
+
+	/**
+	 * @testdox Should include estimated table row counts in database information.
+	 */
+	public function test_get_database_info_includes_estimated_rows(): void {
+		global $wpdb;
+
+		$database = $this->sut->get_database_info();
+		$tables   = array_merge( $database['database_tables']['woocommerce'], $database['database_tables']['other'] );
+		$table    = $tables[ $wpdb->prefix . 'wc_orders_meta' ];
+
+		$this->assertArrayHasKey( 'rows', $table );
+		$this->assertSame(
+			(int) $wpdb->get_var( $wpdb->prepare( 'SELECT TABLE_ROWS FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s', DB_NAME, $wpdb->prefix . 'wc_orders_meta' ) ),
+			$table['rows']
+		);
+	}
 }

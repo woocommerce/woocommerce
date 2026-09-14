@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -61,6 +62,56 @@ class SystemStatusReport {
 					?>
 				</tbody>
 			</table>
+		<?php
+	}
+
+	/**
+	 * Render the HPOS order metadata check using existing database statistics.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $database Database information from the system status endpoint.
+	 */
+	public function render_order_meta_health( array $database ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$tables     = array_merge( $database['database_tables']['woocommerce'] ?? array(), $database['database_tables']['other'] ?? array() );
+		$order_rows = $tables[ $wpdb->prefix . 'wc_orders' ]['rows'] ?? null;
+		$meta_table = $tables[ $wpdb->prefix . 'wc_orders_meta' ] ?? array();
+		$meta_rows  = $meta_table['rows'] ?? null;
+		$warning    = false;
+		$message    = __( 'Unable to check: order table row estimates are unavailable or the estimated order count is zero.', 'woocommerce' );
+
+		if ( is_numeric( $order_rows ) && 0 < $order_rows && is_numeric( $meta_rows ) && 0 <= $meta_rows ) {
+			$ratio = $meta_rows / $order_rows;
+			// Row estimates can be imprecise, so only flag extreme growth as a reason to investigate.
+			$warning = 100000 <= $meta_rows && 1000 < $ratio;
+			$message = sprintf(
+				/* translators: 1: Estimated metadata rows, 2: Estimated order rows, 3: Metadata rows per order, 4: Metadata table size in MB. */
+				__( 'Estimates: %1$s metadata rows / %2$s order rows (%3$s metadata rows per order). Metadata table size: %4$s MB.', 'woocommerce' ),
+				number_format_i18n( (float) $meta_rows ),
+				number_format_i18n( (float) $order_rows ),
+				number_format_i18n( $ratio, 2 ),
+				number_format_i18n( (float) $meta_table['data'] + (float) $meta_table['index'], 2 )
+			);
+		}
+		?>
+		<tr>
+			<td data-export-label="HPOS order metadata"><?php esc_html_e( 'HPOS order metadata', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( __( 'Approximate database statistics. A high ratio can indicate excessive metadata but does not confirm duplicate or corrupt data.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php if ( $warning ) : ?>
+					<mark class="error"><span class="dashicons dashicons-warning"></span>
+						<?php esc_html_e( 'Unusually high order metadata volume. Excessive metadata may affect performance. Ask your developer or hosting provider to investigate.', 'woocommerce' ); ?>
+					</mark><br>
+				<?php endif; ?>
+				<?php echo esc_html( $message ); ?>
+			</td>
+		</tr>
 		<?php
 	}
 

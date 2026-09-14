@@ -1071,6 +1071,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					"SELECT
 					    table_name AS 'name',
 						engine AS 'engine',
+					    table_rows AS 'rows',
 					    round( ( data_length / 1024 / 1024 ), 2 ) 'data',
 					    round( ( index_length / 1024 / 1024 ), 2 ) 'index'
 					FROM information_schema.TABLES
@@ -1136,6 +1137,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'data'   => $table->data,
 					'index'  => $table->index,
 					'engine' => $table->engine,
+					'rows'   => isset( $table->rows ) ? (int) $table->rows : null,
 				);
 
 				$database_size['data']  += $table->data;
