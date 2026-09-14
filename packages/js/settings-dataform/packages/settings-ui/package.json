@@ -5,6 +5,9 @@
 	"license": "GPL-2.0-or-later",
 	"main": "build/index.js",
 	"module": "build-module/index.mjs",
+	"wpCopyFiles": {
+		"files": [ "src/ViewConfig.php" ]
+	},
 	"dependencies": {
 		"@wordpress/i18n": "catalog:wp-min",
 		"react": "18.3.1",

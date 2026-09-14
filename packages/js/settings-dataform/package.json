@@ -6,16 +6,28 @@
 	"license": "GPL-2.0-or-later",
 	"packageManager": "pnpm@10.33.0",
 	"scripts": {
-		"build": "wp-build",
-		"build:core": "node build-core.mjs",
-		"lint:types": "tsc --noEmit",
-		"start": "wp-build --watch",
-		"watch:core": "node build-core.mjs --watch"
+		"build": "pnpm clean && pnpm wp-build",
+		"build:core": "pnpm prepare:core && pnpm wp-build",
+		"clean": "rm -rf build",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:lang:types": "tsc --noEmit",
+		"lint:types": "pnpm lint:lang:types",
+		"prepare:core": "pnpm clean && rm -rf ../../../plugins/woocommerce/assets/client/settings-dataform && mkdir -p ../../../plugins/woocommerce/assets/client/settings-dataform && ln -s ../../../plugins/woocommerce/assets/client/settings-dataform build",
+		"start": "pnpm watch",
+		"watch": "pnpm wp-build --watch",
+		"watch:build": "pnpm watch",
+		"watch:core": "pnpm prepare:core && pnpm watch",
+		"wp-build": "wp-build"
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x",
 		"@wordpress/build": "catalog:tooling",
+		"@wordpress/editor": "catalog:wp-min",
+		"@wordpress/private-apis": "catalog:wp-min",
 		"typescript": "5.7.x"
+	},
+	"dependencies": {
+		"@wordpress/admin-ui": "2.10.0"
 	},
 	"wpPlugin": {
 		"name": "woocommerce_settings_ui_experimental",
