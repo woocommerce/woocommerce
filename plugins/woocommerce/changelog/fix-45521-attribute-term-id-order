@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor the Term ID sort order for product attribute terms and variation dropdowns.
