@@ -1042,7 +1042,7 @@ add_action( 'admin_footer', 'flush_rewrite_rules_on_shop_page_save' );
  * @return array
  */
 function wc_fix_rewrite_rules( $rules ) {
-	global $wp_rewrite;
+	global $wp_rewrite, $wpdb;
 
 	$permalinks = wc_get_permalink_structure();
 
@@ -1060,7 +1060,9 @@ function wc_fix_rewrite_rules( $rules ) {
 	$uses_shop_as_base = false;
 
 	// The product base is site-wide, while multilingual extensions can filter the Shop page for the current request.
-	$shop_page_ids = array_unique( array( absint( get_option( 'woocommerce_shop_page_id' ) ), $shop_page_id ) );
+	// Read the stored ID directly too: get_option() can already return a translated Shop page.
+	$stored_shop_page_id = absint( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'woocommerce_shop_page_id'" ) );
+	$shop_page_ids       = array_unique( array( absint( get_option( 'woocommerce_shop_page_id' ) ), $shop_page_id, $stored_shop_page_id ) );
 	foreach ( $shop_page_ids as $candidate_shop_page_id ) {
 		$shop_page = $candidate_shop_page_id > 0 ? get_post( $candidate_shop_page_id ) : null;
 		$shop_base = $shop_page instanceof WP_Post && 'page' === $shop_page->post_type ? trim( rawurldecode( (string) get_page_uri( $candidate_shop_page_id ) ), '/' ) : '';
@@ -1075,13 +1077,16 @@ function wc_fix_rewrite_rules( $rules ) {
 		return $rules;
 	}
 
-	if ( $shop_page_id ) {
-		global $wpdb;
+	// Like WP_Rewrite::page_uri_index(), bypass query filters when building persisted page rules.
+	$pages              = $wpdb->get_results( "SELECT ID, post_name, post_parent FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status NOT IN ( 'auto-draft', 'trash' )" );
+	$page_rewrite_rules = array();
 
-		// Like WP_Rewrite::page_uri_index(), bypass query filters when building persisted page rules.
-		$pages              = $wpdb->get_results( "SELECT ID, post_name, post_parent FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status NOT IN ( 'auto-draft', 'trash' )" );
-		$page_rewrite_rules = array();
-		$subpages           = wp_list_pluck( get_page_children( $shop_page_id, $pages ), 'ID' );
+	// Preserve the filtered Shop rules and include the root matching the persisted product base.
+	foreach ( array_unique( array( $shop_page_id, $candidate_shop_page_id ) ) as $shop_page_id ) {
+		if ( $shop_page_id <= 0 ) {
+			continue;
+		}
+		$subpages = wp_list_pluck( get_page_children( $shop_page_id, $pages ), 'ID' );
 
 		// Subpage rules.
 		foreach ( $subpages as $subpage ) {
@@ -1093,10 +1098,10 @@ function wc_fix_rewrite_rules( $rules ) {
 			}
 			$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
 		}
-
-		// Merge with rules.
-		$rules = array_merge( $page_rewrite_rules, $rules );
 	}
+
+	// Merge with rules.
+	$rules = array_merge( $page_rewrite_rules, $rules );
 
 	return $rules;
 }
