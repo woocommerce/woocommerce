@@ -4,6 +4,7 @@
 import { expect, test, tags, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setFeatureFlag, resetFeatureFlags } from '../../utils/features';
+import { setOption } from '../../utils/options';
 import { wpCLI } from '../../utils/cli';
 
 const compatibilityFailureFragments = [
@@ -25,12 +26,61 @@ const isCompatibilityFailure = ( message: string ): boolean => {
 	);
 };
 
+const recordCompatibilityFailure = (
+	failures: string[],
+	message: string
+): void => {
+	if ( isCompatibilityFailure( message ) ) {
+		failures.push( message );
+	}
+};
+
+const getUpdatedWeightUnit = ( originalUnit: string ): string =>
+	originalUnit === 'kg' ? 'g' : 'kg';
+
 const getBaseURL = ( baseURL: string | undefined ): string => {
 	if ( ! baseURL ) {
 		throw new Error( 'Expected baseURL to be configured.' );
 	}
 
 	return baseURL;
+};
+
+const getPostedFormValue = (
+	postData: string | null,
+	name: string
+): string | null => {
+	if ( ! postData ) {
+		return null;
+	}
+
+	const urlEncodedMarker = `${ name }=`;
+	const urlEncodedIndex = postData.indexOf( urlEncodedMarker );
+	if ( urlEncodedIndex !== -1 ) {
+		const start = urlEncodedIndex + urlEncodedMarker.length;
+		const end = postData.indexOf( '&', start );
+		return decodeURIComponent(
+			end === -1 ? postData.slice( start ) : postData.slice( start, end )
+		);
+	}
+
+	const multipartName = `name="${ name }"`;
+	const nameIndex = postData.indexOf( multipartName );
+	if ( nameIndex === -1 ) {
+		return null;
+	}
+
+	const valueStart = postData.indexOf( '\r\n\r\n', nameIndex );
+	if ( valueStart === -1 ) {
+		return null;
+	}
+
+	const valueEnd = postData.indexOf( '\r\n', valueStart + 4 );
+	if ( valueEnd === -1 ) {
+		return null;
+	}
+
+	return postData.slice( valueStart + 4, valueEnd );
 };
 
 test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
@@ -49,6 +99,15 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		const url = getBaseURL( baseURL );
 
 		await resetFeatureFlags( request, url );
+		await setOption( request, url, 'woocommerce_enable_reviews', 'yes' );
+		await setOption( request, url, 'woocommerce_manage_stock', 'yes' );
+		await setOption( request, url, 'woocommerce_hold_stock_minutes', '60' );
+		await setOption(
+			request,
+			url,
+			'woocommerce_notify_low_stock_amount',
+			'2'
+		);
 		await wpCLI(
 			'wp plugin deactivate settings-ui-component-registration --skip-plugins'
 		);
@@ -58,17 +117,12 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		page,
 	} ) => {
 		const compatibilityFailures: string[] = [];
-		const recordCompatibilityFailure = ( message: string ) => {
-			if ( isCompatibilityFailure( message ) ) {
-				compatibilityFailures.push( message );
-			}
-		};
 
 		page.on( 'pageerror', ( error ) => {
-			recordCompatibilityFailure( error.message );
+			recordCompatibilityFailure( compatibilityFailures, error.message );
 		} );
 		page.on( 'console', ( message ) => {
-			recordCompatibilityFailure( message.text() );
+			recordCompatibilityFailure( compatibilityFailures, message.text() );
 		} );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
@@ -122,7 +176,7 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 
 		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
 		const originalUnit = await weightUnit.inputValue();
-		const updatedUnit = originalUnit === 'kg' ? 'g' : 'kg';
+		const updatedUnit = getUpdatedWeightUnit( originalUnit );
 		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
 
 		try {
@@ -179,6 +233,84 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		await expect( verifiedOwnersOnly ).toBeVisible();
 		// Restoring the original value leaves nothing to save.
 		await expect( saveButton ).toBeDisabled();
+	} );
+
+	test( 'submits an untouched inventory value through classic sanitization', async ( {
+		baseURL,
+		page,
+	} ) => {
+		const url = getBaseURL( baseURL );
+		await setFeatureFlag( request, url, 'settings-ui', true );
+		await setOption( request, url, 'woocommerce_manage_stock', 'yes' );
+		await setOption( request, url, 'woocommerce_hold_stock_minutes', '60' );
+		await setOption(
+			request,
+			url,
+			'woocommerce_notify_low_stock_amount',
+			'02'
+		);
+
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=inventory'
+		);
+
+		const editedHoldStock = page.getByRole( 'spinbutton', {
+			name: 'Hold stock (minutes)',
+		} );
+		const preservedLowStock = page.getByRole( 'spinbutton', {
+			name: 'Low stock threshold',
+		} );
+		const lowStockFormValue = page.locator(
+			'input[type="hidden"][name="woocommerce_notify_low_stock_amount"]'
+		);
+
+		const saveButton = page.getByRole( 'button', {
+			name: 'Save',
+			exact: true,
+		} );
+
+		await expect(
+			page.locator( '[data-wc-settings-ui="1"]' )
+		).toBeVisible();
+		await expect( preservedLowStock ).toHaveValue( '2' );
+		await expect( lowStockFormValue ).toHaveValue( '02' );
+		await editedHoldStock.fill( '61' );
+		await editedHoldStock.blur();
+		await expect( saveButton ).toBeEnabled();
+		await expect( lowStockFormValue ).toHaveValue( '02' );
+
+		const saveRequestPromise = page.waitForRequest( ( httpRequest ) => {
+			return (
+				httpRequest.method() === 'POST' &&
+				httpRequest.url().includes( 'page=wc-settings' )
+			);
+		} );
+		await saveButton.click();
+		const saveRequest = await saveRequestPromise;
+		expect(
+			getPostedFormValue(
+				saveRequest.postData(),
+				'woocommerce_notify_low_stock_amount'
+			)
+		).toBe( '02' );
+
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+			'Your settings have been saved.'
+		);
+		await expect( preservedLowStock ).toBeVisible();
+		await expect( preservedLowStock ).toHaveValue( '2' );
+		await expect( editedHoldStock ).toHaveValue( '61' );
+
+		const [ holdStockOption, lowStockOption ] = await Promise.all( [
+			wpCLI(
+				'wp option get woocommerce_hold_stock_minutes --skip-plugins'
+			),
+			wpCLI(
+				'wp option get woocommerce_notify_low_stock_amount --skip-plugins'
+			),
+		] );
+		expect( holdStockOption.stdout.trim() ).toBe( '61' );
+		expect( lowStockOption.stdout.trim() ).toBe( '2' );
 	} );
 
 	test( 'loads a declared component registration before mounting settings', async ( {

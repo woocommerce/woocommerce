@@ -470,8 +470,14 @@ class OrderController {
 		$all_locales    = wc()->countries->get_country_locale();
 		$address        = $order->get_address( $address_type );
 		$current_locale = $all_locales[ $address['country'] ] ?? [];
+		$default_locale = $all_locales['default'] ?? null;
 
-		foreach ( $all_locales['default'] as $key => $value ) {
+		// A locale filter callback can drop or replace the default entry, so fall back to the unfiltered default fields.
+		if ( ! is_array( $default_locale ) ) {
+			$default_locale = wc()->countries->get_default_address_fields();
+		}
+
+		foreach ( $default_locale as $key => $value ) {
 			// If $current_locale[ $key ] is not empty, merge it with locale default, otherwise just use default locale.
 			$current_locale[ $key ] = ! empty( $current_locale[ $key ] )
 				? wp_parse_args( $current_locale[ $key ], $value )
@@ -770,7 +776,7 @@ class OrderController {
 						 * @param \WC_Product $product Product.
 						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
-						 * @since 9.8.0-dev
+						 * @since 8.1.0
 						 */
 						if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
 							return array(
@@ -796,7 +802,7 @@ class OrderController {
 						 * @param \WC_Product $product Product.
 						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
-						 * @since 9.8.0-dev
+						 * @since 8.1.0
 						 */
 						if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
 							/* translators: 1: product name 2: quantity in stock */

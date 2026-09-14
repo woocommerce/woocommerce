@@ -563,6 +563,7 @@ function get_woocommerce_currency_symbols() {
 			'CAD' => '&#36;',
 			'CDF' => 'Fr',
 			'CHF' => '&#67;&#72;&#70;',
+			'CHW' => 'CHW',
 			'CLP' => '&#36;',
 			'CNY' => '&yen;',
 			'COP' => '&#36;',

@@ -43,6 +43,8 @@ To re-create the environment for a fresh state:
 
 `pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
+Core and Blocks tests share the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:start:blocks` seeds the Blocks profile on top of whatever the database already holds, and `pnpm test:e2e:*` runs against the environment's current state. The Blocks seed resets the shipping zones, tax classes, and tax settings it relies on, so running it after Core tests is safe for those. Other state a Core run leaves behind can still leak into the Blocks profile. If Blocks tests fail after Core tests ran on the same environment, run `pnpm env:e2e:restart` and then `pnpm env:start:blocks`. To go back to Core tests after Blocks, run `pnpm env:e2e:restart`.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
