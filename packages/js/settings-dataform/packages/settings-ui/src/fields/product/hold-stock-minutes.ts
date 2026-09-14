@@ -11,5 +11,6 @@ export default {
 		'Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable.',
 		'woocommerce'
 	),
-	isValid: { min: 0 },
+	isRequired: true,
+	isValid: { min: 2 },
 };
