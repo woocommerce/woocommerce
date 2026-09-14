@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Handles the export of HPOS (High-Performance Order Storage) orders
- * via the WordPress Tools > Export functionality.
+ * Adds HPOS (High-Performance Order Storage) orders to the WordPress Tools > Export file,
+ * and backfills orders created by Tools > Import into the HPOS tables.
  *
  * @since 11.2.0
  */
@@ -23,6 +23,11 @@ class HposOrderExportHandler {
 	 * Number of orders loaded per query while streaming the export.
 	 */
 	private const BATCH_SIZE = 20;
+
+	/**
+	 * Number of imported orders migrated to HPOS per migrator call.
+	 */
+	private const MIGRATION_BATCH_SIZE = 50;
 
 	/**
 	 * Custom orders table controller.
@@ -39,11 +44,11 @@ class HposOrderExportHandler {
 	private DataSynchronizer $data_synchronizer;
 
 	/**
-	 * Legacy data handler used to backfill imported orders into HPOS.
+	 * Migrator used to backfill imported orders from the posts table into HPOS.
 	 *
-	 * @var LegacyDataHandler
+	 * @var PostsToOrdersMigrationController
 	 */
-	private LegacyDataHandler $legacy_data_handler;
+	private PostsToOrdersMigrationController $posts_to_orders_migrator;
 
 	/**
 	 * Cost of goods sold controller, used to know whether the COGS meta is in use.
@@ -60,12 +65,20 @@ class HposOrderExportHandler {
 	private ?array $export_args = null;
 
 	/**
+	 * IDs of order posts created by the import in progress, migrated to HPOS when it ends.
+	 *
+	 * @var int[]
+	 */
+	private array $imported_order_ids = array();
+
+	/**
 	 * Constructor. Registers the export and import hooks.
 	 */
 	public function __construct() {
 		add_action( 'export_wp', array( $this, 'handle_export_wp' ) );
 		add_action( 'rss2_head', array( $this, 'handle_rss2_head' ), 999 );
-		add_action( 'wp_import_insert_post', array( $this, 'handle_wp_import_insert_post' ), 10, 2 );
+		add_action( 'wp_import_insert_post', array( $this, 'handle_wp_import_insert_post' ) );
+		add_action( 'import_end', array( $this, 'handle_import_end' ) );
 	}
 
 	/**
@@ -73,16 +86,16 @@ class HposOrderExportHandler {
 	 *
 	 * @internal
 	 *
-	 * @param CustomOrdersTableController $cot_controller      Custom orders table controller.
-	 * @param DataSynchronizer            $data_synchronizer   Data synchronizer.
-	 * @param LegacyDataHandler           $legacy_data_handler Legacy data handler.
-	 * @param CostOfGoodsSoldController   $cogs_controller     Cost of goods sold controller.
+	 * @param CustomOrdersTableController      $cot_controller           Custom orders table controller.
+	 * @param DataSynchronizer                 $data_synchronizer        Data synchronizer.
+	 * @param PostsToOrdersMigrationController $posts_to_orders_migrator Posts to HPOS migrator.
+	 * @param CostOfGoodsSoldController        $cogs_controller          Cost of goods sold controller.
 	 */
-	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, LegacyDataHandler $legacy_data_handler, CostOfGoodsSoldController $cogs_controller ): void {
-		$this->cot_controller      = $cot_controller;
-		$this->data_synchronizer   = $data_synchronizer;
-		$this->legacy_data_handler = $legacy_data_handler;
-		$this->cogs_controller     = $cogs_controller;
+	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller ): void {
+		$this->cot_controller           = $cot_controller;
+		$this->data_synchronizer        = $data_synchronizer;
+		$this->posts_to_orders_migrator = $posts_to_orders_migrator;
+		$this->cogs_controller          = $cogs_controller;
 	}
 
 	/**
@@ -451,54 +464,45 @@ class HposOrderExportHandler {
 	}
 
 	/**
-	 * Checks if an imported order has enough postmeta to be backfilled to HPOS.
+	 * Remembers order posts created by the WordPress importer.
 	 *
-	 * @param int $post_id The post ID of the imported order.
-	 * @return bool Whether the postmeta is complete enough for backfilling.
-	 */
-	private function is_valid_order_for_backfill( int $post_id ): bool {
-		$required_keys = array(
-			'_order_key',
-			'_order_currency',
-			'_order_total',
-			'_billing_email',
-			'_payment_method',
-			'_order_version',
-		);
-
-		foreach ( $required_keys as $key ) {
-			$value = get_post_meta( $post_id, $key, true );
-			if ( false === $value || '' === $value ) {
-				error_log( "[HPOS Backfill] Skipping order $post_id: missing meta $key" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * When an order is imported via Tools > Import, backfill it into the HPOS table.
+	 * The importer fires this before it writes the post meta, so the migration itself
+	 * waits until `import_end`.
 	 *
 	 * @internal
 	 *
-	 * @param int $post_id          The imported post ID.
-	 * @param int $original_post_id The post ID in the source site.
+	 * @param int|mixed $post_id The imported post ID.
 	 */
-	public function handle_wp_import_insert_post( $post_id, $original_post_id ): void {
-		unset( $original_post_id );
+	public function handle_wp_import_insert_post( $post_id ): void {
+		$post_id = (int) $post_id;
 
-		if ( get_post_type( $post_id ) === 'shop_order' ) {
-			if ( ! $this->is_valid_order_for_backfill( (int) $post_id ) ) {
-				error_log( "HPOS backfill skipped: missing required meta for order $post_id." ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				return;
-			}
+		if ( $post_id <= 0 || ! $this->cot_controller->custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
 
-			try {
-				$this->legacy_data_handler->backfill_order_to_datastore( (int) $post_id, 'posts', 'hpos' );
-			} catch ( \Exception $e ) {
-				error_log( 'HPOS import backfill failed for order ' . $post_id . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
+		if ( in_array( get_post_type( $post_id ), wc_get_order_types( 'cot-migration' ), true ) ) {
+			$this->imported_order_ids[] = $post_id;
+		}
+	}
+
+	/**
+	 * Migrates the imported order posts into the HPOS tables.
+	 *
+	 * Runs after the importer has remapped post parents, so refunds point at the right order.
+	 * The migrator logs failures through the WooCommerce logger.
+	 *
+	 * @internal
+	 */
+	public function handle_import_end(): void {
+		$order_ids                = $this->imported_order_ids;
+		$this->imported_order_ids = array();
+
+		if ( ! $order_ids || ! $this->cot_controller->custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		foreach ( array_chunk( $order_ids, self::MIGRATION_BATCH_SIZE ) as $batch ) {
+			$this->posts_to_orders_migrator->migrate_orders( $batch );
 		}
 	}
 }

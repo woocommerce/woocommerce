@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\ImportExport;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -334,5 +336,88 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$this->sut->handle_rss2_head();
 
 		$this->assertSame( '', (string) ob_get_clean() );
+	}
+
+	/**
+	 * Inserts an order post with meta the way the WordPress importer does.
+	 *
+	 * @param string $post_type Post type.
+	 * @return int Post ID.
+	 */
+	private function insert_imported_post( string $post_type = 'shop_order' ): int {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => $post_type,
+				'post_status' => 'shop_order' === $post_type ? 'wc-processing' : 'publish',
+				'post_title'  => 'Imported',
+			)
+		);
+
+		foreach ( array(
+			'_order_key'          => 'wc_order_imported',
+			'_billing_first_name' => 'Jane',
+			'_order_total'        => '10.00',
+			'_order_currency'     => 'USD',
+		) as $key => $value ) {
+			add_post_meta( $post_id, $key, $value );
+		}
+
+		return $post_id;
+	}
+
+	/**
+	 * Runs the importer hooks the way the WordPress importer fires them.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	private function simulate_import( int $post_id ): void {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
+		$this->sut->handle_wp_import_insert_post( $post_id );
+		$this->sut->handle_import_end();
+		wp_cache_flush();
+	}
+
+	/**
+	 * @testdox Should backfill imported order posts into HPOS once the import ends.
+	 */
+	public function test_backfills_imported_orders_into_hpos_at_import_end(): void {
+		$post_id    = $this->insert_imported_post();
+		$data_store = wc_get_container()->get( OrdersTableDataStore::class );
+
+		$this->sut->handle_wp_import_insert_post( $post_id );
+		$this->assertFalse( $data_store->order_exists( $post_id ), 'Nothing is migrated before the import ends' );
+
+		$this->simulate_import( $post_id );
+		$order = wc_get_order( $post_id );
+
+		$this->assertTrue( $data_store->order_exists( $post_id ) );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+		$this->assertSame( 'Jane', $order->get_billing_first_name() );
+		$this->assertSame( '10.00', $order->get_total() );
+	}
+
+	/**
+	 * @testdox Should ignore imported posts that are not orders.
+	 */
+	public function test_ignores_imported_posts_that_are_not_orders(): void {
+		$post_id = $this->insert_imported_post( 'post' );
+
+		$this->simulate_import( $post_id );
+
+		$this->assertFalse( wc_get_container()->get( OrdersTableDataStore::class )->order_exists( $post_id ) );
+	}
+
+	/**
+	 * @testdox Should not touch the HPOS tables when the posts table is authoritative.
+	 */
+	public function test_skips_backfill_when_posts_are_authoritative(): void {
+		$this->toggle_cot_feature_and_usage( false );
+		$post_id = $this->insert_imported_post();
+
+		$this->simulate_import( $post_id );
+
+		$this->assertFalse( wc_get_container()->get( OrdersTableDataStore::class )->order_exists( $post_id ) );
 	}
 }
