@@ -136,11 +136,13 @@ class ProductButton extends \WP_UnitTestCase {
 			$callback = $this->get_dequeue_callback( $wp_filter['wp_enqueue_scripts'] ?? null );
 			$this->assertNotSame( '', $markup, 'The registered Product Button should render before its frontend action runs.' );
 			$this->assertNotNull( $callback, 'Rendering should queue the Product Button legacy-script callback.' );
-			if ( null === $callback ) {
-				return;
-			}
 
-			$callback[0]->dequeue_add_to_cart_scripts();
+			// Fire the hook rather than calling the callback, so the assertion covers the
+			// whole stack: a later callback re-enqueueing the handle would fail here and
+			// would not if the method were invoked on its own. `_restore_hooks()` rewinds
+			// the `$wp_actions` count and `$wp_current_filter` that firing it leaves.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing core's own frontend action, not declaring one.
+			do_action( 'wp_enqueue_scripts' );
 			$this->assertFalse( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'The registered block-theme callback should dequeue the legacy handle.' );
 		} finally {
 			// _restore_hooks() rewinds wp_enqueue_scripts and the rollback takes the
