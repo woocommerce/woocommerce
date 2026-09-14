@@ -12,36 +12,6 @@ use WC_Unit_Test_Case;
 class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Hooks whose state the compatibility layer can change.
-	 *
-	 * @var string[]
-	 */
-	private const COMPATIBILITY_HOOKS = array(
-		'woocommerce_before_main_content',
-		'woocommerce_after_main_content',
-		'woocommerce_before_shop_loop_item_title',
-		'woocommerce_shop_loop_item_title',
-		'woocommerce_after_shop_loop_item_title',
-		'woocommerce_before_shop_loop_item',
-		'woocommerce_after_shop_loop_item',
-		'woocommerce_before_shop_loop',
-		'woocommerce_after_shop_loop',
-		'woocommerce_no_products_found',
-		'woocommerce_archive_description',
-		'template_include',
-		'render_block_data',
-		'render_block',
-		'woocommerce_disable_compatibility_layer',
-	);
-
-	/**
-	 * Action counts captured before each test.
-	 *
-	 * @var array<string, int|null>
-	 */
-	private $action_snapshots = array();
-
-	/**
 	 * Query globals captured before each test.
 	 *
 	 * @var array<string, array{exists: bool, value: mixed}>
@@ -69,10 +39,6 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
 
-		foreach ( array_slice( self::COMPATIBILITY_HOOKS, 0, 11 ) as $hook_name ) {
-			$this->action_snapshots[ $hook_name ] = array_key_exists( $hook_name, $GLOBALS['wp_actions'] ) ? $GLOBALS['wp_actions'][ $hook_name ] : null;
-		}
-
 		foreach ( array( 'wp_query', 'wp_the_query' ) as $global_name ) {
 			$this->query_snapshots[ $global_name ] = array(
 				'exists' => array_key_exists( $global_name, $GLOBALS ),
@@ -85,14 +51,6 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	 * @inheritdoc
 	 */
 	public function tearDown(): void {
-		foreach ( $this->action_snapshots as $hook_name => $snapshot ) {
-			if ( null === $snapshot ) {
-				unset( $GLOBALS['wp_actions'][ $hook_name ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore prior absence of the action counter.
-			} else {
-				$GLOBALS['wp_actions'][ $hook_name ] = $snapshot; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test action count.
-			}
-		}
-
 		foreach ( $this->query_snapshots as $global_name => $snapshot ) {
 			if ( $snapshot['exists'] ) {
 				$GLOBALS[ $global_name ] = $snapshot['value']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test query global.
