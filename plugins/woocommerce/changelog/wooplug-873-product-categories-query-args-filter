@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add `woocommerce_blocks_product_categories_query_args` filter to the Product Categories List block so the arguments passed to `get_terms()` can be adjusted, e.g. to exclude categories.
+Add the `woocommerce_blocks_product_categories_query_args` filter to the Product Categories List block, keep children visible when their parent is missing from the query result, and prevent PHP warnings in children-only mode.

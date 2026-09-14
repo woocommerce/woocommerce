@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show product category children when their parent is missing from the list, including in children-only mode without PHP warnings.
