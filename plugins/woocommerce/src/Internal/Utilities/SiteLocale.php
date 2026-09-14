@@ -55,30 +55,28 @@ class SiteLocale {
 	 * @since 11.2.0
 	 */
 	public static function translate_slug( string $slug ): string {
-		$site_locale = self::get();
-
-		self::load_translations( $site_locale );
-
-		$translated_slug = WP_Translation_Controller::get_instance()->translate( $slug, 'slug', 'woocommerce', $site_locale );
+		$translated_slug = self::load_and_translate_slug( $slug, self::get() );
 
 		return is_string( $translated_slug ) && '' !== $translated_slug ? $translated_slug : $slug;
 	}
 
 	/**
-	 * Load the WooCommerce translations for a locale without touching the request's translations.
+	 * Translate a slug before restoring the request's translation catalog.
 	 *
 	 * The load_textdomain() call also registers what it loads under the legacy $l10n global, so that global
 	 * is isolated while loading and restored afterwards, along with the controller's locale.
 	 *
+	 * @param string $slug   Untranslated slug.
 	 * @param string $locale Locale to load.
+	 * @return string|false Translated slug, or false when no translation exists.
 	 */
-	private static function load_translations( string $locale ): void {
+	private static function load_and_translate_slug( string $slug, string $locale ) {
 		global $l10n, $wp_textdomain_registry;
 
 		$translation_controller = WP_Translation_Controller::get_instance();
 
 		if ( $translation_controller->is_textdomain_loaded( 'woocommerce', $locale ) || ! $wp_textdomain_registry instanceof WP_Textdomain_Registry ) {
-			return;
+			return $translation_controller->translate( $slug, 'slug', 'woocommerce', $locale );
 		}
 
 		$translation_path           = $wp_textdomain_registry->get( 'woocommerce', $locale );
@@ -97,6 +95,11 @@ class SiteLocale {
 			if ( is_string( $translation_path ) && '' !== $translation_path ) {
 				load_textdomain( 'woocommerce', trailingslashit( $translation_path ) . 'woocommerce-' . $locale . '.mo', $locale );
 			}
+
+			// Override loaders can supply a legacy catalog without populating the translation controller.
+			return isset( $l10n['woocommerce'] )
+				? $l10n['woocommerce']->translate( $slug, 'slug' )
+				: $translation_controller->translate( $slug, 'slug', 'woocommerce', $locale );
 		} finally {
 			$translation_controller->set_locale( $previous_controller_locale );
 
