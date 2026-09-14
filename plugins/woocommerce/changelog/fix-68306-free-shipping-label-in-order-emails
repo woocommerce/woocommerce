@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only show "Free!" for Free Shipping in order emails, so zero cost Flat Rate and Local Pickup methods keep their titles, and add the woocommerce_email_order_shipping_show_free_label filter to override it

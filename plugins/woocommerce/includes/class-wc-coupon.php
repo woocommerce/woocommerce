@@ -803,10 +803,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return void
 	 */
 	public function set_minimum_amount( $amount ) {
+		$amount = wc_format_decimal( $amount );
 		if ( (float) $this->get_maximum_amount() && (float) $amount > (float) $this->get_maximum_amount() ) {
 			$this->error( 'coupon_invalid_minimum_amount', __( 'Invalid minimum spend value.', 'woocommerce' ) );
 		}
-		$this->set_prop( 'minimum_amount', wc_format_decimal( $amount ) );
+		$this->set_prop( 'minimum_amount', $amount );
 	}
 
 	/**
@@ -817,11 +818,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return void
 	 */
 	public function set_maximum_amount( $amount ) {
+		$amount = wc_format_decimal( $amount );
 		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
 			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
 		}
 
-		$this->set_prop( 'maximum_amount', wc_format_decimal( $amount ) );
+		$this->set_prop( 'maximum_amount', $amount );
 	}
 
 	/**

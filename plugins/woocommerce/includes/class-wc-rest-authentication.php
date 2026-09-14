@@ -72,9 +72,9 @@ class WC_REST_Authentication {
 			return false;
 		}
 
-		// 'wc/' is WooCommerce; 'wc-' lets third party plugins use our authentication methods.
-		$route       = $this->route_from_request_uri();
-		$is_wc_route = str_starts_with( $route, 'wc/' ) || str_starts_with( $route, 'wc-' );
+		$resolved_route = $this->resolved_route();
+		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
+			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
 
 		/**
 		 * Filters whether the current request is a request to the WooCommerce REST API.
@@ -84,6 +84,35 @@ class WC_REST_Authentication {
 		 * @param bool $is_request_to_rest_api Whether the request is to a WooCommerce REST API endpoint.
 		 */
 		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $is_wc_route );
+	}
+
+	/**
+	 * Whether a route is in a namespace a WooCommerce API key may authenticate.
+	 *
+	 * 'wc/' is WooCommerce; 'wc-' lets third party plugins use our authentication methods.
+	 *
+	 * @param string $route Route without the REST prefix or surrounding slashes.
+	 * @return bool
+	 */
+	private function is_wc_namespace( string $route ): bool {
+		return str_starts_with( $route, 'wc/' ) || str_starts_with( $route, 'wc-' );
+	}
+
+	/**
+	 * The route WordPress resolved for this request, trimmed of surrounding slashes.
+	 *
+	 * Null when WordPress has not parsed the request yet, which is not the same as an empty route.
+	 *
+	 * @return string|null
+	 */
+	private function resolved_route(): ?string {
+		global $wp;
+
+		if ( ! $wp instanceof WP || ! isset( $wp->query_vars['rest_route'] ) || ! is_string( $wp->query_vars['rest_route'] ) ) {
+			return null;
+		}
+
+		return trim( $wp->query_vars['rest_route'], '/' );
 	}
 
 	/**
@@ -113,7 +142,14 @@ class WC_REST_Authentication {
 		 * needed.
 		 */
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared against REST route prefixes only, never output or stored; sanitizing would diverge from the route WordPress dispatches.
-		$request_uri  = wp_unslash( $_SERVER['REQUEST_URI'] );
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+
+		// WP::parse_request() trims leading slashes off the URI, but wp_parse_url() would read a
+		// leading '//' as a host, so collapse them first.
+		if ( str_starts_with( $request_uri, '//' ) ) {
+			$request_uri = '/' . ltrim( $request_uri, '/' );
+		}
+
 		$query_string = wp_parse_url( $request_uri, PHP_URL_QUERY );
 		$query_params = array();
 
@@ -257,31 +293,30 @@ class WC_REST_Authentication {
 	 * @return bool False only when the resolved route is not ours and the request URI never named it.
 	 */
 	private function is_resolved_route_in_scope() {
-		global $wp;
-
 		// Has WordPress picked a route yet? If not, there is nothing to compare.
-		if ( ! $wp instanceof WP || ! isset( $wp->query_vars['rest_route'] ) || ! is_string( $wp->query_vars['rest_route'] ) ) {
+		$resolved_route = $this->resolved_route();
+
+		if ( null === $resolved_route ) {
 			return true;
 		}
 
-		// Our own namespaces are always in scope for a WooCommerce key: 'wc/' is WooCommerce, 'wc-'
-		// is a third party using our auth. The read/write permission check in check_user_permissions()
-		// still bounds what the key can do there.
-		$resolved_route = trim( $wp->query_vars['rest_route'], '/' );
-
-		if ( str_starts_with( $resolved_route, 'wc/' ) || str_starts_with( $resolved_route, 'wc-' ) ) {
+		// Our own namespaces are always in scope for a WooCommerce key. The read/write permission
+		// check in check_user_permissions() still bounds what the key can do there.
+		if ( $this->is_wc_namespace( $resolved_route ) ) {
 			return true;
 		}
 
 		/*
 		 * Any other namespace is in scope only when the request URI named this exact route.
-		 * WP::parse_request() can take rest_route from more than one place, so the route finally
-		 * dispatched is not necessarily the one is_request_to_rest_api() judged scope from and ran
-		 * woocommerce_rest_is_request_to_rest_api against. We only reach this method once a key
-		 * authenticated, which means that filter approved the URI route: a resolved route equal to the
-		 * URI route inherits that approval, and anything else does not.
+		 * WP::parse_request() can take rest_route from more than one place, so the dispatched route is
+		 * not necessarily the one woocommerce_rest_is_request_to_rest_api approved. WordPress also
+		 * decodes rest_route through parse_str() while the URI route is read raw, so the decoded form
+		 * names the same route.
 		 */
-		return $resolved_route === $this->route_from_request_uri();
+		$uri_route     = $this->route_from_request_uri();
+		$decoded_route = trim( urldecode( $uri_route ), '/' );
+
+		return $resolved_route === $uri_route || $resolved_route === $decoded_route;
 	}
 
 	/**
@@ -400,7 +435,7 @@ class WC_REST_Authentication {
 
 		if ( function_exists( 'getallheaders' ) ) {
 			$headers = getallheaders();
-			// Check for the authoization header case-insensitively.
+			// Check for the authorization header case-insensitively.
 			foreach ( $headers as $key => $value ) {
 				if ( 'authorization' === strtolower( $key ) ) {
 					return $value;
@@ -419,7 +454,7 @@ class WC_REST_Authentication {
 	 * @return array|WP_Error
 	 */
 	public function get_oauth_parameters() {
-		$params = array_merge( $_GET, $_POST ); // WPCS: CSRF ok.
+		$params = array_merge( $_GET, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing -- Raw credentials and request data are required for OAuth signature verification.
 		$params = wp_unslash( $params );
 		$header = $this->get_authorization_header();
 

@@ -214,7 +214,10 @@ function extendRichTextFormats() {
 		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
 		attributes: {},
-		interactive: true,
+		// Must stay non-interactive: blocks using `withoutInteractiveFormatting`
+		// (e.g. the Button block) drop interactive formats entirely, which would
+		// hide the Personalization Tags toolbar button there.
+		interactive: false,
 		edit: PersonalizationTagsButton,
 	} );
 

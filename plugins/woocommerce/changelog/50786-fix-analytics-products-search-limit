@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Show every matching product when a search matches more than 100 products, in the Analytics > Products report and in the single category view of the Analytics > Categories report. The products report endpoints now accept a `search` argument and resolve the search themselves.

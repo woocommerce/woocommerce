@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
  */
 class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
 	/**
 	 * The controller instance.
 	 *
@@ -25,6 +27,7 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->controller = new DataRetentionController();
 	}
 
@@ -32,9 +35,10 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 	 * Clean up after tests
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->controller->clear_daily_task();
 		delete_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold' );
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
 	}
 
 	/**

@@ -588,7 +588,9 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
-		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		// A refund can be created with nobody logged in (gateway webhook, REST, WP-CLI, cron). Record no
+		// user in that case; falling back to user 1 attributes the refund to whoever that happens to be.
+		$refund->set_refunded_by( get_current_user_id() );
 		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
@@ -1253,7 +1255,7 @@ function wc_get_order_notes( $args ) {
 
 	// Set WooCommerce order type.
 	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; the customer flag exists only as commentmeta, so a meta join is the only way to filter on it.
 			array(
 				'key'     => 'is_customer_note',
 				'value'   => 1,
@@ -1261,7 +1263,7 @@ function wc_get_order_notes( $args ) {
 			),
 		);
 	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; internal notes are identified by the absence of the is_customer_note meta, so NOT EXISTS is the only way to filter on them.
 			array(
 				'key'     => 'is_customer_note',
 				'compare' => 'NOT EXISTS',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent WP-CLI runs that skip the active theme from consuming queued rewrite flushes and dropping theme-registered rewrite rules.

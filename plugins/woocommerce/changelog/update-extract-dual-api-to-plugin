@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Move the experimental dual API engine out of WooCommerce core into the WooCommerce Dual API plugin.

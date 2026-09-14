@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -580,6 +581,17 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
+		/**
+		 * Filters the number of products shown per page in a product loop.
+		 *
+		 * In WC_Query::product_query() this applies only when the query does not already
+		 * set posts_per_page. Other callers, such as the Product Collection block, apply it
+		 * unconditionally.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $per_page Products per page. Defaults to the store's columns times its rows setting.
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.
@@ -877,12 +889,7 @@ class WC_Query {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
