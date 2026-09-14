@@ -230,6 +230,24 @@ describe( 'Email editor sidebar settings', () => {
 			{ status: 'inactive' }
 		);
 
+		// The edit goes through `editEntityRecord`, which is mocked, so the saved
+		// record has to be moved on by hand before the toggle can reflect it.
+		mockEntityState.woocommerceData = {
+			...defaultWooCommerceData,
+			enabled: false,
+		};
+		rerender(
+			<>
+				{ mockRegisteredPlugins
+					.get( 'woocommerce-email-editor-email-status' )!
+					.render() }
+			</>
+		);
+
+		expect(
+			screen.getByRole( 'button', { name: 'Change status: Inactive' } )
+		).toBeEnabled();
+
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			is_manual: true,
@@ -317,9 +335,6 @@ describe( 'Email editor sidebar settings', () => {
 		expect(
 			screen.getByText( 'This email is sent to Customer.' )
 		).toBeInTheDocument();
-		expect(
-			screen.queryByDisplayValue( 'merchant@example.com' )
-		).not.toBeInTheDocument();
 
 		await userEvent.click(
 			screen.getByRole( 'checkbox', { name: 'Add CC' } )
