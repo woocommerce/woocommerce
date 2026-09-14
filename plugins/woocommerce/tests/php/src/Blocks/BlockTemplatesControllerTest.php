@@ -23,20 +23,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	private $original_stylesheet;
 
 	/**
-	 * Posts created by the test.
-	 *
-	 * @var int[]
-	 */
-	private $post_ids = array();
-
-	/**
-	 * Terms created by the test.
-	 *
-	 * @var array<string, int[]>
-	 */
-	private $term_ids = array();
-
-	/**
 	 * Set up a block theme and isolated template caches.
 	 */
 	protected function setUp(): void {
@@ -48,20 +34,12 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Restore theme, posts, terms, and object caches.
+	 * Restore the theme.
+	 *
+	 * The posts, terms and object-cache entries this class creates go back with the
+	 * transaction rollback and the cache flush the base class already performs.
 	 */
 	protected function tearDown(): void {
-		foreach ( array_reverse( $this->post_ids ) as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-
-		foreach ( $this->term_ids as $taxonomy => $term_ids ) {
-			foreach ( array_reverse( $term_ids ) as $term_id ) {
-				wp_delete_term( $term_id, $taxonomy );
-			}
-		}
-
-		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
 		switch_theme( $this->original_stylesheet );
 
 		parent::tearDown();
@@ -71,14 +49,8 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	 * @testdox WooCommerce registers its default templates and exposes exact file-backed template and part objects.
 	 */
 	public function test_registered_template_catalog_and_directories(): void {
-		global $wp_filter;
-
 		$wp_registry       = \WP_Block_Templates_Registry::get_instance();
 		$registered_before = $wp_registry->get_all_registered();
-		$hooks_before      = array();
-		foreach ( $wp_filter as $hook_name => $hook ) {
-			$hooks_before[ $hook_name ] = clone $hook;
-		}
 
 		$registered_names = array(
 			'woocommerce//archive-product',
@@ -134,13 +106,12 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 			$this->assertFileExists( $plugin_root . '/tests/e2e/themes/blocks/theme-with-woo-templates/block-templates/archive-product.html' );
 			$this->assertFileExists( $plugin_root . '/tests/e2e/themes/blocks/theme-with-woo-templates/block-template-parts/external-product-add-to-cart-with-options.html' );
 		} finally {
+			// WP_Block_Templates_Registry is a static singleton the base teardown does
+			// not reach; $wp_filter it rebuilds from the suite baseline on its own.
 			$registered_after = $wp_registry->get_all_registered();
 			foreach ( array_diff( array_keys( $registered_after ), array_keys( $registered_before ) ) as $registered_name ) {
 				unregister_block_template( $registered_name );
 			}
-
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test hook registry.
-			$wp_filter = $hooks_before;
 		}
 	}
 
@@ -378,7 +349,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 			throw new \RuntimeException( $post_id->get_error_message() );
 		}
 
-		$this->post_ids[] = $post_id;
 		$this->assign_term( $post_id, $theme, 'wp_theme' );
 
 		if ( 'wp_template_part' === $type ) {
@@ -403,7 +373,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
 				throw new \RuntimeException( $term->get_error_message() );
 			}
-			$this->term_ids[ $taxonomy ][] = (int) $term['term_id'];
 		}
 
 		$result = wp_set_post_terms( $post_id, array( (int) $term['term_id'] ), $taxonomy );

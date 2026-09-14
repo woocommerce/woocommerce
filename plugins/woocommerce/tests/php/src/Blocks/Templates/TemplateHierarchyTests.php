@@ -25,34 +25,6 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	private $original_stylesheet;
 
 	/**
-	 * Original page option states.
-	 *
-	 * @var array<string, array{exists: bool, value: mixed}>
-	 */
-	private $option_states = array();
-
-	/**
-	 * Original hook objects.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $hook_states = array();
-
-	/**
-	 * Posts created by the tests.
-	 *
-	 * @var int[]
-	 */
-	private $post_ids = array();
-
-	/**
-	 * Terms created by the tests.
-	 *
-	 * @var array<string, int[]>
-	 */
-	private $term_ids = array();
-
-	/**
 	 * Original registered product attributes.
 	 *
 	 * @var mixed
@@ -69,13 +41,10 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 
 		$this->original_stylesheet         = get_stylesheet();
 		$this->original_product_attributes = $wc_product_attributes;
-		$this->option_states               = array(
-			'woocommerce_cart_page_id'     => $this->snapshot_option( 'woocommerce_cart_page_id' ),
-			'woocommerce_checkout_page_id' => $this->snapshot_option( 'woocommerce_checkout_page_id' ),
-		);
 
+		// Detach the ambient hierarchy callbacks so each test sees only what the
+		// template under it registers. _restore_hooks() puts them back afterwards.
 		foreach ( array( 'search_template_hierarchy', 'page_template_hierarchy', 'taxonomy_template_hierarchy' ) as $hook_name ) {
-			$this->hook_states[ $hook_name ] = array_key_exists( $hook_name, $wp_filter ) ? $wp_filter[ $hook_name ] : null;
 			unset( $wp_filter[ $hook_name ] );
 		}
 
@@ -84,44 +53,20 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Restore hooks, globals, options, theme, posts, terms, and taxonomies.
+	 * Restore the registered taxonomies, the attribute registry, and the theme.
+	 *
+	 * Everything else this class touches -- posts, terms, the two page-id options,
+	 * the hierarchy hooks and the template caches -- goes back with the rollback,
+	 * the hook restore and the cache flush the base class already performs.
 	 */
 	protected function tearDown(): void {
-		global $wc_product_attributes, $wp_filter;
-
-		foreach ( array_reverse( $this->post_ids ) as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-
-		foreach ( $this->term_ids as $taxonomy => $term_ids ) {
-			foreach ( array_reverse( $term_ids ) as $term_id ) {
-				wp_delete_term( $term_id, $taxonomy );
-			}
-		}
+		global $wc_product_attributes;
 
 		if ( taxonomy_exists( 'pa_hierarchy' ) ) {
 			unregister_taxonomy( 'pa_hierarchy' );
 		}
 		$wc_product_attributes = $this->original_product_attributes;
 
-		foreach ( $this->option_states as $option_name => $state ) {
-			if ( $state['exists'] ) {
-				update_option( $option_name, $state['value'] );
-			} else {
-				delete_option( $option_name );
-			}
-		}
-
-		foreach ( $this->hook_states as $hook_name => $hook ) {
-			if ( null === $hook ) {
-				unset( $wp_filter[ $hook_name ] );
-			} else {
-				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test hook object.
-				$wp_filter[ $hook_name ] = $hook;
-			}
-		}
-
-		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
 		switch_theme( $this->original_stylesheet );
 
 		parent::tearDown();
@@ -198,7 +143,6 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 			throw new \RuntimeException( $term->get_error_message() );
 		}
 		$this->assertIsArray( $term );
-		$this->term_ids[ $taxonomy ][] = (int) $term['term_id'];
 
 		$term_link = get_term_link( (int) $term['term_id'], $taxonomy );
 		if ( is_wp_error( $term_link ) ) {
@@ -246,8 +190,7 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 			throw new \RuntimeException( $term->get_error_message() );
 		}
 		$this->assertIsArray( $term );
-		$this->term_ids['pa_hierarchy'][] = (int) $term['term_id'];
-		$term_link                        = get_term_link( (int) $term['term_id'], 'pa_hierarchy' );
+		$term_link = get_term_link( (int) $term['term_id'], 'pa_hierarchy' );
 		if ( is_wp_error( $term_link ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
 			throw new \RuntimeException( $term_link->get_error_message() );
@@ -277,38 +220,19 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Snapshot exact option existence and value.
-	 *
-	 * @param string $option_name Option name.
-	 * @return array{exists: bool, value: mixed}
-	 */
-	private function snapshot_option( string $option_name ): array {
-		$sentinel = new \stdClass();
-		$value    = get_option( $option_name, $sentinel );
-
-		return array(
-			'exists' => $sentinel !== $value,
-			'value'  => $value,
-		);
-	}
-
-	/**
-	 * Create a published page and track it for cleanup.
+	 * Create a published page.
 	 *
 	 * @param string $slug Page slug.
 	 * @return int
 	 */
 	private function create_page( string $slug ): int {
-		$post_id          = self::factory()->post->create(
+		return self::factory()->post->create(
 			array(
 				'post_name'   => $slug,
 				'post_status' => 'publish',
 				'post_type'   => 'page',
 			)
 		);
-		$this->post_ids[] = $post_id;
-
-		return $post_id;
 	}
 
 	/**
@@ -333,8 +257,6 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
 			throw new \RuntimeException( $post_id->get_error_message() );
 		}
-		$this->post_ids[] = $post_id;
-
 		$term = get_term_by( 'name', $theme, 'wp_theme', ARRAY_A );
 		if ( ! $term ) {
 			$term = wp_insert_term( $theme, 'wp_theme' );
@@ -342,7 +264,6 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
 				throw new \RuntimeException( $term->get_error_message() );
 			}
-			$this->term_ids['wp_theme'][] = (int) $term['term_id'];
 		}
 
 		$result = wp_set_post_terms( $post_id, array( (int) $term['term_id'] ), 'wp_theme' );
