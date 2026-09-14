@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingWrapper as ShippingWrapperBlock;
+use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
@@ -46,6 +47,10 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 				$this->assertSame( '', $rendered, 'The shipping wrapper should be empty for pickup, virtual, missing-address, or unauthorized orders.' );
 			}
 		} finally {
+			if ( 'pickup-location' === $topology ) {
+				// Drop the memo so the next test reloads the ambient method list.
+				WC()->shipping()->unregister_shipping_methods();
+			}
 			$order->delete( true );
 			$product->delete( true );
 			if ( null === $original_shipping_option ) {
@@ -64,7 +69,8 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 	public static function shipping_wrapper_cases(): array {
 		return array(
 			'physical free-shipping order' => array( 'physical', 'full', true, true ),
-			'local pickup order'           => array( 'local-pickup', 'full', true, false ),
+			'classic local pickup order'   => array( 'local-pickup', 'full', true, false ),
+			'blocks pickup location order' => array( 'pickup-location', 'full', true, false ),
 			'virtual downloadable order'   => array( 'virtual', 'full', true, false ),
 			'no view permission'           => array( 'physical', false, true, false ),
 			'no shipping address'          => array( 'physical', 'full', false, false ),
@@ -126,8 +132,25 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 
 		if ( 'virtual' !== $topology ) {
 			$shipping_item = new WC_Order_Item_Shipping();
-			$shipping_item->set_method_title( 'local-pickup' === $topology ? 'Local pickup' : 'Free shipping' );
-			$shipping_item->set_method_id( 'local-pickup' === $topology ? 'local_pickup' : 'free_shipping' );
+			// `local_pickup` is the classic pickup method, `pickup_location` the Blocks one.
+			// `needs_shipping_address()` hides the address for both, but it finds
+			// `pickup_location` only by asking the registered shipping methods which of them
+			// support `local-pickup`. Core registers that method when the Checkout block is
+			// the default checkout, which the test store is not, so register it the same way.
+			$pickup_methods = array(
+				'local-pickup'    => array( 'Local pickup', 'local_pickup' ),
+				'pickup-location' => array( 'Pickup Location', 'pickup_location' ),
+			);
+
+			if ( 'pickup-location' === $topology ) {
+				WC()->shipping()->get_shipping_methods();
+				WC()->shipping()->register_shipping_method( new PickupLocation() );
+			}
+
+			list( $method_title, $method_id ) = $pickup_methods[ $topology ] ?? array( 'Free shipping', 'free_shipping' );
+
+			$shipping_item->set_method_title( $method_title );
+			$shipping_item->set_method_id( $method_id );
 			$order->add_item( $shipping_item );
 		}
 

@@ -150,6 +150,17 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 
 			$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A pending order should not expose downloads.' );
 
+			// Processing permits downloads only when the store grants access after payment,
+			// so the wrapper has to follow that option rather than the status on its own.
+			$downloadable_order->set_status( 'processing' );
+			$downloadable_order->save();
+
+			update_option( 'woocommerce_downloads_grant_access_after_payment', 'no' );
+			$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A processing order should not expose downloads while access is granted only on completion.' );
+
+			update_option( 'woocommerce_downloads_grant_access_after_payment', 'yes' );
+			$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A processing order should expose downloads once the store grants access after payment.' );
+
 			$plain_order->set_status( 'completed' );
 			$plain_order->save();
 			$this->assertSame( '', $this->render( $plain_order, 'full' ), 'An order without a downloadable item should not render the wrapper.' );
