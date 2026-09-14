@@ -15,34 +15,6 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Product IDs created by the current test.
-	 *
-	 * @var int[]
-	 */
-	private $product_ids = array();
-
-	/**
-	 * Original POST data.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $original_post_data;
-
-	/**
-	 * Original current user ID.
-	 *
-	 * @var int
-	 */
-	private $original_user_id;
-
-	/**
-	 * Administrator user created for the current test.
-	 *
-	 * @var int
-	 */
-	private $test_user_id;
-
-	/**
 	 * Original meta-box errors.
 	 *
 	 * @var string[]
@@ -64,52 +36,37 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	private $download_directories;
 
 	/**
-	 * Original approved download directory mode.
-	 *
-	 * @var string
-	 */
-	private $original_download_directory_mode;
-
-	/**
 	 * Set up an isolated classic admin request.
+	 *
+	 * The base class already empties the request globals, rolls back every
+	 * database write and resets the current user, so only the two things it
+	 * does not own are captured here: the static meta-box error list and the
+	 * three product globals the classic save seam sets.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_post_data               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before exercising the real admin save seam.
-		$this->original_user_id                 = get_current_user_id();
-		$this->original_meta_box_errors         = WC_Admin_Meta_Boxes::$meta_box_errors;
-		$this->download_directories             = wc_get_container()->get( Download_Directories::class );
-		$this->original_download_directory_mode = $this->download_directories->get_mode();
+		$this->original_meta_box_errors = WC_Admin_Meta_Boxes::$meta_box_errors;
+		$this->download_directories     = wc_get_container()->get( Download_Directories::class );
 
-		foreach ( array( 'post', 'product', 'product_object', 'thepostid' ) as $global_name ) {
+		foreach ( array( 'product', 'product_object', 'thepostid' ) as $global_name ) {
 			$this->original_globals[ $global_name ] = array(
 				'present' => array_key_exists( $global_name, $GLOBALS ),
 				'value'   => $GLOBALS[ $global_name ] ?? null,
 			);
 		}
 
-		$_POST                                = array();
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
 		$this->download_directories->set_mode( Download_Directories::MODE_DISABLED );
-		$this->test_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->test_user_id );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	/**
-	 * Restore request, user, meta-box, download-directory, and global state.
+	 * Restore the meta-box error list and the product globals.
 	 */
 	public function tearDown(): void {
 		try {
-			foreach ( array_reverse( $this->product_ids ) as $product_id ) {
-				WC_Helper_Product::delete_product( $product_id );
-			}
-		} finally {
-			$_POST                                = $this->original_post_data;
 			WC_Admin_Meta_Boxes::$meta_box_errors = $this->original_meta_box_errors;
-			$this->download_directories->set_mode( $this->original_download_directory_mode );
-			wp_set_current_user( $this->original_user_id );
-			wp_delete_user( $this->test_user_id );
 
 			foreach ( $this->original_globals as $global_name => $global ) {
 				if ( $global['present'] ) {
@@ -118,7 +75,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 					unset( $GLOBALS[ $global_name ] );
 				}
 			}
-
+		} finally {
 			parent::tearDown();
 		}
 	}
@@ -131,14 +88,13 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	 * @param bool $downloadable Whether the submitted simple product is downloadable.
 	 */
 	public function test_save_persists_simple_product_field_matrix( bool $virtual, bool $downloadable ): void {
-		$product             = WC_Helper_Product::create_simple_product(
+		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'   => 'Field Matrix Simple Product',
 				'status' => 'publish',
 			)
 		);
-		$this->product_ids[] = $product->get_id();
 
 		$sku         = 'sku-' . wp_generate_uuid4();
 		$download_id = 'download-' . wp_generate_uuid4();

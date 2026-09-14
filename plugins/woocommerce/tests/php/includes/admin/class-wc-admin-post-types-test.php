@@ -245,11 +245,9 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	 * @testdox Bulk Edit updates only selected products, including prices and stock.
 	 */
 	public function test_bulk_edit_updates_selected_products_and_preserves_unselected_product(): void {
-		$manage_stock_option_exists = false !== get_option( 'woocommerce_manage_stock', false );
-		$original_manage_stock      = get_option( 'woocommerce_manage_stock' );
-		$first_product              = WC_Helper_Product::create_simple_product();
-		$second_product             = WC_Helper_Product::create_simple_product();
-		$unselected_product         = WC_Helper_Product::create_simple_product();
+		$first_product      = WC_Helper_Product::create_simple_product();
+		$second_product     = WC_Helper_Product::create_simple_product();
+		$unselected_product = WC_Helper_Product::create_simple_product();
 
 		$first_product->set_regular_price( '100' );
 		$first_product->set_sale_price( '80' );
@@ -271,26 +269,18 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
-		try {
-			$this->bulk_edit(
-				array( $first_product, $second_product ),
-				array(
-					'change_regular_price' => '2',
-					'_regular_price'       => '10%',
-					'change_sale_price'    => '4',
-					'_sale_price'          => '10%',
-					'_manage_stock'        => 'yes',
-					'change_stock'         => '2',
-					'_stock'               => '10',
-				)
-			);
-		} finally {
-			if ( $manage_stock_option_exists ) {
-				update_option( 'woocommerce_manage_stock', $original_manage_stock );
-			} else {
-				delete_option( 'woocommerce_manage_stock' );
-			}
-		}
+		$this->bulk_edit(
+			array( $first_product, $second_product ),
+			array(
+				'change_regular_price' => '2',
+				'_regular_price'       => '10%',
+				'change_sale_price'    => '4',
+				'_sale_price'          => '10%',
+				'_manage_stock'        => 'yes',
+				'change_stock'         => '2',
+				'_stock'               => '10',
+			)
+		);
 
 		$this->assert_product_prices_and_stock( $first_product->get_id(), '110', '99', 20 );
 		$this->assert_product_prices_and_stock( $second_product->get_id(), '13.57', '12.21', 14 );
