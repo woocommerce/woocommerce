@@ -9,7 +9,7 @@
 :where(.wc-block-product-filter-chips__items) {
 	display: flex;
 	flex-wrap: wrap;
-	gap: $gap-smallest;
+	gap: em($gap-smallest);
 }
 
 .wc-block-product-filter-chips__item {
@@ -112,7 +112,7 @@
 
 // Swatch style — color circles only, no text labels.
 .is-style-swatch {
-	.wc-block-product-filter-chips__items {
+	:where(.wc-block-product-filter-chips__items) {
 		gap: $gap-small;
 	}
 

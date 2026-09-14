@@ -29,13 +29,15 @@
 		},
 		"spacing": {
 			"padding": true,
+			"blockGap": true,
 			"__experimentalSkipSerialization": true
 		}
 	},
 	"selectors": {
 		"border": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item",
 		"spacing": {
-			"padding": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item"
+			"padding": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item",
+			"blockGap": ".wp-block-woocommerce-product-filter-chips .wc-block-product-filter-chips__items"
 		}
 	},
 	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
