@@ -13,13 +13,6 @@ use WC_Unit_Test_Case;
  * @class DefaultFreeExtensionsTest
  */
 class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
-	/**
-	 * Raw option states before the test fixture mutates them.
-	 *
-	 * @var array<string, array{exists: bool, value: string|null, autoload: string|null}>
-	 */
-	private array $initial_option_states = array();
-
 
 	/**
 	 * Mock of bundles of extensions to recommend.
@@ -35,10 +28,6 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		foreach ( $this->get_restored_option_names() as $option_name ) {
-			$this->initial_option_states[ $option_name ] = $this->get_raw_option_state( $option_name );
-		}
 
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
@@ -60,18 +49,6 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		try {
-			parent::tearDown();
-		} finally {
-			$failures = $this->restore_initial_option_states();
-			$this->assert_initial_option_states_restored( $failures );
-		}
 	}
 
 	/**
@@ -285,131 +262,5 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 		}
 
 		$this->fail( "Plugin {$slug} was not found." );
-	}
-
-	/**
-	 * Get options whose exact rows must survive each test.
-	 *
-	 * @return string[]
-	 */
-	private function get_restored_option_names(): array {
-		return array(
-			'woocommerce_default_country',
-			'woocommerce_store_address',
-			'woocommerce_remote_variant_assignment',
-			'active_plugins',
-			'woocommerce_onboarding_profile',
-		);
-	}
-
-	/**
-	 * Read an option without default filters or value coercion.
-	 *
-	 * @param string $option_name Option name.
-	 * @return array{exists: bool, value: string|null, autoload: string|null}
-	 */
-	private function get_raw_option_state( string $option_name ): array {
-		global $wpdb;
-
-		$wpdb->last_error = '';
-		$row              = $wpdb->get_row(
-			$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_name ),
-			ARRAY_A
-		);
-		if ( '' !== $wpdb->last_error ) {
-			throw new \RuntimeException( esc_html( "Failed to read option {$option_name}: {$wpdb->last_error}" ) );
-		}
-
-		return null === $row
-			? array(
-				'exists'   => false,
-				'value'    => null,
-				'autoload' => null,
-			)
-			: array(
-				'exists'   => true,
-				'value'    => $row['option_value'],
-				'autoload' => $row['autoload'],
-			);
-	}
-
-	/**
-	 * Restore every captured option and invalidate its caches.
-	 *
-	 * @return string[] Restoration failures.
-	 */
-	private function restore_initial_option_states(): array {
-		$failures = array();
-		foreach ( $this->initial_option_states as $option_name => $state ) {
-			try {
-				if ( ! $this->restore_raw_option_state( $option_name, $state ) ) {
-					$failures[] = "Database write failed for {$option_name}.";
-				}
-			} catch ( \Throwable $error ) {
-				$failures[] = $error->getMessage();
-			}
-		}
-
-		return $failures;
-	}
-
-	/**
-	 * Verify raw rows and option caches after restoration.
-	 *
-	 * @param string[] $failures Existing restoration failures.
-	 */
-	private function assert_initial_option_states_restored( array $failures ): void {
-		foreach ( $this->initial_option_states as $option_name => $state ) {
-			if ( $state !== $this->get_raw_option_state( $option_name ) ) {
-				$failures[] = "Restored row does not match the captured state for {$option_name}.";
-			}
-			$expected = $state['exists'] ? maybe_unserialize( $state['value'] ) : false;
-			if ( maybe_serialize( get_option( $option_name ) ) !== maybe_serialize( $expected ) ) {
-				$failures[] = "Option cache does not match the captured state for {$option_name}.";
-			}
-		}
-
-		$this->assertSame( array(), $failures, implode( ' ', $failures ) );
-	}
-
-	/**
-	 * Restore an option without invoking setting sanitizers.
-	 *
-	 * @param string                                                         $option_name Option name.
-	 * @param array{exists: bool, value: string|null, autoload: string|null} $state Raw option state.
-	 * @return bool Whether the database operation succeeded.
-	 */
-	private function restore_raw_option_state( string $option_name, array $state ): bool {
-		global $wpdb;
-
-		try {
-			if ( ! $state['exists'] ) {
-				$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option_name ) );
-			} elseif ( $this->get_raw_option_state( $option_name )['exists'] ) {
-				$result = $wpdb->update(
-					$wpdb->options,
-					array(
-						'option_value' => $state['value'],
-						'autoload'     => $state['autoload'],
-					),
-					array( 'option_name' => $option_name )
-				);
-			} else {
-				$result = $wpdb->insert(
-					$wpdb->options,
-					array(
-						'option_name'  => $option_name,
-						'option_value' => $state['value'],
-						'autoload'     => $state['autoload'],
-					)
-				);
-			}
-
-			return false !== $result;
-		} finally {
-			wp_cache_delete( $option_name, 'options' );
-			wp_cache_delete( 'alloptions', 'options' );
-			wp_cache_delete( 'notoptions', 'options' );
-		}
 	}
 }

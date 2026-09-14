@@ -51,44 +51,11 @@ class ProductsTest extends WC_Unit_Test_Case {
 	private $redirect_status;
 
 	/**
-	 * The current screen before the test.
-	 *
-	 * @var \WP_Screen|null
-	 */
-	private $current_screen_backup;
-
-	/**
-	 * Whether the current screen global existed before the test.
-	 *
-	 * @var bool
-	 */
-	private $had_current_screen_global;
-
-	/**
-	 * Raw option states before the test.
-	 *
-	 * @var array<string, array{exists: bool, value: string|null, autoload: string|null}>
-	 */
-	private $option_state_backups = array();
-
-	/**
-	 * Product IDs created by the test.
-	 *
-	 * @var int[]
-	 */
-	private $product_ids = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->had_current_screen_global = array_key_exists( 'current_screen', $GLOBALS );
-		$this->current_screen_backup     = $GLOBALS['current_screen'] ?? null;
-		foreach ( $this->get_restored_option_names() as $option_name ) {
-			$this->option_state_backups[ $option_name ] = $this->get_raw_option_state( $option_name );
-		}
 		delete_transient( Products::HAS_PRODUCT_TRANSIENT );
 		delete_option( Task::COMPLETED_OPTION );
 		update_option( TaskList::HIDDEN_OPTION, array( 'setup' ) );
@@ -110,30 +77,6 @@ class ProductsTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->sut       = new Products( $this->task_list );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'wp_redirect', $this->redirect_interceptor, 10 );
-		$this->remove_products_task_hooks();
-
-		foreach ( $this->product_ids as $product_id ) {
-			wp_delete_post( $product_id, true );
-		}
-
-		foreach ( $this->option_state_backups as $option_name => $state ) {
-			$this->restore_raw_option_state( $option_name, $state );
-		}
-
-		if ( $this->had_current_screen_global ) {
-			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the pre-test screen.
-		} else {
-			unset( $GLOBALS['current_screen'] );
-		}
-
-		parent::tearDown();
 	}
 
 	/**
@@ -223,8 +166,7 @@ class ProductsTest extends WC_Unit_Test_Case {
 		$product->set_name( "Products task {$status} fixture" );
 		$product->set_status( $status );
 		$product_id = $product->save();
-		$this->assertGreaterThan( 0, $product_id, 'The product fixture should persist before it is tracked for cleanup.' );
-		$this->product_ids[] = $product_id;
+		$this->assertGreaterThan( 0, $product_id, 'The product fixture should persist before the task reads it.' );
 
 		return $product_id;
 	}
@@ -242,97 +184,5 @@ class ProductsTest extends WC_Unit_Test_Case {
 				throw $exception;
 			}
 		}
-	}
-
-	/**
-	 * Removes every callback registered by the Products constructor.
-	 */
-	private function remove_products_task_hooks(): void {
-		remove_action( 'admin_enqueue_scripts', array( $this->sut, 'possibly_add_import_return_notice_script' ) );
-		remove_action( 'admin_enqueue_scripts', array( $this->sut, 'possibly_add_load_sample_return_notice_script' ) );
-		remove_action( 'woocommerce_update_product', array( $this->sut, 'maybe_set_has_product_transient' ), 10 );
-		remove_action( 'woocommerce_new_product', array( $this->sut, 'maybe_set_has_product_transient' ), 10 );
-		remove_action( 'untrashed_post', array( $this->sut, 'maybe_set_has_product_transient_on_untrashed_post' ) );
-		remove_action( 'current_screen', array( $this->sut, 'maybe_redirect_to_add_product_tasklist' ), 30 );
-		remove_action( 'trashed_post', array( $this->sut, 'on_product_trashed' ) );
-		remove_action( 'deleted_post_product', array( $this->sut, 'on_product_deleted' ) );
-	}
-
-	/**
-	 * Gets every option row whose exact state must survive a test.
-	 *
-	 * @return string[] Option names.
-	 */
-	private function get_restored_option_names(): array {
-		return array(
-			Task::COMPLETED_OPTION,
-			TaskList::HIDDEN_OPTION,
-			'_transient_' . Products::HAS_PRODUCT_TRANSIENT,
-			'_transient_timeout_' . Products::HAS_PRODUCT_TRANSIENT,
-		);
-	}
-
-	/**
-	 * Reads an option row without default filters or value coercion.
-	 *
-	 * @param string $option_name Option name.
-	 * @return array{exists: bool, value: string|null, autoload: string|null}
-	 */
-	private function get_raw_option_state( string $option_name ): array {
-		global $wpdb;
-
-		$row = $wpdb->get_row(
-			$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_name ),
-			ARRAY_A
-		);
-
-		return null === $row
-			? array(
-				'exists'   => false,
-				'value'    => null,
-				'autoload' => null,
-			)
-			: array(
-				'exists'   => true,
-				'value'    => $row['option_value'],
-				'autoload' => $row['autoload'],
-			);
-	}
-
-	/**
-	 * Restores an option row without invoking sanitizers or changing autoload.
-	 *
-	 * @param string                                                         $option_name Option name.
-	 * @param array{exists: bool, value: string|null, autoload: string|null} $state Raw option state.
-	 */
-	private function restore_raw_option_state( string $option_name, array $state ): void {
-		global $wpdb;
-
-		if ( ! $state['exists'] ) {
-			$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option_name ) );
-		} elseif ( $this->get_raw_option_state( $option_name )['exists'] ) {
-			$result = $wpdb->update(
-				$wpdb->options,
-				array(
-					'option_value' => $state['value'],
-					'autoload'     => $state['autoload'],
-				),
-				array( 'option_name' => $option_name )
-			);
-		} else {
-			$result = $wpdb->insert(
-				$wpdb->options,
-				array(
-					'option_name'  => $option_name,
-					'option_value' => $state['value'],
-					'autoload'     => $state['autoload'],
-				)
-			);
-		}
-
-		$this->assertNotFalse( $result, "Failed to restore option {$option_name}." );
-		wp_cache_delete( $option_name, 'options' );
-		wp_cache_delete( 'alloptions', 'options' );
-		wp_cache_delete( 'notoptions', 'options' );
 	}
 }
