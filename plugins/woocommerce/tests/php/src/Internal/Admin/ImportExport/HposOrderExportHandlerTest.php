@@ -181,6 +181,67 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should export order notes as comments with the customer note flag as comment meta.
+	 */
+	public function test_exports_order_notes_as_comments(): void {
+		$order = $this->create_order();
+		$order->add_order_note( 'Packed and ready' );
+		$order->add_order_note( 'On its way', 1 );
+
+		$xml = $this->export( 'shop_order' );
+
+		$expected_notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+		$this->assertSame( $expected_notes, substr_count( $xml, '<wp:comment>' ), 'One comment per note, including the automatic status note' );
+		$this->assertStringContainsString( '<wp:comment_type><![CDATA[order_note]]></wp:comment_type>', $xml );
+		$this->assertStringContainsString( '<wp:comment_content><![CDATA[Packed and ready]]></wp:comment_content>', $xml );
+		$this->assertStringContainsString( '<wp:comment_content><![CDATA[On its way]]></wp:comment_content>', $xml );
+		$this->assertSame( 1, substr_count( $xml, '<wp:meta_key><![CDATA[is_customer_note]]></wp:meta_key>' ), 'Only the customer note carries the flag' );
+	}
+
+	/**
+	 * @testdox Should emit notes the WordPress importer can recreate as order notes on the imported order.
+	 */
+	public function test_exported_notes_round_trip_through_comment_insert(): void {
+		$order = $this->create_order();
+		$order->add_order_note( 'On its way', 1 );
+
+		$xml = $this->export( 'shop_order' );
+		preg_match_all( '#<wp:comment>(.*?)</wp:comment>#s', $xml, $blocks );
+		$customer_blocks = array_filter(
+			$blocks[1],
+			function ( $block ) {
+				return false !== strpos( $block, 'is_customer_note' );
+			}
+		);
+		$this->assertCount( 1, $customer_blocks, 'Exactly one exported comment carries the customer note flag' );
+		preg_match( '#<wp:comment_content><!\[CDATA\[(.*?)\]\]></wp:comment_content>#', reset( $customer_blocks ), $content );
+		preg_match( '#<wp:comment_type><!\[CDATA\[(.*?)\]\]></wp:comment_type>#', reset( $customer_blocks ), $type );
+
+		// The importer inserts the comment against the new post ID and then writes the comment meta.
+		$target     = $this->create_order();
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $target->get_id(),
+				'comment_content'  => $content[1],
+				'comment_type'     => $type[1],
+				'comment_approved' => 1,
+			)
+		);
+		add_comment_meta( $comment_id, 'is_customer_note', '1' );
+
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $target->get_id(),
+				'type'     => 'customer',
+			)
+		);
+
+		$this->assertCount( 1, $notes );
+		$this->assertSame( 'On its way', $notes[0]->content );
+		$this->assertTrue( $notes[0]->customer_note );
+	}
+
+	/**
 	 * @testdox Should include trashed orders with the trash status like the core exporter does.
 	 */
 	public function test_exports_trashed_orders(): void {

@@ -251,10 +251,91 @@ class HposOrderExportHandler {
 			</wp:postmeta>
 			<?php
 		}
+
+		foreach ( $this->get_order_notes( $order_id ) as $note ) {
+			?>
+			<wp:comment>
+				<wp:comment_id><?php echo (int) $note->comment_ID; ?></wp:comment_id>
+				<wp:comment_author><?php echo self::cdata( $note->comment_author ); ?></wp:comment_author>
+				<wp:comment_author_email><?php echo self::cdata( $note->comment_author_email ); ?></wp:comment_author_email>
+				<wp:comment_author_url><?php echo esc_url( $note->comment_author_url ); ?></wp:comment_author_url>
+				<wp:comment_author_IP><?php echo self::cdata( $note->comment_author_IP ); ?></wp:comment_author_IP>
+				<wp:comment_date><?php echo self::cdata( $note->comment_date ); ?></wp:comment_date>
+				<wp:comment_date_gmt><?php echo self::cdata( $note->comment_date_gmt ); ?></wp:comment_date_gmt>
+				<wp:comment_content><?php echo self::cdata( $note->comment_content ); ?></wp:comment_content>
+				<wp:comment_approved><?php echo self::cdata( $note->comment_approved ); ?></wp:comment_approved>
+				<wp:comment_type><?php echo self::cdata( $note->comment_type ); ?></wp:comment_type>
+				<wp:comment_parent><?php echo (int) $note->comment_parent; ?></wp:comment_parent>
+				<wp:comment_user_id><?php echo (int) $note->user_id; ?></wp:comment_user_id>
+			<?php
+			foreach ( (array) get_comment_meta( (int) $note->comment_ID ) as $meta_key => $meta_values ) {
+				foreach ( (array) $meta_values as $meta_value ) {
+					// Same shape as the commentmeta row core passes to the filter.
+					$meta_row = (object) array(
+						'comment_id' => $note->comment_ID,
+						'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a query.
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Not a query.
+					);
+
+					/** This filter is documented in wp-admin/includes/export.php */
+					if ( apply_filters( 'wxr_export_skip_commentmeta', false, $meta_key, $meta_row ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Core filter.
+						continue;
+					}
+					?>
+				<wp:commentmeta>
+					<wp:meta_key><?php echo self::cdata( $meta_key ); ?></wp:meta_key>
+					<wp:meta_value><?php echo self::cdata( self::meta_value_to_string( $meta_value ) ); ?></wp:meta_value>
+				</wp:commentmeta>
+					<?php
+				}
+			}
+			?>
+			</wp:comment>
+			<?php
+		}
 		?>
 		</item>
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Returns the order notes as comment objects, in the order core would export them.
+	 *
+	 * WooCommerce hides order notes from comment queries; the exclusion is lifted for this
+	 * query only, the same way `wc_get_order_notes()` does it.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return \WP_Comment[]
+	 */
+	private function get_order_notes( int $order_id ): array {
+		$exclusion = array( 'WC_Comments', 'exclude_order_comments' );
+		$excluded  = has_filter( 'comments_clauses', $exclusion );
+
+		if ( $excluded ) {
+			remove_filter( 'comments_clauses', $exclusion );
+		}
+
+		$notes = get_comments(
+			array(
+				'post_id' => $order_id,
+				'type'    => 'order_note',
+				'status'  => 'approve',
+				'orderby' => 'comment_ID',
+				'order'   => 'ASC',
+			)
+		);
+
+		if ( $excluded ) {
+			add_filter( 'comments_clauses', $exclusion );
+		}
+
+		return array_filter(
+			is_array( $notes ) ? $notes : array(),
+			function ( $note ) {
+				return $note instanceof \WP_Comment;
+			}
+		);
 	}
 
 	/**
