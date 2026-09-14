@@ -26,14 +26,23 @@ import { getAdminSetting } from '../../../../../utils/admin-settings';
 /**
  * Reasons a product won't auto-update even though the plugin's own auto-update setting is on.
  *
- * Every reason is about WooCommerce.com delivering the update, so none of them applies to a copy
- * installed from WordPress.org: core updates that one on its own.
+ * A product without a subscription is always blocked. The other reasons are about
+ * WooCommerce.com delivering the update, so none of them applies to a copy installed from
+ * WordPress.org: core updates that one on its own.
  *
  * Whether WordPress runs automatic updates at all is deliberately not one of them: that is a
  * site-wide decision, and repeating it on every row says nothing about the product.
  */
 export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
 	const blockers: string[] = [];
+
+	if ( subscription.product_key === '' ) {
+		blockers.push(
+			__( 'There is no subscription for it.', 'woocommerce' )
+		);
+
+		return blockers;
+	}
 
 	if ( ! subscription.local?.updates_from_wccom ) {
 		return blockers;
@@ -48,14 +57,6 @@ export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
 				'woocommerce'
 			)
 		);
-	}
-
-	if ( subscription.product_key === '' ) {
-		blockers.push(
-			__( 'There is no subscription for it.', 'woocommerce' )
-		);
-
-		return blockers;
 	}
 
 	if ( subscription.expired && ! subscription.lifetime ) {
@@ -79,7 +80,8 @@ export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
  *
  * Offers to turn the plugin's or theme's auto-update setting on or off. When the setting is on
  * but something else holds the update back, shows "Blocked" with the reasons instead, since none
- * of them can be fixed here. A setting that can't be changed from here is shown as plain text.
+ * of them can be fixed here. A setting that can't be changed from here is shown as plain text,
+ * and so is a product without a subscription, since nothing would deliver its updates.
  */
 export default function AutoUpdateStatus( props: {
 	subscription: Subscription;
@@ -192,6 +194,22 @@ export default function AutoUpdateStatus( props: {
 				level={ StatusLevel.Info }
 				explanation={ __(
 					'Auto-updates for this product are controlled outside this screen.',
+					'woocommerce'
+				) }
+				explanationOnHover
+			/>
+		);
+	}
+
+	// Nothing delivers updates for a product without a subscription, so there is nothing to
+	// enable. Once the setting is on, the Blocked pill above says the same thing.
+	if ( subscription.product_key === '' && ! local.auto_update ) {
+		return (
+			<StatusPopover
+				text={ __( 'Off', 'woocommerce' ) }
+				level={ StatusLevel.Info }
+				explanation={ __(
+					'Subscribe to enable auto-updates for this product.',
 					'woocommerce'
 				) }
 				explanationOnHover

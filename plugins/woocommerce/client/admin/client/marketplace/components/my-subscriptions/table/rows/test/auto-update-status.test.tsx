@@ -151,6 +151,26 @@ describe( 'AutoUpdateStatus', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'does not offer to enable auto-updates without a subscription', async () => {
+		renderStatus(
+			subscriptionWith(
+				{},
+				{ product_key: '', expired: true, active: false }
+			)
+		);
+
+		expect(
+			screen.queryByRole( 'button', { name: /auto-updates/ } )
+		).not.toBeInTheDocument();
+		fireEvent.click( screen.getByRole( 'button', { name: 'Off' } ) );
+
+		expect(
+			await screen.findByText(
+				'Subscribe to enable auto-updates for this product.'
+			)
+		).toBeInTheDocument();
+	} );
+
 	it( 'treats a theme like a plugin', () => {
 		renderStatus(
 			subscriptionWith( { type: 'theme', auto_update: true } )
@@ -166,7 +186,7 @@ describe( 'AutoUpdateStatus', () => {
 		renderStatus(
 			subscriptionWith(
 				{ auto_update: true, updates_from_wccom: false },
-				{ product_key: '', expired: true, active: false }
+				{ expired: true, active: false }
 			)
 		);
 
@@ -175,6 +195,24 @@ describe( 'AutoUpdateStatus', () => {
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'blocks a product without a subscription even when it does not update from WooCommerce.com', async () => {
+		renderStatus(
+			subscriptionWith(
+				{ auto_update: true, updates_from_wccom: false },
+				{ product_key: '' }
+			)
+		);
+
+		expect(
+			screen.queryByRole( 'button', { name: 'Disable auto-updates' } )
+		).not.toBeInTheDocument();
+		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
+
+		expect(
+			await screen.findByText( 'There is no subscription for it.' )
 		).toBeInTheDocument();
 	} );
 
