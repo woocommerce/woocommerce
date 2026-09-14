@@ -34,10 +34,10 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 				'woocommerce_specific_allowed_countries'  => array( 'US', 'CA' ),
 				'woocommerce_ship_to_countries'           => 'specific',
 				'woocommerce_specific_ship_to_countries'  => array( 'US' ),
-				'woocommerce_default_customer_address'    => 'base',
+				'woocommerce_default_customer_address'    => 'geolocation',
 				'woocommerce_calc_taxes'                  => 'yes',
-				'woocommerce_enable_coupons'              => 'yes',
-				'woocommerce_calc_discounts_sequentially' => 'no',
+				'woocommerce_enable_coupons'              => 'no',
+				'woocommerce_calc_discounts_sequentially' => 'yes',
 				'woocommerce_currency'                    => 'CAD',
 				'woocommerce_currency_pos'                => 'left_space',
 				'woocommerce_price_thousand_sep'          => '.',
@@ -59,19 +59,26 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 				'woocommerce_specific_allowed_countries'  => array( 'US', 'CA' ),
 				'woocommerce_ship_to_countries'           => 'specific',
 				'woocommerce_specific_ship_to_countries'  => array( 'US' ),
-				'woocommerce_default_customer_address'    => 'base',
+				'woocommerce_default_customer_address'    => 'geolocation',
 				'woocommerce_calc_taxes'                  => 'yes',
-				'woocommerce_enable_coupons'              => 'yes',
-				'woocommerce_calc_discounts_sequentially' => 'no',
+				'woocommerce_enable_coupons'              => 'no',
+				'woocommerce_calc_discounts_sequentially' => 'yes',
 				'woocommerce_currency'                    => 'CAD',
 				'woocommerce_currency_pos'                => 'left_space',
 				'woocommerce_price_thousand_sep'          => '.',
 				'woocommerce_price_decimal_sep'           => ',',
-				'woocommerce_price_num_decimals'          => 1,
+				// A string, not an int. save() runs the value through absint(), so
+				// update_option() leaves an int in the cache while the row holds '1'.
+				// Asserting the int only passes on a cache hit.
+				'woocommerce_price_num_decimals'          => '1',
 			);
 
 			foreach ( $expected_values as $option_name => $expected_value ) {
+				// Autoloaded options are served from the 'alloptions' blob, so deleting
+				// the per-option key alone still reads back what update_option() cached
+				// rather than what was written. Drop both to reach the row.
 				wp_cache_delete( $option_name, 'options' );
+				wp_cache_delete( 'alloptions', 'options' );
 				$this->assertSame( $expected_value, get_option( $option_name ), "Unexpected persisted value for {$option_name}." );
 			}
 		} finally {
