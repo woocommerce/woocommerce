@@ -171,10 +171,14 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 	/**
 	 * Check whether the store is configured to carry the cart over on logout.
 	 *
+	 * A missing option means the installer has not seeded a value yet, so this falls back to
+	 * clearing, which is what every store did before the setting existed. Preserving always
+	 * takes an explicit stored 'preserve'.
+	 *
 	 * @return bool True if the cart should be preserved, false if it should be emptied.
 	 */
 	private function should_cart_be_preserved(): bool {
-		$behavior = get_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+		$behavior = get_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::CLEAR );
 
 		return CartBehaviorOnLogout::PRESERVE === $behavior;
 	}

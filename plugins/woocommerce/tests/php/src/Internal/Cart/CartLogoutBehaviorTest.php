@@ -87,20 +87,20 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve the cart by default, without the option being saved.
+	 * @testdox Should clear the cart when the option has not been saved, matching the behavior before the setting existed.
 	 */
-	public function test_cart_is_preserved_when_option_is_not_set(): void {
+	public function test_cart_is_not_preserved_when_option_is_not_set(): void {
 		delete_option( 'woocommerce_cart_behavior_on_logout' );
-		$product_id = $this->add_product_to_cart();
+		$this->add_product_to_cart();
 
 		$this->sut->handle_wp_logout_capture();
 		$this->destroy_session_like_logout_does();
 		$this->sut->handle_wp_logout_restore();
 
 		$this->assertSame(
-			array( $product_id ),
+			array(),
 			$this->get_product_ids_in_cart(),
-			'The cart should be preserved when the store has not chosen a behavior'
+			'The cart should be cleared when the store has no stored behavior'
 		);
 	}
 

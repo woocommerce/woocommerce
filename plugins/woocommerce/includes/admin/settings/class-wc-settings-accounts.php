@@ -147,7 +147,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'             => __( 'Cart behavior on logout', 'woocommerce' ),
 				'desc_tip'          => __( 'Whether shoppers keep the items in their cart after logging out. Clearing the cart suits stores where devices are shared or the items themselves are sensitive. Either way, the cart is restored when the shopper logs back in.', 'woocommerce' ),
 				'id'                => 'woocommerce_cart_behavior_on_logout',
-				'default'           => CartBehaviorOnLogout::PRESERVE,
+				'default'           => CartBehaviorOnLogout::CLEAR,
 				'type'              => 'select',
 				'class'             => 'wc-enhanced-select',
 				'options'           => array(
@@ -156,7 +156,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				'autoload'          => false,
 				// The starting value depends on whether the store is new, so WC_Install::create_options()
-				// writes it explicitly rather than seeding this default for every store.
+				// writes it explicitly rather than seeding this default for every store. The default here
+				// only decides what an unseeded store shows and does, and matches the runtime fallback.
 				'skip_initial_save' => true,
 			),
 			array(

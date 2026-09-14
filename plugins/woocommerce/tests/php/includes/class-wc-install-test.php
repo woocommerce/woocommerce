@@ -798,8 +798,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * The accounts settings field must opt out of the generic default seeding in
-	 * WC_Install::create_options(), which would otherwise write 'preserve' for every store on upgrade
-	 * and leave a window before the correct value was applied.
+	 * WC_Install::create_options(), which would otherwise write the field default for every store,
+	 * new ones included, and leave a window before the correct value was applied.
 	 */
 	public function test_cart_behavior_on_logout_setting_skips_initial_save(): void {
 		$settings = ( new WC_Settings_Accounts() )->get_settings_for_section( '' );
