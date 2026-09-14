@@ -2277,6 +2277,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$original_server = $GLOBALS['_SERVER'];
 
 		try {
+			// Do not remove this unset as redundant cleanup. It is what keeps the test
+			// alive: after removing an item, update_cart_action() calls wp_safe_redirect()
+			// followed by exit whenever wp_get_referer() is truthy
+			// (includes/class-wc-form-handler.php:818-821). exit inside PHPUnit kills the
+			// whole run, not just this test.
 			unset( $GLOBALS['_SERVER']['HTTP_REFERER'] );
 			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 			WC()->cart->empty_cart();
