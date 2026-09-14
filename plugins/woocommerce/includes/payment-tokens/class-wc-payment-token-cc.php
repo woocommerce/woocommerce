@@ -81,31 +81,8 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		if ( false === parent::validate() ) {
-			return false;
-		}
-
-		if ( ! $this->get_last4( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_expiry_year( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_expiry_month( 'edit' ) ) {
-			return false;
-		}
-
-		if ( ! $this->get_card_type( 'edit' ) ) {
-			return false;
-		}
-
-		if ( 4 !== strlen( $this->get_expiry_year( 'edit' ) ) ) {
-			return false;
-		}
-
-		if ( 2 !== strlen( $this->get_expiry_month( 'edit' ) ) ) {
+		$invalid_fields = $this->get_invalid_token_fields();
+		if ( $invalid_fields !== array() ) {
 			return false;
 		}
 
@@ -194,5 +171,42 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 */
 	public function set_last4( $last4 ) {
 		$this->set_prop( 'last4', $last4 );
+	}
+
+	/**
+	 * Get the invalid token fields.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array<string, mixed> The invalid token fields with the field name as the key and the field value as the value.
+	 */
+	public function get_invalid_token_fields(): array {
+		$invalid_fields = parent::get_invalid_token_fields();
+
+		$last4 = $this->get_last4( 'edit' );
+		if ( ! $last4 ) {
+			$invalid_fields['last4'] = $last4;
+		}
+
+		$expiry_year = $this->get_expiry_year( 'edit' );
+		if ( ! $expiry_year ) {
+			$invalid_fields['expiry_year'] = $expiry_year;
+		} elseif ( 4 !== strlen( $expiry_year ) ) {
+			$invalid_fields['expiry_year'] = $expiry_year;
+		}
+
+		$expiry_month = $this->get_expiry_month( 'edit' );
+		if ( ! $expiry_month ) {
+			$invalid_fields['expiry_month'] = $expiry_month;
+		} elseif ( 2 !== strlen( $expiry_month ) ) {
+			$invalid_fields['expiry_month'] = $expiry_month;
+		}
+
+		$card_type = $this->get_card_type( 'edit' );
+		if ( ! $card_type ) {
+			$invalid_fields['card_type'] = $card_type;
+		}
+
+		return $invalid_fields;
 	}
 }

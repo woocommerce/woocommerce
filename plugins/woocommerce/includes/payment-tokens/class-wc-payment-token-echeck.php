@@ -72,13 +72,11 @@ class WC_Payment_Token_ECheck extends WC_Payment_Token {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		if ( false === parent::validate() ) {
+		$invalid_fields = $this->get_invalid_token_fields();
+		if ( $invalid_fields !== array() ) {
 			return false;
 		}
 
-		if ( ! $this->get_last4( 'edit' ) ) {
-			return false;
-		}
 		return true;
 	}
 
@@ -101,5 +99,23 @@ class WC_Payment_Token_ECheck extends WC_Payment_Token {
 	 */
 	public function set_last4( $last4 ) {
 		$this->set_prop( 'last4', $last4 );
+	}
+
+	/**
+	 * Get the invalid token fields.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array<string, mixed> The invalid token fields with the field name as the key and the field value as the value.
+	 */
+	public function get_invalid_token_fields(): array {
+		$invalid_fields = parent::get_invalid_token_fields();
+
+		$last4 = $this->get_last4( 'edit' );
+		if ( ! $last4 ) {
+			$invalid_fields['last4'] = $last4;
+		}
+
+		return $invalid_fields;
 	}
 }

@@ -223,11 +223,25 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @return boolean True if the passed data is valid
 	 */
 	public function validate() {
-		$token = $this->get_prop( 'token', 'edit' );
-		if ( empty( $token ) ) {
+		$invalid_fields = $this->get_invalid_token_fields();
+		if ( $invalid_fields !== array() ) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * Get the invalid token fields.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array<string, mixed> The invalid token fields with the field name as the key and the field value as the value.
+	 */
+	public function get_invalid_token_fields(): array {
+		$token = $this->get_prop( 'token', 'edit' );
+		if ( empty( $token ) ) {
+			return array( 'token' => $token );
+		}
+		return array();
+	}
 }

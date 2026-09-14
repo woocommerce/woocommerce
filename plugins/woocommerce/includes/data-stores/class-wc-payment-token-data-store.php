@@ -37,12 +37,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 *
 	 * @param WC_Payment_Token $token Payment token object.
 	 *
-	 * @throws Exception Throw exception if invalid or missing payment token fields.
+	 * @throws WC_Data_Exception Thrown when the payment token has specific invalid or missing payment token fields.
+	 * @throws Exception Thrown when the payment token is invalid.
 	 */
 	public function create( &$token ) {
-		if ( false === $token->validate() ) {
-			throw new Exception( __( 'Invalid or missing payment token fields.', 'woocommerce' ) );
-		}
+		$this->validate_token( $token );
 
 		global $wpdb;
 		if ( ! $token->is_default() && $token->get_user_id() > 0 ) {
@@ -81,12 +80,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 *
 	 * @param WC_Payment_Token $token Payment token object.
 	 *
-	 * @throws Exception Throw exception if invalid or missing payment token fields.
+	 * @throws WC_Data_Exception Thrown when the payment token has specific invalid or missing payment token fields.
+	 * @throws Exception Thrown when the payment token is invalid.
 	 */
 	public function update( &$token ) {
-		if ( false === $token->validate() ) {
-			throw new Exception( __( 'Invalid or missing payment token fields.', 'woocommerce' ) );
-		}
+		$this->validate_token( $token );
 
 		global $wpdb;
 
@@ -172,6 +170,33 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			do_action( 'woocommerce_payment_token_loaded', $token );
 		} else {
 			throw new Exception( __( 'Invalid payment token.', 'woocommerce' ) );
+		}
+	}
+
+	/**
+	 * Validate a payment token.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param WC_Payment_Token $token Payment token object.
+	 * @throws WC_Data_Exception Thrown when the payment token has specific invalid or missing payment token fields.
+	 * @throws Exception Thrown when the payment token is invalid.
+	 */
+	protected function validate_token( $token ): void {
+		if ( false === $token->validate() ) {
+			if ( method_exists( $token, 'get_invalid_token_fields' ) ) {
+				$invalid_fields = $token->get_invalid_token_fields();
+				if ( $invalid_fields !== array() ) {
+					throw new WC_Data_Exception(
+						'woocommerce_invalid_payment_token_fields',
+						__( 'Invalid or missing payment token fields.', 'woocommerce' ),
+						0, // Use 0 for backwards compatibility with the Exception below.
+						array( 'invalid_fields' => $invalid_fields )
+					);
+				}
+			}
+
+			throw new Exception( __( 'Invalid or missing payment token fields.', 'woocommerce' ) );
 		}
 	}
 
