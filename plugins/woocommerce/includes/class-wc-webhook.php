@@ -113,12 +113,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @since 11.2.0
 	 * @param int $refund_id Deleted refund ID.
 	 * @param int $order_id  Parent order ID.
-	 * @return mixed Parent order ID when processed.
 	 */
-	public function process_refund_deleted( $refund_id, $order_id ) {
+	public function process_refund_deleted( $refund_id, $order_id = 0 ): void {
 		unset( $refund_id );
 
-		return $this->process( $order_id );
+		if ( ! is_int( $order_id ) || 0 >= $order_id ) {
+			return;
+		}
+
+		$this->process( $order_id );
 	}
 
 	/**
