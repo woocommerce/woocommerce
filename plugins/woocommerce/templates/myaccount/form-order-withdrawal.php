@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.1.0
+ * @version 11.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -47,7 +47,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 ?>
 
 <div class="woocommerce-order-withdrawal-content">
-	<?php wc_print_notices(); ?>
+	<?php woocommerce_output_all_notices(); ?>
 
 	<?php if ( 'confirmation' === $screen ) : ?>
 		<p><strong><?php esc_html_e( 'Your withdrawal has been submitted.', 'woocommerce' ); ?></strong></p>

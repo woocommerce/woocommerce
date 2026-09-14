@@ -29,6 +29,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	// Fire a handler that checkout.js delegated off document.body, with `this`
 	// bound to the element that would have matched the selector.
 	let triggerDelegatedBodyEvent;
+	// Fire a handler that checkout.js bound directly on the checkout form, with
+	// `this` bound to the form the way jQuery would.
+	let triggerFormEvent;
 
 	beforeEach( () => {
 		capturedApi = null;
@@ -100,7 +103,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		$form = {
 			addClass: jest.fn( () => $form ),
+			removeClass: jest.fn( () => $form ),
 			block: jest.fn( () => $form ),
+			unblock: jest.fn( () => $form ),
 			data: jest.fn(),
 			is: jest.fn( () => false ),
 			length: 1,
@@ -153,8 +158,21 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			triggerHandler: jest.fn( () => true ),
 		};
 
-		// Add methods to $form for checkout.js initialization
-		$form.on = jest.fn( () => $form );
+		// Add methods to $form for checkout.js initialization. Direct bindings
+		// are recorded so a test can fire them; delegated ones are ignored.
+		const formEventHandlers = {};
+		$form.on = jest.fn( ( event, selectorOrHandler ) => {
+			if ( typeof selectorOrHandler === 'function' ) {
+				formEventHandlers[ event ] = selectorOrHandler;
+			}
+			return $form;
+		} );
+		triggerFormEvent = ( event ) => {
+			if ( ! formEventHandlers[ event ] ) {
+				throw new Error( 'No direct ' + event + ' handler on form.checkout' );
+			}
+			return formEventHandlers[ event ].call( $form );
+		};
 		$form.attr = jest.fn( () => $form );
 
 		// Default mock for unhandled selectors - provides all common jQuery methods
@@ -650,7 +668,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 			expect( $form.prepend ).toHaveBeenCalledWith(
 				expect.stringContaining(
-					'woocommerce-NoticeGroup-updateOrderReview'
+					'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">'
 				)
 			);
 			expect( $form.prepend ).toHaveBeenCalledWith(
@@ -824,6 +842,30 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
 				1,
 				'validate'
+			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
+		} );
+	} );
+
+	describe( 'Place order error notices', () => {
+		test( 'should render a failed place order inside the shared notices wrapper', () => {
+			global.window.wc_checkout_params.i18n_checkout_error =
+				'Something went wrong.';
+
+			triggerFormEvent( 'submit' );
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'wc-ajax=checkout' )
+			);
+			expect( request ).toBeDefined();
+
+			request.error( {}, 'error', 'Internal Server Error' );
+
+			expect( $form.prepend ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
+					'<div class="woocommerce-error">Something went wrong.</div>' +
+					'</div>'
 			);
 			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
 		} );
