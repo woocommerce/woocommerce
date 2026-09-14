@@ -468,20 +468,29 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	 * @testdox Trashing the shop page does not queue a rewrite flush.
 	 */
 	public function test_trashing_the_shop_page_does_not_queue_a_rewrite_flush(): void {
-		$shop_page_id = $this->prepare_shop_page();
+		$previous_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		$shop_page_id          = $this->prepare_shop_page();
 
-		wp_update_post(
-			array(
-				'ID'          => $shop_page_id,
-				'post_status' => 'trash',
-			)
-		);
+		try {
+			wp_update_post(
+				array(
+					'ID'          => $shop_page_id,
+					'post_status' => 'trash',
+				)
+			);
 
-		$this->assertSame(
-			'no',
-			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
-			'A trashed shop page keeps serving the product archive at its previous URL, so it must not queue a flush.'
-		);
+			$this->assertSame(
+				'no',
+				get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+				'A trashed shop page keeps serving the product archive at its previous URL, so it must not queue a flush.'
+			);
+		} finally {
+			// Trashing renames the page to `shop__trashed`, and `tearDown()` re-registers the
+			// product post type before the transaction rolls back. The base class only resets
+			// post types for core's own suite, so a theme that supports WooCommerce would hand
+			// that name to `has_archive` and leave it there for the rest of the process.
+			update_option( 'woocommerce_shop_page_id', $previous_shop_page_id );
+		}
 	}
 
 	/**
