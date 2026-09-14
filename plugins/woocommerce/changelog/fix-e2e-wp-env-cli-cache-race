@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Queue the E2E wpCLI helper's wp-env calls so two of them cannot corrupt wp-env's cache file.
