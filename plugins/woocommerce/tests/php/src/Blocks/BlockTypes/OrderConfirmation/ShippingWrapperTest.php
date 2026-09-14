@@ -25,10 +25,12 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 	 * @param bool         $expected_visible Whether wrapper content should render.
 	 */
 	public function test_shipping_wrapper_topology( string $topology, $permission, bool $has_address, bool $expected_visible ): void {
-		$order   = $this->create_order( $topology, $has_address );
 		$content = '<h2>Shipping address</h2><p>Shipping wrapper marker</p>';
 
 		try {
+			// Inside the try: create_order() registers PickupLocation partway through,
+			// so a throw after that point must still reach the finally below.
+			$order = $this->create_order( $topology, $has_address );
 			update_option( 'woocommerce_calc_shipping', 'yes' );
 			$rendered = $this->render( $order, $permission, $content );
 
@@ -40,8 +42,6 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 
 			if ( $expected_visible ) {
 				$this->assertSame( $content, $rendered, 'An authorized shipped order should preserve the wrapper heading and content.' );
-				$this->assertStringContainsString( 'Shipping address', $rendered );
-				$this->assertStringContainsString( 'Shipping wrapper marker', $rendered );
 			} else {
 				$this->assertSame( '', $rendered, 'The shipping wrapper should be empty for pickup, virtual, missing-address, or unauthorized orders.' );
 			}

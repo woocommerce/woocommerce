@@ -70,9 +70,10 @@ final class BillingAddress extends \WP_UnitTestCase {
 	 * @param bool         $expected_visible Whether billing content should render.
 	 */
 	public function test_billing_address_topology( string $topology, $permission, bool $expected_visible ): void {
-		$order = $this->create_topology_order( $topology );
-
 		try {
+			// Inside the try: create_topology_order() registers PickupLocation partway
+			// through, so a throw after that point must still reach the finally below.
+			$order = $this->create_topology_order( $topology );
 			update_option( 'woocommerce_calc_shipping', 'yes' );
 			$content = $this->render( $order, $permission );
 
