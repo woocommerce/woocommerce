@@ -17,8 +17,8 @@ type ShippingTopology = {
 };
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
-		const pageObject = new CheckoutPage( { page } );
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
+		const pageObject = new CheckoutPage( { page, requestUtils } );
 		await use( pageObject );
 	},
 } );
