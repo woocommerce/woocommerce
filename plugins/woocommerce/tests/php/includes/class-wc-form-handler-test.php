@@ -668,4 +668,75 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->fail( 'Expected save_account_details() to redirect after a successful save.' );
 	}
+
+	/**
+	 * @testdox An add to cart request rejected by the allowed filter fires the before action but leaves the cart untouched.
+	 */
+	public function test_add_to_cart_action_can_be_aborted_by_the_allowed_filter(): void {
+		$product                 = WC_Helper_Product::create_simple_product();
+		$_REQUEST['add-to-cart'] = (string) $product->get_id();
+
+		$action_args = array();
+		add_action(
+			'woocommerce_before_add_to_cart_action',
+			function ( $product_id, $adding_to_cart ) use ( &$action_args ) {
+				$action_args[] = array( $product_id, $adding_to_cart );
+			},
+			10,
+			2
+		);
+		add_filter( 'woocommerce_add_to_cart_action_allowed', '__return_false' );
+
+		WC_Form_Handler::add_to_cart_action();
+
+		$this->assertCount( 0, WC()->cart->get_cart_contents(), 'A rejected request must not modify the cart.' );
+		$this->assertCount( 1, $action_args, 'The before action must fire once per request, including rejected ones.' );
+		$this->assertSame( $product->get_id(), $action_args[0][0], 'The action must receive the resolved product ID.' );
+		$this->assertInstanceOf( WC_Product::class, $action_args[0][1], 'The action must receive the product object.' );
+		$this->assertSame( $product->get_id(), $action_args[0][1]->get_id(), 'The product object must match the requested product.' );
+	}
+
+	/**
+	 * @testdox An add to cart request proceeds normally when the allowed filter returns true.
+	 */
+	public function test_add_to_cart_action_proceeds_when_the_allowed_filter_returns_true(): void {
+		$product                 = WC_Helper_Product::create_simple_product();
+		$_REQUEST['add-to-cart'] = (string) $product->get_id();
+
+		$filter_args = array();
+		add_filter(
+			'woocommerce_add_to_cart_action_allowed',
+			function ( $allowed, $product_id, $adding_to_cart ) use ( &$filter_args ) {
+				$filter_args[] = array( $allowed, $product_id, $adding_to_cart->get_id() );
+
+				return $allowed;
+			},
+			10,
+			3
+		);
+
+		WC_Form_Handler::add_to_cart_action();
+
+		$this->assertCount( 1, WC()->cart->get_cart_contents(), 'An allowed request must add the product to the cart.' );
+		$this->assertSame( array( array( true, $product->get_id(), $product->get_id() ) ), $filter_args, 'The filter must receive the default, the product ID, and the product object.' );
+	}
+
+	/**
+	 * @testdox The early add to cart hooks do not fire when the requested product cannot be resolved.
+	 */
+	public function test_add_to_cart_action_skips_early_hooks_for_an_unresolvable_product(): void {
+		$_REQUEST['add-to-cart'] = '99999999';
+
+		$fired = 0;
+		add_action(
+			'woocommerce_before_add_to_cart_action',
+			function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+
+		WC_Form_Handler::add_to_cart_action();
+
+		$this->assertSame( 0, $fired, 'The before action must not fire when the product cannot be resolved.' );
+	}
 }

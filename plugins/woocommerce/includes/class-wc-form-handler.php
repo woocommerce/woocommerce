@@ -1032,6 +1032,36 @@ class WC_Form_Handler {
 			return;
 		}
 
+		/**
+		 * Fires before an add to cart request from the cart form or an add to cart URL is handled.
+		 *
+		 * Runs after the requested product has been resolved but before any cart manipulation begins,
+		 * providing an early observation point for every such request, including ones later rejected.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int        $product_id     ID of the product being added to the cart.
+		 * @param WC_Product $adding_to_cart Product object being added to the cart.
+		 */
+		do_action( 'woocommerce_before_add_to_cart_action', $product_id, $adding_to_cart );
+
+		/**
+		 * Filters whether an add to cart request from the cart form or an add to cart URL may proceed.
+		 *
+		 * Returning false aborts the request before any cart manipulation begins, giving external code
+		 * an enforcement point for rate limiting or abuse prevention. The request ends silently;
+		 * callbacks can queue their own notice with wc_add_notice() when feedback is desired.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param bool       $allowed        Whether the add to cart request may proceed. Default true.
+		 * @param int        $product_id     ID of the product being added to the cart.
+		 * @param WC_Product $adding_to_cart Product object being added to the cart.
+		 */
+		if ( ! apply_filters( 'woocommerce_add_to_cart_action_allowed', true, $product_id, $adding_to_cart ) ) {
+			return;
+		}
+
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
 		if ( ProductType::VARIABLE === $add_to_cart_handler || ProductType::VARIATION === $add_to_cart_handler ) {
