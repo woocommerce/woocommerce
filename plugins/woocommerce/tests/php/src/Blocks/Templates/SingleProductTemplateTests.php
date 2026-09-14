@@ -222,6 +222,17 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			wc_reset_loop();
 
 			$single_product_template = new SingleProductTemplate();
+
+			// Calling the method directly is what makes the body_class assertions below
+			// deterministic, but on its own it would still pass if init() stopped wiring
+			// the method up at all. Pin the registration separately.
+			$single_product_template->init();
+			$this->assertSame(
+				11,
+				has_filter( 'get_block_templates', array( $single_product_template, 'update_single_product_content' ) ),
+				'init() must register the callback that installs the body_class filter.'
+			);
+
 			$single_product_template->update_single_product_content( array( $template ) );
 
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.

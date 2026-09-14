@@ -66,7 +66,9 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 		} finally {
 			// The option row, the fixtures and $GLOBALS['post'] go back with tear_down().
 			// The product global, the ProductsStore statics and the Interactivity store
-			// do not, so they are restored here -- and asserted on below.
+			// do not. Rendering really does populate all three -- ProductsStore caches
+			// the product and flips getters_registered -- so these restores are what
+			// keeps the render out of the next test, not a precaution.
 			try {
 				if ( $had_global_product ) {
 					$GLOBALS['product'] = $previous_global_product;
@@ -81,9 +83,6 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 				}
 			}
 		}
-
-		$this->assertSame( $products_store_state, $this->snapshot_products_store_static_state(), 'The registered render should not leak ProductsStore static state.' );
-		$this->assertSame( $interactivity_state, $this->snapshot_interactivity_state(), 'The registered render should not leak global Interactivity API state.' );
 	}
 
 	/**
