@@ -443,11 +443,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 
 		global $wp_rest_server;
 
-		$previous_user_id     = get_current_user_id();
-		$capable_user_id      = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$previous_rest_server = $wp_rest_server;
 		$wp_rest_server       = new \WP_REST_Server();
-		wp_set_current_user( $capable_user_id );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
 
 		try {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
@@ -456,7 +454,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			$request  = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
 			$response = $wp_rest_server->dispatch( $request );
 		} finally {
-			wp_set_current_user( $previous_user_id );
+			// tear_down() resets the current user; $wp_rest_server it does not touch.
 			$wp_rest_server = $previous_rest_server;
 		}
 
