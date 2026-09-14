@@ -1607,14 +1607,8 @@ describe( 'getPreviousDate', () => {
 	it( 'should shift by calendar dates when the range starts sit on different sides of a DST change', () => {
 		// Last quarter (Q2) against the previous period on a New York store:
 		// April starts in EDT, the last day of December in EST.
-		const primaryStart = moment( '2026-04-01T00:00:00-04:00' ).utcOffset(
-			-240,
-			true
-		);
-		const secondaryStart = moment( '2025-12-31T00:00:00-05:00' ).utcOffset(
-			-300,
-			true
-		);
+		const primaryStart = moment.parseZone( '2026-04-01T00:00:00-04:00' );
+		const secondaryStart = moment.parseZone( '2025-12-31T00:00:00-05:00' );
 
 		expect(
 			getPreviousDate(
@@ -1641,7 +1635,7 @@ describe( 'getPreviousDate', () => {
 			getPreviousDate(
 				'2026-05-01 00:00:00',
 				primaryStart,
-				moment( '2026-01-01T00:00:00-05:00' ).utcOffset( -300, true ),
+				moment.parseZone( '2026-01-01T00:00:00-05:00' ),
 				'previous_period',
 				'month'
 			).format( isoDateFormat )
