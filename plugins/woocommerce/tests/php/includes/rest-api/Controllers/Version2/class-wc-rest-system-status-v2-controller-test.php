@@ -70,11 +70,11 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$database = $this->sut->get_database_info();
 		$tables   = array_merge( $database['database_tables']['woocommerce'], $database['database_tables']['other'] );
-		$table    = $tables[ $wpdb->prefix . 'wc_orders_meta' ];
+		$table    = $tables[ $wpdb->posts ];
 
 		$this->assertArrayHasKey( 'rows', $table );
 		$this->assertSame(
-			(int) $wpdb->get_var( $wpdb->prepare( 'SELECT TABLE_ROWS FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s', DB_NAME, $wpdb->prefix . 'wc_orders_meta' ) ),
+			(int) $wpdb->get_var( $wpdb->prepare( 'SELECT TABLE_ROWS FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s', DB_NAME, $wpdb->posts ) ),
 			$table['rows']
 		);
 	}
