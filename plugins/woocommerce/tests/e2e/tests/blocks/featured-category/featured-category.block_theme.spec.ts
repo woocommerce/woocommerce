@@ -34,7 +34,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		let editedMediaId: number | undefined;
 		let productId: string | undefined;
 		let categoryId: string | undefined;
-		let originalCategoryIds: string[] = [];
+		let originalCategoryIds: string[] | undefined;
 		const media = await requestUtils.uploadMedia(
 			path.resolve( __dirname, '../../../test-data/images/image-01.png' )
 		);
@@ -53,11 +53,24 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 				// `wc product update --categories` replaces the list rather than
 				// appending to it, so Cap's own categories have to come back below.
+				//
+				// npm writes its own banner to stdout ahead of the command output,
+				// and a product with no categories prints nothing at all, so the
+				// value goes inside a marker that can be matched on its own line.
+				// The banner echoes the command back, marker text included, but
+				// always behind a "> " prefix, which the anchor excludes.
 				const categoriesCliOutput = await wpCLI(
-					`eval 'echo implode( ",", wp_get_post_terms( ${ productId }, "product_cat", array( "fields" => "ids" ) ) );'`
+					`eval 'echo "CATEGORY_IDS[" . implode( ",", wp_get_post_terms( ${ productId }, "product_cat", array( "fields" => "ids" ) ) ) . "]";'`
 				);
-				originalCategoryIds = categoriesCliOutput.stdout
-					.trim()
+				const capturedCategoryIds = categoriesCliOutput.stdout.match(
+					/^CATEGORY_IDS\[([\d,]*)\]$/m
+				);
+				if ( ! capturedCategoryIds ) {
+					throw new Error(
+						`Failed to read Cap's product categories: ${ categoriesCliOutput.stdout }`
+					);
+				}
+				originalCategoryIds = capturedCategoryIds[ 1 ]
 					.split( ',' )
 					.filter( Boolean );
 
@@ -103,7 +116,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			).toBeVisible();
 		} finally {
 			try {
-				if ( productId ) {
+				if ( productId && originalCategoryIds ) {
 					const categories = originalCategoryIds
 						.map( ( id ) => `{ "id": ${ id } }` )
 						.join( ', ' );

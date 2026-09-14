@@ -56,7 +56,17 @@ test.describe( `${ blockData.slug } Block`, () => {
 			const thumbnailCliOutput = await wpCLI(
 				`eval 'echo (string) get_post_thumbnail_id( ${ productId } );'`
 			);
-			originalThumbnailId = thumbnailCliOutput.stdout.trim();
+			// npm writes its own banner to stdout ahead of the command output, so
+			// match the digits on their own line the way the product lookup above
+			// does. Trimming the whole buffer keeps the banner, and feeding that
+			// back into a shell command makes the restore fail on its own `>`.
+			originalThumbnailId =
+				thumbnailCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! originalThumbnailId ) {
+				throw new Error(
+					`Failed to read Album's thumbnail ID: ${ thumbnailCliOutput.stdout }`
+				);
+			}
 
 			await wpCLI(
 				`post meta update ${ productId } _thumbnail_id ${ media.id }`
@@ -94,9 +104,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} finally {
 			try {
 				if ( productId && originalThumbnailId !== undefined ) {
-					const hadThumbnail =
-						originalThumbnailId !== '' &&
-						originalThumbnailId !== '0';
+					// get_post_thumbnail_id() echoes 0 when the meta key is absent.
+					const hadThumbnail = originalThumbnailId !== '0';
 
 					await wpCLI(
 						hadThumbnail
