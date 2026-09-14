@@ -58,7 +58,7 @@ trait ShippingMethodRestrictionsTrait {
 	 *
 	 * @return array Form fields keyed by setting id.
 	 */
-	protected function get_shipping_method_restrictions_form_fields() {
+	protected function get_shipping_method_restrictions_form_fields(): array {
 		$method_title = $this->get_method_title();
 
 		return array(
@@ -89,8 +89,8 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Check If The Gateway Is Available For Use.
 	 *
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 * @since 10.7.0 Added early return when gateway is disabled.
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @return bool
 	 */
@@ -206,7 +206,7 @@ trait ShippingMethodRestrictionsTrait {
 	 *
 	 * @return array Options keyed by shipping method title, each an array of rate id => option label.
 	 */
-	public function get_shipping_method_options() {
+	public function get_shipping_method_options(): array {
 		$cache_group = 'wc_shipping_method_options';
 		$cache_key   = 'options_' . WC_Cache_Helper::get_transient_version( 'shipping' ) . '_' . get_locale();
 
@@ -263,8 +263,8 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Indicates whether a rate exists in an array of canonically-formatted rate IDs that activates this gateway.
 	 *
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 * @since 3.4.0
+	 * @since 11.2.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @param array $rate_ids Rate ids to check.
 	 * @return array
