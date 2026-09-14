@@ -43,13 +43,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $original_request = array();
 
 	/**
-	 * Original WordPress query variables.
-	 *
-	 * @var array<string,mixed>
-	 */
-	private array $original_query_vars = array();
-
-	/**
 	 * Original WooCommerce session.
 	 *
 	 * @var WC_Session|null
@@ -60,17 +53,14 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
-		global $wp;
-
 		parent::setUp();
 
 		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 
-		$this->original_get        = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->original_post       = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$this->original_request    = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->original_query_vars = $wp->query_vars;
-		$this->original_session    = WC()->session;
+		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_session = WC()->session;
 
 		if ( ! WC()->session ) {
 			WC()->initialize_session();
@@ -84,8 +74,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Clean up test fixtures.
 	 */
 	public function tearDown(): void {
-		global $wp;
-
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		$this->reset_cancel_order_handled_flag();
 
@@ -95,9 +83,8 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		} else {
 			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
 		}
-		$_POST          = $this->original_post;
-		$_REQUEST       = $this->original_request;
-		$wp->query_vars = $this->original_query_vars;
+		$_POST    = $this->original_post;
+		$_REQUEST = $this->original_request;
 
 		wp_set_current_user( 0 );
 		wc_clear_notices();
