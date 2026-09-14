@@ -11,8 +11,10 @@
 		]
 	},
 	"dependencies": {
+		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data": "catalog:wp-min",
 		"@wordpress/editor": "catalog:wp-min",
+		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
