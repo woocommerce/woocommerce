@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Controller;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Unit_Test_Case;
 
 /**
@@ -71,7 +72,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 			'date'            => '2026-09-04 10:00:00',
 			'order_number'    => '123',
 			'total_formatted' => '10.00',
-			'status'          => 'completed',
+			'status'          => OrderStatus::COMPLETED,
 			'customer_type'   => 'new',
 			'num_items_sold'  => 1,
 			'net_total'       => 10.00,
