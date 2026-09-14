@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,11 +19,23 @@ defined( 'ABSPATH' ) || exit;
 class HposOrderExportHandler {
 
 	/**
+	 * Number of orders loaded per query while streaming the export.
+	 */
+	private const BATCH_SIZE = 20;
+
+	/**
 	 * Custom orders table controller.
 	 *
 	 * @var CustomOrdersTableController
 	 */
 	private CustomOrdersTableController $cot_controller;
+
+	/**
+	 * Data synchronizer, used to detect whether posts already mirror HPOS.
+	 *
+	 * @var DataSynchronizer
+	 */
+	private DataSynchronizer $data_synchronizer;
 
 	/**
 	 * Legacy data handler used to backfill imported orders into HPOS.
@@ -31,11 +45,11 @@ class HposOrderExportHandler {
 	private LegacyDataHandler $legacy_data_handler;
 
 	/**
-	 * Buffered XML output for HPOS orders.
+	 * Arguments of the export currently in progress, or null outside of an export.
 	 *
-	 * @var string
+	 * @var array|null
 	 */
-	private string $buffered_items = '';
+	private ?array $export_args = null;
 
 	/**
 	 * Constructor. Registers the export and import hooks.
@@ -52,77 +66,105 @@ class HposOrderExportHandler {
 	 * @internal
 	 *
 	 * @param CustomOrdersTableController $cot_controller      Custom orders table controller.
+	 * @param DataSynchronizer            $data_synchronizer   Data synchronizer.
 	 * @param LegacyDataHandler           $legacy_data_handler Legacy data handler.
 	 */
-	final public function init( CustomOrdersTableController $cot_controller, LegacyDataHandler $legacy_data_handler ): void {
+	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, LegacyDataHandler $legacy_data_handler ): void {
 		$this->cot_controller      = $cot_controller;
+		$this->data_synchronizer   = $data_synchronizer;
 		$this->legacy_data_handler = $legacy_data_handler;
 	}
 
 	/**
-	 * Wraps given string in XML CDATA tag.
-	 *
-	 * @param string $str String to wrap in XML CDATA tag.
-	 * @return string
-	 */
-	private function wxr_cdata( string $str ): string {
-		if ( ! seems_utf8( $str ) ) {
-			$str = (string) mb_convert_encoding( $str, 'UTF-8', 'auto' );
-		}
-
-		return '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
-	}
-
-	/**
-	 * Capture HPOS orders as XML output to be injected later.
+	 * Remembers the export arguments so the orders can be streamed from `rss2_head`.
 	 *
 	 * @internal
 	 *
 	 * @param array $args Export arguments.
 	 */
 	public function handle_export_wp( $args ): void {
-		if ( ! is_array( $args ) || 'shop_order' !== ( $args['content'] ?? '' ) ) {
-			return;
-		}
-
-		if ( ! $this->cot_controller->custom_orders_table_usage_is_enabled() ) {
-			return;
-		}
-
-		ob_start();
-
-		$orders = wc_get_orders(
-			array(
-				'limit'    => -1,
-				'return'   => 'ids',
-				'orderby'  => 'date_created',
-				'order'    => 'ASC',
-				'type'     => 'shop_order',
-				'paginate' => false,
-			)
-		);
-
-		foreach ( is_array( $orders ) ? $orders : array() as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( $order instanceof \WC_Order ) {
-				$this->export_order_to_xml( $order );
-			}
-		}
-
-		$this->buffered_items = (string) ob_get_clean();
+		$this->export_args = is_array( $args ) ? $args : null;
 	}
 
 	/**
-	 * Outputs buffered XML into the WXR document.
+	 * Streams HPOS orders into the WXR document.
+	 *
+	 * `rss2_head` is the only hook core fires inside the document, so this runs during
+	 * regular RSS feeds too. It only emits when `export_wp` set the arguments in this request.
 	 *
 	 * @internal
 	 */
 	public function handle_rss2_head(): void {
-		if ( ! empty( $this->buffered_items ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $this->buffered_items;
-			$this->buffered_items = '';
+		$args              = $this->export_args;
+		$this->export_args = null;
+
+		if ( null === $args || ! $this->should_export_orders( $args ) ) {
+			return;
 		}
+
+		$statuses = array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) );
+		$page     = 1;
+
+		do {
+			$order_ids = wc_get_orders(
+				array(
+					'type'    => 'shop_order',
+					'status'  => $statuses,
+					'limit'   => self::BATCH_SIZE,
+					'page'    => $page,
+					'orderby' => 'id',
+					'order'   => 'ASC',
+					'return'  => 'ids',
+				)
+			);
+			$order_ids = is_array( $order_ids ) ? $order_ids : array();
+			$fetched   = count( $order_ids );
+
+			foreach ( $order_ids as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order instanceof \WC_Order ) {
+					$this->export_order_to_xml( $order );
+				}
+			}
+
+			++$page;
+		} while ( self::BATCH_SIZE === $fetched );
+	}
+
+	/**
+	 * Whether HPOS orders must be added to the export.
+	 *
+	 * Core already exports orders from the posts table, which is complete when posts are
+	 * authoritative or when sync is on. Only HPOS-authoritative sites with sync off miss them.
+	 *
+	 * @param array $args Export arguments.
+	 * @return bool
+	 */
+	private function should_export_orders( array $args ): bool {
+		if ( ! in_array( $args['content'] ?? '', array( 'all', 'shop_order' ), true ) ) {
+			return false;
+		}
+
+		return $this->cot_controller->custom_orders_table_usage_is_enabled()
+			&& ! $this->data_synchronizer->data_sync_is_enabled();
+	}
+
+	/**
+	 * Wraps a string in an XML CDATA section, mirroring core's `wxr_cdata()`.
+	 *
+	 * @param string $str String to wrap.
+	 * @return string
+	 */
+	private static function cdata( string $str ): string {
+		$is_valid_utf8 = function_exists( 'wp_is_valid_utf8' )
+			? wp_is_valid_utf8( $str )
+			: seems_utf8( $str ); // phpcs:ignore WordPress.WP.DeprecatedFunctions.seems_utf8Found -- Fallback for WordPress < 6.9.
+
+		if ( ! $is_valid_utf8 ) {
+			$str = (string) mb_convert_encoding( $str, 'UTF-8', 'auto' );
+		}
+
+		return '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
 	}
 
 	/**
@@ -148,8 +190,8 @@ class HposOrderExportHandler {
 			<dc:creator><?php echo esc_html( 'admin' ); ?></dc:creator>
 			<guid isPermaLink="false"><?php echo esc_html( get_site_url( null, "?post_type=shop_order&p={$order_id}" ) ); ?></guid>
 			<description></description>
-			<content:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></content:encoded>
-			<excerpt:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></excerpt:encoded>
+			<content:encoded><?php echo self::cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></content:encoded>
+			<excerpt:encoded><?php echo self::cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></excerpt:encoded>
 			<wp:post_id><?php echo (int) $order_id; ?></wp:post_id>
 			<wp:post_date><?php echo esc_html( $date_created ); ?></wp:post_date>
 			<wp:post_date_gmt><?php echo esc_html( $date_created ); ?></wp:post_date_gmt>
@@ -177,8 +219,8 @@ class HposOrderExportHandler {
 			foreach ( $essential_meta as $key => $value ) {
 				?>
 				<wp:postmeta>
-					<wp:meta_key><?php echo $this->wxr_cdata( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_key>
-					<wp:meta_value><?php echo $this->wxr_cdata( (string) maybe_serialize( $value ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_value>
+					<wp:meta_key><?php echo self::cdata( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_key>
+					<wp:meta_value><?php echo self::cdata( (string) maybe_serialize( $value ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_value>
 				</wp:postmeta>
 				<?php
 			}
@@ -189,8 +231,8 @@ class HposOrderExportHandler {
 				$value = $meta_item->get_data()['value'];
 				?>
 				<wp:postmeta>
-					<wp:meta_key><?php echo $this->wxr_cdata( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_key>
-					<wp:meta_value><?php echo $this->wxr_cdata( (string) maybe_serialize( $value ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_value>
+					<wp:meta_key><?php echo self::cdata( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_key>
+					<wp:meta_value><?php echo self::cdata( (string) maybe_serialize( $value ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></wp:meta_value>
 				</wp:postmeta>
 				<?php
 			}
