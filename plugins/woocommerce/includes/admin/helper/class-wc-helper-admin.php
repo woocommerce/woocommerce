@@ -108,6 +108,9 @@ class WC_Helper_Admin {
 				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
 				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
 
+				// The "Connected to <email>" banner on My Subscriptions stays hidden once dismissed.
+				$settings['wccomHelper']['show_connected_account_notice'] = PluginsHelper::should_show_notice( PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, false );
+
 				// Read last: the notices above already trigger a subscriptions fetch,
 				// so by this point any failure from it has been recorded.
 				$api_error = WC_Helper::get_api_error();
