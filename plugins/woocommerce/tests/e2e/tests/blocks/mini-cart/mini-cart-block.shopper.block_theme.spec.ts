@@ -94,11 +94,20 @@ test.describe( 'Shopper → Notices', () => {
 				'[data-block-name="woocommerce/mini-cart-title-label-block"]'
 			);
 
-			if ( await miniCartTitleLabelBlock.count() ) {
+			// `count()` samples the DOM once and never waits, so a title block
+			// that is still rendering would send us down the legacy branch and
+			// fail there on markup that was never going to appear. Wait for it
+			// instead, and treat the timeout as "this build ships the legacy
+			// Mini Cart".
+			const usesIapiMiniCart = await miniCartTitleLabelBlock
+				.waitFor( { state: 'visible', timeout: 5000 } )
+				.then(
+					() => true,
+					() => false
+				);
+
+			if ( usesIapiMiniCart ) {
 				// iAPI Mini Cart.
-				await expect( miniCartTitleLabelBlock ).toBeVisible( {
-					timeout: 1000,
-				} );
 				const miniCartTitleItemsCounterBlock = page.locator(
 					'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
 				);
