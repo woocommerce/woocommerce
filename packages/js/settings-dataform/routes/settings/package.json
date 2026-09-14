@@ -2,6 +2,7 @@
 	"name": "@woocommerce-settings-ui-experimental/settings-route",
 	"private": true,
 	"dependencies": {
+		"@woocommerce-settings-ui-experimental/settings-ui": "workspace:*",
 		"@wordpress/admin-ui": "2.10.0",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",

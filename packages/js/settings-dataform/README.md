@@ -45,7 +45,7 @@ The page is implemented in `routes/settings/stage.tsx`, using `Page` from `@word
 
 ## Data and form configuration
 
-The router registers the core-data singleton entity `woo_settings/product` with `baseURL: '/wc/v4/settings/products'` and `key: false`. Its loader preloads the settings record; the stage loads the layout through `useViewConfig`. All entity selectors and actions omit the record ID, using the constants in `routes/settings/constants.ts`.
+The router registers the core-data singleton entity `woo_settings/product` with `baseURL: '/wc/v4/settings/products'` and `key: false`. Its loader preloads the settings record; the stage loads the layout through `useViewConfig`. All entity selectors and actions omit the record ID, using the constants exported by the settings UI package.
 
 The endpoint returns a flat object keyed by setting ID:
 
@@ -59,7 +59,7 @@ The endpoint returns a flat object keyed by setting ID:
 
 `getEditedEntityRecord` supplies this object directly to DataForm. Values retain their boolean, numeric, string, or array types. `editEntityRecord` applies field edits to the singleton, and `saveEditedEntityRecord` sends the changed properties in one request to the same endpoint. Dirty state, saving state, and errors belong to that single record. Discard restores its persisted values. Failed saves keep the edits available for another attempt.
 
-The package's [`ViewConfig` class](packages/settings-ui/src/ViewConfig.php) contributes the Shop pages, Measurements, Reviews, and Inventory groups through `get_entity_view_config_woo_settings_product`. It calls `WP_View_Config_Data::merge( $patch, 1 )` with the DataForm layout. The client requests only `form` through `useViewConfig`; field definitions remain in `packages/settings-ui/fields/product/`. Only registered fields with values in the settings response are passed to DataForm.
+The package's [`ViewConfig` class](packages/settings-ui/src/ViewConfig.php) contributes the Shop pages, Measurements, Reviews, and Inventory groups through `get_entity_view_config_woo_settings_product`. It calls `WP_View_Config_Data::merge( $patch, 1 )` with the DataForm layout. The client requests only `form` through `useViewConfig`; field definitions remain in `packages/settings-ui/src/fields/product/`. Only registered fields with values in the settings response are passed to DataForm.
 
 Core loads the PHP configuration on `init`, including REST requests, when `wp_get_entity_view_config()` is available. The WordPress/Gutenberg runtime must support View Config and `useViewConfig` with its `fields` argument. The page shows a loading indicator while data is resolving and displays settings or View Config request errors.
 
@@ -83,7 +83,7 @@ The admin page integration skips older WordPress versions, missing builds, front
 
 ## Build output
 
-The builder discovers implementations under `packages/*/src/` and writes transpiled files into each package's `build/` and `build-module/` directories. WordPress bundles and generated PHP asset registration files go into this workspace's root `build/` directory. The settings UI package's `wpCopyFiles` configuration copies `ViewConfig.php` to `build/scripts/settings-ui/ViewConfig.php`, including during watch builds.
+The builder discovers implementations under `packages/*/src/` and writes transpiled files into each package's `build/` and `build-module/` directories. WordPress bundles and generated PHP asset registration files go into this workspace's root `build/` directory. The settings UI package's `wpCopyFiles` configuration copies `ViewConfig.php` to `build/scripts/settings-ui/ViewConfig.php`, including during watch builds. Route-specific code and styles live together under `routes/settings/`; importing `style.scss` from `stage.tsx` lets `wp-build` compile and inject the styles with the route content module.
 
 The settings UI implementation is bundled into the route. The generated admin page mounts it using WordPress's boot module.
 

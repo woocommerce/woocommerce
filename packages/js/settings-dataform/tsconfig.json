@@ -9,13 +9,9 @@
 		"skipLibCheck": true,
 		"paths": {
 			"@woocommerce-settings-ui-experimental/settings-ui": [
-				"./packages/settings-ui/src/index.tsx"
+				"./packages/settings-ui/src/index.ts"
 			]
 		}
 	},
-	"include": [
-		"packages/*/src/**/*",
-		"packages/*/fields/**/*",
-		"routes/**/*"
-	]
+	"include": [ "packages/*/src/**/*", "routes/**/*" ]
 }

@@ -7,8 +7,8 @@ import { store as editorStore } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import { SETTINGS_ENTITY } from '../../../../routes/settings/constants';
-import { unlock } from '../../../../routes/settings/unlock';
+import { SETTINGS_ENTITY } from '../../constants';
+import { unlock } from '../../unlock';
 import shopPageId from './shop-page-id';
 import cartRedirectAfterAdd from './cart-redirect-after-add';
 import enableAjaxAddToCart from './enable-ajax-add-to-cart';
@@ -42,9 +42,7 @@ import attributeLookupDirectUpdates from './attribute-lookup-direct-updates';
 import attributeLookupOptimizedUpdates from './attribute-lookup-optimized-updates';
 import productMatchFeaturedImageBySku from './product-match-featured-image-by-sku';
 
-const { registerEntityField } = unlock( dispatch( editorStore ) );
-
-[
+const fields = [
 	shopPageId,
 	cartRedirectAfterAdd,
 	enableAjaxAddToCart,
@@ -77,6 +75,22 @@ const { registerEntityField } = unlock( dispatch( editorStore ) );
 	attributeLookupDirectUpdates,
 	attributeLookupOptimizedUpdates,
 	productMatchFeaturedImageBySku,
-].forEach( ( field ) => {
-	registerEntityField( SETTINGS_ENTITY.kind, SETTINGS_ENTITY.name, field );
-} );
+];
+let areProductFieldsRegistered = false;
+
+export function registerProductFields() {
+	if ( areProductFieldsRegistered ) {
+		return;
+	}
+
+	const { registerEntityField } = unlock( dispatch( editorStore ) );
+
+	fields.forEach( ( field ) => {
+		registerEntityField(
+			SETTINGS_ENTITY.kind,
+			SETTINGS_ENTITY.name,
+			field
+		);
+	} );
+	areProductFieldsRegistered = true;
+}

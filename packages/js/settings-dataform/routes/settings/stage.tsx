@@ -11,18 +11,19 @@ import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { useViewConfig } from '@wordpress/views';
 import { useId, useMemo } from 'react';
-
-/**
- * Internal dependencies
- */
 import {
 	SETTINGS_ENTITY,
 	SETTINGS_ARGS,
 	VIEW_CONFIG_FIELDS,
 	VIEW_CONFIG_ARGS,
-} from './constants';
-import type { Settings } from './types';
-import { unlock } from './unlock';
+	unlock,
+} from '@woocommerce-settings-ui-experimental/settings-ui';
+import type { Settings } from '@woocommerce-settings-ui-experimental/settings-ui';
+
+/**
+ * Styles
+ */
+import './style.scss';
 
 const { kind, name } = SETTINGS_ENTITY;
 

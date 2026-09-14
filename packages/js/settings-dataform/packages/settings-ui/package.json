@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"license": "GPL-2.0-or-later",
-	"main": "build/index.js",
+	"main": "build/index.cjs",
 	"module": "build-module/index.mjs",
 	"wpCopyFiles": {
 		"files": [
@@ -16,6 +16,7 @@
 		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/private-apis": "catalog:wp-min",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
 	}
