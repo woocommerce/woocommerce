@@ -95,20 +95,26 @@ test.describe( 'Add Product Task', () => {
 		const idsToDelete = createdProductIds.splice( 0 );
 		// Every teardown call runs before anything is asserted: a failed delete must not stop
 		// the task list from being unhidden, or the rest of this serial project inherits it.
-		const deleteStatus = idsToDelete.length
-			? (
-					await restApi.post( `${ WC_API_PATH }/products/batch`, {
-						delete: idsToDelete,
-					} )
-			  ).status
+		const deleteResponse = idsToDelete.length
+			? await restApi.post( `${ WC_API_PATH }/products/batch`, {
+					delete: idsToDelete,
+			  } )
 			: null;
 		const taskListShown = await show_task_list( restApi, 'setup' );
 
 		// On a passing run the test deletes its own product, so there is nothing left here
-		// and no status to check. Asserting 200 unconditionally would pass whether a delete
-		// happened or not.
-		if ( deleteStatus !== null ) {
-			expect( deleteStatus ).toBe( 200 );
+		// and no response to check. Asserting 200 unconditionally would pass whether a
+		// delete happened or not.
+		if ( deleteResponse !== null ) {
+			expect( deleteResponse.status ).toBe( 200 );
+			// The batch endpoint reports per-item failures in the body and still
+			// returns 200, so the status on its own says nothing about whether the
+			// products actually went.
+			const deleted = deleteResponse.data?.delete ?? [];
+			expect( deleted ).toHaveLength( idsToDelete.length );
+			expect(
+				deleted.filter( ( item: { error?: unknown } ) => item?.error )
+			).toHaveLength( 0 );
 		}
 		expect( taskListShown ).toBe( true );
 	} );
@@ -215,11 +221,14 @@ test.describe( 'Add Product Task', () => {
 			`${ WC_API_PATH }/products/${ createdProductId }`,
 			{ force: true }
 		);
+		expect( deleteResponse.status ).toBe( 200 );
+		// Stop tracking only once the delete is confirmed. Splicing first means a
+		// failed delete leaves a published product that the afterEach sweep no
+		// longer knows about -- in a spec whose whole premise is an empty catalog.
 		createdProductIds.splice(
 			createdProductIds.indexOf( createdProductId ),
 			1
 		);
-		expect( deleteResponse.status ).toBe( 200 );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=products' );
 		await page
