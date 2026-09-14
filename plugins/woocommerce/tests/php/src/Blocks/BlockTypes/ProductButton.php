@@ -13,37 +13,15 @@ use WC_Helper_Product;
 class ProductButton extends \WP_UnitTestCase {
 
 	/**
-	 * Previous WooCommerce options to restore after each test.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $previous_options = array();
-
-	/**
 	 * Set up test options.
+	 *
+	 * Both writes land inside the per-test transaction, which tear_down() rolls back.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		foreach ( array( 'woocommerce_cart_redirect_after_add', 'woocommerce_enable_ajax_add_to_cart' ) as $option_name ) {
-			$this->previous_options[ $option_name ] = get_option( $option_name, null );
-			update_option( $option_name, 'no' );
-		}
-	}
-
-	/**
-	 * Restore test options.
-	 */
-	protected function tearDown(): void {
-		foreach ( $this->previous_options as $option_name => $value ) {
-			if ( null === $value ) {
-				delete_option( $option_name );
-			} else {
-				update_option( $option_name, $value );
-			}
-		}
-
-		parent::tearDown();
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'no' );
 	}
 
 	/**
@@ -108,9 +86,8 @@ class ProductButton extends \WP_UnitTestCase {
 			$this->assertSame( (string) $product->get_id(), $processor->get_attribute( 'data-product_id' ), 'The rendered button should identify the fixture product.' );
 			$this->assertStringContainsString( '>Buy Now</span>', $markup, 'The real product text filter should reach escaped Product Button markup.' );
 		} finally {
-			remove_filter( 'woocommerce_product_add_to_cart_text', $filter );
-			WC_Helper_Product::delete_product( $product->get_id() );
-
+			// _restore_hooks() drops the filter and the rollback drops the product;
+			// the product global is this test's own to put back.
 			if ( $had_product ) {
 				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
 			} else {
@@ -125,16 +102,14 @@ class ProductButton extends \WP_UnitTestCase {
 	public function test_block_theme_dequeues_legacy_add_to_cart_script(): void {
 		global $wp_filter;
 
-		$original_theme        = get_stylesheet();
-		$had_product           = array_key_exists( 'product', $GLOBALS );
-		$previous_product      = $GLOBALS['product'] ?? null;
-		$previous_cart         = WC()->cart;
-		$had_enqueue_hook      = isset( $wp_filter['wp_enqueue_scripts'] );
-		$previous_enqueue_hook = $had_enqueue_hook ? clone $wp_filter['wp_enqueue_scripts'] : null;
-		$scripts               = wp_scripts();
-		$previous_queue        = $scripts->queue;
-		$previous_registered   = $scripts->registered;
-		$product               = WC_Helper_Product::create_simple_product(
+		$original_theme      = get_stylesheet();
+		$had_product         = array_key_exists( 'product', $GLOBALS );
+		$previous_product    = $GLOBALS['product'] ?? null;
+		$previous_cart       = WC()->cart;
+		$scripts             = wp_scripts();
+		$previous_queue      = $scripts->queue;
+		$previous_registered = $scripts->registered;
+		$product             = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'          => 'Product Button script policy fixture',
@@ -168,17 +143,13 @@ class ProductButton extends \WP_UnitTestCase {
 			$callback[0]->dequeue_add_to_cart_scripts();
 			$this->assertFalse( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'The registered block-theme callback should dequeue the legacy handle.' );
 		} finally {
-			if ( $had_enqueue_hook ) {
-				$wp_filter['wp_enqueue_scripts'] = $previous_enqueue_hook;
-			} else {
-				unset( $wp_filter['wp_enqueue_scripts'] );
-			}
-
+			// _restore_hooks() rewinds wp_enqueue_scripts and the rollback takes the
+			// product back. WP_Scripts, WC()->cart and the product global survive both:
+			// this class extends WP_UnitTestCase, so there is no WooCommerce teardown.
 			$scripts->queue      = $previous_queue;
 			$scripts->registered = $previous_registered;
 			switch_theme( $original_theme );
 			WC()->cart = $previous_cart;
-			WC_Helper_Product::delete_product( $product->get_id() );
 
 			if ( $had_product ) {
 				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
@@ -238,11 +209,7 @@ class ProductButton extends \WP_UnitTestCase {
 		};
 
 		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
-		try {
-			$this->render_product_button( $product );
-		} finally {
-			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
-		}
+		$this->render_product_button( $product );
 
 		$this->assertIsArray( $filtered_args );
 		$this->assertArrayHasKey( 'rel', $filtered_args['attributes'] );
