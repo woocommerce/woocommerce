@@ -2272,17 +2272,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @testdox Should remove grouped child cart items through consecutive form requests.
 	 */
 	public function test_update_cart_action_removes_grouped_child_items(): void {
-		$original_get                     = $GLOBALS['_GET'];
-		$original_post                    = $GLOBALS['_POST'];
-		$original_request                 = $GLOBALS['_REQUEST'];
-		$original_server                  = $GLOBALS['_SERVER'];
-		$original_cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add', null );
-		$original_notices                 = WC()->session->get( 'wc_notices', null );
-		$original_cart                    = WC()->cart->get_cart();
-		$original_session_cart            = WC()->session->get( 'cart', null );
-		$first_child                      = null;
-		$second_child                     = null;
-		$grouped_product                  = null;
+		// $_SERVER is the only request global the base class leaves alone; it resets
+		// the other three before every test.
+		$original_server = $GLOBALS['_SERVER'];
 
 		try {
 			unset( $GLOBALS['_SERVER']['HTTP_REFERER'] );
@@ -2362,32 +2354,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 				}
 			}
 		} finally {
-			WC()->cart->empty_cart();
-
-			if ( $grouped_product instanceof WC_Product_Grouped ) {
-				$grouped_product->delete( true );
-			}
-			if ( $second_child instanceof WC_Product ) {
-				$second_child->delete( true );
-			}
-			if ( $first_child instanceof WC_Product ) {
-				$first_child->delete( true );
-			}
-
-			if ( null === $original_cart_redirect_after_add ) {
-				delete_option( 'woocommerce_cart_redirect_after_add' );
-			} else {
-				update_option( 'woocommerce_cart_redirect_after_add', $original_cart_redirect_after_add );
-			}
-
-			$GLOBALS['_GET']     = $original_get;
-			$GLOBALS['_POST']    = $original_post;
-			$GLOBALS['_REQUEST'] = $original_request;
-			$GLOBALS['_SERVER']  = $original_server;
-
-			WC()->cart->set_cart_contents( $original_cart );
-			WC()->session->set( 'cart', $original_session_cart );
-			WC()->session->set( 'wc_notices', $original_notices );
+			$GLOBALS['_SERVER'] = $original_server;
 		}
 	}
 }
