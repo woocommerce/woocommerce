@@ -320,9 +320,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			// Three $20 products exceed the field's $59 required threshold.
+			// Four $20 products against the field's $59 required threshold. Three
+			// would also clear it, but only by a dollar, so any sale price or
+			// total-computation change would silently drop the field out of
+			// "required" and fail the assertions below for an unrelated reason.
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeVisible();
@@ -369,10 +373,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
-			// The error should be gone
+			// The error should be gone. Assert the same string the visible check
+			// above uses: "Add shipping insurance is a required field." appears
+			// nowhere in the plugin, so toBeHidden() was matching zero elements
+			// and passing whether or not the error had actually cleared.
 			await expect(
 				checkoutPageObject.page.getByText(
-					'Add shipping insurance is a required field.'
+					'Please check this box if you want to proceed.'
 				)
 			).toBeHidden();
 		} );
