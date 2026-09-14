@@ -122,9 +122,18 @@ for ( const {
 				} )
 				.click();
 			const expectProductCollectionQuery = async () => {
+				// The helper returns `{}` until the upgraded block reaches the
+				// editor store, and reading it once would dereference that empty
+				// object. Poll for the shape first. This is a condition on the
+				// block's own attributes, not a wait for the editor to settle.
+				await expect
+					.poll( () => getProductCollectionQuery( page ) )
+					.toMatchObject( {
+						isProductCollectionBlock: true,
+						inherit: true,
+					} );
+
 				const query = await getProductCollectionQuery( page );
-				expect( query.isProductCollectionBlock ).toBe( true );
-				expect( query.inherit ).toBe( true );
 				expect( query.perPage ).toBeGreaterThan( 1 );
 			};
 			await expectProductCollectionQuery();
