@@ -54,9 +54,6 @@ export function useCoverImage(
 		if (
 			! cover ||
 			! category ||
-			! attributes.className
-				?.split( /\s+/ )
-				.includes( 'wc-block-featured-category__cover' ) ||
 			( ! metadata?.[ IMAGE_KEY ] && ! previousBinding )
 		) {
 			return;
@@ -103,10 +100,6 @@ export function useCoverImage(
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
 				metadata: nextMetadata,
-				className: ( attributes.className || '' ).replace(
-					/\s*wc-block-featured-category__no-image\b/g,
-					''
-				),
 			} );
 			return;
 		}
@@ -124,27 +117,15 @@ export function useCoverImage(
 			media?.source_url ||
 			( ! image?.attachmentId && getCategoryImageSrc( category ) ) ||
 			getSetting< string >( 'placeholderImgSrcFullSize', '' );
-		const className =
-			( attributes.className || '' ).replace(
-				/\s*wc-block-featured-category__no-image\b/g,
-				''
-			) +
-			( ( ! id ||
-				( ( image?.size || image?.attachmentId ) && ! media ) ) &&
-			image?.noPlaceholder
-				? ' wc-block-featured-category__no-image'
-				: '' );
 		if (
 			previousBinding ||
 			attributes.id !== ( id || undefined ) ||
-			attributes.url !== url ||
-			attributes.className !== className
+			attributes.url !== url
 		) {
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
 				id: id || undefined,
 				url,
-				className,
 				metadata: {
 					...nextMetadata,
 					[ IMAGE_KEY ]: { ...image, id, url },
