@@ -191,6 +191,11 @@ test.describe(
 						page.locator( 'div.updated.inline' )
 					).toContainText( 'Your settings have been saved.' );
 
+					// The save is what completes Transact onboarding, and onboarding is
+					// what unlocks `Enable PayPal Buttons` — but the field is missing
+					// from the page the save returns, so assert against the next load
+					// instead, which is the one a merchant actually reaches. Not a wait:
+					// see https://github.com/woocommerce/woocommerce/issues/68689.
 					await page.reload();
 				} );
 
