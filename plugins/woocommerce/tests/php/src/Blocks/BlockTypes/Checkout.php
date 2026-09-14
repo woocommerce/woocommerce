@@ -148,16 +148,16 @@ class Checkout extends \WP_UnitTestCase {
 	public function test_enqueue_data_exposes_shipping_topology(): void {
 		global $wpdb;
 
-		$original_ship_to_countries = get_option( 'woocommerce_ship_to_countries', false );
-		$original_pickup_settings   = get_option( 'woocommerce_pickup_location_settings', false );
-		$original_method_states     = $wpdb->get_results(
-			"SELECT instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods",
+		// Read rather than snapshot: the ambient methods have to be switched off for the
+		// topology assertions below, and the rollback switches them back on.
+		$ambient_method_states = $wpdb->get_results(
+			"SELECT instance_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods",
 			ARRAY_A
 		);
-		$shipping_zone              = new \WC_Shipping_Zone();
+		$shipping_zone         = new \WC_Shipping_Zone();
 
 		try {
-			foreach ( $original_method_states as $method_state ) {
+			foreach ( $ambient_method_states as $method_state ) {
 				$wpdb->update(
 					"{$wpdb->prefix}woocommerce_shipping_zone_methods",
 					array( 'is_enabled' => '0' ),
@@ -211,24 +211,9 @@ class Checkout extends \WP_UnitTestCase {
 			$this->assertFalse( $data['shippingMethodsExist'], 'No ordinary shipping method should be exposed when none is configured.' );
 			$this->assertFalse( $data['shippingEnabled'], 'Globally disabled store shipping should be exposed.' );
 		} finally {
-			if ( $shipping_zone->get_id() ) {
-				$shipping_zone->delete( true );
-			}
-
-			foreach ( $original_method_states as $method_state ) {
-				$wpdb->update(
-					"{$wpdb->prefix}woocommerce_shipping_zone_methods",
-					array( 'is_enabled' => $method_state['is_enabled'] ),
-					array( 'instance_id' => $method_state['instance_id'] )
-				);
-			}
-
-			false === $original_ship_to_countries
-				? delete_option( 'woocommerce_ship_to_countries' )
-				: update_option( 'woocommerce_ship_to_countries', $original_ship_to_countries );
-			false === $original_pickup_settings
-				? delete_option( 'woocommerce_pickup_location_settings' )
-				: update_option( 'woocommerce_pickup_location_settings', $original_pickup_settings );
+			// The zone, the method rows and both options are inside the transaction.
+			// The memo on the WC_Shipping singleton is not, and this class extends
+			// WP_UnitTestCase, so nothing else reloads it.
 			$this->flush_shipping_method_cache();
 		}
 	}
