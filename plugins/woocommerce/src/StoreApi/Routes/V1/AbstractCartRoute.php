@@ -205,7 +205,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * Load the cart session before handling responses.
 	 *
 	 * @throws \RuntimeException When a previous cart session load failed.
-	 * @throws \Throwable When the cart session cannot be loaded.
+	 * @throws \Throwable When the cart cannot be loaded or normalized.
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
@@ -224,7 +224,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				);
 			}
 			$this->cart_controller->load_cart();
-			$this->cart_controller->normalize_cart();
 		} catch ( \Throwable $error ) {
 			if ( WC()->cart instanceof \WC_Cart ) {
 				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
@@ -232,6 +231,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 			throw $error;
 		}
+
+		$this->cart_controller->normalize_cart();
 	}
 
 	/**
