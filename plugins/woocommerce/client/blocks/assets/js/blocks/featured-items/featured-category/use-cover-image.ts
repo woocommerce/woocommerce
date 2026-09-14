@@ -5,7 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import type { WP_REST_API_Category } from 'wp-types';
 
 /**
@@ -116,7 +116,7 @@ export function useCoverImage(
 				?.source_url ||
 			media?.source_url ||
 			( ! image?.attachmentId && getCategoryImageSrc( category ) ) ||
-			getSetting< string >( 'placeholderImgSrcFullSize', '' );
+			getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
 		if (
 			previousBinding ||
 			attributes.id !== ( id || undefined ) ||
