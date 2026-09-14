@@ -275,10 +275,11 @@ class MiniCart extends AbstractBlock {
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
 		if ( is_cart() || is_checkout() ) {
-			$this->prevent_view_script_module_loading();
 			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
+		// The view script module is deliberately not declared in block.json, so it is only
+		// enqueued here and never on the cart and checkout pages handled above.
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
@@ -608,35 +609,6 @@ class MiniCart extends AbstractBlock {
 		}
 
 		return $template_part_contents;
-	}
-
-	/**
-	 * Prevent the Mini-Cart view script module from loading on pages where the block is not interactive.
-	 *
-	 * WordPress enqueues the `viewScriptModule` declared in block.json right after the render callback
-	 * returns, so it cannot be skipped from within `render()`. On the cart and checkout pages the block
-	 * is a static placeholder and never registers its interactivity state, so the module (and the cart
-	 * store it imports) must not execute there. Dequeue it before script modules are printed.
-	 */
-	protected function prevent_view_script_module_loading(): void {
-		foreach ( array( 'wp_head', 'wp_footer' ) as $hook ) {
-			if ( ! has_action( $hook, array( $this, 'dequeue_view_script_module' ) ) ) {
-				add_action( $hook, array( $this, 'dequeue_view_script_module' ), 1 );
-			}
-		}
-	}
-
-	/**
-	 * Dequeue the Mini-Cart view script module.
-	 *
-	 * Hooked to `wp_head` and `wp_footer` at priority 1 so it runs before WordPress prints
-	 * the enqueued script modules, regardless of whether the block was rendered before or
-	 * after `wp_head`.
-	 *
-	 * @internal
-	 */
-	public function dequeue_view_script_module(): void {
-		wp_dequeue_script_module( $this->get_full_block_name() );
 	}
 
 	/**
