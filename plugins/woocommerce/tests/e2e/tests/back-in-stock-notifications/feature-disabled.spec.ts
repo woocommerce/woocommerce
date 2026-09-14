@@ -26,7 +26,10 @@ test.describe(
 
 			// Prove the product page rendered before asserting the form is absent.
 			await expect(
-				page.getByRole( 'heading', { name: product.name } )
+				page.getByRole( 'heading', {
+					name: product.name,
+					exact: true,
+				} )
 			).toBeVisible();
 			await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 		} );
