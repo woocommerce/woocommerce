@@ -188,6 +188,11 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertSame( 'N/A', $setting['placeholder'] );
 		$this->assertStringContainsString( '{store_address}', $setting['desc'] );
 		$this->assertStringContainsString( '{store_email}', $setting['desc'] );
+		// desc_tip is what routes desc into the help tip the deleted E2E title read.
+		// Setting it to a string is a supported form that replaces the tooltip text,
+		// which would drop the placeholder hints while the two assertions above stay
+		// green, so pin the boolean rather than just the description.
+		$this->assertTrue( $setting['desc_tip'] );
 	}
 
 	/**
