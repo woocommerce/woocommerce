@@ -6,7 +6,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { expect, request } from '../../fixtures/fixtures';
+import { expect, request, tags } from '../../fixtures/fixtures';
 import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
@@ -58,336 +58,346 @@ async function createTestCustomer( restApi ): Promise< TestCustomer > {
 	return { id: response.data.id, username, password };
 }
 
-test.describe( 'Back in Stock Notifications — My Account', () => {
-	test.beforeAll( async ( { baseURL } ) => {
-		await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
-	} );
+test.describe(
+	'Back in Stock Notifications — My Account',
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	() => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		try {
-			await resetBISOptions( request, baseURL! );
-		} finally {
-			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
-		}
-	} );
+		test.afterAll( async ( { baseURL } ) => {
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
+		} );
 
-	test.describe( 'Logged-in customer with signups', () => {
-		// Signed out, so each test can sign in as the account it owns.
-		test.use( { storageState: { cookies: [], origins: [] } } );
+		test.describe( 'Logged-in customer with signups', () => {
+			// Signed out, so each test can sign in as the account it owns.
+			test.use( { storageState: { cookies: [], origins: [] } } );
 
-		test( 'renders a pending and an active notification in the tab', async ( {
-			page,
-			baseURL,
-			product,
-			restApi,
-		} ) => {
-			const customer = await createTestCustomer( restApi );
-			// Single opt-in so the first signup lands as "active" straight away.
-			await setBISOptions( request, baseURL!, {
-				allowSignups: true,
-				doubleOptIn: false,
+			test( 'renders a pending and an active notification in the tab', async ( {
+				page,
+				baseURL,
+				product,
+				restApi,
+			} ) => {
+				const customer = await createTestCustomer( restApi );
+				// Single opt-in so the first signup lands as "active" straight away.
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+				} );
+
+				const secondProduct = await createOutOfStockProduct( restApi );
+
+				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
+
+					// Row 1: signup while double opt-in is off → active.
+					await page.goto( product.permalink );
+					await signUpOnProductPage( page );
+					await expect(
+						page.getByText(
+							/You have successfully signed up|You have already joined this waitlist/i
+						)
+					).toBeVisible();
+
+					// Row 2: flip double opt-in on and sign up again → pending.
+					await setBISOptions( request, baseURL!, {
+						allowSignups: true,
+						doubleOptIn: true,
+					} );
+					await page.goto( secondProduct.permalink );
+					await signUpOnProductPage( page );
+
+					await page.goto( MY_ACCOUNT_ENDPOINT );
+
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Stock notifications',
+						} )
+					).toBeVisible();
+
+					// The unconfirmed signup sits in its own "Awaiting confirmation" table
+					// with Resend verification + Cancel actions.
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Awaiting confirmation',
+						} )
+					).toBeVisible();
+					const pendingTable = page.locator( PENDING_TABLE );
+					await expect( pendingTable ).toBeVisible();
+					const pendingRow = pendingTable
+						.locator( 'tbody tr' )
+						.filter( {
+							has: page.getByRole( 'link', {
+								name: secondProduct.name,
+								exact: true,
+							} ),
+						} );
+					await expect( pendingRow ).toBeVisible();
+					await expect(
+						pendingRow.getByRole( 'link', {
+							name: 'Resend verification email',
+						} )
+					).toBeVisible();
+					await expect(
+						pendingRow.getByRole( 'link', { name: 'Cancel' } )
+					).toBeVisible();
+					await expect(
+						pendingTable.locator( 'tbody tr' )
+					).toHaveCount( 1 );
+
+					// The confirmed signup sits in the "Active" table.
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Active',
+							exact: true,
+						} )
+					).toBeVisible();
+					const activeTable = page.locator( ACTIVE_TABLE );
+					await expect( activeTable ).toBeVisible();
+					const activeRow = activeTable
+						.locator( 'tbody tr' )
+						.filter( {
+							has: page.getByRole( 'link', {
+								name: product.name,
+								exact: true,
+							} ),
+						} );
+					await expect( activeRow ).toBeVisible();
+					await expect(
+						activeRow.getByRole( 'link', { name: 'Cancel' } )
+					).toBeVisible();
+					await expect(
+						activeRow.getByRole( 'link', {
+							name: 'Resend verification email',
+						} )
+					).toHaveCount( 0 );
+					await expect(
+						activeTable.locator( 'tbody tr' )
+					).toHaveCount( 1 );
+				} finally {
+					await restApi.delete(
+						`${ WC_API_PATH }/products/${ secondProduct.id }`,
+						{ force: true }
+					);
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
+				}
 			} );
 
-			const secondProduct = await createOutOfStockProduct( restApi );
-
-			try {
-				await page.goto( 'my-account/' );
-				await logInFromMyAccount(
-					page,
-					customer.username,
-					customer.password
-				);
-
-				// Row 1: signup while double opt-in is off → active.
-				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
-				await expect(
-					page.getByText(
-						/You have successfully signed up|You have already joined this waitlist/i
-					)
-				).toBeVisible();
-
-				// Row 2: flip double opt-in on and sign up again → pending.
+			test( 'resend email click sends the verification email and stays on the tab', async ( {
+				page,
+				baseURL,
+				product,
+				restApi,
+			} ) => {
+				const customer = await createTestCustomer( restApi );
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: true,
 				} );
-				await page.goto( secondProduct.permalink );
-				await signUpOnProductPage( page );
 
-				await page.goto( MY_ACCOUNT_ENDPOINT );
+				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
 
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Stock notifications',
-					} )
-				).toBeVisible();
+					await page.goto( product.permalink );
+					await signUpOnProductPage( page );
 
-				// The unconfirmed signup sits in its own "Awaiting confirmation" table
-				// with Resend verification + Cancel actions.
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Awaiting confirmation',
-					} )
-				).toBeVisible();
-				const pendingTable = page.locator( PENDING_TABLE );
-				await expect( pendingTable ).toBeVisible();
-				const pendingRow = pendingTable.locator( 'tbody tr' ).filter( {
-					has: page.getByRole( 'link', {
-						name: secondProduct.name,
-						exact: true,
-					} ),
-				} );
-				await expect( pendingRow ).toBeVisible();
-				await expect(
-					pendingRow.getByRole( 'link', {
-						name: 'Resend verification email',
-					} )
-				).toBeVisible();
-				await expect(
-					pendingRow.getByRole( 'link', { name: 'Cancel' } )
-				).toBeVisible();
-				await expect( pendingTable.locator( 'tbody tr' ) ).toHaveCount(
-					1
-				);
+					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-				// The confirmed signup sits in the "Active" table.
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Active',
-						exact: true,
-					} )
-				).toBeVisible();
-				const activeTable = page.locator( ACTIVE_TABLE );
-				await expect( activeTable ).toBeVisible();
-				const activeRow = activeTable.locator( 'tbody tr' ).filter( {
-					has: page.getByRole( 'link', {
-						name: product.name,
-						exact: true,
-					} ),
-				} );
-				await expect( activeRow ).toBeVisible();
-				await expect(
-					activeRow.getByRole( 'link', { name: 'Cancel' } )
-				).toBeVisible();
-				await expect(
-					activeRow.getByRole( 'link', {
-						name: 'Resend verification email',
-					} )
-				).toHaveCount( 0 );
-				await expect( activeTable.locator( 'tbody tr' ) ).toHaveCount(
-					1
-				);
-			} finally {
-				await restApi.delete(
-					`${ WC_API_PATH }/products/${ secondProduct.id }`,
-					{ force: true }
-				);
-				await restApi.delete(
-					`${ WC_API_PATH }/customers/${ customer.id }`,
-					{ force: true }
-				);
-			}
-		} );
+					// Only a pending signup exists, so the pending table renders on its
+					// own — no active table and no "nothing signed up" notice.
+					await expect( page.locator( PENDING_TABLE ) ).toBeVisible();
+					await expect( page.locator( ACTIVE_TABLE ) ).toHaveCount(
+						0
+					);
+					await expect(
+						page.getByText(
+							"You haven't signed up for any back-in-stock notifications yet."
+						)
+					).toHaveCount( 0 );
 
-		test( 'resend email click sends the verification email and stays on the tab', async ( {
-			page,
-			baseURL,
-			product,
-			restApi,
-		} ) => {
-			const customer = await createTestCustomer( restApi );
-			await setBISOptions( request, baseURL!, {
-				allowSignups: true,
-				doubleOptIn: true,
+					const row = page
+						.locator( `${ PENDING_TABLE } tbody tr` )
+						.filter( {
+							has: page.getByRole( 'link', {
+								name: product.name,
+								exact: true,
+							} ),
+						} );
+					await expect( row ).toBeVisible();
+
+					await row
+						.getByRole( 'link', {
+							name: 'Resend verification email',
+						} )
+						.click();
+
+					// The redirect after the GET lands us back on the clean tab URL with a notice.
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Stock notifications',
+						} )
+					).toBeVisible();
+					await expect( page ).toHaveURL( MY_ACCOUNT_ENDPOINT );
+					await expect(
+						page.getByText( /Verification email sent to/ )
+					).toBeVisible();
+
+					// The row is still pending and still offers the actions.
+					await expect(
+						row.getByRole( 'link', {
+							name: 'Resend verification email',
+						} )
+					).toBeVisible();
+				} finally {
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
+				}
 			} );
 
-			try {
-				await page.goto( 'my-account/' );
-				await logInFromMyAccount(
-					page,
-					customer.username,
-					customer.password
-				);
+			test( 'cancel click removes the row from the My Account list', async ( {
+				page,
+				baseURL,
+				product,
+				restApi,
+			} ) => {
+				const customer = await createTestCustomer( restApi );
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: true,
+				} );
 
-				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
+				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
 
-				await page.goto( MY_ACCOUNT_ENDPOINT );
+					await page.goto( product.permalink );
+					await signUpOnProductPage( page );
 
-				// Only a pending signup exists, so the pending table renders on its
-				// own — no active table and no "nothing signed up" notice.
-				await expect( page.locator( PENDING_TABLE ) ).toBeVisible();
-				await expect( page.locator( ACTIVE_TABLE ) ).toHaveCount( 0 );
-				await expect(
-					page.getByText(
-						"You haven't signed up for any back-in-stock notifications yet."
-					)
-				).toHaveCount( 0 );
+					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-				const row = page
-					.locator( `${ PENDING_TABLE } tbody tr` )
-					.filter( {
-						has: page.getByRole( 'link', {
-							name: product.name,
-							exact: true,
-						} ),
-					} );
-				await expect( row ).toBeVisible();
+					// Double opt-in is on, so the signup lands in the pending table.
+					const row = page
+						.locator( `${ PENDING_TABLE } tbody tr` )
+						.filter( {
+							has: page.getByRole( 'link', {
+								name: product.name,
+								exact: true,
+							} ),
+						} );
+					await expect( row ).toBeVisible();
 
-				await row
-					.getByRole( 'link', {
-						name: 'Resend verification email',
-					} )
-					.click();
+					await row.getByRole( 'link', { name: 'Cancel' } ).click();
 
-				// The redirect after the GET lands us back on the clean tab URL with a notice.
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Stock notifications',
-					} )
-				).toBeVisible();
-				await expect( page ).toHaveURL( MY_ACCOUNT_ENDPOINT );
-				await expect(
-					page.getByText( /Verification email sent to/ )
-				).toBeVisible();
+					// The redirect after the GET lands us back on the clean tab URL.
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Stock notifications',
+						} )
+					).toBeVisible();
 
-				// The row is still pending and still offers the actions.
-				await expect(
-					row.getByRole( 'link', {
-						name: 'Resend verification email',
-					} )
-				).toBeVisible();
-			} finally {
-				await restApi.delete(
-					`${ WC_API_PATH }/customers/${ customer.id }`,
-					{ force: true }
-				);
-			}
-		} );
+					// The cancelled row is filtered out — only PENDING/ACTIVE rows render.
+					await expect( row ).toHaveCount( 0 );
 
-		test( 'cancel click removes the row from the My Account list', async ( {
-			page,
-			baseURL,
-			product,
-			restApi,
-		} ) => {
-			const customer = await createTestCustomer( restApi );
-			await setBISOptions( request, baseURL!, {
-				allowSignups: true,
-				doubleOptIn: true,
+					// And a notice confirms the cancellation.
+					await expect(
+						page.getByText(
+							`Back in stock notification for "${ product.name }" cancelled.`
+						)
+					).toBeVisible();
+				} finally {
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
+				}
 			} );
+		} );
 
-			try {
-				await page.goto( 'my-account/' );
-				await logInFromMyAccount(
-					page,
-					customer.username,
-					customer.password
-				);
+		test.describe( 'Logged-in customer with no signups', () => {
+			test.use( { storageState: { cookies: [], origins: [] } } );
 
-				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
+			test( 'renders the empty state and a catalog link', async ( {
+				page,
+				restApi,
+			} ) => {
+				const customer = await createTestCustomer( restApi );
 
+				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
+
+					await page.goto( MY_ACCOUNT_ENDPOINT );
+
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Stock notifications',
+						} )
+					).toBeVisible();
+
+					await expect(
+						page.getByText(
+							"You haven't signed up for any back-in-stock notifications yet."
+						)
+					).toBeVisible();
+
+					await expect(
+						page.getByRole( 'link', { name: 'Browse products' } )
+					).toBeVisible();
+
+					await expect( page.locator( TABLE ) ).toHaveCount( 0 );
+				} finally {
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
+				}
+			} );
+		} );
+
+		test.describe( 'Anonymous visitor', () => {
+			test.use( { storageState: { cookies: [], origins: [] } } );
+
+			test( 'is redirected to the login form', async ( { page } ) => {
 				await page.goto( MY_ACCOUNT_ENDPOINT );
 
-				// Double opt-in is on, so the signup lands in the pending table.
-				const row = page
-					.locator( `${ PENDING_TABLE } tbody tr` )
-					.filter( {
-						has: page.getByRole( 'link', {
-							name: product.name,
-							exact: true,
-						} ),
-					} );
-				await expect( row ).toBeVisible();
-
-				await row.getByRole( 'link', { name: 'Cancel' } ).click();
-
-				// The redirect after the GET lands us back on the clean tab URL.
+				// Standard WC behaviour: unauthenticated account endpoints show
+				// the login form on the My Account page.
 				await expect(
-					page.getByRole( 'heading', {
-						name: 'Stock notifications',
-					} )
+					page.getByRole( 'heading', { name: 'Login' } )
 				).toBeVisible();
-
-				// The cancelled row is filtered out — only PENDING/ACTIVE rows render.
-				await expect( row ).toHaveCount( 0 );
-
-				// And a notice confirms the cancellation.
 				await expect(
-					page.getByText(
-						`Back in stock notification for "${ product.name }" cancelled.`
-					)
+					page.getByLabel( 'Username or email address' )
 				).toBeVisible();
-			} finally {
-				await restApi.delete(
-					`${ WC_API_PATH }/customers/${ customer.id }`,
-					{ force: true }
-				);
-			}
+			} );
 		} );
-	} );
-
-	test.describe( 'Logged-in customer with no signups', () => {
-		test.use( { storageState: { cookies: [], origins: [] } } );
-
-		test( 'renders the empty state and a catalog link', async ( {
-			page,
-			restApi,
-		} ) => {
-			const customer = await createTestCustomer( restApi );
-
-			try {
-				await page.goto( 'my-account/' );
-				await logInFromMyAccount(
-					page,
-					customer.username,
-					customer.password
-				);
-
-				await page.goto( MY_ACCOUNT_ENDPOINT );
-
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Stock notifications',
-					} )
-				).toBeVisible();
-
-				await expect(
-					page.getByText(
-						"You haven't signed up for any back-in-stock notifications yet."
-					)
-				).toBeVisible();
-
-				await expect(
-					page.getByRole( 'link', { name: 'Browse products' } )
-				).toBeVisible();
-
-				await expect( page.locator( TABLE ) ).toHaveCount( 0 );
-			} finally {
-				await restApi.delete(
-					`${ WC_API_PATH }/customers/${ customer.id }`,
-					{ force: true }
-				);
-			}
-		} );
-	} );
-
-	test.describe( 'Anonymous visitor', () => {
-		test.use( { storageState: { cookies: [], origins: [] } } );
-
-		test( 'is redirected to the login form', async ( { page } ) => {
-			await page.goto( MY_ACCOUNT_ENDPOINT );
-
-			// Standard WC behaviour: unauthenticated account endpoints show
-			// the login form on the My Account page.
-			await expect(
-				page.getByRole( 'heading', { name: 'Login' } )
-			).toBeVisible();
-			await expect(
-				page.getByLabel( 'Username or email address' )
-			).toBeVisible();
-		} );
-	} );
-} );
+	}
+);
