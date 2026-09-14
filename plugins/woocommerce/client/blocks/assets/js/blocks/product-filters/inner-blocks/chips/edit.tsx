@@ -22,6 +22,9 @@ import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalGetGapCSSValue as getGapCSSValue,
 } from '@wordpress/block-editor';
 
 /**
@@ -86,6 +89,8 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const colorVars = getColorVars( attributes );
 	const borderProps = useBorderProps( attributes );
 	const spacingProps = useSpacingProps( attributes );
+	const itemsGap = getGapCSSValue( attributes.style?.spacing?.blockGap );
+	const itemsGapStyle = itemsGap ? { gap: itemsGap } : undefined;
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -139,7 +144,10 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<Disabled>
-					<div className="wc-block-product-filter-chips__items">
+					<div
+						className="wc-block-product-filter-chips__items"
+						style={ itemsGapStyle }
+					>
 						{ isLoading && loadingState }
 						{ ! isLoading &&
 							( isLongList

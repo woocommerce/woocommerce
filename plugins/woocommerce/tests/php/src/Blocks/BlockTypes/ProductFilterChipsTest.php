@@ -87,6 +87,138 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Block gap is applied to the items container, not the wrapper or chip items.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::render
+	 */
+	public function test_applies_block_gap_to_items_container(): void {
+		$markup = $this->render_chips(
+			array(
+				'style' => array(
+					'spacing' => array(
+						'blockGap' => '12px',
+						'padding'  => array(
+							'top'    => '8px',
+							'right'  => '16px',
+							'bottom' => '8px',
+							'left'   => '16px',
+						),
+					),
+				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+				),
+			)
+		);
+
+		$wrapper_style = $this->get_style( $markup, 'wc-block-product-filter-chips' );
+		$items_style   = $this->get_style( $markup, 'wc-block-product-filter-chips__items' );
+		$item_style    = $this->get_style( $markup, 'wc-block-product-filter-chips__item' );
+
+		$this->assertStringContainsString( 'gap:12px', $items_style, 'Items container should have the block gap.' );
+		$this->assertStringNotContainsString( 'gap:', $wrapper_style, 'Wrapper should not have the block gap.' );
+		$this->assertStringNotContainsString( 'gap:', $item_style, 'Chip items should not have the block gap.' );
+		$this->assertStringContainsString( 'padding-top:8px', $item_style, 'Chip items should still get padding.' );
+	}
+
+	/**
+	 * @testdox Block gap is applied to the items container for visual swatches.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::render
+	 */
+	public function test_applies_block_gap_to_swatch_items_container(): void {
+		$markup = $this->render_chips(
+			array(
+				'style' => array(
+					'spacing' => array(
+						'blockGap' => '20px',
+					),
+				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+					'visual'   => array(
+						'type'  => 'color',
+						'color' => '#ff0000',
+					),
+				),
+			)
+		);
+
+		$items_style = $this->get_style( $markup, 'wc-block-product-filter-chips__items' );
+
+		$this->assertStringContainsString( 'is-style-swatch', $markup, 'Visual items should use the swatch style.' );
+		$this->assertStringContainsString( 'gap:20px', $items_style, 'Swatch items container should have the block gap.' );
+	}
+
+	/**
+	 * @testdox Preset and axial block gap values are converted to CSS gap.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::render
+	 */
+	public function test_converts_preset_and_axial_block_gap_to_css(): void {
+		$preset_markup = $this->render_chips(
+			array(
+				'style' => array(
+					'spacing' => array(
+						'blockGap' => 'var:preset|spacing|30',
+					),
+				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+				),
+			)
+		);
+		$axial_markup  = $this->render_chips(
+			array(
+				'style' => array(
+					'spacing' => array(
+						'blockGap' => array(
+							'top'  => '8px',
+							'left' => '16px',
+						),
+					),
+				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+				),
+			)
+		);
+
+		$this->assertStringContainsString(
+			'gap:var(--wp--preset--spacing--30)',
+			$this->get_style( $preset_markup, 'wc-block-product-filter-chips__items' ),
+			'Preset block gap should be converted to a CSS custom property.'
+		);
+		$this->assertStringContainsString(
+			'row-gap:8px',
+			$this->get_style( $axial_markup, 'wc-block-product-filter-chips__items' ),
+			'Axial block gap should set row-gap from the top value.'
+		);
+		$this->assertStringContainsString(
+			'column-gap:16px',
+			$this->get_style( $axial_markup, 'wc-block-product-filter-chips__items' ),
+			'Axial block gap should set column-gap from the left value.'
+		);
+	}
+
+	/**
 	 * Render the Chips block with the given attributes.
 	 *
 	 * @param array $attributes Block attributes.

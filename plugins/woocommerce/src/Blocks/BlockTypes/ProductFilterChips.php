@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
@@ -81,7 +82,21 @@ final class ProductFilterChips extends AbstractBlock {
 			)
 		);
 
-		$wrapper_attributes = array(
+		$block_gap = $attributes['style']['spacing']['blockGap'] ?? null;
+
+		$chips_classes_and_styles = is_string( $block_gap ) && '' !== $block_gap ? wp_parse_args(
+			array(
+				'css' => \WP_Style_Engine::compile_css( array( 'gap' => StyleAttributesUtils::get_spacing_value( $block_gap ) ), '' ),
+			),
+			array(
+				'css'        => '',
+				'classnames' => '',
+			)
+		) : array(
+			'css'        => '',
+			'classnames' => '',
+		);
+		$wrapper_attributes       = array(
 			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
 			'data-wp-init--colors' => 'callbacks.initColors',
 			'data-wp-context'      => (string) wp_json_encode(
@@ -130,7 +145,12 @@ final class ProductFilterChips extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) && ! $has_external_label ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div class="wc-block-product-filter-chips__items">
+				<div
+					class="wc-block-product-filter-chips__items <?php echo esc_attr( $chips_classes_and_styles['classnames'] ); ?>"
+					<?php if ( $chips_classes_and_styles['css'] ) : ?>
+						style="<?php echo esc_attr( $chips_classes_and_styles['css'] ); ?>"
+					<?php endif; ?>
+				>
 					<?php
 					foreach ( $visible_items as $item ) :
 						?>

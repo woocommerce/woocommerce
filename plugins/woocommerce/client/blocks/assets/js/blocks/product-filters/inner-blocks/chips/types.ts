@@ -18,6 +18,11 @@ export type Color = {
 
 export type BlockAttributes = {
 	className: string;
+	style?: {
+		spacing?: {
+			blockGap?: string | { top?: string; left?: string };
+		};
+	};
 	chipText?: string;
 	customChipText?: string;
 	chipBackground?: string;
