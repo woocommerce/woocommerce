@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear product CSV import mapping markers in the last import batch, so an import abandoned during cleanup cannot make a later import resolve its id: references to the wrong products.
