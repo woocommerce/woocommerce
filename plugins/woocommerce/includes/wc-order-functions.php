@@ -692,8 +692,7 @@ function wc_create_refund( $args = array() ) {
 			if ( ! empty( $refunded_order_and_products ) && $order instanceof WC_Order ) {
 				$download_data_store = WC_Data_Store::load( 'customer-download' );
 
-				// Quantities refunded by the refund that was just saved, per original order item.
-				// Read from the refund object so 'woocommerce_create_refund' adjustments are included.
+				// Quantities refunded by this refund, per original order item.
 				$current_refund_quantities = array();
 				foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
 					$original_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
@@ -703,9 +702,7 @@ function wc_create_refund( $args = array() ) {
 					}
 				}
 
-				// Products that still have unrefunded quantity across all line items of the order.
-				// The refund is already saved at this point, so get_qty_refunded_for_item() covers
-				// all refunds, including the current one, exactly once.
+				// Products with unrefunded quantity left on the order, across all line items.
 				$products_with_remaining_qty = array();
 				foreach ( $order->get_items() as $order_item_id => $order_item ) {
 					if ( ! $order_item instanceof WC_Order_Item_Product ) {
@@ -721,9 +718,7 @@ function wc_create_refund( $args = array() ) {
 				foreach ( $refunded_order_and_products as $refunded_item_id => $refunded_order_and_product ) {
 					$product_id = $refunded_order_and_product['product_id'];
 
-					// Refunding an explicit quantity keeps the download permissions while unrefunded
-					// quantity of the product remains on the order. Amount-only refunds keep the
-					// historical all-or-nothing behavior and always revoke (#67008).
+					// Only a quantity refund keeps the permissions; amount-only refunds always revoke.
 					$is_quantity_refund = ! empty( $current_refund_quantities[ $refunded_item_id ] );
 					$should_revoke      = ! ( $is_quantity_refund && isset( $products_with_remaining_qty[ $product_id ] ) );
 
