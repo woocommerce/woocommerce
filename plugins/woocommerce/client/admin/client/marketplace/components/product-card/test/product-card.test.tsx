@@ -136,3 +136,85 @@ describe( 'ProductCard quality badge placement', () => {
 		expect( getBadge( container ) ).toBeNull();
 	} );
 } );
+
+describe( 'ProductCard sponsored label', () => {
+	const sponsoredProduct: Product = {
+		...product,
+		vendorName: 'Test vendor',
+		vendorUrl: 'https://example.com',
+		label: 'promoted',
+		primary_color: '#720eec',
+	};
+
+	function renderSponsoredCard(
+		cardType: ProductCardType,
+		overrides: Partial< Product > = {}
+	) {
+		return render(
+			<MarketplaceContext.Provider value={ context }>
+				<ProductCard
+					type={ ProductType.extension }
+					product={ { ...sponsoredProduct, ...overrides } }
+					cardType={ cardType }
+					tracksData={ {} }
+				/>
+			</MarketplaceContext.Provider>
+		);
+	}
+
+	function getSponsoredLabel( view: ReturnType< typeof render > ) {
+		return view.queryByText( 'Sponsored' );
+	}
+
+	// The vendor line renders "By <name>" across separate elements, and the
+	// vendor link carries screen-reader text of its own. Match the phrase at
+	// its shallowest element so ancestors and the link itself don't match.
+	const VENDOR_PHRASE = /^By Test vendor/;
+
+	function matchesVendorPhrase( content: string, element: Element | null ) {
+		return (
+			VENDOR_PHRASE.test( element?.textContent ?? '' ) &&
+			! Array.from( element?.children ?? [] ).some( ( child ) =>
+				VENDOR_PHRASE.test( child.textContent ?? '' )
+			)
+		);
+	}
+
+	it( 'renders the label on compact cards, without the vendor', () => {
+		const view = renderSponsoredCard( ProductCardType.compact );
+
+		expect( view.getByText( 'Sponsored' ) ).toBeVisible();
+		expect( view.queryByText( matchesVendorPhrase ) ).toBeNull();
+		expect(
+			view.container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details__separator'
+			)
+		).toBeNull();
+	} );
+
+	it( 'renders the vendor, separator and label on regular cards', () => {
+		const view = renderSponsoredCard( ProductCardType.regular );
+
+		// The space in "By Test vendor" is the regression guarded against.
+		expect( view.getByText( matchesVendorPhrase ) ).toBeVisible();
+		expect(
+			view.container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details__separator'
+			)
+		).not.toBeNull();
+		expect( view.getByText( 'Sponsored' ) ).toBeVisible();
+	} );
+
+	it( 'renders no label or vendor line on compact cards that are not sponsored', () => {
+		const view = renderSponsoredCard( ProductCardType.compact, {
+			label: undefined,
+		} );
+
+		expect( getSponsoredLabel( view ) ).toBeNull();
+		expect(
+			view.container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details'
+			)
+		).toBeNull();
+	} );
+} );

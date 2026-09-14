@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Expose the Customer Stock Notifications settings through the REST settings API by registering them outside the admin context.

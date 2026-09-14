@@ -26,7 +26,8 @@
 }
 
 #variable_product_options
-	.woocommerce_variation:has(.wc-variation-gallery-field) {
+.woocommerce_variation:has(.wc-variation-gallery-field) {
+
 	/* === Design tokens ============================================== */
 
 	/* Colors (WP admin palette). */
@@ -69,7 +70,8 @@
 	/* Elevation. */
 	--wc-vg-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.12);
 	--wc-vg-elevation-2: 0 1px 2px rgba(0, 0, 0, 0.2);
-	--wc-vg-elevation-3-hover: 0 1px 4px rgba(0, 0, 0, 0.3),
+	--wc-vg-elevation-3-hover:
+		0 1px 4px rgba(0, 0, 0, 0.3),
 		0 0 0 2px var(--wc-vg-focus-ring);
 
 	/* Typography. */
@@ -82,6 +84,7 @@
 	--wc-vg-transition-fast: 120ms ease-out;
 
 	/* === Layout overrides for the gallery's flex row ================= */
+
 	/* Scoped to the specific .form-flex-box that contains the gallery
 	 * field; other variation rows (pricing, weight, dimensions, etc.)
 	 * use the same .form-flex-box class and must keep their own layout. */
@@ -181,11 +184,13 @@
 	}
 
 	.wc-variation-gallery-field__hero-img {
+
 		@include fill-parent;
 		@include cover-image;
 	}
 
 	.wc-variation-gallery-field__hero-broken {
+
 		@include fill-parent;
 		@include center-content;
 		color: var(--wc-vg-text-placeholder);
@@ -247,6 +252,7 @@
 	}
 
 	.wc-variation-gallery-field__empty-cta {
+
 		@include fill-parent;
 		display: inline-flex;
 		flex-direction: column;
@@ -259,7 +265,8 @@
 		color: var(--wc-vg-text-muted);
 		cursor: pointer;
 		font-size: var(--wc-vg-font-size-sm);
-		transition: background-color var(--wc-vg-transition-fast),
+		transition:
+			background-color var(--wc-vg-transition-fast),
 			border-color var(--wc-vg-transition-fast);
 
 		&:hover,
@@ -302,7 +309,8 @@
 			position: relative;
 			border: 2px solid transparent;
 			cursor: grab;
-			transition: border-color var(--wc-vg-transition-fast),
+			transition:
+				border-color var(--wc-vg-transition-fast),
 				box-shadow var(--wc-vg-transition-fast);
 
 			&.is-active {
@@ -324,6 +332,7 @@
 			}
 
 			&.is-broken {
+
 				@include center-content;
 				background: var(--wc-vg-surface);
 				color: var(--wc-vg-text-placeholder);
@@ -350,6 +359,7 @@
 			}
 
 			img {
+
 				@include cover-image;
 			}
 		}

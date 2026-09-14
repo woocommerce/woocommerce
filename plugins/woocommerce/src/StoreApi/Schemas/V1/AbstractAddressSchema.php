@@ -148,6 +148,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			[]
 		);
 
+		// After the loop, so this cleans the value the schema sanitizer produced rather than
+		// the raw one from the request.
+		if ( isset( $address['phone'] ) && is_string( $address['phone'] ) ) {
+			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
+		}
+
 		return $sanitization_util->wp_kses_array( $address );
 	}
 
@@ -200,6 +206,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			return $errors;
 		}
 
+		// Validation runs before sanitization in the REST dispatcher, so sanitize here to check
+		// the same value that will be stored. The phone checks below rely on it.
 		$address = $this->sanitize_callback( $address, $request, $param );
 
 		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
@@ -233,16 +241,11 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
-		if ( ! empty( $address['phone'] ) ) {
-			// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
-			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
-
-			if ( ! \WC_Validation::is_phone( $address['phone'], $address['country'] ?? null ) ) {
-				$errors->add(
-					'invalid_phone',
-					__( 'The provided phone number is not valid', 'woocommerce' )
-				);
-			}
+		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'], $address['country'] ?? null ) ) {
+			$errors->add(
+				'invalid_phone',
+				__( 'The provided phone number is not valid', 'woocommerce' )
+			);
 		}
 
 		$additional_fields = array_intersect_key(

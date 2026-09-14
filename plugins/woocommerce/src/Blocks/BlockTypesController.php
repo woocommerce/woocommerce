@@ -54,6 +54,13 @@ final class BlockTypesController {
 	private static $register_blocks_has_run = false;
 
 	/**
+	 * Whether WooCommerce block styles should be enqueued on demand for classic themes.
+	 *
+	 * @var bool|null
+	 */
+	private $should_enqueue_block_style_for_classic_themes = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -595,17 +602,16 @@ final class BlockTypesController {
 	 */
 	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
 
-		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
-		static $should_enqueue_block_style_for_classic_themes = null;
-		if ( null === $should_enqueue_block_style_for_classic_themes ) {
-			$should_enqueue_block_style_for_classic_themes = ! (
+		// Repeatedly checking the theme is expensive. Cache this logic result and remove the filter if not needed.
+		if ( null === $this->should_enqueue_block_style_for_classic_themes ) {
+			$this->should_enqueue_block_style_for_classic_themes = ! (
 				is_admin() ||
 				wp_is_block_theme() ||
 				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
 				wp_should_load_separate_core_block_assets()
 			);
 		}
-		if ( ! $should_enqueue_block_style_for_classic_themes ) {
+		if ( ! $this->should_enqueue_block_style_for_classic_themes ) {
 			remove_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10 );
 
 			return $args;

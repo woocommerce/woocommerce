@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
@@ -273,16 +274,31 @@ export const buildDataFormField = (
 		options.context
 	);
 
+	const disabled = isFieldDisabled( settingsField );
+	const help = createSettingsHelpElement( settingsField.description );
+	const disabledTooltip =
+		settingsField.customAttributes?.[ 'disabled-tooltip' ];
+	const description =
+		disabled && typeof disabledTooltip === 'string' && disabledTooltip
+			? createElement(
+					'span',
+					null,
+					help,
+					help ? ' ' : null,
+					disabledTooltip
+			  )
+			: help;
+
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
-		description: createSettingsHelpElement( settingsField.description ),
+		description,
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
 		isValid: buildValidationRules( settingsField, descriptor ),
 		isVisible: createIsVisible( settingsField, options ),
-		isDisabled: isFieldDisabled( settingsField ),
+		isDisabled: disabled,
 	};
 
 	if ( registeredComponent ) {
@@ -342,8 +358,11 @@ const buildGroupFormField = ( group: SettingsUIGroup ): FormField => ( {
 export const createDataFormAdapter = (
 	options: DataFormAdapterOptions
 ): DataFormAdapter => {
-	const groups = Object.values( options.schema.groups );
-	const fields = groups.flatMap( ( group ) =>
+	const groups = Object.values( options.schema.groups ).map( ( group ) => ( {
+		group,
+		form: buildGroupFormField( group ),
+	} ) );
+	const fields = groups.flatMap( ( { group } ) =>
 		group.fields.map( ( field ) => buildDataFormField( field, options ) )
 	);
 	const fieldsById = new Map(
@@ -382,8 +401,8 @@ export const createDataFormAdapter = (
 
 	const getForm = ( values: SettingsValues ): Form => ( {
 		fields: groups
-			.filter( ( group ) => isGroupVisible( group, values ) )
-			.map( buildGroupFormField ),
+			.filter( ( { group } ) => isGroupVisible( group, values ) )
+			.map( ( { form } ) => form ),
 	} );
 
 	return { fields, getForm };

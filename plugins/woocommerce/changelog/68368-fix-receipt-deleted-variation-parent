@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error generating receipts for orders with a deleted variation parent.

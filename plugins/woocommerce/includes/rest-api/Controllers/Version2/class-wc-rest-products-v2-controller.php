@@ -601,7 +601,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return     string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
-		$tax    = get_taxonomy( $name );
+		$tax = get_taxonomy( $name );
+		if ( ! $tax ) {
+			return wc_attribute_taxonomy_slug( $name );
+		}
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
@@ -640,7 +643,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
 			$taxonomy = $attribute->get_taxonomy_object();
-			return $taxonomy->attribute_label;
+			return $taxonomy ? $taxonomy->attribute_label : $slug;
 		}
 
 		// Custom product attribute name.
