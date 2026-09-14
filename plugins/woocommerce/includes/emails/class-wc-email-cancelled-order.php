@@ -31,6 +31,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		public function __construct() {
 			$this->id             = 'cancelled_order';
 			$this->title          = __( 'Cancelled order', 'woocommerce' );
+			$this->email_group    = 'orders';
 			$this->template_html  = 'emails/admin-cancelled-order.php';
 			$this->template_plain = 'emails/plain/admin-cancelled-order.php';
 			$this->placeholders   = array(
@@ -42,14 +43,20 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			// Triggers for this email.
 			add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Receive an email notification when an order that was processing or on hold gets cancelled', 'woocommerce' )
-				: __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
+				? __( 'Receive an email notification when an order that was pending, processing, or on hold gets cancelled', 'woocommerce' )
+				: __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously pending, processing, or on-hold).', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Canceled order', 'woocommerce' );
+				$this->description = __( 'Notifies admins when an order that was pending, processing, or on hold has been canceled.', 'woocommerce' );
+			}
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
@@ -97,9 +104,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 				$this->placeholders['{order_billing_full_name}'] = $this->object->get_formatted_billing_full_name();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -229,6 +234,9 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 	}

@@ -33,10 +33,27 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 	private $renderer_mock;
 
 	/**
+	 * Callback to register the test email post type.
+	 *
+	 * @var callable
+	 */
+	private $post_register_callback;
+
+	/**
 	 * Set up before each test
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->post_register_callback = function ( $post_types ) {
+			$post_types[] = array(
+				'name' => 'custom_email_type',
+				'args' => array(),
+				'meta' => array(),
+			);
+			return $post_types;
+		};
+		add_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
 
 		$this->renderer_mock = $this->createMock( Renderer::class );
 		$this->renderer_mock->method( 'render' )->willReturn(
@@ -70,6 +87,7 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 
 		$email_post_id = $this->factory->post->create(
 			array(
+				'post_type'    => 'custom_email_type',
 				'post_content' => '<!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
 		);
@@ -104,6 +122,7 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 
 		$email_post_id = $this->factory->post->create(
 			array(
+				'post_type'    => 'custom_email_type',
 				'post_content' => '<!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
 		);
@@ -117,6 +136,47 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 		$result = $mock->send_preview_email( $post_data );
 
 		$this->assertEquals( $mailing_status, $result );
+	}
+
+	/**
+	 * Test the preview email subject defaults to the post title.
+	 */
+	public function testGetPreviewEmailSubjectDefaultsToPostTitle(): void {
+		$post = $this->factory->post->create_and_get(
+			array(
+				'post_title' => 'My Email Subject',
+			)
+		);
+		$this->assertInstanceOf( \WP_Post::class, $post );
+
+		$result = $this->send_preview_email->get_preview_email_subject( $post );
+
+		$this->assertEquals( 'My Email Subject', $result );
+	}
+
+	/**
+	 * Test the preview email subject can be filtered.
+	 */
+	public function testGetPreviewEmailSubjectCanBeFiltered(): void {
+		$post = $this->factory->post->create_and_get(
+			array(
+				'post_title' => 'Original Subject',
+			)
+		);
+		$this->assertInstanceOf( \WP_Post::class, $post );
+
+		$filter = function ( $subject, $filter_post ) use ( $post ) {
+			$this->assertInstanceOf( \WP_Post::class, $filter_post );
+			$this->assertEquals( $post->ID, $filter_post->ID );
+			return 'Filtered: ' . $subject;
+		};
+		add_filter( 'woocommerce_email_editor_send_preview_email_subject', $filter, 10, 2 );
+
+		$result = $this->send_preview_email->get_preview_email_subject( $post );
+
+		$this->assertEquals( 'Filtered: Original Subject', $result );
+
+		remove_filter( 'woocommerce_email_editor_send_preview_email_subject', $filter );
 	}
 
 	/**
@@ -148,6 +208,22 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it throws an exception when the post is not of an email post type
+	 */
+	public function testItThrowsAnExceptionWhenPostIsNotAnEmailPostType(): void {
+		$post_id = $this->factory->post->create( array( 'post_type' => 'post' ) );
+		$this->assertIsInt( $post_id );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid post' );
+		$post_data = array(
+			'email'  => 'hello@example.com',
+			'postId' => $post_id,
+		);
+		$this->send_preview_email->send_preview_email( $post_data );
+	}
+
+	/**
 	 * Test it throws an exception when the post cannot be found
 	 */
 	public function testItThrowsAnExceptionWhenPostCannotBeFound(): void {
@@ -159,5 +235,13 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 			'postId'       => 100,
 		);
 		$this->send_preview_email->send_preview_email( $post_data );
+	}
+
+	/**
+	 * Clean up after each test
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
+		parent::tearDown();
 	}
 }

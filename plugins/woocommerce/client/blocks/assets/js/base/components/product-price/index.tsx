@@ -119,12 +119,6 @@ interface SalePriceProps {
 	 * The new price during the sale
 	 */
 	price: number | string | undefined;
-	/**
-	 * Custom style to be applied to both regular and sale price containers for RTL currency symbol handling
-	 *
-	 * Applied to both `<del>` and `<ins>` elements
-	 */
-	rtlPrefixStyles?: React.CSSProperties | undefined;
 }
 
 const SalePrice = ( {
@@ -135,7 +129,6 @@ const SalePrice = ( {
 	priceClassName,
 	priceStyle,
 	price,
-	rtlPrefixStyles,
 }: SalePriceProps ) => {
 	return (
 		<>
@@ -150,10 +143,8 @@ const SalePrice = ( {
 							'wc-block-components-product-price__regular',
 							regularPriceClassName
 						) }
-						style={ {
-							...regularPriceStyle,
-							...rtlPrefixStyles,
-						} }
+						style={ regularPriceStyle }
+						translate="no"
 					>
 						{ value }
 					</del>
@@ -172,10 +163,8 @@ const SalePrice = ( {
 							'is-discounted',
 							priceClassName
 						) }
-						style={ {
-							...priceStyle,
-							...rtlPrefixStyles,
-						} }
+						style={ priceStyle }
+						translate="no"
 					>
 						{ value }
 					</ins>
@@ -250,14 +239,9 @@ export interface ProductPriceProps {
 	 */
 	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
-	 * Custom margin to apply to the price wrapper.
+	 * Custom styles to apply to the price wrapper.
 	 */
-	style?:
-		| Pick<
-				React.CSSProperties,
-				'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
-		  >
-		| undefined;
+	style?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {
@@ -290,7 +274,12 @@ const ProductPrice = ( {
 		console.error( 'Price formats need to include the `<price/>` tag.' );
 	}
 
-	const isDiscounted = regularPrice && price && price < regularPrice;
+	// Explicitly check for undefined values because 0 is a valid price.
+	const isDiscounted =
+		regularPrice !== undefined &&
+		price !== undefined &&
+		price < regularPrice;
+
 	let priceComponent = (
 		<span
 			className={ clsx(
@@ -301,15 +290,6 @@ const ProductPrice = ( {
 	);
 
 	if ( isDiscounted ) {
-		// If we have rtl character in the prefix, we need to set the direction to ltr
-		// to avoid the price being displayed in the wrong direction.
-		const rtlPrefixStyles =
-			currency?.prefix && currency.prefix !== ''
-				? {
-						unicodeBidi: 'bidi-override' as const,
-						direction: 'ltr' as const,
-				  }
-				: {};
 		priceComponent = (
 			<SalePrice
 				currency={ currency }
@@ -319,7 +299,6 @@ const ProductPrice = ( {
 				regularPrice={ regularPrice }
 				regularPriceClassName={ regularPriceClassName }
 				regularPriceStyle={ regularPriceStyle }
-				rtlPrefixStyles={ rtlPrefixStyles }
 			/>
 		);
 	} else if ( minPrice !== undefined && maxPrice !== undefined ) {
@@ -332,7 +311,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	} else if ( price ) {
+	} else if ( price || price === 0 ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ clsx(

@@ -40,11 +40,8 @@ registerBlockType( metadata, {
 			),
 			description: sprintf(
 				// translators: %s is the taxonomy label.
-				__(
-					`Enable customers to filter the product collection by selecting one or more %s terms.`,
-					'woocommerce'
-				),
-				item.labels.singular_name || item.label
+				__( 'Let shoppers filter products by %s.', 'woocommerce' ),
+				item.label.toLocaleLowerCase()
 			),
 			attributes: {
 				taxonomy: item.name,

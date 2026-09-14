@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix stale 'Tamanghasset' spelling and add missing DZ-49 through DZ-58 Algeria wilayas to the onboarding country/state test fixture.

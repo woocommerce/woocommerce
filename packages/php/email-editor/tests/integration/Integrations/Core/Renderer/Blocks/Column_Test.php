@@ -73,7 +73,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders column content
 	 */
 	public function testItRendersColumnContent(): void {
-		$rendered = $this->column_renderer->render( '', $this->parsed_column, $this->rendering_context );
+		$rendered = $this->column_renderer->render( '<p>Column content</p>', $this->parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Column content', $rendered );
 	}
@@ -180,5 +180,52 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->column_renderer->render( $content, $parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'wp-block-column editor-class-1 another-class', $rendered );
+	}
+
+	/**
+	 * Test it preserves percentage width attributes.
+	 */
+	public function testItPreservesPercentageWidthAttributes(): void {
+		$parsed_column                   = $this->parsed_column;
+		$parsed_column['attrs']['width'] = '33.33%';
+		$rendered                        = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width="33.33%"', $rendered );
+	}
+
+	/**
+	 * Test it uses numeric width attributes for pixel widths.
+	 */
+	public function testItUsesNumericWidthAttributesForPixelWidths(): void {
+		$parsed_column                   = $this->parsed_column;
+		$parsed_column['attrs']['width'] = '220px';
+		$rendered                        = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width="220"', $rendered );
+		$this->assertStringNotContainsString( 'width="220px"', $rendered );
+	}
+
+	/**
+	 * Test it applies padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap)
+	 */
+	public function testItAppliesPaddingLeftFromEmailAttrs(): void {
+		$parsed_column                                = $this->parsed_column;
+		$parsed_column['email_attrs']['padding-left'] = '30px';
+		$rendered                                     = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'padding-left:30px', $rendered );
+	}
+
+	/**
+	 * Test it applies padding-left with preset variable from email_attrs (set by Spacing_Preprocessor for columns blockGap)
+	 * Verifies that wp_style_engine_get_styles transforms var:preset|spacing|30 to CSS variable format
+	 */
+	public function testItAppliesPaddingLeftWithPresetVariableFromEmailAttrs(): void {
+		$parsed_column                                = $this->parsed_column;
+		$parsed_column['email_attrs']['padding-left'] = 'var:preset|spacing|30';
+		$rendered                                     = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		// wp_style_engine_get_styles transforms var:preset|spacing|30 to var(--wp--preset--spacing--30).
+		$this->assertStringContainsString( 'var(--wp--preset--spacing--30)', $rendered );
 	}
 }

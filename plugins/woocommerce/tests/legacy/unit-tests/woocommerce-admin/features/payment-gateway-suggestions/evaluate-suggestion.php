@@ -385,7 +385,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	}
 }
 
-//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
 /**
  * TestableEvaluateSuggestion class.
  */
@@ -399,4 +399,4 @@ class TestableEvaluateSuggestion extends EvaluateSuggestion {
 		return self::$memo;
 	}
 }
-//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName

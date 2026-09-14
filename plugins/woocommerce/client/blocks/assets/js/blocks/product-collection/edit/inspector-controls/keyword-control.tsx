@@ -6,7 +6,6 @@ import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import {
 	TextControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -47,6 +46,8 @@ const KeywordControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<TextControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Keyword', 'woocommerce' ) }
 				value={ querySearch }
 				onChange={ setQuerySearch }

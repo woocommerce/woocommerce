@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Notify wc/admin/options store changes after the data is saved in the server and not before

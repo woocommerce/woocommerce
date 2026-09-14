@@ -106,7 +106,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$included_categories = $this->get_included_categories( $query_args );
 		if ( $included_categories ) {
-			$this->subquery->add_sql_clause( 'where', "AND {$wpdb->term_relationships}.term_taxonomy_id IN ({$included_categories})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$wpdb->term_taxonomy}.term_id IN ({$included_categories})" );
 
 			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.

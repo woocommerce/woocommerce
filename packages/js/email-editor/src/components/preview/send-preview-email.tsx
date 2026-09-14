@@ -79,7 +79,7 @@ function RawSendPreviewEmail() {
 	return (
 		<Modal
 			className="woocommerce-send-preview-email"
-			title={ __( 'Send a test email', 'woocommerce' ) }
+			title={ __( 'Send a test email', __i18n_text_domain__ ) }
 			onRequestClose={ closeCallback }
 			focusOnMount={ false }
 		>
@@ -88,7 +88,7 @@ function RawSendPreviewEmail() {
 					<p>
 						{ __(
 							'Sorry, we were unable to send this email.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 					</p>
 
@@ -96,7 +96,7 @@ function RawSendPreviewEmail() {
 						{ errorMessage &&
 							sprintf(
 								// translators: %s is an error message.
-								__( 'Error: %s', 'woocommerce' ),
+								__( 'Error: %s', __i18n_text_domain__ ),
 								errorMessage
 							) }
 					</strong>
@@ -107,7 +107,7 @@ function RawSendPreviewEmail() {
 								createInterpolateElement(
 									__(
 										'Please check your <link>sending method configuration</link> with your hosting provider.',
-										'woocommerce'
+										__i18n_text_domain__
 									),
 									{
 										link: (
@@ -132,7 +132,7 @@ function RawSendPreviewEmail() {
 							{ createInterpolateElement(
 								__(
 									'Or, sign up for MailPoet Sending Service to easily send emails. <link>Sign up for free</link>',
-									'woocommerce'
+									__i18n_text_domain__
 								),
 								{
 									link: (
@@ -158,11 +158,11 @@ function RawSendPreviewEmail() {
 			<p>
 				{ __(
 					'Send yourself a test email to test how your email would look like in different email apps.',
-					'woocommerce'
+					__i18n_text_domain__
 				) }
 			</p>
 			<TextControl
-				label={ __( 'Send to', 'woocommerce' ) }
+				label={ __( 'Send to', __i18n_text_domain__ ) }
 				onChange={ ( email ) => {
 					void updateSendPreviewEmail( email );
 					recordEventOnce(
@@ -190,7 +190,10 @@ function RawSendPreviewEmail() {
 			{ sendingPreviewStatus === SendingPreviewStatus.SUCCESS ? (
 				<p className="woocommerce-send-preview-modal-notice-success">
 					<Icon icon={ check } style={ { fill: '#4AB866' } } />
-					{ __( 'Test email sent successfully!', 'woocommerce' ) }
+					{ __(
+						'Test email sent successfully!',
+						__i18n_text_domain__
+					) }
 				</p>
 			) : null }
 			<div className="woocommerce-send-preview-modal-footer">
@@ -203,7 +206,7 @@ function RawSendPreviewEmail() {
 						closeCallback();
 					} }
 				>
-					{ __( 'Cancel', 'woocommerce' ) }
+					{ __( 'Cancel', __i18n_text_domain__ ) }
 				</Button>
 				<Button
 					variant="primary"
@@ -218,8 +221,8 @@ function RawSendPreviewEmail() {
 					}
 				>
 					{ isSendingPreviewEmail
-						? __( 'Sending…', 'woocommerce' )
-						: __( 'Send test email', 'woocommerce' ) }
+						? __( 'Sending…', __i18n_text_domain__ )
+						: __( 'Send test email', __i18n_text_domain__ ) }
 				</Button>
 			</div>
 		</Modal>

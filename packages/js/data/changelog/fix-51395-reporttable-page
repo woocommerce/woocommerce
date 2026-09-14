@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use page query param consistently as string for `getReportTableQuery`.

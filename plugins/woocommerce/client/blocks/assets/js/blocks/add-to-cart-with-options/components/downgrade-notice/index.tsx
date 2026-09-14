@@ -43,16 +43,15 @@ export const DowngradeNotice = ( {
 	blockClientId: string;
 } ) => {
 	const notice = __(
-		'Switch back to the classic Add to Cart + Options block.',
+		'Facing compatibility issues with extensions? You can switch back to the classic Add to Cart with Options block.',
 		'woocommerce'
 	);
 
 	const buttonLabel = __( 'Switch back', 'woocommerce' );
 
 	const handleClick = async () => {
-		const downgraded = await downgradeToClassicAddToCartWithOptions(
-			blockClientId
-		);
+		const downgraded =
+			await downgradeToClassicAddToCartWithOptions( blockClientId );
 		if ( downgraded ) {
 			recordEvent( 'blocks_add_to_cart_with_options_migration', {
 				transform_to: 'legacy',

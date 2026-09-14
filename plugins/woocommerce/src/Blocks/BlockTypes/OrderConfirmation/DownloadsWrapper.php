@@ -20,30 +20,34 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 	 * @return boolean
 	 */
 	protected function store_has_downloadable_products() {
-		$has_downloadable_product = get_transient( 'wc_blocks_has_downloadable_product', false );
+		global $wpdb;
 
-		if ( false === $has_downloadable_product ) {
-			$product_ids              = get_posts(
-				array(
-					'post_type'   => 'product',
-					'numberposts' => 1,
-					'post_status' => 'publish',
-					'fields'      => 'ids',
-					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					'meta_query'  => array(
-						array(
-							'key'     => '_downloadable',
-							'value'   => 'yes',
-							'compare' => '=',
-						),
-					),
-				)
+		if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+			// The underlying SQL is slower than querying `wc_product_meta_lookup`, so caching is used for performance.
+			$has_downloadable_products = wp_cache_get( 'woocommerce_has_downloadable_products', 'woocommerce' );
+			if ( false === $has_downloadable_products ) {
+				$has_downloadable_products = (bool) $wpdb->get_var(
+					"SELECT posts.ID
+						FROM {$wpdb->posts} as posts
+						INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+					 WHERE
+						    postmeta.meta_key   = '_downloadable'
+						AND postmeta.meta_value = 'yes'
+						AND posts.post_type     = 'product'
+						AND posts.post_status   = 'publish'
+						LIMIT 1"
+				);
+				$has_downloadable_products = $has_downloadable_products ? 'yes' : 'no';
+				wp_cache_set( 'woocommerce_has_downloadable_products', $has_downloadable_products, 'woocommerce', HOUR_IN_SECONDS );
+			}
+			$has_downloadable_products = 'yes' === $has_downloadable_products;
+		} else {
+			$has_downloadable_products = (bool) $wpdb->get_var(
+				"SELECT product_id FROM {$wpdb->wc_product_meta_lookup} WHERE downloadable = 1 LIMIT 1",
 			);
-			$has_downloadable_product = ! empty( $product_ids );
-			set_transient( 'wc_blocks_has_downloadable_product', $has_downloadable_product ? '1' : '0', MONTH_IN_SECONDS );
 		}
 
-		return (bool) $has_downloadable_product;
+		return $has_downloadable_products;
 	}
 
 	/**

@@ -331,7 +331,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Shipping tax amounts.
+	 * Shipping tax amounts (default behavior - exclusive).
 	 */
 	public function test_calc_shipping_tax() {
 		$tax_rate = array(
@@ -358,9 +358,49 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 			)
 		);
 
+		// Default behavior: shipping cost is net, tax is added on top.
+		// 10.00 * 20% = 2.00.
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '2' ) );
+	}
+
+	/**
+	 * Shipping tax amounts (inclusive behavior when filter enabled).
+	 */
+	public function test_calc_shipping_tax_inclusive() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// With filter: shipping cost is gross, tax is calculated from inclusive price.
+		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+
+		$expected_tax = 10.00 - ( 10.00 / 1.20 );
+		$this->assertEqualsWithDelta( $expected_tax, $calced_tax[ $tax_rate_id ], 0.01, 'Inclusive: tax should be calculated from gross price' );
 	}
 
 	/**

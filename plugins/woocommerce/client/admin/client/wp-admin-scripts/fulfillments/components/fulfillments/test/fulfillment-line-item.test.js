@@ -18,6 +18,11 @@ jest.mock( '@wordpress/components', () => ( {
 			onChange={ ( e ) => onChange( e.target.checked ) }
 		/>
 	),
+	Button: ( { onClick, children, ...props } ) => (
+		<button onClick={ onClick } { ...props }>
+			{ children }
+		</button>
+	),
 	Icon: ( { icon, onClick } ) => (
 		<div
 			role="button"

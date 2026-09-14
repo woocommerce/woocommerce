@@ -4,7 +4,10 @@
 import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
-import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
+import {
+	useCheckoutAddress,
+	useShippingData,
+} from '@woocommerce/base-context/hooks';
 import { useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 
@@ -15,8 +18,8 @@ import Block from './block';
 import attributes from './attributes';
 import { useCheckoutBlockContext } from '../../context';
 import {
-	getBillingAddresssBlockTitle,
-	getBillingAddresssBlockDescription,
+	getBillingAddressBlockTitle,
+	getBillingAddressBlockDescription,
 } from './utils';
 
 const FrontendBlock = ( {
@@ -37,14 +40,21 @@ const FrontendBlock = ( {
 	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
 		useCheckoutAddress();
 
+	const { hasSelectedLocalPickup } = useShippingData();
+
 	if ( ! showBillingFields && ! useBillingAsShipping ) {
 		return null;
 	}
 
-	title = getBillingAddresssBlockTitle( title, forcedBillingAddress );
-	description = getBillingAddresssBlockDescription(
+	title = getBillingAddressBlockTitle(
+		title,
+		forcedBillingAddress,
+		hasSelectedLocalPickup
+	);
+	description = getBillingAddressBlockDescription(
 		description,
-		forcedBillingAddress
+		forcedBillingAddress,
+		hasSelectedLocalPickup
 	);
 	return (
 		<FormStep

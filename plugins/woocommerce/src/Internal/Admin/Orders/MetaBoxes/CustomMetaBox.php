@@ -122,7 +122,7 @@ class CustomMetaBox {
 			 *
 			 * @param int $limit Number of custom fields to retrieve. Default 30.
 			 */
-			$limit = apply_filters( 'postmeta_form_limit', 30 );
+			$limit = (int) apply_filters( 'postmeta_form_limit', 30 );
 			$keys  = wc_get_container()->get( OrdersTableDataStoreMeta::class )->get_meta_keys( $limit );
 		}
 
@@ -398,7 +398,7 @@ class CustomMetaBox {
 		$r .= "\n\t\t<td class='left'><label class='screen-reader-text' for='meta-{$entry['meta_id']}-key'>" . __( 'Key', 'woocommerce' ) . "</label><input name='meta[{$entry['meta_id']}][key]' id='meta-{$entry['meta_id']}-key' type='text' size='20' value='{$entry['meta_key']}' />";
 
 		$r .= "\n\t\t<div class='submit'>";
-		$r .= get_submit_button( __( 'Delete', 'woocommerce' ), 'deletemeta small', "deletemeta[{$entry['meta_id']}]", false, array( 'data-wp-lists' => "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce:$delete_nonce" ) );
+		$r .= get_submit_button( __( 'Delete', 'woocommerce' ), 'deletemeta small', "deletemeta[{$entry['meta_id']}]", false, array( 'data-wp-lists' => "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce=$delete_nonce" ) );
 		$r .= "\n\t\t";
 		$r .= get_submit_button( __( 'Update', 'woocommerce' ), 'updatemeta small', "meta-{$entry['meta_id']}-submit", false, array( 'data-wp-lists' => "add:the-list:meta-{$entry['meta_id']}::_ajax_nonce-add-meta={$this->update_nonce}" ) );
 		$r .= '</div>';

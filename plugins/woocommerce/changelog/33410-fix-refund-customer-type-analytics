@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics > Orders: report refunds with the customer type of the order they refund, instead of always reporting them as returning customers.

@@ -140,4 +140,12 @@ final class PaymentGatewayFeature {
 	 * @var string
 	 */
 	public const TOKENIZATION = 'tokenization';
+
+	/**
+	 * Agentic Commerce feature.
+	 *
+	 * @deprecated 11.2.0 The Agentic Checkout API was removed from WooCommerce core; nothing reads this
+	 *             capability any more. Kept so gateways declaring it do not fatal on an undefined constant.
+	 */
+	public const AGENTIC_COMMERCE = 'agentic_commerce';
 }

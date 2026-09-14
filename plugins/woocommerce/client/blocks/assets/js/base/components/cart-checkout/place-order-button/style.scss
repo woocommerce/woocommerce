@@ -1,0 +1,44 @@
+.wc-block-components-checkout-place-order-button {
+	// TODO: Align with our grid system (or remove TODO after confirming with
+	// design that we want to retain these magic values)
+	padding: 18px 30px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	@include cart-checkout-mobile-container {
+		width: 100%;
+	}
+
+	// Hides labels when the spinner is shown.
+	&--loading {
+		.wc-block-components-button__text {
+			visibility: hidden;
+		}
+		.wc-block-components-spinner,
+		.wc-block-components-checkout-place-order-button__icon {
+			visibility: visible;
+		}
+	}
+
+	.wc-block-components-checkout-place-order-button__text {
+		display: flex;
+		align-items: center;
+	}
+
+	.wc-block-components-checkout-place-order-button__separator {
+		margin: 0 $gap;
+	}
+
+	.wc-block-components-button__text {
+		> svg {
+			fill: $white;
+			vertical-align: top;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+	}
+}

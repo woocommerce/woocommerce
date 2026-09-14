@@ -241,4 +241,47 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 		$this->assertEquals( 2, $gaming_tree['depth'] );
 		$this->assertEquals( $laptops_id, $gaming_tree['parent'] );
 	}
+
+	/**
+	 * Should include menu_order field in tree structure with default value of 0.
+	 */
+	public function test_tree_structure_includes_menu_order_default(): void {
+		$electronics_id = $this->create_test_term( 'Electronics' );
+
+		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
+
+		$this->assertArrayHasKey( 'menu_order', $map['tree'][ $electronics_id ] );
+		$this->assertEquals( 0, $map['tree'][ $electronics_id ]['menu_order'] );
+	}
+
+	/**
+	 * Should include menu_order field from term meta when set.
+	 */
+	public function test_tree_structure_includes_menu_order_from_meta(): void {
+		$electronics_id = $this->create_test_term( 'Electronics' );
+		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
+
+		update_term_meta( $electronics_id, 'order', 5 );
+		update_term_meta( $laptops_id, 'order', 10 );
+
+		$this->sut->clear_cache( $this->taxonomy );
+		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
+
+		$this->assertEquals( 5, $map['tree'][ $electronics_id ]['menu_order'] );
+		$this->assertEquals( 10, $map['tree'][ $electronics_id ]['children'][ $laptops_id ]['menu_order'] );
+	}
+
+	/**
+	 * Should handle non-numeric menu_order meta gracefully.
+	 */
+	public function test_tree_structure_handles_invalid_menu_order_meta(): void {
+		$electronics_id = $this->create_test_term( 'Electronics' );
+
+		update_term_meta( $electronics_id, 'order', 'invalid' );
+
+		$this->sut->clear_cache( $this->taxonomy );
+		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
+
+		$this->assertEquals( 0, $map['tree'][ $electronics_id ]['menu_order'] );
+	}
 }

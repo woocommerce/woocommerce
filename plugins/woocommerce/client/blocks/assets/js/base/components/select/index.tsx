@@ -95,9 +95,9 @@ export const Select = ( props: SelectProps ) => {
 
 	useEffect( () => {
 		if ( ! required || value ) {
-			clearValidationError( errorId );
+			void clearValidationError( errorId );
 		} else {
-			setValidationErrors( {
+			void setValidationErrors( {
 				[ errorId ]: {
 					message: errorMessage,
 					hidden: true,
@@ -105,7 +105,7 @@ export const Select = ( props: SelectProps ) => {
 			} );
 		}
 		return () => {
-			clearValidationError( errorId );
+			void clearValidationError( errorId );
 		};
 	}, [
 		clearValidationError,

@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import moment from 'moment';
 import { find } from 'lodash';
-import { getCurrentDates, appendTimestamp } from '@woocommerce/date';
+import {
+	getCurrentDates,
+	appendTimestamp,
+	getStoreTimeZoneMoment,
+} from '@woocommerce/date';
 import { getFilterQuery, settingsStore, reportsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
@@ -87,7 +90,7 @@ export const getIndicatorData = ( select, indicators, query, filters ) => {
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp(
 			endPrimary,
-			endPrimary.isSame( moment(), 'day' ) ? 'now' : 'end'
+			endPrimary.isSame( getStoreTimeZoneMoment(), 'day' ) ? 'now' : 'end'
 		),
 		stats: statKeys,
 	};
@@ -97,7 +100,9 @@ export const getIndicatorData = ( select, indicators, query, filters ) => {
 		after: appendTimestamp( datesFromQuery.secondary.after, 'start' ),
 		before: appendTimestamp(
 			endSecondary,
-			endSecondary.isSame( moment(), 'day' ) ? 'now' : 'end'
+			endSecondary.isSame( getStoreTimeZoneMoment(), 'day' )
+				? 'now'
+				: 'end'
 		),
 		stats: statKeys,
 	};

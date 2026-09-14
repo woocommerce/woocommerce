@@ -127,7 +127,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 		$legend[] = array(
 			/* translators: %s: total items purchased */
-			'title'            => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . ( $total_items ) . '</strong>' ),
+			'title'            => sprintf( __( '%s purchases for the selected items', 'woocommerce' ), '<strong>' . number_format_i18n( $total_items ) . '</strong>' ),
 			'color'            => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
 		);
@@ -194,6 +194,11 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 	public function current_filters() {
 
 		$this->product_ids_titles = array();
+
+		if ( ! empty( $this->product_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $this->product_ids );
+		}
 
 		foreach ( $this->product_ids as $product_id ) {
 

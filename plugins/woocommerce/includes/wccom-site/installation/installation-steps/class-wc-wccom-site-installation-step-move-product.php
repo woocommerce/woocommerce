@@ -6,6 +6,9 @@
  * @since   7.7.0
  */
 
+use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
+use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -30,6 +33,8 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 
 	/**
 	 * Run the step installation process.
+	 *
+	 * @throws WC_REST_WCCOM_Site_Installer_Error If installation failed.
 	 */
 	public function run() {
 		$upgrader = WC_WCCOM_Site_Installer::get_wp_upgrader();
@@ -64,11 +69,12 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 			return $this->state;
 		}
 
-		if ( ! is_wp_error( $result ) ) {
-			$this->maybe_connect_theme();
+		if ( is_wp_error( $result ) ) {
+			throw new Installer_Error( Installer_Error_Codes::INSTALLATION_FAILED, esc_html( $result->get_error_message() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Installer_Error_Codes constant is a static string, not unescaped output.
 		}
 
 		$this->state->set_installed_path( $result['destination'] );
+		$this->maybe_connect_theme();
 
 		return $this->state;
 	}

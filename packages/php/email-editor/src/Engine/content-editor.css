@@ -74,6 +74,29 @@
 	margin: 0;
 }
 
+/*
+ * Table block enhancements
+ */
+.wp-block-table figcaption {
+	/* Center-align table captions like core WordPress */
+	text-align: center;
+}
+
+/* Ensure bold formatting shows up in table cells and captions in the editor */
+.wp-block-table td strong,
+.wp-block-table th strong,
+.wp-block-table figcaption strong {
+	font-weight: bold;
+}
+
+/*
+ * Embed block enhancements
+ */
+.wp-block-embed figcaption {
+	/* Center-align embed captions like core WordPress, matching the email renderer and the table block */
+	text-align: center;
+}
+
 .wp-block-image.alignleft,
 .wp-block-image.alignright {
 	margin-inline: 0 0;
@@ -130,27 +153,6 @@ ol {
 	display: none;
 }
 
-/*
- * Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
- */
-[data-rich-text-comment],
-[data-rich-text-format-boundary] {
-	border-radius: 2px;
-}
-
-[data-rich-text-comment] {
-	background-color: var(
-		--wp-components-color-accent,
-		var(--wp-admin-theme-color, #3858e9)
-	);
-
-	span {
-		color: var(--wp-components-color-accent-inverted, #fff);
-		filter: none;
-		padding: 0 2px;
-	}
-}
-
 /**
  * Override the default gap for social links block in the editor.
  * This is needed because we do not want to have a gap between the social links and also for a WYSIWYG experience.
@@ -176,4 +178,12 @@ ol {
 :where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-chain {
 	background-color:#000;
 	color:#fff;
+}
+
+/**
+ * Override the default overflow-x for the iframe in the editor.
+ * This is needed because we do want allow scrolling on small screens such as mobile devices.
+ */
+.block-editor-iframe__body {
+	overflow-x: auto;
 }

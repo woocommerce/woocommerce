@@ -105,10 +105,6 @@ class MarketingJetpack {
 		$note->set_content( __( 'Store downtime means lost sales. One-click restores get you back online quickly if something goes wrong.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
-		$note->set_layout( 'thumbnail' );
-		$note->set_image(
-			WC_ADMIN_IMAGES_FOLDER_URL . '/admin_notes/marketing-jetpack-2x.png'
-		);
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin-notes' );
 		$note->add_action(

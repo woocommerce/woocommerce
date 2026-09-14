@@ -16,6 +16,19 @@
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
+	<exclude-pattern>php-stubs/</exclude-pattern>
+	<!-- Custom PHPCS sniffs: must follow the PHP_CodeSniffer API naming, not WordPress'. -->
+	<exclude-pattern>bin/phpcs/</exclude-pattern>
+	<!-- Fixture PHP files used in e2e tests. -->
+	<exclude-pattern>tests/e2e/themes/blocks/</exclude-pattern>
+	<exclude-pattern>tests/e2e/test-plugins/blocks/</exclude-pattern>
+	<!-- Helper scripts loaded only during e2e tests. -->
+	<exclude-pattern>tests/e2e/bin/</exclude-pattern>
+	<!-- Custom PHPCS sniffs and their fixtures follow PHPCS naming/structure, not the WooCommerce ruleset. -->
+	<exclude-pattern>tests/Tools/phpcs/</exclude-pattern>
+
+	<!-- Only check PHP files. -->
+	<arg name="extensions" value="php" />
 
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps" />
@@ -33,6 +46,20 @@
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
 
+	<!-- Local sniff: flag `%i` SQL identifier placeholders in wpdb::prepare() that aren't guarded by
+	     wpdb::has_cap( 'identifier_placeholders' ). Trusted identifiers should be interpolated directly. -->
+	<rule ref="./tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>includes/</include-pattern>
+    </rule>  
+    
+	<!-- The cart token selects which customer session loads; it must be read from one place only. -->
+	<rule ref="./bin/phpcs/WooCommerceStoreApi/Sniffs/StoreApi/CartTokenSourceSniff.php">
+		<!-- The canonical accessor, and tests that simulate raw request headers. -->
+		<exclude-pattern>src/StoreApi/Utilities/CartTokenUtils.php</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
@@ -43,7 +70,9 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="woocommerce" />
+			<property name="text_domain" type="array">
+				<element value="woocommerce" />
+			</property>
 		</properties>
 	</rule>
 
@@ -51,14 +80,17 @@
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 
-	<rule ref="Suin.Classes.PSR4">
+	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
 		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Internal/DependencyManagement/ExampleClasses/</exclude-pattern>
 		<properties>
-			<property name="composerJsonPath" value="composer.json"/>
+			<property name="rootNamespaces" type="array">
+				<element key="src" value="Automattic\WooCommerce"/>
+				<element key="tests/php/src" value="Automattic\WooCommerce\Tests"/>
+			</property>
 		</properties>
 	</rule>
 
@@ -126,6 +158,18 @@
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 
+	<!-- Hook comments document firing points for extension developers; tests fire hooks to
+	     exercise callbacks, they don't declare API surface. -->
+	<rule ref="WooCommerce.Commenting.CommentHooks">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<!-- Tests fire legacy hyphenated core hooks (e.g. woocommerce_settings-{page_id}) that
+	     can't be renamed. -->
+	<rule ref="WordPress.NamingConventions.ValidHookName.UseUnderscores">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
 		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
 	</rule>
@@ -153,6 +197,13 @@
 
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
 		<exclude-pattern>tests/php/</exclude-pattern>
+	</rule>
+
+	<!-- LongConditionClosingComment wants `//end if` / `//end foreach` markers on
+	     long blocks. Archaic convention from legacy WP code that adds noise without
+	     improving readability in modern editors. Disabled project-wide. -->
+	<rule ref="Squiz.Commenting.LongConditionClosingComment.Missing">
+		<severity>0</severity>
 	</rule>
 
 	<!-- Temporary -->

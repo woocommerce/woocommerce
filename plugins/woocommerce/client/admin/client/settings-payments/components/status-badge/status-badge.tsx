@@ -24,7 +24,8 @@ interface StatusBadgeProps {
 		| 'test_mode'
 		| 'test_account'
 		| 'recommended'
-		| 'has_incentive';
+		| 'has_incentive'
+		| 'not_supported';
 	/**
 	 * Override the default status message to display a custom one. Optional.
 	 */
@@ -78,6 +79,17 @@ export const StatusBadge = ( {
 		setPopoverVisible( false );
 	};
 
+	const handleKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleClick( event );
+		}
+	};
+
 	/**
 	 * Get the appropriate CSS class for the badge based on the status.
 	 */
@@ -89,6 +101,7 @@ export const StatusBadge = ( {
 			case 'needs_setup':
 			case 'test_mode':
 			case 'test_account':
+			case 'not_supported':
 				return 'woocommerce-status-badge--warning';
 			case 'recommended':
 			case 'inactive':
@@ -115,6 +128,8 @@ export const StatusBadge = ( {
 				return __( 'Test account', 'woocommerce' );
 			case 'recommended':
 				return __( 'Recommended', 'woocommerce' );
+			case 'not_supported':
+				return __( 'Not supported', 'woocommerce' );
 			default:
 				return '';
 		}
@@ -128,13 +143,12 @@ export const StatusBadge = ( {
 					className="woocommerce-status-badge__icon-container"
 					tabIndex={ 0 }
 					role="button"
+					aria-haspopup="dialog"
+					aria-expanded={ isPopoverVisible }
+					aria-label={ __( 'More information', 'woocommerce' ) }
 					ref={ buttonRef }
 					onClick={ handleClick }
-					onKeyDown={ ( event: React.KeyboardEvent ) => {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
-							handleClick( event );
-						}
-					} }
+					onKeyDown={ handleKeyDown }
 				>
 					<Icon
 						className="woocommerce-status-badge-icon"
@@ -151,8 +165,13 @@ export const StatusBadge = ( {
 							noArrow={ true }
 							shift={ true }
 							onFocusOutside={ handleFocusOutside }
+							onKeyDown={ handleKeyDown }
 						>
-							<div className="components-popover__content-container">
+							{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+							<div
+								className="components-popover__content-container"
+								onKeyDown={ handleKeyDown }
+							>
 								{ popoverContent }
 							</div>
 						</Popover>

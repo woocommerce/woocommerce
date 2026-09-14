@@ -1,11 +1,8 @@
 .wc-block-components-product-badge {
-	@include font-size(smaller);
-	border-radius: $universal-border-radius;
-	border: 1px solid;
+	@include font-x-small-locked;
 	display: inline-block;
-	font-weight: 600;
-	padding: 0 0.66em;
-	text-transform: uppercase;
+	background: color-mix(in srgb, currentColor 10%, transparent);
+	padding: 2px 4px;
 	white-space: nowrap;
 
 	&[hidden] {

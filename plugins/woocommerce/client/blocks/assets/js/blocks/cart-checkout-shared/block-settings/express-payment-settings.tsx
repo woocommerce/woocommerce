@@ -165,6 +165,7 @@ export const ExpressPaymentControls = ( {
 					className="express-payment-button-settings"
 				>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ toggleLabel }
 						checked={ attributes.showButtonStyles }
 						onChange={ () =>

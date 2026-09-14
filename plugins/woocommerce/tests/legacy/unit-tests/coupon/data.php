@@ -298,7 +298,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( '0', $coupon->get_maximum_amount() );
 
 		$coupon->set_maximum_amount( '' );
-		$this->assertEquals( '', $coupon->get_maximum_amount() );
+		$this->assertEquals( '0', $coupon->get_maximum_amount() );
 
 		// Test invalid maximum amounts (less than minimum).
 		try {

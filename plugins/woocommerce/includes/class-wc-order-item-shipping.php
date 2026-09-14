@@ -131,6 +131,8 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 *
 	 * This is an array of tax ID keys with total amount values.
 	 *
+	 * @since 10.5.0 Handles legacy scalar tax values by converting to arrays.
+	 *
 	 * @param array $raw_tax_data Value to set.
 	 * @throws WC_Data_Exception May throw exception if data is invalid.
 	 */
@@ -140,7 +142,29 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			'total' => array(),
 		);
 		if ( isset( $raw_tax_data['total'] ) ) {
-			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+			$total = $raw_tax_data['total'];
+
+			// Handle legacy data where total might be a float/string instead of an array.
+			if ( ! is_array( $total ) ) {
+				$order = $this->get_order();
+				$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+
+				// Log legacy data format for debugging purposes.
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %d: order item ID */
+						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+						$this->get_id()
+					),
+					array(
+						'source'        => 'woocommerce-order-item-shipping',
+						'order_item_id' => $this->get_id(),
+						'order_id'      => $order ? $order->get_id() : 0,
+					)
+				);
+			}
+
+			$tax_data['total'] = array_map( 'wc_format_decimal', $total );
 		} elseif ( ! empty( $raw_tax_data ) && is_array( $raw_tax_data ) ) {
 			// Older versions just used an array.
 			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data );

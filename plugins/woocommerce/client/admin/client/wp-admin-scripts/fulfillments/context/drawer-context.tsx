@@ -104,9 +104,14 @@ export const FulfillmentDrawerProvider = ( {
 			// If all the items are in a single fulfillment,
 			// open that fulfillment section directly.
 			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
-		} else {
+		} else if ( fulfillments && fulfillments.length > 0 ) {
 			// If there are no pending items and multiple fulfillments,
-			// collapse all.
+			// open the latest fulfillment.
+			setOpenSection(
+				'fulfillment-' + fulfillments[ fulfillments.length - 1 ].id
+			);
+		} else {
+			// No fulfillments data yet or empty, collapse all.
 			setOpenSection( '' );
 		}
 	}, [ orderId, fulfillments, order, refunds ] );

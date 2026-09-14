@@ -25,7 +25,19 @@
 			"type": "string"
 		},
 		"displayLayout": {
-			"type": "object"
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": [ "flex", "list", "carousel" ]
+				},
+				"columns": {
+					"type": "number"
+				},
+				"shrinkColumns": {
+					"type": "boolean"
+				}
+			}
 		},
 		"dimensions": {
 			"type": "object"
@@ -49,7 +61,8 @@
 			"default": false
 		},
 		"__privatePreviewState": {
-			"type": "object"
+			"type": "object",
+			"role": "local"
 		}
 	},
 	"providesContext": {
@@ -59,6 +72,7 @@
 		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
+		"forcePageReload": "forcePageReload",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug", "postId" ],
@@ -67,7 +81,8 @@
 		"anchor": true,
 		"html": false,
 		"__experimentalLayout": true,
-		"interactivity": true
+		"interactivity": true,
+		"email": true
 	},
 	"editorStyle": "file:../woocommerce/product-collection-editor.css",
 	"style": "file:../woocommerce/product-collection-style.css"

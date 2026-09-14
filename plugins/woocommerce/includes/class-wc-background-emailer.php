@@ -16,6 +16,8 @@ if ( ! class_exists( 'WC_Background_Process', false ) ) {
 
 /**
  * WC_Background_Emailer Class.
+ *
+ * @deprecated 10.8.0 Deferred emails now use Action Scheduler. No stable public replacement exists.
  */
 class WC_Background_Emailer extends WC_Background_Process {
 
@@ -117,7 +119,7 @@ class WC_Background_Emailer extends WC_Background_Process {
 		// Pass cookies through with the request so nonces function.
 		$cookies = array();
 
-		foreach ( $_COOKIE as $name => $value ) { // WPCS: input var ok.
+		foreach ( $_COOKIE as $name => $value ) {
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}

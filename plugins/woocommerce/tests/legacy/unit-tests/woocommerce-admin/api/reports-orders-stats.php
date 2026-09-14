@@ -44,6 +44,8 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -139,9 +141,9 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 			$this->markTestSkipped( 'Skipped in older versions of WordPress due to a bug in WP when validating arrays.' );
 		}
 
-		global $wpdb;
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'yes' );
 
 		// Create a variable product.
 		$variable_product   = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
@@ -183,14 +185,14 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
+		$unrelated_product = WC_Helper_Product::create_simple_product();
 		for ( $i = 0; $i < 10; $i++ ) {
-			$order = WC_Helper_Order::create_order( $this->user );
+			$order = WC_Helper_Order::create_order( $this->user, $unrelated_product );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );

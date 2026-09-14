@@ -13,7 +13,6 @@ import AddToCartWithOptionsVariationSelectorSave from './save';
 
 registerBlockType( metadata, {
 	edit: AddToCartWithOptionsVariationSelectorEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

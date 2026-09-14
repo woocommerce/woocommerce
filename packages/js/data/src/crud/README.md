@@ -148,7 +148,6 @@ For TypeScript support in a customized store, you can define your types and exte
 ```ts
 // types.ts
 import { CrudActions, CrudSelectors } from '../crud/types';
-import { DispatchFromMap } from '@automattic/data-stores';
 
 // Define your resource type
 export interface MyCustomResource {

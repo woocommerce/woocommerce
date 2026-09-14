@@ -1,0 +1,4 @@
+.wc-block-store-notices:has(> .woocommerce-notices-wrapper:only-child:empty) {
+	margin-block-start: 0;
+	margin-block-end: 0;
+}

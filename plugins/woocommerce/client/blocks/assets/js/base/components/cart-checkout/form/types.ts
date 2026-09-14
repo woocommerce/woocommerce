@@ -16,11 +16,11 @@ import type {
 import { FieldProps } from './utils';
 
 export interface FormProps<
-	T extends AddressFormValues | ContactFormValues | OrderFormValues
+	T extends AddressFormValues | ContactFormValues | OrderFormValues,
 > {
 	// Id for component.
 	id?: string;
-	// Type of form (billing or shipping).
+	// Type of form (billing, shipping, contact or order).
 	addressType?: FormType;
 	// aria-describedby attribute to add to the input.
 	ariaDescribedBy?: string;

@@ -5,7 +5,151 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	/**
+	 * Percent-encode literal apostrophes in an already URL-encoded request body.
+	 *
+	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
+	 * server with literal apostrophes that some WAF rules reject.
+	 *
+	 * @param {string} data URL-encoded request body.
+	 * @return {string} Body with apostrophes encoded as %27.
+	 */
+	function encodeApostrophes( data ) {
+		return data.split( "'" ).join( '%27' );
+	}
+
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
+
+	// A paste can carry characters that render as nothing. The server strips them
+	// before validating, so flagging the field here would blame the customer for
+	// something invisible. Mirrors the strip in wc_remove_non_displayable_chars(),
+	// not the server's phone check — that one is stricter, so a number can pass
+	// here and still be refused on submit. No "u" flag, and surrogate pairs for the
+	// ranges above U+FFFF, so the pattern builds on any browser.
+	var invisible_chars = new RegExp(
+		'[\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F' +
+			'\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\u3164' +
+			'\\uFE00-\\uFE0F\\uFEFF\\uFFA0\\uFFF0-\\uFFFB]' +
+			'|\\uD82F[\\uDCA0-\\uDCA3]' +
+			'|\\uD834[\\uDD73-\\uDD7A]' +
+			'|[\\uDB40-\\uDB43][\\uDC00-\\uDFFF]',
+		'g'
+	);
+
+	/**
+	 * Create the API object passed to custom place order button render callbacks.
+	 * This is checkout-specific and includes form validation.
+	 *
+	 * @return {Object} API object with validate and submit methods
+	 */
+	function createCheckoutPlaceOrderApi() {
+		var $form = window.wc.customPlaceOrderButton.__getForm();
+
+		return {
+			/**
+			 * Validate the checkout form.
+			 * This gets a little tricky.
+			 * The existing checkout.js does NOT have a "validate everything before submit" function - it's not needed.
+			 * Validation is done:
+			 *  - Field-by-field via `validate_field` on blur/change
+			 *  - Server-side on form submission (errors are returned in AJAX response).
+			 * This function tries to mimic client-side validation, but WooCommerce's real validation happens server-side.
+			 *
+			 * @return {Promise<{hasError: boolean}>} Promise resolving to validation result
+			 */
+			validate: function () {
+				return new Promise( function ( resolve ) {
+					var hasError = false;
+
+					// On a "normal" shortcode checkout page, the page validates this server-side only (not via validate_field).
+					// We do client-side validation here for a better UX with custom place order buttons.
+					// Clearing any stale invalid state before re-validating, to ensure a clean slate.
+					var $termsCheckbox = $form.find( 'input[name="terms"]:visible' );
+					if ( $termsCheckbox.length ) {
+						$termsCheckbox.closest( '.form-row' ).removeClass( 'woocommerce-invalid' );
+					}
+
+					// Trigger field-level validation (which adds `.woocommerce-invalid` to invalid fields)
+					$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' );
+
+					// Check for validation errors (from validate_field handler).
+					// Only consider visible fields: `validate_field` flags any empty
+					// required field regardless of visibility, so hidden fields (e.g.
+					// the collapsed "Ship to a different address?" shipping fields)
+					// would otherwise block submission even when the visible form is
+					// valid. The `.woocommerce-invalid` class lives on the `.form-row`,
+					// which is hidden when its section is collapsed.
+					if ( $form.find( '.woocommerce-invalid:visible' ).length > 0 ) {
+						hasError = true;
+					}
+
+					// Check required fields (adds .woocommerce-invalid if not already set)
+					$form.find( '.validate-required:visible' ).each( function () {
+						var $field = $( this );
+						var $input = $field.find( 'input.input-text, select, input:checkbox' );
+
+						if ( $input.length === 0 ) {
+							return;
+						}
+
+						var isEmpty;
+						if ( $input.is( ':checkbox' ) ) {
+							isEmpty = ! $input.is( ':checked' );
+						} else {
+							isEmpty = $input.val() === '' || $input.val() === null;
+						}
+
+						if ( isEmpty ) {
+							hasError = true;
+							$field.addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
+						}
+					} );
+
+					// Check terms checkbox - this is our client-side validation for better UX
+					// (WC Core only validates terms server-side)
+					if ( $termsCheckbox.length && ! $termsCheckbox.is( ':checked' ) ) {
+						hasError = true;
+						$termsCheckbox.closest( '.form-row' ).addClass( 'woocommerce-invalid' );
+					}
+
+					// Scroll to the first invalid field in DOM order
+					if ( hasError ) {
+						var $firstInvalidField = $form.find( '.woocommerce-invalid:visible' ).first();
+						if ( $firstInvalidField.length ) {
+							$( 'html, body' ).animate(
+								{
+									scrollTop: $firstInvalidField.offset().top - 100,
+								},
+								500
+							);
+						}
+					}
+
+					resolve( { hasError: hasError } );
+				} );
+			},
+
+			/**
+			 * Submit the checkout form.
+			 * Triggers the same logic as clicking the default place order button.
+			 */
+			submit: function () {
+				$form.trigger( 'submit' );
+			},
+		};
+	}
+
+	// Clean up custom place order button before checkout update destroys the DOM.
+	// After the update, init_payment_methods() will trigger payment method selection,
+	// which will call render() again for the active gateway.
+	$( document.body ).on( 'update_checkout', function () {
+		window.wc.customPlaceOrderButton.__cleanup();
+	} );
+
+	// When a gateway registers after a page load, render its button if it's selected.
+	$( document.body ).on( 'wc_custom_place_order_button_registered', function ( e, gatewayId ) {
+		window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
+	} );
 
 	var wc_checkout_form = {
 		updateTimer: false,
@@ -33,6 +177,13 @@ jQuery( function ( $ ) {
 				);
 				this.$order_review.on( 'submit', this.submitOrder );
 				this.$order_review.attr( 'novalidate', 'novalidate' );
+
+				// Initialize the custom place order button for the "order-pay" page
+				var $orderPayMethod = this.$order_review.find( 'input[name="payment_method"]:checked' );
+				if ( $orderPayMethod.length ) {
+					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
+					$orderPayMethod.trigger( 'click' );
+				}
 			}
 
 			// Prevent HTML5 validation which can conflict.
@@ -72,6 +223,13 @@ jQuery( function ( $ ) {
 				'keydown',
 				'.address-field input.input-text, .update_totals_on_change input.input-text',
 				this.queue_update_checkout
+			);
+
+			// Handle blur on address_1 fields when autocomplete provider is available
+			this.$checkout_form.on(
+				'blur',
+				'#billing_address_1, #shipping_address_1',
+				this.address_field_blur
 			);
 
 			// Address fields
@@ -133,6 +291,13 @@ jQuery( function ( $ ) {
 					.slideUp( 0 );
 			}
 
+			// Check if initially selected gateway has custom place order button (via server-side flag)
+			// This hides the default button immediately to prevent flash while the gateway JS loads
+			var $selectedMethod = $payment_methods.filter( ':checked' ).eq( 0 );
+			if ( $selectedMethod.length ) {
+				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $selectedMethod.val() );
+			}
+
 			// Trigger click event for selected method
 			$payment_methods.filter( ':checked' ).eq( 0 ).trigger( 'click' );
 		},
@@ -179,6 +344,10 @@ jQuery( function ( $ ) {
 				$( document.body ).trigger( 'payment_method_selected' );
 			}
 
+			// Handle custom place order button
+			var gatewayId = $( this ).val();
+			window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
+
 			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
 		toggle_create_account: function () {
@@ -186,27 +355,141 @@ jQuery( function ( $ ) {
 
 			if ( $( this ).is( ':checked' ) ) {
 				// Ensure password is not pre-populated.
-				$( '#account_password' ).val( '' ).trigger( 'change' );
+				$( '#account_password' ).val( '' );
 				$( 'div.create-account' ).slideDown();
 			}
 		},
 		init_checkout: function () {
 			$( document.body ).trigger( 'update_checkout' );
 		},
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should skip checkout updates
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be skipped, false otherwise
+		 */
+		should_skip_address_update: function ( e ) {
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Skip if we're manipulating the DOM for autocomplete
+				if (
+					target.getAttribute( 'data-autocomplete-manipulating' ) ===
+					'true'
+				) {
+					return true;
+				}
+
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should trigger checkout updates on blur
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be triggered, false otherwise
+		 */
+		should_trigger_address_blur_update: function ( e ) {
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Skip if we're manipulating the DOM for autocomplete
+				if (
+					target.getAttribute( 'data-autocomplete-manipulating' ) ===
+					'true'
+				) {
+					return false;
+				}
+
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
 		maybe_input_changed: function ( e ) {
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
+			}
+
 			if ( wc_checkout_form.dirtyInput ) {
 				wc_checkout_form.input_changed( e );
 			}
 		},
 		input_changed: function ( e ) {
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
+			}
+
 			wc_checkout_form.dirtyInput = e.target;
 			wc_checkout_form.maybe_update_checkout();
+		},
+		address_field_blur: function ( e ) {
+			if ( wc_checkout_form.should_trigger_address_blur_update( e ) ) {
+				wc_checkout_form.dirtyInput = e.target;
+				wc_checkout_form.maybe_update_checkout();
+			}
 		},
 		queue_update_checkout: function ( e ) {
 			var code = e.keyCode || e.which || 0;
 
 			if ( code === 9 ) {
 				return true;
+			}
+
+			// Check if we're in an address_1 field with an active provider
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Check if an autocomplete provider is available for this field
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						// Provider is available - don't queue updates while typing
+						// Updates will be triggered on blur instead
+						return true;
+					}
+				}
 			}
 
 			wc_checkout_form.dirtyInput = this;
@@ -328,7 +611,13 @@ jQuery( function ( $ ) {
 				if ( validate_phone ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
-					if ( 0 < $this.val().replace( pattern, '' ).length ) {
+					if (
+						0 <
+						$this
+							.val()
+							.replace( invisible_chars, '' )
+							.replace( pattern, '' ).length
+					) {
 						$this.attr( 'aria-invalid', 'true' );
 						$parent
 							.removeClass( 'woocommerce-validated' )
@@ -463,7 +752,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -549,26 +838,55 @@ jQuery( function ( $ ) {
 						} );
 					}
 
-					// Check for error
-					if ( data && 'failure' === data.result ) {
-						var $form = $( 'form.checkout' );
+					var $form = $( 'form.checkout' );
 
-						// Remove notices from all sources
+					// `result` only reports whether the response carries a notice, so a success
+					// or info notice reads as `failure` there. Prefer the explicit error flag
+					// when it is the boolean this endpoint documents and, if it reports an
+					// error, the response carries the notice to show for it. Otherwise fall
+					// back to `result`, such as for a third-party callback that answers before
+					// Core does.
+					var trustsErrorFlag =
+						!! data &&
+						'boolean' === typeof data.has_errors &&
+						( ! data.has_errors || !! data.messages );
+					var hasErrors = trustsErrorFlag
+						? data.has_errors
+						: !! data && 'failure' === data.result;
+
+					// Whether this response has a notice to render. `result` is the legacy
+					// signal for that and third-party callbacks still set it, so keep honoring
+					// it alongside the error flag.
+					var rendersNotices =
+						!! data &&
+						!! data.messages &&
+						( hasErrors || 'failure' === data.result );
+
+					if ( hasErrors ) {
+						// Remove notices from all sources before rendering an error.
 						$(
 							'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
 						).remove();
+					} else if ( rendersNotices ) {
+						// A non-error notice supersedes a failed place order, but leaves every
+						// other notice on the page alone.
+						$( '.woocommerce-NoticeGroup-checkout' ).remove();
+					}
 
-						// Add new errors returned by this event
-						if ( data.messages ) {
-							$form.prepend(
-								'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
-									data.messages +
-									'</div>'
-							); // eslint-disable-line max-len
-						} else {
-							$form.prepend( data );
-						}
+					// Add notices returned by this event.
+					if ( rendersNotices ) {
+						$form.prepend(
+							'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+								data.messages +
+								'</div>'
+						); // eslint-disable-line max-len
+					} else if ( data && 'failure' === data.result ) {
+						// A response that reports a notice without carrying one: render it as-is.
+						$form.prepend( data );
+					}
 
+					// Check for error.
+					if ( hasErrors ) {
 						// Lose focus for all fields
 						$form
 							.find( '.input-text, select, input:checkbox' )
@@ -584,14 +902,19 @@ jQuery( function ( $ ) {
 					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
 					if (
 						data &&
-						'success' === data.result &&
+						! hasErrors &&
 						args.current_target &&
 						args.current_target.id.indexOf( 'shipping_method' ) !==
 							-1
 					) {
-						document
-							.getElementById( args.current_target.id )
-							.focus();
+						// The refreshed fragment may no longer offer the method that was selected.
+						var shippingInput = document.getElementById(
+							args.current_target.id
+						);
+
+						if ( shippingInput ) {
+							shippingInput.focus();
+						}
 					}
 
 					// Fire updated_checkout event.
@@ -707,7 +1030,7 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: $form.serialize(),
+					data: encodeApostrophes( $form.serialize() ),
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -833,7 +1156,7 @@ jQuery( function ( $ ) {
 				.find(
 					'.woocommerce-error[tabindex="-1"], .wc-block-components-notice-banner.is-error[tabindex="-1"]'
 				)
-				.focus();
+				.trigger( 'focus' );
 			$( document.body ).trigger( 'checkout_error', [ error_message ] );
 		},
 		wrapMessagesInsideLink: function ( $msgs ) {
@@ -944,7 +1267,7 @@ jQuery( function ( $ ) {
 
 			$target
 				.find( '#coupon_code' )
-				.focus()
+				.trigger( 'focus' )
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
 				.attr( 'aria-describedby', 'coupon-error-notice' );
@@ -974,11 +1297,11 @@ jQuery( function ( $ ) {
 		clear_coupon_input: function () {
 			const $coupon_field = $( '#coupon_code' );
 			$coupon_field
-				.val('')
-				.removeClass('has-error')
-				.removeAttr('aria-invalid')
-				.removeAttr('aria-describedby')
-				.next('.coupon-error-notice')
+				.val( '' )
+				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
+				.next( '.coupon-error-notice' )
 				.remove();
 		},
 		submit: function ( evt ) {
@@ -1013,7 +1336,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1039,6 +1362,11 @@ jQuery( function ( $ ) {
 							self.show_coupon_error(
 								response,
 								$coupon_field.parent()
+							);
+
+							$( document.body ).trigger(
+								'errored_coupon_in_checkout',
+								[ data.coupon_code, response ]
 							);
 						}
 
@@ -1082,7 +1410,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'

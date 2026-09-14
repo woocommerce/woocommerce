@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clear template cache on email template edit via admin

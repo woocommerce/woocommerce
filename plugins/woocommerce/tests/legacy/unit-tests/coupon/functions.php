@@ -80,4 +80,24 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 		$this->assertEmpty( wc_get_coupon_id_by_code( 0 ) );
 	}
 
+	/**
+	 * Test wc_get_coupon_id_by_code().
+	 *
+	 * @since 10.5
+	 */
+	public function test_wc_get_coupon_id_by_code_case_insensitive() {
+		// Create two coupons with the same code in a different case.
+		$coupon1 = WC_Helper_Coupon::create_coupon( 'testcoupon' );
+		$coupon2 = WC_Helper_Coupon::create_coupon( 'TESTCOUPON' );
+
+		// Expect the second coupon to be returned as it was created last.
+		$this->assertEquals( $coupon2->get_id(), wc_get_coupon_id_by_code( 'testCOUPON' ) );
+
+		// Delete second coupon.
+		WC_Helper_Coupon::delete_coupon( $coupon2->get_id() );
+
+		$this->assertEquals( $coupon1->get_id(), wc_get_coupon_id_by_code( 'testCOUPON' ) );
+
+		WC_Helper_Coupon::delete_coupon( $coupon1->get_id() );
+	}
 }

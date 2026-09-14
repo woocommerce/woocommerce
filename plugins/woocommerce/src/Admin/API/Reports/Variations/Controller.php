@@ -381,7 +381,14 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_columns['stock']        = __( 'Stock', 'woocommerce' );
 		}
 
-		return $export_columns;
+		/**
+		 * Filter to add or remove column names from the variations report for
+		 * export.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_columns Key value pair of column ID and label.
+		 */
+		return apply_filters( 'woocommerce_report_variations_export_columns', $export_columns );
 	}
 
 	/**
@@ -391,8 +398,31 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
+		$product_name = $item['extended_info']['name'];
+		/**
+		 * Filter the separator used in the product variation title.
+		 *
+		 * @since 10.2.0
+		 * @param string $separator The separator.
+		 * @param \WC_Product $product The product object.
+		 * @return string The separator.
+		*/
+		$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
+		if ( ! empty( $item['extended_info']['attributes'] ) && strpos( $product_name, $separator ) === false ) {
+			$attributes = array();
+			foreach ( $item['extended_info']['attributes'] as $attribute ) {
+				if ( empty( $attribute['option'] ) ) {
+					// translators: %s: the attribute name.
+					$attributes[] = sprintf( __( 'Any %s', 'woocommerce' ), ucfirst( $attribute['name'] ) );
+				} else {
+					$attributes[] = $attribute['option'];
+				}
+			}
+			$product_name .= $separator . implode( ', ', $attributes );
+		}
+
 		$export_item = array(
-			'product_name' => $item['extended_info']['name'],
+			'product_name' => $product_name,
 			'sku'          => $item['extended_info']['sku'],
 			'items_sold'   => $item['items_sold'],
 			'net_revenue'  => self::csv_number_format( $item['net_revenue'] ),
@@ -404,6 +434,14 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_item['stock']        = $item['extended_info']['stock_quantity'];
 		}
 
-		return $export_item;
+		/**
+		 * Filter to prepare extra columns in the export item for the variations
+		 * report.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_item Key value pair of column ID and row value.
+		 * @param array $item        The original report item.
+		 */
+		return apply_filters( 'woocommerce_report_variations_prepare_export_item', $export_item, $item );
 	}
 }

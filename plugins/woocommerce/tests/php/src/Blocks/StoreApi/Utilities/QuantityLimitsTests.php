@@ -5,35 +5,16 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * QuantityLimitsTests class.
  */
-class QuantityLimitsTests extends TestCase {
+class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
-	 * @var string
-	 */
-	private $manage_stock;
-
-	/**
-	 * Set up test environment.
-	 */
-	public function setUp(): void {
-		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
-		parent::setUp();
-	}
-
-	/**
-	 * Clean up test environment.
+	 * Clean up filters registered by tests, even when a test fails mid-way.
 	 */
 	public function tearDown(): void {
-		update_option( 'woocommerce_manage_stock', $this->manage_stock );
-		// Clean up custom filters.
-		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
-		remove_all_filters( 'woocommerce_quantity_input_args' );
+		remove_all_filters( 'woocommerce_store_api_cart_item_quantity_validation' );
 		parent::tearDown();
 	}
 
@@ -45,16 +26,6 @@ class QuantityLimitsTests extends TestCase {
 		remove_all_filters( 'woocommerce_stock_amount' );
 		// Add only floatval.
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
-	}
-
-	/**
-	 * Disable float support and restore integer support.
-	 */
-	private function disable_float_support() {
-		// Remove all existing filters first.
-		remove_all_filters( 'woocommerce_stock_amount' );
-		// Add only intval.
-		add_filter( 'woocommerce_stock_amount', 'intval' );
 	}
 
 	/**
@@ -179,6 +150,60 @@ class QuantityLimitsTests extends TestCase {
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
 		$this->assertEquals( 9999, $limits['maximum'], 'When stock management is disabled, maximum quantity should be 9999' );
+	}
+
+	/**
+	 * Test quantity limit when stock management is disabled but product has manage_stock enabled from when it was previously enabled.
+	 * This reproduces the Cart Block bug where products retain their stock quantity as max even when stock management is globally disabled.
+	 */
+	public function test_quantity_limit_when_stock_management_disabled_but_product_has_manage_stock_enabled() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		// Step 1: Enable stock management globally and on product level.
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		// Verify that with stock management enabled, max is limited to stock quantity.
+		$quantity_limits     = new QuantityLimits();
+		$limits_when_enabled = $quantity_limits->get_add_to_cart_limits( $product );
+		$this->assertEquals( 10, $limits_when_enabled['maximum'], 'When stock management is enabled, maximum should be limited to stock quantity' );
+
+		// Step 2: Disable stock management globally but leave product-level manage_stock as true.
+		// This simulates the scenario from import or when stock management was previously enabled.
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		// The product still has manage_stock = true and stock_quantity = 10.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertTrue( $product->get_manage_stock(), 'Product should still have manage_stock = true' );
+		$this->assertEquals( 10, $product->get_stock_quantity(), 'Product should still have stock quantity of 10' );
+
+		// Step 3: Test quantity limits - this should return 9999, not 10.
+		$quantity_limits      = new QuantityLimits();
+		$limits_when_disabled = $quantity_limits->get_add_to_cart_limits( $product );
+
+		/**
+		 * Filter the maximum quantity to allow extensions to override the default value for testing purposes.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param mixed $value The value being filtered.
+		 * @param \WC_Product $product The product object.
+		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
+		 * @return mixed
+		 */
+		$expected_max = apply_filters( 'woocommerce_store_api_product_quantity_maximum', 9999, $product );
+		$this->assertEquals( $expected_max, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should ignore product-level manage_stock/stock and use the default maximum' );
+		$this->assertEquals( 1, $limits_when_disabled['minimum'], 'Minimum should remain default when stock management is globally disabled' );
+		$this->assertEquals( 1, $limits_when_disabled['multiple_of'], 'Multiple-of should remain default when stock management is globally disabled' );
 	}
 
 	/**
@@ -650,5 +675,134 @@ class QuantityLimitsTests extends TestCase {
 
 		// Test with invalid rounding function (should default to 'round').
 		$this->assertEquals( 6.0, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'invalid' ), 'Invalid rounding function should default to round' );
+	}
+
+	/**
+	 * Create a simple product wrapped in a cart item array.
+	 *
+	 * @return array Cart item with the product under the data key.
+	 */
+	private function get_validation_cart_item() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+		$product->save();
+
+		return array(
+			'data' => $product,
+		);
+	}
+
+	/**
+	 * @testdox Should return the WP_Error produced by a woocommerce_store_api_cart_item_quantity_validation callback.
+	 */
+	public function test_validate_cart_item_quantity_filter_returns_wp_error(): void {
+		$cart_item = $this->get_validation_cart_item();
+		$sut       = new QuantityLimits();
+
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function () {
+				return new \WP_Error( 'custom_rejection', 'Rejected by extension' );
+			}
+		);
+
+		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
+
+		$this->assertInstanceOf( 'WP_Error', $result, 'A WP_Error returned by the filter should be passed through' );
+		$this->assertSame( 'custom_rejection', $result->get_error_code(), 'The filter callback error code should be preserved' );
+		$this->assertSame( 'Rejected by extension', $result->get_error_message(), 'The filter callback error message should be preserved' );
+	}
+
+	/**
+	 * @testdox Should return true when a woocommerce_store_api_cart_item_quantity_validation callback returns true.
+	 */
+	public function test_validate_cart_item_quantity_filter_returns_true(): void {
+		$cart_item = $this->get_validation_cart_item();
+		$sut       = new QuantityLimits();
+
+		$received_args = array();
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function ( $valid, $quantity, $product, $filtered_cart_item ) use ( &$received_args ) {
+				$received_args = array( $quantity, $product, $filtered_cart_item );
+				return $valid;
+			},
+			10,
+			4
+		);
+
+		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'A true filter return should be accepted' );
+		$this->assertSame( 3, $received_args[0], 'The callback should receive the new quantity' );
+		$this->assertSame( $cart_item['data']->get_id(), $received_args[1]->get_id(), 'The callback should receive the product object' );
+		$this->assertSame( $cart_item, $received_args[2], 'The callback should receive the cart item' );
+	}
+
+	/**
+	 * Data provider of unexpected filter return values.
+	 *
+	 * @return array
+	 */
+	public function unexpected_filter_return_values() {
+		return array(
+			'false'       => array( false ),
+			'null'        => array( null ),
+			'string'      => array( 'nope' ),
+			'truthy int'  => array( 1 ),
+			'empty array' => array( array() ),
+		);
+	}
+
+	/**
+	 * @testdox Should ignore unexpected filter return values and accept the quantity.
+	 * @dataProvider unexpected_filter_return_values
+	 *
+	 * @param mixed $filter_return_value Value returned by the filter callback.
+	 */
+	public function test_validate_cart_item_quantity_filter_unexpected_return_is_ignored( $filter_return_value ): void {
+		$cart_item = $this->get_validation_cart_item();
+		$sut       = new QuantityLimits();
+
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function () use ( $filter_return_value ) {
+				return $filter_return_value;
+			}
+		);
+
+		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'Unexpected filter return values should fall back to the original valid result' );
+	}
+
+	/**
+	 * @testdox Should return the core WP_Error even when a permissive filter callback is attached.
+	 */
+	public function test_validate_cart_item_quantity_core_error_bypasses_filter(): void {
+		$cart_item = $this->get_validation_cart_item();
+		$product   = $cart_item['data'];
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$sut = new QuantityLimits();
+
+		$filter_ran = false;
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function () use ( &$filter_ran ) {
+				$filter_ran = true;
+				return true;
+			}
+		);
+
+		$result = $sut->validate_cart_item_quantity( 11, $cart_item );
+
+		$this->assertInstanceOf( 'WP_Error', $result, 'Core limit violations should return WP_Error regardless of filter callbacks' );
+		$this->assertStringContainsString( 'maximum', $result->get_error_message(), 'The core maximum-quantity error should win' );
+		$this->assertFalse( $filter_ran, 'The filter should not run when core validation fails' );
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Decode HTML entities in the currency config symbol.

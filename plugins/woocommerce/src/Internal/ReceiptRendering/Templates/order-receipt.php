@@ -22,7 +22,7 @@
 	<h3 id="payment_status_section_title"><?php echo strtoupper( $data['texts']['payment_status_section_title'] ); ?></h3>
 	<p><?php echo $data['texts']['payment_status']; ?></p>
 
-	<?php if ( isset( $data['payment_method'] ) ) { ?>
+	<?php if ( isset( $data['payment_method'] ) && ( ! $data['show_payment_method_title'] || '' !== trim( (string) $data['payment_method'] ) ) ) { ?>
 		<h3 id="payment_method_section_title"><?php echo strtoupper( $data['texts']['payment_method_section_title'] ); ?></h3>
 		<p>
 			<?php if ( $data['show_payment_method_title'] ) { ?>
@@ -49,7 +49,7 @@
 <?php if ( ! empty( $data['notes'] ) ) { ?>
 	<h3 id="order_notes_section_title"><?php echo strtoupper( $data['texts']['order_notes_section_title'] ); ?></h3>
 	<?php foreach ( $data['notes'] as $note ) { ?>
-		<p><?php echo $note; ?></p>
+		<p><?php echo wp_kses_post( $note ); ?></p>
 		<?php
 	}
 }

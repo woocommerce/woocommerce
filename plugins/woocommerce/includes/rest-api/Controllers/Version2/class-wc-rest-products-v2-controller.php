@@ -13,7 +13,10 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,6 +27,9 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
+
+	use ProductRequestPreparationTrait;
+	use RestApiCache;
 
 	/**
 	 * Endpoint namespace.
@@ -58,6 +64,70 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function __construct() {
 		add_action( "woocommerce_rest_insert_{$this->post_type}_object", array( $this, 'clear_transients' ) );
+		$this->initialize_rest_api_cache();
+	}
+
+	/**
+	 * Get the default entity type for response caching.
+	 *
+	 * @return string|null The entity type.
+	 */
+	protected function get_default_response_entity_type(): ?string {
+		return 'product';
+	}
+
+	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_rest_prepare_product_object',
+			'woocommerce_product_type_query',
+			'woocommerce_product_class',
+			'woocommerce_short_description',
+			'woocommerce_rest_product_object_query',
+		);
+	}
+
+	/**
+	 * Get data for ETag generation, excluding fields that change on each request.
+	 *
+	 * @param array                                 $data        Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Cleaned data for ETag generation.
+	 */
+	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return $this->remove_related_ids_from_response_data( $data );
+	}
+
+	/**
+	 * Remove related_ids from response data for ETag calculation.
+	 *
+	 * The related_ids field contains a random sample of related products,
+	 * so it should not be used for ETag calculation.
+	 *
+	 * @param array $data Response data.
+	 * @return array Response data without related_ids.
+	 */
+	private function remove_related_ids_from_response_data( array $data ): array {
+		// Handle single product response.
+		if ( isset( $data['related_ids'] ) ) {
+			unset( $data['related_ids'] );
+		}
+
+		// Handle collection response (array of products).
+		foreach ( $data as $key => $item ) {
+			if ( is_array( $item ) && isset( $item['related_ids'] ) ) {
+				unset( $data[ $key ]['related_ids'] );
+			}
+		}
+
+		return $data;
 	}
 
 	/**
@@ -70,7 +140,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_items' ),
+						array(
+							'endpoint_id'              => 'get_products',
+							'relevant_version_strings' => array( 'list_products' ),
+						)
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
@@ -96,13 +172,23 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_item' ),
+						array( 'endpoint_id' => 'get_product' )
+					),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'context' => $this->get_context_param(
+						'context'    => $this->get_context_param(
 							array(
 								'default' => 'view',
 							)
+						),
+						'image_size' => array(
+							'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+							'type'              => 'string',
+							'default'           => 'full',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),
@@ -141,6 +227,24 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/related',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_related_products' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -156,6 +260,29 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Bulk create, update, and delete items.
+	 *
+	 * This method extends the parent batch_items functionality by deferring term counting
+	 * to optimize performance when processing multiple products that may share common terms.
+	 *
+	 * @param WP_REST_Request $request Full details about the request containing arrays of
+	 *                                 products to create, update, or delete.
+	 *
+	 * @return array Array of WP_Error or WP_REST_Response objects for each processed item.
+	 * @since 10.4.0 Added term counting optimization for bulk operations.
+	 */
+	public function batch_items( $request ) {
+		$already_deferred = wp_defer_term_counting();
+		wp_defer_term_counting( true );
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			// Be sure to trigger term counting already processed terms even if there was an exception unless something had already deferred it.
+			wp_defer_term_counting( $already_deferred );
+		}
+	}
+
+	/**
 	 * Prepare a single product output for response.
 	 *
 	 * @param WC_Data         $object  Object data.
@@ -165,7 +292,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
 		$this->request = $request;
 
 		$data = $this->prepare_object_for_response_core( $object, $request, $context );
@@ -270,7 +398,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( ! empty( $tax_query ) ) {
-			$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+			$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 		}
 
 		// Filter featured.
@@ -291,7 +419,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Exact _sku match; wc_product_meta_lookup truncates SKUs to 100 chars and is empty while it regenerates, so it is not an equivalent path.
 				$args,
 				array(
 					'key'     => '_sku',
@@ -303,7 +431,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- wc_product_meta_lookup.tax_class is unindexed and holds NULL where _tax_class is unset, so it is neither faster nor equivalent.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -314,12 +442,12 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- _price is stored once per child price; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Postmeta stays correct while wc_product_meta_lookup is stale or regenerating; the _stock_status meta_key index bounds the scan.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -402,6 +530,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -413,6 +544,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
+
 		// Build image data.
 		foreach ( $attachment_ids as $position => $attachment_id ) {
 			$attachment_post = get_post( $attachment_id );
@@ -420,7 +556,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 			if ( ! is_array( $attachment ) ) {
 				continue;
 			}
@@ -465,7 +601,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return     string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
-		$tax    = get_taxonomy( $name );
+		$tax = get_taxonomy( $name );
+		if ( ! $tax ) {
+			return wc_attribute_taxonomy_slug( $name );
+		}
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
@@ -504,7 +643,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
 			$taxonomy = $attribute->get_taxonomy_object();
-			return $taxonomy->attribute_label;
+			return $taxonomy ? $taxonomy->attribute_label : $slug;
 		}
 
 		// Custom product attribute name.
@@ -591,8 +730,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
-						'slug'   => $name,
-						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+						'slug'   => rawurldecode( $name ),
+						'option' => $option_term && ! is_wp_error( $option_term ) ? rawurldecode( $option_term->name ) : rawurldecode( $attribute ),
 					);
 				} else {
 					$attributes[] = array(
@@ -642,6 +781,26 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function api_get_related_ids( $product, $context ) {
 		return array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) );
+	}
+
+	/**
+	 * Get related products for a specific product.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 *
+	 * @internal
+	 */
+	public function get_related_products( $request ) {
+		$product = $this->get_object( (int) $request['id'] );
+
+		if ( ! $product instanceof \WC_Product || 0 === $product->get_id() ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$related_ids = $this->api_get_related_ids( $product, 'view' );
+
+		return rest_ensure_response( array( 'related_ids' => $related_ids ) );
 	}
 
 	/**
@@ -925,31 +1084,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$product = $this->get_product_for_rest_request( $request );
 
-		// Type is the most important part here because we need to be using the correct class and methods.
-		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			$product = new $classname( $id );
-		} elseif ( isset( $request['id'] ) ) {
-			$product = wc_get_product( $id );
-		} else {
-			$product = new WC_Product_Simple();
-		}
-
-		if ( ProductType::VARIATION === $product->get_type() ) {
-			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
-				array(
-					'status' => 404,
-				)
-			);
+		if ( is_wp_error( $product ) ) {
+			return $product;
 		}
 
 		// Post title.
@@ -1262,7 +1400,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $request['button_text'] );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 
@@ -1282,11 +1420,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product );
 
 		/**
 		 * Filters an object before it is inserted via the REST API.
@@ -1514,7 +1648,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						$value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
@@ -2435,6 +2569,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'type' => 'string',
 			),
 			'sanitize_callback' => 'wp_parse_list',
+		);
+		$params['image_size']   = array(
+			'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

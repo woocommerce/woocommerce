@@ -3,6 +3,7 @@
  */
 import { createContext, useContext, useCallback } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 interface EditorContextType {
 	// Indicates whether in the editor context.
@@ -44,14 +45,13 @@ export const EditorProvider = ( {
 	currentPostId = 0,
 	previewData = {},
 	currentView = '',
-	isPreview = false,
 }: {
 	children: React.ReactNode;
 	currentPostId?: number | undefined;
 	previewData?: Record< string, unknown > | undefined;
 	currentView?: string | undefined;
-	isPreview?: boolean | undefined;
 } ) => {
+	const isPreviewMode = usePreviewMode();
 	const editingPostId = useSelect(
 		( select ): number =>
 			currentPostId
@@ -79,7 +79,7 @@ export const EditorProvider = ( {
 		currentView,
 		previewData,
 		getPreviewData,
-		isPreview,
+		isPreview: isPreviewMode,
 	};
 
 	return (

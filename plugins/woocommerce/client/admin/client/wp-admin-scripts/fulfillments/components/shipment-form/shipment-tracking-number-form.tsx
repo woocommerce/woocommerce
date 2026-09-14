@@ -1,51 +1,79 @@
 /**
  * External dependencies
  */
-
-import { Button, ExternalLink, TextControl } from '@wordpress/components';
+import { Button, ExternalLink, Flex, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
+import { speak } from '@wordpress/a11y';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ErrorLabel from '../user-interface/error-label';
-import { EditIcon } from '../../utils/icons';
+import { EditIcon, TruckIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
 import ShipmentProviders from '../../data/shipment-providers';
 import { useFulfillmentContext } from '../../context/fulfillment-context';
+import { SHIPMENT_OPTION_MANUAL_ENTRY } from '../../data/constants';
+
+interface TrackingNumberParsingPossibility {
+	url: string;
+	ambiguity_score: number;
+}
 
 interface TrackingNumberParsingResponse {
-	tracking_number_details: {
-		tracking_number: string;
-		tracking_url: string;
-		shipping_provider: string;
-	};
+	tracking_number: string;
+	tracking_url: string;
+	shipping_provider: string;
+	possibilities?: Record< string, TrackingNumberParsingPossibility >;
 }
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
 	const provider = ShipmentProviders.find( ( p ) => p.value === providerKey );
-	const icon = provider?.icon;
-	if ( ! provider || ! icon ) {
+	if ( ! provider ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-fulfillment-shipment-provider-icon">
-			<img src={ icon } alt={ provider.label } key={ providerKey } />
+			{ provider.icon ? (
+				<img
+					src={ provider.icon }
+					alt={ provider.label }
+					key={ providerKey }
+				/>
+			) : (
+				<TruckIcon />
+			) }
 		</div>
 	);
 };
 
 export default function ShipmentTrackingNumberForm() {
 	const [ trackingNumberTemp, setTrackingNumberTemp ] = useState( '' );
+	const [ isAmbiguousProvider, setIsAmbiguousProvider ] = useState( false );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const inputRef = useRef< HTMLInputElement >( null );
 	const { order } = useFulfillmentContext();
+	const trackingNumberErrorId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'tracking-number-error'
+	) as string;
+	const findingStatusId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'finding-status'
+	) as string;
+	const providerAmbiguityNoticeId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'provider-ambiguity-notice'
+	) as string;
 	const {
 		trackingNumber,
 		setTrackingNumber,
@@ -54,6 +82,7 @@ export default function ShipmentTrackingNumberForm() {
 		setProviderName,
 		shipmentProvider,
 		setShipmentProvider,
+		setSelectedOption,
 	} = useShipmentFormContext();
 
 	// Reset error when order changes
@@ -65,29 +94,71 @@ export default function ShipmentTrackingNumberForm() {
 		setError( null );
 		try {
 			setIsLoading( true );
-			const { tracking_number_details } =
+			const tracking_number_response =
 				await apiFetch< TrackingNumberParsingResponse >( {
-					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ order?.id }/fulfillments/lookup`,
+						{
+							tracking_number: trackingNumberTemp.trim(),
+						}
+					),
 					method: 'GET',
 				} );
-			if ( ! tracking_number_details.tracking_number ) {
-				setError(
-					__(
-						'No information found for this tracking number. Check the number or enter the details manually.',
-						'woocommerce'
-					)
+			if ( ! tracking_number_response.tracking_number ) {
+				const errorMessage = __(
+					'No information found for this tracking number. Check the number or enter the details manually.',
+					'woocommerce'
 				);
+				setError( errorMessage );
+				speak( errorMessage, 'assertive' );
 				return;
 			}
-			setTrackingNumber( tracking_number_details.tracking_number );
-			setTrackingUrl( tracking_number_details.tracking_url );
-			setShipmentProvider( tracking_number_details.shipping_provider );
+
+			// Reset the ambiguous provider state when a new tracking number is looked up
+			setIsAmbiguousProvider( false );
+
+			if (
+				tracking_number_response.possibilities &&
+				Object.keys( tracking_number_response.possibilities ).length > 1
+			) {
+				const possibilities = Object.values(
+					tracking_number_response.possibilities
+				);
+				// If one possibility has an ambiguity score of 85 or more, we assume it's a clear match. (test  123456789012:US)
+				// If all possibilities have an ambiguity score less than 85, show the ambiguous provider message. (test 1234567890123456:US)
+				// If multiple possibilities have ambiguity scores of 85 or more, we still consider it ambiguous. (test AB123456789US:US)
+				const hasAmbiguousPossibilities =
+					possibilities.every(
+						( possibility ) => possibility.ambiguity_score < 85
+					) ||
+					possibilities.filter(
+						( possibility ) => possibility.ambiguity_score >= 85
+					).length > 1;
+				if ( hasAmbiguousPossibilities ) {
+					setIsAmbiguousProvider( true );
+				}
+			}
+
+			setTrackingNumber( tracking_number_response.tracking_number );
+			setTrackingUrl( tracking_number_response.tracking_url );
+			setShipmentProvider( tracking_number_response.shipping_provider );
 			setProviderName( '' );
 			setEditMode( false );
-		} catch ( err ) {
-			setError(
-				__( 'Failed to fetch shipment information.', 'woocommerce' )
+
+			const successMessage = __(
+				'Tracking information found successfully.',
+				'woocommerce'
 			);
+			speak( successMessage, 'polite' );
+		} catch ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Tracking number lookup failed:', err );
+			const errorMessage = __(
+				'Failed to fetch shipment information.',
+				'woocommerce'
+			);
+			setError( errorMessage );
+			speak( errorMessage, 'assertive' );
 		} finally {
 			setIsLoading( false );
 		}
@@ -98,6 +169,17 @@ export default function ShipmentTrackingNumberForm() {
 			setEditMode( true );
 		}
 	}, [ trackingNumber ] );
+
+	useEffect( () => {
+		if ( editMode && inputRef.current ) {
+			inputRef.current.focus();
+		}
+	}, [ editMode ] );
+
+	const handleEditModeToggle = () => {
+		setEditMode( true );
+		setTrackingNumberTemp( trackingNumber );
+	};
 
 	return (
 		<>
@@ -111,6 +193,7 @@ export default function ShipmentTrackingNumberForm() {
 				<div className="woocommerce-fulfillment-input-container">
 					<div className="woocommerce-fulfillment-input-group">
 						<TextControl
+							ref={ inputRef }
 							type="text"
 							label={ __( 'Tracking Number', 'woocommerce' ) }
 							placeholder={ __(
@@ -120,6 +203,9 @@ export default function ShipmentTrackingNumberForm() {
 							value={ trackingNumberTemp }
 							onChange={ ( value ) => {
 								setTrackingNumberTemp( value );
+								if ( error ) {
+									setError( null );
+								}
 							} }
 							onKeyDown={ ( event ) => {
 								if (
@@ -127,23 +213,46 @@ export default function ShipmentTrackingNumberForm() {
 									! isLoading &&
 									! isEmpty( trackingNumberTemp.trim() )
 								) {
-									handleTrackingNumberLookup();
+									void handleTrackingNumberLookup();
 								}
 							} }
+							aria-invalid={ !! error }
+							aria-describedby={
+								error ? trackingNumberErrorId : undefined
+							}
+							autoComplete="off"
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
 						/>
 						<Button
 							variant="secondary"
-							text="Find info"
+							text={
+								isLoading
+									? __( 'Finding…', 'woocommerce' )
+									: __( 'Find info', 'woocommerce' )
+							}
 							disabled={
 								isLoading ||
 								isEmpty( trackingNumberTemp.trim() )
 							}
 							isBusy={ isLoading }
 							onClick={ handleTrackingNumberLookup }
+							aria-describedby={
+								isLoading ? findingStatusId : undefined
+							}
 							__next40pxDefaultSize
 						/>
+						{ isLoading && (
+							<span
+								id={ findingStatusId }
+								className="screen-reader-text"
+							>
+								{ __(
+									'Searching for tracking information…',
+									'woocommerce'
+								) }
+							</span>
+						) }
 					</div>
 				</div>
 			) : (
@@ -152,10 +261,7 @@ export default function ShipmentTrackingNumberForm() {
 						<h4>{ __( 'Tracking Number', 'woocommerce' ) }</h4>
 						<div className="woocommerce-fulfillment-input-group space-between">
 							<span
-								onClick={ () => {
-									setEditMode( true );
-									setTrackingNumberTemp( trackingNumber );
-								} }
+								onClick={ handleEditModeToggle }
 								role="button"
 								tabIndex={ 0 }
 								onKeyDown={ ( event ) => {
@@ -163,20 +269,24 @@ export default function ShipmentTrackingNumberForm() {
 										event.key === 'Enter' ||
 										event.key === ' '
 									) {
-										setEditMode( true );
-										setTrackingNumberTemp( trackingNumber );
+										handleEditModeToggle();
 									}
 								} }
 								style={ { cursor: 'pointer' } }
+								aria-label={ __(
+									'Edit tracking number',
+									'woocommerce'
+								) }
 							>
 								{ trackingNumber }
 							</span>
 							<Button
 								size="small"
-								onClick={ () => {
-									setEditMode( true );
-									setTrackingNumberTemp( trackingNumber );
-								} }
+								aria-label={ __(
+									'Edit tracking number',
+									'woocommerce'
+								) }
+								onClick={ handleEditModeToggle }
 							>
 								<EditIcon />
 							</Button>
@@ -196,6 +306,44 @@ export default function ShipmentTrackingNumberForm() {
 								</span>
 							</div>
 						</div>
+						{ isAmbiguousProvider && (
+							<Flex direction={ 'column' } gap={ 0 }>
+								<p
+									className="woocommerce-fulfillment-description"
+									id={ providerAmbiguityNoticeId }
+								>
+									{ __(
+										'Not your provider?',
+										'woocommerce'
+									) }
+								</p>
+								<Button
+									variant="link"
+									size="small"
+									className="woocommerce-fulfillment-description-button"
+									onClick={ () => {
+										setSelectedOption(
+											SHIPMENT_OPTION_MANUAL_ENTRY
+										);
+										speak(
+											__(
+												'Switched to manual provider selection.',
+												'woocommerce'
+											),
+											'polite'
+										);
+									} }
+									aria-describedby={
+										providerAmbiguityNoticeId
+									}
+								>
+									{ __(
+										'Select your provider manually',
+										'woocommerce'
+									) }
+								</Button>
+							</Flex>
+						) }
 					</div>
 					<div className="woocommerce-fulfillment-input-container">
 						<h4>{ __( 'Tracking URL', 'woocommerce' ) }</h4>
@@ -215,7 +363,11 @@ export default function ShipmentTrackingNumberForm() {
 					</div>
 				</>
 			) }
-			{ error && <ErrorLabel error={ error } /> }
+			{ error && (
+				<div id={ trackingNumberErrorId } role="alert">
+					<ErrorLabel error={ error } />
+				</div>
+			) }
 		</>
 	);
 }

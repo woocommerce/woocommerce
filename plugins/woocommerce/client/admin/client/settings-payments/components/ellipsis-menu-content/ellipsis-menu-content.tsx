@@ -51,6 +51,10 @@ interface EllipsisMenuContentProps {
 	 * Indicates if the payment gateway is enabled for payment processing. Optional.
 	 */
 	isEnabled?: boolean;
+	/**
+	 * Indicates if the onboarding can be reset. Optional.
+	 */
+	canResetOnboarding?: boolean;
 }
 
 /**
@@ -67,6 +71,7 @@ export const EllipsisMenuContent = ( {
 	canResetAccount = false,
 	setResetAccountModalVisible = () => {},
 	isEnabled = false,
+	canResetOnboarding = false,
 }: EllipsisMenuContentProps ) => {
 	const { deactivatePlugin } = useDispatch( pluginsStore );
 	const [ isDeactivating, setIsDeactivating ] = useState( false );
@@ -103,7 +108,9 @@ export const EllipsisMenuContent = ( {
 						'woocommerce'
 					)
 				);
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsDeactivating( false );
 				onToggle();
 			} )
@@ -149,7 +156,9 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsDisabling( false );
 				onToggle();
 			} )
@@ -187,7 +196,9 @@ export const EllipsisMenuContent = ( {
 
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
 			.then( () => {
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 				setIsHidingSuggestion( false );
 				onToggle();
 			} )
@@ -275,7 +286,7 @@ export const EllipsisMenuContent = ( {
 					</Button>
 				</div>
 			) }
-			{ canResetAccount && (
+			{ ( canResetAccount || canResetOnboarding ) && (
 				<div
 					className="woocommerce-ellipsis-menu__content__item"
 					key="reset-account"
@@ -287,6 +298,7 @@ export const EllipsisMenuContent = ( {
 								provider,
 								{
 									link_type: 'reset_onboarding',
+									with_account: canResetAccount, // Indicates if the reset is for an account or just for onboarding.
 								}
 							);
 							setResetAccountModalVisible( true );
@@ -294,7 +306,9 @@ export const EllipsisMenuContent = ( {
 						} }
 						className={ 'components-button__danger' }
 					>
-						{ __( 'Reset account', 'woocommerce' ) }
+						{ canResetAccount
+							? __( 'Reset account', 'woocommerce' )
+							: __( 'Reset onboarding', 'woocommerce' ) }
 					</Button>
 				</div>
 			) }
@@ -316,8 +330,12 @@ export const EllipsisMenuContent = ( {
 							deactivateProviderExtension();
 						} }
 						isBusy={ isDeactivating }
-						// If the plugin file is not available, the button should be disabled.
-						disabled={ ! pluginFile || isDeactivating }
+						// If the plugin file is not available, or it's a bundled gateway, the button should be disabled.
+						disabled={
+							! pluginFile ||
+							pluginFile === 'woocommerce/woocommerce' ||
+							isDeactivating
+						}
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>

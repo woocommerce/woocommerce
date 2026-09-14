@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -63,6 +64,7 @@ class QuantitySelector extends AbstractBlock {
 
 		if ( AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ) {
 			$product = $previous_product;
+
 			return '';
 		}
 
@@ -84,10 +86,13 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_html = ob_get_clean();
 
-		$product_name = $product->get_name();
-
-		$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
-		$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
+		// If the quantity input is hidden, don't render the stepper buttons and styles.
+		$has_visible_quantity_input = AddToCartWithOptionsUtils::has_visible_quantity_input( $product_html );
+		if ( $has_visible_quantity_input ) {
+			$product_name = $product->get_name();
+			$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
+			$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
+		}
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
@@ -97,18 +102,30 @@ class QuantitySelector extends AbstractBlock {
 				array(
 					'wp-block-add-to-cart-with-options-quantity-selector wc-block-add-to-cart-with-options__quantity-selector',
 					esc_attr( $classes_and_styles['classes'] ),
+					$has_visible_quantity_input ? '' : 'wc-block-add-to-cart-with-options__quantity-selector--hidden',
 				)
 			)
 		);
 
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'class' => $classes,
-				'style' => esc_attr( $classes_and_styles['styles'] ),
-			)
+		$wrapper_attributes = array(
+			'class' => $classes,
+			'style' => esc_attr( $classes_and_styles['styles'] ),
 		);
+		$input_attributes   = array();
 
-		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
+		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
+
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+
+			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
+			$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
+			$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
+			$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
+			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
+		}
+
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
 
 		$product = $previous_product;
 

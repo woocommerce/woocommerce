@@ -170,7 +170,7 @@ body {
 	font-family: $headings;
 
 	del {
-		opacity: 0.5;
+		opacity: 0.7;
 		display: inline-block;
 	}
 
@@ -1313,7 +1313,7 @@ a.reset_variations {
 	input[type="radio"].shipping_method {
 		display: none;
 
-		& + label {
+		+ label {
 
 			&::before {
 				content: "";
@@ -1679,7 +1679,7 @@ a.reset_variations {
 	input[type="radio"].shipping_method {
 		display: none;
 
-		& + label {
+		+ label {
 
 			&::before {
 				content: "";
@@ -1833,7 +1833,7 @@ a.reset_variations {
 	input.input-radio[name="payment_method"] {
 		display: none;
 
-		& + label {
+		+ label {
 			font-family: $headings;
 
 			&::before {
@@ -2301,10 +2301,7 @@ a.reset_variations {
 		}
 
 		.woocommerce-ResetPassword {
-
-			.woocommerce-form-row--first {
-				float: none;
-			}
+			width: 100%;
 		}
 	}
 

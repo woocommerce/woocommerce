@@ -14,13 +14,13 @@ You are an extension developer, and to allow users to interact with your extensi
 
 You may use the `IntegrationRegistry` to register an `IntegrationInterface` this will be a class that will handle the enqueuing of scripts, styles, and data. You may have a different `IntegrationInterface` for each block (Mini-Cart, Cart and Checkout), or you may use the same one, it is entirely dependent on your use case.
 
-You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationRegistry.php) to the callback.
+You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Integrations/IntegrationRegistry.php) to the callback.
 
 You may then use the `register` method on this object to register your `IntegrationInterface`.
 
 ## `IntegrationInterface` methods
 
-To begin, we'll need to create our integration class, our `IntegrationInterface`. This will be a class that implements WooCommerce Blocks' interface named [`IntegrationInterface`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationInterface.php).
+To begin, we'll need to create our integration class, our `IntegrationInterface`. This will be a class that implements WooCommerce Blocks' interface named [`IntegrationInterface`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Integrations/IntegrationInterface.php).
 
 In this section, we will step through the interface's members and discuss what they are used for.
 
@@ -193,6 +193,14 @@ Now, when we load a page containing either block, we should see the scripts we r
 
 We associated some data with the extension in the `get_script_data` method of our interface, we need to know how to get this!
 
-In the `@woocommerce/settings` package there is a method you can import called `getSetting`. This method accepts a string. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
+On the client, read it with `getSetting` from the `wc.wcSettings` global, which the `wc-settings` script provides. Make sure your script lists `wc-settings` as a dependency and loads in the footer, as the example above does with the last `wp_register_script` argument; WooCommerce moves header scripts that depend on `wc-settings` to the footer and logs a console warning. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
 
-The value returned here is a plain old JavaScript object, keyed by the keys of the array returned by `get_script_data`, the values will serialized.
+```js
+const { getSetting } = window.wc.wcSettings;
+
+const data = getSetting( 'woocommerce-example-plugin_data', {} );
+```
+
+If you build with [`@woocommerce/dependency-extraction-webpack-plugin`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin), you can write `import { getSetting } from '@woocommerce/settings';` instead. The build maps that import to the same global and adds `wc-settings` to your script dependencies for you. `@woocommerce/settings` is an alias handled by the build, not the npm package of that name, which is deprecated.
+
+The value returned here is a plain old JavaScript object, keyed by the keys of the array returned by `get_script_data`, the values will be serialized.

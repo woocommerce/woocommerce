@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { noticeContexts } from '@woocommerce/base-context';
+import { noticeContexts, useStoreCart } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
-import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import { paymentStore } from '@woocommerce/block-data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import clsx from 'clsx';
 
@@ -18,16 +18,13 @@ import { getExpressPaymentMethodsState } from './express-payment-methods-helpers
 
 const CartExpressPayment = () => {
 	const {
-		isCalculating,
 		availableExpressPaymentMethods = {},
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
 		registeredExpressPaymentMethods = {},
 	} = useSelect( ( select ) => {
-		const checkout = select( checkoutStore );
 		const payment = select( paymentStore );
 		return {
-			isCalculating: checkout.isCalculating(),
 			availableExpressPaymentMethods:
 				payment.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
@@ -38,6 +35,7 @@ const CartExpressPayment = () => {
 				payment.getRegisteredExpressPaymentMethods(),
 		};
 	}, [] );
+	const { hasPendingItemsOperations } = useStoreCart();
 
 	const {
 		hasRegisteredExpressPaymentMethods,
@@ -50,12 +48,34 @@ const CartExpressPayment = () => {
 		registeredExpressPaymentMethods,
 	} );
 
+	// We show the skeleton when
+	// the express payment method is not active (because they trigger recalculations) and
+	// cart items are being added, updated, or deleted, because it can result in different express payment methods
+	// or when the express payment methods are not initialized
+	const showSkeleton =
+		! isExpressPaymentMethodActive &&
+		( hasPendingItemsOperations ||
+			hasRegisteredNotInitializedExpressPaymentMethods );
+
 	if (
 		! hasRegisteredExpressPaymentMethods ||
 		hasNoValidRegisteredExpressPaymentMethods
 	) {
 		return null;
 	}
+	/*
+	 * Define the elements used for the Express Payments markup.
+	 *
+	 * When multiple express payment options are available, this will use an
+	 * unordered list to display each option.
+	 *
+	 * When only one express payment option is available, this will use a
+	 * non-semantic DIV for both the wrapper and the individual items. This
+	 * is to prevent accessibility issues caused by a list of one (which isn't
+	 * a list).
+	 */
+	const ExpressPayWrapper = availableExpressPaymentsCount > 1 ? 'ul' : 'div';
+	const ExpressPayItem = availableExpressPaymentsCount > 1 ? 'li' : 'div';
 
 	return (
 		<>
@@ -70,22 +90,24 @@ const CartExpressPayment = () => {
 				) }
 				aria-disabled={ isExpressPaymentMethodActive }
 				aria-live="polite"
-				aria-label={ __(
-					'Processing express checkout',
-					'woocommerce'
-				) }
+				{ ...( isExpressPaymentMethodActive && {
+					'aria-busy': true,
+					'aria-label': __(
+						'Processing express checkout',
+						'woocommerce'
+					),
+				} ) }
 			>
 				<div className="wc-block-components-express-payment__content">
 					<StoreNoticesContainer
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
-					{ isCalculating ||
-					hasRegisteredNotInitializedExpressPaymentMethods ? (
-						<ul className="wc-block-components-express-payment__event-buttons">
+					{ showSkeleton ? (
+						<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,
 							} ).map( ( _, index ) => (
-								<li key={ index }>
+								<ExpressPayItem key={ index }>
 									<Skeleton
 										height="48px"
 										ariaMessage={ __(
@@ -93,9 +115,9 @@ const CartExpressPayment = () => {
 											'woocommerce'
 										) }
 									/>
-								</li>
+								</ExpressPayItem>
 							) ) }
-						</ul>
+						</ExpressPayWrapper>
 					) : (
 						<ExpressPaymentMethods />
 					) }

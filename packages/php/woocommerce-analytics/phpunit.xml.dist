@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+	bootstrap="tests/php/bootstrap.php"
+	cacheResultFile=".phpunit.cache/test-results"
+	colors="true"
+	executionOrder="depends"
+	beStrictAboutOutputDuringTests="true"
+	failOnRisky="true"
+	failOnWarning="true"
+>
+	<testsuites>
+		<testsuite name="main">
+			<directory suffix="Test.php">tests/php</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

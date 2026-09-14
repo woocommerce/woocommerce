@@ -7,12 +7,12 @@ import type { BlockAttributes } from '@wordpress/blocks';
  * Internal dependencies
  */
 import formStepAttributes from '../../form-step/attributes';
-import { DEFAULT_TITLE, DEFAULT_DESCRIPTION } from './constants';
+import { DEFAULT_TITLE } from './constants';
 
 const attributes: BlockAttributes = {
 	...formStepAttributes( {
 		defaultTitle: DEFAULT_TITLE,
-		defaultDescription: DEFAULT_DESCRIPTION,
+		defaultDescription: '',
 	} ),
 	className: {
 		type: 'string',

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { BlockAttributes } from '@wordpress/blocks';
+import { BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 
@@ -14,6 +14,7 @@ import {
 } from '../../../../../../../tests/integration/helpers/integration-test-editor';
 import '../';
 import '../../checkbox-list';
+import '../../chips';
 
 // Mock getSetting to return the taxonomy data we need
 jest.mock( '@woocommerce/settings', () => {
@@ -25,15 +26,17 @@ jest.mock( '@woocommerce/settings', () => {
 				return [
 					{
 						name: 'product_cat',
-						label: 'Product Categories',
-						labels: { singular_name: 'Category' },
+						label: 'Category',
 					},
 					{
 						name: 'product_tag',
-						label: 'Product Tags',
-						labels: { singular_name: 'Tag' },
+						label: 'Tag',
 					},
 				];
+			}
+			if ( key === 'sortableTaxonomies' ) {
+				// Only product_cat supports custom ordering by default
+				return [ 'product_cat' ];
 			}
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
@@ -47,7 +50,7 @@ jest.mock( '@woocommerce/settings', () => {
 } );
 
 // Mock WooCommerce schema selectors to prevent namespace errors
-jest.mock( '../../../../../data/schema/selectors', () => ( {
+jest.mock( '@woocommerce/block-data/schema/selectors', () => ( {
 	getRoute: jest.fn( () => null ),
 	getRoutes: jest.fn( () => ( {
 		'/wc/store/v1': {},
@@ -99,27 +102,29 @@ describe( 'Taxonomy Filter block', () => {
 					/Please select a taxonomy to use this filter!/i
 				)
 			).toBeInTheDocument();
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// Should display the taxonomy label as heading
-			expect(
-				block.getByText( /Product Categories/i )
-			).toBeInTheDocument();
+			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
 		} );
 	} );
 
 	describe( 'Inspector controls', () => {
 		beforeEach( async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 		} );
 
 		test( 'should show product counts toggle', () => {
@@ -132,10 +137,10 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should allow toggling product counts', async () => {
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// expect the list doesn't have count indicators initially
@@ -161,7 +166,7 @@ describe( 'Taxonomy Filter block', () => {
 	describe( 'Advanced controls', () => {
 		beforeEach( async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 		} );
 
 		test( 'should show sort order control when enabled', () => {
@@ -173,6 +178,10 @@ describe( 'Taxonomy Filter block', () => {
 
 			expect( sortOrderSelect ).toBeInTheDocument();
 			expect( sortOrderSelect ).toHaveValue( 'count-desc' );
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should allow changing sort order when enabled', () => {
@@ -218,20 +227,18 @@ describe( 'Taxonomy Filter block', () => {
 			await setup( {
 				taxonomy: 'product_cat',
 				showCounts: true,
-				displayStyle: 'dropdown',
+				displayStyle: 'woocommerce/product-filter-chips',
 				sortOrder: 'name-asc',
 				hideEmpty: false,
 			} );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// Should display the heading
-			expect(
-				block.getByText( /Product Categories/i )
-			).toBeInTheDocument();
+			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
 
 			// Check that all controls reflect the set attributes
 			expect(
@@ -254,19 +261,72 @@ describe( 'Taxonomy Filter block', () => {
 				taxonomy: 'product_tag',
 				showCounts: true,
 			} );
-			await selectBlock( /Block: Product Tags Filter/i );
+			await selectBlock( /Block: Tag Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Tags Filter/i )
+				screen.getByLabelText( /Block: Tag Filter/i )
 			);
 
 			// Should display the taxonomy label as heading
-			expect( block.getByText( /Product Tags/i ) ).toBeInTheDocument();
+			expect( block.getByText( /Tag/i ) ).toBeInTheDocument();
 
 			// Should show count indicators since showCounts is true
 			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
 				0
 			);
+		} );
+	} );
+
+	describe( 'Menu order option visibility', () => {
+		test( 'should show Menu order option for sortable taxonomies (product_cat)', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should be available for product_cat
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).toContain( 'Menu order' );
+		} );
+
+		test( 'should not show Menu order option for non-sortable taxonomies (product_tag)', async () => {
+			await setup( { taxonomy: 'product_tag' } );
+			await selectBlock( /Block: Tag Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should NOT be available for product_tag
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).not.toContain( 'Menu order' );
+		} );
+
+		test( 'should allow selecting Menu order for sortable taxonomies', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			fireEvent.change( sortOrderSelect, {
+				target: { value: 'menu_order-asc' },
+			} );
+
+			expect( sortOrderSelect ).toHaveValue( 'menu_order-asc' );
 		} );
 	} );
 } );

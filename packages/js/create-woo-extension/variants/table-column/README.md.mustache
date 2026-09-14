@@ -1,0 +1,50 @@
+# {{title}}
+
+{{#description}}
+{{description}}
+{{/description}}
+
+This is a WooCommerce extension that adds custom columns to WooCommerce Analytics report tables.
+
+## Development
+
+### Getting started
+
+1. `npm install` to install dependencies
+2. `npm start` to start the development server
+3. `npm run build` to build the production version
+
+### File Structure
+
+- `src/index.js` - Main JavaScript file that filters the report table data
+- `includes/Admin/Setup.php` - PHP class that handles script registration and REST API schema modifications
+- `{{slug}}.php` - Main plugin file
+
+## Features
+
+- Adds custom columns to the Products report table
+- Demonstrates how to extend the REST API schema for reports
+- Shows how to add extended product attributes
+- Example of using the `woocommerce_admin_report_table` filter
+
+## How It Works
+
+This extension demonstrates adding custom columns to report tables in two steps:
+
+1. **Backend (PHP)**: Extends the REST API schema to include additional product data (in this case, `average_rating`)
+2. **Frontend (JavaScript)**: Uses the `woocommerce_admin_report_table` filter to add columns to the report table UI
+
+## Customization
+
+To customize this extension for your needs:
+
+1. In `includes/Admin/Setup.php`:
+   - Add your custom fields to the REST API schema
+   - Add extended attributes to make product data available
+2. In `src/index.js`:
+   - Modify the filter to add your custom columns
+   - Update the column headers and data display
+
+## Learn More
+
+For more information about WooCommerce Analytics and report customization, see the [WooCommerce documentation](https://woocommerce.com/document/woocommerce-analytics/).

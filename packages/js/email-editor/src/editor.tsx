@@ -1,15 +1,17 @@
 /**
  * External dependencies
  */
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select, dispatch } from '@wordpress/data';
 import {
 	StrictMode,
 	createRoot,
 	useEffect,
-	useLayoutEffect,
 	useState,
+	useMemo,
 } from '@wordpress/element';
-import { applyFilters } from '@wordpress/hooks';
+import { addFilter, applyFilters, hasFilter } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
+import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
 /**
@@ -19,7 +21,6 @@ import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName } from './store';
-import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -27,44 +28,69 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
-import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
+import { initHacks } from './hacks';
+import {
+	useContentValidation,
+	useFilterEditorContentStylesheets,
+	useNoticeOverrides,
+	useRemoveSavingFailedNotices,
+} from './hooks';
+import { cleanupConfigurationChanges } from './config-tools';
+import { getEditorConfigFromWindow } from './store/settings';
+import { EmailEditorConfig } from './store/types';
 
 function Editor( {
 	postId,
 	postType,
 	isPreview = false,
+	contentRef = null,
+	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
-		( select ) => ( {
-			settings: select( storeName ).getInitialEditorSettings(),
+		( sel ) => ( {
+			settings: sel( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
 
 	useContentValidation();
 	useRemoveSavingFailedNotices();
+	useNoticeOverrides();
 
 	const { setEmailPost } = useDispatch( storeName );
 	useEffect( () => {
-		setEmailPost( postId, postType );
+		void setEmailPost( postId, postType );
 		setIsInitialized( true );
 	}, [ postId, postType, setEmailPost ] );
+
+	const stylesContentRef = useFilterEditorContentStylesheets();
+	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
+
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = useMemo(
+		() => ( {
+			...settings,
+			allowedBlockTypes: getAllowedBlockNames(),
+			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
+		} ),
+		[ settings, isPreview ]
+	);
 
 	if ( ! isInitialized ) {
 		return null;
 	}
-
-	// Set allowed blockTypes and isPreviewMode to the editor settings.
-	const editorSettings = {
-		...settings,
-		allowedBlockTypes: getAllowedBlockNames(),
-		isPreviewMode: isPreview,
-	};
 
 	return (
 		<StrictMode>
@@ -72,21 +98,48 @@ function Editor( {
 				postId={ postId }
 				postType={ postType }
 				settings={ editorSettings }
+				contentRef={ mergedContentRef }
+				customSavePanel={ customSavePanel }
+				customSaveButton={ customSaveButton }
 			/>
 		</StrictMode>
 	);
 }
 
+/**
+ * WordPress 7.0 introduces Real-time Collaboration. The email editor does not
+ * yet fully support it, so we temporarily opt out by clearing sync providers.
+ */
+function disableCollab() {
+	if (
+		hasFilter( 'sync.providers', 'woocommerce/email-editor/disable-collab' )
+	) {
+		return;
+	}
+
+	if ( window._wpCollaborationEnabled ) {
+		window._wpCollaborationEnabled = false;
+	}
+
+	addFilter(
+		'sync.providers',
+		'woocommerce/email-editor/disable-collab',
+		() => [],
+		1000
+	);
+}
+
 function onInit() {
+	disableCollab();
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
 	createStore();
 	initContentValidationMiddleware();
-	initializeLayout();
 	initBlocks();
-	initHooks();
+	initHacks();
 	initTextHooks();
+	initializeLayout();
 }
 
 export function initialize( elementId: string ) {
@@ -109,7 +162,13 @@ export function initialize( elementId: string ) {
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
+
 	onInit();
+
+	// Set configuration to store from window object for backward compatibility
+	const editorConfig = getEditorConfigFromWindow();
+	void dispatch( storeName ).setEditorConfig( editorConfig );
+
 	const root = createRoot( container );
 	root.render(
 		<WrappedEditor
@@ -123,17 +182,40 @@ export function ExperimentalEmailEditor( {
 	postId,
 	postType,
 	isPreview = false,
+	contentRef = null,
+	config,
+	customSavePanel,
+	customSaveButton,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	config?: EmailEditorConfig;
+	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useLayoutEffect( () => {
+	useEffect( () => {
+		const backupEditorSettings = select( editorStore ).getEditorSettings();
+		// Set configuration to store from window object for backward compatibility
+		const editorConfig = config || getEditorConfigFromWindow();
 		onInit();
+
+		void dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
-	}, [] );
+		// Cleanup global editor settings
+		return () => {
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				void dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
+		};
+	}, [ config ] );
 
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',
@@ -149,6 +231,9 @@ export function ExperimentalEmailEditor( {
 			postId={ postId }
 			postType={ postType }
 			isPreview={ isPreview }
+			contentRef={ contentRef }
+			customSavePanel={ customSavePanel }
+			customSaveButton={ customSaveButton }
 		/>
 	);
 }

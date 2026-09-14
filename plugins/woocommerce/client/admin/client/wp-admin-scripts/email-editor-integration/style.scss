@@ -36,3 +36,308 @@
 .editor-post-excerpt__dropdown button {
 	display: none;
 }
+
+/*
+	Review drawer (RSM-143). Hand-rolled right-side drawer rendered via
+	`createPortal` to `document.body` (the `<PluginArea>` wrapper is
+	`display: none`, which would trap a fixed-position panel). Chrome,
+	tag pills, and typography are all styled here — no `@wordpress/ui`
+	dependency.
+ */
+
+/* ---------- Chrome (overlay + panel + header + body + footer) ---------- */
+
+.woocommerce-review-drawer__overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 100000;
+}
+
+.woocommerce-review-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	pointer-events: none;
+}
+
+.woocommerce-review-drawer__panel {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 480px;
+	max-width: 100vw;
+	background: #fff;
+	box-shadow: -2px 0 16px rgba(0, 0, 0, 0.12);
+	display: flex;
+	flex-direction: column;
+	pointer-events: auto;
+	transform: translateX(100%);
+	transition: transform 240ms cubic-bezier(0.08, 0.52, 0.52, 1);
+
+	&.is-open {
+		transform: translateX(0);
+	}
+
+	&:focus-visible {
+		outline: none;
+	}
+}
+
+.woocommerce-review-drawer__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.woocommerce-review-drawer__h-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.woocommerce-review-drawer__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: #1d2327;
+}
+
+.woocommerce-review-drawer__subtitle {
+	margin: 0;
+	font-size: 12px;
+	color: #50575e;
+	line-height: 1.4;
+}
+
+.woocommerce-review-drawer__close {
+	flex: 0 0 auto;
+}
+
+.woocommerce-review-drawer__body {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding: 0;
+}
+
+.woocommerce-review-drawer__footer {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 20px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.woocommerce-review-drawer__foot-note {
+	margin: 0;
+	flex: 1 1 auto;
+	font-size: 12px;
+	color: #6b7280;
+}
+
+.woocommerce-review-drawer__footer-actions {
+	display: flex;
+	gap: 8px;
+	flex-shrink: 0;
+
+	/*
+		Keep Cancel / Apply at their natural width so the label never
+		wraps onto two lines when the count grows (e.g. "Apply (11)").
+		The footer note absorbs the shrinkage instead.
+	*/
+	> button {
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+}
+
+/* ---------- Body (status, groups, items, diff, choice grid, tags) ---------- */
+
+.woocommerce-review-drawer__status {
+	padding: 24px 20px;
+	color: #50575e;
+}
+
+.woocommerce-review-drawer__group {
+	padding: 12px 0;
+	border-bottom: 1px solid #f0f0f1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.woocommerce-review-drawer__group-h {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 4px 20px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #50575e;
+}
+
+.woocommerce-review-drawer__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	display: inline-block;
+	flex: 0 0 auto;
+}
+
+.woocommerce-review-drawer__dot--warning {
+	background: #b26200;
+}
+
+.woocommerce-review-drawer__dot--brand {
+	background: var(--wp-admin-theme-color, #3858e9);
+}
+
+.woocommerce-review-drawer__item {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 20px;
+	border-top: 1px solid #f0f0f1;
+
+	&:first-of-type {
+		border-top: 0;
+	}
+}
+
+.woocommerce-review-drawer__item-h {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.woocommerce-review-drawer__item-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.3;
+	color: #1d2327;
+}
+
+.woocommerce-review-drawer__item-sub {
+	margin: 0;
+	font-size: 13px;
+	color: #4b5563;
+	line-height: 1.4;
+}
+
+.woocommerce-review-drawer__tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 9999px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1.4;
+	white-space: nowrap;
+	flex: 0 0 auto;
+}
+
+.woocommerce-review-drawer__tag--conflict {
+	background: #fef3c7;
+	color: #92400e;
+}
+
+.woocommerce-review-drawer__tag--apply-core {
+	background: #dbeafe;
+	color: #1e40af;
+}
+
+.woocommerce-review-drawer__tag--keep-yours {
+	background: #f3f4f6;
+	color: #374151;
+}
+
+.woocommerce-review-drawer__diff {
+	border: 1px solid #f0f0f1;
+	border-radius: 2px;
+	overflow: hidden;
+	font-family: Menlo, Consolas, monospace;
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+.woocommerce-review-drawer__diff-row {
+	padding: 6px 10px;
+}
+
+.woocommerce-review-drawer__diff-row--minus {
+	background: #fff6f5;
+	color: #6b1b1b;
+
+	&::before {
+		content: "−  ";
+		color: #cc1818;
+	}
+}
+
+.woocommerce-review-drawer__diff-row--plus {
+	background: #ebffed;
+	color: #003814;
+
+	&::before {
+		content: "+  ";
+		color: #008030;
+	}
+}
+
+.woocommerce-review-drawer__choice {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 6px;
+	margin-top: 4px;
+}
+
+.woocommerce-review-drawer__choice-card {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+	padding: 10px 12px;
+	text-align: left;
+	cursor: pointer;
+	display: grid;
+	gap: 2px;
+	font: inherit;
+	color: inherit;
+
+	&:hover {
+		border-color: #999;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+		outline-offset: 1px;
+	}
+
+	&.is-active {
+		background: #f5f8ff;
+		border-color: var(--wp-admin-theme-color, #3858e9);
+		box-shadow: inset 0 0 0 1px var(--wp-admin-theme-color, #3858e9);
+	}
+}
+
+.woocommerce-review-drawer__choice-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.woocommerce-review-drawer__choice-hint {
+	font-size: 11px;
+	color: #50575e;
+}

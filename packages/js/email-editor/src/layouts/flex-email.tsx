@@ -3,8 +3,11 @@
  */
 import clsx from 'clsx';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
-import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
+import {
+	getBlockSupport,
+	hasBlockSupport,
+	getBlockTypes,
+} from '@wordpress/blocks';
 import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { justifyLeft, justifyCenter, justifyRight } from '@wordpress/icons';
@@ -23,6 +26,11 @@ import {
 	JustifyContentControl,
 } from '@wordpress/block-editor';
 
+/**
+ * Internal dependencies
+ */
+import { addFilterForEmail, updateBlockSettings } from '../config-tools';
+
 const layoutBlockSupportKey = '__experimentalEmailFlexLayout';
 
 function hasLayoutBlockSupport( blockName: string ) {
@@ -39,17 +47,17 @@ function JustificationControls( {
 		{
 			value: 'left',
 			icon: justifyLeft,
-			label: __( 'Justify items left', 'woocommerce' ),
+			label: __( 'Justify items left', __i18n_text_domain__ ),
 		},
 		{
 			value: 'center',
 			icon: justifyCenter,
-			label: __( 'Justify items center', 'woocommerce' ),
+			label: __( 'Justify items center', __i18n_text_domain__ ),
 		},
 		{
 			value: 'right',
 			icon: justifyRight,
-			label: __( 'Justify items right', 'woocommerce' ),
+			label: __( 'Justify items right', __i18n_text_domain__ ),
 		},
 	];
 
@@ -72,7 +80,7 @@ function JustificationControls( {
 	return (
 		<ToggleGroupControl
 			__nextHasNoMarginBottom
-			label={ __( 'Justification', 'woocommerce' ) }
+			label={ __( 'Justification', __i18n_text_domain__ ) }
 			value={ justificationValue }
 			onChange={ onChange }
 			className="block-editor-hooks__flex-layout-justification-controls"
@@ -125,7 +133,7 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Layout', 'woocommerce' ) }
+					label={ __( 'Layout', __i18n_text_domain__ ) }
 					resetAll={ resetAll }
 				>
 					<ToolsPanelItem
@@ -134,7 +142,7 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 						hasValue={ () =>
 							attributes.layout?.justifyContent || false
 						}
-						label={ __( 'Justification', 'woocommerce' ) }
+						label={ __( 'Justification', __i18n_text_domain__ ) }
 					>
 						<Flex>
 							<FlexItem>
@@ -161,24 +169,21 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 
 /**
  * Filters registered block settings, extending attributes to include `layout`.
- *
- * @param {Object} settings Original block settings.
- *
- * @return {Object} Filtered block settings.
  */
-export function addAttribute( settings: Block ) {
-	if ( hasLayoutBlockSupport( settings.name ) ) {
-		return {
-			...settings,
-			attributes: {
-				...settings.attributes,
-				layout: {
-					type: 'object',
+export function addAttribute() {
+	getBlockTypes().forEach( ( blockType: Block ) => {
+		if ( hasLayoutBlockSupport( blockType.name ) ) {
+			updateBlockSettings( blockType.name, ( current ) => ( {
+				...current,
+				attributes: {
+					...current.attributes,
+					layout: {
+						type: 'object',
+					},
 				},
-			},
-		};
-	}
-	return settings;
+			} ) );
+		}
+	} );
 }
 
 /**
@@ -241,17 +246,13 @@ export const withLayoutStyles = createHigherOrderComponent(
 );
 
 export function initializeLayout() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/layout/addAttribute',
-		addAttribute
-	);
-	addFilter(
+	addAttribute();
+	addFilterForEmail(
 		'editor.BlockListBlock',
 		'woocommerce-email-editor/with-layout-styles',
 		withLayoutStyles
 	);
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/with-inspector-controls',
 		withLayoutControls

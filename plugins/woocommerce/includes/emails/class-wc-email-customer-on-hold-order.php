@@ -30,6 +30,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			$this->id             = 'customer_on_hold_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Order on-hold', 'woocommerce' );
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-on-hold-order.php';
 			$this->template_plain = 'emails/plain/customer-on-hold-order.php';
 			$this->placeholders   = array(
@@ -49,6 +50,11 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Send an email to customers notifying them when their order has been placed on hold', 'woocommerce' )
 				: __( 'This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Cancelled or Failed order status.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order on hold', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order is on hold while the next required step is completed.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -58,6 +64,9 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
+			if ( $this->block_email_editor_enabled ) {
+				return __( 'Your order from {site_title} is on hold', 'woocommerce' );
+			}
 			return __( 'Your {site_title} order has been received!', 'woocommerce' );
 		}
 
@@ -68,6 +77,9 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
+			if ( $this->block_email_editor_enabled ) {
+				return __( 'Your order is on hold', 'woocommerce' );
+			}
 			return __( 'Thank you for your order', 'woocommerce' );
 		}
 
@@ -91,9 +103,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}

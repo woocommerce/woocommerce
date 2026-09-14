@@ -50,6 +50,7 @@ class CartItemSchema extends ItemSchema {
 		 * @param string $cart_item_key     Cart item key.
 		 */
 		$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $product->get_permalink(), $cart_item, $cart_item['key'] );
+		$price_decimals    = wc_get_price_decimals();
 
 		return [
 			'key'                  => $cart_item['key'],
@@ -72,10 +73,10 @@ class CartItemSchema extends ItemSchema {
 			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
 			'totals'               => (object) $this->prepare_currency_response(
 				[
-					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
-					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], wc_get_price_decimals() ),
-					'line_total'        => $this->prepare_money_response( $cart_item['line_total'], wc_get_price_decimals() ),
-					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], wc_get_price_decimals() ),
+					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], $price_decimals ),
+					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], $price_decimals ),
+					'line_total'        => $this->prepare_money_response( $cart_item['line_total'], $price_decimals ),
+					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], $price_decimals ),
 				]
 			),
 			'catalog_visibility'   => $product->get_catalog_visibility(),
@@ -122,13 +123,13 @@ class CartItemSchema extends ItemSchema {
 			}
 
 			// Check if thumbnail is a valid url.
-			if ( empty( $image->thumbnail ) || ! filter_var( $image->thumbnail, FILTER_VALIDATE_URL ) ) {
+			if ( empty( $image->thumbnail ) || ! wp_parse_url( $image->thumbnail, PHP_URL_HOST ) ) {
 				$logger->warning( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid thumbnail property.', $image->id ) );
 				continue;
 			}
 
 			// Check if src is a valid url.
-			if ( empty( $image->src ) || ! filter_var( $image->src, FILTER_VALIDATE_URL ) ) {
+			if ( empty( $image->src ) || ! wp_parse_url( $image->src, PHP_URL_HOST ) ) {
 				$logger->warning( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid src property.', $image->id ) );
 				continue;
 			}
@@ -156,7 +157,11 @@ class CartItemSchema extends ItemSchema {
 		/**
 		 * Filters cart item data.
 		 *
-		 * Filters the variation option name for custom option slugs.
+		 * Allows extensions to attach their own name/value pairs to a cart item, which the Store
+		 * API returns in the item's `item_data` field.
+		 *
+		 * Set `raw_key` so clients can find your entry without matching a translated label.
+		 * Data you do not intend to display belongs in your `extensions` namespace.
 		 *
 		 * @since 4.3.0
 		 *
@@ -169,9 +174,7 @@ class CartItemSchema extends ItemSchema {
 		$item_data       = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
 		$clean_item_data = [];
 		foreach ( $item_data as $data ) {
-			// We will check each piece of data in the item data element to ensure it is scalar. Extensions could add arrays
-			// to this, which would cause a fatal in wp_strip_all_tags. If it is not scalar, we will return an empty array,
-			// which will be filtered out in get_item_data (after this function has run).
+			// A non-scalar value would fatal in wp_strip_all_tags, so drop the whole entry.
 			foreach ( $data as $data_value ) {
 				if ( ! is_scalar( $data_value ) ) {
 					continue 2;
@@ -192,6 +195,6 @@ class CartItemSchema extends ItemSchema {
 		if ( array_key_exists( '__experimental_woocommerce_blocks_hidden', $item_data_element ) ) {
 			$item_data_element['hidden'] = $item_data_element['__experimental_woocommerce_blocks_hidden'];
 		}
-		return array_map( 'wp_strip_all_tags', $item_data_element );
+		return array_map( 'wp_kses_post', $item_data_element );
 	}
 }

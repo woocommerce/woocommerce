@@ -15,7 +15,6 @@ const FormStepHeading = ( {
 } ): JSX.Element => (
 	<div className="wc-block-components-checkout-step__heading">
 		<Title
-			aria-hidden="true"
 			className="wc-block-components-checkout-step__title"
 			headingLevel="2"
 		>

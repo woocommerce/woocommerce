@@ -36,10 +36,10 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * Clears the cart session when called.
  */
 function wc_empty_cart() {
-	if ( ! WC()->cart instanceof WC_Cart ) {
+	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart();
+	WC()->cart->empty_cart( false );
 }
 
 /**
@@ -55,10 +55,10 @@ function wc_get_raw_referer() {
 		return wp_get_raw_referer();
 	}
 
-	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
-	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only fallback that only reports where the request came from; no state changes here.
+		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
+	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
 	}
 
 	return false;
@@ -177,12 +177,13 @@ function wc_clear_cart_after_payment() {
 
 	$should_clear_cart_after_payment = false;
 	$after_payment                   = false;
+	$order                           = null;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
-		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Order key is cleaned and compared with hash_equals() against the order's key below.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
@@ -208,6 +209,11 @@ function wc_clear_cart_after_payment() {
 	// If it doesn't look like a payment happened, bail early.
 	if ( ! $after_payment ) {
 		return;
+	}
+
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
 	}
 
 	/**
@@ -257,8 +263,7 @@ function wc_cart_totals_shipping_html() {
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
-				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
+				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
@@ -512,6 +517,25 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 				$default = $rate_key;
 				break;
 			}
+		}
+
+		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
+		// Without this, pickup gets silently selected because it's the only remaining rate after filtering.
+		if (
+			'' === $default
+			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
+			&& WC()->customer instanceof \WC_Customer
+			&& ! WC()->customer->has_full_shipping_address()
+		) {
+			/**
+			 * Filters the default shipping method for a package.
+			 *
+			 * @since 3.2.0
+			 * @param string $default Default shipping method.
+			 * @param array  $rates   Shipping rates.
+			 * @param string $chosen_method Chosen method id.
+			 */
+			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 		}
 	}
 

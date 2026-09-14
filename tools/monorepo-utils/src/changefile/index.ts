@@ -10,7 +10,6 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../core/logger';
-import { isGithubCI } from '../core/environment';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
@@ -196,7 +195,9 @@ const program = new Command( 'changefile' )
 					if ( comment ) {
 						fileContent += `Comment: ${ comment }\n`;
 					}
-					fileContent += `\n${ message }`;
+					// Terminate with a trailing newline to match `changelogger add`
+					// output and satisfy .editorconfig's insert_final_newline rule.
+					fileContent += `\n${ message }\n`;
 					writeFileSync( changelogFilePath, fileContent );
 				}
 			} catch ( e ) {
@@ -213,23 +214,11 @@ const program = new Command( 'changefile' )
 
 			const git = simpleGit( {
 				baseDir: tmpRepoPath,
+				unsafe: {
+					allowUnsafeHooksPath: true,
+				},
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
-
-			if ( isGithubCI() ) {
-				await git.raw(
-					'config',
-					'--global',
-					'user.email',
-					'github-actions@github.com'
-				);
-				await git.raw(
-					'config',
-					'--global',
-					'user.name',
-					'github-actions'
-				);
-			}
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
 

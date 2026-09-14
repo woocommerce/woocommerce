@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
+use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
@@ -163,6 +163,13 @@ class Utils {
 	 * @return array The normalized order map.
 	 */
 	public static function order_map_normalize( array $order_map ): array {
+		// Remove entries with non-string keys (legacy/corrupt data).
+		$order_map = array_filter(
+			$order_map,
+			fn( $key ) => is_string( $key ),
+			ARRAY_FILTER_USE_KEY
+		);
+
 		asort( $order_map );
 
 		return array_flip( array_keys( $order_map ) );
@@ -443,11 +450,7 @@ class Utils {
 	 * }
 	 */
 	public static function get_wpcom_connection_authorization( string $return_url ): array {
-		$plugin_onboarding = new OnboardingPlugins();
-
-		$request = new WP_REST_Request();
-		$request->set_param( 'redirect_url', $return_url );
-		$result = $plugin_onboarding->get_jetpack_authorization_url( $request );
+		$result = JetpackConnection::get_authorization_url( $return_url );
 
 		if ( ! empty( $result['url'] ) ) {
 			$result['url'] = add_query_arg(

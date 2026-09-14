@@ -2,7 +2,9 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_User class.
@@ -11,35 +13,76 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
 	 * Setup COT.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->setup_cot();
-		$this->toggle_cot_feature_and_usage( false );
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
 	 * Clean COT specific things.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->clean_up_cot_setup();
+		$this->toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		parent::tearDown();
+
+		// In case `wc_update_user_last_active` test fail, clean the global state.
+		global $wp_current_filter;
+		$wp_current_filter = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
 	 * Test wc_get_customer_order_count. Borrowed from `WC_Tests_Customer_Functions` class for COT.
 	 */
 	public function test_hpos_wc_customer_bought_product() {
-		$this->toggle_cot_feature_and_usage( true );
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
+		$customer_id_3 = wc_create_new_customer( 'account@example.com', 'testuser3', 'testpassword3' );
 		$product_1     = new WC_Product_Simple();
 		$product_1->save();
 		$product_id_1 = $product_1->get_id();
 		$product_2    = new WC_Product_Simple();
 		$product_2->save();
 		$product_id_2 = $product_2->get_id();
+		$product_3    = new WC_Product_Simple();
+		$product_3->save();
+		$product_id_3 = $product_3->get_id();
+		$product_4    = new WC_Product_Simple();
+		$product_4->save();
+		$product_id_4 = $product_4->get_id();
+		$product_5    = new WC_Product_Simple();
+		$product_5->save();
+		$product_id_5 = $product_5->get_id();
 
 		$order_1 = WC_Helper_Order::create_order( $customer_id_1, $product_1 );
 		$order_1->set_billing_email( 'test@example.com' );
@@ -58,16 +101,46 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$order_4->set_status( OrderStatus::COMPLETED );
 		$order_4->save();
 
+		$guest_order = wc_create_order();
+		$guest_order->add_product( $product_3 );
+		$guest_order->set_billing_email( 'guest@example.com' );
+		$guest_order->set_status( OrderStatus::COMPLETED );
+		$guest_order->save();
+
+		$different_billing_email_order = WC_Helper_Order::create_order( $customer_id_3, $product_4 );
+		$different_billing_email_order->set_billing_email( 'billing@example.com' );
+		$different_billing_email_order->set_status( OrderStatus::COMPLETED );
+		$different_billing_email_order->save();
+
+		$unlinked_guest_order = wc_create_order();
+		$unlinked_guest_order->add_product( $product_5 );
+		$unlinked_guest_order->set_billing_email( 'test@example.com' );
+		$unlinked_guest_order->set_status( OrderStatus::COMPLETED );
+		$unlinked_guest_order->save();
+
 		// Manually trigger the product lookup tables update, since it may take a few moments for it to happen automatically.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		foreach ( array( '__return_true', '__return_false' ) as $lookup_tables ) {
 			add_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+
 			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
 			$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
 			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
 			$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
 			$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'guest@example.com', 0, $product_id_3 ) );
+			$this->assertFalse( wc_customer_bought_product( 'other@example.com', 0, $product_id_3 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'billing@example.com', $customer_id_3, $product_id_4 ) );
+			$this->assertTrue( wc_customer_bought_product( '', $customer_id_3, $product_id_4 ) );
+			$this->assertTrue( wc_customer_bought_product( 'billing@example.com', 0, $product_id_4 ) );
+
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_5 ) );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_5 ) );
+			$this->assertFalse( wc_customer_bought_product( '', $customer_id_1, $product_id_5 ) );
+
 			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
 		}
 	}
@@ -78,6 +151,8 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	 * @since 9.3
 	 */
 	public function test_wc_get_customer_available_downloads_for_partial_refunds(): void {
+		$this->toggle_cot_feature_and_usage( false );
+
 		/** @var Download_Directories $download_directories */
 		$download_directories = wc_get_container()->get( Download_Directories::class );
 		$download_directories->set_mode( Download_Directories::MODE_ENABLED );
@@ -148,5 +223,42 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $prod_download2->get_id(), $download['download_id'] );
 		$this->assertEquals( $order->get_id(), $download['order_id'] );
 		$this->assertEquals( $product2->get_id(), $download['product_id'] );
+	}
+
+	/**
+	 * Test `wc_update_user_last_active`: verify the applied thresholds.
+	 */
+	public function test_wc_update_user_last_active(): void {
+		global $wp_current_filter;
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+
+		// Verify threshold crossing is handled as intended.
+		$original = time() - 30;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		wc_update_user_last_active( $customer_id );
+		$this->assertSame( (string) $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify fallback of one-minute update interval.
+		$original = time() - MINUTE_IN_SECONDS - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify immediate update after logging in.
+		$original = time() - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		$wp_current_filter = array( 'wp_login' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify five minutes update interval for pages navigation use-case.
+		$original = time() - ( 5 * MINUTE_IN_SECONDS ) - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		$wp_current_filter = array( 'wp' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		$customer->delete();
 	}
 }

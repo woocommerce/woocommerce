@@ -58,3 +58,14 @@ $cart_subtotal = $woocommerce->cart->get_cart_subtotal();
 ```
 
 View the [WC_Cart Code Reference](https://woocommerce.github.io/code-reference/classes/WC-Cart.html) for a full list of methods contained in this class.
+
+## Internal Classes (Do Not Use)
+
+WooCommerce contains internal infrastructure code that's **not intended for use by extensions**:
+
+- **`Automattic\WooCommerce\Internal\*`**: All classes in this namespace are internal. Backwards compatibility is not guaranteed: these classes may change, be renamed, or be removed in future releases of WooCommerce.
+- **Classes with `@internal` annotations**: Equivalently, any class, method or hook marked with `@internal` in its docblock should not be used by extensions.
+
+Using internal code may cause your extension to break when WooCommerce is updated. Any code that's not internal per the above definition is public and generally safe to use.
+
+For more details, see the [Internal namespace documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/README.md).

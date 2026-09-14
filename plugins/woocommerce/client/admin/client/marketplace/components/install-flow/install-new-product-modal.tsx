@@ -7,11 +7,11 @@ import { dispatch } from '@wordpress/data';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import type { Status } from 'wordpress__notices';
 
 /**
  * Internal dependencies
  */
+import type { NoticeStatus } from '~/lib/notices/types';
 import ProductCard from '../product-card/product-card';
 import { Product } from '../product-list/types';
 import ConnectAccountButton from '../my-subscriptions/table/actions/connect-account-button';
@@ -46,7 +46,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	const [ showModal, setShowModal ] = useState< boolean >( false );
 	const [ notice, setNotice ] = useState< {
 		message: string;
-		status: Status;
+		status: NoticeStatus;
 	} >();
 	const { addInstalledProduct } = useContext( MarketplaceContext );
 
@@ -162,7 +162,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					throw response;
 				}
 
-				dispatch( installingStore ).startInstalling(
+				void dispatch( installingStore ).startInstalling(
 					String( product.id ?? '' )
 				);
 				setDocumentationUrl( response.data.documentation_url );
@@ -175,7 +175,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					response.data.product_type,
 					response.data.zip_slug
 				).then( ( downloadResponse ) => {
-					dispatch( installingStore ).stopInstalling(
+					void dispatch( installingStore ).stopInstalling(
 						String( product.id ?? '' )
 					);
 

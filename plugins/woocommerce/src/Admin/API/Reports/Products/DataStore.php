@@ -9,8 +9,10 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -93,6 +95,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'products';
 
 	/**
+	 * Whether the query currently being served carries a `search` argument.
+	 *
+	 * @var bool
+	 */
+	private $is_search = false;
+
+	/**
+	 * Last search statement built, with the arguments it was built from.
+	 *
+	 * @var array|null
+	 */
+	private $search_subquery = null;
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
@@ -112,6 +128,40 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
+		add_action( 'woocommerce_order_partially_refunded', array( __CLASS__, 'add_partial_refund_type_meta' ), 10, 2 );
+		add_action( 'woocommerce_order_fully_refunded', array( __CLASS__, 'add_full_refund_type_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Add a partial refund type meta to the order.
+	 *
+	 * @param int $order_id  Order ID.
+	 * @param int $refund_id Refund ID.
+	 */
+	public static function add_partial_refund_type_meta( $order_id, $refund_id ) {
+		self::add_refund_type_meta( $refund_id, 'partial' );
+	}
+
+	/**
+	 * Add a full refund type meta to the order.
+	 *
+	 * @param int $order_id  Order ID.
+	 * @param int $refund_id Refund ID.
+	 */
+	public static function add_full_refund_type_meta( $order_id, $refund_id ) {
+		self::add_refund_type_meta( $refund_id, 'full' );
+	}
+
+	/**
+	 * Add a refund type meta to the order.
+	 *
+	 * @param int    $refund_id Refund ID.
+	 * @param string $type      Refund type.
+	 */
+	public static function add_refund_type_meta( $refund_id, $type ) {
+		$order = wc_get_order( $refund_id );
+		$order->update_meta_data( '_refund_type', $type );
+		$order->save_meta_data();
 	}
 
 	/**
@@ -163,10 +213,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
-		$included_products = $this->get_included_products( $query_args );
-		if ( $included_products ) {
+		$included_products = $this->get_included_products_array( $query_args );
+		$product_id_filter = ProductSearchQuery::get_id_condition(
+			"{$order_product_lookup_table}.product_id",
+			$this->get_search_subquery( $query_args, $included_products ),
+			$included_products
+		);
+		if ( $product_id_filter ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$product_id_filter}" );
 		} else {
 			$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
 		}
@@ -181,6 +236,73 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
+	}
+
+	/**
+	 * Returns the statement the query's `search` argument resolves to.
+	 *
+	 * Serving one report needs it twice, once for the restriction and once for the row count, and
+	 * building it runs a WP_Query, so the last one is kept for as long as the arguments match.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $query_args        Query parameters.
+	 * @param array $included_products Product IDs the `categories` and `products` filters resolve to.
+	 * @return string SQL statement, or an empty string when the query carries no search.
+	 */
+	private function get_search_subquery( $query_args, array $included_products ): string {
+		$terms = $query_args['search'] ?? array();
+
+		if ( null === $this->search_subquery
+			|| $this->search_subquery['terms'] !== $terms
+			|| $this->search_subquery['included_products'] !== $included_products
+		) {
+			$this->search_subquery = array(
+				'terms'             => $terms,
+				'included_products' => $included_products,
+				'subquery'          => ProductSearchQuery::get_ids_subquery( $terms, $included_products ),
+			);
+		}
+
+		return $this->search_subquery['subquery'];
+	}
+
+	/**
+	 * Returns the cache key for a query, and records whether it carries a search.
+	 *
+	 * `should_use_cache()` decides whether the response is cached but only receives the key, so the
+	 * search has to be noted here, where the query arguments are still around.
+	 *
+	 * @override ReportsDataStore::get_cache_key()
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $params Query parameters.
+	 * @return string Cache key.
+	 */
+	protected function get_cache_key( $params ) {
+		$this->is_search = ! empty( $params['search'] );
+
+		return parent::get_cache_key( $params );
+	}
+
+	/**
+	 * Whether the report should be read from and written to the report cache.
+	 *
+	 * @override ReportsDataStore::should_use_cache()
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	protected function should_use_cache() {
+		// Run the parent first, since it applies the filter plugins opt out of the cache through.
+		$use_cache = parent::should_use_cache();
+
+		// A search is resolved against product titles and SKUs while the report runs, and nothing
+		// invalidates the report cache when one is renamed, so a cached response would keep
+		// answering with the old matches for up to a week.
+		return $this->is_search ? false : $use_cache;
 	}
 
 	/**
@@ -201,6 +323,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( 'sku' === $order_by ) {
 			return 'meta_value';
 		}
+
 		return $order_by;
 	}
 
@@ -214,6 +337,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$product_names = array();
 
+		if ( $query_args['extended_info'] ) {
+			self::prime_object_caches( array_column( $products_data, 'product_id' ) );
+		}
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
@@ -225,11 +352,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						$product_names[ $product_id ] = $wpdb->get_var(
 							$wpdb->prepare(
 								"SELECT i.order_item_name
-								FROM {$wpdb->prefix}woocommerce_order_items i, {$wpdb->prefix}woocommerce_order_itemmeta m
-								WHERE i.order_item_id = m.order_item_id
-								AND m.meta_key = '_product_id'
-								AND m.meta_value = %s
-								ORDER BY i.order_item_id DESC
+								FROM {$wpdb->prefix}wc_order_product_lookup l
+								JOIN {$wpdb->prefix}woocommerce_order_items i ON i.order_item_id = l.order_item_id
+								WHERE l.product_id = %d
+								ORDER BY l.order_item_id DESC
 								LIMIT 1",
 								$product_id
 							)
@@ -301,6 +427,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults                      = parent::get_default_query_vars();
 		$defaults['category_includes'] = array();
 		$defaults['product_includes']  = array();
+		$defaults['search']            = array();
 		$defaults['extended_info']     = false;
 
 		return $defaults;
@@ -332,13 +459,23 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$selections        = $this->selected_columns( $query_args );
 		$included_products = $this->get_included_products_array( $query_args );
+		$search_subquery   = $this->get_search_subquery( $query_args, $included_products );
 		$params            = $this->get_limit_params( $query_args );
 		$this->add_sql_query_params( $query_args );
 
-		if ( count( $included_products ) > 0 ) {
-			$filtered_products = array_diff( $included_products, array( '-1' ) );
-			$total_results     = count( $filtered_products );
-			$total_pages       = (int) ceil( $total_results / $params['per_page'] );
+		if ( $search_subquery || count( $included_products ) > 0 ) {
+			if ( $search_subquery ) {
+				// The set of matching products is only known to the database, so count it there too.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $search_subquery is built from prepared fragments.
+				$total_results = (int) $wpdb->get_var( "SELECT COUNT(*) FROM ( {$search_subquery} ) AS search_results" );
+				$ids_table     = $search_subquery;
+			} else {
+				$filtered_products = array_diff( $included_products, array( '-1' ) );
+				$total_results     = count( $filtered_products );
+				$ids_table         = $this->get_ids_table( $included_products, 'product_id' );
+			}
+
+			$total_pages = (int) ceil( $total_results / $params['per_page'] );
 
 			if ( 'date' === $query_args['orderby'] ) {
 				$selections .= ", {$table_name}.date_created";
@@ -346,7 +483,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$fields          = $this->get_fields( $query_args );
 			$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
-			$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
@@ -360,6 +496,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ON default_results.product_id = {$table_name}.product_id"
 			);
 			$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
+
+			// The database is free to resolve a tie differently for each page, so a product comes
+			// back on two of them while another is never reached. A product without sales ties on
+			// every column the report can order by, and a filtered report is mostly those.
+			// `get_ids_table()` types its column as text, so cast it or 100 would sort before 99.
+			$order_by = $this->get_sql_clause( 'order_by' );
+			$this->clear_sql_clause( 'order_by' );
+			$this->add_sql_clause( 'order_by', "{$order_by}, CAST( default_results.product_id AS SIGNED )" );
 
 			$products_query = $this->get_query_statement();
 		} else {
@@ -379,7 +523,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count', 'variations' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$products_query = $this->subquery->get_query_statement();
 		}
@@ -405,7 +553,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Create or update an entry in the wc_admin_order_product_lookup table for an order.
+	 * Create or update an entry in the wc_order_product_lookup table for an order.
 	 *
 	 * @since 3.5.0
 	 * @param int $order_id Order ID.
@@ -433,30 +581,128 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
+		$is_full_refund_without_line_items = false;
+		$partial_refund_product_revenue    = array();
+		$refund_type                       = $order->get_meta( '_refund_type' );
+		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
+
+		$parent_order = null;
+
+		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
+		// We need to get the parent order items, and exclude the items that are already being partially refunded.
+		if (
+			'shop_order_refund' === $order->get_type() &&
+			'full' === $refund_type &&
+			empty( $order_items ) &&
+			$uses_new_full_refund_data
+		) {
+			$is_full_refund_without_line_items = true;
+
+			$parent_order_id = $order->get_parent_id();
+			$parent_order    = wc_get_order( $parent_order_id );
+			$order_items     = $parent_order->get_items();
+
+			// Get the partially refunded product and variation IDs along with their sum of product_net_revenue from the parent order.
+			$partial_refund_products = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+						SELECT
+							product_lookup.product_id,
+							product_lookup.variation_id,
+							SUM( product_lookup.product_net_revenue ) AS product_net_revenue
+						FROM %i AS product_lookup
+						INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
+							ON order_stats.order_id = product_lookup.order_id
+						WHERE 1 = 1
+							AND order_stats.parent_id = %d
+							AND product_lookup.product_net_revenue < 0
+						GROUP BY product_lookup.product_id, product_lookup.variation_id
+					",
+					$table_name,
+					$parent_order_id
+				)
+			);
+
+			/**
+			 * Create a lookup table for partially refunded products.
+			 * E.g. [
+			 *   '1' => -20,
+			 *   '2' => -40,
+			 *   '51' => -10,
+			 *   '52' => -30,
+			 * ]
+			 */
+			foreach ( $partial_refund_products as $product ) {
+				$id                                    = $product->variation_id ? $product->variation_id : $product->product_id;
+				$partial_refund_product_revenue[ $id ] = (float) $product->product_net_revenue;
+			}
+		}
+
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
 			$product_qty         = $order_item->get_quantity( 'edit' );
+			$product_id          = $order_item->get_product_id( 'edit' );
+			$variation_id        = $order_item->get_variation_id( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
+			$tax_amount          = $order->get_item_cart_tax_amount( $order_item );
+			$net_revenue         = round( $order_item->get_total( 'edit' ), $decimals );
+
+			// If the order is a full refund and there is no order items. The order item here is the parent order item.
+			if ( $is_full_refund_without_line_items ) {
+				$id             = $variation_id ? $variation_id : $product_id;
+				$partial_refund = $partial_refund_product_revenue[ $id ] ?? 0;
+				// If a single line item was refunded 60% then fully refunded after, we need store the difference in the product lookup table.
+				// E.g. A product costs $100, it was previously partially refunded $60, then fully refunded $40.
+				// So it will be -abs( 100 + (-60) ) = -40.
+				$net_revenue = -abs( $net_revenue + $partial_refund );
+
+				// Skip items that have already been fully refunded (single or multiple partial refunds).
+				if ( 0.0 === $net_revenue ) {
+					continue;
+				}
+
+				$product_qty = -abs( $product_qty );
+
+				// Set coupon amount to 0 for full refunds without line items.
+				$coupon_amount = 0;
+
+				if ( $parent_order ) {
+					$remaining_refund_items = $parent_order->get_remaining_refund_items();
+
+					// Calculate the shipping amount to refund from the parent order.
+					$total_shipping_refunded  = $parent_order->get_total_shipping_refunded();
+					$shipping_total           = (float) $parent_order->get_shipping_total();
+					$total_shipping_to_refund = $shipping_total - $total_shipping_refunded;
+
+					if ( $total_shipping_to_refund > 0 ) {
+						$shipping_amount = -abs( $parent_order->get_item_shipping_amount( $order_item, $remaining_refund_items, $total_shipping_to_refund ) );
+					}
+
+					// Calculate the shipping tax amount to refund from the parent order.
+					$shipping_tax                 = (float) $parent_order->get_shipping_tax();
+					$total_shipping_tax_refunded  = $parent_order->get_total_shipping_tax_refunded();
+					$total_shipping_tax_to_refund = $shipping_tax - $total_shipping_tax_refunded;
+
+					if ( $total_shipping_tax_to_refund > 0 ) {
+						$shipping_tax_amount = -abs( $parent_order->get_item_shipping_tax_amount( $order_item, $remaining_refund_items, $total_shipping_tax_to_refund ) );
+					}
+
+					// Calculate cart tax amount of the item from the parent order.
+					$tax_amount = -abs( $parent_order->get_item_cart_tax_amount( $order_item ) );
+				}
+			}
+
+			$is_refund = $net_revenue < 0;
 
 			// Skip line items without changes to product quantity.
-			if ( ! $product_qty ) {
+			if ( ! $product_qty && ! $is_refund ) {
 				++$num_updated;
 				continue;
 			}
 
-			// Tax amount.
-			$tax_amount  = 0;
-			$order_taxes = $order->get_taxes();
-			$tax_data    = $order_item->get_taxes();
-			foreach ( $order_taxes as $tax_item ) {
-				$tax_item_id = $tax_item->get_rate_id();
-				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? (float) $tax_data['total'][ $tax_item_id ] : 0;
-			}
-
-			$net_revenue = round( $order_item->get_total( 'edit' ), $decimals );
 			if ( $round_tax ) {
 				$tax_amount = round( $tax_amount, $decimals );
 			}
@@ -466,8 +712,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				array(
 					'order_item_id'         => $order_item_id,
 					'order_id'              => $order->get_id(),
-					'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
-					'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
+					'product_id'            => $product_id,
+					'variation_id'          => $variation_id,
 					'customer_id'           => $order->get_report_customer_id(),
 					'product_qty'           => $product_qty,
 					'product_net_revenue'   => $net_revenue,
@@ -494,7 +740,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'%f', // shipping_tax_amount.
 					'%f', // product_gross_revenue.
 				)
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This data store owns the formatted analytics write; caching a write is not applicable.
 
 			/**
 			 * Fires when product's reports are updated.

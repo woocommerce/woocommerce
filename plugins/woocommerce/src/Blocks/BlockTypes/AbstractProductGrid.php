@@ -83,6 +83,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			return '';
 		}
 
+		// Prime caches to reduce future queries.
+		_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $products ) ) );
+
 		/**
 		 * Override product description to prevent infinite loop.
 		 *
@@ -346,9 +349,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		/**
 		 * Filters whether or not the product grid is cacheable.
 		 *
-		 * @param boolean $is_cacheable The list of script dependencies.
+		 * @param boolean $is_cacheable Whether the product grid is cacheable. True to enable cache, false to disable.
 		 * @param array $query_args Query args for the products query passed to BlocksWpQuery.
-		 * @return array True to enable cache, false to disable cache.
+		 * @return boolean True to enable cache, false to disable cache.
 		 *
 		 * @since 2.5.0
 		 */
@@ -361,9 +364,8 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
 		WC()->query->remove_ordering_args();
 
-		// Prime caches to reduce future queries. Note _prime_post_caches is private--we could replace this with our own
-		// query if it becomes unavailable.
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $results ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $results );
 		}
 
@@ -544,7 +546,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		);
 
 		if ( $product->get_image_id() ) {
-			$image_alt = get_post_meta( $product->get_image_id(), '_wp_attachment_image_alt', true );
+			$image_alt = get_post_meta( (int) $product->get_image_id(), '_wp_attachment_image_alt', true );
 			$attr      = array(
 				'alt' => ( $image_alt ? $image_alt : $product->get_name() ),
 			);

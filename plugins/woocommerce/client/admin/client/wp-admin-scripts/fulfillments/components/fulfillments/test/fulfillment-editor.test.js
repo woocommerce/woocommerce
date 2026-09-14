@@ -20,15 +20,11 @@ jest.mock( '@wordpress/components', () => ( {
 jest.mock(
 	'../../action-buttons/edit-fulfillment-button',
 	() =>
-		( { onClick } ) =>
-			(
-				<button
-					data-testid="edit-fulfillment-button"
-					onClick={ onClick }
-				>
-					Edit
-				</button>
-			)
+		( { onClick } ) => (
+			<button data-testid="edit-fulfillment-button" onClick={ onClick }>
+				Edit
+			</button>
+		)
 );
 jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
 	<button data-testid="fulfill-items-button">Fulfill items</button>
@@ -272,5 +268,20 @@ describe( 'FulfillmentEditor', () => {
 		expect(
 			screen.getByText( 'This fulfillment is locked.' )
 		).toBeInTheDocument();
+	} );
+
+	it( 'should render content when expanded', () => {
+		render( <FulfillmentEditor { ...mockProps } expanded={ true } /> );
+
+		// Verify expanded content is rendered
+		expect(
+			screen.getByTestId( 'edit-fulfillment-button' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByTestId( 'fulfill-items-button' )
+		).toBeInTheDocument();
+
+		// Verify the component renders without errors when expanded
+		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
 	} );
 } );

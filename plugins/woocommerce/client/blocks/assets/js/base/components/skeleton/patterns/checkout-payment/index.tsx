@@ -17,10 +17,10 @@ export const CheckoutPaymentSkeleton = () => {
 			aria-label={ __( 'Loading payment options… ', 'woocommerce' ) }
 		>
 			<div className="wc-block-components-skeleton--checkout-payment-container">
-				<Skeleton height="22px" width="22px" borderRadius="100%" />
-				<Skeleton height="22px" maxWidth="148px" />
+				<Skeleton height="20px" width="20px" borderRadius="100%" />
+				<Skeleton height="20px" maxWidth="148px" />
 			</div>
-			<Skeleton height="22px" />
+			<Skeleton height="20px" />
 		</div>
 	);
 };

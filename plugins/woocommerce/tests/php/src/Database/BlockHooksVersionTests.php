@@ -37,7 +37,7 @@ class BlockHooksVersionTests extends \WC_Unit_Test_Case {
 
 		WC_Install::newly_installed();
 
-		$this->assertEquals( WC()->version, get_option( self::$option_name ) );
+		$this->assertEquals( WC()->stable_version(), get_option( self::$option_name ) );
 	}
 
 	/**
@@ -83,7 +83,7 @@ class BlockHooksVersionTests extends \WC_Unit_Test_Case {
 
 		// This fires the action that sets the block hooks version: 'after_switch_theme'.
 		check_theme_switched();
-		$this->assertEquals( WC()->version, get_option( self::$option_name ) );
+		$this->assertEquals( WC()->stable_version(), get_option( self::$option_name ) );
 		$this->assertEquals( $initial_option_value, false );
 	}
 }

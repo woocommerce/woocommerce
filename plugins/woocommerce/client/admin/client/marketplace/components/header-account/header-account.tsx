@@ -7,8 +7,15 @@ import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
+	VisuallyHidden,
 } from '@wordpress/components';
-import { Icon, commentAuthorAvatar, external, linkOff } from '@wordpress/icons';
+import {
+	Icon,
+	commentAuthorAvatar,
+	external,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -18,12 +25,14 @@ import { recordEvent } from '@woocommerce/tracks';
 import './header-account.scss';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import HeaderAccountModal from './header-account-modal';
-import { MARKETPLACE_HOST } from '../constants';
+import { MARKETPLACE_MY_ACCOUNT_PATH } from '../constants';
 import { connectUrl } from '../../utils/functions';
 
 // Make TS happy: The MenuItem component passes these as an href prop to the underlying button.
 interface MenuItemProps extends ComponentProps< typeof OriginalMenuItem > {
 	href?: string; // Explicitly declare `href`
+	target?: string;
+	rel?: string;
 }
 
 const MenuItem = ( props: MenuItemProps ) => <OriginalMenuItem { ...props } />;
@@ -34,7 +43,7 @@ interface HeaderAccountProps {
 
 export default function HeaderAccount( {
 	page = 'wc-admin',
-}: HeaderAccountProps ): JSX.Element {
+}: HeaderAccountProps ): React.JSX.Element {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ useDefaultAvatar, setUseDefaultAvatar ] = useState( false );
 
@@ -44,23 +53,71 @@ export default function HeaderAccount( {
 	const isConnected = wccomSettings?.isConnected ?? false;
 	const connectionURL = connectUrl( page );
 	const userEmail = wccomSettings?.userEmail;
-	const avatarURL = wccomSettings?.userAvatar ?? commentAuthorAvatar;
+	const avatarURL = wccomSettings?.userAvatar;
 
-	const accountURL = MARKETPLACE_HOST + '/my-dashboard/';
+	const accountURL = MARKETPLACE_MY_ACCOUNT_PATH;
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
+	const isInApp = page === 'wc-addons';
+
+	const newTabProps = { target: '_blank', rel: 'noopener noreferrer' };
+	const newTabText = (
+		<VisuallyHidden as="span">
+			{ __( '(opens in a new tab)', 'woocommerce' ) }
+		</VisuallyHidden>
+	);
 
 	const avatar = () => {
-		if ( ! isConnected || useDefaultAvatar ) {
-			return commentAuthorAvatar;
+		// Render the default avatar SVG when the user isn't connected, when
+		// the connected user has no avatar URL, or when the avatar image
+		// failed to load. Previously `avatarURL` fell back to the
+		// `commentAuthorAvatar` icon component, which is a JSX element —
+		// passing it as <img src> rendered `[object Object]` and only
+		// recovered via the onError handler below.
+		if ( ! isConnected || ! avatarURL || useDefaultAvatar ) {
+			return <Icon icon={ commentAuthorAvatar } size={ 18 } />;
 		}
 
+		// Lock the avatar to 18x18 to match every other floating-header tab
+		// icon (bell, store, listView, gear, ?). Without this the
+		// connected-user state renders the avatar at 30x30, making the User
+		// button wider than its neighbours — which knocks tab spacing out
+		// of alignment and creates timing issues with adjacent click flows.
 		return (
 			<img
 				src={ avatarURL }
 				alt=""
-				className="woocommerce-marketplace__menu-avatar-image"
+				className="woocommerce-marketplace__header-account-avatar"
 				onError={ () => setUseDefaultAvatar( true ) }
 			/>
+		);
+	};
+
+	const dropdownTrigger = () => {
+		if ( ! isInApp ) {
+			return avatar();
+		}
+
+		return (
+			<span className="woocommerce-marketplace__header-account-trigger">
+				{ avatar() }
+				<span
+					className="woocommerce-marketplace__header-account-trigger__email"
+					title={
+						isConnected
+							? userEmail
+							: __( 'Connect to WooCommerce.com', 'woocommerce' )
+					}
+				>
+					{ isConnected
+						? userEmail
+						: __( 'Connect to WooCommerce.com', 'woocommerce' ) }
+				</span>
+				<Icon
+					icon={ chevronDown }
+					size={ 24 }
+					className="woocommerce-marketplace__header-account-trigger__expand-icon"
+				/>
+			</span>
 		);
 	};
 
@@ -79,7 +136,13 @@ export default function HeaderAccount( {
 					/>
 					<span className="woocommerce-marketplace__main-text">
 						{ userEmail }
+						{ newTabText }
 					</span>
+					<Icon
+						icon={ external }
+						size={ 16 }
+						className="woocommerce-marketplace__menu-external-icon"
+					/>
 				</>
 			);
 		}
@@ -106,8 +169,16 @@ export default function HeaderAccount( {
 	return (
 		<>
 			<DropdownMenu
-				className="woocommerce-layout__activity-panel-tab woocommerce-marketplace__user-menu"
-				icon={ avatar() }
+				// woocommerce-layout__activity-panel-tab is intentionally
+				// only on toggleProps (the inner button) — not on the outer
+				// DropdownMenu wrapper. Doubling it up made the User button
+				// 16px wider than its neighbours (padding compounded on
+				// both elements) and created a click "dead zone" on the
+				// outer wrapper that swallowed the first click when
+				// switching focus from another tab. Outer alignment is
+				// handled by `__user-menu` styles in header-account.scss.
+				className="woocommerce-marketplace__user-menu"
+				icon={ dropdownTrigger() }
 				label={ __( 'User options', 'woocommerce' ) }
 				toggleProps={ {
 					className: 'woocommerce-layout__activity-panel-tab',
@@ -122,11 +193,16 @@ export default function HeaderAccount( {
 					<>
 						<MenuGroup
 							className="woocommerce-layout__homescreen-display-options"
-							label={ connectionStatusText }
+							label={
+								isInApp && ! isConnected
+									? undefined
+									: connectionStatusText
+							}
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"
 								href={ accountOrConnect }
+								{ ...( isConnected ? newTabProps : {} ) }
 								onClick={ () => {
 									if ( isConnected ) {
 										recordEvent(
@@ -146,6 +222,7 @@ export default function HeaderAccount( {
 							{ page === 'wc-addons' && ! isConnected && (
 								<MenuItem
 									href={ accountURL }
+									{ ...newTabProps }
 									onClick={ () =>
 										recordEvent(
 											'header_account_view_click',
@@ -159,9 +236,10 @@ export default function HeaderAccount( {
 										className="woocommerce-marketplace__menu-icon"
 									/>
 									{ __(
-										'WooCommerce.com account',
+										'Your WooCommerce.com account',
 										'woocommerce'
 									) }
+									{ newTabText }
 								</MenuItem>
 							) }
 						</MenuGroup>

@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useArgs } from '@storybook/client-api';
-import type { Story, Meta } from '@storybook/react';
+import { useArgs } from 'storybook/preview-api';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import {
 	currenciesAPIShape as currencies,
 	currencyControl,
@@ -80,7 +80,7 @@ export default {
 	},
 } as Meta< TotalsDiscountProps >;
 
-const Template: Story< TotalsDiscountProps > = ( args ) => {
+const Template: StoryFn< TotalsDiscountProps > = ( args ) => {
 	const [ {}, setArgs ] = useArgs();
 
 	const removeCoupon = ( code: string ) => {

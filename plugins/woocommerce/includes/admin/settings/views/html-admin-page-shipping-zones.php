@@ -68,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '" data-id="' . esc_attr( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
 				} else {
-					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					echo '<li>' . esc_html__( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 				}
 				?>
 			</ul>
@@ -87,8 +87,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<p class="main"><?php esc_html_e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 				<p><?php esc_html_e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
-					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?></li>
+					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?></li>
 				</ul>
 				<p><?php esc_html_e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
 				<a class="button button-primary wc-shipping-zone-add" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
@@ -105,6 +105,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
+			<# if ( data.zone_order_conflict_warning ) { #>
+				<div class="notice notice-warning inline wc-shipping-zone-order-conflict-warning">
+					<p>{{ data.zone_order_conflict_warning }}</p>
+				</div>
+			<# } #>
 		</td>
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
@@ -147,7 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
+					<div class="wc-backbone-modal-buttons">
 						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>

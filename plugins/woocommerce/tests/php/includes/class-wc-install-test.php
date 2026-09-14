@@ -1,16 +1,21 @@
 <?php
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Caches\ProductCountCache;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
  * Class WC_Install_Test.
  */
 class WC_Install_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
-	 * Test if verify base table can detect missing table and adds/remove a notice.
+	 * Test if verify base table can detect missing tables and clear the stored missing table list.
 	 */
-	public function test_verify_base_tables_adds_and_remove_notice() {
+	public function test_verify_base_tables_stores_and_removes_missing_tables() {
 		global $wpdb;
 
 		// Remove drop filter because we do want to drop temp table if it exists.
@@ -38,13 +43,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
 		$this->assertContains( $original_table_name, $missing_tables );
-		$this->assertContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertContains( $original_table_name, get_option( 'woocommerce_schema_missing_tables', array() ) );
 
 		// Ideally, no missing table anymore because we have switched back table name.
 		$missing_tables = \WC_Install::verify_base_tables();
 
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 
@@ -81,7 +86,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Ideally, no missing table because verify base tables created the table as well.
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 	/**
@@ -108,6 +113,106 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * dbDelta cannot change a primary key, so wc_order_tax_lookup is re-keyed by a guarded ALTER in
+	 * create_tables(). The rows a store carries into it have to survive, and since create_tables()
+	 * runs again on every update, the second pass has to leave everything alone.
+	 *
+	 * @testdox create_tables() re-keys the tax lookup by tax order item, keeps its rows, and runs once.
+	 */
+	public function test_create_tables_rekeys_the_order_tax_lookup_by_tax_order_item(): void {
+		global $wpdb;
+
+		// The lookup tables are real rather than temporary, so let this test alter them.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+		$key   = function () use ( $wpdb, $table ) {
+			return $wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+		$rows  = function () use ( $wpdb, $table ) {
+			return $wpdb->get_results( "SELECT * FROM `{$table}` WHERE order_id = 4242", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->insert(
+			$table,
+			array(
+				'order_id'     => 4242,
+				'tax_rate_id'  => 7,
+				'date_created' => '2023-02-10 10:00:00',
+				'total_tax'    => 6.0,
+			)
+		);
+
+		$this->assertEmpty( $key(), 'The table should start out on the released key.' );
+
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The primary key should gain the tax order item column.' );
+		$this->assertCount( 1, $rows(), 'The rows a store carried into the re-key should survive it.' );
+		$this->assertSame( 0, (int) $rows()[0]['order_item_id'], 'Rows that predate the column should land on its default and keep reporting on their rate id alone.' );
+
+		$before = $rows();
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The second pass should leave the key alone.' );
+		$this->assertSame( $before, $rows(), 'The second pass should leave the rows alone.' );
+
+		$wpdb->delete( $table, array( 'order_id' => 4242 ), array( '%d' ) );
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+	}
+
+	/**
+	 * The reports read a table the re-key never reached the way they always did, so nothing else
+	 * says the store missed the fix.
+	 *
+	 * @testdox create_tables() logs a tax lookup re-key that did not land.
+	 */
+	public function test_create_tables_logs_a_failed_order_tax_lookup_rekey(): void {
+		global $wpdb;
+
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Fail every ALTER against the table, the way a server that refuses the statement would.
+		$break_alter = function ( $query ) use ( $table ) {
+			if ( 0 === strpos( $query, "ALTER TABLE {$table} " ) ) {
+				return "ALTER TABLE `{$table}_missing` ADD COLUMN broken bigint";
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_alter );
+
+		$suppress = $wpdb->suppress_errors( true );
+		WC_Install::create_tables();
+		$wpdb->suppress_errors( $suppress );
+
+		remove_filter( 'query', $break_alter );
+
+		$this->assertLogged( 'error', 'wc_order_tax_lookup', array( 'source' => 'wc-order-tax-lookup-migration' ) );
+
+		// Put the key right again for the tests that follow.
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty(
+			$wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'The re-key should land again once the server accepts the ALTER.'
+		);
+
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+	}
+
+	/**
 	 * Test that delete_obsolete_notes deletes notes.
 	 */
 	public function test_delete_obsolete_notes_deletes_notes() {
@@ -127,7 +232,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		WC_Install::delete_obsolete_notes();
 
 		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
-
 	}
 
 	/**
@@ -191,11 +295,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_is_new_install(): void {
-		// Determining if we are in a new install is based on the following three factors.
-		$version       = null;
-		$shop_id       = null;
-		$post_count    = 0;
-		$counted_posts = false;
+		// Determining if we are in a new install is based on the following factors.
+		$version         = false;
+		$shop_id         = null;
+		$post_count      = 0;
+		$counted_posts   = false;
+		$coming_soon     = 'yes';
+		$completed_lists = array();
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -205,15 +311,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			return $shop_id;
 		};
 
-		$supply_post_count = function () use ( &$post_count ) {
+		$supply_post_count = function () use ( &$post_count, &$counted_posts ) {
 			$counted_posts = true;
-			return $post_count;
+			return (object) array( ProductStatus::PUBLISH => $post_count );
+		};
+
+		$supply_coming_soon = function () use ( &$coming_soon ) {
+			return $coming_soon;
+		};
+
+		$supply_completed_lists = function () use ( &$completed_lists ) {
+			return $completed_lists;
 		};
 
 		// Make it straightforward to test different values for our key variables.
 		add_filter( 'option_woocommerce_version', $supply_version );
 		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		add_filter( 'wp_count_posts', $supply_post_count );
+		add_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		add_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null.' );
 
@@ -223,13 +339,22 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$post_count = 1;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set and we have one or more products).' );
 
-		$version = '9.0.0';
+		$version     = '9.0.0';
+		$coming_soon = 'no';
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the store is live (coming soon is disabled).' );
+
+		$coming_soon     = 'yes';
+		$completed_lists = array( 'setup' );
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if onboarding has been completed.' );
+
+		$completed_lists = array();
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set, we have a shop ID and we have one or more products.' );
 
 		$shop_id = null;
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set and we have one or more products (even if the shop ID is not set).' );
 
 		$post_count = 0;
+		( new ProductCountCache() )->flush( 'product' );
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is set but the shop ID is not set and we do not have any products.' );
 
 		$counted_posts = false;
@@ -239,9 +364,11 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
 
 		// Cleanup.
-		remove_filter( 'option_woocommerce_db_version', $supply_version );
+		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'wp_count_posts', $supply_post_count );
+		remove_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		remove_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 	}
 
 	/**
@@ -256,18 +383,18 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @param bool|null $auto_update Whether to enable auto-updates (TRUE) or not. NULL means use the defaults.
 	 */
 	public function test_db_auto_updates( ?bool $auto_update = null ): void {
-		$options = array( 'woocommerce_db_version', 'woocommerce_version' );
+		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
+		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+		$maybe_update_db = function () {
+			static::maybe_update_db_version();
+		};
 
 		if ( ! is_null( $auto_update ) ) {
 			add_filter( 'woocommerce_enable_auto_update_db', fn() => $auto_update );
 		}
 
-		foreach ( $options as $option_name ) {
-			update_option( $option_name, '9.4.0' );
-		}
-
-		// Trigger version check.
-		\WC_Install::check_version();
+		update_option( 'woocommerce_db_version', $from_version );
+		$maybe_update_db->call( new WC_Install() );
 
 		// Did we schedule anything automatically?
 		$update_scheduled = ! is_null( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
@@ -277,5 +404,395 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertFalse( $update_scheduled );
 		}
+	}
+
+	/**
+	 * Tests that the version check reaches the automatic database updater.
+	 *
+	 * This is a single end-to-end smoke test of the check_version() -> install() ->
+	 * maybe_update_db_version() wiring; the auto-update on/off/default decision logic
+	 * itself is covered for all variations by test_db_auto_updates() above.
+	 *
+	 * @testdox The version check schedules the automatic database update.
+	 */
+	public function test_version_check_schedules_db_auto_update(): void {
+		// Simulate version older than WC()->version is installed.
+		update_option( 'woocommerce_db_version', '9.4.0' );
+		update_option( 'woocommerce_version', '9.4.0' );
+
+		WC_Install::check_version();
+
+		$this->assertNotNull( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
+	}
+
+	/**
+	 * Ensures that the versions in `WC_Install::$db_update_callbacks` are correct.
+	 */
+	public function test_db_update_callbacks_versions(): void {
+		$callbacks = \WC_Install::get_db_update_callbacks();
+		$versions  = array_keys( $callbacks );
+		usort( $versions, 'version_compare' );
+
+		// Array must be sorted by version.
+		$this->assertSame(
+			$versions,
+			array_keys( $callbacks ),
+			'WC_Install::$db_update_callbacks must be sorted by version.',
+		);
+
+		// Greatest version can't be ahead of current stable (except, possibly, for its suffix).
+		$this->assertTrue(
+			empty( $versions ) || version_compare( preg_replace( '/-.*$/', '', end( $versions ) ), WC()->stable_version(), '<=' ),
+			'WC_Install::$db_update_callbacks must not contain versions that are ahead of current stable (except, possibly, for suffix).',
+		);
+
+		// Sequential keys (X.Y.Z-1, X.Y.Z-2) are not needed for -dev versions.
+		if ( '-dev' === substr( WC()->version, -4 ) ) {
+			$this->assertEmpty(
+				preg_grep( '/^' . preg_quote( WC()->stable_version(), '/' ) . '-/', $versions ),
+				sprintf( 'WC_Install::$db_update_callbacks must not contain sequential keys for %1$s while the version is %2$s. Add the callbacks to the plain \'%1$s\' key instead.', WC()->stable_version(), WC()->version ),
+			);
+		}
+	}
+
+	/**
+	 * Test that order stats table schema includes fulfillment_status column for new installations with fulfillments feature enabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_includes_fulfillment_status_for_new_install_with_fulfillments_feature_enabled(): void {
+		// Mock is_new_install to return true.
+		$version = false;
+		$shop_id = null;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		$supply_feature_enabled = function () {
+			return 'yes';
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		add_filter( 'pre_option_woocommerce_feature_fulfillments_enabled', $supply_feature_enabled );
+
+		// Verify that is_new_install returns true.
+		$this->assertTrue( WC_Install::is_new_install(), 'is_new_install should return true for testing new installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema includes fulfillment_status column.
+		$this->assertStringContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should include fulfillment_status column for new installations.' );
+
+		// Assert that the schema includes fulfillment_status index.
+		$this->assertStringContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should include fulfillment_status index for new installations.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		remove_filter( 'pre_option_woocommerce_feature_fulfillments_enabled', $supply_feature_enabled );
+	}
+
+	/**
+	 * Test that order stats table schema does not includes fulfillment_status column for new installations without fulfillments feature enabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_does_not_include_fulfillment_status_for_new_install_without_fulfillments_feature_enabled(): void {
+		// Ensure the fulfillments feature is disabled (a prior test class may have enabled it).
+		delete_option( 'woocommerce_feature_fulfillments_enabled' );
+
+		// Mock is_new_install to return true.
+		$version = false;
+		$shop_id = null;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+
+		// Verify that is_new_install returns true.
+		$this->assertTrue( WC_Install::is_new_install(), 'is_new_install should return true for testing new installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema does NOT include fulfillment_status column.
+		$this->assertStringNotContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should NOT include fulfillment_status column for new installations without fulfillments feature enabled.' );
+
+		// Assert that the schema does NOT include fulfillment_status index.
+		$this->assertStringNotContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should NOT include fulfillment_status index for new installations without fulfillments feature enabled.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+	}
+
+	/**
+	 * Test that order stats table schema excludes fulfillment_status column for existing installations without the column.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_excludes_fulfillment_status_for_existing_install_without_column(): void {
+		// Mock is_new_install to return false.
+		$version = '9.0.0';
+		$shop_id = 10;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+
+		// Mock has_fulfillment_status_column to return false (column does not exist).
+		$supply_column_status = function () {
+			return 'no';
+		};
+
+		add_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+
+		// Verify that is_new_install returns false.
+		$this->assertFalse( WC_Install::is_new_install(), 'is_new_install should return false for testing existing installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema does NOT include fulfillment_status column.
+		$this->assertStringNotContainsString( 'fulfillment_status', $schema, 'Schema should NOT include fulfillment_status column for existing installations without the column.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+	}
+
+	/**
+	 * Test that order stats table schema includes fulfillment_status column for existing installations with the column.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_includes_fulfillment_status_for_existing_install_with_column(): void {
+		// Mock is_new_install to return false.
+		$version = '9.0.0';
+		$shop_id = 10;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+
+		// Mock has_fulfillment_status_column to return true (column exists).
+		$supply_column_status = function () {
+			return 'yes';
+		};
+
+		add_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+
+		// Verify that is_new_install returns false.
+		$this->assertFalse( WC_Install::is_new_install(), 'is_new_install should return false for testing existing installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema DOES include fulfillment_status column for consistency.
+		$this->assertStringContainsString( 'fulfillment_status', $schema, 'Schema should include fulfillment_status column for existing installations that already have the column.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+	}
+
+	/**
+	 * @testdox Should return every actionscheduler_* table that exists in the database, each prefixed with the table prefix.
+	 */
+	public function test_get_action_scheduler_tables_matches_database_tables(): void {
+		global $wpdb;
+
+		// Action Scheduler is bundled with WooCommerce, so its tables exist in the test database. Comparing
+		// against the live schema (rather than re-listing the same hardcoded names the method returns) means
+		// this test fails if Action Scheduler ever adds, renames or drops a table and the method drifts out
+		// of sync, which would otherwise leave those tables behind on uninstall.
+		$actual_tables = $wpdb->get_col(
+			"SHOW TABLES LIKE '" . $wpdb->esc_like( $wpdb->prefix . 'actionscheduler_' ) . "%'"
+		);
+
+		$this->assertNotEmpty(
+			$actual_tables,
+			'No actionscheduler_* tables were found in the database; the test environment is not set up as expected.'
+		);
+
+		$reported_tables = WC_Install::get_action_scheduler_tables();
+
+		foreach ( $reported_tables as $table ) {
+			$this->assertStringStartsWith(
+				$wpdb->prefix,
+				$table,
+				"Action Scheduler table {$table} should be prefixed with the database table prefix."
+			);
+		}
+
+		sort( $actual_tables );
+		sort( $reported_tables );
+
+		$this->assertSame(
+			$actual_tables,
+			$reported_tables,
+			'get_action_scheduler_tables() should match the actionscheduler_* tables present in the database.'
+		);
+	}
+
+	/**
+	 * @testdox Should delete the placeholder image attachment and its meta.
+	 */
+	public function test_delete_placeholder_image_removes_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'woocommerce-placeholder',
+				'post_mime_type' => 'image/webp',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', 'woocommerce-placeholder.webp' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertNull( get_post( $attachment_id ), 'The placeholder attachment post should be deleted.' );
+		$this->assertSame(
+			'',
+			get_post_meta( $attachment_id, '_wp_attached_file', true ),
+			'The placeholder attachment meta should be deleted.'
+		);
+	}
+
+	/**
+	 * @testdox Should not delete a custom image set by the merchant as the placeholder.
+	 */
+	public function test_delete_placeholder_image_keeps_custom_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'merchant-logo',
+				'post_mime_type' => 'image/png',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', '2026/06/merchant-logo.png' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertInstanceOf(
+			WP_Post::class,
+			get_post( $attachment_id ),
+			'A custom merchant placeholder attachment should not be deleted.'
+		);
+	}
+
+	/**
+	 * @testdox Should reference block patterns instead of baking translated empty cart strings into the Cart page content.
+	 */
+	public function test_cart_block_content_references_empty_cart_patterns(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->',
+			$content,
+			'The empty cart title should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->',
+			$content,
+			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'Your cart is currently empty!',
+			$content,
+			'The empty cart title must not be frozen into the page content in the install-time locale.'
+		);
+		$this->assertStringNotContainsString(
+			'New in store',
+			$content,
+			'The "New in store" heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
+	 */
+	public function test_empty_cart_message_patterns_render_expected_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-empty-message' ),
+			'The cart-empty-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-new-in-store-message' ),
+			'The cart-new-in-store-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /--><!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->'
+		);
+
+		$this->assertStringContainsString(
+			'Your cart is currently empty!',
+			$rendered,
+			'The cart-empty-message pattern should render the empty cart title.'
+		);
+		$this->assertStringContainsString(
+			'wc-block-cart__empty-cart__title',
+			$rendered,
+			'The rendered empty cart title should keep the markup the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'New in store',
+			$rendered,
+			'The cart-new-in-store-message pattern should render the "New in store" heading.'
+		);
+		$this->assertStringContainsString(
+			'Browse store',
+			$rendered,
+			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
 	}
 }

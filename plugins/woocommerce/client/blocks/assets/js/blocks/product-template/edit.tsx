@@ -32,6 +32,7 @@ import {
 	parseTemplateSlug,
 } from './utils';
 import { getDefaultStockStatuses } from '../product-collection/constants';
+import { usePlaceholderProducts } from './use-placeholder-products';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
@@ -45,9 +46,9 @@ const ProductTemplateInnerBlocks = () => {
 
 type ProductTemplateBlockPreviewProps = {
 	blocks: object[];
-	blockContextId: string;
+	blockContextId: string | number;
 	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string ) => void;
+	setActiveBlockContextId: ( blockContextId: string | number ) => void;
 };
 
 const ProductTemplateBlockPreview = ( {
@@ -87,19 +88,42 @@ const ProductTemplateBlockPreview = ( {
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
 type ProductContentProps = {
-	attributes: { productId: string };
-	isLoading: boolean;
-	product: ProductResponseItem;
+	attributes: { productId: string | number };
 	displayTemplate: boolean;
 	blocks: BlockInstance[];
 	blockContext: {
 		postType: string;
-		postId: string;
+		postId: string | number;
 	};
-	setActiveBlockContextId: ( id: string ) => void;
+	setActiveBlockContextId: ( id: string | number ) => void;
 };
 
-const ProductContent = withProduct(
+const ProductContent = ( {
+	displayTemplate,
+	blocks,
+	blockContext,
+	setActiveBlockContextId,
+}: ProductContentProps ) => {
+	return (
+		<BlockContextProvider
+			key={ blockContext.postId }
+			value={ blockContext }
+		>
+			{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+			<MemoizedProductTemplateBlockPreview
+				blocks={ blocks }
+				blockContextId={ blockContext.postId }
+				setActiveBlockContextId={ setActiveBlockContextId }
+				isHidden={ displayTemplate }
+			/>
+		</BlockContextProvider>
+	);
+};
+
+// This version of the component is used only when Product Collection is within Single Product block.
+// But because it's causing performance issues in editor, it's extracted to a separate component
+// and will be removed once all inner blocks are migrated from withProduct to useProduct HOC.
+const ProductContentWithProduct = withProduct(
 	( {
 		isLoading,
 		product,
@@ -107,7 +131,10 @@ const ProductContent = withProduct(
 		blocks,
 		blockContext,
 		setActiveBlockContextId,
-	}: ProductContentProps ) => {
+	}: ProductContentProps & {
+		isLoading: boolean;
+		product: ProductResponseItem;
+	} ) => {
 		return (
 			<BlockContextProvider
 				key={ blockContext.postId }
@@ -208,8 +235,9 @@ const ProductTemplateEdit = (
 	const location = useGetLocation( props.context, props.clientId );
 
 	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] =
-		useState< string >();
+	const [ activeBlockContextId, setActiveBlockContextId ] = useState<
+		string | number
+	>();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
 		'loopShopPerPage',
@@ -229,11 +257,12 @@ const ProductTemplateEdit = (
 		queryContextIncludes: queryContextIncludesWithDefaults,
 	} );
 
-	const { products, blocks } = useSelect(
+	const { products, isInSingleProductBlock, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getEditedEntityRecord, getTaxonomies } =
 				select( coreStore );
-			const { getBlocks } = select( blockEditorStore );
+			const { getBlocks, getBlockParentsByBlockName } =
+				select( blockEditorStore );
 			const taxonomies = getTaxonomies( {
 				type: postType,
 				per_page: -1,
@@ -330,6 +359,10 @@ const ProductTemplateEdit = (
 						woocommerceStockStatus: getDefaultStockStatuses(),
 					} ),
 				} ),
+				isInSingleProductBlock:
+					getBlockParentsByBlockName( clientId, [
+						'woocommerce/single-product',
+					] ).length > 0,
 				blocks: getBlocks( clientId ),
 			};
 		},
@@ -365,8 +398,25 @@ const ProductTemplateEdit = (
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
 
-	// We don't want to apply layout styles if there's no products.
-	if ( products && products.length && hasLayoutFlex ) {
+	const isPreviewWithNoProducts =
+		!! __privateProductCollectionPreviewState?.isPreview &&
+		!! products &&
+		! products.length;
+
+	const {
+		blockContexts: placeholderContexts,
+		placeholderProductMap,
+		isReady: placeholdersReady,
+	} = usePlaceholderProducts( {
+		isPreviewWithNoProducts,
+		count: perPage ?? 4,
+	} );
+
+	// Apply layout styles when products are present or when showing preview placeholders.
+	if (
+		( ( products && products.length ) || isPreviewWithNoProducts ) &&
+		hasLayoutFlex
+	) {
 		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
 		const staticGrid = `is-flex-container columns-${ columns }`;
 
@@ -382,6 +432,10 @@ const ProductTemplateEdit = (
 		),
 	} );
 
+	const ProductContentComponent = isInSingleProductBlock
+		? ProductContentWithProduct
+		: ProductContent;
+
 	if ( ! products ) {
 		return (
 			<p { ...blockProps }>
@@ -391,6 +445,57 @@ const ProductTemplateEdit = (
 	}
 
 	if ( ! products.length ) {
+		if (
+			isPreviewWithNoProducts &&
+			placeholdersReady &&
+			placeholderContexts
+		) {
+			return (
+				<ul { ...blockProps }>
+					{ placeholderContexts.map( ( blockContext ) => {
+						const displayTemplate =
+							blockContext.postId ===
+							( activeBlockContextId ||
+								placeholderContexts[ 0 ]?.postId );
+
+						return (
+							<ProductDataContextProvider
+								key={ blockContext.postId }
+								product={
+									placeholderProductMap.get(
+										blockContext.postId as number
+									) ?? null
+								}
+								isLoading={ false }
+							>
+								{ /* Always use ProductContent for placeholders to avoid
+								   withProduct HOC making failing API calls for negative IDs. */ }
+								<ProductContent
+									attributes={ {
+										productId: blockContext.postId,
+									} }
+									blocks={ blocks }
+									displayTemplate={ displayTemplate }
+									blockContext={ blockContext }
+									setActiveBlockContextId={
+										setActiveBlockContextId
+									}
+								/>
+							</ProductDataContextProvider>
+						);
+					} ) }
+				</ul>
+			);
+		}
+
+		if ( isPreviewWithNoProducts && ! placeholdersReady ) {
+			return (
+				<p { ...blockProps }>
+					<Spinner className="wc-block-product-template__spinner" />
+				</p>
+			);
+		}
+
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
@@ -417,7 +522,7 @@ const ProductTemplateEdit = (
 					return (
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore isLoading and product props are missing as they're coming from untyped withProduct HOC.
-						<ProductContent
+						<ProductContentComponent
 							key={ blockContext.postId }
 							attributes={ {
 								productId: blockContext.postId,

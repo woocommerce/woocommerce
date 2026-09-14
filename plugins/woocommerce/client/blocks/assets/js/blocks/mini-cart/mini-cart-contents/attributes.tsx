@@ -8,10 +8,6 @@ import { filledCart, removeCart } from '@woocommerce/icons';
 export const blockName = 'woocommerce/mini-cart-contents';
 
 export const attributes = {
-	isPreview: {
-		type: 'boolean',
-		default: false,
-	},
 	lock: {
 		type: 'object',
 		default: {

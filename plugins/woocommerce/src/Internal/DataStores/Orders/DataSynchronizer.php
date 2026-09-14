@@ -105,6 +105,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
 		add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
 		add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
+		add_action( 'woocommerce_update_order_refund', array( $this, 'handle_updated_order' ), 100 );
 		add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
 		add_action( 'wp_scheduled_delete', array( $this, 'delete_trashed_orders' ), 9 );
 		add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
@@ -591,7 +592,7 @@ $limit_clause",
 		$sql = $wpdb->prepare(
 			"
 SELECT(
-	($missing_orders_count_sql)
+	COALESCE(($missing_orders_count_sql), 0)
 	+
 	(SELECT COUNT(1) FROM (
 		SELECT orders.id FROM $orders_table orders

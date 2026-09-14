@@ -13,7 +13,6 @@ import './style.scss';
 
 registerBlockType( metadata, {
 	edit: ProductItemCTAEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

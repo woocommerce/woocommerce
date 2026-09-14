@@ -57,7 +57,7 @@ class PaymentInfoTest extends WC_Unit_Test_Case {
 		);
 		$order->save();
 
-		// Add a dummy callback to the filter. It should be prefered over metadata.
+		// Add a dummy callback to the filter. It should be preferred over metadata.
 		$filter_callback = fn() => array( 'payment_method' => 'foo' );
 		add_filter( 'wc_order_payment_card_info', $filter_callback );
 

@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -80,6 +81,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				LEFT JOIN {$wpdb->postmeta} low_stock_amount_meta ON posts.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount'
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status IN ( 'publish', 'private' )
 				AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 				AND wc_product_meta_lookup.stock_status = 'instock'
 				AND (
@@ -119,6 +121,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status IN ( 'publish', 'private' )
 				AND wc_product_meta_lookup.stock_status = %s
 				",
 				$status
@@ -132,10 +135,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return int Product count.
 	 */
 	private function get_product_count() {
-		$query_args              = array();
-		$query_args['post_type'] = array( 'product', 'product_variation' );
-		$query                   = new \WP_Query();
+		// The statuses are the ones the counts above use. WP_Query's default set is context-dependent,
+		// and this count is cached store-wide for 30 days, so it would otherwise freeze at whatever
+		// the first caller's context produced and disagree with the rest of the report.
+		$query_args = array(
+			'post_type'   => array( 'product', 'product_variation' ),
+			'post_status' => array( ProductStatus::PUBLISH, ProductStatus::PRIVATE ),
+		);
+
+		$query = new \WP_Query();
 		$query->query( $query_args );
+
 		return intval( $query->found_posts );
 	}
 }

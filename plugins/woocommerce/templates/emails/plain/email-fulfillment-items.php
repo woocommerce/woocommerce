@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates\Emails\Plain
- * @version     10.1.0
+ * @version     10.8.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,7 +60,10 @@ foreach ( $items as $item_id => $item ) :
 		 * @param int           $quantity Item quantity.
 		 * @param WC_Order_Item $item     Item object.
 		 */
-		$product_name .= ' × ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->qty, $item->item );
+		$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $item->qty, $item->item );
+		if ( '' !== $quantity ) {
+			$product_name .= ' × ' . $quantity;
+		}
 		echo wp_kses_post( str_pad( wp_kses_post( $product_name ), 40 ) );
 		echo ' ';
 		echo esc_html( str_pad( wp_kses( $order->get_formatted_line_subtotal( $item->item ), array() ), 20, ' ', STR_PAD_LEFT ) ) . "\n";

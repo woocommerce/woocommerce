@@ -8,7 +8,8 @@
 	&__suffix {
 		display: none;
 
-		.wc-block-components-product-sku.is-selected & {
+		.wc-block-components-product-sku.is-selected &,
+		&.has-content {
 			display: inline;
 		}
 	}

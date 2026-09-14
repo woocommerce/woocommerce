@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class ProductBrandTemplate extends AbstractTemplate {
+class ProductBrandTemplate extends AbstractTemplateWithFallback {
 
 	/**
 	 * The slug of the template.
@@ -24,14 +24,14 @@ class ProductBrandTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	public string $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
-	 * Initialization method.
+	 * Whether this is a taxonomy template.
+	 *
+	 * @var bool
 	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-	}
+	public bool $is_taxonomy_template = true;
 
 	/**
 	 * Returns the title of the template.
@@ -52,18 +52,12 @@ class ProductBrandTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_product_taxonomy() && is_tax( 'product_brand' ) ) {
 			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
 			$compatibility_layer->init();
-
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

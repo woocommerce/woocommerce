@@ -11,13 +11,16 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,6 +37,16 @@ class WC_Tracker {
 	 * @var string
 	 */
 	private static $api_url = 'https://tracking.woocommerce.com/v1/';
+
+	/**
+	 * Consecutive failed attempts after which the current snapshot is abandoned.
+	 *
+	 * Counts attempts rather than delivery failures, so a snapshot that cannot be built is
+	 * bounded too. Retries happen on the daily tracker action, so this is a few days.
+	 *
+	 * @var int
+	 */
+	private const MAX_CONSECUTIVE_SEND_FAILURES = 3;
 
 	/**
 	 * Hook into cron event.
@@ -66,39 +79,163 @@ class WC_Tracker {
 			}
 		} else {
 			// Make sure there is at least a 1 hour delay between override sends, we don't want duplicate calls due to double clicking links.
-			$last_send = self::get_last_send_time();
-			if ( $last_send && $last_send > strtotime( '-1 hours' ) ) {
+			$last_attempt = max( (int) self::get_last_send_time(), (int) get_option( 'woocommerce_tracker_last_attempt', 0 ) );
+			if ( $last_attempt > strtotime( '-1 hours' ) ) {
 				return;
 			}
 		}
 
-		// Update time first before sending to ensure it is set.
-		update_option( 'woocommerce_tracker_last_send', time() );
+		// Recorded before building the snapshot so overlapping override sends are still suppressed.
+		update_option( 'woocommerce_tracker_last_attempt', time(), false );
 
-		$params = self::get_tracking_data();
-		wp_safe_remote_post(
+		// Count the attempt before the snapshot is built. A fatal or timeout inside
+		// get_tracking_data() never reaches record_send_result(), so a counter that only
+		// moved on delivery outcomes would let an unbuildable snapshot rebuild on every
+		// scheduled run instead of giving up the way a failed delivery does.
+		$attempts = (int) get_option( 'woocommerce_tracker_send_failures', 0 ) + 1;
+
+		if ( self::MAX_CONSECUTIVE_SEND_FAILURES < $attempts ) {
+			self::finish_snapshot();
+			wc_get_logger()->warning(
+				'WooCommerce tracker snapshot attempts ended before recording a result; giving up until the next interval.',
+				array(
+					'source'   => 'woocommerce-tracker',
+					'failures' => $attempts - 1,
+				)
+			);
+			return;
+		}
+
+		update_option( 'woocommerce_tracker_send_failures', $attempts, false );
+
+		$body = wp_json_encode( self::get_tracking_data() );
+		if ( false === $body ) {
+			self::record_send_failure( false, 0, 'json_encode_failure', 0 );
+			return;
+		}
+
+		$response = wp_safe_remote_post(
 			self::$api_url,
 			array(
 				'method'      => 'POST',
-				'timeout'     => 45,
+				'timeout'     => 10,
 				'redirection' => 5,
 				'httpversion' => '1.0',
-				'blocking'    => false,
+				'blocking'    => true,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-				'body'        => wp_json_encode( $params ),
+				'body'        => $body,
 				'cookies'     => array(),
+			)
+		);
+
+		self::record_send_result( $response, strlen( $body ) );
+	}
+
+	/**
+	 * Record the outcome of a delivery attempt.
+	 *
+	 * The send time is recorded after acceptance or permanent abandonment. A transient failure
+	 * remains pending for the next run.
+	 *
+	 * @param array|WP_Error $response   Response from wp_safe_remote_post().
+	 * @param int            $body_bytes Size of the posted snapshot.
+	 */
+	private static function record_send_result( $response, $body_bytes ): void {
+		$status = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
+
+		if ( 200 <= $status && 300 > $status ) {
+			self::finish_snapshot();
+			return;
+		}
+
+		self::record_send_failure( self::is_retryable_status( $status ), $status, is_wp_error( $response ) ? (string) $response->get_error_code() : '', $body_bytes );
+	}
+
+	/**
+	 * Record a failed delivery attempt.
+	 *
+	 * The attempt was already counted before the snapshot was built, so this only decides
+	 * whether to keep retrying: a non-retryable failure or the last allowed attempt gives up
+	 * on the current snapshot. Retry state is discarded when tracking was turned off while
+	 * the request was in flight.
+	 *
+	 * @param bool   $retryable  Whether the next scheduled run should try again.
+	 * @param int    $status     HTTP status code, 0 when no response was received.
+	 * @param string $error_code Error code when no response was received.
+	 * @param int    $body_bytes Size of the snapshot.
+	 */
+	private static function record_send_failure( $retryable, $status, $error_code, $body_bytes ): void {
+		// The attempt was already counted before the snapshot was built.
+		$failures = (int) get_option( 'woocommerce_tracker_send_failures', 0 );
+		$give_up  = ! $retryable || self::MAX_CONSECUTIVE_SEND_FAILURES <= $failures;
+
+		if ( $give_up ) {
+			self::finish_snapshot();
+		} elseif ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			delete_option( 'woocommerce_tracker_send_failures' );
+		}
+
+		if ( 413 === $status ) {
+			$message = 'WooCommerce tracker snapshot delivery failed; the snapshot is too large for the service and will not be retried.';
+		} elseif ( 'json_encode_failure' === $error_code ) {
+			$message = 'WooCommerce tracker snapshot could not be encoded and will not be retried.';
+		} elseif ( $give_up ) {
+			$message = 'WooCommerce tracker snapshot delivery failed; giving up until the next interval.';
+		} else {
+			$message = 'WooCommerce tracker snapshot delivery failed; it will be retried on the next run.';
+		}
+
+		wc_get_logger()->warning(
+			$message,
+			array(
+				'source'      => 'woocommerce-tracker',
+				'http_status' => $status,
+				'error_code'  => $error_code,
+				'failures'    => $failures,
+				'body_bytes'  => $body_bytes,
 			)
 		);
 	}
 
 	/**
-	 * Get the last time tracking data was sent.
+	 * Close out the current tracking attempt, whether a snapshot was sent or the
+	 * attempt was abandoned before one existed.
+	 *
+	 * The scheduled gate reads only the send time, so advancing it is what puts the
+	 * store back on the weekly interval and stops the daily retries.
+	 */
+	private static function finish_snapshot(): void {
+		update_option( 'woocommerce_tracker_last_send', time() );
+		delete_option( 'woocommerce_tracker_send_failures' );
+	}
+
+	/**
+	 * Whether a delivery failure with the given status is worth retrying.
+	 *
+	 * Transport failures (status 0), rate limiting, timeouts and server errors are retried;
+	 * other client errors mean the snapshot itself was rejected.
+	 *
+	 * @param int $status HTTP status code, 0 for a transport failure.
+	 * @return bool
+	 */
+	private static function is_retryable_status( $status ) {
+		return 0 === $status || in_array( $status, array( 408, 425, 429 ), true ) || 500 <= $status;
+	}
+
+	/**
+	 * Get the time the current tracking attempt was closed out.
+	 *
+	 * Despite the option name, this is not only set on delivery: it also advances when an
+	 * attempt is abandoned, including before a snapshot could be built. The scheduled gate
+	 * reads it as "this cycle is done", not "a snapshot was sent".
 	 *
 	 * @return int|bool
 	 */
 	private static function get_last_send_time() {
 		/**
 		 * Filter the last time tracking data was sent.
+		 *
+		 * The timestamp also covers abandoned attempts, not only deliveries.
 		 *
 		 * @since 2.3.0
 		 */
@@ -183,6 +320,9 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
+		// Migrator CLI statistics.
+		$data['migrator'] = self::get_migrator_data();
+
 		// Get order snapshot.
 		$data['order_snapshot'] = self::get_order_snapshot();
 
@@ -234,6 +374,9 @@ class WC_Tracker {
 		// Store email usage.
 		$data['store_emails'] = self::get_store_emails();
 
+		// Address autocomplete usage.
+		$data['address_autocomplete'] = self::get_address_autocomplete_info();
+
 		/**
 		 * Filter the data that's sent with the tracker.
 		 *
@@ -244,6 +387,53 @@ class WC_Tracker {
 		// Total seconds taken to generate snapshot (including filtered data).
 		$data['snapshot_generation_time'] = microtime( true ) - $start_time;
 
+		return $data;
+	}
+
+	/**
+	 * Get address autocomplete info.
+	 *
+	 * @return array Address autocomplete info.
+	 */
+	public static function get_address_autocomplete_info() {
+		$data = array(
+			'enabled'            => ( 'yes' === wc_bool_to_string( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) ) ? 'yes' : 'no',
+			'providers'          => array(),
+			'preferred_provider' => '',
+		);
+
+		if ( ! class_exists( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class ) ) {
+			// The option could still be set even if the class doesn't exist (e.g. if set manually in the DB).
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		$autocomplete_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class );
+		$autocomplete_controller->init();
+
+		// Get all registered providers.
+		$providers = $autocomplete_controller->get_providers();
+		if ( is_array( $providers ) ) {
+			foreach ( $providers as $provider ) {
+				if ( ! ( $provider instanceof WC_Address_Provider ) ) {
+					continue;
+				}
+				$data['providers'][] = $provider->id;
+			}
+		}
+
+		if ( empty( $data['providers'] ) ) {
+			// If there are no providers, the feature is effectively disabled.
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		if ( 'no' === $data['enabled'] ) {
+			// If the feature is disabled, no need to go further, but we will still track which providers are available.
+			return $data;
+		}
+
+		$data['preferred_provider'] = $autocomplete_controller->get_preferred_provider();
 		return $data;
 	}
 
@@ -434,9 +624,8 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_product_counts() {
-		$product_count          = array();
-		$product_count_data     = wp_count_posts( 'product' );
-		$product_count['total'] = $product_count_data->publish;
+		$product_count_data = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+		$product_count      = array( 'total' => $product_count_data[ ProductStatus::PUBLISH ] ?? 0 );
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $product_statuses as $product_status ) {
@@ -920,6 +1109,24 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get migrator CLI statistics.
+	 *
+	 * @return array
+	 */
+	private static function get_migrator_data() {
+		if ( ! class_exists( MigratorTracker::class ) ) {
+			return array();
+		}
+
+		try {
+			$tracker = wc_get_container()->get( MigratorTracker::class );
+			return $tracker->get_data();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+	}
+
+	/**
 	 * Get a list of all active payment gateways.
 	 *
 	 * @return array
@@ -984,13 +1191,13 @@ class WC_Tracker {
 	 */
 	private static function get_all_woocommerce_options_values() {
 		return array(
-			'version'                               => WC()->version,
+			'version'                               => WC()->stable_version(),
 			'currency'                              => get_woocommerce_currency(),
 			'base_location'                         => WC()->countries->get_base_country(),
 			'base_state'                            => WC()->countries->get_base_state(),
 			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
-			'api_enabled'                           => get_option( 'woocommerce_api_enabled', 'no' ),
+			'api_enabled'                           => WC()->legacy_rest_api_is_available() ? 'yes' : 'no',
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
 			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
 			'download_method'                       => get_option( 'woocommerce_file_download_method' ),
@@ -1521,7 +1728,7 @@ class WC_Tracker {
 	 * Check if any core emails are being overridden by a template override.
 	 *
 	 * @param array $template_overrides Template overrides.
-	 * @return array Array with count of core email overrides and the templates that are overriden.
+	 * @return array Array with count of core email overrides and the templates that are overridden.
 	 */
 	public static function get_core_email_overrides( $template_overrides ): array {
 		$email_template_overrides = EmailImprovements::get_core_email_overrides( $template_overrides );

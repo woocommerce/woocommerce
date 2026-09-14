@@ -3,22 +3,28 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Fragment, useEffect, useRef } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 import { SectionHeader, ScrollTo } from '@woocommerce/components';
-import { useSettings } from '@woocommerce/data';
+import { itemsStore, reportsStore, useSettings } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './index.scss';
-import { config } from './config';
+import { config, SCHEDULED_IMPORT_SETTING_NAME } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
+import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
-const Settings = ( { createNotice, query } ) => {
+const Settings = ( { query } ) => {
+	const { createNotice } = useDispatch( 'core/notices' );
+	const {
+		invalidateResolutionForStoreSelector: invalidateReportResolutions,
+	} = useDispatch( reportsStore );
+	const { invalidateResolutionForStoreSelector: invalidateItemResolutions } =
+		useDispatch( itemsStore );
 	const {
 		settingsError,
 		isRequesting,
@@ -29,6 +35,10 @@ const Settings = ( { createNotice, query } ) => {
 		wcAdminSettings,
 	} = useSettings( 'wc_admin', [ 'wcAdminSettings' ] );
 	const hasSaved = useRef( false );
+	const [ isImportModeModalOpen, setIsImportModeModalOpen ] =
+		useState( false );
+	const [ pendingImportModeChange, setPendingImportModeChange ] =
+		useState( null );
 
 	useEffect( () => {
 		function warnIfUnsavedChanges( event ) {
@@ -52,6 +62,9 @@ const Settings = ( { createNotice, query } ) => {
 		}
 		if ( ! isRequesting && hasSaved.current ) {
 			if ( ! settingsError ) {
+				invalidateReportResolutions( 'getReportItems' );
+				invalidateReportResolutions( 'getReportStats' );
+				invalidateItemResolutions( 'getItems' );
 				createNotice(
 					'success',
 					__(
@@ -70,7 +83,13 @@ const Settings = ( { createNotice, query } ) => {
 			}
 			hasSaved.current = false;
 		}
-	}, [ isRequesting, settingsError, createNotice ] );
+	}, [
+		isRequesting,
+		settingsError,
+		createNotice,
+		invalidateReportResolutions,
+		invalidateItemResolutions,
+	] );
 
 	const resetDefaults = () => {
 		if (
@@ -110,7 +129,25 @@ const Settings = ( { createNotice, query } ) => {
 	};
 
 	const handleInputChange = ( e ) => {
+		if ( isImportModeModalOpen ) {
+			return;
+		}
+
 		const { checked, name, type, value } = e.target;
+
+		// Intercept import mode change from scheduled to immediate
+		if (
+			name === SCHEDULED_IMPORT_SETTING_NAME &&
+			config[ SCHEDULED_IMPORT_SETTING_NAME ] &&
+			wcAdminSettings[ name ] === 'yes' &&
+			value === 'no'
+		) {
+			setPendingImportModeChange( { name, value } );
+			setIsImportModeModalOpen( true );
+
+			return;
+		}
+
 		const nextSettings = { ...wcAdminSettings };
 
 		if ( type === 'checkbox' ) {
@@ -127,6 +164,34 @@ const Settings = ( { createNotice, query } ) => {
 		updateSettings( 'wcAdminSettings', nextSettings );
 	};
 
+	const handleImportModeConfirm = () => {
+		if ( pendingImportModeChange ) {
+			const nextSettings = { ...wcAdminSettings };
+			nextSettings[ pendingImportModeChange.name ] =
+				pendingImportModeChange.value;
+			updateSettings( 'wcAdminSettings', nextSettings );
+		}
+		setIsImportModeModalOpen( false );
+		setPendingImportModeChange( null );
+	};
+
+	const handleImportModeCancel = () => {
+		setIsImportModeModalOpen( false );
+		setPendingImportModeChange( null );
+	};
+
+	const getSettingValue = ( setting ) => {
+		if (
+			setting === SCHEDULED_IMPORT_SETTING_NAME &&
+			! wcAdminSettings[ setting ]
+		) {
+			// If scheduled import setting is not set, return 'no' to show the immediate import option by default
+			return 'no';
+		}
+
+		return wcAdminSettings[ setting ];
+	};
+
 	return (
 		<Fragment>
 			<SectionHeader
@@ -136,18 +201,18 @@ const Settings = ( { createNotice, query } ) => {
 				{ Object.keys( config ).map( ( setting ) => (
 					<Setting
 						handleChange={ handleInputChange }
-						value={ wcAdminSettings[ setting ] }
+						value={ getSettingValue( setting ) }
 						key={ setting }
 						name={ setting }
 						{ ...config[ setting ] }
 					/>
 				) ) }
 				<div className="woocommerce-settings__actions">
-					<Button isSecondary onClick={ resetDefaults }>
+					<Button variant="secondary" onClick={ resetDefaults }>
 						{ __( 'Reset defaults', 'woocommerce' ) }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						isBusy={ isRequesting }
 						onClick={ saveChanges }
 					>
@@ -162,16 +227,15 @@ const Settings = ( { createNotice, query } ) => {
 			) : (
 				<HistoricalData createNotice={ createNotice } />
 			) }
+			{ config[ SCHEDULED_IMPORT_SETTING_NAME ] && (
+				<ImportModeConfirmationModal
+					isOpen={ isImportModeModalOpen }
+					onClose={ handleImportModeCancel }
+					onConfirm={ handleImportModeConfirm }
+				/>
+			) }
 		</Fragment>
 	);
 };
 
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			createNotice,
-		};
-	} )
-)( Settings );
+export default Settings;

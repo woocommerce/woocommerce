@@ -9,12 +9,29 @@ import { isEmpty } from 'lodash';
  */
 import './meta-list.scss';
 
+function MetaValue( { value, href }: { value: string; href?: string } ) {
+	if ( isEmpty( String( value ) ) ) {
+		return <>{ __( '(empty)', 'woocommerce' ) }</>;
+	}
+
+	if ( href ) {
+		return (
+			<a href={ href } target="_blank" rel="noopener noreferrer">
+				{ String( value ) }
+			</a>
+		);
+	}
+
+	return <>{ String( value ) }</>;
+}
+
 export default function MetaList( {
 	metaList,
 }: {
 	metaList: Array< {
 		label: string;
 		value: string;
+		href?: string;
 	} >;
 } ) {
 	return (
@@ -28,9 +45,7 @@ export default function MetaList( {
 						{ meta.label }
 					</div>
 					<div className="woocommerce-fulfillment-meta-list__item-value">
-						{ isEmpty( String( meta.value ) )
-							? __( '(empty)', 'woocommerce' )
-							: String( meta.value ) }
+						<MetaValue value={ meta.value } href={ meta.href } />
 					</div>
 				</li>
 			) ) }

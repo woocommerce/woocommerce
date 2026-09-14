@@ -70,7 +70,8 @@ const getPickupDetails = (
 
 const renderPickupLocation = (
 	option: CartShippingPackageShippingRate,
-	packageCount: number
+	packageCount: number,
+	clientSelectedOption = ''
 ): RadioControlOptionType => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
@@ -78,8 +79,6 @@ const renderPickupLocation = (
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
 	const details = getPickupDetails( option );
-
-	const isSelected = option?.selected;
 
 	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
 	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
@@ -127,12 +126,14 @@ const renderPickupLocation = (
 				<Icon
 					icon={ mapMarker }
 					className="wc-block-editor-components-block-icon"
+					width={ 16 }
+					height={ 16 }
 				/>
 				{ decodeEntities( address ) }
 			</>
 		) : undefined,
 		secondaryDescription:
-			isSelected && details ? (
+			clientSelectedOption === option?.rate_id && details ? (
 				<ReadMore maxLines={ 2 }>
 					{ decodeEntities( details ) }
 				</ReadMore>
@@ -176,7 +177,7 @@ const Block = () => {
 			selectShippingRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
-		// shipping rate selection to end up in inifite loop
+		// shipping rate selection to end up in infinite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
@@ -207,12 +208,15 @@ const Block = () => {
 		renderPickupLocation,
 	};
 
+	const packageData = shippingRates[ 0 ] || null;
+
 	return (
 		<>
 			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
-					title={ shippingRates[ 0 ].name }
+					title={ packageData?.name }
+					packageData={ packageData }
 					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }

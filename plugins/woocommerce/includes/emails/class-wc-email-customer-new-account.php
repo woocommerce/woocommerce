@@ -59,16 +59,30 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 		public $set_password_url;
 
 		/**
+		 * User display name (first name, or login as fallback).
+		 *
+		 * @var string
+		 */
+		public $user_display_name;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
 			$this->id             = 'customer_new_account';
 			$this->customer_email = true;
 			$this->title          = __( 'New account', 'woocommerce' );
+			$this->email_group    = 'accounts';
 			$this->description    = __( 'Send an email to customers notifying them that they have created an account', 'woocommerce' );
 			$this->template_html  = 'emails/customer-new-account.php';
 			$this->template_plain = 'emails/plain/customer-new-account.php';
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Account created', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their account has been created.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -106,14 +120,15 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 				$this->set_password_url   = $this->generate_set_password_url();
 				$this->user_login         = stripslashes( $this->object->user_login );
 				$this->user_email         = stripslashes( $this->object->user_email );
+				$customer                 = new WC_Customer( $user_id );
+				$first_name               = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
+				$this->user_display_name  = ! empty( $first_name ) ? $first_name : $this->user_login;
 				$this->recipient          = $this->user_email;
 				$this->user_pass          = $user_pass;
 				$this->password_generated = $password_generated;
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -130,6 +145,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'blogname'           => $this->get_blogname(),
 					'set_password_url'   => $this->set_password_url,
 					'sent_to_admin'      => false,
@@ -153,6 +169,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'blogname'           => $this->get_blogname(),
 					'set_password_url'   => $this->set_password_url,
 					'sent_to_admin'      => false,
@@ -174,6 +191,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 				$this->template_block_content,
 				array(
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'set_password_url'   => $this->set_password_url,
 					'sent_to_admin'      => false,
 					'plain_text'         => false,

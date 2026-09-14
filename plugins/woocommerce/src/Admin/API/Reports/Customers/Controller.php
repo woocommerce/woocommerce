@@ -42,8 +42,19 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return mixed Results from the data store.
 	 */
 	protected function get_datastore_data( $query_args = array() ) {
-		$query = new Query( $query_args );
-		return $query->get_data();
+		$query       = new Query( $query_args );
+		$report_data = $query->get_data();
+
+		// Warm the user caches in one query so the per-item role lookup in
+		// prepare_item_for_response() doesn't query per row.
+		if ( ! empty( $report_data->data ) ) {
+			$user_ids = array_filter( array_map( 'absint', wp_list_pluck( $report_data->data, 'user_id' ) ) );
+			if ( ! empty( $user_ids ) ) {
+				cache_users( $user_ids );
+			}
+		}
+
+		return $report_data;
 	}
 
 	/**
@@ -84,9 +95,13 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 		$args['customers']           = $request['customers'];
+		$args['customers_exclude']   = $request['customers_exclude'];
 		$args['users']               = $request['users'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		$args['filter_empty']        = $request['filter_empty'];
+		$args['user_type']           = $request['user_type'];
+		$args['location_includes']   = $request['location_includes'];
+		$args['location_excludes']   = $request['location_excludes'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -94,7 +109,102 @@ class Controller extends GenericController implements ExportableInterface {
 		$normalized_params_date    = TimeInterval::normalize_between_params( $request, $between_params_date, true );
 		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
 
+		$args = self::consolidate_customer_id_filters( $args );
+
 		return $args;
+	}
+
+	/**
+	 * Consolidate customer identity filter IDs into customers/customers_exclude.
+	 *
+	 * When the frontend sends customer IDs via name_includes, email_includes, or
+	 * username_includes, this method collects those IDs and merges them into the
+	 * customers/customers_exclude params so the DataStore filters by customer_id.
+	 *
+	 * Only numeric values are consolidated. String values (e.g. actual email
+	 * addresses or names) are left untouched for the DataStore's exact-match
+	 * filtering.
+	 *
+	 * @param array $args Query arguments.
+	 * @return array Modified query arguments.
+	 */
+	public static function consolidate_customer_id_filters( $args ) {
+		$include_params = array( 'name_includes', 'email_includes', 'username_includes' );
+		$exclude_params = array( 'name_excludes', 'email_excludes', 'username_excludes' );
+		$match          = $args['match'] ?? 'all';
+
+		$include_sets = array();
+		foreach ( $include_params as $param ) {
+			if ( ! empty( $args[ $param ] ) && self::is_id_list( $args[ $param ] ) ) {
+				$include_sets[] = wp_parse_id_list( $args[ $param ] );
+				$args[ $param ] = null;
+			}
+		}
+		if ( ! empty( $include_sets ) ) {
+			$consolidated = count( $include_sets ) > 1
+				? ( 'all' === $match
+					? call_user_func_array( 'array_intersect', $include_sets )
+					: array_unique( array_merge( ...$include_sets ) ) )
+				: $include_sets[0];
+
+			// Merge with any pre-existing customers filter.
+			if ( ! empty( $args['customers'] ) ) {
+				$existing     = wp_parse_id_list( $args['customers'] );
+				$consolidated = 'all' === $match
+					? array_intersect( $consolidated, $existing )
+					: array_unique( array_merge( $consolidated, $existing ) );
+			}
+
+			// When match=all and intersection is empty, force no-results.
+			$args['customers'] = empty( $consolidated ) ? array( 0 ) : array_values( $consolidated );
+		}
+
+		$exclude_sets = array();
+		foreach ( $exclude_params as $param ) {
+			if ( ! empty( $args[ $param ] ) && self::is_id_list( $args[ $param ] ) ) {
+				$exclude_sets[] = wp_parse_id_list( $args[ $param ] );
+				$args[ $param ] = null;
+			}
+		}
+		if ( ! empty( $exclude_sets ) ) {
+			$consolidated = count( $exclude_sets ) > 1
+				? ( 'all' === $match
+					? array_unique( array_merge( ...$exclude_sets ) )
+					: call_user_func_array( 'array_intersect', $exclude_sets ) )
+				: $exclude_sets[0];
+
+			// Merge with any pre-existing customers_exclude filter.
+			if ( ! empty( $args['customers_exclude'] ) ) {
+				$existing     = wp_parse_id_list( $args['customers_exclude'] );
+				$consolidated = array_unique( array_merge( $consolidated, $existing ) );
+			}
+
+			$args['customers_exclude'] = array_values( $consolidated );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Check if a value is a comma-separated list of numeric IDs.
+	 *
+	 * @param mixed $value The value to check.
+	 * @return bool True if the value contains only numeric IDs.
+	 */
+	private static function is_id_list( $value ) {
+		if ( is_array( $value ) ) {
+			$values = $value;
+		} elseif ( is_string( $value ) ) {
+			$values = explode( ',', $value );
+		} else {
+			return false;
+		}
+		foreach ( $values as $v ) {
+			if ( ! is_numeric( trim( $v ) ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -133,13 +243,19 @@ class Controller extends GenericController implements ExportableInterface {
 	public function prepare_item_for_response( $report, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $report, $request );
+		// Trim name field to prevent whitespace issues.
+		$data['name'] = trim( $data['name'] );
 		// Registered date is UTC.
 		$data['date_registered_gmt'] = wc_rest_prepare_date_response( $data['date_registered'] );
 		$data['date_registered']     = wc_rest_prepare_date_response( $data['date_registered'], false );
 		// Last active date is local time.
 		$data['date_last_active_gmt'] = wc_rest_prepare_date_response( $data['date_last_active'], false );
 		$data['date_last_active']     = wc_rest_prepare_date_response( $data['date_last_active'] );
-		$data                         = $this->filter_response_by_context( $data, $context );
+		$data['role']                 = $this->get_user_role_names( $data['user_id'] ?? 0 );
+		// Rows can be served from a report cache written before these columns existed.
+		$data['billing_phone']  = $data['billing_phone'] ?? '';
+		$data['shipping_phone'] = $data['shipping_phone'] ?? '';
+		$data                   = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
@@ -155,6 +271,35 @@ class Controller extends GenericController implements ExportableInterface {
 		 * @since 4.0.0
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_customers', $response, $report, $request );
+	}
+
+	/**
+	 * Get the localized role names of a user as a comma-separated string.
+	 *
+	 * Roles are resolved at response time rather than stored in the customer
+	 * lookup table, since role changes (e.g. via WP_User::set_role() or plugins
+	 * editing capabilities directly) would leave a stored copy stale.
+	 *
+	 * @param int $user_id User ID, 0 for guest customers.
+	 * @return string Comma-separated localized role names, empty for guests and deleted users.
+	 */
+	protected function get_user_role_names( $user_id ) {
+		if ( empty( $user_id ) ) {
+			return '';
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return '';
+		}
+
+		$role_names = array();
+		foreach ( $user->roles as $role ) {
+			$name         = wp_roles()->role_names[ $role ] ?? $role;
+			$role_names[] = translate_user_role( $name );
+		}
+
+		return implode( ', ', $role_names );
 	}
 
 	/**
@@ -207,8 +352,32 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'first_name'           => array(
+					'description' => __( 'First name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'last_name'            => array(
+					'description' => __( 'Last name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'email'                => array(
+					'description' => __( 'Email address.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'username'             => array(
 					'description' => __( 'Username.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'role'                 => array(
+					'description' => __( 'Role(s) of the user, comma-separated. Empty for guest customers.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -233,6 +402,18 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 				'postcode'             => array(
 					'description' => __( 'Postal code.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'billing_phone'        => array(
+					'description' => __( 'Billing phone.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'shipping_phone'       => array(
+					'description' => __( 'Shipping phone.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -308,6 +489,10 @@ class Controller extends GenericController implements ExportableInterface {
 			array(
 				'username',
 				'name',
+				'first_name',
+				'last_name',
+				'email',
+				'location',
 				'country',
 				'city',
 				'state',
@@ -502,6 +687,15 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
+		$params['customers_exclude']       = array(
+			'description'       => __( 'Limit result to exclude items with specified customer ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
 		$params['users']                   = array(
 			'description'       => __( 'Limit result to items with specified user ids.', 'woocommerce' ),
 			'type'              => 'array',
@@ -527,7 +721,27 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 			),
 		);
-
+		$params['user_type']               = array(
+			'description'       => __( 'Limit result to items with specified user type.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'validate_callback' => 'rest_validate_request_arg',
+			'enum'              => array(
+				'all',
+				'registered',
+				'guest',
+			),
+		);
+		$params['location_includes']       = array(
+			'description'       => __( 'Includes customers by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['location_excludes']       = array(
+			'description'       => __( 'Excludes customers by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		return $params;
 	}
 
@@ -537,6 +751,10 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
+		// Appending keeps positional consumers of the released columns working, and
+		// this order must match getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js, which produces the
+		// browser-side CSV for single-page reports from the same Download button.
 		$export_columns = array(
 			'name'            => __( 'Name', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
@@ -550,6 +768,9 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => __( 'City', 'woocommerce' ),
 			'region'          => __( 'Region', 'woocommerce' ),
 			'postcode'        => __( 'Postal Code', 'woocommerce' ),
+			'billing_phone'   => __( 'Billing Phone', 'woocommerce' ),
+			'shipping_phone'  => __( 'Shipping Phone', 'woocommerce' ),
+			'role'            => __( 'Role', 'woocommerce' ),
 		);
 
 		/**
@@ -584,12 +805,15 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => $item['city'],
 			'region'          => $item['state'],
 			'postcode'        => $item['postcode'],
+			'billing_phone'   => $item['billing_phone'] ?? '',
+			'shipping_phone'  => $item['shipping_phone'] ?? '',
+			'role'            => $item['role'] ?? '',
 		);
 
 		/**
 		 * Filter the column values of an item being exported.
 		 *
-		 * @param object $export_item Key value pair of Column ID => Row Value.
+		 * @param array  $export_item Key value pair of Column ID => Row Value.
 		 * @param object $item        Single report item/row.
 		 * @since 4.0.0
 		 */

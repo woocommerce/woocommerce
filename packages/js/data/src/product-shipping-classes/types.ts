@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
-import { BaseQueryParams } from '../types';
+import { BaseQueryParams, DispatchFromMap } from '../types';
 
 export type ProductShippingClass = {
 	id: number;

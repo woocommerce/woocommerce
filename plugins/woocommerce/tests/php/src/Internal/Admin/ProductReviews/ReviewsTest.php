@@ -163,7 +163,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		yield 'no pending' => [ 0, '' ];
 		yield 'has pending' => [
 			2,
-			' <span class="awaiting-mod count-2"><span class="pending-count">2</span></span>',
+			' <span class="menu-counter count-2"><span class="pending-count">2</span></span>',
 		];
 	}
 

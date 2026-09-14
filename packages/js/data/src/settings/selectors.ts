@@ -66,17 +66,17 @@ export const isUpdateSettingsRequesting = (
 /**
  * Retrieves a setting value from the setting store.
  *
- * @param {Object}   state                   State param added by wp.data.
- * @param {string}   group                   The settings group.
- * @param {string}   name                    The identifier for the setting.
- * @param {*}        [fallback=false]        The value to use as a fallback
- *                                           if the setting is not in the
- *                                           state.
- * @param {Function} [filter=( val ) => val] A callback for filtering the
- *                                           value before it's returned.
- *                                           Receives both the found value
- *                                           (if it exists for the key) and
- *                                           the provided fallback arg.
+ * @param {Object}   state      State param added by wp.data.
+ * @param {string}   group      The settings group.
+ * @param {string}   name       The identifier for the setting.
+ * @param {*}        [fallback] The value to use as a fallback
+ *                              if the setting is not in the
+ *                              state.
+ * @param {Function} [filter]   A callback for filtering the
+ *                              value before it's returned.
+ *                              Receives both the found value
+ *                              (if it exists for the key) and
+ *                              the provided fallback arg.
  *
  * @return {*}  The value present in the settings state for the given
  *                   name.
@@ -98,13 +98,7 @@ export function getSetting(
 export const getLastSettingsErrorForGroup = (
 	state: SettingsState,
 	group: string
-) => {
-	const settingsIds = state[ group ].data;
-	if ( ! Array.isArray( settingsIds ) || settingsIds.length === 0 ) {
-		return state[ group ].error;
-	}
-	return [ ...settingsIds ].pop().error;
-};
+) => ( state[ group ] && state[ group ].error ) || false;
 
 export const getSettingsError = (
 	state: SettingsState,

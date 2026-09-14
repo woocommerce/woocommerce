@@ -1,7 +1,7 @@
 ---
 post_title: How to manage WooCommerce Data Stores
 sidebar_label: Manage data stores
-
+description: A guide to managing WooCommerce data stores, including creating new data stores, replacing core data stores, and calling data stores from your own code.
 ---
 
 # How to manage WooCommerce Data Stores
@@ -108,7 +108,7 @@ public function read( &$coupon ) {
 	// Read should do a check to see if this is a valid coupon
 	// and otherwise	throw an 'Invalid coupon.' exception.
 	// For valid coupons, set $data to contain our database result.
-	// All props should be set using set_props with output from the database. This "hydates" the CRUD data object.
+	// All props should be set using set_props with output from the database. This "hydrates" the CRUD data object.
 	$coupon_id = $coupon->get_id();
 	$coupon->set_props( array(
 		'code'                        => $data->code,

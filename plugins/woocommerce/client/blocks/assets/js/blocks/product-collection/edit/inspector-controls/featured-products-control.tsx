@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -34,10 +33,12 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<BaseControl
+				__nextHasNoMarginBottom
 				id="product-collection-featured-products-control"
 				label={ __( 'Featured', 'woocommerce' ) }
 			>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Show only featured products', 'woocommerce' ) }
 					checked={ query.featured || false }
 					onChange={ ( featured ) => {

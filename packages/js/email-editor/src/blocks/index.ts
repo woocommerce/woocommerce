@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerCoreBlocks } from '@wordpress/block-library';
+import { getBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import {
 	activatePersonalizationTagsReplacing,
 } from './core/rich-text';
 import { enhanceButtonsBlock } from './core/buttons';
+import { enhanceEmbedBlock } from './core/embed';
 import {
 	alterSupportConfiguration,
 	removeBlockStylesFromAllBlocks,
@@ -26,12 +28,18 @@ import {
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
-import { modifyMoveToTrashAction } from './core/move-to-trash';
 import { enhanceSiteLogoBlock } from './core/site-logo';
+import { enableFullWidthBlocks } from './core/full-width';
+import { enableProductImageAlignment } from './woocommerce/product-image';
 
 export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
+	// Check if core blocks are already registered by looking for a fundamental core block
+	// 'core/paragraph' is always included in core blocks
+	if ( ! getBlockType( 'core/paragraph' ) ) {
+		registerCoreBlocks();
+	}
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
@@ -40,14 +48,15 @@ export function initBlocks() {
 	disableColumnsLayoutAndEnhanceColumnsBlock();
 	disableGroupVariations();
 	enhanceButtonsBlock();
+	enhanceEmbedBlock();
 	enhancePostContentBlock();
 	enhanceQuoteBlock();
 	extendRichTextFormats();
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
-	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
-	registerCoreBlocks();
+	enableFullWidthBlocks();
+	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
 }

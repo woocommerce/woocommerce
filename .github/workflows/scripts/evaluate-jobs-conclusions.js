@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
-const { REPOSITORY, RUN_ID, GITHUB_TOKEN, TEST_MODE } = process.env;
+const fs = require( 'fs' );
+const { REPOSITORY, RUN_ID, GITHUB_TOKEN, GITHUB_OUTPUT, TEST_MODE } =
+	process.env;
 const IGNORED_JOBS = [
 	/Evaluate Project Job Statuses/,
 	/Report results on Slack/,
@@ -83,6 +85,22 @@ const evaluateJobs = async () => {
 			console.warn( `✅ ${ jobPrintName }, optional` );
 		}
 	} );
+
+	// Write non-successful jobs to GitHub output
+	if ( GITHUB_OUTPUT && ! TEST_MODE ) {
+		const jobsJson = JSON.stringify(
+			nonSuccessfulCompletedJobs.map( ( job ) => ( {
+				name: job.name,
+				status: job.status,
+				conclusion: job.conclusion,
+				html_url: job.html_url,
+			} ) )
+		);
+		fs.appendFileSync(
+			GITHUB_OUTPUT,
+			`non_successful_jobs=${ jobsJson }\n`
+		);
+	}
 
 	if ( failed.length > 0 ) {
 		console.error( 'Failed required jobs:', failed );

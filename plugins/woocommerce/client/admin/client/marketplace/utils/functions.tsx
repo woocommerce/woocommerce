@@ -4,7 +4,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import type { Options } from 'wordpress__notices';
 import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
 
@@ -18,7 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
-	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -28,7 +27,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeStatus } from '../contexts/types';
+import { NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -80,6 +79,7 @@ async function apiFetchWithCache( params: object ): Promise< object > {
 // Wrapper around fetch() that caches results in memory
 async function fetchJsonWithCache(
 	url: string,
+	headers: Record< string, string > = {},
 	abortSignal?: AbortSignal
 ): Promise< object > {
 	// Attempt to fetch from cache:
@@ -91,7 +91,7 @@ async function fetchJsonWithCache(
 
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url, { signal: abortSignal } )
+		fetch( url, { signal: abortSignal, headers } )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
 					throw new Error( response.statusText );
@@ -134,9 +134,15 @@ async function fetchSearchResults(
 		'?' +
 		params.toString();
 
+	const headers = {
+		'X-VIP-Go-Segmentation': wccomSettings.isConnected
+			? 'connected'
+			: 'no-connection',
+	};
+
 	// Fetch data from WCCOM API
 	return new Promise( ( resolve, reject ) => {
-		fetchJsonWithCache( url, abortSignal )
+		fetchJsonWithCache( url, headers, abortSignal )
 			.then( ( json ) => {
 				/**
 				 * Product card component expects a Product type.
@@ -170,6 +176,7 @@ async function fetchSearchResults(
 							billingPeriodInterval:
 								product.billing_period_interval,
 							currency: product.currency,
+							hasQualityBadge: product.has_quality_badge ?? false,
 						};
 					}
 				);
@@ -319,7 +326,7 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-type WpAjaxReponse = {
+type WpAjaxResponse = {
 	success: boolean;
 	data: WpAjaxResponseData;
 };
@@ -337,7 +344,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< WpAjaxReponse > {
+): Promise< WpAjaxResponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -432,7 +439,9 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
+function updateProduct(
+	subscription: Subscription
+): Promise< WpAjaxResponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
@@ -443,10 +452,10 @@ function addNotice(
 	productKey: string,
 	message: string,
 	status?: NoticeStatus,
-	options?: Partial< Options >
+	options?: Partial< NoticeOptions >
 ) {
 	if ( status === NoticeStatus.Error ) {
-		dispatch( noticeStore ).addNotice(
+		void dispatch( noticeStore ).addNotice(
 			productKey,
 			message,
 			status,
@@ -460,12 +469,42 @@ function addNotice(
 			};
 		}
 
-		dispatch( coreNoticesStore ).createSuccessNotice( message, options );
+		void dispatch( coreNoticesStore ).createSuccessNotice(
+			message,
+			options
+		);
 	}
 }
 
+/**
+ * Pull the human-readable message out of a rejected subscriptions request.
+ *
+ * `/wc/v3/marketplace/refresh` answers failures with `wp_send_json_error()`,
+ * which nests the message under `data`, while transport failures and generic
+ * REST errors put it at the top level. Reading only one shape renders
+ * "undefined" to the merchant.
+ *
+ * Both candidates are typed `unknown` and checked rather than asserted: they
+ * come off the wire, and a `message` that wasn't a string would be handed
+ * straight to sprintf and reach the merchant as "[object Object]".
+ *
+ * @param error The rejection value from apiFetch.
+ * @return The best available message.
+ */
+const getRefreshErrorMessage = ( error: unknown ): string => {
+	const candidate = error as
+		| { data?: { message?: unknown }; message?: unknown }
+		| undefined;
+
+	const message = [ candidate?.data?.message, candidate?.message ].find(
+		( value ): value is string => typeof value === 'string' && value !== ''
+	);
+
+	return message ?? __( 'Unexpected error.', 'woocommerce' );
+};
+
 const removeNotice = ( productKey: string ) => {
-	dispatch( noticeStore ).removeNotice( productKey );
+	void dispatch( noticeStore ).removeNotice( productKey );
 };
 
 const subscriptionToProduct = ( subscription: Subscription ): Product => {
@@ -511,9 +550,9 @@ const appendURLParams = (
 const enableAutorenewalUrl = ( subscription: Subscription ): string => {
 	if ( ! subscription.product_key ) {
 		// review subscriptions on the Marketplace
-		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+		return MARKETPLACE_RENEW_SUBSCRIPTION_PATH;
 	}
-	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTION_PATH, [
 		[ 'key', subscription.product_key.toString() ],
 	] );
 };
@@ -577,6 +616,7 @@ export {
 	installProduct,
 	updateProduct,
 	addNotice,
+	getRefreshErrorMessage,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

@@ -41,7 +41,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$legend[] = array(
 			/* translators: %s: signups amount */
-			'title'            => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . count( $this->customers ) . '</strong>' ),
+			'title'            => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . number_format_i18n( count( $this->customers ) ) . '</strong>' ),
 			'color'            => $this->chart_colours['signups'],
 			'highlight_series' => 2,
 		);
@@ -188,26 +188,18 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$this->check_current_range_nonce( $current_range );
 		$this->calculate_current_range( $current_range );
 
-		$admin_users = new WP_User_Query(
+		$privileged_users = new WP_User_Query(
 			array(
-				'role'   => 'administrator',
-				'fields' => 'ID',
-			)
+				'fields'   => 'ID',
+				'role__in' => array( 'administrator', 'shop_manager' ),
+			),
 		);
-
-		$manager_users = new WP_User_Query(
-			array(
-				'role'   => 'shop_manager',
-				'fields' => 'ID',
-			)
-		);
-
-		$users_query = new WP_User_Query(
+		$users_query      = new WP_User_Query(
 			apply_filters(
 				'woocommerce_admin_report_customers_user_query_args',
 				array(
 					'fields'  => array( 'user_registered' ),
-					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+					'exclude' => $privileged_users->get_results(),
 				)
 			)
 		);

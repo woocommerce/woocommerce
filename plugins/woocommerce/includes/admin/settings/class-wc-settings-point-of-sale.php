@@ -7,9 +7,7 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,8 +28,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 		$this->label = __( 'Point of Sale', 'woocommerce' );
 
 		parent::__construct();
-
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 	}
 
 	/**
@@ -40,22 +36,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'store';
-
-	/**
-	 * Add Point of Sale page to settings if the feature is enabled.
-	 *
-	 * @param array $pages Existing pages.
-	 * @return array|mixed
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function add_settings_page( $pages ) {
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			return parent::add_settings_page( $pages );
-		} else {
-			return $pages;
-		}
-	}
 
 	/**
 	 * Get settings for the default section.
@@ -72,12 +52,13 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 			),
 
 			array(
-				'title'   => __( 'Store name', 'woocommerce' ),
-				'desc'    => __( 'The name of your physical store.', 'woocommerce' ),
-				'id'      => 'woocommerce_pos_store_name',
-				'default' => PointOfSaleDefaultSettings::get_default_store_name(),
-				'type'    => 'text',
-				'css'     => 'min-width:300px;',
+				'title'             => __( 'Store name', 'woocommerce' ),
+				'desc'              => __( 'The name of your physical store.', 'woocommerce' ),
+				'id'                => 'woocommerce_pos_store_name',
+				'default'           => PointOfSaleDefaultSettings::get_default_store_name(),
+				'type'              => 'text',
+				'css'               => 'min-width:300px;',
+				'skip_initial_save' => true,
 			),
 
 			array(

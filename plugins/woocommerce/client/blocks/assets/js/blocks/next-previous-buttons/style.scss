@@ -40,7 +40,9 @@
 	height: 40px;
 	font-size: 12px;
 	padding: 0;
-	background: #fff;
+	color: inherit;
+	background: var(--wp--preset--color--base, #fff);
+	outline-color: currentColor;
 	outline-offset: -2px;
 }
 

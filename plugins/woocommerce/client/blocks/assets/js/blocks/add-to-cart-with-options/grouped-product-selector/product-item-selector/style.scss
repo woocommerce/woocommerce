@@ -1,5 +1,13 @@
 @import "../../../../base/components/quantity-selector/style";
 
+// This will make sure buttons and checkboxes take at least the same width as
+// the quantity selector. Buttons might still be wider in certain locales.
+// We exclude grid layouts to avoid changing the previous default layout.
+// See https://github.com/woocommerce/woocommerce/pull/62702.
+:where(.wp-block-group.is-layout-flex:not(.is-vertical) > .wc-block-add-to-cart-with-options-grouped-product-item-selector) {
+	min-width: 6.8em;
+	text-align: right;
+}
 :where(.wc-block-add-to-cart-with-options-grouped-product-item-selector .button) {
 	display: inline-flex;
 }

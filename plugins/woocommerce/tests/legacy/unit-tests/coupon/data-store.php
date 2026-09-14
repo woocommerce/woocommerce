@@ -56,10 +56,19 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 */
 	public function test_coupon_cache_deletion() {
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+
+		// Prime the cache.
+		$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
+		$cache_name  = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+		wc_get_coupon_id_by_code( $coupon->get_code() );
+
+		$ids = wp_cache_get( $cache_name, 'coupons' );
+
+		$this->assertNotEquals( false, $ids, sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
+
 		$coupon->delete( true );
 
-		$cache_name = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code();
-		$ids        = wp_cache_get( $cache_name, 'coupons' );
+		$ids = wp_cache_get( $cache_name, 'coupons' );
 
 		$this->assertEquals( false, $ids, sprintf( 'Object cache for %s was not removed upon deletion of coupon.', $cache_name ) );
 	}
@@ -164,6 +173,40 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$coupon->decrease_usage_count( $user_id );
 		$this->assertEquals( 1, $coupon->get_usage_count() );
 		$this->assertEquals( array( 1 ), $coupon->get_used_by() );
+	}
+
+	/**
+	 * Test coupon status update from publish to draft.
+	 * @since 10.4.0
+	 */
+	public function test_coupon_status_update_to_draft() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'update-test-coupon' );
+		$coupon->save();
+		$this->assertEquals( 'publish', $coupon->get_status() );
+
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+
+		$updated_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'draft', $updated_coupon->get_status() );
+	}
+
+	/**
+	 * Test coupon creation with specific status.
+	 * @since 10.4.0
+	 */
+	public function test_coupon_create_with_status() {
+		$code   = 'create-test-coupon-' . time();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+
+		$this->assertEquals( 'draft', $coupon->get_status() );
+		$this->assertNotEquals( 0, $coupon->get_id() );
+
+		$read_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'draft', $read_coupon->get_status() );
 	}
 
 }

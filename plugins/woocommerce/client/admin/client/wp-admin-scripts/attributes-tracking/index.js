@@ -10,11 +10,13 @@ const configureTerms = document.querySelectorAll( '.configure-terms' );
 
 addNewAttribute?.addEventListener( 'click', function () {
 	const archiveInput = document.querySelector( '#attribute_public' );
+	const attributeTypeInput = document.querySelector( '#attribute_type' );
 	const sortOrder = document.querySelector( '#attribute_orderby' );
 	const name = document.querySelector( '#attribute_label' );
 	const slug = document.querySelector( '#attribute_name' );
 	recordEvent( 'product_attributes_add', {
 		enable_archive: archiveInput?.checked ? 'yes' : 'no',
+		attribute_type: attributeTypeInput?.value,
 		default_sort_order: sortOrder?.value,
 		name: name?.value,
 		slug: slug?.value,
@@ -24,9 +26,11 @@ addNewAttribute?.addEventListener( 'click', function () {
 
 saveAttribute?.addEventListener( 'click', function () {
 	const archiveInput = document.querySelector( '#attribute_public' );
+	const attributeTypeInput = document.querySelector( '#attribute_type' );
 	const sortOrder = document.querySelector( '#attribute_orderby' );
 	recordEvent( 'product_attributes_update', {
 		enable_archive: archiveInput?.checked ? 'yes' : 'no',
+		attribute_type: attributeTypeInput?.value,
 		default_sort_order: sortOrder?.value,
 		page: 'attributes',
 	} );

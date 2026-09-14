@@ -45,8 +45,9 @@ class WC_Comments {
 		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
 
 		// Secure order notes.
-		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ) );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
+		add_filter( 'akismet_excluded_comment_types', array( __CLASS__, 'akismet_excluded_comment_types' ) );
 
 		// Secure webhook comments.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
@@ -65,7 +66,7 @@ class WC_Comments {
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
-		// Delete comments count cache whenever there is a new comment or a comment status changes.
+		// Actualize comments count cache whenever there is a new comment or a comment status changes.
 		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
 		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
 
@@ -119,6 +120,19 @@ class WC_Comments {
 	public static function exclude_order_comments( $clauses ) {
 		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 		return $clauses;
+	}
+
+	/**
+	 * Exclude order comments from Akismet comments counting SQL queries for better performance.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string[] $comment_types Excluded comments types.
+	 * @return string[]
+	 */
+	public static function akismet_excluded_comment_types( $comment_types ): array {
+		$comment_types[] = 'order_note';
+		return $comment_types;
 	}
 
 	/**
@@ -210,7 +224,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in.
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint() and the rating is only tested for emptiness.
 			wp_die( esc_html__( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -223,13 +237,25 @@ class WC_Comments {
 	 * @param int $comment_id Comment ID.
 	 */
 	public static function add_comment_rating( $comment_id ) {
-		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) { // WPCS: input var ok, CSRF ok, sanitization ok.
+		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
+			$raw_rating = is_scalar( $_POST['rating'] ) ? wp_unslash( $_POST['rating'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the value is range checked and cast to an integer below.
+
+			// Stored ratings are whole numbers from 1 to 5. Numeric input is range checked before it
+			// is truncated, so 0.5 and 5.9 are rejected rather than stored as 0 and 5, while 4.7
+			// still stores 4 as before.
+			if ( is_numeric( $raw_rating ) && ( $raw_rating < 1 || $raw_rating > 5 ) ) {
 				return;
 			}
-			add_comment_meta( $comment_id, 'rating', intval( $_POST['rating'] ), true ); // WPCS: input var ok, CSRF ok.
 
-			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // WPCS: input var ok, CSRF ok.
+			$rating = intval( $raw_rating );
+
+			if ( $rating < 1 || $rating > 5 ) {
+				return;
+			}
+
+			add_comment_meta( $comment_id, 'rating', $rating, true );
+
+			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			if ( $post_id ) {
 				self::clear_transients( $post_id );
 			}
@@ -259,8 +285,13 @@ class WC_Comments {
 	 * @param int $post_id Post ID.
 	 */
 	public static function clear_transients( $post_id ) {
-		if ( 'product' === get_post_type( $post_id ) ) {
-			$product = wc_get_product( $post_id );
+		$post_id = absint( $post_id );
+		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$product = wc_get_product( $post_id );
+		if ( $product instanceof WC_Product ) {
 			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
 			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
 			$product->set_review_count( self::get_review_count_for_product( $product ) );
@@ -310,7 +341,7 @@ class WC_Comments {
 	 * @return bool
 	 */
 	private static function is_comment_excluded_from_wp_comment_counts( $comment ) {
-		return in_array( $comment->comment_type, array( 'action_log', 'order_note', 'webhook_delivery' ), true )
+		return in_array( $comment->comment_type, array( 'action_log', 'note', 'order_note', 'webhook_delivery' ), true )
 			|| get_post_type( $comment->comment_post_ID ) === 'product';
 	}
 
@@ -609,7 +640,7 @@ class WC_Comments {
 		);
 
 		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = absint( $count->meta_value_count ); // WPCS: slow query ok.
+			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
 		}
 
 		return $counts;
@@ -623,7 +654,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function update_comment_type( $comment_data ) {
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			$comment_data['comment_type'] = 'review';
 		}
 

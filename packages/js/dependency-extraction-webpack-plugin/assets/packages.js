@@ -1,7 +1,6 @@
 module.exports = [
 	// wc-admin packages
 	'@woocommerce/admin-layout',
-	'@woocommerce/block-templates',
 	'@woocommerce/components',
 	'@woocommerce/csv-export',
 	'@woocommerce/currency',
@@ -13,13 +12,13 @@ module.exports = [
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
 	'@woocommerce/extend-cart-checkout-block',
+	'@woocommerce/settings-ui',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',
-	'@woocommerce/product-editor',
-	'@woocommerce/settings-editor',
 	'@woocommerce/tracks',
 	'@woocommerce/remote-logging',
+	'@woocommerce/sanitize',
 	// wc-blocks packages
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-components',

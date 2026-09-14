@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid running Inbox Note cleanup during admin initialization.

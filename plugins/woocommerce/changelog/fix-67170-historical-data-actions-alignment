@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Left-align the action buttons on the Analytics settings page (Import historical data, and Reset defaults / Save settings) with the rest of the page content on wide viewports.

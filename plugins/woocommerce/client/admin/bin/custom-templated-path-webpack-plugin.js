@@ -28,10 +28,7 @@ class CustomTemplatedPathPlugin {
 		this.handlers = [];
 
 		for ( const [ key, handler ] of Object.entries( handlers ) ) {
-			const regexp = new RegExp(
-				`\\[${ escapeRegExp( key ) }\\]`,
-				'gi'
-			);
+			const regexp = new RegExp( `\\[${ escapeRegExp( key ) }\\]`, 'gi' );
 			this.handlers.push( [ regexp, handler ] );
 		}
 	}
@@ -45,7 +42,7 @@ class CustomTemplatedPathPlugin {
 		compiler.hooks.compilation.tap(
 			'CustomTemplatedPathPlugin',
 			( compilation ) => {
-				compilation.mainTemplate.hooks.assetPath.tap(
+				compilation.hooks.assetPath.tap(
 					'CustomTemplatedPathPlugin',
 					( path, data ) => {
 						for ( let i = 0; i < this.handlers.length; i++ ) {

@@ -3,6 +3,7 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { controls, dispatch } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -25,7 +26,7 @@ import {
 	CoreProfilerCompletedSteps,
 } from './types';
 import { Plugin, PluginNames } from '../plugins/types';
-import { optionsStore } from '..';
+import { store as optionsStore } from '../options';
 
 export function getFreeExtensionsError( error: unknown ) {
 	return {
@@ -123,47 +124,67 @@ export function undoSnoozeTaskSuccess( task: Partial< TaskType > ) {
 	};
 }
 
-export function dismissTaskError( taskId: string, error: unknown ) {
+export function dismissTaskError(
+	taskId: string,
+	error: unknown,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.DISMISS_TASK_ERROR,
 		taskId,
 		error,
+		taskListId,
 	};
 }
 
-export function dismissTaskRequest( taskId: string ) {
+export function dismissTaskRequest( taskId: string, taskListId?: string ) {
 	return {
 		type: TYPES.DISMISS_TASK_REQUEST,
 		taskId,
+		taskListId,
 	};
 }
 
-export function dismissTaskSuccess( task: Partial< TaskType > ) {
+export function dismissTaskSuccess(
+	task: Partial< TaskType >,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.DISMISS_TASK_SUCCESS,
 		task,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskError( taskId: string, error: unknown ) {
+export function undoDismissTaskError(
+	taskId: string,
+	error: unknown,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_ERROR,
 		taskId,
 		error,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskRequest( taskId: string ) {
+export function undoDismissTaskRequest( taskId: string, taskListId?: string ) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_REQUEST,
 		taskId,
+		taskListId,
 	};
 }
 
-export function undoDismissTaskSuccess( task: Partial< TaskType > ) {
+export function undoDismissTaskSuccess(
+	task: Partial< TaskType >,
+	taskListId?: string
+) {
 	return {
 		type: TYPES.UNDO_DISMISS_TASK_SUCCESS,
 		task,
+		taskListId,
 	};
 }
 
@@ -430,12 +451,15 @@ export function* undoSnoozeTask( id: string ) {
 	}
 }
 
-export function* dismissTask( id: string ) {
-	yield dismissTaskRequest( id );
+export function* dismissTask( id: string, taskListId?: string ) {
+	yield dismissTaskRequest( id, taskListId );
 
 	try {
 		const task: TaskType = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/dismiss`,
+			path: addQueryArgs(
+				`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/dismiss`,
+				taskListId ? { task_list_id: taskListId } : {}
+			),
 			method: 'POST',
 		} );
 
@@ -443,20 +467,24 @@ export function* dismissTask( id: string ) {
 			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isDismissed',
 				'isSnoozed',
-			] )
+			] ),
+			taskListId
 		);
 	} catch ( error ) {
-		yield dismissTaskError( id, error );
+		yield dismissTaskError( id, error, taskListId );
 		throw new Error();
 	}
 }
 
-export function* undoDismissTask( id: string ) {
-	yield undoDismissTaskRequest( id );
+export function* undoDismissTask( id: string, taskListId?: string ) {
+	yield undoDismissTaskRequest( id, taskListId );
 
 	try {
 		const task: TaskType = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/undo_dismiss`,
+			path: addQueryArgs(
+				`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/undo_dismiss`,
+				taskListId ? { task_list_id: taskListId } : {}
+			),
 			method: 'POST',
 		} );
 
@@ -464,10 +492,11 @@ export function* undoDismissTask( id: string ) {
 			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isDismissed',
 				'isSnoozed',
-			] )
+			] ),
+			taskListId
 		);
 	} catch ( error ) {
-		yield undoDismissTaskError( id, error );
+		yield undoDismissTaskError( id, error, taskListId );
 		throw new Error();
 	}
 }

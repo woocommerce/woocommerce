@@ -70,7 +70,7 @@
 		background-color: transparent !important;
 		outline: 1px solid #333;
 		outline-offset: 2px;
-	}	
+	}
 }
 
 .woocommerce-breadcrumb {
@@ -139,7 +139,7 @@
 .price {
 
 	del {
-		opacity: 0.5;
+		opacity: 0.7;
 		display: inline-block;
 	}
 
@@ -371,7 +371,7 @@ table.variations {
 		border: 1px solid #f2f2f2;
 	}
 
-	.woocommerce-product-gallery__image:nth-child(n+2) {
+	.woocommerce-product-gallery__image:nth-child(n + 2) {
 		width: 25%;
 		display: inline-block;
 	}
@@ -411,7 +411,7 @@ table.variations {
 		width: 33.3333%;
 	}
 
-	.flex-control-thumbs li:nth-child(3n+1) {
+	.flex-control-thumbs li:nth-child(3n + 1) {
 		clear: left;
 	}
 }
@@ -422,7 +422,7 @@ table.variations {
 		width: 25%;
 	}
 
-	.flex-control-thumbs li:nth-child(4n+1) {
+	.flex-control-thumbs li:nth-child(4n + 1) {
 		clear: left;
 	}
 }
@@ -433,7 +433,7 @@ table.variations {
 		width: 20%;
 	}
 
-	.flex-control-thumbs li:nth-child(5n+1) {
+	.flex-control-thumbs li:nth-child(5n + 1) {
 		clear: left;
 	}
 }
@@ -615,7 +615,7 @@ table.variations {
 			font-size: 16px;
 			text-align: center;
 			border-radius: 100%;
-			border: 1px solid black;
+			border: 1px solid #000;
 			margin-right: 0.25em;
 		}
 	}
@@ -908,7 +908,7 @@ table.variations {
 				display: block;
 				width: 14px;
 				height: 14px;
-				background: white;
+				background: #fff;
 				position: absolute;
 				top: 7px;
 				right: 17px;
@@ -976,7 +976,7 @@ table.variations {
 	.woocommerce-input-wrapper {
 
 		.description {
-			background: royalblue;
+			background: #4169e1;
 			color: #fff;
 			border-radius: 3px;
 			padding: 1em;
@@ -1001,7 +1001,7 @@ table.variations {
 				position: absolute;
 				border-width: 4px 6px 0 6px;
 				border-style: solid;
-				border-color: royalblue transparent transparent transparent;
+				border-color: #4169e1 transparent transparent transparent;
 				z-index: 100;
 				display: block;
 			}
@@ -1073,16 +1073,16 @@ table.variations {
 	input.input-radio[name="payment_method"] {
 		display: none;
 
-		& + label {
+		+ label {
 
 			&::before {
 				content: "";
 				display: inline-block;
 				width: 16px;
 				height: 16px;
-				border: 2px solid white;
-				box-shadow: 0 0 0 2px black;
-				background: white;
+				border: 2px solid #fff;
+				box-shadow: 0 0 0 2px #000;
+				background: #fff;
 				margin-left: 4px;
 				margin-right: 0.5em;
 				border-radius: 100%;
@@ -1093,7 +1093,7 @@ table.variations {
 		&:checked + label {
 
 			&::before {
-				background: black;
+				background: #000;
 			}
 		}
 	}
@@ -1143,14 +1143,22 @@ table.variations {
 	}
 
 	body.page-two-column.woocommerce-cart:not(.archive) #primary .entry-header,
-	body.page-two-column.woocommerce-checkout:not(.archive) #primary .entry-header,
-	body.page-two-column.woocommerce-account:not(.archive) #primary .entry-header {
+	body.page-two-column.woocommerce-checkout:not(.archive)
+	#primary
+	.entry-header,
+	body.page-two-column.woocommerce-account:not(.archive)
+	#primary
+	.entry-header {
 		width: 16%;
 	}
 
 	body.page-two-column.woocommerce-cart:not(.archive) #primary .entry-content,
-	body.page-two-column.woocommerce-checkout:not(.archive) #primary .entry-content,
-	body.page-two-column.woocommerce-account:not(.archive) #primary .entry-content {
+	body.page-two-column.woocommerce-checkout:not(.archive)
+	#primary
+	.entry-content,
+	body.page-two-column.woocommerce-account:not(.archive)
+	#primary
+	.entry-content {
 		width: 78%;
 	}
 }
@@ -1164,17 +1172,17 @@ table.variations {
 }
 
 .woocommerce-message {
-	background: teal;
+	background: #008080;
 	color: #fff;
 }
 
 .woocommerce-error {
-	background: firebrick;
+	background: #b22222;
 	color: #fff;
 }
 
 .woocommerce-info {
-	background: royalblue;
+	background: #4169e1;
 	color: #fff;
 }
 
@@ -1189,7 +1197,7 @@ table.variations {
 }
 
 .woocommerce-store-notice {
-	background: royalblue;
+	background: #4169e1;
 	color: #fff;
 	padding: 1em;
 	position: absolute;
@@ -1255,8 +1263,11 @@ form.checkout_coupon {
  * Log in form
  */
 .woocommerce-page {
+
 	form {
+
 		.password-input {
+
 			input[type="text"] {
 				padding-right: 2.5rem;
 			}

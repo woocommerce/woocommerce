@@ -1,12 +1,15 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
 
 /**
  * ProductsById class.
  */
 class ProductsById extends AbstractRoute {
+	use ProductLinksTrait;
+
 	/**
 	 * The route identifier.
 	 *
@@ -79,10 +82,10 @@ class ProductsById extends AbstractRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$object = wc_get_product( (int) $request['id'] );
 
-		if ( ! $object || 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() || ! $object->is_publicly_viewable() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), 404 );
 		}
 
-		return rest_ensure_response( $this->schema->get_item_response( $object ) );
+		return $this->prepare_item_for_response( $object, $request );
 	}
 }

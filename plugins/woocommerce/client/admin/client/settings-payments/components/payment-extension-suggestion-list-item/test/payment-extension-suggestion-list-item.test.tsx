@@ -23,7 +23,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 			<PaymentExtensionSuggestionListItem
 				suggestion={
 					{
-						id: 'test-suggestion',
+						id: '_wc_pes_test-suggestion',
 						title: 'Test Suggestion',
 						description: 'Test Suggestion Description',
 						icon: 'test-suggestion-icon',
@@ -37,6 +37,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 						} as PluginData,
 						_order: 1,
 						_type: 'suggestion',
+						_suggestion_id: 'test-suggestion',
 					} as unknown as PaymentsExtensionSuggestionProvider
 				}
 				installingPlugin={ null }
@@ -51,7 +52,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
 			expect.objectContaining( {
-				provider_id: 'test-suggestion',
+				provider_id: '_wc_pes_test-suggestion',
 				suggestion_id: 'test-suggestion',
 			} )
 		);

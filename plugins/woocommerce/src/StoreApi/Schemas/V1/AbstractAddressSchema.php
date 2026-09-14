@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * AddressSchema class.
@@ -127,16 +128,16 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			function ( $carry, $key ) use ( $address, $validation_util, $schema ) {
 				switch ( $key ) {
 					case 'country':
-						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
+						$carry[ $key ] = wc_strtoupper( sanitize_text_field( $address[ $key ] ) );
 						break;
 					case 'state':
-						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
+						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( $address[ $key ] ), $address['country'] );
 						break;
 					case 'postcode':
-						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( $address['postcode'] ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $schema[ $key ], $key );
+						$carry[ $key ] = rest_sanitize_value_from_schema( $address[ $key ], $schema[ $key ], $key );
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
@@ -146,6 +147,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			},
 			[]
 		);
+
+		// After the loop, so this cleans the value the schema sanitizer produced rather than
+		// the raw one from the request.
+		if ( isset( $address['phone'] ) && is_string( $address['phone'] ) ) {
+			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
+		}
 
 		return $sanitization_util->wp_kses_array( $address );
 	}
@@ -199,6 +206,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			return $errors;
 		}
 
+		// Validation runs before sanitization in the REST dispatcher, so sanitize here to check
+		// the same value that will be stored. The phone checks below rely on it.
 		$address = $this->sanitize_callback( $address, $request, $param );
 
 		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
@@ -232,25 +241,36 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
-		if ( ! empty( $address['phone'] ) ) {
-			// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
-			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
-
-			if ( ! \WC_Validation::is_phone( $address['phone'] ) ) {
-				$errors->add(
-					'invalid_phone',
-					__( 'The provided phone number is not valid', 'woocommerce' )
-				);
-			}
+		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'], $address['country'] ?? null ) ) {
+			$errors->add(
+				'invalid_phone',
+				__( 'The provided phone number is not valid', 'woocommerce' )
+			);
 		}
 
-		// Get additional field keys here as we need to know if they are present in the address for validation.
-		$additional_keys = array_keys( $this->get_additional_address_fields_schema() );
+		$additional_fields = array_intersect_key(
+			$this->additional_fields_controller->get_additional_fields(),
+			$this->get_additional_address_fields_schema()
+		);
 
 		foreach ( array_keys( $address ) as $key ) {
 			// Skip email here it will be validated in BillingAddressSchema.
 			if ( 'email' === $key ) {
 				continue;
+			}
+
+			$field_value = $address[ $key ];
+			if ( 'date' === ( $additional_fields[ $key ]['type'] ?? '' ) && '' !== $field_value ) {
+				if ( ! is_string( $field_value ) || ! TimeUtil::is_valid_date( $field_value, 'Y-m-d' ) ) {
+					$errors->add(
+						'invalid_' . $key,
+						sprintf(
+							/* translators: %s: is the field label */
+							__( 'Please provide a valid %s in YYYY-MM-DD format.', 'woocommerce' ),
+							$additional_fields[ $key ]['label']
+						)
+					);
+				}
 			}
 
 			// Only run specific validation on properties that are defined in the schema and present in the address.

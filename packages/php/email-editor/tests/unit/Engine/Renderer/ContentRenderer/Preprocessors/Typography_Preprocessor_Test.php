@@ -286,6 +286,70 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it ignores non-string textColor values
+	 */
+	public function testItIgnoresNonStringTextColor(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'plugin/custom-block',
+				'attrs'       => array(
+					// Third-party block might use textColor as an array or number.
+					'textColor' => array(
+						'r' => 255,
+						'g' => 0,
+						'b' => 0,
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+		// Should use theme defaults since textColor is not a string.
+		$expected_email_attrs = array(
+			'color'     => '#000000',
+			'font-size' => '13px',
+		);
+		$result               = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$result               = $result[0];
+		$this->assertEquals( $expected_email_attrs, $result['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['email_attrs'] );
+	}
+
+	/**
+	 * Test it ignores non-string fontSize values
+	 */
+	public function testItIgnoresNonStringFontSize(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'plugin/custom-block',
+				'attrs'       => array(
+					// Third-party block might use fontSize as a number or array.
+					'fontSize' => 16,
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+		// Should use theme defaults since fontSize is not a string.
+		$expected_email_attrs = array(
+			'color'     => '#000000',
+			'font-size' => '13px',
+		);
+		$result               = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$result               = $result[0];
+		$this->assertEquals( $expected_email_attrs, $result['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['email_attrs'] );
+	}
+
+	/**
 	 * Test it overrides columns typography
 	 */
 	public function testItOverridesColumnsTypography(): void {

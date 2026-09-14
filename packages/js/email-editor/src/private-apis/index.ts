@@ -4,13 +4,11 @@
 import { dispatch } from '@wordpress/data';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 import {
-	// @ts-expect-error No types for privateApis.
 	privateApis as editorPrivateApis,
 	store as editorStore,
 } from '@wordpress/editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
-	// @ts-expect-error No types for privateApis.
+	// @ts-expect-error privateApis is not in the DT types for @wordpress/block-editor.
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
 
@@ -20,14 +18,26 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 );
 
 /**
- * We use the ColorPanel component from the block editor to render the color panel in the style settings sidebar.
+ * We use the ColorPanel and BackgroundPanel components from the block editor to render
+ * the color and background panels in the style settings sidebar.
+ *
+ * Since WordPress 7.1 the ColorPanel no longer renders the text and background color
+ * controls — text color lives in the typography panel and background color in the
+ * background panel. The useHasColorPanel and useHasBackgroundPanel hooks let us detect
+ * where the controls live in the running WordPress version. The fallbacks cover a WordPress
+ * version whose private API surface lacks these exports and resolve to the legacy
+ * behavior: text and background color handled by ColorPanel, no background screen.
  */
-const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
+const {
+	ColorPanel: StylesColorPanel,
+	BackgroundPanel,
+	useHasColorPanel,
+	useHasBackgroundPanel,
+} = unlock( blockEditorPrivateApis );
 
-/**
- * The useGlobalStylesOutputWithConfig is used to generate the CSS for the email editor content from the style settings.
- */
-const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
+const StylesBackgroundPanel = BackgroundPanel ?? ( () => null );
+const useHasStylesColorPanel = useHasColorPanel ?? ( () => true );
+const useHasStylesBackgroundPanel = useHasBackgroundPanel ?? ( () => false );
 
 /**
  * The Editor is the main component for the email editor.
@@ -46,7 +56,9 @@ const { registerEntityAction, unregisterEntityAction } = unlock(
 
 export {
 	StylesColorPanel,
-	useGlobalStylesOutputWithConfig,
+	StylesBackgroundPanel,
+	useHasStylesColorPanel,
+	useHasStylesBackgroundPanel,
 	Editor,
 	FullscreenMode,
 	ViewMoreMenuGroup,

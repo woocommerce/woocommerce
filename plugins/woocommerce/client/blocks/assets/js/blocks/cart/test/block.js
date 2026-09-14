@@ -11,8 +11,8 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/cart/default-state';
-import { allSettings } from '../../../settings/shared/settings-init';
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
+import { allSettings } from '@woocommerce/settings';
 
 import Cart from '../block';
 
@@ -211,9 +211,9 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent(
-				'16€'
-			)
+			expect(
+				document.querySelector( '.wc-block-cart-item__total' )
+			).toHaveTextContent( '16€' )
 		);
 	} );
 
@@ -261,37 +261,25 @@ describe( 'Testing cart', () => {
 				)
 			).toHaveValue( 5 )
 		);
-
-		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
-		expect( console ).toHaveErrored();
-
-		// TODO: This can be simplified to expect(console).toHaveErroredWith('error message', expect.any( String ))
-		// after this ticket is done https://github.com/WordPress/gutenberg/issues/22850
-		// eslint-disable-next-line no-console
-		const [ firstArg, secondArg ] = console.error.mock.calls.at( -1 );
-		expect( firstArg ).toEqual(
-			'Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s'
-		);
-		// The stack trace
-		expect( secondArg ).toBeTruthy();
 	} );
 
 	it( 'does not show the remove item button when a filter prevents this', async () => {
-		// We're removing the link for the first previewCart item
-		registerCheckoutFilters( 'woo-blocks-test-extension', {
-			showRemoveItemLink: ( value, extensions, { cartItem } ) => {
-				return cartItem.id !== previewCart.items[ 0 ].id;
-			},
+		act( () => {
+			// We're removing the link for the first previewCart item
+			registerCheckoutFilters( 'woo-blocks-test-extension', {
+				showRemoveItemLink: ( value, extensions, { cartItem } ) => {
+					return cartItem.id !== previewCart.items[ 0 ].id;
+				},
+			} );
 		} );
-
 		render( <CartBlock /> );
 
 		await waitFor( () => {
 			expect(
-				screen.getByText( /Proceed to Checkout/i )
-			).toBeInTheDocument();
+				screen.queryAllByRole( 'button', {
+					name: /Remove .* from cart/i,
+				} ).length
+			).toBe( 1 );
 		} );
-
-		expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 1 );
 	} );
 } );

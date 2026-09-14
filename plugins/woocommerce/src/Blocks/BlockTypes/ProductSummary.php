@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -192,12 +193,6 @@ class ProductSummary extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-
 		$post_id = $block->context['postId'] ?? '';
 		$product = wc_get_product( $post_id );
 
@@ -206,7 +201,12 @@ class ProductSummary extends AbstractBlock {
 		}
 
 		$show_description_if_empty = isset( $attributes['showDescriptionIfEmpty'] ) && $attributes['showDescriptionIfEmpty'];
-		$source                    = $this->get_source( $product, $show_description_if_empty );
+		$source                    = ProductDescriptionUtils::guarded_format(
+			$product,
+			function () use ( $product, $show_description_if_empty ) {
+				return $this->get_source( $product, $show_description_if_empty );
+			}
+		);
 
 		if ( ! $source ) {
 			return '';

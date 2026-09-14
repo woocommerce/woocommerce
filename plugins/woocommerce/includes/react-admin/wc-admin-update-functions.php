@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 
 /**
  * Update order stats `status` index length.
@@ -55,8 +57,8 @@ function wc_admin_update_0230_rename_gross_total() {
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' );
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' );
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' ); // @phpstan-ignore-line argument.type We want to use null. With null we clean any action with the given hook. Passing array would only clean actions with the given args.
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' ); // @phpstan-ignore-line argument.type
 }
 
 /**
@@ -282,4 +284,45 @@ function wc_admin_update_340_remove_is_primary_from_note_action() {
  */
 function wc_update_670_delete_deprecated_remote_inbox_notifications_option() {
 	delete_option( 'wc_remote_inbox_notifications_specs' );
+}
+
+/**
+ * Add an index to the wc_order_stats table for (date_paid, status, parent) to improve report performance.
+ */
+function wc_update_1040_add_idx_date_paid_status_parent() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}wc_order_stats WHERE key_name = 'idx_date_paid_status_parent'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
+	}
+}
+
+/**
+ * Add an index to the woocommerce_downloadable_product_permissions table for (user_email) to improve anonymization/deletion performance.
+ */
+function wc_update_1050_add_idx_user_email() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'idx_user_email'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX idx_user_email (user_email(100))" );
+	}
+}
+
+/**
+ * Queue the rebuild of `wc_order_tax_lookup` rows recorded before the table held one row per tax
+ * order item.
+ *
+ * The rebuild runs through BatchProcessingController, which owns the batching, the retries and the
+ * "Rebuild analytics tax data" tool on WooCommerce > Status > Tools. Until it has been through an
+ * order, that order's rows keep reporting the way they did before the column existed, so nothing
+ * waits on this finishing.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_migrate_tax_lookup_order_items() {
+	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 }

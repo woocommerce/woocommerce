@@ -134,7 +134,7 @@ class ProductHelper {
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
-				'sku'  => 'DUMMY VARIABLE SKU',
+				'sku'  => 'DUMMY VARIABLE SKU' . microtime(),
 			)
 		);
 
@@ -210,7 +210,7 @@ class ProductHelper {
 		if ( ! $attribute_id ) {
 			$taxonomy_name = \wc_attribute_taxonomy_name( $attribute_name );
 
-			// Degister taxonomy which other tests may have created...
+			// Deregister taxonomy which other tests may have created...
 			\unregister_taxonomy( $taxonomy_name );
 
 			$attribute_id = \wc_create_attribute(

@@ -9,7 +9,7 @@ import { useEffect, useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import { getHistory } from '../history';
-import { parseAdminUrl } from '../';
+import { parseAdminUrl } from '../url';
 
 export const useConfirmUnsavedChanges = (
 	hasUnsavedChanges: boolean,

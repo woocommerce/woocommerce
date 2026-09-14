@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace legacy WPCS suppression comments with PHPCS directives.

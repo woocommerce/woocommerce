@@ -17,6 +17,13 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 	use \Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * @var PostsToOrdersMigrationController
 	 */
 	private $migrator;
@@ -44,8 +51,6 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
-		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->sut              = wc_get_container()->get( OrdersTableRefundDataStore::class );
 		$this->order_data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator         = wc_get_container()->get( PostsToOrdersMigrationController::class );
@@ -263,6 +268,47 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 			$this->assertEquals( null, get_post_meta( $refund->get_id(), 'test_key2', true ) );
 			$this->assertEquals( 'test_value3_2', get_post_meta( $refund->get_id(), 'test_key3', true ) );
 		}
+	}
+
+
+	/**
+	 * @testDox  Test that refund hooks are fired as expected.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_hooks( $hpos_on_or_off ) {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$hook_called_count = array();
+		$callback          = function () use ( &$hook_called_count ) {
+			$hook_called_count[ current_action() ] = ( $hook_called_count[ current_action() ] ?? 0 ) + 1;
+		};
+
+		add_action( 'woocommerce_create_refund', $callback );
+
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => array(),
+			)
+		);
+
+		add_action( 'woocommerce_update_order_refund', $callback );
+		$refund->set_reason( 'Some reason' );
+		$refund->save();
+
+		$refund->add_meta_data( 'foo', 'bar' );
+		$refund->save();
+
+		remove_action( 'woocommerce_create_refund', $callback );
+		remove_action( 'woocommerce_update_order_refund', $callback );
+
+		$this->assertEquals( 1, $hook_called_count['woocommerce_create_refund'] );
+		$this->assertEquals( 2, $hook_called_count['woocommerce_update_order_refund'] );
 	}
 
 }

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { Button, CheckboxControl, SelectControl } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	RadioControl,
+	SelectControl,
+} from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
@@ -59,7 +64,7 @@ class Setting extends Component {
 			case 'button':
 				return (
 					<Button
-						isSecondary
+						variant="secondary"
 						onClick={ this.handleInputCallback }
 						disabled={ disabled }
 					>
@@ -78,6 +83,7 @@ class Setting extends Component {
 			case 'select':
 				return (
 					<SelectControl
+						__next40pxDefaultSize
 						options={ options }
 						value={ value }
 						onChange={ ( newValue ) =>
@@ -85,6 +91,22 @@ class Setting extends Component {
 								target: {
 									name,
 									type: 'select',
+									value: newValue,
+								},
+							} )
+						}
+					/>
+				);
+			case 'radio':
+				return (
+					<RadioControl
+						selected={ value }
+						options={ options }
+						onChange={ ( newValue ) =>
+							handleChange( {
+								target: {
+									name,
+									type: 'radio',
 									value: newValue,
 								},
 							} )
@@ -205,6 +227,7 @@ Setting.propTypes = {
 		'text',
 		'component',
 		'select',
+		'radio',
 	] ),
 	/**
 	 * Label used for describing the setting.

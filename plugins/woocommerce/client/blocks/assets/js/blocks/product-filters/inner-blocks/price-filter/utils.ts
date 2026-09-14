@@ -20,10 +20,10 @@ export function getPriceFilterData(
 ) {
 	if ( ! objectHasProp( results, 'price_range' ) ) {
 		return {
-			minPrice: 0,
-			maxPrice: 0,
-			minRange: 0,
-			maxRange: 0,
+			currentMin: 0,
+			currentMax: 0,
+			min: 0,
+			max: 0,
 		};
 	}
 
@@ -43,9 +43,9 @@ export function getPriceFilterData(
 			: 0;
 
 	return {
-		minPrice,
-		maxPrice,
-		minRange: minPrice,
-		maxRange: maxPrice,
+		currentMin: minPrice,
+		currentMax: maxPrice,
+		min: minPrice,
+		max: maxPrice,
 	};
 }

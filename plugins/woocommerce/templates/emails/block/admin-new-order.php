@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.1.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -26,20 +26,20 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:heading -->
 <h2 class="wp-block-heading"><?php
 /* translators: %s: order number */
-printf( esc_html__( 'New order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+printf( esc_html__( 'New order: #%s', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
 ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p><?php
 /* translators: %s: Customer full name */
-printf( esc_html__( 'You’ve received a new order from %s', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
+printf( esc_html__( 'You’ve received a new order from %s:', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
 ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
-<!-- /wp:woo/email-content -->
+<!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
+<div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
+<!-- /wp:woocommerce/email-content -->
 
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center"> <?php echo esc_html__( 'Congratulations on the sale!', 'woocommerce' ); ?> </p>

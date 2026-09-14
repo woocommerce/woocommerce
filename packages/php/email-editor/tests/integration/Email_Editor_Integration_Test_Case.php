@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 use Automattic\WooCommerce\EmailEditor\Container;
 use Automattic\WooCommerce\EmailEditor\Email_Css_Inliner;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
@@ -48,6 +49,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	 * @var Container
 	 */
 	public Container $di_container;
+
+	/**
+	 * Registries replaced by swapEnqueueRegistries(), until restored.
+	 *
+	 * @var array{styles: mixed, scripts: mixed}|null
+	 */
+	private $original_enqueue_registries;
 
 	/**
 	 * Set up before each test.
@@ -122,7 +130,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
-			\Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class,
+			Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
 			}
@@ -212,6 +220,17 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
+				);
+			}
+		);
+		$container->set(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -246,6 +265,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Process_Manager::class ),
 				);
 			}
 		);
@@ -303,10 +323,43 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
-					$container->get( Email_Editor_Logger::class )
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);
 		$this->di_container = $container;
+	}
+
+	/**
+	 * Replace the global styles and scripts registries with fresh ones.
+	 *
+	 * Enqueue state is global and WP_UnitTestCase does not reset it. Call from setUp()
+	 * in tests that enqueue assets, and restoreEnqueueRegistries() from tearDown().
+	 */
+	protected function swapEnqueueRegistries(): void {
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolate enqueue state per test, as core's own script and style tests do.
+		$this->original_enqueue_registries = array(
+			'styles'  => $GLOBALS['wp_styles'] ?? null,
+			'scripts' => $GLOBALS['wp_scripts'] ?? null,
+		);
+
+		$GLOBALS['wp_styles']  = new \WP_Styles();
+		$GLOBALS['wp_scripts'] = new \WP_Scripts();
+		// phpcs:enable
+	}
+
+	/**
+	 * Restore the registries replaced by swapEnqueueRegistries().
+	 */
+	protected function restoreEnqueueRegistries(): void {
+		if ( null === $this->original_enqueue_registries ) {
+			return;
+		}
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the registries swapped in swapEnqueueRegistries().
+		$GLOBALS['wp_styles']  = $this->original_enqueue_registries['styles'];
+		$GLOBALS['wp_scripts'] = $this->original_enqueue_registries['scripts'];
+		// phpcs:enable
+		$this->original_enqueue_registries = null;
 	}
 }

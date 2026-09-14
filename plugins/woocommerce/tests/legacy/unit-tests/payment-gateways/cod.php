@@ -84,4 +84,47 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'enable_for_methods', $form_fields );
 		$this->assertNotEmpty( $form_fields['enable_for_methods']['options'] );
 	}
+
+	/**
+	 * Make sure is_available() returns early for disabled gateways.
+	 */
+	public function test_is_available_returns_early_when_disabled() {
+		$gateway          = new WC_Gateway_COD();
+		$gateway->enabled = 'no';
+
+		$cart                    = WC()->cart;
+		$has_order_pay_query_var = array_key_exists( 'order-pay', $GLOBALS['wp']->query_vars );
+		$order_pay_query_var     = $has_order_pay_query_var ? $GLOBALS['wp']->query_vars['order-pay'] : null;
+
+		try {
+			WC()->cart = new class() {
+				/**
+				 * Number of times needs_shipping() is called.
+				 *
+				 * @var int
+				 */
+				public $needs_shipping_call_count = 0;
+
+				/**
+				 * Track calls to needs_shipping().
+				 *
+				 * @return bool
+				 */
+				public function needs_shipping() {
+					++$this->needs_shipping_call_count;
+					return false;
+				}
+			};
+			unset( $GLOBALS['wp']->query_vars['order-pay'] );
+
+			$this->assertFalse( $gateway->is_available() );
+			$this->assertSame( 0, WC()->cart->needs_shipping_call_count );
+		} finally {
+			WC()->cart = $cart;
+
+			if ( $has_order_pay_query_var ) {
+				$GLOBALS['wp']->query_vars['order-pay'] = $order_pay_query_var;
+			}
+		}
+	}
 }

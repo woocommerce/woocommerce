@@ -59,6 +59,8 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -103,19 +105,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
-
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 1,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -228,6 +217,148 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 
 	/**
+	 * Test getting reports with multiple tax line items on a single order.
+	 * Ensures that the report returns the correct number of unique tax rates
+	 * when an order has multiple different taxes applied.
+	 *
+	 * @since 10.4.0
+	 */
+	public function test_get_reports_with_multiple_tax_line_items() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a test product.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Create multiple tax rates.
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 1,
+				'tax_rate'          => '5',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'State Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_order'    => 1,
+			)
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 2,
+				'tax_rate'          => '2.5',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'City Tax',
+				'tax_rate_priority' => 2,
+				'tax_rate_order'    => 2,
+			)
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 3,
+				'tax_rate'          => '1',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'County Tax',
+				'tax_rate_priority' => 3,
+				'tax_rate_order'    => 3,
+			)
+		);
+
+		// Create an order with multiple tax line items.
+		$order = WC_Helper_Order::create_order( 1, $product );
+
+		// Add first tax item (State Tax).
+		$tax_item_1 = new WC_Order_Item_Tax();
+		$tax_item_1->set_rate( 1 );
+		$tax_item_1->set_tax_total( 5 );
+		$tax_item_1->set_shipping_tax_total( 1 );
+		$order->add_item( $tax_item_1 );
+
+		// Add second tax item (City Tax).
+		$tax_item_2 = new WC_Order_Item_Tax();
+		$tax_item_2->set_rate( 2 );
+		$tax_item_2->set_tax_total( 2.5 );
+		$tax_item_2->set_shipping_tax_total( 0.5 );
+		$order->add_item( $tax_item_2 );
+
+		// Add third tax item (County Tax).
+		$tax_item_3 = new WC_Order_Item_Tax();
+		$tax_item_3->set_rate( 3 );
+		$tax_item_3->set_tax_total( 1 );
+		$tax_item_3->set_shipping_tax_total( 0.25 );
+		$order->add_item( $tax_item_3 );
+
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 109.75 ); // Product + all taxes.
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Make the API request.
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		// Assert response is successful.
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Assert we get exactly 3 unique tax rates in the report.
+		$this->assertEquals( 3, count( $reports ), 'Should return 3 unique tax rates' );
+
+		// Organize reports by tax_rate_id for easier assertions.
+		$reports_by_id = array();
+		foreach ( $reports as $report ) {
+			$reports_by_id[ $report['tax_rate_id'] ] = $report;
+		}
+
+		// Assert each tax rate has correct data.
+		// Tax Rate 1 - State Tax.
+		$this->assertArrayHasKey( 1, $reports_by_id );
+		$this->assertEquals( 1, $reports_by_id[1]['tax_rate_id'] );
+		$this->assertEquals( 5.0, $reports_by_id[1]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[1]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[1]['state'] );
+		$this->assertEquals( 'STATE TAX', $reports_by_id[1]['name'] );
+		$this->assertEquals( 6, $reports_by_id[1]['total_tax'] );
+		$this->assertEquals( 5, $reports_by_id[1]['order_tax'] );
+		$this->assertEquals( 1, $reports_by_id[1]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[1]['orders_count'] );
+
+		// Tax Rate 2 - City Tax.
+		$this->assertArrayHasKey( 2, $reports_by_id );
+		$this->assertEquals( 2, $reports_by_id[2]['tax_rate_id'] );
+		$this->assertEquals( 2.5, $reports_by_id[2]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[2]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[2]['state'] );
+		$this->assertEquals( 'CITY TAX', $reports_by_id[2]['name'] );
+		$this->assertEquals( 3, $reports_by_id[2]['total_tax'] );
+		$this->assertEquals( 2.5, $reports_by_id[2]['order_tax'] );
+		$this->assertEquals( 0.5, $reports_by_id[2]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[2]['orders_count'] );
+
+		// Tax Rate 3 - County Tax.
+		$this->assertArrayHasKey( 3, $reports_by_id );
+		$this->assertEquals( 3, $reports_by_id[3]['tax_rate_id'] );
+		$this->assertEquals( 1.0, $reports_by_id[3]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[3]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[3]['state'] );
+		$this->assertEquals( 'COUNTY TAX', $reports_by_id[3]['name'] );
+		$this->assertEquals( 1.25, $reports_by_id[3]['total_tax'] );
+		$this->assertEquals( 1, $reports_by_id[3]['order_tax'] );
+		$this->assertEquals( 0.25, $reports_by_id[3]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[3]['orders_count'] );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0
@@ -236,6 +367,30 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test that the CSV export column order stays in sync with the report table.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/taxes/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'tax_code',
+			'rate',
+			'total_tax',
+			'order_tax',
+			'shipping_tax',
+			'taxable_amount',
+			'orders_count',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'The CSV column order must match the column order in table.js' );
 	}
 
 	/**
@@ -251,7 +406,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
 		$this->assertArrayHasKey( 'tax_rate_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'tax_rate', $properties );
@@ -261,6 +416,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'total_tax', $properties );
 		$this->assertArrayHasKey( 'order_tax', $properties );
 		$this->assertArrayHasKey( 'shipping_tax', $properties );
+		$this->assertArrayHasKey( 'taxable_amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 	}
 
@@ -369,54 +525,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_es_2->set_total( 100 ); // $25 x 4.
 		$order_es_2->save();
 		$order_es_2->calculate_totals( true );
-
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 1,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_ca->get_id(),
-				'tax_rate_id'  => 2,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_es->get_id(),
-				'tax_rate_id'  => 3,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_es_2->get_id(),
-				'tax_rate_id'  => 3,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 	}

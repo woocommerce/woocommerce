@@ -3,7 +3,7 @@
 		"woocommerce/woocommerce-sniffs": "1.0.0",
 		"phpcompatibility/php-compatibility": "dev-develop#9013cd039fe5740953f9fdeebd19d901b80e26f2 as 9.3.10",
 		"sirbrillig/phpcs-changed": "^2.11.1",
-		"suin/phpcs-psr4-sniff": "^3.0"
+		"slevomat/coding-standard": "^6.3"
 	},
 	"config": {
 		"platform": {

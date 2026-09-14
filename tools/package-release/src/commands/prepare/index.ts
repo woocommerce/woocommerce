@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 import { writeFileSync } from 'fs';
+import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -21,6 +22,7 @@ import {
 	writeChangelog,
 	hasValidChangelogs,
 } from '../../changelogger';
+import { WOOCOMMERCE_PLUGIN_ROOT } from '../../const';
 
 /**
  * PackagePrepare class
@@ -34,14 +36,13 @@ export default class PackagePrepare extends Command {
 	/**
 	 * CLI arguments
 	 */
-	static args = [
-		{
-			name: 'packages',
+	static args = {
+		packages: Args.string( {
 			description:
 				'Package to release, or packages to release separated by commas.',
 			required: false,
-		},
-	];
+		} ),
+	};
 
 	/**
 	 * CLI flags.
@@ -63,6 +64,7 @@ export default class PackagePrepare extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( PackagePrepare );
+		const packages = args.packages ? args.packages.split( ',' ) : [];
 
 		if ( ! args.packages && ! flags.all ) {
 			this.error( 'No packages supplied.' );
@@ -72,8 +74,6 @@ export default class PackagePrepare extends Command {
 			await this.preparePackages( getAllPackages() );
 			return;
 		}
-
-		const packages = args.packages.split( ',' );
 
 		if ( flags[ 'initial-release' ] && packages.length > 1 ) {
 			this.error(
@@ -98,7 +98,7 @@ export default class PackagePrepare extends Command {
 		initialRelease?: boolean
 	) {
 		packages.forEach( async ( name ) => {
-			CliUx.ux.action.start( `Preparing ${ name }` );
+			ux.action.start( `Preparing ${ name }` );
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
@@ -121,9 +121,9 @@ export default class PackagePrepare extends Command {
 
 					this.bumpPackageVersion( name, nextVersion );
 
-					CliUx.ux.action.stop();
+					ux.action.stop();
 				} else {
-					CliUx.ux.action.stop(
+					ux.action.stop(
 						`Skipping ${ name }. No changes available for a release.`
 					);
 				}
@@ -165,6 +165,32 @@ export default class PackagePrepare extends Command {
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
+
+			// if preparing a php package and the package is used in the woocommerce plugin
+			// also update the version in the plugin's composer.json and composer.lock
+			// this is done to ensure jetpack autoloader fetches the correct version of the package
+			if ( packageType === 'php' ) {
+				try {
+					// will throw an error if the package is not used in the woocommerce plugin
+					execSync(
+						`composer show ${ json.name } --no-scripts --direct --quiet`,
+						{
+							encoding: 'utf-8',
+							cwd: WOOCOMMERCE_PLUGIN_ROOT,
+							stdio: 'ignore',
+						}
+					);
+					execSync(
+						`composer update ${ json.name } --no-scripts --no-plugins --quiet`,
+						{
+							encoding: 'utf-8',
+							cwd: WOOCOMMERCE_PLUGIN_ROOT,
+						}
+					);
+				} catch ( error ) {
+					// Ignore the error - package is not used in the woocommerce plugin.
+				}
+			}
 		} catch ( e ) {
 			this.error( `Can't bump version for ${ name }.` );
 		}

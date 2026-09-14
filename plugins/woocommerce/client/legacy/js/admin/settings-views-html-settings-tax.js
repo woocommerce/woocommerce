@@ -21,6 +21,63 @@
 			$pagination        = $( '#rates-pagination, #rates-bottom-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.woocommerce-save-button[type=submit]' ),
+			/**
+			 * Filter a list of { value, label } items against the autocomplete term,
+			 * matching both the stored code (`value`) and the display name (`label`)
+			 * so a field holding a code can be found by typing the code, not just the
+			 * name. Matches are ranked so the most relevant code matches surface first.
+			 *
+			 * @param {Array}    items    List of { value, label } objects to search.
+			 * @param {Object}   request  jQuery UI autocomplete request ({ term }).
+			 * @param {Function} response jQuery UI autocomplete response callback.
+			 */
+			rankCodeAwareMatches = function( items, request, response ) {
+				var term    = request.term.toLowerCase(),
+					matcher = new RegExp( $.ui.autocomplete.escapeRegex( term ), 'i' ),
+					matches = $.grep( items, function( item ) {
+						return matcher.test( item.value ) || matcher.test( item.label );
+					} );
+
+				/* Rank: exact code (0), code prefix (1), name prefix (2), name substring (3). */
+				response( _.sortBy( matches, function( item ) {
+					// Some state codes are numeric (e.g. US Minor Outlying Islands),
+					// which arrive as numbers, so coerce to string before comparing.
+					var value = String( item.value ).toLowerCase(),
+						label = String( item.label ).toLowerCase();
+
+					if ( value === term ) {
+						return 0;
+					}
+					if ( 0 === value.indexOf( term ) ) {
+						return 1;
+					}
+					if ( 0 === label.indexOf( term ) ) {
+						return 2;
+					}
+					return 3;
+				} ) );
+			},
+			countryAutocompleteSource = function( request, response ) {
+				rankCodeAwareMatches( data.countries, request, response );
+			},
+			stateAutocompleteSource = function( request, response ) {
+				// Scope state suggestions to the row's selected country when known,
+				// falling back to all states if no/unknown country is entered yet.
+				var country = String( this.element.closest( 'tr' ).find( 'td.country input' ).val() || '' ).trim().toUpperCase(),
+					states  = data.states;
+
+				if ( country ) {
+					var scoped = $.grep( data.states, function( state ) {
+						return state.country === country;
+					} );
+
+					if ( scoped.length ) {
+						states = scoped;
+					}
+				}
+
+				rankCodeAwareMatches( states, request, response );
+			},
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes: {},
 				setRateAttribute: function( rateID, attribute, value ) {
@@ -154,14 +211,14 @@
 
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({
-						source: data.countries,
+						source: countryAutocompleteSource,
 						minLength: 2
 					});
 
 					// Initialize autocomplete for states.
 					this.$el.find( 'td.state input' ).autocomplete({
-						source: data.states,
-						minLength: 3
+						source: stateAutocompleteSource,
+						minLength: 2
 					});
 
 					// Postcode and city don't have `name` values by default.

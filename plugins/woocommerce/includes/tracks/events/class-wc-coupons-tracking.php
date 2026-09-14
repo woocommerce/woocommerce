@@ -19,24 +19,43 @@ class WC_Coupons_Tracking {
 	}
 
 	/**
-	 * Add a listener on the "Apply" button to track bulk actions.
+	 * Enqueue JS to handle tracking for bulk editing of coupons.
+	 *
+	 * @return void
 	 */
 	public function tracks_coupons_bulk_actions() {
-		wc_enqueue_js(
+		$handle = 'wc-tracks-coupons-bulk-actions';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"
-			function onApplyBulkActions( event ) {
-				var id = event.data.id;
-				var action = $( '#' + id ).val();
-				
-				if ( action && '-1' !== action ) {
-					window.wcTracks.recordEvent( 'coupons_view_bulk_action', {
-						action: action
-					} );
-				}
-			}
-			$( '#doaction' ).on( 'click', { id: 'bulk-action-selector-top' }, onApplyBulkActions );
-			$( '#doaction2' ).on( 'click', { id: 'bulk-action-selector-bottom' }, onApplyBulkActions );
-		"
+				(function() {
+				    'use strict';
+
+				    function trackBulkAction( selectorId ) {
+				        return function() {
+				            const select = document.getElementById( selectorId );
+				            const action = select ? select.value : null;
+
+				            if ( action && '-1' !== action && window.wcTracks && window.wcTracks.recordEvent ) {
+				                window.wcTracks.recordEvent( 'coupons_view_bulk_action', { action: action } );
+				            }
+				        };
+				    }
+
+				    const topButton = document.getElementById( 'doaction' );
+				    const bottomButton = document.getElementById( 'doaction2' );
+
+				    if ( topButton ) {
+				        topButton.addEventListener( 'click', trackBulkAction( 'bulk-action-selector-top' ) );
+				    }
+
+				    if ( bottomButton ) {
+				        bottomButton.addEventListener( 'click', trackBulkAction( 'bulk-action-selector-bottom' ) );
+				    }
+				})();
+			"
 		);
 	}
 

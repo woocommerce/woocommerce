@@ -198,9 +198,9 @@ export const Edit = ( {
 
 	const changeView = ( method: string ) => {
 		if ( method === 'pickup' ) {
-			setPrefersCollection( true );
+			void setPrefersCollection( true );
 		} else {
-			setPrefersCollection( false );
+			void setPrefersCollection( false );
 		}
 	};
 
@@ -222,6 +222,7 @@ export const Edit = ( {
 						) }
 					</p>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show icon', 'woocommerce' ) }
 						checked={ showIcon }
 						onChange={ () =>
@@ -231,6 +232,7 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show costs', 'woocommerce' ) }
 						checked={ showPrice }
 						onChange={ () =>

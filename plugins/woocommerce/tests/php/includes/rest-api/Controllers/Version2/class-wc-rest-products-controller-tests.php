@@ -1,12 +1,15 @@
 <?php
 
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V2 REST API.
  */
 class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
+	use MetaDataAssertionTrait;
+
 	/**
 	 * @var WC_Product_Simple[]
 	 */
@@ -18,6 +21,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		for ( $i = 1; $i <= 4; $i++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
@@ -27,6 +31,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$product->add_meta_data( 'test2', 'test2', true );
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -35,9 +40,11 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -404,9 +411,13 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		foreach ( $skus_and_names as $sku => $name ) {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_name( $name );
-			$product->set_sku( $sku );
+			$product = WC_Helper_Product::create_simple_product(
+				false,
+				array(
+					'name' => $name,
+					'sku'  => $sku,
+				)
+			);
 			$product->save();
 		}
 
@@ -422,5 +433,86 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$actual_data = ArrayUtil::select( $actual_data, 'sku' );
 
 		$this->assertEqualsCanonicalizing( $expected_obtained_data, $actual_data );
+	}
+
+	/**
+	 * @testdox Updating a product via V2 with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating a variation through the products endpoint returns the existing variation endpoint error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Getting a product loaded before its global attribute is deleted uses the attribute slug as its name.
+	 */
+	public function test_get_item_for_product_loaded_before_its_global_attribute_is_deleted(): void {
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Variable();
+		$product->set_name( 'Stale attribute product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->set_default_attributes( array( $attribute->get_name() => 'matte' ) );
+		$product->save();
+		wc_get_product( $product->get_id() );
+
+		wc_delete_attribute( $attribute->get_id() );
+
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		try {
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array(), $warnings, 'Serializing the product should not raise warnings.' );
+		$data = $response->get_data();
+		$this->assertSame( array( 'stale-finish' ), wp_list_pluck( $data['attributes'], 'name' ) );
+		$this->assertSame( array( 'stale-finish' ), wp_list_pluck( $data['default_attributes'], 'name' ) );
+	}
+
+	/**
+	 * @testdox The deprecated get_attribute_taxonomy_label() returns the attribute slug for a taxonomy that is not registered.
+	 */
+	public function test_deprecated_attribute_taxonomy_label_for_unregistered_taxonomy(): void {
+		$get_label = new ReflectionMethod( WC_REST_Products_V2_Controller::class, 'get_attribute_taxonomy_label' );
+		$get_label->setAccessible( true );
+
+		$this->assertSame( 'not-registered', $get_label->invoke( $this->endpoint, 'pa_not-registered' ) );
 	}
 }

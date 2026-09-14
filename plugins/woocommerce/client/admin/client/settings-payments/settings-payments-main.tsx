@@ -9,11 +9,16 @@ import {
 	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
-import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
+import {
+	dispatch,
+	resolveSelect,
+	useDispatch,
+	useSelect,
+} from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { getAdminLink } from '@woocommerce/settings';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,16 +38,16 @@ import {
 	isWooPayments,
 	getWooPaymentsFromProviders,
 	providersContainWooPaymentsNeedsSetup,
-	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
 	recordPaymentsEvent,
 	recordPaymentsOnboardingEvent,
+	getPluginActionErrorMessage,
+	getFailedPluginAction,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
@@ -74,6 +79,8 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
+
+	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -157,7 +164,7 @@ export const SettingsPaymentsMain = () => {
 	const dismissIncentive = useCallback(
 		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
-			apiFetch( {
+			void apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
@@ -170,7 +177,7 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const acceptIncentive = useCallback( ( id: string ) => {
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ id }`,
 			method: 'POST',
 		} );
@@ -195,7 +202,7 @@ export const SettingsPaymentsMain = () => {
 			orderMap[ provider.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update
 		setSortedProviders( sorted );
@@ -317,19 +324,13 @@ export const SettingsPaymentsMain = () => {
 
 			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
 				// We are not interested in the response; we just want to trigger the preload.
-				apiFetch( {
+				void apiFetch( {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
 						location: businessCountry,
 					},
 				} );
-			}
-
-			// A fail-safe to ensure that the onboarding URL is set for WooPayments.
-			// Note: We should get rid of this sooner rather than later!
-			if ( ! onboardingUrl && isWooPayments( paymentsEntity.id ) ) {
-				onboardingUrl = getWooPaymentsTestDriveAccountLink();
 			}
 
 			setInstallingPlugin( paymentsEntity.id );
@@ -348,11 +349,11 @@ export const SettingsPaymentsMain = () => {
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
-						attachPaymentExtensionSuggestion( attachUrl );
+						void attachPaymentExtensionSuggestion( attachUrl );
 					}
 
 					createNoticesFromResponse( response );
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
 					);
 
@@ -371,9 +372,10 @@ export const SettingsPaymentsMain = () => {
 					setInstallingPlugin( null );
 
 					// Wait for the state update and fetch the latest providers.
-					const updatedProviders = await resolveSelect(
-						paymentSettingsStore
-					).getPaymentProviders( businessCountry );
+					const updatedProviders =
+						await resolveSelect(
+							paymentSettingsStore
+						).getPaymentProviders( businessCountry );
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
@@ -421,21 +423,35 @@ export const SettingsPaymentsMain = () => {
 						}
 					}
 				} )
-				.catch( ( response: { errors: Record< string, string > } ) => {
-					let eventName = 'provider_extension_installation_failed';
-					if ( paymentsEntity.plugin.status !== 'not_installed' ) {
-						eventName = 'provider_extension_activation_failed';
-					}
-					recordPaymentsEvent( eventName, {
-						provider_id: paymentsEntity.id,
-						suggestion_id:
-							paymentsEntity?._suggestion_id ?? 'unknown',
-						provider_extension_slug: paymentsEntity.plugin.slug,
-						from: context,
-						source: wooPaymentsOnboardingSessionEntrySettings,
-						reason: 'error',
-					} );
-					createNoticesFromResponse( response );
+				.catch( ( error: unknown ) => {
+					const actionType = getFailedPluginAction(
+						error,
+						paymentsEntity.plugin.status === 'not_installed'
+							? 'install'
+							: 'activate'
+					);
+					recordPaymentsEvent(
+						actionType === 'install'
+							? 'provider_extension_installation_failed'
+							: 'provider_extension_activation_failed',
+						{
+							provider_id: paymentsEntity.id,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							provider_extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+							source: wooPaymentsOnboardingSessionEntrySettings,
+							reason: 'error',
+						}
+					);
+					dispatch( 'core/notices' ).createNotice(
+						'error',
+						getPluginActionErrorMessage(
+							actionType,
+							paymentsEntity.title,
+							error
+						)
+					);
 					setInstallingPlugin( null );
 				} );
 		},
@@ -482,24 +498,17 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<TrackedLink
-			message={ __(
-				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment options.',
-				'woocommerce'
-			) }
-			onClickCallback={ trackMorePaymentsOptionsClicked }
-			targetUrl={
-				isFeatureEnabled( 'marketplace' )
-					? getAdminLink(
-							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-					  )
-					: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
-			}
-			linkType={
-				isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-			}
-		/>
+		<Button
+			variant={ 'link' }
+			target="_blank"
+			rel="noopener noreferrer"
+			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+			className="more-payment-options-link"
+			onClick={ trackMorePaymentsOptionsClicked }
+		>
+			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
+			{ __( 'More payment options', 'woocommerce' ) }
+		</Button>
 	);
 
 	return (

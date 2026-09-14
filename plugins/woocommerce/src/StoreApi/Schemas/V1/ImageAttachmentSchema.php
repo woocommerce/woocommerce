@@ -26,42 +26,52 @@ class ImageAttachmentSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'id'        => [
+			'id'               => [
 				'description' => __( 'Image ID.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'src'       => [
+			'src'              => [
 				'description' => __( 'Full size image URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'thumbnail' => [
+			'thumbnail'        => [
 				'description' => __( 'Thumbnail URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'srcset'    => [
+			'srcset'           => [
+				'description' => __( 'Full size image srcset for responsive images.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit', 'embed' ],
+			],
+			'sizes'            => [
+				'description' => __( 'Full size image sizes for responsive images.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit', 'embed' ],
+			],
+			'thumbnail_srcset' => [
 				'description' => __( 'Thumbnail srcset for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'sizes'     => [
+			'thumbnail_sizes'  => [
 				'description' => __( 'Thumbnail sizes for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'name'      => [
+			'name'             => [
 				'description' => __( 'Image name.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'alt'       => [
+			'alt'              => [
 				'description' => __( 'Image alternative text.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 			],
 		];
 	}
@@ -86,13 +96,15 @@ class ImageAttachmentSchema extends AbstractSchema {
 		$thumbnail = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
 
 		return (object) [
-			'id'        => (int) $attachment_id,
-			'src'       => current( $attachment ),
-			'thumbnail' => current( $thumbnail ),
-			'srcset'    => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-			'sizes'     => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
-			'name'      => get_the_title( $attachment_id ),
-			'alt'       => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			'id'               => (int) $attachment_id,
+			'src'              => current( $attachment ),
+			'thumbnail'        => current( $thumbnail ),
+			'srcset'           => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
+			'sizes'            => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+			'thumbnail_srcset' => (string) wp_get_attachment_image_srcset( $attachment_id, 'woocommerce_thumbnail' ),
+			'thumbnail_sizes'  => (string) wp_get_attachment_image_sizes( $attachment_id, 'woocommerce_thumbnail' ),
+			'name'             => get_the_title( $attachment_id ),
+			'alt'              => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 		];
 	}
 

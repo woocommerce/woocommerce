@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 10.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -28,8 +28,8 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 <?php do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
-<?php /* translators: %s: Customer username */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ); ?></p>
+<?php /* translators: %s: Customer first name, or username if name is not available */ ?>
+<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
 <?php /* translators: %s: Store name */ ?>
 <p><?php printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), esc_html( $blogname ) ); ?></p>
 <?php if ( $email_improvements_enabled ) : ?>
@@ -61,7 +61,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
-	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content email-additional-content-aligned">' : '';
+	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td class="email-additional-content email-additional-content-aligned">' : '';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }

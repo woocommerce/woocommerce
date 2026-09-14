@@ -32,6 +32,8 @@ export const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<RangeControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __(
 							'Cross-Sells products to show',
 							'woocommerce'

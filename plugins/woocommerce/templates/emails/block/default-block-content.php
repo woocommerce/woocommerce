@@ -8,7 +8,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.1.0
+ * @version 10.6.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -32,12 +32,12 @@ esc_html_e( 'Default block content', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
-<!-- /wp:woo/email-content -->
+<!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
+<div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
+<!-- /wp:woocommerce/email-content -->
 
-<!-- wp:paragraph -->
-<p><?php
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php
 /* translators: %s: Store admin email */
 	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>

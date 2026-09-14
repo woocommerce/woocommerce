@@ -10,10 +10,13 @@
 		},
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
-		"html": false,
 		"color": {
 			"background": true,
 			"text": true
+		},
+		"html": false,
+		"filter": {
+			"duotone": true
 		},
 		"spacing": {
 			"padding": true,
@@ -26,6 +29,11 @@
 			"color": true,
 			"radius": true,
 			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"width": true
+			},
 			"__experimentalSkipSerialization": true
 		}
 	},
@@ -41,10 +49,6 @@
 		"dimRatio": {
 			"type": "number",
 			"default": 50
-		},
-		"editMode": {
-			"type": "boolean",
-			"default": true
 		},
 		"focalPoint": {
 			"type": "object",
@@ -94,13 +98,19 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
-		},
-		"showDesc": {
-			"type": "boolean",
-			"default": true
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
 		}
 	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"usesContext": [ "termId", "termTaxonomy" ],
+	"providesContext": {
+		"termId": "categoryId",
+		"termTaxonomy": "termTaxonomy"
+	}
 }

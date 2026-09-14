@@ -13,8 +13,10 @@ import Block from './block';
 import metadata from './block.json';
 import { register } from '../register';
 import { example } from './example';
+import deprecated from './deprecated';
 
 register( Block, example, metadata, {
+	deprecated,
 	icon: {
 		src: (
 			<Icon

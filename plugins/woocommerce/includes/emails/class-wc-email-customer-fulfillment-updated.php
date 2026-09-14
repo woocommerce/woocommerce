@@ -5,7 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -32,12 +32,20 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 		private $fulfillment;
 
 		/**
+		 * Customer note.
+		 *
+		 * @var string
+		 */
+		private $customer_note = '';
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
 			$this->id             = 'customer_fulfillment_updated';
 			$this->customer_email = true;
 			$this->title          = __( 'Fulfillment updated', 'woocommerce' );
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-fulfillment-updated.php';
 			$this->template_plain = 'emails/plain/customer-fulfillment-updated.php';
 			$this->placeholders   = array(
@@ -46,12 +54,14 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 			);
 
 			// Triggers for this email.
-			add_action( 'woocommerce_fulfillment_updated_notification', array( $this, 'trigger' ), 10, 3 );
+			add_action( 'woocommerce_fulfillment_updated_notification', array( $this, 'trigger' ), 10, 4 );
 
 			// Call parent constructor.
 			parent::__construct();
 
 			$this->description = __( 'Fulfillment updated emails are sent to the customer when the merchant updates a fulfillment for the order. The notification isn’t sent for draft fulfillments.', 'woocommerce' );
+
+			$this->template_block_content = 'emails/block/general-block-content-for-fulfillment-emails.php';
 		}
 
 		/**
@@ -60,8 +70,9 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 		 * @param int            $order_id The order ID.
 		 * @param Fulfillment    $fulfillment The fulfillment.
 		 * @param WC_Order|false $order Order object.
+		 * @param string         $customer_note Customer note.
 		 */
-		public function trigger( $order_id, $fulfillment, $order = false ) {
+		public function trigger( $order_id, $fulfillment, $order = false, $customer_note = '' ) {
 			$this->setup_locale();
 
 			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
@@ -71,14 +82,13 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 			if ( is_a( $order, 'WC_Order' ) ) {
 				$this->object                         = $order;
 				$this->fulfillment                    = $fulfillment;
+				$this->customer_note                  = $customer_note;
 				$this->recipient                      = $this->object->get_billing_email();
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -117,6 +127,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 					'fulfillment'        => $this->fulfillment,
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
+					'customer_note'      => $this->customer_note,
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
 					'email'              => $this,
@@ -138,9 +149,30 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 					'fulfillment'        => $this->fulfillment,
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
+					'customer_note'      => $this->customer_note,
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			$this->maybe_init_fulfillment_for_preview( $this->object );
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'fulfillment'   => $this->fulfillment,
+					'customer_note' => $this->customer_note,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}
@@ -203,6 +235,8 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 						return $keys;
 					}
 				);
+
+				$this->customer_note = __( 'This is a sample note from the store. Your order has been updated with new tracking information.', 'woocommerce' );
 			}
 		}
 	}

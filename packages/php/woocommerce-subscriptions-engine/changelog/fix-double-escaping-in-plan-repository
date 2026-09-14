@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent double-escaping for incoming queries

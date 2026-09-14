@@ -4,7 +4,14 @@
  * class WC_REST_Coupons_Controller_Tests.
  * Coupons Controller tests for V3 REST API.
  */
+
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+
+/**
+ * Coupons Controller tests for V3 REST API.
+ */
 class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
+	use MetaDataAssertionTrait;
 
 
 
@@ -253,5 +260,88 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Ensure coupon was not created.
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-percent-test' ) );
+	}
+
+	/**
+	 * Test updating coupon status via REST API.
+	 */
+	public function test_update_coupon_status() {
+		wp_set_current_user( $this->user );
+		$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'test-coupon', 'draft' );
+		$coupon->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
+		$request->set_body_params( array( 'status' => 'publish' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'publish', $data['status'] );
+
+		$updated_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'publish', $updated_coupon->get_status() );
+	}
+
+	/**
+	 * Test updating coupon status from publish to draft.
+	 */
+	public function test_update_coupon_status_publish_to_draft() {
+		wp_set_current_user( $this->user );
+		$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'test-coupon', 'publish' );
+		$coupon->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
+		$request->set_body_params( array( 'status' => 'draft' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'draft', $data['status'] );
+
+		$updated_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'draft', $updated_coupon->get_status() );
+	}
+
+	/**
+	 * Test creating coupon with specific status.
+	 */
+	public function test_create_coupon_with_status() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'draft-coupon-test',
+				'discount_type' => 'fixed_cart',
+				'amount'        => '10.00',
+				'status'        => 'draft',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'draft', $data['status'] );
+
+		$coupon = new WC_Coupon( $data['id'] );
+		$this->assertEquals( 'draft', $coupon->get_status() );
+	}
+
+	/**
+	 * @testdox Updating a coupon with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		wp_set_current_user( $this->user );
+		$coupon = \WC_Helper_Coupon::create_coupon();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( new \WC_Coupon( $coupon->get_id() ) );
 	}
 }

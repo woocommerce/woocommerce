@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -24,6 +24,25 @@ export const JetpackStep: React.FC = () => {
 	return (
 		<>
 			<WooPaymentsStepHeader onClose={ closeModal } />
+			{ currentStep?.errors && currentStep.errors.length > 0 && (
+				<Notice
+					status="error"
+					isDismissible={ false }
+					className="settings-payments-onboarding-modal__step-jetpack-error"
+					// Adding role="alert" for explicit screen reader announcement.
+					// While @wordpress/components Notice uses speak() internally,
+					// role="alert" provides better backwards compatibility with older AT.
+					{ ...{ role: 'alert' } }
+				>
+					<p>
+						{ currentStep.errors[ 0 ]?.message ||
+							__(
+								'Something went wrong. Please try again.',
+								'woocommerce'
+							) }
+					</p>
+				</Notice>
+			) }
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="settings-payments-onboarding-modal__step--content-jetpack">
 					<h1 className="settings-payments-onboarding-modal__step--content-jetpack-title">
@@ -47,7 +66,7 @@ export const JetpackStep: React.FC = () => {
 							const startUrl = currentStep?.actions?.start?.href;
 							if ( startUrl ) {
 								// No need to wait for the response.
-								apiFetch( {
+								void apiFetch( {
 									url: startUrl,
 									method: 'POST',
 									data: {

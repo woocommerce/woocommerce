@@ -5,6 +5,7 @@ import type { SearchListItem } from '@woocommerce/editor-components/search-list-
 import type {
 	ProductResponseItem,
 	ProductCategoryResponseItem,
+	ProductBrandResponseItem,
 } from '@woocommerce/types';
 
 /**
@@ -43,6 +44,26 @@ export const convertProductCategoryResponseItemToSearchItem = (
 		children: [],
 		details: category,
 		value: category.slug,
+	};
+};
+
+/**
+ * Converts a Product Brand object into a shape compatible with the `SearchListControl`
+ */
+export const convertProductBrandResponseItemToSearchItem = (
+	brand: ProductBrandResponseItem
+): SearchListItem< ProductBrandResponseItem > => {
+	const { id, name, parent, count } = brand;
+
+	return {
+		id,
+		name,
+		parent,
+		count,
+		breadcrumbs: [],
+		children: [],
+		details: brand,
+		value: brand.slug,
 	};
 };
 

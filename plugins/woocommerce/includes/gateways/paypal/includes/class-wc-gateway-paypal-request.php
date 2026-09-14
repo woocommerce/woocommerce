@@ -5,6 +5,10 @@
  * @package WooCommerce\Gateways
  */
 
+declare(strict_types=1);
+
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Generates requests to send to PayPal.
  */
 class WC_Gateway_Paypal_Request {
-
 	/**
 	 * Stores line items to send to PayPal.
 	 *
@@ -44,6 +47,12 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected $endpoint;
 
+	/**
+	 * The delegated request instance.
+	 *
+	 * @var PayPalRequest
+	 */
+	private $request;
 
 	/**
 	 * Constructor.
@@ -53,6 +62,7 @@ class WC_Gateway_Paypal_Request {
 	public function __construct( $gateway ) {
 		$this->gateway    = $gateway;
 		$this->notify_url = WC()->api_request_url( 'WC_Gateway_Paypal' );
+		$this->request    = new PayPalRequest( $gateway );
 	}
 
 	/**
@@ -89,6 +99,109 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Create a PayPal order using the Orders v2 API.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::create_paypal_order() instead. This method will be removed in 11.0.0.
+	 * @param WC_Order $order Order object.
+	 * @param string   $payment_source The payment source.
+	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
+	 * @return array|null
+	 * @throws Exception If the PayPal order creation fails.
+	 */
+	public function create_paypal_order(
+		$order,
+		$payment_source = PayPalConstants::PAYMENT_SOURCE_PAYPAL,
+		$js_sdk_params = array()
+	) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::create_paypal_order()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		return $this->request->create_paypal_order( $order, $payment_source, $js_sdk_params );
+	}
+
+	/**
+	 * Get PayPal order details.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_details() instead. This method will be removed in 11.0.0.
+	 * @param string $paypal_order_id The ID of the PayPal order.
+	 * @return array
+	 * @throws Exception If the PayPal order details request fails.
+	 * @throws Exception If the PayPal order details are not found.
+	 */
+	public function get_paypal_order_details( $paypal_order_id ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_details()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		return $this->request->get_paypal_order_details( $paypal_order_id );
+	}
+
+	/**
+	 * This method authorizes or captures a PayPal payment and updates the order status.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment() instead.
+	 * @param WC_Order    $order Order object.
+	 * @param string|null $action_url The URL to authorize or capture the payment.
+	 * @param string      $action The action to perform. Either 'authorize' or 'capture'.
+	 * @return void
+	 * @throws Exception If the PayPal payment authorization or capture fails.
+	 */
+	public function authorize_or_capture_payment( $order, $action_url, $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		$this->request->authorize_or_capture_payment( $order, $action_url, $action );
+	}
+
+	/**
+	 * Capture a PayPal payment that has been authorized.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::capture_authorized_payment() instead. This method will be removed in 11.0.0.
+	 * @param WC_Order $order Order object.
+	 * @return void
+	 * @throws Exception If the PayPal payment capture fails.
+	 */
+	public function capture_authorized_payment( $order ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::capture_authorized_payment()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		$this->request->capture_authorized_payment( $order );
+	}
+
+	/**
+	 * Get the amount data  for the PayPal order purchase unit field.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_purchase_unit_amount() instead. This method will be removed in 11.0.0.
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	public function get_paypal_order_purchase_unit_amount( $order ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_purchase_unit_amount()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		return $this->request->get_paypal_order_purchase_unit_amount( $order );
+	}
+
+	/**
+	 * Fetch the PayPal client-id from the Transact platform.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::fetch_paypal_client_id() instead. This method will be removed in 11.0.0.
+	 * @return string|null The PayPal client-id, or null if the request fails.
+	 * @throws Exception If the request fails.
+	 */
+	public function fetch_paypal_client_id() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::fetch_paypal_client_id()' );
+		if ( ! $this->request ) {
+			$this->request = new PayPalRequest( $this->gateway );
+		}
+		return $this->request->fetch_paypal_client_id();
+	}
+
+	/**
 	 * Limit length of an arg.
 	 *
 	 * @param  string  $string Argument to limit.
@@ -101,10 +214,8 @@ class WC_Gateway_Paypal_Request {
 			if ( mb_strlen( $string ) > $limit ) {
 				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
 			}
-		} else {
-			if ( strlen( $string ) > $limit ) {
+		} elseif ( strlen( $string ) > $limit ) {
 				$string = substr( $string, 0, $str_limit ) . '...';
-			}
 		}
 		return $string;
 	}
@@ -129,7 +240,7 @@ class WC_Gateway_Paypal_Request {
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
+				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 				'custom'        => wp_json_encode(
 					array(
 						'order_id'  => $order->get_id(),
@@ -180,7 +291,6 @@ class WC_Gateway_Paypal_Request {
 			),
 			$order
 		);
-
 	}
 
 	/**
@@ -575,6 +685,6 @@ class WC_Gateway_Paypal_Request {
 			$decimals = 0;
 		}
 
-		return number_format( $price, $decimals, '.', '' );
+		return number_format( (float) $price, $decimals, '.', '' );
 	}
 }

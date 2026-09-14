@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix class name inconsistencies in Single Product block components to ensure proper BEM naming conventions.

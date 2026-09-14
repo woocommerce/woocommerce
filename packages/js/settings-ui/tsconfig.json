@@ -1,0 +1,26 @@
+{
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"noCheck": false,
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "./build-types",
+		"typeRoots": [
+			"./node_modules/@types"
+		],
+		"composite": true
+	},
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**"
+	],
+	"references": [
+		{
+			"path": "../sanitize"
+		}
+	]
+}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fallback to displaying store notices via the `wp_footer` hook if the `wp_body_open` hook didn't fire. This improves compatibility with themes that haven't been updated to include the `wp_body_open` hook.

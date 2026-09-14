@@ -7,19 +7,12 @@
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
  * Class WC_Order_Functions_Test
  */
 class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
-	/**
-	 * tearDown.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-	}
-
 	/**
 	 * Test that wc_restock_refunded_items() preserves order item stock metadata.
 	 */
@@ -540,5 +533,77 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			// All URLs should preserve their double hyphens.
 			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );
 		}
+	}
+
+	/**
+	 * Test `wc_delete_shop_order_transients`: purging user metas depending on the order state.
+	 */
+	public function test_wc_delete_shop_order_transients_usermeta_purge(): void {
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$order       = WC_Helper_Order::create_order( $customer_id, null, array( 'status' => OrderStatus::COMPLETED ) );
+		$order_id    = $order->get_id();
+
+		// Verify the metas getting purged for order a state different from checkout draft.
+		Users::update_site_user_meta( $customer_id, 'wc_order_count', 123 );
+		Users::update_site_user_meta( $customer_id, 'wc_last_order', 456 );
+		Users::update_site_user_meta( $customer_id, 'wc_money_spent', 789 );
+		wc_delete_shop_order_transients( $order_id );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_order_count' ) );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_last_order' ) );
+		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) );
+
+		// Cleanup.
+		$order->delete();
+		$customer->delete();
+	}
+
+	/**
+	 * @testdox Should record the logged-in user who issued the refund.
+	 */
+	public function test_wc_create_refund_records_the_current_user(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+		$this->assertSame( $user_id, $refund->get_refunded_by() );
+		$this->assertSame(
+			$user_id,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'The refunding user should survive a round trip through the data store.'
+		);
+	}
+
+	/**
+	 * @testdox Should attribute a refund to nobody when no user is logged in, rather than to user 1.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_wc_create_refund_records_no_user_when_nobody_is_logged_in(): void {
+		wp_set_current_user( 0 );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+		$this->assertSame( 0, $refund->get_refunded_by() );
+		$this->assertSame(
+			0,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'An unattributed refund should stay unattributed after a round trip through the data store.'
+		);
 	}
 }

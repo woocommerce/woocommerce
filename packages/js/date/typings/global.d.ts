@@ -2,6 +2,9 @@ declare global {
 	interface Window {
 		wcSettings: {
 			timeZone?: string;
+			admin?: {
+				timeZone?: string;
+			};
 		};
 	}
 }

@@ -38,45 +38,43 @@ Authorization: Basic <base64_encoded_credentials>
 #### Example Response
 
 ```json
-{
-	"fulfillments": [
-		{
-			"fulfillment_id": 1,
-			"entity_type": "WC_Order",
-			"entity_id": "123",
-			"status": "fulfilled",
-			"is_fulfilled": true,
-			"date_updated": "2024-01-15T10:30:00",
-			"date_deleted": null,
-			"meta_data": [
-				{
-					"id": 1,
-					"key": "_items",
-					"value": [
-						{
-							"item_id": 456,
-							"qty": 2
-						},
-						{
-							"item_id": 789,
-							"qty": 1
-						}
-					]
-				},
-				{
-					"id": 2,
-					"key": "_tracking_number",
-					"value": "1Z999AA1234567890"
-				},
-				{
-					"id": 3,
-					"key": "_shipping_provider",
-					"value": "ups"
-				}
-			]
-		}
-	]
-}
+[
+    {
+        "id": 1,
+        "entity_type": "WC_Order",
+        "entity_id": "123",
+        "status": "fulfilled",
+        "is_fulfilled": true,
+        "date_updated": "2024-01-15T10:30:00",
+        "date_deleted": null,
+        "meta_data": [
+            {
+                "id": 1,
+                "key": "_items",
+                "value": [
+                    {
+                        "item_id": 456,
+                        "qty": 2
+                    },
+                    {
+                        "item_id": 789,
+                        "qty": 1
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "key": "_tracking_number",
+                "value": "1Z999AA1234567890"
+            },
+            {
+                "id": 3,
+                "key": "_shipment_provider",
+                "value": "ups"
+            }
+        ]
+    }
+]
 ```
 
 ---
@@ -126,7 +124,7 @@ Authorization: Basic <base64_encoded_credentials>
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipping_provider",
+      "key": "_shipment_provider",
       "value": "ups"
     },
     {
@@ -141,46 +139,44 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-	"fulfillment": {
-		"fulfillment_id": 2,
-		"entity_type": "WC_Order",
-		"entity_id": "123",
-		"status": "fulfilled",
-		"is_fulfilled": true,
-		"date_updated": "2024-01-15T11:45:00",
-		"date_deleted": null,
-		"meta_data": [
-			{
-				"id": 3,
-				"key": "_items",
-				"value": [
-					{
-						"item_id": 456,
-						"qty": 2
-					},
-					{
-						"item_id": 789,
-						"qty": 1
-					}
-				]
-			},
-			{
-				"id": 4,
-				"key": "_tracking_number",
-				"value": "1Z999AA1234567890"
-			},
-			{
-				"id": 5,
-				"key": "_shipping_provider",
-				"value": "ups"
-			},
-			{
-				"id": 6,
-				"key": "_tracking_url",
-				"value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-			}
-		]
-	}
+    "id": 2,
+    "entity_type": "WC_Order",
+    "entity_id": "123",
+    "status": "fulfilled",
+    "is_fulfilled": true,
+    "date_updated": "2024-01-15T11:45:00",
+    "date_deleted": null,
+    "meta_data": [
+        {
+            "id": 3,
+            "key": "_items",
+            "value": [
+                {
+                    "item_id": 456,
+                    "qty": 2
+                },
+                {
+                    "item_id": 789,
+                    "qty": 1
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "key": "_tracking_number",
+            "value": "1Z999AA1234567890"
+        },
+        {
+            "id": 5,
+            "key": "_shipment_provider",
+            "value": "ups"
+        },
+        {
+            "id": 6,
+            "key": "_tracking_url",
+            "value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+        }
+    ]
 }
 ```
 
@@ -210,27 +206,25 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-	"fulfillment": {
-		"fulfillment_id": 2,
-		"entity_type": "WC_Order",
-		"entity_id": "123",
-		"status": "fulfilled",
-		"is_fulfilled": true,
-		"date_updated": "2024-01-15T11:45:00",
-		"date_deleted": null,
-		"meta_data": [
-			{
-				"id": 3,
-				"key": "_tracking_number",
-				"value": "1Z999AA1234567890"
-			},
-			{
-				"id": 4,
-				"key": "_shipping_provider",
-				"value": "ups"
-			}
-		]
-	}
+    "id": 2,
+    "entity_type": "WC_Order",
+    "entity_id": "123",
+    "status": "fulfilled",
+    "is_fulfilled": true,
+    "date_updated": "2024-01-15T11:45:00",
+    "date_deleted": null,
+    "meta_data": [
+        {
+            "id": 3,
+            "key": "_tracking_number",
+            "value": "1Z999AA1234567890"
+        },
+        {
+            "id": 4,
+            "key": "_shipment_provider",
+            "value": "ups"
+        }
+    ]
 }
 ```
 
@@ -261,6 +255,7 @@ Content-Type: application/json
 Authorization: Basic <base64_encoded_credentials>
 
 {
+  "id": 2,
   "status": "fulfilled",
   "is_fulfilled": true,
   "meta_data": [
@@ -282,7 +277,7 @@ Authorization: Basic <base64_encoded_credentials>
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipping_provider",
+      "key": "_shipment_provider",
       "value": "ups"
     },
     {
@@ -297,46 +292,44 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-	"fulfillment": {
-		"fulfillment_id": 2,
-		"entity_type": "WC_Order",
-		"entity_id": "123",
-		"status": "fulfilled",
-		"is_fulfilled": true,
-		"date_updated": "2024-01-16T09:30:00",
-		"date_deleted": null,
-		"meta_data": [
-			{
-				"id": 3,
-				"key": "_items",
-				"value": [
-					{
-						"item_id": 456,
-						"qty": 2
-					},
-					{
-						"item_id": 789,
-						"qty": 1
-					}
-				]
-			},
-			{
-				"id": 4,
-				"key": "_tracking_number",
-				"value": "1Z999AA1234567890"
-			},
-			{
-				"id": 5,
-				"key": "_shipping_provider",
-				"value": "ups"
-			},
-			{
-				"id": 6,
-				"key": "_delivery_date",
-				"value": "2024-01-16"
-			}
-		]
-	}
+    "id": 2,
+    "entity_type": "WC_Order",
+    "entity_id": "123",
+    "status": "fulfilled",
+    "is_fulfilled": true,
+    "date_updated": "2024-01-16T09:30:00",
+    "date_deleted": null,
+    "meta_data": [
+        {
+            "id": 3,
+            "key": "_items",
+            "value": [
+                {
+                    "item_id": 456,
+                    "qty": 2
+                },
+                {
+                    "item_id": 789,
+                    "qty": 1
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "key": "_tracking_number",
+            "value": "1Z999AA1234567890"
+        },
+        {
+            "id": 5,
+            "key": "_shipment_provider",
+            "value": "ups"
+        },
+        {
+            "id": 6,
+            "key": "_delivery_date",
+            "value": "2024-01-16"
+        }
+    ]
 }
 ```
 
@@ -396,39 +389,37 @@ Authorization: Basic <base64_encoded_credentials>
 #### Example Response
 
 ```json
-{
-	"meta_data": [
-		{
-			"id": 3,
-			"key": "_items",
-			"value": [
-				{
-					"item_id": 456,
-					"qty": 2
-				},
-				{
-					"item_id": 789,
-					"qty": 1
-				}
-			]
-		},
-		{
-			"id": 4,
-			"key": "_tracking_number",
-			"value": "1Z999AA1234567890"
-		},
-		{
-			"id": 5,
-			"key": "_shipping_provider",
-			"value": "ups"
-		},
-		{
-			"id": 6,
-			"key": "_tracking_url",
-			"value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-		}
-	]
-}
+[
+    {
+        "id": 3,
+        "key": "_items",
+        "value": [
+            {
+                "item_id": 456,
+                "qty": 2
+            },
+            {
+                "item_id": 789,
+                "qty": 1
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "key": "_tracking_number",
+        "value": "1Z999AA1234567890"
+    },
+    {
+        "id": 5,
+        "key": "_shipment_provider",
+        "value": "ups"
+    },
+    {
+        "id": 6,
+        "key": "_tracking_url",
+        "value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+    }
+]
 ```
 
 ---
@@ -454,73 +445,69 @@ PUT /wp-json/wc/v3/orders/123/fulfillments/2/metadata
 Content-Type: application/json
 Authorization: Basic <base64_encoded_credentials>
 
-{
-  "meta_data": [
+[
     {
-      "key": "_items",
-      "value": [
-        {
-          "item_id": 456,
-          "qty": 2
-        },
-        {
-          "item_id": 789,
-          "qty": 1
-        }
-      ]
+        "key": "_items",
+        "value": [
+            {
+                "item_id": 456,
+                "qty": 2
+            },
+            {
+                "item_id": 789,
+                "qty": 1
+            }
+        ]
     },
     {
-      "key": "_tracking_number",
-      "value": "1Z999AA9876543210"
+        "key": "_tracking_number",
+        "value": "1Z999AA9876543210"
     },
     {
-      "key": "_shipping_provider",
-      "value": "fedex"
+        "key": "_shipment_provider",
+        "value": "fedex"
     },
     {
-      "key": "_estimated_delivery",
-      "value": "2024-01-18"
+        "key": "_estimated_delivery",
+        "value": "2024-01-18"
     }
-  ]
-}
+]
 ```
 
 #### Example Response
 
 ```json
-{
-	"meta_data": [
-		{
-			"id": 3,
-			"key": "_items",
-			"value": [
-				{
-					"item_id": 456,
-					"qty": 2
-				},
-				{
-					"item_id": 789,
-					"qty": 1
-				}
-			]
-		},
-		{
-			"id": 4,
-			"key": "_tracking_number",
-			"value": "1Z999AA9876543210"
-		},
-		{
-			"id": 5,
-			"key": "_shipping_provider",
-			"value": "fedex"
-		},
-		{
-			"id": 7,
-			"key": "_estimated_delivery",
-			"value": "2024-01-18"
-		}
-	]
-}
+[
+    {
+        "id": 3,
+        "key": "_items",
+        "value": [
+            {
+                "item_id": 456,
+                "qty": 2
+            },
+            {
+                "item_id": 789,
+                "qty": 1
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "key": "_tracking_number",
+        "value": "1Z999AA9876543210"
+    },
+    {
+        "id": 5,
+        "key": "_shipment_provider",
+        "value": "fedex"
+    },
+    {
+        "id": 7,
+        "key": "_estimated_delivery",
+        "value": "2024-01-18"
+    }
+]
 ```
 
 ---
@@ -579,25 +566,23 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-	"tracking_number_details": {
-		"tracking_number": "1234567890123456",
-		"shipping_provider": "fedex",
-		"tracking_url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
-		"possibilities": {
-			"fedex": {
-				"url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
-				"ambiguity_score": 95
-			},
-			"ups": {
-				"url": "https://www.ups.com/track?tracknum=1234567890123456",
-				"ambiguity_score": 85
-			},
-			"dhl": {
-				"url": "https://www.dhl.com/track?tracknum=1234567890123456",
-				"ambiguity_score": 75
-			}
-		}
-	}
+    "tracking_number": "1234567890123456",
+    "shipping_provider": "fedex",
+    "tracking_url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+    "possibilities": {
+        "fedex": {
+            "url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+            "ambiguity_score": 95
+        },
+        "ups": {
+            "url": "https://www.ups.com/track?tracknum=1234567890123456",
+            "ambiguity_score": 85
+        },
+        "dhl": {
+            "url": "https://www.dhl.com/track?tracknum=1234567890123456",
+            "ambiguity_score": 75
+        }
+    }
 }
 ```
 
@@ -605,11 +590,9 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-	"tracking_number_details": {
-		"tracking_number": "1Z999AA1234567890",
-		"shipping_provider": "ups",
-		"tracking_url": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-	}
+    "tracking_number": "1Z999AA1234567890",
+    "shipping_provider": "ups",
+    "tracking_url": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
 }
 ```
 
@@ -653,7 +636,7 @@ Metadata objects have the following structure:
 | ------- | ------- | ------------------------------------------------------ |
 | `id`    | integer | Unique identifier for the metadata (0 for new entries) |
 | `key`   | string  | The metadata key                                       |
-| `value` | string  | The metadata value (string, number, array, or object)  |
+| `value` | mixed   | The metadata value (string, number, array, or object)  |
 
 **Note:** The metadata keys prefixed with underscore (`_`) are private and for internal use only. You can add as many as your application needs. The unprefixed ones will be shown to the merchant on the fulfillment metadata box, and to the customer on the fulfillment emails.
 
@@ -664,10 +647,12 @@ Metadata objects have the following structure:
 ### Optional Private Metadata Keys
 
 -   `_tracking_number` - Shipment tracking number
--   `_shipping_provider` - Shipping provider key (ups, fedex, dhl, etc.)
+-   `_shipment_provider` - Shipment provider key (ups, fedex, dhl, etc.)
 -   `_tracking_url` - URL to track the shipment
 -   `_is_locked` - Whether the fulfillment is locked for merchant modification
 -   `_lock_message` - What to show as the lock message for a locked fulfillment
+
+**Note:** The tracking number, shipping provider, and tracking URL metadata keys have typed convenience methods on the `Fulfillment` object: `get_tracking_number()` / `set_tracking_number()`, `get_shipment_provider()` / `set_shipment_provider()`, and `get_tracking_url()` / `set_tracking_url()`. These are recommended over direct `get_meta()` / `update_meta_data()` calls for better type safety and IDE autocompletion.
 
 ### Items Structure
 

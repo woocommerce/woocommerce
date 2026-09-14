@@ -14,7 +14,7 @@ import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 const getChartMeta = ( { query } ) => {
 	const isCompareView =
@@ -48,7 +48,7 @@ const VariationsReport = ( props ) => {
 
 	return (
 		<Fragment>
-			<ReportFilters
+			<ReportHeader
 				query={ query }
 				path={ path }
 				filters={ filters }

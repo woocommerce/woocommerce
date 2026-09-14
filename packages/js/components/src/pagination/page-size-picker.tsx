@@ -45,6 +45,7 @@ export function PageSizePicker( {
 	return (
 		<div className="woocommerce-pagination__per-page-picker">
 			<SelectControl
+				__next40pxDefaultSize
 				label={ label }
 				labelPosition="side"
 				value={ perPage.toString() }

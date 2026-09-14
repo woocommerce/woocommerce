@@ -13,6 +13,7 @@ import { Icon, chartBar } from '@wordpress/icons';
  */
 import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
+import { setEmailEditorPreviewState } from '../utils';
 
 const collection = {
 	name: CoreCollectionNames.BEST_SELLERS,
@@ -57,4 +58,7 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	preview: {
+		setPreviewState: setEmailEditorPreviewState,
+	},
 };

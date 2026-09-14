@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -11,22 +10,26 @@ import { storeName } from '../../store';
 import { SelectTemplateModal } from './select-modal';
 
 export function TemplateSelection() {
-	const [ templateSelected, setTemplateSelected ] = useState( false );
-	const { emailContentIsEmpty, emailHasEdits, postType } = useSelect(
+	const { emailContentIsEmpty, templateSelected, postType } = useSelect(
 		( select ) => ( {
 			emailContentIsEmpty: select( storeName ).hasEmptyContent(),
-			emailHasEdits: select( storeName ).hasEdits(),
+			templateSelected: select( storeName ).isTemplateSelected(),
 			postType: select( storeName ).getEmailPostType(),
 		} ),
 		[]
 	);
-	if ( ! emailContentIsEmpty || emailHasEdits || templateSelected ) {
+	const { setTemplateSelected } = useDispatch( storeName );
+
+	// Show the template modal whenever content is empty, regardless of WP's dirty state.
+	// WP 7.0 auto-inserts an empty paragraph block on fresh posts, causing hasEdits()
+	// to return true before the user does anything.
+	if ( ! emailContentIsEmpty || templateSelected ) {
 		return null;
 	}
 
 	return (
 		<SelectTemplateModal
-			onSelectCallback={ () => setTemplateSelected( true ) }
+			onSelectCallback={ () => void setTemplateSelected() }
 			postType={ postType }
 		/>
 	);

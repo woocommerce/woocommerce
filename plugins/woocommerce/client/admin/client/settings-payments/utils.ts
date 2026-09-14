@@ -7,6 +7,7 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
 
@@ -115,14 +116,6 @@ export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	return (
 		isWooPayments( provider.id ) &&
 		( provider.tags?.includes( 'woopay_eligible' ) || false )
-	);
-};
-
-export const getWooPaymentsTestDriveAccountLink = () => {
-	return getAdminLink(
-		'admin.php?wcpay-connect=1&_wpnonce=' +
-			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
-			'&test_drive=true&auto_start_test_drive_onboarding=true&redirect_to_settings_page=true'
 	);
 };
 
@@ -259,14 +252,17 @@ export const combineRequestMethods = (
 export const combinePaymentMethodsState = (
 	paymentMethodsState: Record< string, boolean >
 ) => {
-	return Object.keys( paymentMethodsState ).reduce( ( acc, key ) => {
-		if ( key === 'apple_pay' || key === 'google_pay' ) {
-			acc.apple_google = paymentMethodsState[ key ];
-		} else {
-			acc[ key ] = paymentMethodsState[ key ];
-		}
-		return acc;
-	}, {} as Record< string, boolean > );
+	return Object.keys( paymentMethodsState ).reduce(
+		( acc, key ) => {
+			if ( key === 'apple_pay' || key === 'google_pay' ) {
+				acc.apple_google = paymentMethodsState[ key ];
+			} else {
+				acc[ key ] = paymentMethodsState[ key ];
+			}
+			return acc;
+		},
+		{} as Record< string, boolean >
+	);
 };
 
 /**
@@ -345,17 +341,11 @@ export const recordPaymentsProviderEvent = (
 	const enrichedData: Record< string, string | boolean | number > = {
 		...data,
 		provider_id: provider.id,
+		provider_type: provider._type ?? 'unknown',
+		suggestion_id: provider._suggestion_id ?? 'unknown',
 	};
 
-	// Add provider-specific data to the event.
-	// If the provider is a suggestion, use its ID as the suggestion ID.
-	if ( provider._type === 'suggestion' ) {
-		enrichedData.suggestion_id = provider.id;
-	} else {
-		enrichedData.suggestion_id = provider._suggestion_id ?? 'unknown';
-	}
-
-	// The provider state.
+	// Capture the provider state.
 	enrichedData.provider_enabled = provider.state?.enabled ?? false;
 	enrichedData.provider_account_connected =
 		provider.state?.account_connected ?? false;
@@ -438,4 +428,74 @@ export const recordPaymentsOnboardingEvent = (
 export const removeOriginFromURL = ( url: string ) => {
 	const parsedUrl = parseAdminUrl( url );
 	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
+};
+
+/**
+ * Resolve which step of an install-and-activate run actually failed.
+ *
+ * `installAndActivatePlugins` installs and then activates, so an install that succeeded can
+ * still fail on activation. The rejection reports the step it failed on; the plugin status
+ * read before the request only says which step we expected to fail.
+ *
+ * @param error           The rejection value from installAndActivatePlugins.
+ * @param requestedAction The step implied by the plugin status before the request.
+ * @return The step that failed.
+ */
+export const getFailedPluginAction = (
+	error: unknown,
+	requestedAction: 'install' | 'activate'
+): 'install' | 'activate' => {
+	const reportedAction =
+		typeof error === 'object' && error !== null && 'actionType' in error
+			? ( error as { actionType: unknown } ).actionType
+			: undefined;
+
+	return reportedAction === 'install' || reportedAction === 'activate'
+		? reportedAction
+		: requestedAction;
+};
+
+/**
+ * Build the notice text for a failed provider extension install or activation.
+ *
+ * `@woocommerce/data` frames its message with the plugin slug. Re-frame with the provider
+ * title the merchant clicked, using the unframed reason the rejection carries. Keep the
+ * already-framed message only when the rejection has no reason at all.
+ *
+ * @param actionType Whether the extension was being installed or activated.
+ * @param title      The provider title shown in the UI.
+ * @param error      The rejection value from installAndActivatePlugins.
+ * @return The notice text.
+ */
+export const getPluginActionErrorMessage = (
+	actionType: 'install' | 'activate',
+	title: string,
+	error: unknown
+): string => {
+	const frame =
+		actionType === 'install'
+			? sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not install %s.', 'woocommerce' ),
+					title
+			  )
+			: sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not activate %s.', 'woocommerce' ),
+					title
+			  );
+
+	const rejection =
+		typeof error === 'object' && error !== null
+			? ( error as { reason?: unknown; message?: unknown } )
+			: undefined;
+
+	if ( typeof rejection?.reason === 'string' && rejection.reason ) {
+		return `${ frame } ${ rejection.reason }`;
+	}
+
+	const message =
+		typeof rejection?.message === 'string' ? rejection.message : '';
+
+	return message || frame;
 };

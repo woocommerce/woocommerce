@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { __ } from '@wordpress/i18n';
 import {
 	RangeControl,
@@ -21,8 +22,12 @@ const CAROUSEL_PERFORMANCE_WARNING_THRESHOLD = 30;
 
 const defaultLabel = __( 'Products per page', 'woocommerce' );
 const carouselLabel = __( 'Products in carousel', 'woocommerce' );
+const emailLabel = __( 'Number of products', 'woocommerce' );
 
-const getLabel = ( carouselVariant: boolean ) => {
+const getLabel = ( carouselVariant: boolean, isEmailEditor: boolean ) => {
+	if ( isEmailEditor ) {
+		return emailLabel;
+	}
 	return carouselVariant ? carouselLabel : defaultLabel;
 };
 
@@ -32,12 +37,13 @@ const ProductsPerPageControl = ( {
 	trackInteraction,
 	carouselVariant,
 }: QueryControlProps & { carouselVariant: boolean } ) => {
+	const isEmailEditor = useIsEmailEditor();
 	const deselectCallback = () => {
 		setQueryAttribute( { perPage: DEFAULT_QUERY.perPage } );
 		trackInteraction( CoreFilterNames.PRODUCTS_PER_PAGE );
 	};
 
-	const label = getLabel( carouselVariant );
+	const label = getLabel( carouselVariant, isEmailEditor );
 	const perPage = query.perPage || DEFAULT_QUERY.perPage;
 	const showPerformanceWarning =
 		carouselVariant && perPage > CAROUSEL_PERFORMANCE_WARNING_THRESHOLD;

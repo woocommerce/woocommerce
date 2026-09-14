@@ -172,3 +172,74 @@ The Core Profiler has a loading screen that is shown after the Extensions page. 
 The selected extensions will be put into an installation queue, and the queue will be processed sequentially while the loader is on screen.
 
 Beyond the 30 second timeout, the remaining plugins will be installed in the background, and the user will be redirected to the WooCommerce Admin homescreen or the Jetpack connection page.
+
+## WordPress.com connection screen
+
+Some extensions offered on the Extensions page require a Jetpack (WordPress.com) connection to work. When a merchant selects one of these extensions, the Core Profiler routes them to a WordPress.com connection screen after installation, before returning them to the WooCommerce Admin homescreen.
+
+### The `requires_jpc` field
+
+Whether the connection step is shown is controlled by the `requires_jpc` field on each extension (JPC stands for "Jetpack Connection"). It was introduced in [PR #52887](https://github.com/woocommerce/woocommerce/pull/52887).
+
+The field is defined on the `Extension` type in [`packages/js/data/src/onboarding/types.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/data/src/onboarding/types.ts):
+
+```typescript
+/**
+ * JPC stands for Jetpack Connection. This flag is used to determine if the
+ * plugin requires Jetpack Connection. If set to true, the user will be
+ * redirected to the Jetpack Connection flow after installing the plugin
+ * during onboarding.
+ */
+requires_jpc?: boolean;
+```
+
+For the extensions bundled with WooCommerce core, the field is set in `with_core_profiler_fields()` in [`src/Internal/Admin/RemoteFreeExtensions/DefaultFreeExtensions.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Admin/RemoteFreeExtensions/DefaultFreeExtensions.php). As of writing, `jetpack` and `woocommerce-payments` (WooPayments) are flagged with `'requires_jpc' => true`.
+
+To make a new extension trigger the connection step, set `requires_jpc` to `true` on its extension data.
+
+### How the step is gated
+
+The state machine in `./client/core-profiler/index.tsx` inspects the selected plugins against `pluginsAvailable`:
+
+-   The `hasJpcRequiredPluginSelected` guard returns `true` when any selected plugin has `requires_jpc === true`. This is what includes (or skips) the connection step.
+-   The `hasJpcRequiredPluginActivated` guard checks whether a `requires_jpc` plugin was successfully activated, so the redirect only happens when there is something to connect.
+
+### Building the authorization URL
+
+When the connection step runs, the Core Profiler requests the authorization URL:
+
+-   `resolveSelect( onboardingStore ).getJetpackAuthUrl( { redirectUrl, from: 'woocommerce-core-profiler' } )`
+
+The URL is built server-side in `JetpackConnection::get_authorization_url()` ([`src/Internal/Jetpack/JetpackConnection.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Jetpack/JetpackConnection.php)), which registers the site with WordPress.com if needed and appends `from` and `calypso_env` query args.
+
+Before redirecting, `redirectToJetpackAuthPage()` in `index.tsx` adds a few more query args to the URL:
+
+-   `installed_ext_success=1`
+-   `plugin_name`: a comma-separated list of the selected plugins that have `requires_jpc` set
+-   `color_scheme`: the current user's admin color scheme, so the connection screen can match it
+
+The `from=woocommerce-core-profiler` parameter is what the WordPress.com side (Calypso, `client/jetpack-connect/authorize.js`) keys off to render the WooCommerce-branded connection screen instead of the default Jetpack-branded one. On approval, the merchant is redirected back to the WooCommerce Admin homescreen.
+
+## Terms of Service acceptance notice
+
+Some of the extensions require the merchant to agree to the WordPress.com [Terms of Service](https://wordpress.com/tos/). When one of these extensions is selected, the Extensions page renders a notice below the list: "By installing _{plugin names}_ plugin(s) for free you agree to our Terms of Service."
+
+This notice is rendered by the `PluginsTermsOfService` component in [`client/core-profiler/pages/Plugins/components/plugin-terms-of-service/PluginsTermsOfService.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/client/core-profiler/pages/Plugins/components/plugin-terms-of-service/PluginsTermsOfService.tsx).
+
+### How to add a plugin to the notice
+
+The component filters the selected plugins against a hard-coded allowlist of plugin keys:
+
+```typescript
+const pluginsWithTOS = selectedPlugins.filter( ( plugin ) =>
+	[
+		'jetpack',
+		'woocommerce-services:tax',
+		'woocommerce-shipping',
+		'woocommerce-tax',
+		'woocommerce-payments',
+	].includes( plugin.key )
+);
+```
+
+To include a new plugin in the Terms of Service notice, add its `key` to this array. If none of the selected plugins are in the list, the component renders nothing.

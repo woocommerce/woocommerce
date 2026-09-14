@@ -9,6 +9,7 @@ import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payme
 import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { type PaymentMethodInterface, responseTypes } from '@woocommerce/types';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -32,7 +33,7 @@ import { prepareTotalItems } from './utils';
 import { useShippingData } from '../shipping/use-shipping-data';
 
 /**
- * Returns am interface to use as payment method props.
+ * Returns an interface to use as payment method props.
  */
 export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	const {
@@ -92,33 +93,29 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		isDoingExpressPayment: paymentIsDoingExpressPayment,
 		get isPristine() {
 			deprecated( 'isPristine', {
-				since: '9.6.0',
+				since: '7.5.0',
 				alternative: 'isIdle',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentIsIdle;
 		},
 		get isFinished() {
 			deprecated( 'isFinished', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentHasError || paymentIsReady;
 		},
 		get hasFailed() {
 			deprecated( 'hasFailed', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentHasError;
 		},
 		get isSuccessful() {
 			deprecated( 'isSuccessful', {
-				since: '9.6.0',
-				plugin: 'WooCommerce Blocks',
+				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
 			} );
 			return paymentIsReady;
@@ -177,7 +174,6 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 				'setExpressPaymentError should only be used by Express Payment Methods (using the provided onError handler).',
 				{
 					alternative: '',
-					plugin: 'woocommerce-gutenberg-products-block',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);
@@ -216,6 +212,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			LoadingMask,
 			PaymentMethodIcons,
 			PaymentMethodLabel,
+			Skeleton,
 			ValidationInputError,
 		},
 		emitResponse: {

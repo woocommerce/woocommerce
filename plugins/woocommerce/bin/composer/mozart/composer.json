@@ -1,6 +1,6 @@
 {
 	"require-dev": {
-		"coenjacobs/mozart": "dev-master"
+		"coenjacobs/mozart": "^0.7.1"
 	},
 	"config": {
 		"platform": {

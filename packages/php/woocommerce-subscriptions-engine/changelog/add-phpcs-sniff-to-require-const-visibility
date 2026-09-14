@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Require explicit visibility for class constants

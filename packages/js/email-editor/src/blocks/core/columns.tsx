@@ -3,8 +3,13 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { Block } from '@wordpress/blocks/index';
-import { addFilter } from '@wordpress/hooks';
+import { BlockSupports } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 const columnsEditCallback = createHigherOrderComponent(
 	( BlockEdit ) =>
@@ -33,7 +38,7 @@ const columnsEditCallback = createHigherOrderComponent(
 );
 
 function deactivateStackOnMobile() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/deactivate-stack-on-mobile',
 		columnsEditCallback
@@ -49,28 +54,22 @@ const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
  * Also, enhances the columns block to support background image.
  */
 function disableColumnsLayoutAndEnhanceColumnsBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/disable-columns-layout',
-		( settings: Block, name ) => {
-			if ( COLUMN_BLOCKS.includes( name ) ) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-				return {
-					...settings,
-					supports: {
-						...settings.supports,
-						layout: false,
-						background: {
-							backgroundImage: true,
-						},
-					},
-				};
-			}
-
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-			return settings;
-		}
-	);
+	COLUMN_BLOCKS.forEach( ( blockName ) => {
+		updateBlockSettings( blockName, ( current ) => ( {
+			...current,
+			supports: {
+				...( current.supports || {} ),
+				layout: false,
+				background: {
+					// Preserve any existing background supports and enable backgroundImage
+					// @ts-expect-error BlockSupports type not complete
+					...( ( current.support as BlockSupports )?.background ||
+						{} ),
+					backgroundImage: true,
+				},
+			},
+		} ) );
+	} );
 }
 
 export { deactivateStackOnMobile, disableColumnsLayoutAndEnhanceColumnsBlock };

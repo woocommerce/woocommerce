@@ -88,8 +88,9 @@ class Button extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$button_text = $dom_helper->get_element_inner_html( $button_link ) ? $dom_helper->get_element_inner_html( $button_link ) : '';
-		$button_url  = $button_link->getAttribute( 'href' ) ? $button_link->getAttribute( 'href' ) : '#';
+		$button_text    = $dom_helper->get_element_inner_html( $button_link ) ? $dom_helper->get_element_inner_html( $button_link ) : '';
+		$button_url     = $button_link->getAttribute( 'href' ) ? $button_link->getAttribute( 'href' ) : '#';
+		$data_link_href = $button_link->getAttribute( 'data-link-href' );
 
 		$block_attributes = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
@@ -117,11 +118,16 @@ class Button extends Abstract_Block_Renderer {
 			'role'   => 'presentation',
 		);
 
+		$data_link_attr = $data_link_href
+			? sprintf( ' data-link-href="%s"', esc_attr( $data_link_href ) )
+			: '';
+
 		$button_content = sprintf(
-			'<a class="button-link %1$s" style="%2$s" href="%3$s" target="_blank">%4$s</a>',
+			'<a class="button-link %1$s" style="%2$s" href="%3$s"%4$s target="_blank">%5$s</a>',
 			esc_attr( $link_styles['classnames'] ),
 			esc_attr( $link_styles['css'] ),
 			esc_url( $button_url ),
+			$data_link_attr,
 			$button_text
 		);
 

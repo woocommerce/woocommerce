@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -16,22 +15,6 @@ class MiniCartContents extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'mini-cart-contents';
-
-	/**
-	 * Get the editor script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 *
-	 * @return array|string;
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
-		return $key ? $script[ $key ] : $script;
-	}
 
 	/**
 	 * Get the frontend script handle for this block type.
@@ -52,21 +35,28 @@ class MiniCartContents extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return [ 'wc-blocks-style', 'wc-blocks-packages-style' ];
 	}
 
 	/**
-	 * Render experimental iAPI powered Mini-Cart Contents block.
+	 * Render the markup for the Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, $block ) {
+		if ( is_admin() || WC()->is_rest_api_request() ) {
+			// In the editor we will display the placeholder, so no need to
+			// print the markup.
+			return '';
+		}
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wp-interactive' => 'woocommerce/mini-cart-contents',
+				'data-wp-interactive'             => 'woocommerce/mini-cart-contents',
+				'data-wp-style--background-color' => 'woocommerce/mini-cart::state.contentsBackgroundColor',
 			)
 		);
 
@@ -74,7 +64,7 @@ class MiniCartContents extends AbstractBlock {
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-drawer__close-wrapper">
-				<button data-wp-on--click="woocommerce/mini-cart::callbacks.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="Close" type="button">
+				<button data-wp-on--click="woocommerce/mini-cart::actions.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="Close" type="button">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
 						<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
 					</svg>
@@ -86,37 +76,15 @@ class MiniCartContents extends AbstractBlock {
 			?>
 		</div>
 		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Render the markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( is_admin() || WC()->is_rest_api_request() ) {
-			// In the editor we will display the placeholder, so no need to
-			// print the markup.
-			return '';
-		}
-
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_mini_cart_contents( $attributes, $content, $block );
-		}
-
-		return $content;
+		return (string) ob_get_clean();
 	}
 
 	/**
 	 * Enqueue frontend assets for this block, just in time for rendering.
 	 *
-	 * @param array    $attributes  Any attributes that currently are available from the block.
-	 * @param string   $content    The block content.
-	 * @param WP_Block $block    The block object.
+	 * @param array     $attributes Any attributes that currently are available from the block.
+	 * @param string    $content    The block content.
+	 * @param \WP_Block $block      The block object.
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
@@ -151,10 +119,10 @@ class MiniCartContents extends AbstractBlock {
 			),
 		);
 
-		$parsed_style = '';
-		if ( array_key_exists( 'width', $attributes ) ) {
-			$parsed_style .= ':root{--drawer-width: ' . esc_html( $attributes['width'] ) . '}';
-		}
+		$parsed_style = sprintf(
+			':root { --drawer-width: %s; --neg-drawer-width: calc(var(--drawer-width) * -1); }',
+			esc_html( $attributes['width'] )
+		);
 
 		foreach ( $styles as $style ) {
 			$selector = is_array( $style['selector'] ) ? implode( ',', $style['selector'] ) : $style['selector'];

@@ -6,7 +6,6 @@
  */
 
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -172,7 +171,7 @@ if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 wc_admin_connect_page(
 	array(
 		'id'        => 'woocommerce-coupons',
-		'parent'    => Features::is_enabled( 'coupons' ) ? 'woocommerce-marketing' : null,
+		'parent'    => 'woocommerce-marketing',
 		'screen_id' => 'edit-shop_coupon',
 		'title'     => __( 'Coupons', 'woocommerce' ),
 		'path'      => add_query_arg( 'post_type', 'shop_coupon', $posttype_list_base ),
@@ -296,6 +295,16 @@ wc_admin_connect_page(
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_attributes',
 		'title'     => __( 'Attributes', 'woocommerce' ),
+	)
+);
+
+// WooCommerce > Products > Reviews.
+wc_admin_connect_page(
+	array(
+		'id'        => 'woocommerce-product-reviews',
+		'parent'    => 'woocommerce-products',
+		'screen_id' => 'product_page_product-reviews',
+		'title'     => __( 'Product Reviews', 'woocommerce' ),
 	)
 );
 

@@ -3,6 +3,7 @@
 -   I have followed the [WooCommerce Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) and the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/).
 -   I have checked to ensure there aren't other open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls) for the same update/change.
 -   I have reviewed my code for [security best practices](https://developer.wordpress.org/apis/security/).
+-   I have assessed the impact of this change and followed the applicable [review requirements](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/contributing/deciding-pr-high-impact.md#review-requirements).
 -   Following the above guidelines will result in quick merges and clear and detailed feedback when appropriate.
 
 <!-- You can erase any parts of this template not applicable to your Pull Request. -->
@@ -37,7 +38,7 @@ Closes # .
 
 <!-- Include detailed instructions on how these changes can be tested. Review and follow the guide for how to write high-quality testing instructions. -->
 
-Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions), include your detailed testing instructions:
+Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions/), include your detailed testing instructions:
 
 1.
 2.
@@ -51,6 +52,18 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 <!-- Include environment details such as hosting type, plugins, theme, store size, store age, and relevant settings. -->
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
+
+### Milestone
+
+<!-- DO NOT remove or modify this section (other than to check the box). -->
+
+<!-- milestone-target-selection -->
+- [ ] Automatically assign milestone for the **[next WooCommerce version](../blob/trunk/plugins/woocommerce/woocommerce.php#L6)**
+<!-- /milestone-target-selection -->
+
+> **Note:** Check the box above to have the milestone automatically assigned when merged.
+> Alternatively (e.g. for point releases), manually assign the appropriate milestone.
+
 
 ### Changelog entry
 
@@ -102,3 +115,9 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 #### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
 </details>
+
+### Use of AI Tools
+
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but you must disclose what tooling you are using and to what extent a pull request has been authored by AI. It is your responsibility to review and take responsibility for what AI generates. See the WordPress AI Guidelines: <https://make.wordpress.org/ai/handbook/ai-guidelines/>.
+-->

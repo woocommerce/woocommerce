@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update @wordpress/* peerDependencies from dist-tags to semver ranges for pnpm 10 compatibility.

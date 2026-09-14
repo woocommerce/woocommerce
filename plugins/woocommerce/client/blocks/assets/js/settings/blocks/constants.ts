@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { getSetting, STORE_PAGES } from '@woocommerce/settings';
-import { CountryData } from '@woocommerce/types';
+import {
+	getSetting,
+	getSettingWithCoercion,
+	STORE_PAGES,
+} from '@woocommerce/settings';
+import { CountryData, isObject, isString } from '@woocommerce/types';
 import type {
 	OrderForm,
 	AddressForm,
@@ -21,7 +25,6 @@ export interface WcBlocksConfig {
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
 	experimentalBlocksEnabled?: boolean;
-	experimentalWcRestApi?: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {
@@ -69,7 +72,7 @@ type FieldsLocations = {
 };
 
 // Contains country names.
-const countries = getSetting< Record< string, string > >( 'countries', {} );
+const countries = getSettingWithCoercion( 'countries', {}, isObject );
 
 // Contains country settings.
 const countryData = getSetting< Record< string, CountryData > >(
@@ -83,7 +86,8 @@ export const ALLOWED_COUNTRIES = Object.fromEntries(
 			return countryData[ countryCode ].allowBilling === true;
 		} )
 		.map( ( countryCode ) => {
-			return [ countryCode, countries[ countryCode ] || '' ];
+			const countryName = countries[ countryCode ];
+			return [ countryCode, isString( countryName ) ? countryName : '' ];
 		} )
 );
 
@@ -93,7 +97,8 @@ export const SHIPPING_COUNTRIES = Object.fromEntries(
 			return countryData[ countryCode ].allowShipping === true;
 		} )
 		.map( ( countryCode ) => {
-			return [ countryCode, countries[ countryCode ] || '' ];
+			const countryName = countries[ countryCode ];
+			return [ countryCode, isString( countryName ) ? countryName : '' ];
 		} )
 );
 

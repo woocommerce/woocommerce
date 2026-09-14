@@ -1,3 +1,3 @@
 module.exports = {
-	presets: [ '@babel/preset-typescript', '@wordpress/babel-preset-default' ],
+	presets: [ '@wordpress/babel-preset-default' ],
 };

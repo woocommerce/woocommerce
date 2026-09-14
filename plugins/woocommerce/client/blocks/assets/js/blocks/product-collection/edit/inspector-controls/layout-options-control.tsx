@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
@@ -64,6 +63,8 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 			} }
 		>
 			<ToggleGroupControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Layout', 'woocommerce' ) }
 				isBlock
 				onChange={ ( value: LayoutOptions ) => {
@@ -80,12 +81,10 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 					value={ LayoutOptions.GRID }
 					label={ __( 'Grid', 'woocommerce' ) }
 				/>
-				{ isExperimentalBlocksEnabled() && (
-					<ToggleGroupControlOption
-						value={ LayoutOptions.CAROUSEL }
-						label={ __( 'Carousel', 'woocommerce' ) }
-					/>
-				) }
+				<ToggleGroupControlOption
+					value={ LayoutOptions.CAROUSEL }
+					label={ __( 'Carousel', 'woocommerce' ) }
+				/>
 			</ToggleGroupControl>
 		</ToolsPanelItem>
 	);

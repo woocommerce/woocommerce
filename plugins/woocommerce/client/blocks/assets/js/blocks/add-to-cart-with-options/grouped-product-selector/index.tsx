@@ -13,7 +13,6 @@ import AddToCartWithOptionsGroupedProductSelectorSave from './save';
 
 registerBlockType( metadata, {
 	edit: AddToCartWithOptionsGroupedProductSelectorEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

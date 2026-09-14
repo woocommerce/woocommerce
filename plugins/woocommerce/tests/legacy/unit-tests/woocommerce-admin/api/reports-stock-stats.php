@@ -33,9 +33,20 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		unset( $GLOBALS['current_screen'] );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -49,32 +60,13 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$number_of_low_stock = 3;
-		for ( $i = 1; $i <= $number_of_low_stock; $i++ ) {
-			$low_stock = new WC_Product_Simple();
-			$low_stock->set_name( "Test low stock {$i}" );
-			$low_stock->set_regular_price( 5 );
-			$low_stock->set_manage_stock( true );
-			$low_stock->set_stock_quantity( 1 );
-			$low_stock->set_stock_status( ProductStockStatus::IN_STOCK );
-			$low_stock->save();
-		}
+		$this->create_stock_products( $number_of_low_stock, ProductStockStatus::IN_STOCK, 1 );
 
 		$number_of_out_of_stock = 6;
-		for ( $i = 1; $i <= $number_of_out_of_stock; $i++ ) {
-			$out_of_stock = new WC_Product_Simple();
-			$out_of_stock->set_name( "Test out of stock {$i}" );
-			$out_of_stock->set_regular_price( 5 );
-			$out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
-			$out_of_stock->save();
-		}
+		$this->create_stock_products( $number_of_out_of_stock, ProductStockStatus::OUT_OF_STOCK );
 
 		$number_of_in_stock = 10;
-		for ( $i = 1; $i <= $number_of_in_stock; $i++ ) {
-			$in_stock = new WC_Product_Simple();
-			$in_stock->set_name( "Test in stock {$i}" );
-			$in_stock->set_regular_price( 25 );
-			$in_stock->save();
-		}
+		$this->create_stock_products( $number_of_in_stock, ProductStockStatus::IN_STOCK );
 
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
@@ -89,12 +81,14 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
 		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 
-		// Test backorder and cache update.
-		$backorder_stock = new WC_Product_Simple();
-		$backorder_stock->set_name( 'Test backorder' );
-		$backorder_stock->set_regular_price( 5 );
-		$backorder_stock->set_stock_status( ProductStockStatus::ON_BACKORDER );
-		$backorder_stock->save();
+		// Test backorder and cache update. Save a real product so the
+		// production lookup-table sync-on-save path is exercised as well.
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::ON_BACKORDER,
+			)
+		);
 
 		// Clear caches.
 		delete_transient( 'wc_admin_stock_count_lowstock' );
@@ -115,6 +109,65 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::ON_BACKORDER ] );
 		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
 		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
+	}
+
+	/**
+	 * The products total is cached store-wide for 30 days, so it must not depend on the context
+	 * of whichever request happened to prime it. Left to its default, WP_Query also counts draft,
+	 * pending and scheduled products in an admin context.
+	 */
+	public function test_get_reports_products_total_ignores_unpublished_products() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		delete_transient( 'wc_admin_product_count' );
+
+		$this->create_stock_products( 2, ProductStockStatus::IN_STOCK );
+		$this->factory->post->create_many(
+			3,
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'draft',
+			)
+		);
+
+		set_current_screen( 'edit-post' );
+		$this->assertTrue( is_admin(), 'The report must be requested in an admin context.' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, $reports['totals']['products'] );
+	}
+
+	/**
+	 * Create published products with the lookup data consumed by the stock stats queries.
+	 *
+	 * @param int        $count          Number of products to create.
+	 * @param string     $stock_status   Product stock status.
+	 * @param float|null $stock_quantity Product stock quantity.
+	 */
+	private function create_stock_products( $count, $stock_status, $stock_quantity = null ) {
+		global $wpdb;
+
+		$product_ids = $this->factory->post->create_many(
+			$count,
+			array(
+				'post_type' => 'product',
+			)
+		);
+		$rows        = array();
+
+		foreach ( $product_ids as $product_id ) {
+			$rows[] = null === $stock_quantity
+				? $wpdb->prepare( '(%d, NULL, %s)', $product_id, $stock_status )
+				: $wpdb->prepare( '(%d, %f, %s)', $product_id, $stock_quantity, $stock_status );
+		}
+
+		$query  = $wpdb->prepare( 'INSERT INTO %i ( product_id, stock_quantity, stock_status ) VALUES ', $wpdb->wc_product_meta_lookup );
+		$query .= implode( ', ', $rows );
+
+		$wpdb->query( $query ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared -- Table and row values are prepared above.
 	}
 
 	/**

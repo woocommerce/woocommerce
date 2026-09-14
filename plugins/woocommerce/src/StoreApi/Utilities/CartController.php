@@ -488,7 +488,7 @@ class CartController {
 		 *
 		 * @since 7.2.0
 		 *
-		 * @example See docs/examples/validate-cart.md
+		 * @example docs/examples/validate-cart.md
 		 *
 		 * @param \WP_Error $errors  WP_Error object.
 		 * @param \WC_Cart  $cart    Cart object.
@@ -514,12 +514,15 @@ class CartController {
 		 * Fires when cart items are being validated.
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
-		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
-		 * notices and convert to wp errors instead.
+		 *
+		 * This action will be deprecated in the Store API because it encourages wc_add_notice:
+		 * the API has to capture those notices and convert them to WP_Error objects. Prefer
+		 * `woocommerce_store_api_cart_errors`, which passes a WP_Error to callbacks directly.
+		 * Core keeps firing this action from the classic cart and checkout, so it is not
+		 * deprecated there.
 		 *
 		 * @since 7.2.0
 		 *
-		 * @deprecated
 		 * @internal Matches action name in WooCommerce core.
 		 */
 		do_action( 'woocommerce_check_cart_items' );
@@ -692,13 +695,6 @@ class CartController {
 			);
 		}
 
-		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
-			throw new TooManyInCartException(
-				'woocommerce_rest_product_too_many_in_cart',
-				$product->get_name()
-			);
-		}
-
 		if ( ! $product->is_in_stock() ) {
 			throw new OutOfStockException(
 				'woocommerce_rest_product_out_of_stock',
@@ -706,11 +702,17 @@ class CartController {
 			);
 		}
 
-		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+		if ( $cart_item['quantity'] > 1 && $product->is_sold_individually() ) {
+			throw new TooManyInCartException(
+				'woocommerce_rest_product_too_many_in_cart',
+				$product->get_name()
+			);
+		}
 
-			if ( $qty_remaining < $qty_in_cart ) {
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
+			$stock_remaining = $this->get_remaining_stock_for_product( $product );
+			$sold_out        = $stock_remaining <= 0;
+			if ( $sold_out || $stock_remaining < $this->get_product_quantity_in_cart( $product ) ) {
 				throw new PartialOutOfStockException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					$product->get_name()
@@ -905,58 +907,12 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Return early if invalid object supplied by the filter or no packages.
-		if ( ! is_array( $packages ) || empty( $packages ) ) {
+		// Return early if no packages.
+		if ( empty( $packages ) ) {
 			return [];
 		}
 
-		// Add extra package data to array.
-		$packages = array_map(
-			function ( $key, $package, $index ) {
-				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-				return $package;
-			},
-			array_keys( $packages ),
-			$packages,
-			range( 1, count( $packages ) )
-		);
-
 		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
-	}
-
-	/**
-	 * Creates a name for a package.
-	 *
-	 * @param array $package Shipping package from WooCommerce.
-	 * @param int   $index Package number.
-	 * @return string
-	 */
-	protected function get_package_name( $package, $index ) {
-		/**
-		 * Filters the shipping package name.
-		 *
-		 * @since 4.3.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param string $shipping_package_name Shipping package name.
-		 * @param string $package_id Shipping package ID.
-		 * @param array $package Shipping package from WooCommerce.
-		 * @return string Shipping package name.
-		 */
-		return apply_filters(
-			'woocommerce_shipping_package_name',
-			$index > 1 ?
-				sprintf(
-					/* translators: %d: shipping package number */
-					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-					$index
-				) :
-				_x( 'Shipment 1', 'shipping packages', 'woocommerce' ),
-			$package['package_id'],
-			$package
-		);
 	}
 
 	/**
@@ -1138,7 +1094,7 @@ class CartController {
 		$product_quantities = $cart->get_cart_item_quantities();
 		$product_id         = $product->get_stock_managed_by_id();
 
-		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+		return $product_quantities[ $product_id ] ?? 0;
 	}
 
 	/**
@@ -1148,8 +1104,7 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		$reserve_stock = new ReserveStock();
-		$qty_reserved  = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$qty_reserved = ( new ReserveStock() )->get_reserved_stock( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
 	}
@@ -1201,6 +1156,19 @@ class CartController {
 	}
 
 	/**
+	 * Get product name, hiding it for draft and private products.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return string
+	 */
+	protected function get_product_name( \WC_Product $product ) {
+		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+			return '';
+		}
+		return $product->get_name();
+	}
+
+	/**
 	 * Default exception thrown when an item cannot be added to the cart.
 	 *
 	 * @throws RouteException Exception with code woocommerce_rest_product_not_purchasable.
@@ -1208,13 +1176,21 @@ class CartController {
 	 * @param \WC_Product $product Product object associated with the cart item.
 	 */
 	protected function throw_default_product_exception( \WC_Product $product ) {
+		$product_name = $this->get_product_name( $product );
+
+		if ( empty( $product_name ) ) {
+			$message = __( 'This item is not available for purchase.', 'woocommerce' );
+		} else {
+			$message = sprintf(
+				/* translators: %s: product name */
+				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
+				$product_name
+			);
+		}
+
 		throw new RouteException(
 			'woocommerce_rest_product_not_purchasable',
-			sprintf(
-				/* translators: %s: product name */
-				esc_html__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
-				$product->get_name()
-			),
+			esc_html( $message ),
 			400
 		);
 	}

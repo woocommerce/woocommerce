@@ -28,11 +28,31 @@
 	}
 
 	/**
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements within each owning form to prevent
+	 * sending the same data multiple times. Treat groups without an enclosing form as document-owned.
+	 */
+	function removeDuplicateInputGroups() {
+		const owners = new Set();
+
+		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group ) => {
+			const owner = group.closest( 'form' ) || document;
+
+			if ( owners.has( owner ) ) {
+				group.remove();
+			} else {
+				owners.add( owner );
+			}
+		} );
+	}
+
+	/**
 	 * Update `wc_order_attribution` input elements' values.
 	 *
 	 * @param {Object} values Object containing field values.
 	 */
 	function updateFormValues( values ) {
+		// Remove duplicates before updating to ensure only one set of elements exists.
+		removeDuplicateInputGroups();
 		// Update `<wc-order-attribution-inputs>` elements if any exist.
 		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
 			element.values = values;

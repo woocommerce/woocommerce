@@ -7,4 +7,5 @@ export type Options = {
 	commitDirectToBase?: boolean;
 	override?: string;
 	appendChangelog?: boolean;
+	githubActor?: string;
 };

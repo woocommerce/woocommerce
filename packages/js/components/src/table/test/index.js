@@ -258,4 +258,64 @@ describe( 'Table', () => {
 
 		expect( el ).toHaveClass( 'class-222' );
 	} );
+
+	it( 'should remove scrollable classes when table is no longer scrollable', () => {
+		// Mock a table that is initially scrollable
+		const mockScrollableTable = {
+			scrollWidth: 1000,
+			offsetWidth: 500,
+			scrollLeft: 0,
+		};
+
+		// Mock a table that is no longer scrollable
+		const mockNonScrollableTable = {
+			scrollWidth: 400,
+			offsetWidth: 500,
+			scrollLeft: 0,
+		};
+
+		const {} = render(
+			<Table
+				caption="Test table"
+				headers={ mockHeaders }
+				rows={ mockData }
+			/>
+		);
+
+		const tableElement = screen.getByLabelText( 'Test table' );
+
+		// Mock the container ref to simulate scrollable state
+		Object.defineProperty( tableElement, 'scrollWidth', {
+			value: mockScrollableTable.scrollWidth,
+			writable: true,
+		} );
+		Object.defineProperty( tableElement, 'offsetWidth', {
+			value: mockScrollableTable.offsetWidth,
+			writable: true,
+		} );
+		Object.defineProperty( tableElement, 'scrollLeft', {
+			value: mockScrollableTable.scrollLeft,
+			writable: true,
+		} );
+
+		// Trigger a resize event to simulate window resize
+		window.dispatchEvent( new Event( 'resize' ) );
+
+		// Now simulate the table becoming non-scrollable
+		Object.defineProperty( tableElement, 'scrollWidth', {
+			value: mockNonScrollableTable.scrollWidth,
+			writable: true,
+		} );
+		Object.defineProperty( tableElement, 'offsetWidth', {
+			value: mockNonScrollableTable.offsetWidth,
+			writable: true,
+		} );
+
+		// Trigger another resize event
+		window.dispatchEvent( new Event( 'resize' ) );
+
+		// The table should not have scrollable classes when it's not scrollable
+		expect( tableElement ).not.toHaveClass( 'is-scrollable-right' );
+		expect( tableElement ).not.toHaveClass( 'is-scrollable-left' );
+	} );
 } );

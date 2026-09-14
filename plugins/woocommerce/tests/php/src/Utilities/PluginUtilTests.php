@@ -252,15 +252,16 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'test_feature_1' => array(
-						'name' => 'Test feature 1',
-						'plugins_are_incompatible_by_default' => true,
+						'name'                         => 'Test feature 1',
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'test_feature_2' => array(
-						'name' => 'Test feature 2',
-						'plugins_are_incompatible_by_default' => false,
+						'name'                         => 'Test feature 2',
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'test_feature_3' => array(
-						'name' => 'Test feature 2',
+						'name'                         => 'Test feature 3',
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
@@ -337,7 +338,7 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		);
 
 		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$features_controller->add_feature_definition( 'test_feature', 'Test Feature' );
+		$features_controller->add_feature_definition( 'test_feature', 'Test Feature', array( 'default_plugin_compatibility' => 'compatible' ) );
 
 		// Simulate declaration (should not call get_plugins yet).
 		$this->simulate_inside_before_woocommerce_init_hook();

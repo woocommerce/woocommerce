@@ -172,4 +172,254 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertEquals( array( 'tax_1' ), $deleted );
 		$this->assertEquals( array( 'tax_4' ), $created );
 	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' shows notice when tax-inclusive pricing is enabled without base rate.
+	 */
+	public function test_tax_configuration_validation_notice_shows_when_prices_include_tax_but_no_base_rate() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen to simulate being on WooCommerce settings page.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Ensure no tax rates exist for US.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = 'US' OR tax_rate_country = ''" );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is displayed with country code and "standard tax rates" text.
+		$this->assertStringContainsString( 'Tax configuration incomplete', $output );
+		$this->assertStringContainsString( 'configure standard tax rates', $output );
+		$this->assertStringContainsString( '(US)', $output );
+		$this->assertStringContainsString( 'notice-warning', $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when taxes are disabled.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_taxes_disabled() {
+		// Set up prices include tax but taxes disabled.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Ensure no tax rates exist for US.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = 'US' OR tax_rate_country = ''" );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed because taxes are disabled.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when base rate exists.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_base_rate_exists() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Insert a tax rate for US.
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Test Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when prices are not tax-inclusive.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_prices_not_inclusive() {
+		// Set up prices exclude tax option.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice on non-WooCommerce pages.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_on_non_woocommerce_pages() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Mock the screen to simulate being on a different admin page.
+		set_current_screen( 'dashboard' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when filtered to false.
+	 */
+	public function test_tax_configuration_validation_notice_respects_filter() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Ensure no tax rates exist for US.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = 'US' OR tax_rate_country = ''" );
+
+		// Add filter to disable the notice.
+		add_filter( 'woocommerce_show_tax_configuration_notice', '__return_false' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Remove filter.
+		remove_filter( 'woocommerce_show_tax_configuration_notice', '__return_false' );
+
+		// Assert notice is NOT displayed due to filter.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when localized tax rate exists for base country.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_localized_rate_exists() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		// Base location is DE without a specific state.
+		update_option( 'woocommerce_default_country', 'DE' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Insert a tax rate for DE with a specific state (more localized than base).
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate_state'    => 'BE', // Berlin - more specific than base location.
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'MwSt',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+
+		// Assert notice is NOT displayed because a rate exists for the country.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when adjust_non_base_location_prices is disabled.
+	 */
+	public function test_tax_configuration_validation_notice_respects_adjust_non_base_location_prices_filter() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Ensure no tax rates exist for US.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = 'US' OR tax_rate_country = ''" );
+
+		// Disable non-base location price adjustments.
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Remove filter.
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		// Assert notice is NOT displayed because price adjustment is disabled.
+		$this->assertEmpty( $output );
+	}
 }

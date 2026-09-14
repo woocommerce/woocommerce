@@ -8,7 +8,6 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
-import { Selectors } from '~/marketing/data-multichannel/selectors';
 import {
 	CampaignType as APICampaignType,
 	ApiFetchError,
@@ -38,14 +37,13 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getCampaignTypes', [] );
+		void invalidateResolution( 'getCampaignTypes', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaignTypes } = select(
-				STORE_KEY
-			) as Selectors;
+			const { hasFinishedResolution, getCampaignTypes } =
+				select( STORE_KEY );
 			const campaignTypesState = getCampaignTypes();
 
 			return {

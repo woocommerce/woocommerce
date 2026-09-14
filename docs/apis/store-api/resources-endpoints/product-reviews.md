@@ -14,7 +14,7 @@ GET /products/reviews?orderby=rating&order=desc
 | Attribute     | Type    | Required | Description                                                                                         |
 | :------------ | :------ | :------: | :-------------------------------------------------------------------------------------------------- |
 | `page`        | integer |    no    | Current page of the collection.                                                                     |
-| `per_page`    | integer |    no    | Maximum number of items to be returned in result set. Defaults to no limit if left blank.           |
+| `per_page`    | integer |    no    | Maximum number of items to be returned in result set.                                               |
 | `offset`      | integer |    no    | Offset the result set by a specific number of items.                                                |
 | `order`       | string  |    no    | Order sort attribute ascending or descending. Allowed values: `asc`, `desc`                         |
 | `orderby`     | string  |    no    | Sort collection by object attribute. Allowed values : `date`, `date_gmt`, `id`, `rating`, `product` |
@@ -58,3 +58,11 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 	}
 ]
 ```
+
+### Password-protected products
+
+Reviews of password-protected products are excluded until the visitor has submitted the correct password. They are omitted from both the collection and the pagination totals.
+
+Password verification uses WordPress's native `wp-postpass_*` cookie, set when a user submits the password form on the frontend. The Store API does not accept passwords directly.
+
+A request that targets a locked product via `product_id` returns an empty collection with status `200`.

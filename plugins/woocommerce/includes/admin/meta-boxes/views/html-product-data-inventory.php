@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />
 			<p>
-				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+				<?php esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 			</p>
 		</div>
 		<?php
@@ -66,10 +66,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			echo '<div class="stock_fields show_if_simple show_if_variable">';
 
+			/**
+			 * Filters product default stock amount.
+			 *
+			 * @since 10.6.0
+			 *
+			 * @param int $default_stock_amount Default stock amount. Default is 1.
+			 */
+			$default_stock_amount = apply_filters( 'woocommerce_product_stock_default_amount', 1 );
+
 			woocommerce_wp_text_input(
 				array(
 					'id'                => '_stock',
-					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ?? 1 ),
+					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ?? $default_stock_amount ),
 					'label'             => __( 'Quantity', 'woocommerce' ),
 					'desc_tip'          => true,
 					'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),

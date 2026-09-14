@@ -35,12 +35,31 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/payment-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Payment illustration', 'woocommerce' );
+	}
+
+	/**
 	 * Title.
 	 *
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid with WooPayments', 'woocommerce' );
+		/* translators: %s: Payment provider name. */
+		return sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' );
 	}
 
 	/**

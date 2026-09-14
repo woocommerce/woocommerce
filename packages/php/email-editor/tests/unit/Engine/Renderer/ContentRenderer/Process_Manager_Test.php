@@ -51,7 +51,8 @@ class Process_Manager_Test extends \Email_Editor_Unit_Test {
 		$typography->expects( $this->once() )->method( 'preprocess' )->willReturn( array() );
 
 		$spacing = $this->createMock( Spacing_Preprocessor::class );
-		$spacing->expects( $this->once() )->method( 'preprocess' )->willReturn( array() );
+		$spacing->expects( $this->once() )->method( 'preprocess_with_context' )->willReturn( array() );
+		$spacing->expects( $this->never() )->method( 'preprocess' );
 
 		$quote_text_align = $this->createMock( Quote_Preprocessor::class );
 		$quote_text_align->expects( $this->once() )->method( 'preprocess' )->willReturn( array() );

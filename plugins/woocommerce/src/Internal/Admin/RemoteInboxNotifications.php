@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 
 /**
@@ -38,7 +37,7 @@ class RemoteInboxNotifications {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		if ( Features::is_enabled( 'remote-inbox-notifications' ) ) {
+		if ( 'yes' === get_option( self::TOGGLE_OPTION_NAME, 'yes' ) ) {
 			RemoteInboxNotificationsEngine::init();
 		}
 	}

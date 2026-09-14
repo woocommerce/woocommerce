@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.1.0
+ * @version 11.2.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -27,14 +27,25 @@ if ( $email_improvements_enabled ) {
 
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
-if ( $email_improvements_enabled ) {
-	/* translators: %1$s: Order ID. %2$s: Order date */
-	echo wp_kses_post( sprintf( esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) . "\n";
-	echo "\n==========\n";
-} else {
-	/* translators: %1$s: Order ID. %2$s: Order date */
-	echo wp_kses_post( wc_strtoupper( sprintf( esc_html__( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
+/**
+ * Filter whether to display the order number in the order details heading of emails.
+ *
+ * @since 10.8.0
+ * @param bool     $display Whether to display the order number. Default true.
+ * @param WC_Order $order   Order object.
+ * @param WC_Email $email   Email object.
+ */
+if ( (bool) apply_filters( 'woocommerce_email_display_order_number', true, $order, $email ) ) {
+	if ( $email_improvements_enabled ) {
+		/* translators: %1$s: Order ID. %2$s: Order date */
+		echo wp_kses_post( sprintf( esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) . "\n";
+		echo "\n==========\n";
+	} else {
+		/* translators: %1$s: Order ID. %2$s: Order date */
+		echo wp_kses_post( wc_strtoupper( sprintf( esc_html__( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
+	}
 }
+
 echo "\n" . wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	$order,
 	array(
@@ -53,6 +64,22 @@ $item_totals = $order->get_order_item_totals();
 if ( $item_totals ) {
 	foreach ( $item_totals as $total ) {
 		if ( $email_improvements_enabled ) {
+			if ( 'shipping' === ( $total['type'] ?? '' ) && isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
+				/**
+				 * Filters whether a zero cost shipping row shows 'Free!' in place of the repeated method name.
+				 *
+				 * Defaults to true only for Free Shipping. Other methods can cost nothing yet still use the
+				 * name to tell the customer something, such as 'Shipping TBD'.
+				 *
+				 * @since 11.2.0
+				 *
+				 * @param bool     $show_free_label Whether to replace the value with 'Free!'.
+				 * @param WC_Order $order           The order being emailed.
+				 */
+				if ( (bool) apply_filters( 'woocommerce_email_order_shipping_show_free_label', $order->has_shipping_method( 'free_shipping' ), $order ) ) {
+					$total['value'] = __( 'Free!', 'woocommerce' );
+				}
+			}
 			$label = $total['label'];
 			if ( isset( $total['meta'] ) ) {
 				$label .= ' ' . $total['meta'];

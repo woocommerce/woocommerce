@@ -1,0 +1,442 @@
+# Unit Testing Conventions
+
+## Table of Contents
+
+- [Complete Test File Template](#complete-test-file-template)
+- [Fixture Lifecycle and Cleanup](#fixture-lifecycle-and-cleanup)
+- [Test File Naming and Location](#test-file-naming-and-location)
+- [System Under Test Variable](#system-under-test-variable)
+- [Test Method Documentation](#test-method-documentation)
+- [Comments in Tests](#comments-in-tests)
+- [Avoid Performative Tests](#avoid-performative-tests)
+- [Group Similar Tests with @testWith or a Data Provider](#group-similar-tests-with-testwith-or-a-data-provider)
+- [Test Configuration](#test-configuration)
+- [Example: Payment Extension Suggestions Tests](#example-payment-extension-suggestions-tests)
+- [Mocking the WooCommerce Logger](#mocking-the-woocommerce-logger)
+- [General Testing Best Practices](#general-testing-best-practices)
+
+## Complete Test File Template
+
+Use this template when creating new test files. It shows all conventions applied together:
+
+```php
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin;
+
+use Automattic\WooCommerce\Internal\Admin\OrderProcessor;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the OrderProcessor class.
+ */
+class OrderProcessorTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var OrderProcessor
+	 */
+	private $sut;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new OrderProcessor();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			// A static cache on the SUT, which no base class resets.
+			OrderProcessor::reset_cache();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * @testdox Should return true when order is valid.
+	 */
+	public function test_returns_true_for_valid_order(): void {
+		$order = wc_create_order();
+
+		$result = $this->sut->is_valid( $order );
+
+		$this->assertTrue( $result, 'Valid orders should return true' );
+	}
+
+	/**
+	 * @testdox Should throw exception when order ID is negative.
+	 */
+	public function test_throws_exception_for_negative_order_id(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->process( -1 );
+	}
+}
+```
+
+### Key Elements
+
+| Element | Requirement |
+| ------- | ----------- |
+| `declare( strict_types = 1 )` | Required at file start |
+| Namespace | Match source location: `Automattic\WooCommerce\Tests\{path}` |
+| Base class | Extend `WC_Unit_Test_Case` |
+| SUT variable | Use `$sut` with docblock "The System Under Test." |
+| Test docblock | Use `@testdox` with sentence ending in `.` |
+| Return type | Use `void` for test methods |
+| Assertion messages | Include helpful context for failures |
+| Teardown | Only for state the base does not own; guarantee `parent::tearDown()` runs |
+
+## Fixture Lifecycle and Cleanup
+
+Choose cleanup from the test's base class; PHPUnit alone provides no database isolation.
+
+| Base class | Automatic isolation when parent setup/teardown runs |
+| --- | --- |
+| `WP_UnitTestCase` descendants, including `WP_HTTP_TestCase` and `WP_Test_REST_TestCase` | `$wpdb` transaction rollback, reset of the WordPress globals managed by the base, and hook snapshot restoration; the next setup flushes the object cache |
+| `WC_Unit_Test_Case` descendants, including `WC_REST_Unit_Test_Case` | All `WP_UnitTestCase` behavior plus WooCommerce cart/context, notices, and country-locale singleton cleanup |
+| `PHPUnit\Framework\TestCase` | No WordPress transaction, hook restoration, or global cleanup |
+| Other custom base | Inspect its implementation; do not infer cleanup from PHPUnit or its name |
+
+For a `WP_UnitTestCase` descendant, do not manually delete per-test products, coupons, orders, users, options, metadata, or other rows as post-assertion cleanup when its transaction covers them. Rollback does not cover writes made before the parent setup starts the transaction, class fixtures, explicit commits or DDL, non-transactional tables, other database connections, files, external services, or process state that the selected base does not reset.
+
+- Call the parent setup before any write the rollback must cover, matching the method you override: `parent::setUp()` from a camelCase override, `parent::set_up()` from a snake_case one. Both reach `WP_UnitTestCase_Base::set_up()`, which starts the transaction as its last step, so writes made earlier in the override are committed and outlive the test.
+- Create persistent class fixtures in `wpSetUpBeforeClass()` and delete them in `wpTearDownAfterClass()`.
+- Remove a hook before the test ends only when later work in that test must not run it; WordPress parent teardown restores the hook snapshot.
+- An arrangement-time reset is valid when `setUp()` or the base class preloads state. Do not repeat cleanup already performed by the base.
+- If custom cleanup is required, guarantee `parent::tearDown()` runs. In a `WP_UnitTestCase` descendant, perform cleanup that can write through `$wpdb` before the parent rollback. Do not add an override that only calls the parent: `Generic.CodeAnalysis.UselessOverridingMethod` flags it, and the Lint job treats that warning as a failure.
+
+See [Performance and isolation principles](../../../plugins/woocommerce/tests/README.md#performance-and-isolation-principles) for fixture sizing and database constraints.
+
+## Test File Naming and Location
+
+| Source               | Test                                                 | Pattern                  |
+| -------------------- | ---------------------------------------------------- | ------------------------ |
+| `includes/` classes  | `tests/php/includes/{path}/class-wc-{name}-test.php` | Add `-test` suffix       |
+| `src/` classes       | `tests/php/src/{path}/{name}Test.php`                | Append `Test` (no hyphen)|
+
+Test class: Same name as source class + `_Test` or `Test` suffix, extends `WC_Unit_Test_Case`
+
+## System Under Test Variable
+
+Use `$sut` with docblock "The System Under Test."
+
+```php
+/**
+ * The System Under Test.
+ *
+ * @var OrderProcessor
+ */
+private $sut;
+```
+
+## Test Method Documentation
+
+When adding or modifying a unit test method, the part of the docblock that describes the test must be prepended with `@testdox`. End the comment with `.` for compliance with linting rules.
+
+**Example:**
+
+```php
+/**
+ * @testdox Should return true when order is valid.
+ */
+public function test_returns_true_for_valid_order() {
+    // ...
+}
+
+/**
+ * @testdox Should throw exception when order ID is negative.
+ */
+public function test_throws_exception_for_negative_order_id() {
+    // ...
+}
+```
+
+## Comments in Tests
+
+**Avoid over-commenting tests.** Test names and assertion messages should explain intent.
+
+**Good - Self-explanatory:**
+
+```php
+/**
+ * @testdox Should return true when order status is draft.
+ */
+public function test_returns_true_for_draft_orders() {
+    $order = $this->create_draft_order();
+
+    $result = $this->sut->can_delete( $order );
+
+    $this->assertTrue( $result, 'Draft orders should be deletable' );
+}
+```
+
+**Avoid - Over-commented:**
+
+```php
+/**
+ * @testdox Should return true when order status is draft.
+ */
+public function test_returns_true_for_draft_orders() {
+    // Create a draft order
+    $order = $this->create_draft_order();
+
+    // Call the method we're testing
+    $result = $this->sut->can_delete( $order );
+
+    // Verify the result is true
+    $this->assertTrue( $result, 'Draft orders should be deletable' );
+}
+```
+
+**Avoid - Arrange/Act/Assert comments:**
+
+```php
+// Don't add these structural comments
+// Arrange
+$order = $this->create_draft_order();
+
+// Act
+$result = $this->sut->can_delete( $order );
+
+// Assert
+$this->assertTrue( $result );
+```
+
+Use blank lines for visual separation instead. The test structure should be self-evident.
+
+**When comments ARE useful in tests:**
+
+- Explaining complex test setup: `// Simulate race condition by...`
+- Documenting known issues: `// Workaround for WordPress core bug #12345`
+- Clarifying business rules: `// Payment processor requires 24h hold`
+
+## Avoid Performative Tests
+
+Tests exist to catch regressions, not to raise a coverage number. A test that passes no matter what the implementation does isn't providing value.
+
+**Signs a test is performative:**
+
+- Asserting something PHP or WordPress already guarantees (e.g. a setter stored the exact value passed in, with no transformation or validation involved)
+- Weak assertions (`assertNotNull`, unqualified `assertTrue`) where a specific expected value would actually catch a regression
+- Mocking so many of the SUT's related helpers or classes that you end up checking the mock's pre-set return value, not the SUT's own logic
+- A near-duplicate of another test, added just to "cover one more case," that doesn't touch any new code path
+
+**Before adding a test, ask:** if the implementation had a bug, would this test actually fail? If you can't think of a bug this test would catch, it isn't worth adding.
+
+## Group Similar Tests with `@testWith` or a Data Provider
+
+When several tests call the same method with different inputs but the same assertion logic, don't write many near-identical test methods with copy-pasted setup. Collapse them into one test.
+
+- Prefer **`@testWith`** when the inputs are simple values (strings, numbers, booleans) or arrays written directly in the annotation (see real examples in `wc-core-functions-test.php`).
+- Use a **`dataProvider`** method only when the dataset needs to be built with logic (loops, constants, fixtures) rather than written out literally.
+
+**Avoid - Repeated tests, same shape:**
+
+```php
+public function test_get_shipping_cost_us() {
+    $this->assertSame( 5.00, $this->sut->get_shipping_cost( 'US' ) );
+}
+
+public function test_get_shipping_cost_ca() {
+    $this->assertSame( 7.50, $this->sut->get_shipping_cost( 'CA' ) );
+}
+
+public function test_get_shipping_cost_mx() {
+    $this->assertSame( 12.00, $this->sut->get_shipping_cost( 'MX' ) );
+}
+```
+
+**Prefer - One test with `@testWith`:**
+
+```php
+/**
+ * @testWith ["US", 5.00]
+ *           ["CA", 7.50]
+ *           ["MX", 12.00]
+ */
+public function test_get_shipping_cost( string $country, float $expected ) {
+    $this->assertSame( $expected, $this->sut->get_shipping_cost( $country ) );
+}
+```
+
+Never recompute the expected value inside the test or provider by reimplementing the system under test's own logic. Hardcode the expected literal instead. A provider that recalculates the answer the same way the SUT does will pass even when both are wrong.
+
+## Test Configuration
+
+Test configuration file: `phpunit.xml`
+
+## Example: Payment Extension Suggestions Tests
+
+The `PaymentsExtensionSuggestionsTest` class demonstrates good testing practices for country-specific functionality.
+
+### Key Patterns Used
+
+1. **Data-driven tests** using PHPUnit data providers
+2. **Extension count verification** for different merchant types
+3. **Clear test organization** by merchant type (online/offline)
+
+### Example Test Structure
+
+```php
+class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
+    /**
+     * The System Under Test.
+     *
+     * @var PaymentsExtensionSuggestions
+     */
+    private $sut;
+
+    public function setUp(): void {
+        parent::setUp();
+        $this->sut = new PaymentsExtensionSuggestions();
+    }
+
+    /**
+     * @testdox Should return correct extension count for online merchants by country
+     * @dataProvider online_merchant_country_data
+     */
+    public function test_get_country_extensions_count_for_online_merchants(
+        string $country_code,
+        int $expected_count
+    ) {
+        $merchant = array(
+            'country'       => $country_code,
+            'selling_venues' => 'online',
+        );
+
+        $result = $this->sut->get_country_extensions_count( $merchant );
+
+        $this->assertSame(
+            $expected_count,
+            $result,
+            "Expected {$expected_count} extensions for online merchant in {$country_code}"
+        );
+    }
+
+    /**
+     * Data provider for online merchant tests.
+     *
+     * @return array
+     */
+    public function online_merchant_country_data() {
+        return array(
+            'United States'    => array( 'US', 5 ),
+            'United Kingdom'   => array( 'GB', 4 ),
+            'Canada'           => array( 'CA', 3 ),
+            'Australia'        => array( 'AU', 3 ),
+            // ... more countries
+        );
+    }
+
+    /**
+     * @testdox Should return correct extension count for offline merchants by country
+     * @dataProvider offline_merchant_country_data
+     */
+    public function test_get_country_extensions_count_for_offline_merchants(
+        string $country_code,
+        int $expected_count
+    ) {
+        $merchant = array(
+            'country'        => $country_code,
+            'selling_venues' => 'offline',
+        );
+
+        $result = $this->sut->get_country_extensions_count( $merchant );
+
+        $this->assertSame(
+            $expected_count,
+            $result,
+            "Expected {$expected_count} extensions for offline merchant in {$country_code}"
+        );
+    }
+
+    /**
+     * Data provider for offline merchant tests.
+     *
+     * @return array
+     */
+    public function offline_merchant_country_data() {
+        return array(
+            'United States'  => array( 'US', 2 ),
+            'United Kingdom' => array( 'GB', 1 ),
+            'Canada'         => array( 'CA', 1 ),
+            // ... more countries
+        );
+    }
+}
+```
+
+### Important Notes for Payment Extension Tests
+
+When working with payment extension suggestions:
+
+1. **Extension counts must match the implementation** in `src/Internal/Admin/Suggestions/PaymentsExtensionSuggestions.php`
+2. **When adding new countries** to the implementation, update both data providers in the test file
+3. **Tests are separated by merchant type** (online vs offline) as they have different extension counts
+4. **Data providers use descriptive keys** (country names) for better test output
+
+## Mocking the WooCommerce Logger
+
+When testing code that uses `wc_get_logger()` (directly or via `SafeGlobalFunctionProxy::wc_get_logger()`), use the `woocommerce_logging_class` filter to inject a fake logger.
+
+### Why the Filter Approach?
+
+- `register_legacy_proxy_function_mocks` doesn't intercept `SafeGlobalFunctionProxy` calls
+- Passing an object (not a class name string) bypasses `wc_get_logger()`'s internal cache
+
+### Creating a Fake Logger
+
+The fake logger must implement `WC_Logger_Interface`. Create an anonymous class with public arrays to track calls (`$debug_calls`, `$warning_calls`, etc.) and implement all interface methods (`add`, `log`, `debug`, `info`, `warning`, `error`, `emergency`, `alert`, `critical`, `notice`).
+
+### Using the Fake Logger
+
+```php
+public function test_logs_warning_for_invalid_input(): void {
+	$fake_logger = $this->create_fake_logger();
+
+	// Inject via filter - passing object bypasses cache.
+	add_filter(
+		'woocommerce_logging_class',
+		static function () use ( $fake_logger ) {
+			return $fake_logger;
+		}
+	);
+
+	$this->sut->process_input( 'invalid-value' );
+
+	$this->assertCount( 1, $fake_logger->warning_calls );
+}
+```
+
+### Key Points
+
+| Aspect       | Detail                                                        |
+| ------------ | ------------------------------------------------------------- |
+| Filter name  | `woocommerce_logging_class`                                   |
+| Return value | Object instance (not class name string)                       |
+| Interface    | Must implement `WC_Logger_Interface`                          |
+| Isolation    | `WP_UnitTestCase` parent teardown restores the filter snapshot |
+
+### Reference
+
+See `PaymentGatewayTest.php:create_fake_logger()` for a complete implementation.
+
+## General Testing Best Practices
+
+1. **Always run tests after making changes** to verify functionality
+2. **Use specific test filters** during development (see running-tests.md in the woocommerce-dev-cycle skill)
+3. **Write descriptive test names** that explain what is being tested
+4. **Use `@testWith` or a data provider** instead of several near-identical tests for the same logic
+5. **Include helpful assertion messages** for debugging when tests fail
+6. **Test both success and failure cases**
+7. **Mock external dependencies** (database, API calls, etc.)
+8. **Only add tests that can fail on a real bug**

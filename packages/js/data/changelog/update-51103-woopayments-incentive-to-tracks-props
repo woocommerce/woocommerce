@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Add wooPaymentsIncentiveId to the TaskType additionalData.

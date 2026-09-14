@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate customer entries in Analytics after manually creating guest orders without an email address.

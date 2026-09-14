@@ -119,7 +119,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 34, count( $environment ) );
+		$this->assertEquals( 35, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
@@ -127,6 +127,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( get_option( \WC_Install::STORE_ID_OPTION, null ), $environment['store_id'] );
 		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
+		$this->assertEquals( wp_get_environment_type(), $environment['wp_environment_type'] );
 	}
 
 	/**
@@ -159,7 +160,9 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status' );
+		$request->set_param( '_fields', 'active_plugins' );
+		$response = $this->server->dispatch( $request );
 		update_option( 'active_plugins', array() );
 
 		$data    = $response->get_data();
@@ -212,7 +215,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
 		$this->assertEquals( 17, count( $settings ) );
-		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
+		$this->assertEquals( WC()->legacy_rest_api_is_available(), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
 	}

@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Helper_Options;
 use WC_Helper_Updater;
 
@@ -29,12 +27,6 @@ class Marketplace {
 	 * Hook into WordPress on init.
 	 */
 	public function on_init() {
-		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-			/** Feature controller instance @var FeaturesController $feature_controller */
-			$feature_controller = wc_get_container()->get( FeaturesController::class );
-			$feature_controller->change_feature_enable( 'marketplace', true );
-		}
-
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
@@ -137,7 +129,6 @@ class Marketplace {
 			array(
 				'page' => 'wc-admin',
 				'path' => '/extensions',
-				'tab'  => 'extensions',
 				'ref'  => 'plugins',
 			),
 			admin_url( 'admin.php' )

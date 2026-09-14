@@ -8,6 +8,7 @@
 	.components-navigator-provider,
 	.components-navigator-screen {
 		height: 100%;
+		padding: 0;
 	}
 
 	.components-navigator-screen {
@@ -56,5 +57,10 @@
 	// This style hides it.
 	.interface-complementary-area-header__small {
 		display: none;
+	}
+
+	// Hide border around styles screen root.
+	.edit-site-global-styles-screen-root {
+		box-shadow: none;
 	}
 }

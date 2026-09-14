@@ -6,36 +6,30 @@ module.exports = function ( grunt ) {
 		// Setting folder templates.
 		dirs: {
 			css: 'css',
-			cssDest: 'build/css',
+			// Write directly to the plugin's `assets/css` so PHP enqueues
+			// from the final location with no intermediate rsync step.
+			cssDest: '../../assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'js',
-			jsDest: 'build/js',
-			php: 'includes',
+			// See `cssDest`. The plugin enqueues from `assets/js`.
+			jsDest: '../../assets/js',
 		},
 
-		// JavaScript linting with ESLint.
-		eslint: {
-			src: [
-				'<%= dirs.js %>/admin/*.js',
-				'!<%= dirs.js %>/admin/*.min.js',
-				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-			],
-		},
 
 		// Sass linting with Stylelint.
 		stylelint: {
 			options: {
 				configFile: '.stylelintrc',
 			},
-			all: [ '<%= dirs.css %>/*.scss', '!<%= dirs.css %>/select2.scss' ],
+			// select2.scss is excluded through `ignoreFiles` in .stylelintrc,
+			// so a direct stylelint run skips it too.
+			all: [ '<%= dirs.css %>/*.scss' ],
 		},
 
 		// Minify .js files.
 		uglify: {
 			options: {
-				ie8: true,
 				parse: {
 					strict: false,
 				},
@@ -116,9 +110,9 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// Concatenate select2.css onto the admin.css files.
 		concat: {
-			admin: {
+			// Concatenate select2.css onto the admin.css files.
+			css: {
 				files: {
 					'<%= dirs.css %>/admin.css': [
 						'<%= dirs.css %>/select2.css',
@@ -130,62 +124,20 @@ module.exports = function ( grunt ) {
 					],
 				},
 			},
-		},
-
-		// Watch changes for assets.
-		watch: {
-			css: {
-				files: [ '<%= dirs.css %>/*.scss' ],
-				tasks: [
-					'sass',
-					'rtlcss',
-					'postcss',
-					'cssmin',
-					'concat',
-					'move:css',
-					'copy:css',
-				],
-			},
+			// Concatenate number validation and maybe modify decimal utility functions with shipping zone methods
 			js: {
-				files: [
-					'GruntFile.js',
-					'<%= dirs.js %>/**/*.js',
-					'!<%= dirs.js %>/**/*.min.js',
-				],
-				tasks: [ 'eslint', 'copy:js', 'newer:uglify' ],
+				files: {
+					'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js': [
+						'<%= dirs.js %>/admin/utils/number-validation.js',
+						'<%= dirs.js %>/admin/utils/maybe-modify-decimal.js',
+						'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js',
+					],
+				},
 			},
 		},
 
-		// PHP Code Sniffer.
-		phpcs: {
-			options: {
-				bin: 'vendor/bin/phpcs',
-			},
-			dist: {
-				src: [
-					'**/*.php', // Include all php files.
-					'!includes/api/legacy/**',
-					'!includes/libraries/**',
-					'!node_modules/**',
-					'!tests/cli/**',
-					'!tmp/**',
-					'!vendor/**',
-				],
-			},
-		},
-
-		// Autoprefixer.
-		postcss: {
-			options: {
-				processors: [ require( 'autoprefixer' ) ],
-			},
-			dist: {
-				src: [ '<%= dirs.css %>/*.css' ],
-			},
-		},
-
-		// Specifying different src/dest for postcss broke everything,
-		// so we'll just move files to their new location afterwards.
+		// The css tasks process files in place, so move them
+		// to their final location afterwards.
 		move: {
 			css: {
 				files: [
@@ -225,7 +177,7 @@ module.exports = function ( grunt ) {
 						expand: true,
 						src: '*.scss',
 						dest: '<%= dirs.cssDest %>/',
-					}
+					},
 				],
 			},
 			js: {
@@ -233,7 +185,7 @@ module.exports = function ( grunt ) {
 					{
 						cwd: '<%= dirs.js %>/',
 						expand: true,
-						src: '**',
+						src: [ '**', '!admin/utils/**', '!**/test/**' ],
 						dest: '<%= dirs.jsDest %>/',
 					},
 					{
@@ -241,7 +193,7 @@ module.exports = function ( grunt ) {
 						flatten: true,
 						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
 						dest: '<%= dirs.jsDest %>/sourcebuster/',
-					}
+					},
 				],
 			},
 		},
@@ -249,30 +201,25 @@ module.exports = function ( grunt ) {
 
 	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
-	grunt.loadNpmTasks( 'grunt-phpcs' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
-	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-newer' );
 	grunt.loadNpmTasks( 'grunt-move' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [ 'js', 'css' ] );
 
-	grunt.registerTask( 'js', [ 'copy:js', 'uglify:js_assets' ] );
+	grunt.registerTask( 'js', [ 'copy:js', 'concat:js', 'uglify:js_assets' ] );
 
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
-		'postcss',
 		'cssmin',
-		'concat',
+		'concat:css',
 		'move:css',
 		'copy:css',
 	] );
@@ -283,4 +230,67 @@ module.exports = function ( grunt ) {
 
 	// Only an alias to 'default' task.
 	grunt.registerTask( 'dev', [ 'default' ] );
+
+	grunt.registerTask(
+		'watch',
+		'Rebuild js/css assets when their sources change.',
+		function () {
+			const chokidar = require( 'chokidar' );
+			this.async(); // Keep this task alive until SIGINT.
+
+			let running = false;
+			const pending = new Set();
+			const runQueued = ( tasks ) => {
+				tasks.forEach( ( task ) => pending.add( task ) );
+				if ( running ) {
+					return;
+				}
+				running = true;
+				const next = [ ...pending ];
+				pending.clear();
+				grunt.util.spawn(
+					{
+						grunt: true,
+						args: next,
+						opts: { stdio: 'inherit' },
+					},
+					() => {
+						running = false;
+						if ( pending.size > 0 ) {
+							// Drain the queue.
+							runQueued( [] );
+						}
+					}
+				);
+			};
+
+			chokidar
+				.watch( [ 'css/*.scss' ], { ignoreInitial: true } )
+				.on( 'all', () =>
+					runQueued( [
+						'sass',
+						'rtlcss',
+						'cssmin',
+						'concat:css',
+						'move:css',
+						'copy:css',
+					] )
+				);
+
+			chokidar
+				.watch( [ 'js/**/*.js', 'Gruntfile.js' ], {
+					ignoreInitial: true,
+					ignored: '**/*.min.js',
+				} )
+				.on( 'all', () =>
+					runQueued( [
+						'copy:js',
+						'concat:js',
+						'newer:uglify',
+					] )
+				);
+
+			grunt.log.writeln( 'Watching css/ and js/ for changes...' );
+		}
+	);
 };

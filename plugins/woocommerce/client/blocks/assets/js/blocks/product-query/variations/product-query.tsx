@@ -14,8 +14,8 @@ import {
 	QueryBlockAttributes,
 	ProductQueryBlockQuery,
 } from '@woocommerce/blocks/product-query/types';
-import { isSiteEditorPage } from '@woocommerce/utils';
-import { isNumber } from '@woocommerce/types';
+import { isSiteEditorPage, CORE_EDITOR_STORE } from '@woocommerce/utils';
+import { isNumber, isString } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -29,11 +29,12 @@ import {
 } from '../constants';
 
 const ARCHIVE_PRODUCT_TEMPLATES = [
-	'woocommerce/woocommerce//archive-product',
-	'woocommerce/woocommerce//taxonomy-product_cat',
-	'woocommerce/woocommerce//taxonomy-product_tag',
-	'woocommerce/woocommerce//taxonomy-product_attribute',
-	'woocommerce/woocommerce//product-search-results',
+	'archive-product',
+	'taxonomy-product_cat',
+	'taxonomy-product_tag',
+	'taxonomy-product_brand',
+	'taxonomy-product_attribute',
+	'product-search-results',
 ];
 
 const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
@@ -44,7 +45,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Beta)', 'woocommerce' ),
+		title: __( 'Products (Deprecated)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
@@ -67,17 +68,20 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	} );
 };
 
-let currentTemplateId: string | undefined;
+let currentTemplateSlug: string | undefined;
 subscribe( () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
-	currentTemplateId = store?.getEditedPostId();
-	if ( previousTemplateId === currentTemplateId ) {
+	const previousTemplateSlug = currentTemplateSlug;
+	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
+	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;
 	}
 
-	if ( isSiteEditorPage( store ) ) {
-		const inherit = ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId );
+	if ( isSiteEditorPage() ) {
+		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
+			isString( currentTemplateSlug )
+				? currentTemplateSlug.includes( template )
+				: false
+		);
 
 		const inheritQuery: Partial< ProductQueryBlockQuery > = {
 			inherit,

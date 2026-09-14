@@ -75,7 +75,10 @@ class WC_CLI_Update_Command {
 		);
 
 		foreach ( $callbacks_to_run as $update_callback ) {
-			call_user_func( $update_callback );
+			// Batched callbacks return true while more work remains, as WC_Install::run_update_callback() expects.
+			do {
+				$needs_another_run = (bool) call_user_func( $update_callback );
+			} while ( $needs_another_run );
 			$update_count ++;
 			$progress->tick();
 		}
@@ -83,8 +86,7 @@ class WC_CLI_Update_Command {
 		WC_Install::update_db_version();
 		$progress->finish();
 
-		WC_Admin_Notices::remove_notice( 'update', true );
-		( new WC_Notes_Run_Db_Update() )->set_notice_actioned();
+		\WC_Install::remove_update_db_notice();
 
 		WC()->call_static(
 			WP_CLI::class,

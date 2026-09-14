@@ -13,6 +13,7 @@ import {
 	OrderAttributionInstallBannerImage,
 } from '~/order-attribution-install-banner';
 import './style.scss';
+import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
 const CustomizableDashboard = lazy( () =>
 	import( /* webpackChunkName: "customizable-dashboard" */ './customizable' )
@@ -38,6 +39,7 @@ class Dashboard extends Component {
 					bannerImage={ <OrderAttributionInstallBannerImage /> }
 					dismissable
 				/>
+				<ScheduledUpdatesPromotionNotice />
 				<CustomizableDashboard query={ query } path={ path } />
 			</Suspense>
 		);

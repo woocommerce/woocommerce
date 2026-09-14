@@ -1,4 +1,4 @@
-/*global ajaxurl */
+/*global ajaxurl, woocommerce_product_ordering_params */
 
 /**
  * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/)
@@ -46,7 +46,13 @@ jQuery( function( $ ) {
 			// Go do the sorting stuff via ajax
 			$.post(
 				ajaxurl,
-				{ action: 'woocommerce_product_ordering', id: postid, previd: prevpostid, nextid: nextpostid },
+				{
+					action: 'woocommerce_product_ordering',
+					security: woocommerce_product_ordering_params.nonce,
+					id: postid,
+					previd: prevpostid,
+					nextid: nextpostid,
+				},
 				function( response ) {
 					$.each( response, function( key, value ) {
 						$( '#inline_' + key + ' .menu_order' ).html( value );
@@ -54,6 +60,14 @@ jQuery( function( $ ) {
 					ui.item.find( '.check-column input' ).show().siblings( 'img' ).remove();
 					$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
 					$( 'table.widefat tbody' ).sortable( 'enable' );
+					if (
+						response &&
+						'object' === typeof response &&
+						window.wcTracks &&
+						window.wcTracks.recordEvent
+					) {
+						window.wcTracks.recordEvent( 'products_sorting_reordered' );
+					}
 				}
 			);
 
