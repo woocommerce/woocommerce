@@ -470,8 +470,14 @@ class OrderController {
 		$all_locales    = wc()->countries->get_country_locale();
 		$address        = $order->get_address( $address_type );
 		$current_locale = $all_locales[ $address['country'] ] ?? [];
+		$default_locale = $all_locales['default'] ?? null;
 
-		foreach ( $all_locales['default'] as $key => $value ) {
+		// A locale filter callback can drop or replace the default entry, so fall back to the unfiltered default fields.
+		if ( ! is_array( $default_locale ) ) {
+			$default_locale = wc()->countries->get_default_address_fields();
+		}
+
+		foreach ( $default_locale as $key => $value ) {
 			// If $current_locale[ $key ] is not empty, merge it with locale default, otherwise just use default locale.
 			$current_locale[ $key ] = ! empty( $current_locale[ $key ] )
 				? wp_parse_args( $current_locale[ $key ], $value )
