@@ -19,19 +19,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 	 */
 	public function test_save_persists_general_setting_values() {
 		$sut                      = new WC_Settings_General();
-		$settings                 = $sut->get_settings_for_section( '' );
-		$option_states            = array();
-		$original_post            = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Direct settings save test.
 		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
 		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
-
-		foreach ( $settings as $setting ) {
-			if ( empty( $setting['id'] ) || ( isset( $setting['is_option'] ) && false === $setting['is_option'] ) ) {
-				continue;
-			}
-
-			$option_states[ $setting['id'] ] = $this->get_raw_option_state( $setting['id'] );
-		}
 
 		try {
 			$_POST                      = array(
@@ -86,16 +75,13 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 				$this->assertSame( $expected_value, get_option( $option_name ), "Unexpected persisted value for {$option_name}." );
 			}
 		} finally {
-			$_POST = $original_post;
-
+			// The option rows and $_POST go back with the rollback and the next
+			// clean_up_global_scope(); current_section is the one the base class
+			// does not touch.
 			if ( $had_current_section ) {
 				$GLOBALS['current_section'] = $original_current_section;
 			} else {
 				unset( $GLOBALS['current_section'] );
-			}
-
-			foreach ( $option_states as $option_name => $state ) {
-				$this->restore_raw_option_state( $option_name, $state );
 			}
 		}
 	}
@@ -193,69 +179,5 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, $currencies );
-	}
-
-	/**
-	 * Read an option without default filters or value coercion.
-	 *
-	 * @param string $option_name Option name.
-	 * @return array{exists: bool, value: string|null, autoload: string|null}
-	 */
-	private function get_raw_option_state( string $option_name ): array {
-		global $wpdb;
-
-		$row = $wpdb->get_row(
-			$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_name ),
-			ARRAY_A
-		);
-
-		return null === $row
-			? array(
-				'exists'   => false,
-				'value'    => null,
-				'autoload' => null,
-			)
-			: array(
-				'exists'   => true,
-				'value'    => $row['option_value'],
-				'autoload' => $row['autoload'],
-			);
-	}
-
-	/**
-	 * Restore an option row without invoking settings sanitizers.
-	 *
-	 * @param string                                                         $option_name Option name.
-	 * @param array{exists: bool, value: string|null, autoload: string|null} $state Raw option state.
-	 */
-	private function restore_raw_option_state( string $option_name, array $state ): void {
-		global $wpdb;
-
-		if ( ! $state['exists'] ) {
-			$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option_name ) );
-		} elseif ( $this->get_raw_option_state( $option_name )['exists'] ) {
-			$result = $wpdb->update(
-				$wpdb->options,
-				array(
-					'option_value' => $state['value'],
-					'autoload'     => $state['autoload'],
-				),
-				array( 'option_name' => $option_name )
-			);
-		} else {
-			$result = $wpdb->insert(
-				$wpdb->options,
-				array(
-					'option_name'  => $option_name,
-					'option_value' => $state['value'],
-					'autoload'     => $state['autoload'],
-				)
-			);
-		}
-
-		wp_cache_delete( $option_name, 'options' );
-		wp_cache_delete( 'alloptions', 'options' );
-		wp_cache_delete( 'notoptions', 'options' );
-		$this->assertNotFalse( $result, "Failed to restore option {$option_name}." );
 	}
 }

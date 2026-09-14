@@ -150,54 +150,16 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	 * @param string $peer_option_id     Peer checkbox option ID.
 	 */
 	public function test_save_persists_woocommerce_com_checkbox_options( $selected_option_id, $peer_option_id ): void {
-		$option_ids                  = array( $selected_option_id, $peer_option_id );
-		$original_options            = array();
-		$original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the test.
-		$had_current_section         = array_key_exists( 'current_section', $GLOBALS );
-		$original_current_section    = $had_current_section ? $GLOBALS['current_section'] : null;
-		$tracking_callback_methods   = array( 'get_tracking_history', 'handle_tracking_setting_change' );
-		$registered_tracking_methods = array();
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
 
-		global $wpdb;
-
-		foreach ( $option_ids as $option_id ) {
-			$row = $wpdb->get_row(
-				$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_id ),
-				ARRAY_A
-			);
-
-			$original_options[ $option_id ] = null === $row
-				? array(
-					'exists'   => false,
-					'value'    => null,
-					'autoload' => null,
-				)
-				: array(
-					'exists'   => true,
-					'value'    => $row['option_value'],
-					'autoload' => $row['autoload'],
-				);
+		// Detach the callbacks that react to these two options changing, so seeding and
+		// saving here cannot reach past the settings screen. `_restore_hooks()` puts them
+		// back after the test, the same way the rollback puts the option rows back.
+		foreach ( array( 'get_tracking_history', 'handle_tracking_setting_change' ) as $method ) {
+			remove_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10 );
 		}
-
-		foreach ( $tracking_callback_methods as $method ) {
-			$callback = array( WC(), $method );
-
-			if ( 10 === has_action( 'update_option_woocommerce_allow_tracking', $callback ) ) {
-				$registered_tracking_methods[] = $method;
-			}
-
-			remove_action( 'update_option_woocommerce_allow_tracking', $callback, 10 );
-		}
-
-		// Notes::possibly_delete_marketing_notes deletes every E_WC_ADMIN_NOTE_MARKETING note when
-		// this option changes, and no teardown can put those back. Detach it for the same window as
-		// the tracking callbacks so seeding and saving here cannot damage other tests.
-		$marketing_callback   = array( Notes::class, 'possibly_delete_marketing_notes' );
-		$marketing_registered = 10 === has_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback );
-
-		if ( $marketing_registered ) {
-			remove_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback, 10 );
-		}
+		remove_action( 'update_option_woocommerce_show_marketplace_suggestions', array( Notes::class, 'possibly_delete_marketing_notes' ), 10 );
 
 		try {
 			// The peer starts at 'yes' on purpose. Seeding both to 'no' would make the peer
@@ -219,39 +181,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			$this->assertSame( 'yes', get_option( $selected_option_id ) );
 			$this->assertSame( 'no', get_option( $peer_option_id ) );
 		} finally {
-			if ( $marketing_registered ) {
-				add_action( 'update_option_woocommerce_show_marketplace_suggestions', $marketing_callback, 10, 2 );
-			}
-
-			foreach ( $original_options as $option_id => $state ) {
-				if ( $state['exists'] ) {
-					$wpdb->update(
-						$wpdb->options,
-						array(
-							'option_value' => $state['value'],
-							'autoload'     => $state['autoload'],
-						),
-						array( 'option_name' => $option_id )
-					);
-				} else {
-					$wpdb->delete( $wpdb->options, array( 'option_name' => $option_id ) );
-				}
-
-				wp_cache_delete( $option_id, 'options' );
-			}
-
-			wp_cache_delete( 'alloptions', 'options' );
-
-			$_POST = $original_post;
-
 			if ( $had_current_section ) {
 				$GLOBALS['current_section'] = $original_current_section;
 			} else {
 				unset( $GLOBALS['current_section'] );
-			}
-
-			foreach ( $registered_tracking_methods as $method ) {
-				add_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10, 2 );
 			}
 		}
 	}
