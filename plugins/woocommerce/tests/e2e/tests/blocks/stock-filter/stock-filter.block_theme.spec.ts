@@ -96,7 +96,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const automaticBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		expect( automaticBaseline ).not.toHaveLength( 0 );
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
 
 		await page.getByText( 'Out of Stock' ).click();
 		await expect( page ).toHaveURL(
@@ -133,7 +137,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		expect( deferredBaseline ).not.toHaveLength( 0 );
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
 		const deferredUrl = page.url();
 
 		await outOfStockFilter.click();

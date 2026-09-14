@@ -199,7 +199,11 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 
 		await expect( productTitles.first() ).toBeVisible();
-		expect( await productTitles.allTextContents() ).not.toHaveLength( 0 );
+		// See the note on the other baselines: more than one product, so the test
+		// cannot pass against a shop page that was already filtered.
+		expect(
+			( await productTitles.allTextContents() ).length
+		).toBeGreaterThan( 1 );
 
 		// The price filter input is initially enabled, but it becomes disabled
 		// for the time it takes to fetch the data. To avoid setting the filter
@@ -276,7 +280,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 
 		await expect( productTitles.first() ).toBeVisible();
-		expect( await productTitles.allTextContents() ).not.toHaveLength( 0 );
+		// See the note on the other baselines: more than one product, so the test
+		// cannot pass against a shop page that was already filtered.
+		expect(
+			( await productTitles.allTextContents() ).length
+		).toBeGreaterThan( 1 );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -312,7 +320,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const automaticBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		expect( automaticBaseline ).not.toHaveLength( 0 );
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -355,7 +367,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
-		expect( deferredBaseline ).not.toHaveLength( 0 );
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
 		const deferredUrl = page.url();
 
 		await deferredMaxPriceInput.dblclick();
