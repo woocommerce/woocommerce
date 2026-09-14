@@ -122,7 +122,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return;
 		}
 
-		$this->process( $order_id );
+		$this->process( (int) $order_id );
 	}
 
 	/**
