@@ -41,27 +41,37 @@ pnpm --filter @woocommerce/plugin-woocommerce watch:build:project:settings-dataf
 
 These commands also run as part of Core's full build and watch commands. They link the package's `build/` directory to Core's asset directory, so the native `wp-build` watcher updates Core directly. Run `pnpm build` to restore local output. Stop any active watcher before switching between local and Core output. Restart the watcher after changing package metadata or `tsconfig.json`.
 
-The page is implemented in `routes/settings/stage.tsx`, using [`Page` from `@wordpress/admin-ui`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-admin-ui/) for its title, subtitle, and content spacing. It edits the store address and currency options from General settings. Runtime dependencies are declared in `routes/settings/package.json`.
-
-The Page header provides section navigation and compact Discard changes and Save changes actions. Navigation follows the labeled groups in the form configuration (Store address and Currency options by default). Switching sections preserves edits; validation and saving cover the whole form. This configuration requires `@wordpress/admin-ui` 2.10.0, pinned in this package and its settings route.
+The page is implemented in `routes/settings/stage.tsx`, using `Page` from `@wordpress/admin-ui` for its title, subtitle, and content spacing. It edits product settings and provides Discard changes and Save changes actions. Runtime dependencies are declared in `routes/settings/package.json`.
 
 ## Data and form configuration
 
-The router's `beforeLoad` registers the core-data entity `woo_settings/product` with `baseURL: '/wc/v4/settings/general'` and `key: 'id'`. Its `loader` preloads settings and View Config in parallel before the stage renders. The router and stage share entity and query constants from `routes/settings/constants.ts`, so `useEntityRecords` reads the preloaded values and available country/state and currency options from the same core-data cache. Request errors remain available to the stage's error and retry UI. `editEntityRecord` stores edits, and `getEditedEntityRecord` supplies the form values. Save calls `saveEditedEntityRecord` for each setting; core-data skips unchanged records and manages requests, persisted values, saving state, and errors. Failed updates remain editable. Discard restores each entity’s persisted value through `editEntityRecord`.
+The router registers the core-data singleton entity `woo_settings/product` with `baseURL: '/wc/v4/settings/products'` and `key: false`. Its loader preloads the settings record; the stage loads the layout through `useViewConfig`. All entity selectors and actions omit the record ID, using the constants in `routes/settings/constants.ts`.
 
-The layout comes from [`useViewConfig`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-views/) in `@wordpress/views`, using the entity key `kind: 'woo_settings'` and `name: 'product'`. `VIEW_CONFIG_FIELDS = [ 'form' ]` requests only the DataForm configuration through WordPress's core-data store. The `default_view` and `default_layouts` properties apply to DataViews lists and are not needed here. The View Config uses the same entity key as the settings records; the data and save endpoints remain General settings.
+The endpoint returns a flat object keyed by setting ID:
 
-The package's [`ViewConfig` class](packages/settings-ui/src/ViewConfig.php) provides the Store address and Currency options sections through the [View Config API](https://developer.wordpress.org/block-editor/reference-guides/view-config-reference/) filter `get_entity_view_config_woo_settings_product`. It receives a `WP_View_Config_Data` container and calls `merge( $patch, 1 )` to contribute the form using configuration schema version 1. Additional callbacks can customize the layout through the same filter and must return the container. The router continues to register the client-side data entity.
+```json
+{
+  "woocommerce_manage_stock": true,
+  "woocommerce_weight_unit": "kg",
+  "woocommerce_hold_stock_minutes": 60
+}
+```
 
-Core loads the PHP configuration on `init`, including REST requests, when `wp_get_entity_view_config()` is available. The API is documented as introduced in WordPress 7.1.0; earlier runtimes retain the client fallback. After `init`, retrieve the configuration with `wp_get_entity_view_config( 'woo_settings', 'product' )`, or request `/wp/v2/view-config?kind=woo_settings&name=product` through the authenticated REST API. This configuration contains field layout metadata; setting values and saves continue to use WooCommerce's settings endpoint and its permissions.
+`getEditedEntityRecord` supplies this object directly to DataForm. Values retain their boolean, numeric, string, or array types. `editEntityRecord` applies field edits to the singleton, and `saveEditedEntityRecord` sends the changed properties in one request to the same endpoint. Dirty state, saving state, and errors belong to that single record. Discard restores its persisted values. Failed saves keep the edits available for another attempt.
 
-When the endpoint reports a missing route/entity, or its form has no fields, the page uses `DEFAULT_FORM` from `stage.tsx`. Keep that fallback aligned with the PHP form when changing the default layout. Loading and error states use the matching core-data resolution; retry invalidates the settings and View Config resolutions before requesting them again. The WordPress/Gutenberg runtime must support `useViewConfig` and its `fields` argument.
+The package's [`ViewConfig` class](packages/settings-ui/src/ViewConfig.php) contributes the Shop pages, Measurements, Reviews, and Inventory groups through `get_entity_view_config_woo_settings_product`. It calls `WP_View_Config_Data::merge( $patch, 1 )` with the DataForm layout. The client requests only `form` through `useViewConfig`; field definitions remain in `packages/settings-ui/fields/product/`. Only registered fields with values in the settings response are passed to DataForm.
 
-Field definitions stay in the client; View Config controls grouping, order, and layout. Only supported settings returned by the WooCommerce API are rendered. Unknown field IDs and empty groups are removed. Permission and other request errors are shown with a retry action, rather than treated as missing configuration.
+Core loads the PHP configuration on `init`, including REST requests, when `wp_get_entity_view_config()` is available. The WordPress/Gutenberg runtime must support View Config and `useViewConfig` with its `fields` argument. The page shows a loading indicator while data is resolving and displays settings or View Config request errors.
+
+## Compatibility
+
+The products endpoint now returns setting values directly, replacing the previous `{ id, title, description, values, groups }` envelope. Consumers must read the response itself instead of `response.values` and obtain field definitions and layout separately. Both flat update bodies and the existing `{ "values": { ... } }` update format are accepted; both return the flat response. Other v4 settings endpoints retain their existing formats.
+
+Settings remain site-scoped through the existing option storage and permission checks. This change introduces no network options or new URL construction. Multisite behavior has not been tested.
 
 ## Verification
 
-Run `pnpm lint:types` and `pnpm build:core` from this package. In the Settings DataForm page, verify that editing enables Save changes, Discard changes restores the saved values, and a negative number of decimals prevents saving. Save a temporary address-line change, reload to verify persistence, then restore the original value.
+Run `pnpm lint:types` and `pnpm build:core` from this package. In the Settings DataForm page, verify that editing a checkbox, weight unit, or stock threshold enables Save changes, and that Discard changes restores the saved values. Save two edits together and confirm there is one update request to `/wc/v4/settings/products`, then reload to verify persistence and restore the original values. A negative stock threshold should prevent saving. A failed save should display an error and retain the edits.
 
 ## WordPress menu
 

@@ -2,13 +2,12 @@ export const SETTINGS_ENTITY = {
 	kind: 'woo_settings',
 	name: 'product',
 	baseURL: '/wc/v4/settings/products',
-	key: 'id',
+	key: false,
 };
-export const SETTINGS_QUERY = { per_page: -1 };
 export const SETTINGS_ARGS = [
 	SETTINGS_ENTITY.kind,
 	SETTINGS_ENTITY.name,
-	SETTINGS_QUERY,
+	undefined,
 ] as const;
 
 export const VIEW_CONFIG_FIELDS = [ 'form' ];

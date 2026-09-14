@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { Page } from '@wordpress/admin-ui';
-import { Button, Notice } from '@wordpress/components';
-import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
+import { Button, Notice, Spinner } from '@wordpress/components';
+import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import type { Field, Form } from '@wordpress/dataviews';
@@ -17,18 +17,12 @@ import { useId, useMemo } from 'react';
  */
 import {
 	SETTINGS_ENTITY,
-	SETTINGS_QUERY,
 	SETTINGS_ARGS,
 	VIEW_CONFIG_FIELDS,
 	VIEW_CONFIG_ARGS,
 } from './constants';
+import type { Settings } from './types';
 import { unlock } from './unlock';
-
-type Settings = Record< string, string >;
-type Setting = {
-	id: string;
-	value: string;
-};
 
 const { kind, name } = SETTINGS_ENTITY;
 
@@ -37,76 +31,52 @@ function SettingsForm( {
 	fields,
 	form,
 }: {
-	settings: Setting[];
+	settings: Settings;
 	fields: Field< Settings >[];
 	form: Form;
 } ) {
 	const formId = useId();
 	const { editEntityRecord, saveEditedEntityRecord } =
 		useDispatch( coreStore );
-	const { data, isDirty, isSaving, saveError } = useSelect(
-		( select ) => {
-			const {
-				getEditedEntityRecord,
-				hasEditsForEntityRecord,
-				isSavingEntityRecord,
-				getLastEntitySaveError,
-			} = select( coreStore );
+	const { data, isDirty, isSaving, saveError } = useSelect( ( select ) => {
+		const {
+			getEditedEntityRecord,
+			hasEditsForEntityRecord,
+			isSavingEntityRecord,
+			getLastEntitySaveError,
+		} = select( coreStore );
 
-			return {
-				data: Object.fromEntries(
-					settings.map( ( { id } ) => [
-						id,
-						String( getEditedEntityRecord( kind, name, id ).value ),
-					] )
-				) as Settings,
-				isDirty: settings.some( ( { id } ) =>
-					hasEditsForEntityRecord( kind, name, id )
-				),
-				isSaving: settings.some( ( { id } ) =>
-					isSavingEntityRecord( kind, name, id )
-				),
-				saveError: settings
-					.map( ( { id } ) =>
-						getLastEntitySaveError( kind, name, id )
-					)
-					.find( Boolean ),
-			};
-		},
-		[ settings ]
-	);
+		return {
+			data: getEditedEntityRecord( kind, name, undefined ) as Settings,
+			isDirty: hasEditsForEntityRecord( kind, name, undefined ),
+			isSaving: isSavingEntityRecord( kind, name, undefined ),
+			saveError: getLastEntitySaveError( kind, name, undefined ),
+		};
+	}, [] );
 	const { validity, isValid } = useFormValidity( data, fields, form );
 
 	const onChange = ( edits: Partial< Settings > ) => {
 		if ( isSaving ) {
 			return;
 		}
-		Object.entries( edits ).forEach( ( [ id, value ] ) => {
-			void editEntityRecord( kind, name, id, { value } );
-		} );
+		void editEntityRecord( kind, name, undefined, edits );
 	};
 	const onDiscard = () => {
-		onChange(
-			Object.fromEntries(
-				settings.map( ( { id, value } ) => [ id, value ] )
-			)
-		);
+		onChange( settings );
 	};
 	const onSave = () => {
 		if ( isSaving || ! isDirty || ! isValid ) {
 			return;
 		}
-		settings.forEach( ( { id } ) => {
-			void saveEditedEntityRecord( kind, name, id );
-		} );
+		void saveEditedEntityRecord( kind, name, undefined );
 	};
 
 	return (
 		<Page
 			className="wc-settings-dataform"
-			title={ __( 'General settings', 'woocommerce' ) }
+			title={ __( 'Product settings', 'woocommerce' ) }
 			subTitle={ __(
-				'Manage your store address and currency.',
+				'Manage your shop pages, measurements, reviews, and inventory.',
 				'woocommerce'
 			) }
 			showSidebarToggle={ false }
@@ -146,13 +116,27 @@ function SettingsForm( {
 					width: '100%',
 				} }
 			>
-				<DataForm
-					data={ data }
-					fields={ fields }
-					form={ form }
-					validity={ validity }
-					onChange={ onChange }
-				/>
+				{ saveError && (
+					<Notice status="error" isDismissible={ false }>
+						{ saveError.message ||
+							__( 'Unable to save settings.', 'woocommerce' ) }
+					</Notice>
+				) }
+				<form
+					id={ formId }
+					onSubmit={ ( event ) => {
+						event.preventDefault();
+						onSave();
+					} }
+				>
+					<DataForm
+						data={ data }
+						fields={ fields }
+						form={ form }
+						validity={ validity }
+						onChange={ onChange }
+					/>
+				</form>
 			</div>
 		</Page>
 	);
@@ -164,38 +148,58 @@ function SettingsStage() {
 		name,
 		fields: VIEW_CONFIG_FIELDS,
 	} );
-	const { records } = useEntityRecords< Setting >(
-		kind,
-		name,
-		SETTINGS_QUERY
+	const { record, hasResolved, fields, loadError } = useSelect(
+		( select ) => {
+			const {
+				getEntityRecord,
+				hasFinishedResolution,
+				getResolutionError,
+			} = select( coreStore );
+			return {
+				record: getEntityRecord( ...SETTINGS_ARGS ) as
+					| Settings
+					| undefined,
+				hasResolved: hasFinishedResolution(
+					'getEntityRecord',
+					SETTINGS_ARGS
+				),
+				fields: unlock( select( editorStore ) ).getEntityFields(
+					kind,
+					name
+				) as Field< Settings >[],
+				loadError:
+					getResolutionError( 'getEntityRecord', SETTINGS_ARGS ) ||
+					getResolutionError( 'getViewConfig', VIEW_CONFIG_ARGS ),
+			};
+		},
+		[]
 	);
-	const { fields, loadError } = useSelect( ( select ) => {
-		const { getResolutionError } = select( coreStore );
-		return {
-			fields: unlock( select( editorStore ) ).getEntityFields(
-				kind,
-				name
-			) as Field< Settings >[],
-			loadError:
-				getResolutionError( 'getEntityRecords', SETTINGS_ARGS ) ||
-				getResolutionError( 'getViewConfig', VIEW_CONFIG_ARGS ),
-		};
-	}, [] );
-	const settings = useMemo(
+	const availableFields = useMemo(
 		() =>
-			records?.filter( ( { id } ) =>
-				fields.some( ( field ) => field.id === id )
-			) ?? [],
-		[ records, fields ]
+			fields.filter( ( { id } ) =>
+				Object.prototype.hasOwnProperty.call( record ?? {}, id )
+			),
+		[ record, fields ]
 	);
 
-	console.log( fields, form );
+	if ( loadError ) {
+		return (
+			<Notice status="error" isDismissible={ false }>
+				{ loadError.message ||
+					__( 'Unable to load settings.', 'woocommerce' ) }
+			</Notice>
+		);
+	}
+
+	if ( ! hasResolved || ! record || ! form ) {
+		return <Spinner />;
+	}
 
 	return (
 		<SettingsForm
-			settings={ settings }
-			fields={ fields }
-			form={ form ?? {} }
+			settings={ record }
+			fields={ availableFields }
+			form={ form }
 		/>
 	);
 }

@@ -8,7 +8,7 @@ import '../../packages/settings-ui/fields/product';
 /**
  * Internal dependencies
  */
-import { SETTINGS_ENTITY, SETTINGS_ARGS, VIEW_CONFIG_ARGS } from './constants';
+import { SETTINGS_ENTITY, SETTINGS_ARGS } from './constants';
 import { stage } from './stage';
 
 export const route = {
@@ -16,13 +16,10 @@ export const route = {
 		await dispatch( coreStore ).addEntities( [ SETTINGS_ENTITY ] );
 	},
 	loader: async () => {
-		const { getEntityRecords, getViewConfig } = resolveSelect( coreStore );
+		const { getEntityRecord } = resolveSelect( coreStore );
 
 		// Let the stage handle request errors and missing form configuration.
-		await Promise.allSettled( [
-			getEntityRecords( ...SETTINGS_ARGS ),
-			// getViewConfig( ...VIEW_CONFIG_ARGS ),
-		] );
+		await Promise.allSettled( [ getEntityRecord( ...SETTINGS_ARGS ) ] );
 	},
 	stage,
 };
