@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Align behavour of `wc_get_orders` when querying unknown statuses between CPT and HPOS stores - return empty list.
+`order.updated` webhook should be triggered when refund is deleted on an order.
