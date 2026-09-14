@@ -3,38 +3,10 @@
  */
 import {
 	TemplateCompiler,
+	getProductAttributeIds,
 	test as base,
 	expect,
-	wpCLI,
 } from '@woocommerce/e2e-utils';
-
-const getColorAttributeId = async () => {
-	const { stdout } = await wpCLI(
-		'wc product_attribute list --format=json --user=1'
-	);
-	const firstBracket = stdout.indexOf( '[' );
-	const lastBracket = stdout.lastIndexOf( ']' );
-
-	if ( firstBracket < 0 || lastBracket <= firstBracket ) {
-		throw new Error( 'Product attribute CLI output did not contain JSON.' );
-	}
-
-	const attributes = JSON.parse(
-		stdout.slice( firstBracket, lastBracket + 1 )
-	) as Array< { id: number | string; name: string; slug: string } >;
-	const colorAttributes = attributes.filter(
-		( attribute ) =>
-			attribute.name === 'Color' && attribute.slug === 'pa_color'
-	);
-
-	expect( colorAttributes ).toHaveLength( 1 );
-	const attributeId = Number( colorAttributes[ 0 ].id );
-	expect( Number.isSafeInteger( attributeId ) && attributeId > 0 ).toBe(
-		true
-	);
-
-	return attributeId;
-};
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
@@ -219,7 +191,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 	test.describe( 'Overlay', () => {
 		test.beforeEach( async ( { templateCompiler, page } ) => {
-			const colorAttributeId = await getColorAttributeId();
+			const { colorAttributeId } = await getProductAttributeIds();
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: colorAttributeId,
@@ -343,7 +315,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const templateCompiler = await requestUtils.createTemplateFromFile(
 				'archive-product_multiple-product-filters'
 			);
-			const colorAttributeId = await getColorAttributeId();
+			const { colorAttributeId } = await getProductAttributeIds();
 
 			await templateCompiler.compile( {
 				attributes: {
