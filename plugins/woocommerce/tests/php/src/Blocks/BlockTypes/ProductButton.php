@@ -67,7 +67,7 @@ class ProductButton extends \WP_UnitTestCase {
 		$product          = WC_Helper_Product::create_simple_product(
 			true,
 			array(
-				'name'          => 'Slice 071 Filtered Product Button',
+				'name'          => 'Product Button add-to-cart text fixture',
 				'regular_price' => '10',
 			)
 		);
@@ -137,7 +137,7 @@ class ProductButton extends \WP_UnitTestCase {
 		$product               = WC_Helper_Product::create_simple_product(
 			true,
 			array(
-				'name'          => 'Slice 071 Script Product Button',
+				'name'          => 'Product Button script policy fixture',
 				'regular_price' => '10',
 			)
 		);
