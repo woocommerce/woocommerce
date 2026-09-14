@@ -232,6 +232,19 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Breadcrumb structured data decodes HTML entities in crumb names.
+	 */
+	public function test_breadcrumb_data_decodes_html_entities(): void {
+		$breadcrumbs = new WC_Breadcrumb();
+		$breadcrumbs->add_crumb( 'A Smart Girl&#8217;s Guide', home_url() );
+
+		$this->structured_data->generate_breadcrumblist_data( $breadcrumbs );
+
+		$data = $this->structured_data->get_data();
+		$this->assertSame( 'A Smart Girl’s Guide', $data[0]['itemListElement'][0]['item']['name'], 'Breadcrumb names should contain decoded characters.' );
+	}
+
+	/**
 	 * @testdox Order structured data looks up the product image with an integer attachment ID.
 	 */
 	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
