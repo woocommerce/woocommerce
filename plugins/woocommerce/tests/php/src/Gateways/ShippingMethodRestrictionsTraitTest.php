@@ -3,11 +3,13 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Gateways;
 
+use WC_Cache_Helper;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
+use WC_Helper_Product;
+use WC_Helper_Shipping;
 use WC_Payment_Gateway;
-use WC_Shipping_Rate;
 use WC_Shipping_Zone;
 use WC_Unit_Test_Case;
 
@@ -17,26 +19,59 @@ use WC_Unit_Test_Case;
 class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 
 	/**
-	 * The real cart, restored after each test.
+	 * Shipping zone matching the test customer's address.
 	 *
-	 * @var mixed
+	 * @var WC_Shipping_Zone
 	 */
-	private $original_cart;
+	private $zone;
 
 	/**
-	 * Set up test fixtures.
+	 * Canonical rate ids ("method_id:instance_id") of the zone's methods, keyed by a symbolic name.
+	 *
+	 * @var array<string, string>
+	 */
+	private $rate_ids = array();
+
+	/**
+	 * Shipping enabled state before the test.
+	 *
+	 * @var bool
+	 */
+	private $shipping_was_enabled;
+
+	/**
+	 * Set up a zone with several shipping methods so the real cart can resolve chosen rates.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_cart = WC()->cart;
+
+		$this->shipping_was_enabled = WC()->shipping()->enabled;
+		WC()->shipping()->enabled   = true;
+		WC_Helper_Shipping::force_customer_us_address();
+
+		$this->zone = new WC_Shipping_Zone();
+		$this->zone->set_zone_name( 'Restrictions zone' );
+		$this->zone->add_location( 'US', 'country' );
+		$this->zone->save();
+
+		$this->rate_ids = array(
+			'flat_rate_a'   => 'flat_rate:' . $this->zone->add_shipping_method( 'flat_rate' ),
+			'flat_rate_b'   => 'flat_rate:' . $this->zone->add_shipping_method( 'flat_rate' ),
+			'free_shipping' => 'free_shipping:' . $this->zone->add_shipping_method( 'free_shipping' ),
+		);
+
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
 	}
 
 	/**
-	 * Tear down test fixtures.
+	 * Restore the state the base test case does not reset; the zone itself is rolled back with the database transaction.
 	 */
 	public function tearDown(): void {
 		try {
-			WC()->cart = $this->original_cart;
+			WC()->session->set( 'chosen_shipping_methods', null );
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->enabled = $this->shipping_was_enabled;
 		} finally {
 			parent::tearDown();
 		}
@@ -83,7 +118,7 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 				'title'   => 'Offline payment',
 			)
 		);
-		$this->fake_cart( array( $this->create_rate( 'free_shipping', 3 ) ) );
+		$this->fill_cart( 'free_shipping' );
 
 		$this->assertSame( array(), $gateway->enable_for_methods, 'No shipping method restriction should be applied' );
 		$this->assertTrue( $gateway->enable_for_virtual, 'Virtual orders should be accepted' );
@@ -94,21 +129,20 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	 * @testdox Should only be available when a selected shipping method matches the restriction.
 	 * @dataProvider availability_scenarios
 	 *
-	 * @param array  $enable_for_methods Restriction saved in the settings.
-	 * @param string $method_id          Selected shipping method id.
-	 * @param int    $instance_id        Selected shipping method instance id.
+	 * @param array  $enable_for_methods Restriction saved in the settings, as symbolic rate names or bare method ids.
+	 * @param string $chosen_rate        Symbolic name of the shipping rate selected in the cart.
 	 * @param bool   $expected           Expected availability.
 	 */
-	public function test_is_available_respects_shipping_method_restrictions( array $enable_for_methods, string $method_id, int $instance_id, bool $expected ): void {
+	public function test_is_available_respects_shipping_method_restrictions( array $enable_for_methods, string $chosen_rate, bool $expected ): void {
 		$gateway = $this->create_gateway(
 			WC_Gateway_BACS::class,
 			array(
 				'enabled'            => 'yes',
-				'enable_for_methods' => $enable_for_methods,
+				'enable_for_methods' => array_map( array( $this, 'resolve_rate_id' ), $enable_for_methods ),
 				'enable_for_virtual' => 'yes',
 			)
 		);
-		$this->fake_cart( array( $this->create_rate( $method_id, $instance_id ) ) );
+		$this->fill_cart( $chosen_rate );
 
 		$this->assertSame( $expected, $gateway->is_available() );
 	}
@@ -116,15 +150,17 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for the shipping method restriction scenarios.
 	 *
+	 * Rates are named symbolically because the zone's instance ids are only known once it is created in setUp().
+	 *
 	 * @return array
 	 */
 	public function availability_scenarios(): array {
 		return array(
-			'matching instance'          => array( array( 'flat_rate:1' ), 'flat_rate', 1, true ),
-			'other instance'             => array( array( 'flat_rate:1' ), 'flat_rate', 2, false ),
-			'other method'               => array( array( 'flat_rate:1' ), 'free_shipping', 1, false ),
-			'any instance of the method' => array( array( 'flat_rate' ), 'flat_rate', 7, true ),
-			'one of several'             => array( array( 'local_pickup:4', 'flat_rate:1' ), 'flat_rate', 1, true ),
+			'matching instance'          => array( array( 'flat_rate_a' ), 'flat_rate_a', true ),
+			'other instance'             => array( array( 'flat_rate_a' ), 'flat_rate_b', false ),
+			'other method'               => array( array( 'flat_rate_a' ), 'free_shipping', false ),
+			'any instance of the method' => array( array( 'flat_rate' ), 'flat_rate_b', true ),
+			'one of several'             => array( array( 'free_shipping', 'flat_rate_a' ), 'flat_rate_a', true ),
 		);
 	}
 
@@ -141,11 +177,11 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 			WC_Gateway_Cheque::class,
 			array(
 				'enabled'            => 'yes',
-				'enable_for_methods' => array( 'flat_rate:1' ),
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
 				'enable_for_virtual' => $enable_for_virtual,
 			)
 		);
-		$this->fake_cart( array(), false );
+		$this->fill_cart( null );
 
 		$this->assertSame( $expected, $gateway->is_available() );
 	}
@@ -158,10 +194,19 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_available_returns_false_when_disabled( string $gateway_class ): void {
 		$gateway = $this->create_gateway( $gateway_class, array( 'enabled' => 'no' ) );
-		$cart    = $this->fake_cart( array( $this->create_rate( 'flat_rate', 1 ) ) );
+		$this->fill_cart( 'flat_rate_a' );
+
+		$needs_shipping_calls = 0;
+		add_filter(
+			'woocommerce_cart_needs_shipping',
+			function ( $needs_shipping ) use ( &$needs_shipping_calls ) {
+				++$needs_shipping_calls;
+				return $needs_shipping;
+			}
+		);
 
 		$this->assertFalse( $gateway->is_available() );
-		$this->assertSame( 0, $cart->needs_shipping_call_count, 'The cart should not be queried for disabled gateways' );
+		$this->assertSame( 0, $needs_shipping_calls, 'The cart should not be queried for disabled gateways' );
 	}
 
 	/**
@@ -192,13 +237,8 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	 * @testdox Should share the shipping method options between gateways for the rest of the request and refresh them when a zone changes.
 	 */
 	public function test_shipping_method_options_are_cached_per_request_and_invalidated_on_zone_change(): void {
-		$zone = new WC_Shipping_Zone();
-		$zone->set_zone_name( 'Cached zone' );
-		$zone->save();
-		$instance_id = $zone->add_shipping_method( 'flat_rate' );
-
 		$cod_options = ( new WC_Gateway_COD() )->get_shipping_method_options();
-		$this->assertArrayHasKey( 'flat_rate:' . $instance_id, $cod_options['Flat rate'] );
+		$this->assertArrayHasKey( $this->rate_ids['flat_rate_a'], $cod_options['Flat rate'] );
 
 		$zone_query_count = 0;
 		$count_queries    = function ( $query ) use ( &$zone_query_count ) {
@@ -218,9 +258,9 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 		$this->assertSame( $cod_options, $bacs_options );
 		$this->assertSame( 0, $zone_query_count, 'Another gateway should reuse the options loaded earlier in the request' );
 
-		$new_instance_id = $zone->add_shipping_method( 'free_shipping' );
+		$new_instance_id = $this->zone->add_shipping_method( 'local_pickup' );
 
-		$this->assertArrayHasKey( 'free_shipping:' . $new_instance_id, ( new WC_Gateway_Cheque() )->get_shipping_method_options()['Free shipping'], 'Changing a zone should refresh the options' );
+		$this->assertArrayHasKey( 'local_pickup:' . $new_instance_id, ( new WC_Gateway_Cheque() )->get_shipping_method_options()['Local pickup'], 'Changing a zone should refresh the options' );
 	}
 
 	/**
@@ -237,84 +277,46 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a shipping rate for the given method and instance.
+	 * Translate a symbolic rate name from the data providers into the zone's real rate id.
 	 *
-	 * @param string $method_id   Shipping method id.
-	 * @param int    $instance_id Shipping method instance id.
-	 * @return WC_Shipping_Rate
+	 * Bare method ids such as "flat_rate" (any instance) are passed through unchanged.
+	 *
+	 * @param string $name Symbolic rate name or method id.
+	 * @return string
 	 */
-	private function create_rate( string $method_id, int $instance_id ): WC_Shipping_Rate {
-		return new WC_Shipping_Rate( "$method_id:$instance_id", 'Shipping', 10, array(), $method_id, $instance_id );
+	private function resolve_rate_id( string $name ): string {
+		return $this->rate_ids[ $name ] ?? $name;
 	}
 
 	/**
-	 * Replace WC()->cart with a minimal fake exposing the selected shipping methods.
+	 * Put a product in the real cart and select a shipping rate for it.
 	 *
-	 * @param WC_Shipping_Rate[] $shipping_methods Selected shipping methods.
-	 * @param bool               $needs_shipping   Whether the cart needs shipping.
-	 * @return object The fake cart.
+	 * @param string|null $chosen_rate Symbolic name of the rate to select, or null for a virtual-only cart that needs no shipping.
 	 */
-	private function fake_cart( array $shipping_methods, bool $needs_shipping = true ) {
-		WC()->cart = new class( $shipping_methods, $needs_shipping ) {
-			/**
-			 * Cart total, read by WC_Payment_Gateway::get_order_total().
-			 *
-			 * @var float
-			 */
-			public $total = 10.0;
+	private function fill_cart( ?string $chosen_rate ): void {
+		WC()->cart->empty_cart();
 
-			/**
-			 * Number of times needs_shipping() was called.
-			 *
-			 * @var int
-			 */
-			public $needs_shipping_call_count = 0;
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => null === $chosen_rate ) );
+		WC()->cart->add_to_cart( $product->get_id() );
 
-			/**
-			 * Selected shipping methods.
-			 *
-			 * @var WC_Shipping_Rate[]
-			 */
-			private $shipping_methods;
+		if ( null === $chosen_rate ) {
+			WC()->cart->calculate_totals();
+			$this->assertFalse( WC()->cart->needs_shipping(), 'Precondition: a virtual-only cart should not need shipping' );
+			return;
+		}
 
-			/**
-			 * Whether the cart needs shipping.
-			 *
-			 * @var bool
-			 */
-			private $needs_shipping;
+		WC()->session->set( 'chosen_shipping_methods', array( $this->rate_ids[ $chosen_rate ] ) );
+		WC()->cart->calculate_totals();
 
-			/**
-			 * Constructor.
-			 *
-			 * @param WC_Shipping_Rate[] $shipping_methods Selected shipping methods.
-			 * @param bool               $needs_shipping   Whether the cart needs shipping.
-			 */
-			public function __construct( array $shipping_methods, bool $needs_shipping ) {
-				$this->shipping_methods = $shipping_methods;
-				$this->needs_shipping   = $needs_shipping;
-			}
-
-			/**
-			 * Whether the cart needs shipping.
-			 *
-			 * @return bool
-			 */
-			public function needs_shipping(): bool {
-				++$this->needs_shipping_call_count;
-				return $this->needs_shipping;
-			}
-
-			/**
-			 * Selected shipping methods.
-			 *
-			 * @return WC_Shipping_Rate[]
-			 */
-			public function get_shipping_methods(): array {
-				return $this->shipping_methods;
-			}
-		};
-
-		return WC()->cart;
+		$this->assertSame(
+			array( $this->rate_ids[ $chosen_rate ] ),
+			array_map(
+				function ( $rate ) {
+					return $rate->get_id();
+				},
+				array_values( WC()->cart->get_shipping_methods() )
+			),
+			'Precondition: the real cart should resolve the chosen shipping rate'
+		);
 	}
 }
