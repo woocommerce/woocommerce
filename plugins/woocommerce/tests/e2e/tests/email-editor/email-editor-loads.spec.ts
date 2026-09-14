@@ -165,11 +165,16 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			page.getByRole( 'button', { name: 'Save', exact: true } )
 		).toBeVisible();
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
-		// The editor writes every announcement into this one region, so match the
-		// save announcement inside it rather than requiring it to be the only one.
-		await expect( page.locator( '#a11y-speak-polite' ) ).toContainText(
-			'Email saved.'
-		);
+		// Assert the snackbar, not the a11y live region. @wordpress/a11y's speak()
+		// clears every .a11y-speak-region before writing, so announcements replace
+		// rather than accumulate: the region holds exactly one message, and any
+		// later announcement during the save wipes this one. The snackbar carries
+		// the same rewritten notice text and stays on screen.
+		await expect(
+			page
+				.locator( '.components-snackbar' )
+				.filter( { hasText: 'Email saved.' } )
+		).toBeVisible();
 		await expect(
 			page
 				.locator( 'iframe[name="editor-canvas"]' )
