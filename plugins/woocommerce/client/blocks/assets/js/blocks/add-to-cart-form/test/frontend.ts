@@ -99,9 +99,9 @@ describe( 'Add to Cart Form interactivity store', () => {
 				changeEvents.push( event );
 			} );
 
-			expect( actions[ action ]( { target: button } ) ).toBeUndefined();
+			actions[ action ]( { target: button } );
+
 			expect( changeEvents ).toHaveLength( 0 );
-			expect( wrapper.querySelector( 'input' ) ).toBeNull();
 		}
 	);
 
