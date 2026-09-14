@@ -577,8 +577,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$this->orders[] = $order;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
-		$previous_post = $_POST;
-		$_POST         = array(
+		$_POST = array(
 			'order_status'      => 'wc-' . $status,
 			'_payment_method'   => $order->get_payment_method(),
 			'customer_user'     => 0,
@@ -587,13 +586,9 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 			'order_date_minute' => '14',
 			'order_date_second' => '15',
 		);
-
-		try {
-			WC_Meta_Box_Order_Data::save( $order->get_id() );
-		} finally {
-			$_POST = $previous_post;
-		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		WC_Meta_Box_Order_Data::save( $order->get_id() );
 
 		$saved_order = wc_get_order( $order->get_id() );
 		if ( ! $saved_order instanceof WC_Order ) {

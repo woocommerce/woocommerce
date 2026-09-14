@@ -1427,173 +1427,127 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Calculating line taxes persists the tax class, rate, and totals for each supported product type.
 	 */
 	public function test_calc_line_taxes_persists_multiple_tax_classes(): void {
-		$missing_option          = new stdClass();
-		$original_calc_taxes     = get_option( 'woocommerce_calc_taxes', $missing_option );
-		$original_prices_include = get_option( 'woocommerce_prices_include_tax', $missing_option );
-		$original_tax_based_on   = get_option( 'woocommerce_tax_based_on', $missing_option );
-		$suffix                  = strtolower( wp_generate_password( 8, false, false ) );
-		$class_definitions       = array(
+		$suffix            = strtolower( wp_generate_password( 8, false, false ) );
+		$class_definitions = array(
 			array( "Ajax order ten {$suffix}", "ajax-order-ten-{$suffix}", '10', "Ajax order Ten {$suffix}" ),
 			array( "Ajax order twenty {$suffix}", "ajax-order-twenty-{$suffix}", '20', "Ajax order Twenty {$suffix}" ),
 			array( "Ajax order thirty {$suffix}", "ajax-order-thirty-{$suffix}", '30', "Ajax order Thirty {$suffix}" ),
 		);
-		$tax_classes             = array();
-		$tax_rate_ids            = array();
-		$order                   = false;
-		$simple_product          = false;
-		$variable_product        = false;
-		$variation               = false;
-		$external_product        = false;
+		$tax_classes       = array();
+		$tax_rate_ids      = array();
 
-		try {
-			update_option( 'woocommerce_calc_taxes', 'yes' );
-			update_option( 'woocommerce_prices_include_tax', 'no' );
-			update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
 
-			foreach ( $class_definitions as $definition ) {
-				$tax_class = WC_Tax::create_tax_class( $definition[0], $definition[1] );
-				if ( is_wp_error( $tax_class ) ) {
-					throw new RuntimeException( $tax_class->get_error_message() );
-				}
-				$tax_classes[] = $tax_class['slug'];
-				$tax_rate_id   = WC_Tax::_insert_tax_rate(
-					array(
-						'tax_rate_country'  => 'US',
-						'tax_rate_state'    => 'CA',
-						'tax_rate'          => $definition[2],
-						'tax_rate_name'     => $definition[3],
-						'tax_rate_priority' => 1,
-						'tax_rate_compound' => 0,
-						'tax_rate_shipping' => 0,
-						'tax_rate_order'    => 1,
-						'tax_rate_class'    => $tax_class['slug'],
-					)
-				);
-				if ( ! $tax_rate_id ) {
-					throw new RuntimeException( 'Could not create the tax-rate fixture.' );
-				}
-				$tax_rate_ids[] = $tax_rate_id;
+		foreach ( $class_definitions as $definition ) {
+			$tax_class = WC_Tax::create_tax_class( $definition[0], $definition[1] );
+			if ( is_wp_error( $tax_class ) ) {
+				throw new RuntimeException( esc_html( $tax_class->get_error_message() ) );
 			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-
-			$simple_product = WC_Helper_Product::create_simple_product();
-			$simple_product->set_regular_price( '100' );
-			$simple_product->set_tax_class( $tax_classes[0] );
-			$simple_product->save();
-
-			$variable_product = new WC_Product_Variable();
-			$variable_product->set_name( 'Ajax order taxed variable parent' );
-			$variable_product->save();
-			$variation = new WC_Product_Variation();
-			$variation->set_parent_id( $variable_product->get_id() );
-			$variation->set_regular_price( '100' );
-			$variation->set_tax_class( $tax_classes[1] );
-			$variation->save();
-
-			$external_product = WC_Helper_Product::create_external_product();
-			$external_product->set_regular_price( '100' );
-			$external_product->set_tax_class( $tax_classes[2] );
-			$external_product->save();
-
-			$order = wc_create_order();
-			if ( is_wp_error( $order ) ) {
-				throw new RuntimeException( 'Could not create the empty taxed order fixture.' );
-			}
-			$order->set_shipping_country( 'GB' );
-			$order->add_product( $simple_product, 1 );
-			$order->add_product( $variation, 1 );
-			$order->add_product( $external_product, 1 );
-			$order->save();
-
-			$serialized_items = array(
-				'order_item_id'        => array(),
-				'order_item_name'      => array(),
-				'order_item_qty'       => array(),
-				'order_item_tax_class' => array(),
-				'line_subtotal'        => array(),
-				'line_total'           => array(),
-			);
-			foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
-				$serialized_items['order_item_id'][]                  = $item_id;
-				$serialized_items['order_item_name'][ $item_id ]      = $item->get_name();
-				$serialized_items['order_item_qty'][ $item_id ]       = 1;
-				$serialized_items['order_item_tax_class'][ $item_id ] = $item->get_tax_class();
-				$serialized_items['line_subtotal'][ $item_id ]        = '100';
-				$serialized_items['line_total'][ $item_id ]           = '100';
-			}
-
-			$taxes_controller = wc_get_container()->get( TaxesController::class );
-			$taxes_controller->calc_line_taxes(
+			$tax_classes[] = $tax_class['slug'];
+			$tax_rate_id   = WC_Tax::_insert_tax_rate(
 				array(
-					'order_id' => $order->get_id(),
-					'items'    => http_build_query( $serialized_items ),
-					'country'  => 'US',
-					'state'    => 'CA',
-					'postcode' => '90210',
-					'city'     => 'Beverly Hills',
+					'tax_rate_country'  => 'US',
+					'tax_rate_state'    => 'CA',
+					'tax_rate'          => $definition[2],
+					'tax_rate_name'     => $definition[3],
+					'tax_rate_priority' => 1,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 0,
+					'tax_rate_order'    => 1,
+					'tax_rate_class'    => $tax_class['slug'],
 				)
 			);
-
-			$fresh_order = wc_get_order( $order->get_id() );
-			if ( ! $fresh_order instanceof WC_Order ) {
-				throw new RuntimeException( 'Could not reload the taxed order fixture.' );
+			if ( ! $tax_rate_id ) {
+				throw new RuntimeException( 'Could not create the tax-rate fixture.' );
 			}
-			$fresh_items  = array_values( $fresh_order->get_items( 'line_item' ) );
-			$expected_tax = array( 10.0, 20.0, 30.0 );
-			$this->assertCount( 3, $fresh_items );
-
-			foreach ( $fresh_items as $index => $item ) {
-				$taxes = $item->get_taxes();
-				$this->assertSame( $tax_classes[ $index ], $item->get_tax_class() );
-				$this->assertSame( array( $tax_rate_ids[ $index ] ), array_map( 'intval', array_keys( $taxes['total'] ) ) );
-				$this->assertSame( $expected_tax[ $index ], (float) current( $taxes['total'] ) );
-			}
-
-			$tax_items = array_values( $fresh_order->get_items( 'tax' ) );
-			$this->assertCount( 3, $tax_items );
-			foreach ( $tax_items as $index => $tax_item ) {
-				$this->assertSame( $tax_rate_ids[ $index ], $tax_item->get_rate_id() );
-				$this->assertSame( $class_definitions[ $index ][3], $tax_item->get_label() );
-				$this->assertSame( $expected_tax[ $index ], (float) $tax_item->get_tax_total() );
-			}
-			$this->assertSame( 60.0, (float) $fresh_order->get_total_tax() );
-			$this->assertSame( 360.0, (float) $fresh_order->get_total() );
-		} finally {
-			if ( $order instanceof WC_Order ) {
-				$order->delete( true );
-			}
-			if ( $variation instanceof WC_Product ) {
-				$variation->delete( true );
-			}
-			foreach ( array( $variable_product, $external_product, $simple_product ) as $product ) {
-				if ( $product instanceof WC_Product ) {
-					$product->delete( true );
-				}
-			}
-			foreach ( $tax_rate_ids as $tax_rate_id ) {
-				WC_Tax::_delete_tax_rate( $tax_rate_id );
-			}
-			foreach ( $tax_classes as $tax_class ) {
-				WC_Tax::delete_tax_class_by( 'slug', $tax_class );
-			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-
-			if ( $missing_option === $original_calc_taxes ) {
-				delete_option( 'woocommerce_calc_taxes' );
-			} else {
-				update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			}
-			if ( $missing_option === $original_prices_include ) {
-				delete_option( 'woocommerce_prices_include_tax' );
-			} else {
-				update_option( 'woocommerce_prices_include_tax', $original_prices_include );
-			}
-			if ( $missing_option === $original_tax_based_on ) {
-				delete_option( 'woocommerce_tax_based_on' );
-			} else {
-				update_option( 'woocommerce_tax_based_on', $original_tax_based_on );
-			}
+			$tax_rate_ids[] = $tax_rate_id;
 		}
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$simple_product->set_regular_price( '100' );
+		$simple_product->set_tax_class( $tax_classes[0] );
+		$simple_product->save();
+
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Ajax order taxed variable parent' );
+		$variable_product->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_regular_price( '100' );
+		$variation->set_tax_class( $tax_classes[1] );
+		$variation->save();
+
+		$external_product = WC_Helper_Product::create_external_product();
+		$external_product->set_regular_price( '100' );
+		$external_product->set_tax_class( $tax_classes[2] );
+		$external_product->save();
+
+		$order = wc_create_order();
+		if ( is_wp_error( $order ) ) {
+			throw new RuntimeException( 'Could not create the empty taxed order fixture.' );
+		}
+		$order->set_shipping_country( 'GB' );
+		$order->add_product( $simple_product, 1 );
+		$order->add_product( $variation, 1 );
+		$order->add_product( $external_product, 1 );
+		$order->save();
+
+		$serialized_items = array(
+			'order_item_id'        => array(),
+			'order_item_name'      => array(),
+			'order_item_qty'       => array(),
+			'order_item_tax_class' => array(),
+			'line_subtotal'        => array(),
+			'line_total'           => array(),
+		);
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			$serialized_items['order_item_id'][]                  = $item_id;
+			$serialized_items['order_item_name'][ $item_id ]      = $item->get_name();
+			$serialized_items['order_item_qty'][ $item_id ]       = 1;
+			$serialized_items['order_item_tax_class'][ $item_id ] = $item->get_tax_class();
+			$serialized_items['line_subtotal'][ $item_id ]        = '100';
+			$serialized_items['line_total'][ $item_id ]           = '100';
+		}
+
+		$taxes_controller = wc_get_container()->get( TaxesController::class );
+		$taxes_controller->calc_line_taxes(
+			array(
+				'order_id' => $order->get_id(),
+				'items'    => http_build_query( $serialized_items ),
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '90210',
+				'city'     => 'Beverly Hills',
+			)
+		);
+
+		$fresh_order = wc_get_order( $order->get_id() );
+		if ( ! $fresh_order instanceof WC_Order ) {
+			throw new RuntimeException( 'Could not reload the taxed order fixture.' );
+		}
+		$fresh_items  = array_values( $fresh_order->get_items( 'line_item' ) );
+		$expected_tax = array( 10.0, 20.0, 30.0 );
+		$this->assertCount( 3, $fresh_items );
+
+		foreach ( $fresh_items as $index => $item ) {
+			$taxes = $item->get_taxes();
+			$this->assertSame( $tax_classes[ $index ], $item->get_tax_class() );
+			$this->assertSame( array( $tax_rate_ids[ $index ] ), array_map( 'intval', array_keys( $taxes['total'] ) ) );
+			$this->assertSame( $expected_tax[ $index ], (float) current( $taxes['total'] ) );
+		}
+
+		$tax_items = array_values( $fresh_order->get_items( 'tax' ) );
+		$this->assertCount( 3, $tax_items );
+		foreach ( $tax_items as $index => $tax_item ) {
+			$this->assertSame( $tax_rate_ids[ $index ], $tax_item->get_rate_id() );
+			$this->assertSame( $class_definitions[ $index ][3], $tax_item->get_label() );
+			$this->assertSame( $expected_tax[ $index ], (float) $tax_item->get_tax_total() );
+		}
+		$this->assertSame( 60.0, (float) $fresh_order->get_total_tax() );
+		$this->assertSame( 360.0, (float) $fresh_order->get_total() );
 	}
 
 	/**
@@ -1717,9 +1671,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 		$legacy_proxy->reset();
 
-		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before installing a real nonce.
-		$original_request   = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test snapshots request state before installing a real nonce.
-		$original_user_id   = get_current_user_id();
 		$customer_id        = 0;
 		$is_member_of_blog  = true;
 		$is_multisite       = false;
@@ -1801,12 +1752,9 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$response             = $this->do_ajax( 'woocommerce_get_customer_details' );
 			$this->assertNull( $response, 'Customers outside the current multisite blog must remain inaccessible.' );
 		} finally {
-			$_POST    = $original_post;
-			$_REQUEST = $original_request;
-			wp_set_current_user( $original_user_id );
+			// The container keeps the mocked functions; nothing else here outlives
+			// the transaction rollback and the hook restore in tear_down().
 			$legacy_proxy->reset();
-			$customer->delete( true );
-			wp_delete_user( $administrator_user );
 		}
 	}
 
@@ -1814,10 +1762,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Registered Add Order Item AJAX persists every supported product type and its quantities.
 	 */
 	public function test_add_order_item_via_ajax_persists_supported_product_types(): void {
-		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before installing a real nonce.
-		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test snapshots request state before installing a real nonce.
-		$original_user_id = get_current_user_id();
-		$order            = wc_create_order();
+		$order = wc_create_order();
 		if ( is_wp_error( $order ) ) {
 			throw new RuntimeException( 'Could not create the empty order fixture.' );
 		}
@@ -1844,64 +1789,52 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			array( $external_product, 5, ProductType::EXTERNAL ),
 		);
 
-		try {
-			$this->_setRole( 'administrator' );
-			$request_data = array(
-				'security' => wp_create_nonce( 'order-item' ),
-				'order_id' => $order->get_id(),
-				'items'    => '',
-				'data'     => array_map(
-					static fn ( array $row ): array => array(
-						'id'  => $row[0]->get_id(),
-						'qty' => $row[1],
-					),
-					$products
+		$this->_setRole( 'administrator' );
+		$request_data = array(
+			'security' => wp_create_nonce( 'order-item' ),
+			'order_id' => $order->get_id(),
+			'items'    => '',
+			'data'     => array_map(
+				static fn ( array $row ): array => array(
+					'id'  => $row[0]->get_id(),
+					'qty' => $row[1],
 				),
-			);
-			$_POST        = $request_data;
-			$_REQUEST     = $request_data;
+				$products
+			),
+		);
+		$_POST        = $request_data;
+		$_REQUEST     = $request_data;
 
-			$response = $this->do_ajax( 'woocommerce_add_order_item' );
-			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+		$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
 
-			$fresh_order = wc_get_order( $order->get_id() );
-			if ( ! $fresh_order instanceof WC_Order ) {
-				throw new RuntimeException( 'Could not reload the order-item fixture.' );
+		$fresh_order = wc_get_order( $order->get_id() );
+		if ( ! $fresh_order instanceof WC_Order ) {
+			throw new RuntimeException( 'Could not reload the order-item fixture.' );
+		}
+		$items = array_values( $fresh_order->get_items( 'line_item' ) );
+		$this->assertCount( 4, $items );
+
+		foreach ( $products as $index => $expected ) {
+			list( $product, $quantity, $product_type ) = $expected;
+			$item                                      = $items[ $index ];
+
+			$this->assertSame( $quantity, $item->get_quantity() );
+			$this->assertSame( $product_type, $item->get_product()->get_type() );
+			if ( ProductType::VARIATION === $product_type ) {
+				$this->assertSame( $variable_product->get_id(), $item->get_product_id() );
+				$this->assertSame( $variation->get_id(), $item->get_variation_id() );
+			} else {
+				$this->assertSame( $product->get_id(), $item->get_product_id() );
+				$this->assertSame( 0, $item->get_variation_id() );
 			}
-			$items = array_values( $fresh_order->get_items( 'line_item' ) );
-			$this->assertCount( 4, $items );
+		}
 
-			foreach ( $products as $index => $expected ) {
-				list( $product, $quantity, $product_type ) = $expected;
-				$item                                      = $items[ $index ];
-
-				$this->assertSame( $quantity, $item->get_quantity() );
-				$this->assertSame( $product_type, $item->get_product()->get_type() );
-				if ( ProductType::VARIATION === $product_type ) {
-					$this->assertSame( $variable_product->get_id(), $item->get_product_id() );
-					$this->assertSame( $variation->get_id(), $item->get_variation_id() );
-				} else {
-					$this->assertSame( $product->get_id(), $item->get_product_id() );
-					$this->assertSame( 0, $item->get_variation_id() );
-				}
-			}
-
-			$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-			$this->assertNotEmpty( $notes, 'Adding line items should create an order update note.' );
-			$this->assertStringContainsString( 'Added line items:', $notes[0]->content );
-			foreach ( $products as $expected ) {
-				$this->assertStringContainsString( $expected[0]->get_name(), $notes[0]->content );
-			}
-		} finally {
-			$_POST    = $original_post;
-			$_REQUEST = $original_request;
-			wp_set_current_user( $original_user_id );
-			$order->delete( true );
-			$variation->delete( true );
-			$variable_product->delete( true );
-			$grouped_product->delete( true );
-			$external_product->delete( true );
-			$simple_product->delete( true );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertNotEmpty( $notes, 'Adding line items should create an order update note.' );
+		$this->assertStringContainsString( 'Added line items:', $notes[0]->content );
+		foreach ( $products as $expected ) {
+			$this->assertStringContainsString( $expected[0]->get_name(), $notes[0]->content );
 		}
 	}
 
@@ -1909,14 +1842,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Registered Remove Order Coupon AJAX removes the coupon, recalculates totals, and records its internal note.
 	 */
 	public function test_remove_order_coupon(): void {
-		$original_post             = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test snapshots request state before installing a real nonce.
-		$original_request          = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test snapshots request state before installing a real nonce.
-		$original_user_id          = get_current_user_id();
-		$original_last_response    = $this->_last_response;
 		$output_buffering_level    = ob_get_level();
-		$product                   = null;
-		$coupon                    = null;
-		$order                     = null;
 		$coupon_code               = 'remove-coupon-' . wp_rand( 1000, 9999 );
 		$product_name              = 'Coupon Removal Product';
 		$expected_removal_note     = sprintf( 'Coupon removed: "%s".', $coupon_code );
@@ -1982,26 +1908,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertCount( 1, $removal_notes, 'Removing the coupon should create one exact removal note.' );
 			$this->assertSame( 0, (int) $removal_notes[0]->customer_note, 'The coupon-removal note should remain internal.' );
 		} finally {
-			$_POST                = $original_post;
-			$_REQUEST             = $original_request;
-			$this->_last_response = $original_last_response;
-			wp_set_current_user( $original_user_id );
-
+			// Output buffering is process state, so a die handler that unwinds mid-render
+			// would otherwise leave the level where the next test inherits it.
 			while ( ob_get_level() > $output_buffering_level ) {
 				ob_end_clean();
 			}
 			while ( ob_get_level() < $output_buffering_level ) {
 				ob_start();
-			}
-
-			if ( $order instanceof WC_Order ) {
-				$order->delete( true );
-			}
-			if ( $coupon instanceof WC_Coupon ) {
-				$coupon->delete( true );
-			}
-			if ( $product instanceof WC_Product ) {
-				$product->delete( true );
 			}
 		}
 	}
