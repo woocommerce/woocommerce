@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use WC_Unit_Test_Case;
-use WP_Hook;
 
 /**
  * Tests for the archive Product Collection hook compatibility layer.
@@ -34,13 +33,6 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 		'render_block',
 		'woocommerce_disable_compatibility_layer',
 	);
-
-	/**
-	 * Hook stacks captured before each test.
-	 *
-	 * @var array<string, WP_Hook|null>
-	 */
-	private $hook_snapshots = array();
 
 	/**
 	 * Action counts captured before each test.
@@ -77,12 +69,6 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
 
-		foreach ( self::COMPATIBILITY_HOOKS as $hook_name ) {
-			$this->hook_snapshots[ $hook_name ] = isset( $GLOBALS['wp_filter'][ $hook_name ] ) && $GLOBALS['wp_filter'][ $hook_name ] instanceof WP_Hook
-				? clone $GLOBALS['wp_filter'][ $hook_name ]
-				: null;
-		}
-
 		foreach ( array_slice( self::COMPATIBILITY_HOOKS, 0, 11 ) as $hook_name ) {
 			$this->action_snapshots[ $hook_name ] = array_key_exists( $hook_name, $GLOBALS['wp_actions'] ) ? $GLOBALS['wp_actions'][ $hook_name ] : null;
 		}
@@ -99,14 +85,6 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	 * @inheritdoc
 	 */
 	public function tearDown(): void {
-		foreach ( $this->hook_snapshots as $hook_name => $snapshot ) {
-			if ( $snapshot instanceof WP_Hook ) {
-				$GLOBALS['wp_filter'][ $hook_name ] = clone $snapshot; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test hook stack.
-			} else {
-				unset( $GLOBALS['wp_filter'][ $hook_name ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Remove callbacks installed by the compatibility layer or test.
-			}
-		}
-
 		foreach ( $this->action_snapshots as $hook_name => $snapshot ) {
 			if ( null === $snapshot ) {
 				unset( $GLOBALS['wp_actions'][ $hook_name ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore prior absence of the action counter.
