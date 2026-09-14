@@ -149,6 +149,19 @@ const test = baseTest.extend( {
 	},
 } );
 
+// This describe carries `tags.HPOS`, and the `e2e-hpos-disabled` project greps on that tag
+// with `DISABLE_HPOS=1` set. So these titles also run against legacy post storage, where
+// `admin.php?page=wc-orders` is not registered and the editor lives under `post.php`.
+const newOrderUrl = () =>
+	process.env.DISABLE_HPOS === '1'
+		? 'wp-admin/post-new.php?post_type=shop_order'
+		: 'wp-admin/admin.php?page=wc-orders&action=new';
+
+const editOrderUrl = ( orderId: number | string ) =>
+	process.env.DISABLE_HPOS === '1'
+		? `wp-admin/post.php?post=${ orderId }&action=edit`
+		: `wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`;
+
 test.describe(
 	'WooCommerce Orders > Add new order',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
@@ -195,7 +208,7 @@ test.describe(
 			page,
 			simpleProduct,
 		} ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+			await page.goto( newOrderUrl() );
 
 			// Open the Add products modal.
 			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
@@ -257,7 +270,7 @@ test.describe(
 			customer,
 			order,
 		} ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+			await page.goto( newOrderUrl() );
 			order.id = await getOrderIdFromPage( page );
 
 			// Select customer
@@ -311,9 +324,7 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Create' } ).click();
 			await expect( page.getByText( 'Order updated' ) ).toBeVisible();
 
-			await page.goto(
-				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
-			);
+			await page.goto( editOrderUrl( order.id ) );
 			await expect( page.locator( '#_billing_address_1' ) ).toHaveValue(
 				'124 Fake St'
 			);
