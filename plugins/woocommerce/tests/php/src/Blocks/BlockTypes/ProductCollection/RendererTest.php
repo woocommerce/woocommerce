@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Renderer;
 use WC_Unit_Test_Case;
-use WP_Hook;
 
 /**
  * Tests for the Product Collection render lifecycle.
@@ -29,7 +28,6 @@ class RendererTest extends WC_Unit_Test_Case {
 	 * @testdox Should reset result and No Results state between Product Collection renders.
 	 */
 	public function test_resets_render_state_between_collections(): void {
-		$hook_snapshots = $this->snapshot_render_hooks();
 		$global_product = $GLOBALS['product'] ?? null;
 		$had_product    = array_key_exists( 'product', $GLOBALS );
 
@@ -91,7 +89,6 @@ class RendererTest extends WC_Unit_Test_Case {
 				'A later populated collection should render after the empty and No Results cases.'
 			);
 		} finally {
-			$this->restore_render_hooks( $hook_snapshots );
 			if ( $had_product ) {
 				$GLOBALS['product'] = $global_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact product global captured before rendering.
 			} else {
@@ -104,7 +101,6 @@ class RendererTest extends WC_Unit_Test_Case {
 	 * @testdox Should add one render event initializer to each Product Collection.
 	 */
 	public function test_adds_one_render_event_init_per_collection(): void {
-		$hook_snapshots      = $this->snapshot_render_hooks();
 		$script_module_id    = 'woocommerce/product-collection';
 		$module_was_enqueued = in_array( $script_module_id, wp_script_modules()->get_queue(), true );
 
@@ -177,38 +173,10 @@ class RendererTest extends WC_Unit_Test_Case {
 				'Non-Product Collection markup should remain byte-identical.'
 			);
 		} finally {
-			$this->restore_render_hooks( $hook_snapshots );
+			// The script-module queue is the only thing here the base class does not
+			// reset; _restore_hooks() rewinds every RENDER_HOOKS stack on its own.
 			if ( ! $module_was_enqueued ) {
 				wp_dequeue_script_module( $script_module_id );
-			}
-		}
-	}
-
-	/**
-	 * Snapshot the hook stacks touched by the renderer constructor.
-	 *
-	 * @return array<string, WP_Hook|null>
-	 */
-	private function snapshot_render_hooks(): array {
-		$snapshots = array();
-		foreach ( self::RENDER_HOOKS as $hook_name ) {
-			$snapshots[ $hook_name ] = isset( $GLOBALS['wp_filter'][ $hook_name ] ) ? clone $GLOBALS['wp_filter'][ $hook_name ] : null;
-		}
-
-		return $snapshots;
-	}
-
-	/**
-	 * Restore the exact hook stacks captured before rendering.
-	 *
-	 * @param array<string, WP_Hook|null> $snapshots Hook snapshots.
-	 */
-	private function restore_render_hooks( array $snapshots ): void {
-		foreach ( $snapshots as $hook_name => $snapshot ) {
-			if ( $snapshot instanceof WP_Hook ) {
-				$GLOBALS['wp_filter'][ $hook_name ] = clone $snapshot; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact hook stack captured before rendering.
-			} else {
-				unset( $GLOBALS['wp_filter'][ $hook_name ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Remove callbacks registered by the test renderer.
 			}
 		}
 	}
