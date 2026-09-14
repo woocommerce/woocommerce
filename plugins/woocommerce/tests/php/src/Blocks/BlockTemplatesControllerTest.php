@@ -423,6 +423,12 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 		$this->assertSame( $type, $template->type );
 		$this->assertSame( 'custom', $template->source );
 		$this->assertSame( 'publish', $template->status );
+		// The fixtures are created with post_title set to the slug, which is exactly
+		// the case update_template_data() rewrites back to the canonical title. Without
+		// this, deleting that branch leaves every assertion here green -- and keeping
+		// customised templates from losing their name is what issue 42221 was about,
+		// which the deleted E2E titles cited by name.
+		$this->assertSame( BlockTemplateUtils::get_block_template_title( $template->slug ), $template->title );
 	}
 
 	/**

@@ -79,17 +79,16 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 		$template = new ProductSearchResultsTemplate();
 		$template->init();
 
+		// go_to() on its own does not produce a product-search query -- the archive
+		// flags come back false -- so the shape has to be built by hand. Nothing below
+		// asserts these values back: that would just restate the arrangement. The
+		// hierarchy assertion is the test.
 		$this->go_to( '/?s=hoodie&post_type=product' );
 		$GLOBALS['wp_query']->set( 'post_type', 'product' );
 		$GLOBALS['wp_query']->is_search            = true;
 		$GLOBALS['wp_query']->is_post_type_archive = true;
 		$GLOBALS['wp_query']->is_archive           = true;
 		$GLOBALS['wp_query']->is_404               = false;
-		$this->assertTrue( is_search(), 'The request must be a search.' );
-		$this->assertSame( 'product', get_query_var( 'post_type' ), 'The request must carry the product post type.' );
-		$this->assertNotNull( get_post_type_object( get_query_var( 'post_type' ) ), 'The product post type must be registered.' );
-		$this->assertTrue( $GLOBALS['wp_query']->is_post_type_archive, 'The current global query must be an archive.' );
-		$this->assertTrue( is_post_type_archive( 'product' ), 'The request must target the product archive.' );
 
 		$this->assertSame(
 			array( 'product-search-results', 'search.php', 'index.php' ),
