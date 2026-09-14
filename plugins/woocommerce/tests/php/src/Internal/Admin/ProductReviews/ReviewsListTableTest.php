@@ -1901,24 +1901,17 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_per_page_uses_dedicated_user_option(): void {
-		$previous_user_id = get_current_user_id();
-		$user_id          = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
 
 		wp_set_current_user( $user_id );
 		update_user_option( $user_id, Reviews::PER_PAGE_USER_OPTION_KEY, 55 );
 		update_user_option( $user_id, 'edit_comments_per_page', 35 );
 
-		try {
-			$list_table = $this->get_reviews_list_table();
-			$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
-			$method->setAccessible( true );
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method->setAccessible( true );
 
-			$this->assertSame( 55, $method->invoke( $list_table ) );
-		} finally {
-			delete_user_option( $user_id, Reviews::PER_PAGE_USER_OPTION_KEY );
-			delete_user_option( $user_id, 'edit_comments_per_page' );
-			wp_set_current_user( $previous_user_id );
-		}
+		$this->assertSame( 55, $method->invoke( $list_table ) );
 	}
 
 	/**
