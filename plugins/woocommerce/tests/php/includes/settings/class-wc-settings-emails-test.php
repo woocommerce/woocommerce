@@ -194,79 +194,41 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox A single email preview renders its exact type, content settings, URL, and sender values.
 	 */
 	public function test_email_preview_single_contract(): void {
-		$option_names        = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address' );
-		$previous            = array();
-		$previous_transients = array();
+		update_option( 'woocommerce_email_from_name', 'Woo Test Store' );
+		update_option( 'woocommerce_email_from_address', 'orders@example.com' );
 
-		foreach ( $option_names as $option_name ) {
-			$previous[ $option_name ] = get_option( $option_name, null );
-		}
-		foreach ( EmailPreview::get_all_email_setting_ids() as $transient_name ) {
-			$previous_transients[ $transient_name ] = array(
-				'value'   => get_option( '_transient_' . $transient_name, false ),
-				'timeout' => get_option( '_transient_timeout_' . $transient_name, false ),
-			);
-		}
+		$email = WC_Emails::instance()->get_emails()[ WC_Email_Customer_Processing_Order::class ];
 
+		ob_start();
 		try {
-			update_option( 'woocommerce_email_from_name', 'Woo Test Store' );
-			update_option( 'woocommerce_email_from_address', 'orders@example.com' );
-
-			$email = WC_Emails::instance()->get_emails()[ WC_Email_Customer_Processing_Order::class ];
-
-			ob_start();
-			try {
-				( new WC_Settings_Emails() )->email_preview_single( $email );
-				$output = (string) ob_get_contents();
-			} finally {
-				ob_end_clean();
-			}
-
-			$document = $this->load_html_document( $output );
-			$mount    = $this->get_element_by_id( $document, 'wc_settings_email_preview_slotfill' );
-
-			$this->assertSame(
-				array(
-					array(
-						'label' => $email->get_title(),
-						'value' => WC_Email_Customer_Processing_Order::class,
-					),
-				),
-				json_decode( $mount->getAttribute( 'data-email-types' ), true )
-			);
-			$this->assertSame(
-				EmailPreview::get_email_content_setting_ids( $email->id ),
-				json_decode( $mount->getAttribute( 'data-email-setting-ids' ), true )
-			);
-			$this->assertSame(
-				html_entity_decode( wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ),
-				$mount->getAttribute( 'data-preview-url' )
-			);
-			$this->assertSame( 'Woo Test Store', $this->get_element_by_id( $document, 'woocommerce_email_from_name' )->getAttribute( 'value' ) );
-			$this->assertSame( 'orders@example.com', $this->get_element_by_id( $document, 'woocommerce_email_from_address' )->getAttribute( 'value' ) );
+			( new WC_Settings_Emails() )->email_preview_single( $email );
+			$output = (string) ob_get_contents();
 		} finally {
-			foreach ( $previous_transients as $transient_name => $transient ) {
-				delete_transient( $transient_name );
-				if ( false !== $transient['value'] ) {
-					add_option(
-						'_transient_' . $transient_name,
-						$transient['value'],
-						'',
-						false === $transient['timeout']
-					);
-				}
-				if ( false !== $transient['timeout'] ) {
-					add_option( '_transient_timeout_' . $transient_name, $transient['timeout'], '', false );
-				}
-			}
-			foreach ( $previous as $option_name => $value ) {
-				if ( null === $value ) {
-					delete_option( $option_name );
-				} else {
-					update_option( $option_name, $value );
-				}
-			}
+			ob_end_clean();
 		}
+
+		$document = $this->load_html_document( $output );
+		$mount    = $this->get_element_by_id( $document, 'wc_settings_email_preview_slotfill' );
+
+		$this->assertSame(
+			array(
+				array(
+					'label' => $email->get_title(),
+					'value' => WC_Email_Customer_Processing_Order::class,
+				),
+			),
+			json_decode( $mount->getAttribute( 'data-email-types' ), true )
+		);
+		$this->assertSame(
+			EmailPreview::get_email_content_setting_ids( $email->id ),
+			json_decode( $mount->getAttribute( 'data-email-setting-ids' ), true )
+		);
+		$this->assertSame(
+			html_entity_decode( wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ),
+			$mount->getAttribute( 'data-preview-url' )
+		);
+		$this->assertSame( 'Woo Test Store', $this->get_element_by_id( $document, 'woocommerce_email_from_name' )->getAttribute( 'value' ) );
+		$this->assertSame( 'orders@example.com', $this->get_element_by_id( $document, 'woocommerce_email_from_address' )->getAttribute( 'value' ) );
 	}
 
 	/**
