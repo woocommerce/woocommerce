@@ -157,6 +157,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Number of orders product appeared in.', 'woocommerce' ),
 				),
+				'last_sold'     => array(
+					'type'        => array( 'string', 'null' ),
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Date the product was last sold in the requested period, or null when it sold nothing.', 'woocommerce' ),
+				),
 				'extended_info' => array(
 					'name'             => array(
 						'type'        => 'string',
@@ -218,6 +224,12 @@ class Controller extends GenericController implements ExportableInterface {
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Product SKU.', 'woocommerce' ),
 					),
+					'total_sales'      => array(
+						'type'        => 'integer',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Lifetime quantity of the product sold, across all dates.', 'woocommerce' ),
+					),
 				),
 			),
 		);
@@ -241,6 +253,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'product_name',
 				'variations',
 				'sku',
+				'last_sold',
 			)
 		);
 		$params['categories']      = array(
@@ -275,6 +288,13 @@ class Controller extends GenericController implements ExportableInterface {
 		$params['search']        = ProductSearchQuery::get_collection_param();
 		$params['extended_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['unsold']        = array(
+			'description'       => __( 'Limit result to products with no sales in the requested period.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -326,6 +346,8 @@ class Controller extends GenericController implements ExportableInterface {
 			'items_sold'   => __( 'Items sold', 'woocommerce' ),
 			'net_revenue'  => __( 'N. Revenue', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
+			'last_sold'    => __( 'Last sold', 'woocommerce' ),
+			'total_sales'  => __( 'Lifetime sales', 'woocommerce' ),
 			'product_cat'  => __( 'Category', 'woocommerce' ),
 			'variations'   => __( 'Variations', 'woocommerce' ),
 		);
@@ -360,6 +382,8 @@ class Controller extends GenericController implements ExportableInterface {
 			'items_sold'   => $item['items_sold'],
 			'net_revenue'  => $item['net_revenue'],
 			'orders_count' => $item['orders_count'],
+			'last_sold'    => isset( $item['last_sold'] ) ? $item['last_sold'] : '',
+			'total_sales'  => isset( $item['extended_info']['total_sales'] ) ? $item['extended_info']['total_sales'] : 0,
 			'product_cat'  => $this->get_categories( $item['extended_info']['category_ids'] ),
 			'variations'   => isset( $item['extended_info']['variations'] ) ? count( $item['extended_info']['variations'] ) : 0,
 		);
