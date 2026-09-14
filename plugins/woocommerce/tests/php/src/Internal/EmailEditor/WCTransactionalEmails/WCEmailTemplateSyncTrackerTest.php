@@ -366,8 +366,23 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		// Positive control. Every assertion below is an absence, and the backfill has
+		// several early returns -- no eligible posts, an empty registry, the sweep's
+		// own completion guard -- any of which would leave all of them green while
+		// nothing ran at all. A mapped post in the same run has to come out stamped.
+		$mapped_post_id = $this->generate_stamped_post( 'wc_test_tracker_unmapped_control' );
+		foreach ( $this->get_sync_meta_keys() as $meta_key ) {
+			delete_post_meta( $mapped_post_id, $meta_key );
+		}
+
 		WCEmailTemplateSyncBackfill::run();
 		WCEmailTemplateDivergenceDetector::run_sweep();
+
+		$this->assertNotSame(
+			'',
+			(string) get_post_meta( $mapped_post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'The mapped control post must be processed, or the assertions below prove nothing.'
+		);
 
 		foreach ( $this->get_sync_meta_keys() as $meta_key ) {
 			$this->assertFalse( metadata_exists( 'post', $post_id, $meta_key ), "Unmapped posts must not receive `{$meta_key}`." );
