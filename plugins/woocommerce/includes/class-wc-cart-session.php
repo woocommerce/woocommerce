@@ -736,7 +736,7 @@ final class WC_Cart_Session {
 
 		// Don't cleanup if user just removed an item (undo link is being displayed).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['removed_item'] ) ) {
+		if ( isset( $_GET['remove_item'] ) || isset( $_GET['removed_item'] ) ) {
 			return;
 		}
 
