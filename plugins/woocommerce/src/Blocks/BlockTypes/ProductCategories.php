@@ -150,6 +150,8 @@ class ProductCategories extends AbstractDynamicBlock {
 		 * Filters the `get_terms()` arguments used by the Product Categories List block.
 		 * Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output.
 		 * The `taxonomy` and `fields` arguments are reset after filtering, and a non-array return value is ignored.
+		 * `hide_empty` only works one way: a callback can hide empty categories, but `hide_empty => false` cannot show them while the block's own empty-category setting is off.
+		 * `get => 'all'` and a positive `parent` both drop `child_of`, which changes what children-only mode renders.
 		 *
 		 * @since 11.2.0
 		 *
