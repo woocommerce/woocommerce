@@ -242,12 +242,16 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Bulk Edit updates only selected products, including prices and stock.
+	 * @testdox Bulk Edit applies percentage price and stock changes to each edited product.
+	 *
+	 * Deliberately not a "leaves unselected products alone" test. Selection happens in
+	 * core's bulk-edit loop over $_REQUEST['post'], which calls the WooCommerce handler
+	 * once per selected post; this test drives that handler directly, so an untouched
+	 * third product would only ever read back the values the test itself wrote.
 	 */
-	public function test_bulk_edit_updates_selected_products_and_preserves_unselected_product(): void {
-		$first_product      = WC_Helper_Product::create_simple_product();
-		$second_product     = WC_Helper_Product::create_simple_product();
-		$unselected_product = WC_Helper_Product::create_simple_product();
+	public function test_bulk_edit_applies_percentage_price_and_stock_changes(): void {
+		$first_product  = WC_Helper_Product::create_simple_product();
+		$second_product = WC_Helper_Product::create_simple_product();
 
 		$first_product->set_regular_price( '100' );
 		$first_product->set_sale_price( '80' );
@@ -260,12 +264,6 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$second_product->set_manage_stock( true );
 		$second_product->set_stock_quantity( 4 );
 		$second_product->save();
-
-		$unselected_product->set_regular_price( '55' );
-		$unselected_product->set_sale_price( '45' );
-		$unselected_product->set_manage_stock( true );
-		$unselected_product->set_stock_quantity( 7 );
-		$unselected_product->save();
 
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
@@ -284,7 +282,6 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 
 		$this->assert_product_prices_and_stock( $first_product->get_id(), '110', '99', 20 );
 		$this->assert_product_prices_and_stock( $second_product->get_id(), '13.57', '12.21', 14 );
-		$this->assert_product_prices_and_stock( $unselected_product->get_id(), '55', '45', 7 );
 	}
 
 	/**
