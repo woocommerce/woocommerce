@@ -36,10 +36,12 @@ export function useCoverImage(
 			? bindings.url
 			: undefined;
 	const image = metadata?.[ IMAGE_KEY ] || previousBinding?.args;
+	// A preserved custom attachment wins; otherwise follow the category's current image.
 	const id =
 		image?.attachmentId ||
 		( category && getCategoryImageId( category ) ) ||
 		0;
+	// Fetch attachment details only when we need a particular size or a custom attachment.
 	const media = useSelect(
 		( select ) =>
 			id && ( image?.size || image?.attachmentId )
@@ -59,18 +61,34 @@ export function useCoverImage(
 		) {
 			return;
 		}
-		const nextBindings = { ...bindings };
-		for ( const key of [ 'id', 'url' ] ) {
-			if ( nextBindings[ key ]?.source === 'woocommerce/term-image' ) {
-				delete nextBindings[ key ];
-			}
-		}
-		const nextMetadata = { ...metadata, bindings: nextBindings };
-		if ( ! Object.keys( nextBindings ).length ) {
-			delete nextMetadata.bindings;
-		}
+		const {
+			bindings: savedBindings,
+			[ IMAGE_KEY ]: managedImage,
+			...otherMetadata
+		} = metadata;
+		const {
+			id: idBinding,
+			url: urlBinding,
+			...otherBindings
+		} = savedBindings || {};
+		const nextBindings = {
+			...otherBindings,
+			...( idBinding && idBinding.source !== 'woocommerce/term-image'
+				? { id: idBinding }
+				: {} ),
+			...( urlBinding && urlBinding.source !== 'woocommerce/term-image'
+				? { url: urlBinding }
+				: {} ),
+		};
+		const nextMetadata = {
+			...otherMetadata,
+			...( Object.keys( nextBindings ).length
+				? { bindings: nextBindings }
+				: {} ),
+		};
+		// Different from our last image means the user replaced it directly in Cover.
 		const overridden =
-			metadata?.[ IMAGE_KEY ] &&
+			managedImage &&
 			( ( attributes.id || 0 ) !== ( image.id || 0 ) ||
 				( attributes.url || '' ) !== ( image.url || '' ) );
 		if (
@@ -82,7 +100,6 @@ export function useCoverImage(
 			nextBindings.url ||
 			nextBindings.__default
 		) {
-			delete nextMetadata[ IMAGE_KEY ];
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
 				metadata: nextMetadata,
@@ -93,6 +110,7 @@ export function useCoverImage(
 			} );
 			return;
 		}
+		// Attachment details are still loading. Keep the current image until they arrive.
 		if (
 			id &&
 			( image?.size || image?.attachmentId ) &&
@@ -122,13 +140,15 @@ export function useCoverImage(
 			attributes.url !== url ||
 			attributes.className !== className
 		) {
-			nextMetadata[ IMAGE_KEY ] = { ...image, id, url };
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
 				id: id || undefined,
 				url,
 				className,
-				metadata: nextMetadata,
+				metadata: {
+					...nextMetadata,
+					[ IMAGE_KEY ]: { ...image, id, url },
+				},
 			} );
 		}
 	}, [
