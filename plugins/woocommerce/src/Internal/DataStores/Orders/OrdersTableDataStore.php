@@ -2931,6 +2931,31 @@ FROM $order_meta_table
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
 		if ( 'wc-' . $order->get_status() === $previous_status ) {
+			wp_untrash_post_comments( $id );
+
+			// Order notes are always restored. Other comment types are left alone.
+			global $wpdb;
+			$order_note_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = %s AND comment_type = %s",
+					$id,
+					'post-trashed',
+					'order_note'
+				)
+			);
+			if ( $order_note_ids ) {
+				$wpdb->update(
+					$wpdb->comments,
+					array( 'comment_approved' => '1' ),
+					array(
+						'comment_post_ID'  => $id,
+						'comment_approved' => 'post-trashed',
+						'comment_type'     => 'order_note',
+					)
+				);
+				clean_comment_cache( $order_note_ids );
+			}
+
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );

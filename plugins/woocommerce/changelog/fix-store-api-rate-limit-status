@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return HTTP 429 instead of 400 when Store API requests exceed the rate limit.
