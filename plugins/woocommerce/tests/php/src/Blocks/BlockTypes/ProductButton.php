@@ -109,6 +109,9 @@ class ProductButton extends \WP_UnitTestCase {
 		$scripts             = wp_scripts();
 		$previous_queue      = $scripts->queue;
 		$previous_registered = $scripts->registered;
+		$styles              = wp_styles();
+		$previous_styles     = $styles->queue;
+		$previous_style_reg  = $styles->registered;
 		$product             = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -121,16 +124,14 @@ class ProductButton extends \WP_UnitTestCase {
 			switch_theme( 'twentytwentyfour' );
 			$this->assertTrue( wp_is_block_theme(), 'The script policy should run under a real block theme.' );
 
-			wp_register_script(
-				'wc-add-to-cart',
-				WC()->plugin_url() . '/assets/js/frontend/add-to-cart.min.js',
-				array( 'jquery', 'wc-jquery-blockui' ),
-				WC_VERSION,
-				true
-			);
-			$this->assertTrue( wp_script_is( 'wc-add-to-cart', 'registered' ), 'WooCommerce should register the real legacy handle.' );
-			wp_enqueue_script( 'wc-add-to-cart' );
-			$this->assertTrue( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'The legacy handle should start enqueued.' );
+			// Let WooCommerce enqueue the handle rather than standing in for it. A test
+			// that registers 'wc-add-to-cart' itself pins the same literal on both
+			// sides, so core folding the legacy script into another handle would leave
+			// dequeue_add_to_cart_scripts() a silent no-op with this test still green --
+			// which is the regression the deleted E2E title used to catch.
+			update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+			\WC_Frontend_Scripts::load_scripts();
+			$this->assertTrue( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'WooCommerce should enqueue the legacy handle when AJAX add to cart is on.' );
 
 			$markup   = $this->render_product_button( $product );
 			$callback = $this->get_dequeue_callback( $wp_filter['wp_enqueue_scripts'] ?? null );
@@ -150,6 +151,11 @@ class ProductButton extends \WP_UnitTestCase {
 			// this class extends WP_UnitTestCase, so there is no WooCommerce teardown.
 			$scripts->queue      = $previous_queue;
 			$scripts->registered = $previous_registered;
+			// Firing wp_enqueue_scripts writes to WP_Styles too -- WooCommerce's own
+			// frontend styles, plus core attaching the theme's global stylesheet to the
+			// shared 'global-styles' handle, which outlives the switch_theme() below.
+			$styles->queue      = $previous_styles;
+			$styles->registered = $previous_style_reg;
 			switch_theme( $original_theme );
 			WC()->cart = $previous_cart;
 
