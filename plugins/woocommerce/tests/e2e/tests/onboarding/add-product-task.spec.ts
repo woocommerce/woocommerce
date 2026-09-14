@@ -41,6 +41,9 @@ const show_task_list = async ( restApi: any, task_list_name: string ) => {
 test.describe( 'Add Product Task', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
+	// Ids this spec creates, so teardown can delete its own products and nobody else's.
+	const createdProductIds: number[] = [];
+
 	test.beforeAll( async ( { restApi } ) => {
 		const productIds = [];
 
@@ -85,21 +88,28 @@ test.describe( 'Add Product Task', () => {
 		// setup task list hidden if it fails between hiding and showing it. Both are torn down
 		// here rather than in the body so that a failure reports the assertion that failed
 		// instead of a cleanup error raised on the way out.
-		const { data } = await restApi.get( `${ WC_API_PATH }/products`, {
-			_fields: 'id',
-			per_page: 100,
-			status: 'any',
-		} );
+		//
+		// Only this spec's own products are deleted. The site is shared with the rest of the
+		// run, so sweeping every id the products endpoint returns would take other specs'
+		// fixtures with it.
+		const idsToDelete = createdProductIds.splice( 0 );
 		// Every teardown call runs before anything is asserted: a failed delete must not stop
 		// the task list from being unhidden, or the rest of this serial project inherits it.
-		const { status } = await restApi.post(
-			`${ WC_API_PATH }/products/batch`,
-			{
-				delete: data.map( ( { id } ) => id ),
-			}
-		);
+		const deleteStatus = idsToDelete.length
+			? (
+					await restApi.post( `${ WC_API_PATH }/products/batch`, {
+						delete: idsToDelete,
+					} )
+			  ).status
+			: null;
 		const taskListShown = await show_task_list( restApi, 'setup' );
-		expect( status ).toBe( 200 );
+
+		// On a passing run the test deletes its own product, so there is nothing left here
+		// and no status to check. Asserting 200 unconditionally would pass whether a delete
+		// happened or not.
+		if ( deleteStatus !== null ) {
+			expect( deleteStatus ).toBe( 200 );
+		}
 		expect( taskListShown ).toBe( true );
 	} );
 
@@ -188,6 +198,7 @@ test.describe( 'Add Product Task', () => {
 			}
 		);
 		const createdProductId = productResponse.data.id;
+		createdProductIds.push( createdProductId );
 		expect( productResponse.status ).toBe( 201 );
 		expect(
 			Number.isSafeInteger( createdProductId ) && createdProductId > 0
@@ -203,6 +214,10 @@ test.describe( 'Add Product Task', () => {
 		const deleteResponse = await restApi.delete(
 			`${ WC_API_PATH }/products/${ createdProductId }`,
 			{ force: true }
+		);
+		createdProductIds.splice(
+			createdProductIds.indexOf( createdProductId ),
+			1
 		);
 		expect( deleteResponse.status ).toBe( 200 );
 
