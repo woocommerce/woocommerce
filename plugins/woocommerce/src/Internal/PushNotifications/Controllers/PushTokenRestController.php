@@ -341,15 +341,10 @@ class PushTokenRestController extends RestApiControllerBase {
 						'readonly'    => true,
 					),
 					'metadata'              => array(
-						'description'          => __( 'Values the app supplies to describe itself and the device, such as the app and OS version.', 'woocommerce' ),
-						'type'                 => 'object',
-						'maxProperties'        => PushTokenValidator::METADATA_MAXIMUM_ITEMS,
-						'additionalProperties' => array(
-							'type'      => array( 'string', 'number', 'boolean' ),
-							'maxLength' => PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH,
-						),
-						'context'              => array( 'view' ),
-						'readonly'             => true,
+						'description' => __( 'Values the app supplies to describe itself and the device, such as the app and OS version.', 'woocommerce' ),
+						'type'        => 'object',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
 					),
 					'created_at_gmt'        => array(
 						'description' => __( 'The date the token was registered, as GMT. Null when the date is unknown.', 'woocommerce' ),
@@ -456,16 +451,11 @@ class PushTokenRestController extends RestApiControllerBase {
 				'sanitize_callback' => 'wp_unslash',
 			),
 			'metadata'      => array(
-				'description'          => __( 'Metadata', 'woocommerce' ),
-				'type'                 => 'object',
-				'context'              => array( 'create' ),
-				'maxProperties'        => PushTokenValidator::METADATA_MAXIMUM_ITEMS,
-				'additionalProperties' => array(
-					'type'      => array( 'string', 'number', 'boolean' ),
-					'maxLength' => PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH,
-				),
-				'validate_callback'    => array( $this, 'validate_argument' ),
-				'sanitize_callback'    => 'wp_unslash',
+				'description'       => __( 'Metadata', 'woocommerce' ),
+				'type'              => 'object',
+				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_argument' ),
+				'sanitize_callback' => 'wp_unslash',
 			),
 		);
 
