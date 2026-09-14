@@ -5,8 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Downloads as DownloadsBlock;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
-use WC_Customer_Download;
-use WC_Data_Store;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -20,70 +18,47 @@ final class DownloadsTest extends WC_Unit_Test_Case {
 	 * @testdox Download rows render for authorized processing and completed orders with the exact names, URLs, and table classes.
 	 */
 	public function test_download_table_requires_entitlement_and_permission(): void {
-		$download_directories  = wc_get_container()->get( Download_Directories::class );
-		$original_mode_option  = get_option( 'wc_downloads_approved_directories_mode', null );
-		$original_grant_option = get_option( 'woocommerce_downloads_grant_access_after_payment', null );
-		$product               = null;
-		$order                 = null;
-		$file_exists           = static function (): bool {
-			return true;
-		};
+		$download_directories = wc_get_container()->get( Download_Directories::class );
+
 		$download_directories->set_mode( Download_Directories::MODE_DISABLED );
 		update_option( 'woocommerce_downloads_grant_access_after_payment', 'yes' );
-		add_filter( 'woocommerce_downloadable_file_exists', $file_exists );
+		add_filter(
+			'woocommerce_downloadable_file_exists',
+			static function (): bool {
+				return true;
+			}
+		);
 
-		try {
-			$product = \WC_Helper_Product::create_downloadable_product(
+		$product = \WC_Helper_Product::create_downloadable_product(
+			array(
 				array(
-					array(
-						'name' => 'Single 1',
-						'file' => 'https://example.com/single-1.txt',
-					),
-					array(
-						'name' => 'Single 2',
-						'file' => 'https://example.com/single-2.txt',
-					),
-				)
-			);
-			$order   = $this->create_order( $product );
+					'name' => 'Single 1',
+					'file' => 'https://example.com/single-1.txt',
+				),
+				array(
+					'name' => 'Single 2',
+					'file' => 'https://example.com/single-2.txt',
+				),
+			)
+		);
+		$order   = $this->create_order( $product );
 
-			$this->assertSame( '', $this->render( $order, 'full' ), 'Pending orders should not render a downloads table.' );
+		$this->assertSame( '', $this->render( $order, 'full' ), 'Pending orders should not render a downloads table.' );
 
-			$order->set_status( 'processing' );
-			$order->save();
-			wc_downloadable_product_permissions( $order->get_id(), true );
-			$order = $this->reload_order( $order );
+		$order->set_status( 'processing' );
+		$order->save();
+		wc_downloadable_product_permissions( $order->get_id(), true );
+		$order = $this->reload_order( $order );
 
-			$this->assert_download_table( $order, 'processing' );
+		$this->assert_download_table( $order, 'processing' );
 
-			$order->set_status( 'completed' );
-			$order->save();
-			$order = $this->reload_order( $order );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order = $this->reload_order( $order );
 
-			$this->assert_download_table( $order, 'completed' );
+		$this->assert_download_table( $order, 'completed' );
 
-			$this->assertSame( '', $this->render( $order, false ), 'Order details permission is required even after entitlement is granted.' );
-		} finally {
-			if ( $order instanceof WC_Order ) {
-				$this->delete_download_permissions( $order );
-				$order->delete( true );
-			}
-			if ( $product instanceof WC_Product ) {
-				$product->delete( true );
-			}
-			remove_filter( 'woocommerce_downloadable_file_exists', $file_exists );
-			if ( null === $original_mode_option ) {
-				delete_option( 'wc_downloads_approved_directories_mode' );
-			} else {
-				update_option( 'wc_downloads_approved_directories_mode', $original_mode_option );
-			}
-			wp_cache_delete( 'wc_downloads_approved_directories_mode', 'options' );
-			if ( null === $original_grant_option ) {
-				delete_option( 'woocommerce_downloads_grant_access_after_payment' );
-			} else {
-				update_option( 'woocommerce_downloads_grant_access_after_payment', $original_grant_option );
-			}
-		}
+		$this->assertSame( '', $this->render( $order, false ), 'Order details permission is required even after entitlement is granted.' );
 	}
 
 	/**
@@ -171,21 +146,5 @@ final class DownloadsTest extends WC_Unit_Test_Case {
 		$order->save();
 
 		return $order;
-	}
-
-	/**
-	 * Delete every download grant associated with the fixture order.
-	 *
-	 * @param WC_Order $order Order object.
-	 */
-	private function delete_download_permissions( WC_Order $order ): void {
-		$download_store = WC_Data_Store::load( 'customer-download' );
-		$downloads      = $download_store->get_downloads( array( 'order_id' => $order->get_id() ) );
-
-		foreach ( $downloads as $download ) {
-			if ( $download instanceof WC_Customer_Download ) {
-				$download->delete( true );
-			}
-		}
 	}
 }

@@ -70,8 +70,7 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	 * @param bool         $expected_visible Whether shipping content should render.
 	 */
 	public function test_shipping_address_topology( string $topology, $permission, bool $expected_visible ): void {
-		$original_shipping_option = get_option( 'woocommerce_calc_shipping', null );
-		list( $order, $product )  = $this->create_topology_order( $topology );
+		$order = $this->create_topology_order( $topology );
 
 		try {
 			update_option( 'woocommerce_calc_shipping', 'yes' );
@@ -91,13 +90,6 @@ final class ShippingAddress extends \WP_UnitTestCase {
 			if ( 'pickup-location' === $topology ) {
 				// Drop the memo so the next test reloads the ambient method list.
 				WC()->shipping()->unregister_shipping_methods();
-			}
-			$order->delete( true );
-			$product->delete( true );
-			if ( null === $original_shipping_option ) {
-				delete_option( 'woocommerce_calc_shipping' );
-			} else {
-				update_option( 'woocommerce_calc_shipping', $original_shipping_option );
 			}
 		}
 	}
@@ -164,9 +156,9 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	 * Create an order with a persisted shipping address and fulfillment topology.
 	 *
 	 * @param string $topology Order fulfillment topology.
-	 * @return array{\WC_Order, \WC_Product}
+	 * @return \WC_Order
 	 */
-	private function create_topology_order( string $topology ): array {
+	private function create_topology_order( string $topology ): \WC_Order {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -216,6 +208,6 @@ final class ShippingAddress extends \WP_UnitTestCase {
 
 		$order->save();
 
-		return array( $order, $product );
+		return $order;
 	}
 }

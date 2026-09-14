@@ -124,72 +124,48 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 */
 	public function test_runtime_render_requires_download_permission(): void {
 		$download_directories = wc_get_container()->get( Download_Directories::class );
-		$original_mode_option = get_option( 'wc_downloads_approved_directories_mode', null );
-		$downloadable_product = null;
-		$plain_product        = null;
-		$downloadable_order   = null;
-		$plain_order          = null;
-		$file_exists          = static function (): bool {
-			return true;
-		};
+
 		$download_directories->set_mode( Download_Directories::MODE_DISABLED );
-		add_filter( 'woocommerce_downloadable_file_exists', $file_exists );
+		add_filter(
+			'woocommerce_downloadable_file_exists',
+			static function (): bool {
+				return true;
+			}
+		);
 
-		try {
-			$downloadable_product = \WC_Helper_Product::create_downloadable_product(
+		$downloadable_product = \WC_Helper_Product::create_downloadable_product(
+			array(
 				array(
-					array(
-						'name' => 'Wrapper download',
-						'file' => 'https://example.com/wrapper-download.txt',
-					),
-				)
-			);
-			$plain_product        = \WC_Helper_Product::create_simple_product();
-			$downloadable_order   = $this->create_order_with_product( $downloadable_product );
-			$plain_order          = $this->create_order_with_product( $plain_product );
+					'name' => 'Wrapper download',
+					'file' => 'https://example.com/wrapper-download.txt',
+				),
+			)
+		);
+		$plain_product        = \WC_Helper_Product::create_simple_product();
+		$downloadable_order   = $this->create_order_with_product( $downloadable_product );
+		$plain_order          = $this->create_order_with_product( $plain_product );
 
-			$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A pending order should not expose downloads.' );
+		$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A pending order should not expose downloads.' );
 
-			// Processing permits downloads only when the store grants access after payment,
-			// so the wrapper has to follow that option rather than the status on its own.
-			$downloadable_order->set_status( 'processing' );
-			$downloadable_order->save();
+		// Processing permits downloads only when the store grants access after payment,
+		// so the wrapper has to follow that option rather than the status on its own.
+		$downloadable_order->set_status( 'processing' );
+		$downloadable_order->save();
 
-			update_option( 'woocommerce_downloads_grant_access_after_payment', 'no' );
-			$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A processing order should not expose downloads while access is granted only on completion.' );
+		update_option( 'woocommerce_downloads_grant_access_after_payment', 'no' );
+		$this->assertSame( '', $this->render( $downloadable_order, 'full' ), 'A processing order should not expose downloads while access is granted only on completion.' );
 
-			update_option( 'woocommerce_downloads_grant_access_after_payment', 'yes' );
-			$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A processing order should expose downloads once the store grants access after payment.' );
+		update_option( 'woocommerce_downloads_grant_access_after_payment', 'yes' );
+		$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A processing order should expose downloads once the store grants access after payment.' );
 
-			$plain_order->set_status( 'completed' );
-			$plain_order->save();
-			$this->assertSame( '', $this->render( $plain_order, 'full' ), 'An order without a downloadable item should not render the wrapper.' );
+		$plain_order->set_status( 'completed' );
+		$plain_order->save();
+		$this->assertSame( '', $this->render( $plain_order, 'full' ), 'An order without a downloadable item should not render the wrapper.' );
 
-			$downloadable_order->set_status( 'completed' );
-			$downloadable_order->save();
-			$this->assertSame( '', $this->render( $downloadable_order, false ), 'View permission is required.' );
-			$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A completed downloadable order should render non-empty wrapper content.' );
-		} finally {
-			if ( $downloadable_order instanceof \WC_Order ) {
-				$downloadable_order->delete( true );
-			}
-			if ( $plain_order instanceof \WC_Order ) {
-				$plain_order->delete( true );
-			}
-			if ( $downloadable_product instanceof \WC_Product ) {
-				$downloadable_product->delete( true );
-			}
-			if ( $plain_product instanceof \WC_Product ) {
-				$plain_product->delete( true );
-			}
-			remove_filter( 'woocommerce_downloadable_file_exists', $file_exists );
-			if ( null === $original_mode_option ) {
-				delete_option( 'wc_downloads_approved_directories_mode' );
-			} else {
-				update_option( 'wc_downloads_approved_directories_mode', $original_mode_option );
-			}
-			wp_cache_delete( 'wc_downloads_approved_directories_mode', 'options' );
-		}
+		$downloadable_order->set_status( 'completed' );
+		$downloadable_order->save();
+		$this->assertSame( '', $this->render( $downloadable_order, false ), 'View permission is required.' );
+		$this->assertSame( '<p>Download marker</p>', $this->render( $downloadable_order, 'full' ), 'A completed downloadable order should render non-empty wrapper content.' );
 	}
 
 	/**

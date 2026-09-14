@@ -25,8 +25,8 @@ final class BillingWrapperTest extends WC_Unit_Test_Case {
 	 * @param bool         $expected_visible Whether wrapper content should render.
 	 */
 	public function test_billing_wrapper_topology( string $topology, $permission, bool $has_address, bool $expected_visible ): void {
-		list( $order, $product ) = $this->create_order( $topology, $has_address );
-		$content                 = '<h2>Billing address</h2><p>Billing wrapper marker</p>';
+		$order   = $this->create_order( $topology, $has_address );
+		$content = '<h2>Billing address</h2><p>Billing wrapper marker</p>';
 
 		try {
 			$rendered = $this->render( $order, $permission, $content );
@@ -43,8 +43,6 @@ final class BillingWrapperTest extends WC_Unit_Test_Case {
 				// Drop the memo so the next test reloads the ambient method list.
 				WC()->shipping()->unregister_shipping_methods();
 			}
-			$order->delete( true );
-			$product->delete( true );
 		}
 	}
 
@@ -91,9 +89,9 @@ final class BillingWrapperTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $topology Order fulfillment topology.
 	 * @param bool   $has_address Whether to add billing data.
-	 * @return array{WC_Order, WC_Product}
+	 * @return WC_Order
 	 */
-	private function create_order( string $topology, bool $has_address ): array {
+	private function create_order( string $topology, bool $has_address ): WC_Order {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -143,6 +141,6 @@ final class BillingWrapperTest extends WC_Unit_Test_Case {
 
 		$order->save();
 
-		return array( $order, $product );
+		return $order;
 	}
 }

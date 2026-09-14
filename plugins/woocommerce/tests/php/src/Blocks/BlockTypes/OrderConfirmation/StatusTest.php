@@ -294,45 +294,24 @@ class StatusTest extends WC_Unit_Test_Case {
 	 * @param string $key_mode Missing or invalid key mode.
 	 */
 	public function test_invalid_key_notice_uses_real_permission_result( string $key_mode ): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Request globals are restored fixture state.
-		$original_get     = $_GET;
-		$original_user_id = get_current_user_id();
-		$customer_id      = 0;
-		$order            = null;
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order       = wc_create_order( array( 'customer_id' => $customer_id ) );
+		$order->set_billing_email( 'status-shopper@example.com' );
+		$order->save();
+		wp_set_current_user( $customer_id );
+		$_GET = 'wrong' === $key_mode ? array( 'key' => 'wc_order_wrong' ) : array();
 
-		try {
-			$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
-			$order       = wc_create_order( array( 'customer_id' => $customer_id ) );
-			$order->set_billing_email( 'status-shopper@example.com' );
-			$order->save();
-			wp_set_current_user( $customer_id );
-			$_GET = array();
+		$permission     = $this->get_view_order_permissions( $order );
+		$content        = $this->render_confirmation_notice( $order );
+		$my_account_url = wc_get_page_permalink( 'myaccount' );
 
-			if ( 'wrong' === $key_mode ) {
-				$_GET['key'] = 'wc_order_wrong';
-			}
-
-			$permission     = $this->get_view_order_permissions( $order );
-			$content        = $this->render_confirmation_notice( $order );
-			$my_account_url = wc_get_page_permalink( 'myaccount' );
-
-			$this->assertFalse( $permission, 'The real permission decision must reject a missing or invalid order key.' );
-			$this->assertNotSame( '', $my_account_url, 'The fixture must expose the My account login destination.' );
-			$this->assertStringContainsString( 'Great news! Your order has been received, and a confirmation will be sent to your email address.', $content );
-			$this->assertStringContainsString( 'Have an account with us?', $content );
-			$this->assertStringContainsString( 'Log in here', $content );
-			$this->assertStringContainsString( 'to view your order.', $content );
-			$this->assertStringContainsString( 'href="' . esc_url( $my_account_url ) . '"', $content );
-		} finally {
-			if ( $order instanceof WC_Order ) {
-				$order->delete( true );
-			}
-			wp_set_current_user( $original_user_id );
-			$_GET = $original_get;
-			if ( $customer_id ) {
-				wp_delete_user( $customer_id );
-			}
-		}
+		$this->assertFalse( $permission, 'The real permission decision must reject a missing or invalid order key.' );
+		$this->assertNotSame( '', $my_account_url, 'The fixture must expose the My account login destination.' );
+		$this->assertStringContainsString( 'Great news! Your order has been received, and a confirmation will be sent to your email address.', $content );
+		$this->assertStringContainsString( 'Have an account with us?', $content );
+		$this->assertStringContainsString( 'Log in here', $content );
+		$this->assertStringContainsString( 'to view your order.', $content );
+		$this->assertStringContainsString( 'href="' . esc_url( $my_account_url ) . '"', $content );
 	}
 
 	/**

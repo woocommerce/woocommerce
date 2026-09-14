@@ -25,9 +25,8 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 	 * @param bool         $expected_visible Whether wrapper content should render.
 	 */
 	public function test_shipping_wrapper_topology( string $topology, $permission, bool $has_address, bool $expected_visible ): void {
-		$original_shipping_option = get_option( 'woocommerce_calc_shipping', null );
-		list( $order, $product )  = $this->create_order( $topology, $has_address );
-		$content                  = '<h2>Shipping address</h2><p>Shipping wrapper marker</p>';
+		$order   = $this->create_order( $topology, $has_address );
+		$content = '<h2>Shipping address</h2><p>Shipping wrapper marker</p>';
 
 		try {
 			update_option( 'woocommerce_calc_shipping', 'yes' );
@@ -50,13 +49,6 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 			if ( 'pickup-location' === $topology ) {
 				// Drop the memo so the next test reloads the ambient method list.
 				WC()->shipping()->unregister_shipping_methods();
-			}
-			$order->delete( true );
-			$product->delete( true );
-			if ( null === $original_shipping_option ) {
-				delete_option( 'woocommerce_calc_shipping' );
-			} else {
-				update_option( 'woocommerce_calc_shipping', $original_shipping_option );
 			}
 		}
 	}
@@ -104,9 +96,9 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $topology Order fulfillment topology.
 	 * @param bool   $has_address Whether to add shipping data.
-	 * @return array{WC_Order, WC_Product}
+	 * @return WC_Order
 	 */
-	private function create_order( string $topology, bool $has_address ): array {
+	private function create_order( string $topology, bool $has_address ): WC_Order {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -156,6 +148,6 @@ final class ShippingWrapperTest extends WC_Unit_Test_Case {
 
 		$order->save();
 
-		return array( $order, $product );
+		return $order;
 	}
 }
