@@ -288,8 +288,6 @@ final class OrderWithdrawalFormProcessor {
 				'error'
 			);
 
-			$this->apply_rate_limits( $rate_limit_ids, -1 );
-
 			return false;
 		}
 
