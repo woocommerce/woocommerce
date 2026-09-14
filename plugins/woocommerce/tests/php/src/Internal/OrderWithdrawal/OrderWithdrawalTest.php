@@ -680,8 +680,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
 		$controller    = new OrderWithdrawalController();
+		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification(), $email_preview );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
 
 		try {
 			$controller->register();
@@ -689,10 +690,12 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+			$this->assertNotFalse( has_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ) ) );
 			$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -764,6 +767,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -808,6 +812,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
 			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
 			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
