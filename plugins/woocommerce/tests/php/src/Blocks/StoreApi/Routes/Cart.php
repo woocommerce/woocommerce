@@ -401,14 +401,6 @@ class Cart extends ControllerTestCase {
 	): void {
 		unset( $scenario );
 
-		$option_names = array(
-			'woocommerce_default_customer_address',
-			'woocommerce_shipping_cost_requires_address',
-			'woocommerce_flat_rate_settings',
-			'woocommerce_pickup_location_settings',
-			'pickup_location_pickup_locations',
-		);
-		$options      = $this->capture_options( $option_names );
 		$customer     = $this->capture_shipping_address();
 		$session      = $this->capture_shipping_session();
 		$cart_context = WC()->cart->cart_context;
@@ -499,8 +491,11 @@ class Cart extends ControllerTestCase {
 			$this->assertArrayHasKey( 0, $chosen_methods, 'A serialized package should persist a choice for package zero.' );
 			$this->assertSame( $expected_chosen, $chosen_methods[0], 'The session should persist the same method selected in the response.' );
 		} finally {
+			// The five shipping options this test writes are rows inside the transaction.
+			// Everything else below is on the WC() singletons, which this class does not
+			// inherit a teardown for: it extends WP_Test_REST_TestCase, not
+			// WC_Unit_Test_Case, so clear_wc_singleton_state() never runs.
 			$this->remove_shipping_topology( $fixtures, $topology );
-			$this->restore_options( $options );
 			$this->restore_shipping_address( $customer );
 			WC()->shipping()->reset_shipping();
 			$this->restore_shipping_session( $session );
@@ -727,42 +722,6 @@ class Cart extends ControllerTestCase {
 		);
 
 		return $addresses[ $key ];
-	}
-
-	/**
-	 * Capture option values without turning missing options into stored values.
-	 *
-	 * @param string[] $option_names Option names.
-	 * @return array<string, array{exists: bool, value: mixed}>
-	 */
-	private function capture_options( array $option_names ): array {
-		$options = array();
-		$missing = new \stdClass();
-
-		foreach ( $option_names as $option_name ) {
-			$value                   = get_option( $option_name, $missing );
-			$options[ $option_name ] = array(
-				'exists' => $missing !== $value,
-				'value'  => $value,
-			);
-		}
-
-		return $options;
-	}
-
-	/**
-	 * Restore captured options.
-	 *
-	 * @param array<string, array{exists: bool, value: mixed}> $options Captured options.
-	 */
-	private function restore_options( array $options ): void {
-		foreach ( $options as $option_name => $option ) {
-			if ( $option['exists'] ) {
-				update_option( $option_name, $option['value'] );
-			} else {
-				delete_option( $option_name );
-			}
-		}
 	}
 
 	/**
