@@ -58,96 +58,82 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_single_row(): void {
-		$original_user_id = get_current_user_id();
-		$product          = null;
-		$review           = null;
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Exact Review Row Product' );
+		$product->save();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_name( 'Exact Review Row Product' );
-			$product->save();
-			wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$review = $this->factory()->comment->create_and_get(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Exact Review Author',
+				'comment_author_email' => 'row-reviewer@example.com',
+				'comment_content'      => 'Exact review row content',
+				'comment_approved'     => '1',
+				'comment_type'         => 'review',
+			)
+		);
+		update_comment_meta( $review->comment_ID, 'rating', 4 );
 
-			$review = $this->factory()->comment->create_and_get(
-				array(
-					'comment_post_ID'      => $product->get_id(),
-					'comment_author'       => 'Exact Review Author',
-					'comment_author_email' => 'row-reviewer@example.com',
-					'comment_content'      => 'Exact review row content',
-					'comment_approved'     => '1',
-					'comment_type'         => 'review',
-				)
-			);
-			update_comment_meta( $review->comment_ID, 'rating', 4 );
+		$reviews_list_table = $this->get_reviews_list_table();
 
-			$reviews_list_table = $this->get_reviews_list_table();
+		ob_start();
+		$reviews_list_table->single_row( $review );
+		$row_output = trim( ob_get_clean() );
 
-			ob_start();
-			$reviews_list_table->single_row( $review );
-			$row_output = trim( ob_get_clean() );
+		$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
 
-			$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
-
-			foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
-				if ( 'cb' !== $column_id ) {
-					$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
-				} else {
-					$this->assertMatchesRegularExpression(
-						'~<(?<cell_tag>th|td)[^>]*\bclass="check-column"[^>]*>.*?</\k<cell_tag>>~s',
-						$row_output,
-						'The row should contain the standard review checkbox cell.'
-					);
-				}
+		foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
+			if ( 'cb' !== $column_id ) {
+				$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
+			} else {
+				$this->assertMatchesRegularExpression(
+					'~<(?<cell_tag>th|td)[^>]*\bclass="check-column"[^>]*>.*?</\k<cell_tag>>~s',
+					$row_output,
+					'The row should contain the standard review checkbox cell.'
+				);
 			}
-
-			$document = new DOMDocument();
-			$errors   = libxml_use_internal_errors( true );
-			$document->loadHTML( '<!doctype html><html><body><table>' . $row_output . '</table></body></html>' );
-			libxml_clear_errors();
-			libxml_use_internal_errors( $errors );
-
-			$xpath        = new DOMXPath( $document );
-			$author_cells = $xpath->query(
-				'//td[contains(concat(" ", normalize-space(@class), " "), " author ") and contains(concat(" ", normalize-space(@class), " "), " column-author ")]'
-			);
-			if ( false === $author_cells ) {
-				throw new \RuntimeException( 'Unable to query the author cell.' );
-			}
-
-			$author_cell = $author_cells->item( 0 );
-			$this->assertInstanceOf( DOMElement::class, $author_cell );
-			if ( ! $author_cell instanceof DOMElement ) {
-				throw new \RuntimeException( 'The author cell was not found.' );
-			}
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
-			$this->assertStringContainsString( 'Exact Review Author', $author_cell->textContent );
-
-			$email_links = $xpath->query( './/a[normalize-space(text())="row-reviewer@example.com"]', $author_cell );
-			if ( false === $email_links ) {
-				throw new \RuntimeException( 'Unable to query the author email link.' );
-			}
-
-			$email_link = $email_links->item( 0 );
-			$this->assertInstanceOf( DOMElement::class, $email_link );
-			if ( ! $email_link instanceof DOMElement ) {
-				throw new \RuntimeException( 'The author email link was not found.' );
-			}
-			$this->assertSame( 'mailto:row-reviewer@example.com', $email_link->getAttribute( 'href' ) );
-			$this->assertStringContainsString( 'aria-label="4 out of 5"', $row_output );
-			$this->assertStringContainsString( 'Exact review row content', $row_output );
-			$this->assertStringContainsString( 'Exact Review Row Product', $row_output );
-			$this->assertStringContainsString( 'comments-edit-item-link', $row_output );
-			$this->assertStringContainsString( 'comments-view-item-link', $row_output );
-			$this->assertStringEndsWith( '</tr>', $row_output );
-		} finally {
-			if ( $review ) {
-				wp_delete_comment( $review->comment_ID, true );
-			}
-			if ( $product ) {
-				$product->delete( true );
-			}
-			wp_set_current_user( $original_user_id );
 		}
+
+		$document = new DOMDocument();
+		$errors   = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!doctype html><html><body><table>' . $row_output . '</table></body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $errors );
+
+		$xpath        = new DOMXPath( $document );
+		$author_cells = $xpath->query(
+			'//td[contains(concat(" ", normalize-space(@class), " "), " author ") and contains(concat(" ", normalize-space(@class), " "), " column-author ")]'
+		);
+		if ( false === $author_cells ) {
+			throw new \RuntimeException( 'Unable to query the author cell.' );
+		}
+
+		$author_cell = $author_cells->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $author_cell );
+		if ( ! $author_cell instanceof DOMElement ) {
+			throw new \RuntimeException( 'The author cell was not found.' );
+		}
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
+		$this->assertStringContainsString( 'Exact Review Author', $author_cell->textContent );
+
+		$email_links = $xpath->query( './/a[normalize-space(text())="row-reviewer@example.com"]', $author_cell );
+		if ( false === $email_links ) {
+			throw new \RuntimeException( 'Unable to query the author email link.' );
+		}
+
+		$email_link = $email_links->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $email_link );
+		if ( ! $email_link instanceof DOMElement ) {
+			throw new \RuntimeException( 'The author email link was not found.' );
+		}
+		$this->assertSame( 'mailto:row-reviewer@example.com', $email_link->getAttribute( 'href' ) );
+		$this->assertStringContainsString( 'aria-label="4 out of 5"', $row_output );
+		$this->assertStringContainsString( 'Exact review row content', $row_output );
+		$this->assertStringContainsString( 'Exact Review Row Product', $row_output );
+		$this->assertStringContainsString( 'comments-edit-item-link', $row_output );
+		$this->assertStringContainsString( 'comments-view-item-link', $row_output );
+		$this->assertStringEndsWith( '</tr>', $row_output );
 	}
 
 	/**
