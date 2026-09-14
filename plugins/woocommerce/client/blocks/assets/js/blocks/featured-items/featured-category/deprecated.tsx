@@ -8,7 +8,7 @@ import { InnerBlocks } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { migrateToCover } from './migrate';
+import { migrateToCover } from './migrate-to-cover';
 
 interface BlockAttributes {
 	showDesc?: boolean;

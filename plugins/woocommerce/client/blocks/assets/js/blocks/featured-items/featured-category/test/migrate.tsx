@@ -15,7 +15,7 @@ import { registerCoreBlocks } from '@wordpress/block-library';
  */
 import metadata from '../block.json';
 import deprecated from '../deprecated';
-import { migrateToCover } from '../migrate';
+import { migrateToCover } from '../migrate-to-cover';
 import { register } from '../../register';
 import productMetadata from '../../featured-product/block.json';
 
