@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
+use Automattic\WooCommerce\Internal\Settings\HookedBlocksSetting;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
@@ -388,6 +389,7 @@ final class WooCommerce {
 		$container->get( ProductCacheController::class );
 		$container->get( ProductTermCacheInvalidator::class );
 		$container->get( OptionSanitizer::class );
+		$container->get( HookedBlocksSetting::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
