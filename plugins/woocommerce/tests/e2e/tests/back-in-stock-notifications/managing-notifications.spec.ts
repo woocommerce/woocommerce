@@ -47,8 +47,11 @@ test.describe(
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
-			await resetBISOptions( request, baseURL! );
-			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
 		} );
 
 		// Grouped by opt-in mode rather than flipping the option inside a test:

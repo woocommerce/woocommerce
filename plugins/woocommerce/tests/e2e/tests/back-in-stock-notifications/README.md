@@ -89,10 +89,12 @@ respective feature tickets:
 
 - BIS is gated by the `customer_stock_notifications` feature toggle (WooCommerce
   → Settings → Advanced → Features → Experimental), off by default. Each spec
-  file enables it itself in a top-level `beforeAll` and resets it to `'no'` in
-  `afterAll`, through `setOption()` (never `deleteOption()` — that skips the
-  `updated_option` hook the feature's teardown relies on). That toggling is
-  safe only because these specs run serially, single worker — see below.
+  file sets it explicitly in a top-level `beforeAll` (`'yes'` for the enabled
+  suites, `'no'` for `feature-disabled.spec.ts`), and the enabled suites reset
+  it to `'no'` in `afterAll`, through `setOption()` (never `deleteOption()` —
+  that skips the `updated_option` hook the feature's teardown relies on). That
+  toggling is safe only because these specs run serially, single worker — see
+  below.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via the `.wp-env.e2e.json` plugins list).
 - `woocommerce-e2e-test-helper` zeroes
