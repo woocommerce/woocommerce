@@ -535,9 +535,12 @@ class Settings {
 		$settings['wcAdminSettingsDefaults'] = array();
 
 		foreach ( $wc_admin_group_settings as $setting ) {
-			if ( ! empty( $setting['id'] ) ) {
-				$settings['wcAdminSettings'][ $setting['id'] ]         = $setting['value'];
-				$settings['wcAdminSettingsDefaults'][ $setting['id'] ] = $setting['default'] ?? null;
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+			$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( array_key_exists( 'default', $setting ) ) {
+				$settings['wcAdminSettingsDefaults'][ $setting['id'] ] = $setting['default'];
 			}
 		}
 		return $settings;

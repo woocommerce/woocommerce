@@ -20,7 +20,7 @@ const settingsDefaults = getAdminSetting( 'wcAdminSettingsDefaults', {} );
 
 const getDefaultStatuses = ( setting, fallback ) => {
 	const statuses = settingsDefaults[ setting ];
-	return Array.isArray( statuses ) ? statuses : fallback;
+	return Array.isArray( statuses ) ? [ ...statuses ] : fallback;
 };
 
 export const DEFAULT_EXCLUDED_STATUSES = getDefaultStatuses(
