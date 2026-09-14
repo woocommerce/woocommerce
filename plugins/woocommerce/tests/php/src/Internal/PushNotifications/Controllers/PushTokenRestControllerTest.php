@@ -1226,6 +1226,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',
@@ -1503,6 +1505,82 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the username and email of the account each token belongs to.
+	 */
+	public function test_index_returns_account_fields_for_each_token(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'account-fields-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'account-fields-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$user       = get_userdata( $this->user_id );
+		$token_data = $response->get_data()['tokens'][0];
+
+		$this->assertSame( $this->user_id, $token_data['user_id'] );
+		$this->assertSame( $user->user_login, $token_data['user_login'] );
+		$this->assertSame( $user->user_email, $token_data['user_email'] );
+	}
+
+	/**
+	 * @testdox Should return null account fields when the token's user no longer exists.
+	 */
+	public function test_index_returns_null_account_fields_when_user_no_longer_exists(): void {
+		$missing_user_id = 999999;
+
+		$token = new PushToken(
+			array(
+				'id'            => 1,
+				'user_id'       => $missing_user_id,
+				'token'         => 'orphaned-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'orphaned-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store
+			->method( 'get_tokens_for_roles' )
+			->willReturn(
+				array(
+					'tokens'      => array( $token ),
+					'total'       => 1,
+					'total_pages' => 1,
+				)
+			);
+
+		wc_get_container()->replace( PushTokensDataStore::class, $data_store );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$token_data = $response->get_data()['tokens'][0];
+
+		$this->assertSame( $missing_user_id, $token_data['user_id'] );
+		$this->assertNull( $token_data['user_login'] );
+		$this->assertNull( $token_data['user_email'] );
+	}
+
+	/**
 	 * @testdox Should publish a schema on the index route describing every returned field.
 	 *
 	 * Asserted through an OPTIONS request rather than the registered callback,
@@ -1525,6 +1603,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',
