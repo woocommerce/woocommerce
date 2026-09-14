@@ -173,8 +173,14 @@ class RendererTest extends WC_Unit_Test_Case {
 				'Non-Product Collection markup should remain byte-identical.'
 			);
 		} finally {
-			// The script-module queue is the only thing here the base class does not
-			// reset; _restore_hooks() rewinds every RENDER_HOOKS stack on its own.
+			// _restore_hooks() rewinds every RENDER_HOOKS stack on its own, so only
+			// process state needs undoing here. The script-module queue is one such
+			// piece. The other is the Interactivity store: enhancing the markup runs
+			// render_interactivity_notices_region(), which writes
+			// wp_interactivity_state( 'woocommerce/store-notices', ... ). That one is
+			// left alone deliberately -- it writes the same namespaced values every
+			// time and no test reads them -- but it is not reset for us either, so a
+			// test that starts asserting on that namespace has to restore it.
 			if ( ! $module_was_enqueued ) {
 				wp_dequeue_script_module( $script_module_id );
 			}

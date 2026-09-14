@@ -16,8 +16,13 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should render the same ordered products as the classic loop for $route_label.
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * Do not reach for process isolation to contain the route globals this sets up.
+	 * A forked child re-runs tests/legacy/bootstrap.php, which reinstalls the store
+	 * and writes woocommerce_custom_orders_table_enabled over its own connection,
+	 * outside the parent's rolled-back transaction -- once per provider row. That
+	 * flips the order store for every test that follows in the parent process. The
+	 * finally below restores the five globals, which is what actually needs undoing.
+	 *
 	 * @dataProvider route_context_provider
 	 *
 	 * @param string   $route_label       Route label.
