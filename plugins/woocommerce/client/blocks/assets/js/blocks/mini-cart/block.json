@@ -7,7 +7,6 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
-	"viewScriptModule": "woocommerce/mini-cart",
 	"style": "file:../woocommerce/mini-cart-style.css",
 	"editorStyle": "file:../woocommerce/mini-cart-editor.css",
 	"supports": {
