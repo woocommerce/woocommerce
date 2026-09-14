@@ -84,6 +84,8 @@ module.exports = {
 module.exports = {
 	getSetting: ( name, fallback = false ) =>
 		name in global.wcSettings ? global.wcSettings[ name ] : fallback,
+	getAdminLink: ( path ) =>
+		global.wcSettings.adminUrl ? global.wcSettings.adminUrl + path : path,
 };
 ```
 
@@ -94,7 +96,7 @@ global.wcSettings = {
 };
 ```
 
-Mock only the helpers and settings your code uses. The mock and global that the WooCommerce monorepo uses for its own tests are in [`packages/js/internal-js-tests/src/mocks/woocommerce-settings.js`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js) and [`packages/js/internal-js-tests/src/setup-globals.js`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js).
+Mock the helpers and settings that your code and its dependencies use. For example, `@woocommerce/navigation`, which `@woocommerce/components` depends on, calls `getAdminLink`. The mock and global that the WooCommerce monorepo uses for its own tests are in [`packages/js/internal-js-tests/src/mocks/woocommerce-settings.js`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js) and [`packages/js/internal-js-tests/src/setup-globals.js`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js).
 
 ### Options
 
