@@ -8,6 +8,8 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class WC_Admin_Post_Types_Test.
@@ -59,6 +61,73 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->original_user_id );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox The CPT Add Order screen leaves insertion to WordPress without redirecting or eagerly saving order metadata.
+	 */
+	public function test_new_order_screen_leaves_creation_to_wordpress(): void {
+		global $wp_filter;
+
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		$previous_get        = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$redirected_to       = '';
+		$order_id            = 0;
+		$hooked_admin        = new WC_Admin_Post_Types();
+		$intercept_redirect  = static function ( string $location ) use ( &$redirected_to, &$order_id ) {
+			$redirected_to = $location;
+			parse_str( (string) wp_parse_url( $location, PHP_URL_QUERY ), $query_args );
+			$order_id = absint( $query_args['post'] ?? 0 );
+			throw new RuntimeException( 'Order redirect intercepted.' );
+		};
+		$draft_query         = array(
+			'post_type'   => 'shop_order',
+			'post_status' => 'auto-draft',
+			'fields'      => 'ids',
+			'numberposts' => -1,
+		);
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		add_filter( 'wp_redirect', $intercept_redirect );
+		OrderHelper::toggle_cot_feature_and_usage( false );
+
+		try {
+			$_GET            = array( 'post_type' => 'shop_order' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$existing_drafts = get_posts( $draft_query );
+
+			try {
+				do_action( 'load-post-new.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores -- Simulate the existing WordPress page-load hook.
+			} catch ( RuntimeException $error ) {
+				$this->assertSame( 'Order redirect intercepted.', $error->getMessage() );
+			}
+
+			$this->assertSame( '', $redirected_to, 'WooCommerce must let WordPress continue handling the Add Order request.' );
+			$this->assertSame( $existing_drafts, get_posts( $draft_query ), 'Loading the screen must not pre-create an order.' );
+
+			$post     = get_default_post_to_edit( 'shop_order', true );
+			$order_id = $post->ID;
+
+			$this->assertSame( 'auto-draft', $post->post_status );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_prices_include_tax' ), 'The native draft should not have tax metadata until a CRUD save.' );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_order_currency' ), 'The native draft should not have currency metadata until a CRUD save.' );
+		} finally {
+			if ( $order_id ) {
+				wp_delete_post( $order_id, true );
+			}
+			$_GET = $previous_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			remove_filter( 'wp_redirect', $intercept_redirect );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+			foreach ( $wp_filter as $hook_name => $hook ) {
+				foreach ( $hook->callbacks ?? array() as $priority => $callbacks ) {
+					foreach ( $callbacks as $callback ) {
+						if ( is_array( $callback['function'] ) && $hooked_admin === $callback['function'][0] ) {
+							remove_filter( $hook_name, $callback['function'], $priority );
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
