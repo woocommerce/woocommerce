@@ -50,6 +50,14 @@ describe( 'Analytics settings config - order status defaults', () => {
 		).toEqual( [ 'processing', 'on-hold' ] );
 	} );
 
+	it( 'falls back to the built-in defaults when the preload is null', async () => {
+		const config = await loadConfig( null );
+
+		expect(
+			config.config.woocommerce_actionable_order_statuses.defaultValue
+		).toEqual( [ 'processing', 'on-hold' ] );
+	} );
+
 	it( 'ignores a malformed preloaded default', async () => {
 		const config = await loadConfig( {
 			woocommerce_actionable_order_statuses: 'processing',

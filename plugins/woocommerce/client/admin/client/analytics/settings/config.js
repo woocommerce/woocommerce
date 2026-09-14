@@ -16,7 +16,7 @@ const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 // Defaults resolved by the server for the wc_admin settings group, including the
 // `woocommerce_analytics_settings_default_*_order_statuses` filters. Missing when the
 // page did not preload them, so every consumer keeps a built-in fallback.
-const settingsDefaults = getAdminSetting( 'wcAdminSettingsDefaults', {} );
+const settingsDefaults = getAdminSetting( 'wcAdminSettingsDefaults', {} ) || {};
 
 const getDefaultStatuses = ( setting, fallback ) => {
 	const statuses = settingsDefaults[ setting ];
