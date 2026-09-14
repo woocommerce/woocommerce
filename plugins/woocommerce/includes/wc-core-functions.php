@@ -1076,8 +1076,12 @@ function wc_fix_rewrite_rules( $rules ) {
 	}
 
 	if ( $shop_page_id ) {
+		global $wpdb;
+
+		// Like WP_Rewrite::page_uri_index(), bypass query filters when building persisted page rules.
+		$pages              = $wpdb->get_results( "SELECT ID, post_name, post_parent FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status NOT IN ( 'auto-draft', 'trash' )" );
 		$page_rewrite_rules = array();
-		$subpages           = wc_get_page_children( $shop_page_id );
+		$subpages           = wp_list_pluck( get_page_children( $shop_page_id, $pages ), 'ID' );
 
 		// Subpage rules.
 		foreach ( $subpages as $subpage ) {

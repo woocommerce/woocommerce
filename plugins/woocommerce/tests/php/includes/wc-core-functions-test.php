@@ -175,6 +175,27 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shop subpage rewrite rules ignore language filters without changing the public page helper.
+	 */
+	public function test_wc_fix_rewrite_rules_ignores_page_query_filters(): void {
+		$shop_page_id = $this->create_shop_page_tree();
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
+		add_action(
+			'parse_query',
+			static function ( $query ) {
+				if ( 'page' === $query->get( 'post_type' ) ) {
+					$query->set( 'post__in', array( 0 ) );
+				}
+			}
+		);
+
+		$this->assertSame( array(), wc_get_page_children( $shop_page_id ), 'The public page helper should still honor query filters.' );
+		$rules = wc_fix_rewrite_rules( array( 'fallback/?$' => 'index.php?fallback=1' ) );
+		$this->assertSame( 'shop/sale/?$', array_key_first( $rules ) );
+		$this->assertSame( 'index.php?pagename=shop/sale', $rules['shop/sale/?$'] ?? null );
+	}
+
+	/**
 	 * Test wc_ascii_uasort_comparison() function.
 	 */
 	public function test_wc_ascii_uasort_comparison() {
