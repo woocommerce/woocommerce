@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,6 +59,13 @@ class HposOrderExportHandler {
 	private CostOfGoodsSoldController $cogs_controller;
 
 	/**
+	 * HPOS data store, used to release cached orders while streaming.
+	 *
+	 * @var OrdersTableDataStore
+	 */
+	private OrdersTableDataStore $orders_data_store;
+
+	/**
 	 * Arguments of the export currently in progress, or null outside of an export.
 	 *
 	 * @var array|null
@@ -90,12 +98,14 @@ class HposOrderExportHandler {
 	 * @param DataSynchronizer                 $data_synchronizer        Data synchronizer.
 	 * @param PostsToOrdersMigrationController $posts_to_orders_migrator Posts to HPOS migrator.
 	 * @param CostOfGoodsSoldController        $cogs_controller          Cost of goods sold controller.
+	 * @param OrdersTableDataStore             $orders_data_store        HPOS data store.
 	 */
-	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller ): void {
+	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller, OrdersTableDataStore $orders_data_store ): void {
 		$this->cot_controller           = $cot_controller;
 		$this->data_synchronizer        = $data_synchronizer;
 		$this->posts_to_orders_migrator = $posts_to_orders_migrator;
 		$this->cogs_controller          = $cogs_controller;
+		$this->orders_data_store        = $orders_data_store;
 	}
 
 	/**
@@ -130,6 +140,7 @@ class HposOrderExportHandler {
 		$page     = 1;
 
 		do {
+			/** @var int[] $order_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- IDs because of 'return' => 'ids'.
 			$order_ids = wc_get_orders(
 				array(
 					'type'    => $types,
@@ -141,7 +152,6 @@ class HposOrderExportHandler {
 					'return'  => 'ids',
 				)
 			);
-			$order_ids = is_array( $order_ids ) ? $order_ids : array();
 			$fetched   = count( $order_ids );
 
 			foreach ( $order_ids as $order_id ) {
@@ -151,8 +161,22 @@ class HposOrderExportHandler {
 				}
 			}
 
+			$this->release_order_caches( $order_ids );
 			++$page;
 		} while ( self::BATCH_SIZE === $fetched );
+	}
+
+	/**
+	 * Drops what reading a batch of orders left in the runtime caches, so memory stays flat across the export.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 */
+	private function release_order_caches( array $order_ids ): void {
+		$this->orders_data_store->clear_cached_data( $order_ids );
+
+		foreach ( $order_ids as $order_id ) {
+			wp_cache_delete( \WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
+		}
 	}
 
 	/**

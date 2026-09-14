@@ -298,6 +298,18 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should release each exported order's meta cache so a large export does not grow memory.
+	 */
+	public function test_releases_order_meta_cache_while_streaming(): void {
+		$order     = $this->create_order();
+		$cache_key = WC_Order::generate_meta_cache_key( $order->get_id(), 'orders' );
+
+		$this->export( 'shop_order' );
+
+		$this->assertFalse( wp_cache_get( $cache_key, 'orders' ), 'Meta cache entry must be gone after the export' );
+	}
+
+	/**
 	 * @testdox Should emit nothing for content types other than orders.
 	 */
 	public function test_ignores_other_content_types(): void {
