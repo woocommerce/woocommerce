@@ -215,6 +215,7 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
 	}
+
 	/**
 	 * Test that activating a plugin flushes the order count cache.
 	 */
