@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
