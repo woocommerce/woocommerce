@@ -98,9 +98,6 @@ class OrderCountCacheService {
 	/**
 	 * Flush the order count cache for all order types.
 	 *
-	 * Runs on plugin (de)activation, because plugins can register custom order statuses
-	 * that a previously primed cache does not know about yet (#68009).
-	 *
 	 * @internal
 	 * @since 11.2.0
 	 *
