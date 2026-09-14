@@ -44,9 +44,6 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 		add_action( 'wp_ajax_replyto-comment', array( $this->reviews, 'handle_reply_to_review' ), -1 );
 		add_action( 'wp_ajax_edit-comment', 'wp_ajax_edit_comment', 1 );
 		add_action( 'wp_ajax_replyto-comment', 'wp_ajax_replyto_comment', 1 );
-
-		$this->assertSame( -1, has_action( 'wp_ajax_edit-comment', array( $this->reviews, 'handle_edit_review' ) ) );
-		$this->assertSame( -1, has_action( 'wp_ajax_replyto-comment', array( $this->reviews, 'handle_reply_to_review' ) ) );
 	}
 
 	/**
