@@ -13,6 +13,54 @@ use WP_Translation_Controller;
 class SiteLocaleTest extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Missing permalink bases honor catalogs supplied by translation loaders.
+	 * @testWith ["pre_load_textdomain"]
+	 *           ["override_load_textdomain"]
+	 *
+	 * @param string $hook Translation loading filter.
+	 */
+	public function test_permalink_defaults_honor_translation_loaders( string $hook ): void {
+		global $l10n, $wp_textdomain_registry;
+
+		$locale                = 'wc_LOADER';
+		$previous_path         = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$previous_translations = $l10n['woocommerce'] ?? null;
+		$previous_locale       = WP_Translation_Controller::get_instance()->get_locale();
+		$catalog               = new \MO();
+		$catalog->add_entry(
+			array(
+				'singular'     => 'product',
+				'context'      => 'slug',
+				'translations' => array( 'loader-product' ),
+			)
+		);
+		$wp_textdomain_registry->set( 'woocommerce', $locale, WC_ABSPATH . 'tests/legacy/unit-tests/util/fixtures/' );
+		add_filter( 'pre_option_WPLANG', static fn() => $locale );
+		add_filter(
+			$hook,
+			static function ( $override, $domain ) use ( $catalog ) {
+				if ( 'woocommerce' === $domain ) {
+					$GLOBALS['l10n'][ $domain ] = $catalog; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate an external translation loader.
+					return true;
+				}
+				return $override;
+			},
+			10,
+			2
+		);
+		delete_option( 'woocommerce_permalinks' );
+
+		try {
+			wc_get_permalink_structure();
+			$this->assertSame( 'loader-product', get_option( 'woocommerce_permalinks' )['product_base'] );
+			$this->assertSame( $previous_translations, $l10n['woocommerce'] ?? null, 'Restore the request catalog.' );
+			$this->assertSame( $previous_locale, WP_Translation_Controller::get_instance()->get_locale() );
+		} finally {
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+		}
+	}
+
+	/**
 	 * @testdox get() reads the stored site locale and ignores the locale filter.
 	 */
 	public function test_get_ignores_the_locale_filter(): void {
