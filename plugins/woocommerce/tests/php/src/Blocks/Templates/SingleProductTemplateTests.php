@@ -426,4 +426,63 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
+
+	/**
+	 * @testdox Adds the password form when generic and product-related blocks are on the template.
+	 */
+	public function test_replace_single_product_blocks_next_to_paragraph_with_input_form() {
+		$default_single_product_template = '
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:column -->
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true} /-->
+			<!-- wp:paragraph -->
+			<p>Additional information.</p>
+			<!-- /wp:paragraph -->
+			<!-- wp:woocommerce/add-to-cart-form /-->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = sprintf(
+			'
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:html -->%s<!-- /wp:html -->
+		</div>
+		<!-- /wp:column -->
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:paragraph -->
+			<p>Additional information.</p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->',
+			get_the_password_form()
+		);
+
+		$result = SingleProductTemplate::add_password_form(
+			$default_single_product_template
+		);
+
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
+		);
+	}
 }
