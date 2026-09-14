@@ -162,7 +162,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 
 				// Cart should be empty
 				await expect(
-					page.getByText( 'Your cart is currently empty!' )
+					page.getByText( 'Your cart is empty' )
 				).toBeVisible();
 			}
 		);
@@ -187,7 +187,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 
 				// Cart should be empty
 				await expect(
-					page.getByText( 'Your cart is currently empty!' )
+					page.getByText( 'Your cart is empty' )
 				).toBeVisible();
 			}
 		);
