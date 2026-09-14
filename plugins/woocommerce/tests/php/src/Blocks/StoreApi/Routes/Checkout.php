@@ -3740,6 +3740,45 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox An Error raised inside a status transition after the gateway moved the order on is recovered.
+	 */
+	public function test_error_raised_inside_a_status_transition_after_the_gateway_ran_is_recovered() {
+		// Core catches Exception, not Error, around status-transition hooks, so an integration
+		// dying there is the failure that escapes the gateway and reaches the route. BACS moves
+		// the order on-hold before it empties the cart, so this lands between the two, as the
+		// report did. This is the test that fails if the catch narrows back to \Exception.
+		add_action(
+			'woocommerce_order_status_on-hold',
+			function () {
+				// Raises Error: call to a member function on null.
+				$integration = null;
+				$integration->push_order();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'An Error after the gateway moved the order on must be recovered, not surfaced: ' . print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must report the payment as successful.' );
+
+		$order = wc_get_order( $data['order_id'] );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ), 'The gateway had already moved the order on when the Error was raised.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The gateway never reached empty_cart(), so recovery must empty the cart.' );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'push_order() on null' );
+				}
+			),
+			'The Error must be recorded on the order. Notes: ' . print_r( $notes, true )
+		);
+	}
+
+	/**
 	 * @testdox A failure while the order sits in a custom status the site declares payable is reported, not recovered.
 	 */
 	public function test_failure_in_a_custom_payable_status_is_not_recovered() {
