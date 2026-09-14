@@ -157,11 +157,12 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should emit custom meta and honor the core wxr_export_skip_postmeta filter.
+	 * @testdox Should emit custom meta, including repeated keys, and honor the core wxr_export_skip_postmeta filter.
 	 */
 	public function test_exports_custom_meta_and_honors_skip_filter(): void {
 		$order = $this->create_order();
 		$order->add_meta_data( '_tracking_number', 'ABC123' );
+		$order->add_meta_data( '_tracking_number', 'DEF456' );
 		$order->add_meta_data( 'gift_wrap', array( 'color' => 'red' ) );
 		$order->add_meta_data( '_edit_lock', 'skip me' );
 		$order->save();
@@ -178,6 +179,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$xml = $this->export( 'shop_order' );
 
 		$this->assertStringContainsString( $this->postmeta_xml( '_tracking_number', 'ABC123' ), $xml );
+		$this->assertStringContainsString( $this->postmeta_xml( '_tracking_number', 'DEF456' ), $xml, 'Repeated meta keys keep every row' );
 		$this->assertStringContainsString( $this->postmeta_xml( 'gift_wrap', serialize( array( 'color' => 'red' ) ) ), $xml ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		$this->assertStringNotContainsString( '_edit_lock', $xml, 'Meta skipped by the filter must not be exported' );
 	}

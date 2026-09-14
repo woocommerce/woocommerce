@@ -269,7 +269,7 @@ class HposOrderExportHandler {
 			<wp:post_password><?php echo self::cdata( $password ); ?></wp:post_password>
 			<wp:is_sticky>0</wp:is_sticky>
 		<?php
-		foreach ( $this->get_postmeta( $order ) as $meta_key => $meta_value ) {
+		foreach ( $this->get_postmeta( $order ) as list( $meta_key, $meta_value ) ) {
 			// Same shape as the postmeta row core passes to the filter.
 			$meta_row = (object) array(
 				'post_id'    => $order_id,
@@ -398,7 +398,7 @@ class HposOrderExportHandler {
 	 * can recreate a post that the posts data store, or the posts-to-HPOS migrator, reads back correctly.
 	 *
 	 * @param \WC_Abstract_Order $order The order or refund.
-	 * @return array<string, string> Meta key => meta value.
+	 * @return array<int, array{string, string}> List of [ meta key, meta value ] rows.
 	 */
 	private function get_postmeta( \WC_Abstract_Order $order ): array {
 		$meta = array(
@@ -457,17 +457,21 @@ class HposOrderExportHandler {
 			}
 		}
 
-		$meta = array_map( array( self::class, 'meta_value_to_string' ), $meta );
+		$rows = array();
+		foreach ( $meta as $meta_key => $meta_value ) {
+			$rows[] = array( $meta_key, self::meta_value_to_string( $meta_value ) );
+		}
 
+		// Custom meta can repeat a key, so it is kept as rows rather than keyed.
 		foreach ( $order->get_meta_data() as $meta_item ) {
 			$data = $meta_item->get_data();
 			if ( ! isset( $data['key'] ) || array_key_exists( $data['key'], $meta ) ) {
 				continue;
 			}
-			$meta[ $data['key'] ] = self::meta_value_to_string( $data['value'] ?? '' );
+			$rows[] = array( (string) $data['key'], self::meta_value_to_string( $data['value'] ?? '' ) );
 		}
 
-		return $meta;
+		return $rows;
 	}
 
 	/**
