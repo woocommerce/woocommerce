@@ -20,11 +20,11 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	private WC_Admin $sut;
 
 	/**
-	 * Original $_SERVER.
+	 * Original $_SERVER, or null when setUp did not get as far as capturing it.
 	 *
-	 * @var array<string,mixed>
+	 * @var array<string,mixed>|null
 	 */
-	private array $original_server = array();
+	private ?array $original_server = null;
 
 	/**
 	 * The My Account page this test creates, so the redirect target is a real page.
@@ -63,7 +63,14 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$_SERVER = $this->original_server;
+		// PHPUnit runs tearDown whenever checkRequirements() passed, whether or not
+		// setUp finished, so an unconditional restore would blank $_SERVER for the
+		// rest of the process if setUp threw before the capture below it. Nothing
+		// puts it back: the base class only resets $_SERVER for core's own suite.
+		if ( null !== $this->original_server ) {
+			$_SERVER = $this->original_server;
+		}
+
 		parent::tearDown();
 	}
 
@@ -149,6 +156,10 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 		return array(
 			'customer ordinary wp-admin index script' => array( '/var/www/html/wp-admin/index.php', array() ),
 			'customer wp-admin profile script'        => array( '/var/www/html/wp-admin/profile.php', array() ),
+			// prevent_admin_access() does not read $_GET at all -- wc-ajax requests are
+			// handled by WC_AJAX on init, long before admin_init -- so today this row
+			// takes the same branch as the one above it. It is here to fail if someone
+			// later exempts wc-ajax inside the handler rather than upstream of it.
 			'customer ordinary script with wc-ajax query parameter' => array( '/var/www/html/wp-admin/index.php', array( 'wc-ajax' => '1' ) ),
 		);
 	}
