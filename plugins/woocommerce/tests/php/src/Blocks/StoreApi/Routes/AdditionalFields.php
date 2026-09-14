@@ -2421,7 +2421,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 					return strtoupper( $value );
 				},
 				'validate_callback' => function ( $value ) {
-					return (bool) preg_match( '/^[A-Z]+$/', $value );
+					return ctype_upper( $value );
 				},
 			)
 		);
