@@ -217,31 +217,22 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 * @param string $type_class   Expected product type class.
 	 */
 	public function test_update_single_product_content_adds_product_body_classes( $product_type, $type_class ) {
-		global $wp_filter;
-
-		$body_class_filter_existed = isset( $wp_filter['body_class'] );
-		$body_class_filter         = $body_class_filter_existed ? clone $wp_filter['body_class'] : null;
-		$product_global_existed    = array_key_exists( 'product', $GLOBALS );
-		$product_global            = $product_global_existed ? $GLOBALS['product'] : null;
-		$post_global_existed       = array_key_exists( 'post', $GLOBALS );
-		$post_global               = $post_global_existed ? $GLOBALS['post'] : null;
-		$loop_global_existed       = array_key_exists( 'woocommerce_loop', $GLOBALS );
-		$loop_global               = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
-		$product                   = null;
-		$variation_ids             = array();
+		$product_global_existed = array_key_exists( 'product', $GLOBALS );
+		$product_global         = $product_global_existed ? $GLOBALS['product'] : null;
+		$loop_global_existed    = array_key_exists( 'woocommerce_loop', $GLOBALS );
+		$loop_global            = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
 
 		try {
+			// The template under test installs its own body_class callback, so clear the
+			// stack first to isolate it. _restore_hooks() rebuilds the stack afterwards.
 			remove_all_filters( 'body_class' );
 
 			$product = 'variable' === $product_type
 				? \WC_Helper_Product::create_variation_product()
 				: \WC_Helper_Product::create_simple_product();
-			if ( $product instanceof \WC_Product_Variable ) {
-				$variation_ids = $product->get_children();
-			}
 
 			$GLOBALS['product'] = $product;
-			$GLOBALS['post']    = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; finally restores the exact prior value.
+			$GLOBALS['post']    = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; tear_down() nulls it again.
 
 			$template          = new \WP_Block_Template();
 			$template->slug    = 'single-product';
@@ -264,31 +255,12 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$this->assertContains( 'product', $filtered_classes );
 			$this->assertContains( $type_class, $filtered_classes );
 		} finally {
-			remove_all_filters( 'body_class' );
-			if ( $body_class_filter_existed ) {
-				$wp_filter['body_class'] = $body_class_filter; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact hook stack captured before the test.
-			} else {
-				unset( $wp_filter['body_class'] );
-			}
-
-			foreach ( array_reverse( $variation_ids ) as $variation_id ) {
-				\WC_Helper_Product::delete_product( $variation_id );
-			}
-
-			if ( $product instanceof \WC_Product ) {
-				\WC_Helper_Product::delete_product( $product->get_id() );
-			}
-
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
+			// globals it leaves exactly as the test left them.
 			if ( $product_global_existed ) {
 				$GLOBALS['product'] = $product_global;
 			} else {
 				unset( $GLOBALS['product'] );
-			}
-
-			if ( $post_global_existed ) {
-				$GLOBALS['post'] = $post_global; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact frontend global captured before the test.
-			} else {
-				unset( $GLOBALS['post'] );
 			}
 
 			if ( $loop_global_existed ) {

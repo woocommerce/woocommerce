@@ -22,18 +22,13 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 	 * @param bool   $expected_visible        Whether the Product Rating markup should render.
 	 */
 	public function test_render_visibility_follows_review_settings( bool $product_reviews_allowed, string $global_reviews_setting, bool $expected_visible ): void {
-		$option_name              = 'woocommerce_enable_reviews';
-		$previous_reviews_setting = get_option( $option_name, null );
-		$had_global_post          = array_key_exists( 'post', $GLOBALS );
-		$previous_global_post     = $GLOBALS['post'] ?? null;
-		$had_global_product       = array_key_exists( 'product', $GLOBALS );
-		$previous_global_product  = $GLOBALS['product'] ?? null;
-		$products_store_state     = $this->snapshot_products_store_static_state();
-		$interactivity_state      = $this->snapshot_interactivity_state();
-		$product                  = null;
+		$had_global_product      = array_key_exists( 'product', $GLOBALS );
+		$previous_global_product = $GLOBALS['product'] ?? null;
+		$products_store_state    = $this->snapshot_products_store_static_state();
+		$interactivity_state     = $this->snapshot_interactivity_state();
 
 		try {
-			update_option( $option_name, $global_reviews_setting );
+			update_option( 'woocommerce_enable_reviews', $global_reviews_setting );
 
 			$fixtures = new FixtureData();
 			$product  = $fixtures->get_simple_product(
@@ -69,42 +64,10 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 				$this->assertStringNotContainsString( 'wc-block-components-product-rating', $markup, 'Product Rating markup should not render when either review setting is disabled.' );
 			}
 		} finally {
+			// The option row, the fixtures and $GLOBALS['post'] go back with tear_down().
+			// The product global, the ProductsStore statics and the Interactivity store
+			// do not, so they are restored here -- and asserted on below.
 			try {
-				if ( $product instanceof \WC_Product ) {
-					$product_id = $product->get_id();
-					/** @var int[] $comment_ids */
-					$comment_ids = get_comments(
-						array(
-							'fields'  => 'ids',
-							'post_id' => $product_id,
-							'type'    => 'review',
-						)
-					);
-
-					foreach ( $comment_ids as $comment_id ) {
-						wp_delete_comment( $comment_id, true );
-					}
-
-					\WC_Comments::clear_transients( $product_id );
-					wc_delete_product_transients( $product_id );
-					clean_post_cache( $product_id );
-					$product->delete( true );
-					clean_post_cache( $product_id );
-				}
-
-				if ( null === $previous_reviews_setting ) {
-					delete_option( $option_name );
-				} else {
-					update_option( $option_name, $previous_reviews_setting );
-				}
-
-				if ( $had_global_post ) {
-					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test global after registered block rendering.
-					$GLOBALS['post'] = $previous_global_post;
-				} else {
-					unset( $GLOBALS['post'] );
-				}
-
 				if ( $had_global_product ) {
 					$GLOBALS['product'] = $previous_global_product;
 				} else {
