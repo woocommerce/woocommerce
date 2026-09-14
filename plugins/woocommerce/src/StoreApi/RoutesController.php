@@ -71,10 +71,6 @@ class RoutesController {
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
-			'private'       => [
-				// This route should be moved outside of the Store API namespace.
-				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
-			],
 			'shopper_lists' => [
 				// Gated by ShopperListsController — registered only when at least one shopper-list feature is enabled.
 				Routes\V1\ShopperLists::IDENTIFIER       => Routes\V1\ShopperLists::class,
@@ -91,7 +87,6 @@ class RoutesController {
 	public function register_all_routes() {
 		$this->register_routes( 'v1', self::$api_namespace );
 		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
-		$this->register_routes( 'private', 'wc/private' );
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled() ) {
 			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );

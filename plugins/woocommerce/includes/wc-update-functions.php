@@ -3994,3 +3994,18 @@ function wc_update_11203_normalize_stock_notification_emails() {
 
 	return false;
 }
+
+/**
+ * Remove cached PTK patterns and their scheduled fetch actions.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_remove_ptk_patterns() {
+	delete_option( 'ptk_patterns' );
+	delete_option( 'last_fetch_patterns_request' );
+	delete_transient( 'ptk_patterns' );
+	delete_transient( 'wc_ptk_pattern_store_warning' );
+	as_unschedule_all_actions( 'fetch_patterns' );
+}

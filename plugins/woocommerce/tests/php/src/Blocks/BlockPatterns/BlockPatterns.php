@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockPatterns;
 
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
-use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 
 /**
@@ -27,14 +26,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 */
 	private $pattern_registry;
 
-
-	/**
-	 * Holds the mock PTKPatternsStore instance.
-	 *
-	 * @var PTKPatternsStore The mock PTKPatternsStore.
-	 */
-	private $ptk_patterns_store;
-
 	/**
 	 * Sets up a new TestedBlockPatterns so it can be tested.
 	 */
@@ -43,14 +34,12 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		delete_site_transient( 'woocommerce_blocks_patterns' );
 
-		$package                  = new Package( '0.1.0', __DIR__ );
-		$this->pattern_registry   = $this->createMock( PatternRegistry::class );
-		$this->ptk_patterns_store = $this->createMock( PTKPatternsStore::class );
+		$package                = new Package( '0.1.0', __DIR__ );
+		$this->pattern_registry = $this->createMock( PatternRegistry::class );
 
 		$this->block_patterns = new TestedBlockPatterns(
 			$package,
-			$this->pattern_registry,
-			$this->ptk_patterns_store
+			$this->pattern_registry
 		);
 	}
 
