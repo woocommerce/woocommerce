@@ -13,6 +13,7 @@ import {
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -134,6 +135,11 @@ const CheckoutBlock = () => {
 
 describe( 'Testing Checkout', () => {
 	beforeEach( () => {
+		// Store API batch responses call these; stub so success mocks do not
+		// trip @wordpress/jest-console's console.error assertion.
+		apiFetch.setNonce = jest.fn();
+		apiFetch.setCartHash = jest.fn();
+
 		// Set up MSW handlers for cart API
 		server.use(
 			http.get( '/wc/store/v1/cart', () => {
@@ -144,6 +150,9 @@ describe( 'Testing Checkout', () => {
 			// need to clear the store resolution state between tests.
 			dispatch( cartStore ).invalidateResolutionForStore();
 			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
+			dispatch( checkoutStore ).__internalSetIdle();
+			dispatch( checkoutStore ).__internalSetHasError( false );
+			dispatch( validationStore ).clearValidationErrors();
 		} );
 
 		act( () => {
@@ -582,16 +591,41 @@ describe( 'Testing Checkout', () => {
 			'Coupon code "5fixedcheckout" has already been applied.';
 		let checkoutRequests = 0;
 
+		// Reject apply-coupon only. Other batch calls (update-customer after
+		// address edits) must succeed, or Place Order stays disabled while
+		// checkout isCalculating.
 		server.use(
-			http.post( '/wc/store/v1/batch', () =>
-				HttpResponse.json(
-					{
-						code: 'woocommerce_rest_cart_coupon_error',
-						message: couponError,
-						data: { status: 400, details: { cart: couponError } },
-					},
-					{ status: 400 }
-				)
+			http.post(
+				'/wc/store/v1/batch',
+				async ( { request }: { request: Request } ) => {
+					const rawBody = await request.text();
+					const body = JSON.parse( rawBody ) as {
+						requests?: unknown[];
+					};
+					const requests = body.requests ?? [];
+
+					if ( rawBody.includes( 'apply-coupon' ) ) {
+						return HttpResponse.json(
+							{
+								code: 'woocommerce_rest_cart_coupon_error',
+								message: couponError,
+								data: {
+									status: 400,
+									details: { cart: couponError },
+								},
+							},
+							{ status: 400 }
+						);
+					}
+
+					return HttpResponse.json( {
+						responses: requests.map( () => ( {
+							status: 200,
+							body: previewCart,
+							headers: {},
+						} ) ),
+					} );
+				}
 			),
 			http.post( '/wc/store/v1/checkout', () => {
 				checkoutRequests++;
@@ -669,10 +703,17 @@ describe( 'Testing Checkout', () => {
 			);
 		} );
 
+		// Address edits debounce a Store API update (~1.5s). Wait until Place
+		// Order is clickable so slower CI runners do not race isCalculating.
+		const placeOrderButton = screen.getByRole( 'button', {
+			name: /Place order/i,
+		} );
+		await waitFor( () => expect( placeOrderButton ).toBeEnabled(), {
+			timeout: 5000,
+		} );
+
 		await act( async () => {
-			await user.click(
-				screen.getByRole( 'button', { name: /Place order/i } )
-			);
+			await user.click( placeOrderButton );
 		} );
 
 		// The coupon failure must not stop the order from being sent.
@@ -682,5 +723,5 @@ describe( 'Testing Checkout', () => {
 		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
 		// Placing the order drops the stale coupon message.
 		expect( screen.queryByText( couponError ) ).not.toBeInTheDocument();
-	} );
+	}, 15000 );
 } );
