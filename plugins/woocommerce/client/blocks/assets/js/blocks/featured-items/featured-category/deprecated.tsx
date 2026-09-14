@@ -76,6 +76,7 @@ const v2 = {
 		...v1.attributes,
 		editMode: { type: 'boolean' },
 		height: { type: 'number' },
+		minHeight: { type: 'number' },
 		style: { type: 'object' },
 		textColor: { type: 'string' },
 		fontSize: { type: 'string' },

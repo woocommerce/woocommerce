@@ -9,6 +9,7 @@ import {
 	serialize,
 } from '@wordpress/blocks';
 import { registerCoreBlocks } from '@wordpress/block-library';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -79,6 +80,30 @@ describe( 'Featured Category automatic migration', () => {
 			},
 		} );
 	} );
+
+	it.each( [
+		[ { height: 620 }, 620 ],
+		[ { height: 620, editMode: false }, 620 ],
+		[ { minHeight: 700 }, 700 ],
+		[ { height: 620, minHeight: 500 }, 500 ],
+		[ { height: 620, minHeight: 0 }, 0 ],
+		[ {}, getSetting( 'defaultHeight', 500 ) ],
+	] as const )(
+		'preserves height when parsing %j',
+		( savedAttributes, expected ) => {
+			const block = parse(
+				'<!-- wp:woocommerce/featured-category ' +
+					JSON.stringify( { categoryId: 42, ...savedAttributes } ) +
+					' --><!-- /wp:woocommerce/featured-category -->'
+			)[ 0 ];
+			expect( block.innerBlocks[ 0 ].attributes.minHeight ).toBe(
+				expected
+			);
+			expect( block.innerBlocks[ 0 ].attributes.minHeightUnit ).toBe(
+				'px'
+			);
+		}
+	);
 
 	it.each( [ 'left', 'center', 'right' ] )(
 		'preserves %s positioning, natural image sizing and appearance',
