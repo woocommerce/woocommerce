@@ -46,9 +46,37 @@ test.describe( 'Shopper → Extensibility', () => {
 			checkoutPageObject,
 		} ) => {
 			const { page } = checkoutPageObject;
-			const country = page.getByLabel( 'Country/Region' );
-			await country.selectOption( 'United Kingdom (UK)' );
-			await country.blur();
+
+			// Fill in the address, then wait until it has reached the server. The dirty flag is
+			// not enough on its own: it is cleared by whichever push finishes first, which can
+			// be an earlier one that did not carry the address.
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await expect
+				.poll(
+					async () =>
+						page.evaluate( async () => {
+							const response = await fetch(
+								'/wp-json/wc/store/v1/cart'
+							);
+							if ( ! response.ok ) {
+								return null;
+							}
+							const cart = await response.json();
+							const postcode = cart?.shipping_address?.postcode;
+							return typeof postcode === 'string'
+								? postcode
+								: null;
+						} ),
+					{ timeout: 15000 }
+				)
+				.toBe( '90210' );
+
+			// A postcode that fails validation is never pushed, so it only exists in the browser.
+			// A country change is not usable here: picking one pushes straight away so shipping
+			// can be recalculated, which would leave nothing unpushed to overwrite.
+			const postcode = page.locator( '#shipping-postcode' );
+			await postcode.fill( 'ABCDEF' );
+			await postcode.blur();
 			await page.waitForFunction( () => {
 				return (
 					window.localStorage.getItem(
@@ -56,25 +84,26 @@ test.describe( 'Shopper → Extensibility', () => {
 					) === 'true'
 				);
 			} );
+
+			// Without the arg, the unpushed postcode is kept.
 			await page.evaluate( () =>
 				window.wc.blocksCheckout.extensionCartUpdate( {
 					namespace: 'woocommerce-blocks-test-extension-cart-update',
 				} )
 			);
-			await expect( country ).toHaveValue( 'GB' );
+			await expect( postcode ).toHaveValue( 'ABCDEF' );
 
+			// With overwriteDirtyCustomerData, the address from the server replaces it.
 			const overwriteResponse = await page.evaluate( () =>
 				window.wc.blocksCheckout.extensionCartUpdate( {
 					namespace: 'woocommerce-blocks-test-extension-cart-update',
 					overwriteDirtyCustomerData: true,
 				} )
 			);
-			expect( overwriteResponse.shipping_address.country ).not.toBe(
-				'GB'
+			expect( overwriteResponse.shipping_address.postcode ).toBe(
+				'90210'
 			);
-			await expect( country ).toHaveValue(
-				overwriteResponse.shipping_address.country
-			);
+			await expect( postcode ).toHaveValue( '90210' );
 
 			await page.evaluate( () =>
 				window.wc.blocksCheckout.extensionCartUpdate( {
