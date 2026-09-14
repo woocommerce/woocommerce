@@ -13,5 +13,9 @@
 			]
 		}
 	},
-	"include": [ "packages/*/src/**/*", "routes/**/*" ]
+	"include": [
+		"packages/*/src/**/*",
+		"packages/*/fields/**/*",
+		"routes/**/*"
+	]
 }

@@ -23,7 +23,6 @@ import {
 	VIEW_CONFIG_ARGS,
 } from './constants';
 import { unlock } from './unlock';
-import './style.scss';
 
 type Settings = Record< string, string >;
 type Setting = {
@@ -138,13 +137,23 @@ function SettingsForm( {
 				</>
 			}
 		>
-			<DataForm
-				data={ data }
-				fields={ fields }
-				form={ form }
-				validity={ validity }
-				onChange={ onChange }
-			/>
+			<div
+				style={ {
+					boxSizing: 'border-box',
+					marginInline: 'auto',
+					maxWidth: '680px',
+					padding: '24px',
+					width: '100%',
+				} }
+			>
+				<DataForm
+					data={ data }
+					fields={ fields }
+					form={ form }
+					validity={ validity }
+					onChange={ onChange }
+				/>
+			</div>
 		</Page>
 	);
 }
@@ -180,20 +189,14 @@ function SettingsStage() {
 		[ records, fields ]
 	);
 
-	if ( loadError ) {
-		return (
-			<Notice status="error" isDismissible={ false }>
-				{ loadError.message }
-			</Notice>
-		);
-	}
-
-	if ( ! form || ! records ) {
-		return null;
-	}
+	console.log( fields, form );
 
 	return (
-		<SettingsForm settings={ settings } fields={ fields } form={ form } />
+		<SettingsForm
+			settings={ settings }
+			fields={ fields }
+			form={ form ?? {} }
+		/>
 	);
 }
 

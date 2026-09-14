@@ -1,7 +1,7 @@
 export const SETTINGS_ENTITY = {
 	kind: 'woo_settings',
 	name: 'product',
-	baseURL: '/wc/v4/settings/general',
+	baseURL: '/wc/v4/settings/products',
 	key: 'id',
 };
 export const SETTINGS_QUERY = { per_page: -1 };

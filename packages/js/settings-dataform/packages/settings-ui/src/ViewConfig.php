@@ -30,7 +30,7 @@ final class ViewConfig {
 	}
 
 	/**
-	 * Add the store address and currency sections to the form.
+	 * Add the product settings cards to the form.
 	 *
 	 * @internal
 	 *
@@ -53,35 +53,84 @@ final class ViewConfig {
 					),
 					'fields' => array(
 						array(
-							'id'          => 'store-address',
-							'label'       => __( 'Store address', 'woocommerce' ),
-							'description' => __( 'The location used to calculate tax and shipping rates.', 'woocommerce' ),
-							'layout'      => array(
-								'type'     => 'card',
-								'isOpened' => true,
+							'id'       => 'shop-pages',
+							'label'    => __( 'Shop pages', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
 							),
-							'children'    => array(
-								'woocommerce_store_address',
-								'woocommerce_store_address_2',
-								'woocommerce_store_city',
-								'woocommerce_default_country',
-								'woocommerce_store_postcode',
+							'children' => array(
+								'woocommerce_shop_page_id',
+								'woocommerce_cart_redirect_after_add',
+								'woocommerce_enable_ajax_add_to_cart',
+								'woocommerce_placeholder_image',
 							),
 						),
 						array(
-							'id'          => 'currency-options',
-							'label'       => __( 'Currency options', 'woocommerce' ),
-							'description' => __( 'Choose your currency and how prices appear in your store.', 'woocommerce' ),
-							'layout'      => array(
-								'type'     => 'card',
-								'isOpened' => true,
+							'id'       => 'measurements',
+							'label'    => __( 'Measurements', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
 							),
-							'children'    => array(
-								'woocommerce_currency',
-								'woocommerce_currency_pos',
-								'woocommerce_price_thousand_sep',
-								'woocommerce_price_decimal_sep',
-								'woocommerce_price_num_decimals',
+							'children' => array(
+								'woocommerce_weight_unit',
+								'woocommerce_dimension_unit',
+							),
+						),
+						array(
+							'id'       => 'reviews',
+							'label'    => __( 'Reviews', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
+							),
+							'children' => array(
+								'woocommerce_enable_reviews',
+								'woocommerce_review_rating_verification_label',
+								'woocommerce_review_rating_verification_required',
+								'woocommerce_enable_review_rating',
+								'woocommerce_review_rating_required',
+							),
+						),
+						array(
+							'id'       => 'stock-management',
+							'label'    => __( 'Stock management', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
+							),
+							'children' => array(
+								'woocommerce_manage_stock',
+								'woocommerce_hold_stock_minutes',
+							),
+						),
+						array(
+							'id'       => 'stock-notifications',
+							'label'    => __( 'Stock notifications', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
+							),
+							'children' => array(
+								'woocommerce_notify_low_stock',
+								'woocommerce_notify_no_stock',
+								'woocommerce_notify_backorder',
+								'woocommerce_stock_email_recipient',
+								'woocommerce_notify_low_stock_amount',
+								'woocommerce_notify_no_stock_amount',
+							),
+						),
+						array(
+							'id'       => 'stock-display',
+							'label'    => __( 'Stock display', 'woocommerce' ),
+							'layout'   => array(
+								'type'          => 'card',
+								'isCollapsible' => false,
+							),
+							'children' => array(
+								'woocommerce_hide_out_of_stock_items',
+								'woocommerce_stock_format',
 							),
 						),
 					),

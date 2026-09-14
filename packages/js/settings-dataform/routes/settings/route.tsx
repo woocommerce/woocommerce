@@ -3,11 +3,13 @@
  */
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch, resolveSelect } from '@wordpress/data';
+import '../../packages/settings-ui/fields/product';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_ENTITY, SETTINGS_ARGS, VIEW_CONFIG_ARGS } from './constants';
+import { stage } from './stage';
 
 export const route = {
 	beforeLoad: async () => {
@@ -19,7 +21,8 @@ export const route = {
 		// Let the stage handle request errors and missing form configuration.
 		await Promise.allSettled( [
 			getEntityRecords( ...SETTINGS_ARGS ),
-			getViewConfig( ...VIEW_CONFIG_ARGS ),
+			// getViewConfig( ...VIEW_CONFIG_ARGS ),
 		] );
 	},
+	stage,
 };

@@ -6,9 +6,13 @@
 	"main": "build/index.js",
 	"module": "build-module/index.mjs",
 	"wpCopyFiles": {
-		"files": [ "src/ViewConfig.php" ]
+		"files": [
+			"src/ViewConfig.php"
+		]
 	},
 	"dependencies": {
+		"@wordpress/data": "catalog:wp-min",
+		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
