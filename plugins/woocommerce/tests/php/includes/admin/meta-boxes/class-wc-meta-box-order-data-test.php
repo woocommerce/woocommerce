@@ -578,13 +578,25 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
 		$_POST = array(
-			'order_status'      => 'wc-' . $status,
-			'_payment_method'   => $order->get_payment_method(),
-			'customer_user'     => 0,
-			'order_date'        => '2018-12-14',
-			'order_date_hour'   => '13',
-			'order_date_minute' => '14',
-			'order_date_second' => '15',
+			'order_status'        => 'wc-' . $status,
+			'_payment_method'     => $order->get_payment_method(),
+			'customer_user'       => 0,
+			'order_date'          => '2018-12-14',
+			'order_date_hour'     => '13',
+			'order_date_minute'   => '14',
+			'order_date_second'   => '15',
+			// Billing fields on a guest order go through their own branch in save(),
+			// guarded on the customer being a guest or a valid user. Posting them here
+			// is what covers the deleted "create a simple guest order" E2E title; the
+			// surviving browser test only asserts billing after picking a customer.
+			'_billing_first_name' => 'Guest',
+			'_billing_last_name'  => 'Buyer',
+			'_billing_company'    => 'Guest Co',
+			'_billing_address_1'  => '1 Guest Street',
+			'_billing_city'       => 'Guestville',
+			'_billing_postcode'   => '90210',
+			'_billing_email'      => 'guest.buyer@example.com',
+			'_billing_phone'      => '555-0100',
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
@@ -602,6 +614,13 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $status, $saved_order->get_status() );
 		$this->assertSame( '2018-12-14 13:14:15', $date_created->date( 'Y-m-d H:i:s' ) );
+
+		$this->assertSame( 'Guest', $saved_order->get_billing_first_name( 'edit' ) );
+		$this->assertSame( 'Buyer', $saved_order->get_billing_last_name( 'edit' ) );
+		$this->assertSame( 'Guest Co', $saved_order->get_billing_company( 'edit' ) );
+		$this->assertSame( '1 Guest Street', $saved_order->get_billing_address_1( 'edit' ) );
+		$this->assertSame( 'guest.buyer@example.com', $saved_order->get_billing_email( 'edit' ) );
+		$this->assertSame( '555-0100', $saved_order->get_billing_phone( 'edit' ) );
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$this->assertNotEmpty( $notes, 'The status transition should create an order note.' );
