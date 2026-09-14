@@ -451,7 +451,8 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Remove temporary mappings between CSV IDs and imported products.
 	 *
-	 * Clear both ends of a run because abandoned imports can leave markers behind.
+	 * The last import batch clears them so a run abandoned during cleanup leaves none behind.
+	 * Markers from a run abandoned earlier are kept so a retry of the same file skips rows already imported.
 	 * Concurrent imports are unsupported: markers and placeholder cleanup are shared site-wide.
 	 */
 	private static function delete_original_id_markers(): void {
@@ -563,7 +564,6 @@ class WC_Product_CSV_Importer_Controller {
 
 			if ( 0 === $params['start_pos'] ) {
 				self::release_stranded_cleanup_claims();
-				self::delete_original_id_markers();
 			}
 
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -572,6 +572,10 @@ class WC_Product_CSV_Importer_Controller {
 			$results          = $importer->import();
 			$percent_complete = $importer->get_percent_complete();
 			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
+
+			if ( 100 === $percent_complete ) {
+				self::delete_original_id_markers();
+			}
 
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 

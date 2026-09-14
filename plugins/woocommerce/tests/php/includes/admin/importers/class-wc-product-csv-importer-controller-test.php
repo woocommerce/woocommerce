@@ -8,6 +8,11 @@
 class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * A variable product and a variation that references it by CSV ID.
+	 */
+	private const MARKER_CSV = "ID,Type,SKU,Name,Parent\n4242,variable,marker-parent,Marker parent,\n4243,variation,marker-variation,Marker variation,id:4242\n";
+
+	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
@@ -469,21 +474,20 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The first request of an import run should clear mapping markers an abandoned run left behind.
+	 * @testdox The last import batch should clear mapping markers before handing over to cleanup.
 	 */
-	public function test_first_request_of_a_run_clears_markers_left_by_an_abandoned_run(): void {
-		$product_id = WC_Helper_Product::create_simple_product()->get_id();
-		add_post_meta( $product_id, '_original_id', '4242' );
+	public function test_last_import_batch_clears_markers_before_cleanup(): void {
+		global $wpdb;
 
 		$response     = $this->dispatch_import_request( '0' );
 		$parent_id    = wc_get_product_id_by_sku( 'marker-parent' );
 		$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
 
+		$this->assertSame( 'cleanup:0', $response['data']['position'] );
 		$this->assertSame( 1, $response['data']['imported'] );
 		$this->assertSame( 1, $response['data']['imported_variations'] );
-		$this->assertNotSame( $product_id, $parent_id );
 		$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
-		$this->assertSame( array(), get_post_meta( $product_id, '_original_id', false ) );
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_original_id'" ) );
 	}
 
 	/**
@@ -513,6 +517,38 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Retrying an abandoned run with the same CSV should skip rows without a SKU that the abandoned run imported.
+	 */
+	public function test_retrying_an_abandoned_run_does_not_duplicate_rows_without_a_sku(): void {
+		$csv = "ID,Type,SKU,Name,Parent\n5001,simple,,Retry first,\n5002,simple,,Retry second,\n";
+
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0', $csv );
+		} finally {
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+
+		// The run is abandoned here, before the second row and the cleanup requests.
+		$this->assertIsNumeric( $response['data']['position'] );
+		$this->assertSame( 1, $response['data']['imported'] );
+
+		$response = $this->dispatch_import_request( '0', $csv );
+
+		$first_products = wc_get_products(
+			array(
+				'name'   => 'Retry first',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( 1, $response['data']['skipped'], 'The row the abandoned run imported should be skipped.' );
+		$this->assertSame( 1, $response['data']['imported'], 'Only the row the abandoned run did not reach should be imported.' );
+		$this->assertCount( 1, $first_products, 'The retry should not duplicate the product.' );
+	}
+
+	/**
 	 * Filter callback that shrinks the import batch to a single row.
 	 *
 	 * @return int
@@ -527,11 +563,12 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 * The AJAX wp_die() handler throws an Error because dispatch_ajax() catches Exception.
 	 *
 	 * @param string $position Import position to request.
+	 * @param string $csv      CSV contents to import.
 	 * @return array
 	 */
-	private function dispatch_import_request( string $position ): array {
+	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV ): array {
 		$nonce = wp_create_nonce( 'wc-product-import' );
-		$file  = $this->write_import_csv();
+		$file  = $this->write_import_csv( $csv );
 
 		$_REQUEST['security'] = $nonce;
 		$_POST['security']    = $nonce;
@@ -583,13 +620,14 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	/**
 	 * Write the test CSV to the uploads directory, the only place the importer accepts a file from.
 	 *
+	 * @param string $csv CSV contents to write.
 	 * @return string
 	 */
-	private function write_import_csv(): string {
+	private function write_import_csv( string $csv ): string {
 		$uploads = wp_upload_dir();
 		$path    = trailingslashit( $uploads['basedir'] ) . 'wc-product-import-marker-test.csv';
 
-		file_put_contents( $path, "ID,Type,SKU,Name,Parent\n4242,variable,marker-parent,Marker parent,\n4243,variation,marker-variation,Marker variation,id:4242\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
+		file_put_contents( $path, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
 
 		return $path;
 	}
