@@ -120,7 +120,13 @@ const rules = Object.fromEntries(
 
 		// Postal conventions let a postcode carry its ISO country code, and
 		// wc_format_postcode() strips the separator after it (MD-2001 -> MD2001).
-		const pattern = `(?:${ countryCode })?${ override ?? upstream }`;
+		const selectedRule = override ?? upstream;
+		const hasCountryPrefix = new RegExp(
+			`^(?:\\((?:\\?:)?)?${ countryCode }`
+		).test( selectedRule );
+		const pattern = hasCountryPrefix
+			? selectedRule
+			: `(?:${ countryCode })?${ selectedRule }`;
 
 		// PHP wraps the rule in ~ delimiters.
 		if ( pattern.includes( '~' ) ) {
