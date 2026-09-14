@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Warn in the system status report when HPOS order metadata is unusually large relative to the order count.
