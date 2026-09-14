@@ -61,4 +61,45 @@ class ProductDescriptionUtilsTest extends \WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
 	}
+
+	/**
+	 * @testdox guarded_format() does not invoke the formatter for a password-protected product.
+	 */
+	public function test_guarded_format_blocks_password_protected_product_description(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_post_password( 'secret' );
+		$product->save();
+		$formatter_called = false;
+
+		$result = ProductDescriptionUtils::guarded_format(
+			$product,
+			function () use ( &$formatter_called ) {
+				$formatter_called = true;
+
+				return 'Protected description';
+			}
+		);
+
+		$this->assertSame( '', $result, 'Protected product descriptions should not be formatted before password entry.' );
+		$this->assertFalse( $formatter_called, 'The formatter should not receive the description before password entry.' );
+	}
+
+	/**
+	 * @testdox guarded_format() protects variation descriptions using the parent product password.
+	 */
+	public function test_guarded_format_blocks_description_when_parent_is_password_protected(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_post_password( 'secret' );
+		$product->save();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$result = ProductDescriptionUtils::guarded_format(
+			$variation,
+			function () {
+				return 'Protected variation description';
+			}
+		);
+
+		$this->assertSame( '', $result, 'A variation description should not render until the parent product password is entered.' );
+	}
 }

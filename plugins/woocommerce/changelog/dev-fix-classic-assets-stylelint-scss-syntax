@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the classic-assets stylelint setup to parse SCSS and clean up the violations it surfaced. Tooling and source-formatting only, no functional CSS changes.
