@@ -487,7 +487,6 @@ class Cart extends ControllerTestCase {
 
 			$chosen_methods  = WC()->session->get( 'chosen_shipping_methods', array() );
 			$expected_chosen = $expected_selected_rate_key ? $topology['rate_ids'][ $expected_selected_rate_key ] : '';
-			$this->assertIsArray( $chosen_methods, 'A serialized package should persist indexed shipping choices.' );
 			$this->assertArrayHasKey( 0, $chosen_methods, 'A serialized package should persist a choice for package zero.' );
 			$this->assertSame( $expected_chosen, $chosen_methods[0], 'The session should persist the same method selected in the response.' );
 		} finally {
