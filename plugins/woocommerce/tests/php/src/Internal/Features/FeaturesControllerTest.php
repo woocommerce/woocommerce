@@ -342,6 +342,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
+		// `change_feature_enable` reports whether `update_option` wrote anything, so it
+		// returns false when the option already reads `yes`. Start from no option at
+		// all, so the assertion below measures the transition rather than whatever an
+		// earlier test may have committed. The `finally` block restores the old value.
+		delete_option( $feature_option_name );
+
 		try {
 			$real_sut = new FeaturesController();
 			$real_sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
