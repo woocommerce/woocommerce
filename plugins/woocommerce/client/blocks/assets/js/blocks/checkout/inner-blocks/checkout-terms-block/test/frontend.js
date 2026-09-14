@@ -127,14 +127,16 @@ describe( 'FrontendBlock', () => {
 		expect( actionCreators.clearValidationError ).toHaveBeenCalledTimes(
 			2
 		);
-		expect( actionCreators.clearValidationError ).toHaveBeenNthCalledWith(
-			1,
-			expect.stringMatching( /terms-and-conditions-\d/ )
-		);
-		expect( actionCreators.clearValidationError ).toHaveBeenNthCalledWith(
-			2,
-			expect.stringMatching( /terms-and-conditions-\d/ )
-		);
+
+		const [ [ cleanupId ], [ checkedId ] ] =
+			actionCreators.clearValidationError.mock.calls;
+
+		// The component derives one `validationErrorId` and hands it to both
+		// the effect cleanup and the checked branch. Matching each call
+		// against the pattern separately would pass even if the two ids
+		// diverged, so assert the shape once and then that both calls agree.
+		expect( cleanupId ).toMatch( /^terms-and-conditions-\d+$/ );
+		expect( checkedId ).toBe( cleanupId );
 	} );
 
 	it( 'Renders and describes the validation error when the checkbox is required and unchecked', async () => {
