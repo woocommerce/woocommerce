@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { createSlotFill, Button } from '@wordpress/components';
+import { createSlotFill, Button, Notice } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
-import { useEffect, useState } from '@wordpress/element';
+import { lazy, Suspense, useEffect, useState } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -13,10 +13,47 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
-import { ListView } from './settings-email-listing-listview';
+import type { ListView as ListViewComponent } from './settings-email-listing-listview';
 import { recreateEmailPostRequest } from './settings-email-listing-data';
 import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { VIEWED_FROM_EMAIL_LIST } from '../wp-admin-scripts/email-editor-integration/tracks/build-shared-payload';
+
+// Shown in place of the list when its chunk fails to load. Without it the
+// failure would unmount the whole slot, description and button included.
+const ListViewLoadError: typeof ListViewComponent = () => (
+	<Notice status="error" isDismissible={ false }>
+		{ __(
+			'The email list could not be loaded. Reload the page to try again.',
+			'woocommerce'
+		) }
+	</Notice>
+);
+
+// The list view carries the DataViews runtime, so it loads as its own chunk.
+// Only this fill renders it, and only on the Emails tab with the block email
+// editor enabled. Its stylesheet is a separate chunk picked by text direction,
+// because the chunk runtime bypasses the RTL swap WordPress applies to
+// registered styles. Both are awaited, so the list never renders unstyled.
+const ListView = lazy( () =>
+	Promise.all( [
+		import(
+			/* webpackChunkName: "settings-email-listing" */ './settings-email-listing-listview'
+		),
+		isRTL()
+			? import(
+					/* webpackChunkName: "settings-email-listing-styles-rtl" */ './settings-email-listing-rtl.scss'
+			  )
+			: import(
+					/* webpackChunkName: "settings-email-listing-styles" */ './settings-email-listing.scss'
+			  ),
+	] )
+		.then( ( [ module ] ) => ( { default: module.ListView } ) )
+		.catch( ( error ) => {
+			// eslint-disable-next-line no-console
+			console.error( error );
+			return { default: ListViewLoadError };
+		} )
+);
 
 export type Recipients = {
 	to: string;
@@ -162,6 +199,14 @@ const EditTemplateButton = ( {
 	);
 };
 
+// Same look as the server-rendered placeholder the slot shows before this
+// fill mounts, so the switch to React is not visible.
+const ListViewPlaceholder = () => (
+	<div className="woocommerce-email-listing-placeholder" role="status">
+		<p>{ __( 'Loading…', 'woocommerce' ) }</p>
+	</div>
+);
+
 export const EmailListingFill: React.FC< {
 	emailTypes: EmailType[];
 	editTemplateUrl: string | null;
@@ -220,7 +265,9 @@ export const EmailListingFill: React.FC< {
 					templateSessionEmailTypeId={ emailTypes[ 0 ]?.id ?? null }
 				/>
 			</div>
-			<ListView emailTypes={ emailTypes } />
+			<Suspense fallback={ <ListViewPlaceholder /> }>
+				<ListView emailTypes={ emailTypes } />
+			</Suspense>
 		</Fill>
 	);
 };
