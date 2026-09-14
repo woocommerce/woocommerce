@@ -390,4 +390,40 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
 		);
 	}
+
+	/**
+	 * @testdox Adds the password form when a pattern contains Single Product blocks.
+	 */
+	public function test_replace_pattern_with_single_product_blocks_with_input_form() {
+		register_block_pattern(
+			'test-single-product-pattern',
+			array(
+				'title'       => 'Test Single Product Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:woocommerce/product-price /-->',
+			)
+		);
+
+		$default_single_product_template = '
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:pattern {"slug":"test-single-product-pattern"} /-->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = sprintf(
+			'
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:html -->%s<!-- /wp:html -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->',
+			get_the_password_form()
+		);
+
+		$result = SingleProductTemplate::add_password_form(
+			$default_single_product_template
+		);
+
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
+		);
+	}
 }
