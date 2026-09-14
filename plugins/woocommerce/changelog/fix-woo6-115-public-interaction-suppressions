@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product review ratings posted as a fraction below one, such as 0.5, are no longer stored as a rating of 0.

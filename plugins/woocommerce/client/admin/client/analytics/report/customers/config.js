@@ -49,7 +49,7 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 						chartMode: 'item-comparison',
 						path: [ 'select_customer' ],
 						settings: {
-							type: 'customers',
+							type: 'customerNames',
 							param: 'customers',
 							getLabels: getCustomerLabels,
 							labels: {
@@ -127,7 +127,7 @@ export const advancedFilters = applyFilters(
 				],
 				input: {
 					component: 'Search',
-					type: 'customers',
+					type: 'customerNames',
 					getLabels: getRequestByIdString(
 						NAMESPACE + '/customers',
 						( customer ) => ( {

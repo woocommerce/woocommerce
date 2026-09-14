@@ -92,8 +92,7 @@
 	"autoload": {
 		"exclude-from-classmap": [
 			"includes/legacy",
-			"includes/libraries",
-			"src/Internal/Api/DesignTime"
+			"includes/libraries"
 		],
 		"classmap": [
 			"includes/rest-api"
@@ -109,15 +108,13 @@
 			"src/StoreApi/deprecated.php",
 			"src/StoreApi/functions.php",
 			"src/Blocks/Domain/Services/functions.php",
-			"src/Deprecated.php",
-			"src/Api/Infrastructure/Schema/aliases.php"
+			"src/Deprecated.php"
 		]
 	},
 	"autoload-dev": {
 		"psr-4": {
 			"Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
-			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/",
-			"Automattic\\WooCommerce\\Api\\Infrastructure\\DesignTime\\": "bin/api-builder/"
+			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
 		},
 		"classmap": [
 			"tests/legacy/unit-tests/rest-api/Helpers"

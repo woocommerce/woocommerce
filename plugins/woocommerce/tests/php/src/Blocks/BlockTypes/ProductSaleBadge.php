@@ -10,6 +10,95 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 class ProductSaleBadge extends \WP_UnitTestCase {
 
 	/**
+	 * @testdox Product Sale Badge does not render for a regular-price product.
+	 */
+	public function test_product_sale_badge_does_not_render_for_regular_price(): void {
+		global $product;
+
+		$had_product      = array_key_exists( 'product', $GLOBALS );
+		$original_product = $had_product ? $product : null;
+		$product          = new \WC_Product_Simple();
+
+		try {
+			$product->set_name( 'Regular Product' );
+			$product->set_regular_price( '10' );
+			$product_id = $product->save();
+
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge /--><!-- /wp:woocommerce/single-product -->' );
+
+			$this->assertStringNotContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The outer Sale Badge block should be omitted.' );
+			$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge', $markup, 'The Sale Badge component should be omitted.' );
+			$this->assertStringNotContainsString( 'Sale', $markup, 'Sale text should be omitted.' );
+		} finally {
+			if ( $product->get_id() ) {
+				$product->delete( true );
+			}
+
+			if ( $had_product ) {
+				$product = $original_product;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product Sale Badge renders the $align alignment class.
+	 *
+	 * @dataProvider provider_product_sale_badge_alignment
+	 * @param string $align Alignment value.
+	 */
+	public function test_product_sale_badge_renders_alignment_class( string $align ): void {
+		global $product;
+
+		$had_product      = array_key_exists( 'product', $GLOBALS );
+		$original_product = $had_product ? $product : null;
+		$product          = new \WC_Product_Simple();
+
+		try {
+			$product->set_name( 'Sale Product' );
+			$product->set_regular_price( '10' );
+			$product->set_sale_price( '5' );
+			$product_id = $product->save();
+
+			$markup         = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge {"align":"' . $align . '"} /--><!-- /wp:woocommerce/single-product -->' );
+			$expected_class = 'wc-block-components-product-sale-badge--align-' . $align;
+
+			$this->assertStringContainsString( $expected_class, $markup );
+			foreach ( array_diff( array( 'left', 'center', 'right' ), array( $align ) ) as $other_align ) {
+				$this->assertStringNotContainsString(
+					'wc-block-components-product-sale-badge--align-' . $other_align,
+					$markup,
+					'The Sale Badge should contain only its requested alignment class.'
+				);
+			}
+		} finally {
+			if ( $product->get_id() ) {
+				$product->delete( true );
+			}
+
+			if ( $had_product ) {
+				$product = $original_product;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+		}
+	}
+
+	/**
+	 * Alignment values for the Sale Badge.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_product_sale_badge_alignment(): array {
+		return array(
+			'left'   => array( 'left' ),
+			'center' => array( 'center' ),
+			'right'  => array( 'right' ),
+		);
+	}
+
+	/**
 	 * Tests that the Product Sale Badge block is rendered correctly on the Single Product Block
 	 */
 	public function test_product_sale_badge_render_single_product_block() {

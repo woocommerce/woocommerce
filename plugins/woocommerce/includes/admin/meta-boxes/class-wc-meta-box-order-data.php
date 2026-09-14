@@ -610,7 +610,7 @@ class WC_Meta_Box_Order_Data {
 							<p class="form-field form-field-wide">
 								<label><?php esc_html_e( 'Payment method:', 'woocommerce' ); ?></label>
 								<select name="_payment_method" id="_payment_method" class="first">
-									<option value=""><?php esc_html_e( 'N/A', 'woocommerce' ); ?></option>
+									<option value=""><?php esc_html_e( 'All methods available', 'woocommerce' ); ?></option>
 									<?php
 									$found_method = false;
 

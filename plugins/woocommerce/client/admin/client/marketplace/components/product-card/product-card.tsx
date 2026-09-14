@@ -94,6 +94,9 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		return SPONSORED_PRODUCT_LABEL === product.label;
 	}
 
+	const showSponsoredLabel = ! isLoading && isSponsored();
+	const showVendorDetails = showVendor || showSponsoredLabel;
+
 	/**
 	 * Sponsored products with a primary_color set have that color applied as a dynamically-colored stripe at the top of the card.
 	 * In an ideal world this could be set in a data- attribute and we'd use CSS calc() and attr() to get it, but
@@ -294,16 +297,21 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		);
 	};
 
+	const qualityBadge =
+		! isLoading && props.product ? (
+			<QualityBadge product={ props.product } />
+		) : null;
+
 	const footer = ! isBusinessService ? (
 		<footer className="woocommerce-marketplace__product-card__footer">
 			{ isLoading && (
 				<div className="woocommerce-marketplace__product-card__price" />
 			) }
+			{ /* Regular cards show the badge on its own row above the price;
+			     compact cards show it between the title and the price. */ }
+			{ ! isCompact && qualityBadge }
 			{ ! isLoading && props.product && (
-				<>
-					<ProductCardFooter product={ props.product } />
-					<QualityBadge product={ props.product } />
-				</>
+				<ProductCardFooter product={ props.product } />
 			) }
 		</footer>
 	) : null;
@@ -346,31 +354,34 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 								<span className="woocommerce-marketplace__product-card__vendor" />
 							</p>
 						) }
-						{ showVendor && (
+						{ showVendorDetails && (
 							<p className="woocommerce-marketplace__product-card__vendor-details">
-								{ productVendor && (
+								{ showVendor && productVendor && (
 									<span className="woocommerce-marketplace__product-card__vendor">
 										<span>
-											{ __( 'By ', 'woocommerce' ) }
-										</span>
+											{ __( 'By', 'woocommerce' ) }
+										</span>{ ' ' }
 										{ productVendor }
 									</span>
 								) }
-								{ productVendor && isSponsored() && (
-									<span
-										aria-hidden="true"
-										className="woocommerce-marketplace__product-card__vendor-details__separator"
-									>
-										·
-									</span>
-								) }
-								{ isSponsored() && (
+								{ showVendor &&
+									productVendor &&
+									showSponsoredLabel && (
+										<span
+											aria-hidden="true"
+											className="woocommerce-marketplace__product-card__vendor-details__separator"
+										>
+											·
+										</span>
+									) }
+								{ showSponsoredLabel && (
 									<span className="woocommerce-marketplace__product-card__sponsored-label">
 										{ __( 'Sponsored', 'woocommerce' ) }
 									</span>
 								) }
 							</p>
 						) }
+						{ isCompact && qualityBadge }
 						{ isCompact && footer }
 					</div>
 				</div>

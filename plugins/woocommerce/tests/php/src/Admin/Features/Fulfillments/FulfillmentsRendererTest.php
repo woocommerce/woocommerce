@@ -256,7 +256,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test bulk action for fulfilling orders with all items in an unfullfilled fulfillment.
+	 * Test bulk action for fulfilling orders with all items in an unfulfilled fulfillment.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_unfulfilled_fulfillment() {
 		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
@@ -303,7 +303,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test bulk action for fulfilling orders with all items in a fullfilled fulfillment.
+	 * Test bulk action for fulfilling orders with all items in a fulfilled fulfillment.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_fulfilled_fulfillment() {
 		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );

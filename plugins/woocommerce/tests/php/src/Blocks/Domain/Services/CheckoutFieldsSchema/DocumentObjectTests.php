@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services\CheckoutFieldsSche
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Package;
 use Opis\JsonSchema\{
@@ -27,12 +28,19 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	 * to test the DocumentObject class.
 	 */
 	use CheckoutTrait;
+	use DraftOrderTrait;
 
 	/**
 	 * Checkout fields controller.
 	 * @var CheckoutFields
 	 */
 	protected $additional_fields_controller;
+
+	/**
+	 * Current order, needed for the trait.
+	 * @var \WC_Order|null
+	 */
+	private $order = null;
 
 	/**
 	 * Fixture data.
