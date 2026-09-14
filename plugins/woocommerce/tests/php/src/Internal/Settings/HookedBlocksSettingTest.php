@@ -115,7 +115,9 @@ class HookedBlocksSettingTest extends WC_Unit_Test_Case {
 	public function test_install_does_not_store_virtual_field(): void {
 		switch_theme( 'twentytwentytwo' );
 
-		( new \ReflectionMethod( \WC_Install::class, 'create_options' ) )->invoke( null );
+		$method = new \ReflectionMethod( \WC_Install::class, 'create_options' );
+		$method->setAccessible( true );
+		$method->invoke( null );
 
 		$this->assertNull( $this->get_stored_field_value(), 'The virtual field should not get a default option on install' );
 	}
