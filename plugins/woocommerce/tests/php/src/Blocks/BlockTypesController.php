@@ -22,6 +22,16 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	private $block_types_controller;
 
 	/**
+	 * Block registered through the real registration path, so register_block_type_args fires on it.
+	 */
+	private const PROBE_BLOCK = 'woocommerce/classic-theme-fallback-probe';
+
+	/**
+	 * Style handle the probe block declares, registered without a source.
+	 */
+	private const PROBE_STYLE = 'wc-classic-theme-fallback-probe';
+
+	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -34,6 +44,142 @@ class BlockTypesController extends WC_Unit_Test_Case {
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
 		);
+	}
+
+	/**
+	 * Removes the probe block and style; the base class does not reset the block registry or the style queue.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( \WP_Block_Type_Registry::get_instance()->is_registered( self::PROBE_BLOCK ) ) {
+				unregister_block_type( self::PROBE_BLOCK );
+			}
+			wp_dequeue_style( self::PROBE_STYLE );
+			wp_deregister_style( self::PROBE_STYLE );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * @testdox Should defer a block's style until the block renders on a classic theme.
+	 */
+	public function test_classic_theme_defers_block_style_until_render(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Since WordPress 7.0, wp_load_classic_theme_block_styles_on_demand() opts classic themes into
+		// on-demand block assets at wp_default_styles priority 0, so the fallback is only live on sites that opt out.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must simulate a site that opted out of on-demand block assets.' );
+
+		$block_type = $this->register_probe_block();
+
+		$this->assertSame( array(), $block_type->style_handles, 'Registration must strip the style so Core does not queue it on every page.' );
+		$this->assertFalse( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'The style must not be queued before the block renders.' );
+
+		$this->assertStringContainsString( 'class="probe"', do_blocks( '<!-- wp:' . self::PROBE_BLOCK . ' /-->' ) );
+		$this->assertTrue( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'Rendering the block must queue its style.' );
+	}
+
+	/**
+	 * Both themes satisfy more than one clause of the fallback's guard under Core's defaults, so this asserts the
+	 * real-world outcome that makes the fallback dormant. The three tests below isolate the individual clauses.
+	 *
+	 * @testdox Should stand down under Core's default block asset settings.
+	 * @testWith ["storefront"]
+	 *           ["twentytwentytwo"]
+	 *
+	 * @param string $theme Theme to activate before the decision is made.
+	 */
+	public function test_stands_down_under_core_default_asset_settings( string $theme ): void {
+		switch_theme( $theme );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'WordPress must already be loading block assets on demand.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only on-demand block assets are enabled.
+	 */
+	public function test_stands_down_when_only_on_demand_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the separate-assets clause off so on-demand is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_true', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be on.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only separate core block assets are enabled.
+	 */
+	public function test_stands_down_when_only_separate_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the on-demand clause off so separate assets is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_true', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertTrue( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be on.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down under a block theme even when block assets are not loaded on demand.
+	 */
+	public function test_stands_down_under_a_block_theme_without_on_demand_assets(): void {
+		switch_theme( 'twentytwentytwo' );
+		$this->assertTrue( wp_is_block_theme(), 'The test must run with a block theme.' );
+
+		// Turn both asset clauses off so the block theme check is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * Asserts that the fallback passed the block args through untouched and unhooked itself.
+	 */
+	private function assert_fallback_stands_down(): void {
+		$args = array( 'style_handles' => array( self::PROBE_STYLE ) );
+
+		$result = $this->block_types_controller->enqueue_block_style_for_classic_themes( $args, self::PROBE_BLOCK );
+
+		$this->assertSame( $args, $result, 'Core queues the style on render already, so the args must pass through untouched.' );
+		$this->assertFalse(
+			has_filter( 'register_block_type_args', array( $this->block_types_controller, 'enqueue_block_style_for_classic_themes' ) ),
+			'The fallback must unhook itself once it decides it is not needed.'
+		);
+	}
+
+	/**
+	 * Registers the probe block and its style through the real registration path.
+	 *
+	 * @return \WP_Block_Type The registered block type.
+	 */
+	private function register_probe_block(): \WP_Block_Type {
+		wp_register_style( self::PROBE_STYLE, false, array(), '1' );
+		$block_type = register_block_type(
+			self::PROBE_BLOCK,
+			array(
+				'style_handles'   => array( self::PROBE_STYLE ),
+				'render_callback' => static fn() => '<div class="probe"></div>',
+			)
+		);
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+
+		return $block_type;
 	}
 
 	/**

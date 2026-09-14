@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product list filters and sorting breaking when an extension joins the wc_product_meta_lookup table under its own alias.

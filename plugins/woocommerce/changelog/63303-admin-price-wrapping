@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent price amounts from wrapping onto multiple lines in admin list tables when a space is used as the thousands separator.

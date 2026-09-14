@@ -1278,7 +1278,7 @@ Display filter options as chips.
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
+- **Supports:** interactivity, spacing (padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button

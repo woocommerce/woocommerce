@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailPreview;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -41,19 +42,28 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	private OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification;
 
 	/**
+	 * Email preview handler.
+	 *
+	 * @var OrderWithdrawalEmailPreview
+	 */
+	private OrderWithdrawalEmailPreview $email_preview;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @param OrderWithdrawalFormProcessor                $form_processor                 Form processor.
 	 * @param OrderWithdrawalFormView                     $form_view                      Form view.
 	 * @param OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification Feature highlight notification.
+	 * @param OrderWithdrawalEmailPreview                 $email_preview                  Email preview handler.
 	 * @internal
 	 *
 	 * @since 11.1.0
 	 */
-	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view, OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
+	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view, OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification, OrderWithdrawalEmailPreview $email_preview ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
 		$this->form_processor                 = $form_processor;
 		$this->form_view                      = $form_view;
 		$this->feature_highlight_notification = $feature_highlight_notification;
+		$this->email_preview                  = $email_preview;
 	}
 
 	/**
@@ -63,14 +73,30 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
+		add_action( 'init', array( $this, 'register_feature_hooks' ), 0, 0 );
+	}
+
+	/**
+	 * Register hooks for the current feature state.
+	 *
+	 * @since 11.1.0
+	 */
+	public function register_feature_hooks(): void {
+		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+
+		if ( ! $this->is_enabled() ) {
+			$this->feature_highlight_notification->register();
+			return;
+		}
+
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ), 10, 1 );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
-		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
-		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
-		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
-		add_action( 'init', array( $this, 'maybe_register_feature_highlight_notification' ), 10, 0 );
+
+		$this->email_preview->register();
 	}
 
 	/**
@@ -109,17 +135,6 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register the order withdrawal feature highlight notification if the feature is not enabled.
-	 *
-	 * @since 11.1.0
-	 */
-	public function maybe_register_feature_highlight_notification(): void {
-		if ( ! $this->is_enabled() ) {
-			$this->feature_highlight_notification->register();
-		}
-	}
-
-	/**
 	 * Register the order withdrawal query var.
 	 *
 	 * @param array $query_vars Existing query vars keyed by endpoint key.
@@ -132,8 +147,10 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 			return array();
 		}
 
-		if ( $this->is_enabled() ) {
-			$query_vars[ self::ENDPOINT_KEY ] = (string) get_option( self::ENDPOINT_OPTION, self::ENDPOINT_SLUG );
+		$endpoint = (string) get_option( self::ENDPOINT_OPTION, self::ENDPOINT_SLUG );
+
+		if ( ! empty( $endpoint ) ) {
+			$query_vars[ self::ENDPOINT_KEY ] = $endpoint;
 		}
 
 		return $query_vars;
@@ -164,10 +181,6 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 			return array();
 		}
 
-		if ( ! $this->is_enabled() ) {
-			return $settings;
-		}
-
 		$endpoint_setting = array(
 			'title'    => __( 'Order withdrawal', 'woocommerce' ),
 			'desc'     => __( 'Endpoint for the order withdrawal page.', 'woocommerce' ),
@@ -180,7 +193,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		$new_settings = array();
 		$added        = false;
 
-		foreach ( $settings as $setting ) {
+		foreach ( $settings as $key => $setting ) {
 			if ( is_array( $setting ) && self::ENDPOINT_OPTION === ( $setting['id'] ?? '' ) ) {
 				return $settings;
 			}
@@ -191,15 +204,15 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 				'sectionend' === ( $setting['type'] ?? '' ) &&
 				'account_endpoint_options' === ( $setting['id'] ?? '' )
 			) {
-				$new_settings[] = $endpoint_setting;
-				$added          = true;
+				$new_settings[ self::ENDPOINT_OPTION ] = $endpoint_setting;
+				$added                                 = true;
 			}
 
-			$new_settings[] = $setting;
+			$new_settings[ $key ] = $setting;
 		}
 
 		if ( ! $added ) {
-			$new_settings[] = $endpoint_setting;
+			$new_settings[ self::ENDPOINT_OPTION ] = $endpoint_setting;
 		}
 
 		return $new_settings;
@@ -214,7 +227,6 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
-
 		wc_get_template( 'myaccount/form-order-withdrawal.php', $this->get_template_args() );
 	}
 

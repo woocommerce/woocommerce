@@ -212,7 +212,12 @@
 
 		@include breakpoint("<782px") {
 			width: 100%;
-			margin-top: auto;
+
+			// Only the first button pushes the group down. Applying this to
+			// every button splits the free space between them instead.
+			&:first-of-type {
+				margin-top: auto;
+			}
 		}
 	}
 
