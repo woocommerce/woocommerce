@@ -471,6 +471,7 @@ describe( 'buildChartData across every date range shape', () => {
 		'2024-03-15T12:00:00',
 		'2025-03-15T12:00:00',
 		'2025-12-31T12:00:00',
+		'2026-01-01T02:00:00',
 		'2026-09-09T12:00:00',
 	];
 	const customRanges = [
@@ -558,13 +559,23 @@ describe( 'buildChartData across every date range shape', () => {
 		// No comparison day up to the last labelled one may go missing. Under
 		// a year shift the 29th Feb right after the last label is folded into
 		// it, so it counts too.
-		const lastLabel = (
-			chartData
-				.map( ( point ) => point.secondary.labelDate )
-				.filter( ( labelDate ) => labelDate !== '-' )
-				.sort()
-				.pop() || ''
-		).slice( 0, 10 );
+		const labels = chartData
+			.map( ( point ) => point.secondary.labelDate )
+			.filter( ( labelDate ) => labelDate !== '-' )
+			.map( ( labelDate ) => labelDate.slice( 0, 10 ) )
+			.sort();
+		const lastLabel = labels[ labels.length - 1 ] || '';
+		// A comparison range labelled entirely outside its own days would pass
+		// the total check below with zero on both sides.
+		if ( labels.length && ! secondaryDays.includes( labels[ 0 ] ) ) {
+			problems.push(
+				`${ name }: first label ${
+					labels[ 0 ]
+				} is outside the comparison range ${
+					secondaryDays[ 0 ]
+				} - ${ secondaryDays.at( -1 ) }`
+			);
+		}
 		const yearShifted = secondary.shift === 'year';
 		const expectedTotal = secondaryDays
 			.filter(

@@ -487,8 +487,11 @@ export function getLastPeriod(
 
 	if ( compare === 'previous_period' ) {
 		if ( period === 'year' ) {
-			// Subtract two entire periods for years to take into account leap year
-			secondaryStart = moment().startOf( period ).subtract( 2, period );
+			// Subtract a whole year rather than the primary day count, so a leap
+			// year cannot shift the range. Derive it from the primary start: the
+			// browser clock can sit in a different year than the store clock
+			// around New Year.
+			secondaryStart = primaryStart.clone().subtract( 1, period );
 			secondaryEnd = secondaryStart.clone().endOf( period );
 		} else {
 			// Otherwise, use days in primary period to figure out how far to go back

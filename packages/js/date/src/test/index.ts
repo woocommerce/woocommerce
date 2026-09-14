@@ -1556,6 +1556,33 @@ describe( 'secondary range shift', () => {
 		);
 	} );
 
+	it( 'keeps the previous period of the last year on the store clock around New Year', () => {
+		// 09:30 UTC on 1st January: every browser zone east of -09:30 is
+		// already in 2027 while a Honolulu store is still on 31st December.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2027-01-01T09:30:00Z' )
+		);
+		const previousWcSettings = global.window.wcSettings;
+		global.window.wcSettings = {
+			...previousWcSettings,
+			timeZone: 'Pacific/Honolulu',
+		};
+
+		try {
+			const { primaryStart, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
+			expect( primaryStart.format( isoDateFormat ) ).toBe( '2025-01-01' );
+			expect( secondaryStart.format( isoDateFormat ) ).toBe(
+				'2024-01-01'
+			);
+			expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+				'2024-12-31 23:59:59'
+			);
+		} finally {
+			global.window.wcSettings = previousWcSettings;
+		}
+	} );
+
 	it( 'is exposed on the secondary date picker options', () => {
 		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
 		expect(
