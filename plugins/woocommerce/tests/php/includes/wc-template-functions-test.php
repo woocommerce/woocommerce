@@ -224,4 +224,100 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'rel="nofollow"', $markup );
 	}
+
+	/**
+	 * @testdox Pagination defaults link page one to the canonical archive URL.
+	 */
+	public function test_pagination_defaults_link_page_one_to_canonical_archive_url(): void {
+		global $wp_rewrite;
+
+		$original_permalink_structure = $wp_rewrite->permalink_structure;
+		$buffer_level                 = ob_get_level();
+		$previous_loop                = $GLOBALS['woocommerce_loop'] ?? null;
+		$pagination_args              = null;
+		$get_pagenum_link_filter      = static function ( $link, $pagenum ) {
+			return 'https://example.test/shop/page/' . $pagenum . '/';
+		};
+		$pagination_args_filter       = static function ( $args ) use ( &$pagination_args ) {
+			$pagination_args = $args;
+			return $args;
+		};
+
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		wc_setup_loop(
+			array(
+				'is_shortcode' => false,
+				'is_paginated' => true,
+				'total'        => 2,
+				'total_pages'  => 2,
+				'current_page' => 2,
+			)
+		);
+		add_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10, 2 );
+		add_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+
+		ob_start();
+		try {
+			woocommerce_pagination();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10 );
+			remove_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+			$wp_rewrite->set_permalink_structure( $original_permalink_structure );
+			if ( null === $previous_loop ) {
+				wc_reset_loop();
+			} else {
+				$GLOBALS['woocommerce_loop'] = $previous_loop;
+			}
+		}
+
+		$this->assertSame( 'https://example.test/shop/%_%', $pagination_args['base'] );
+		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
+		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
+	}
+
+	/**
+	 * @testdox wc_display_product_attributes() renders term names when the taxonomy is registered but missing from the global attribute list.
+	 */
+	public function test_display_product_attributes_without_global_attribute_entry(): void {
+		global $wc_product_attributes;
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$taxonomy        = $attribute->get_name();
+		$taxonomy_object = $wc_product_attributes[ $taxonomy ];
+		unset( $wc_product_attributes[ $taxonomy ] );
+		$warnings     = array();
+		$buffer_level = ob_get_level();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		ob_start();
+		try {
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			restore_error_handler();
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			$wc_product_attributes[ $taxonomy ] = $taxonomy_object;
+		}
+
+		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
+		$this->assertStringContainsString( 'Matte', $markup );
+	}
 }

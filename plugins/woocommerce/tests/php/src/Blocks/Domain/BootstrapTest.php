@@ -89,6 +89,32 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bootstrap does not register admin-init work that also runs during admin AJAX.
+	 */
+	public function test_bootstrap_registers_no_admin_init_callbacks(): void {
+		global $wp_filter;
+
+		$bootstrap_file = wp_normalize_path( WC_ABSPATH . 'src/Blocks/Domain/Bootstrap.php' );
+		$callbacks      = $wp_filter['admin_init']->callbacks ?? array();
+
+		foreach ( $callbacks as $callbacks_at_priority ) {
+			foreach ( $callbacks_at_priority as $callback ) {
+				$callback_function = $callback['function'] ?? null;
+				if ( ! is_callable( $callback_function ) ) {
+					continue;
+				}
+				$reflection = new \ReflectionFunction( \Closure::fromCallable( $callback_function ) );
+
+				$this->assertNotSame(
+					$bootstrap_file,
+					wp_normalize_path( (string) $reflection->getFileName() ),
+					'Bootstrap callbacks on admin_init also run during unrelated admin AJAX requests.'
+				);
+			}
+		}
+	}
+
+	/**
 	 * @testdox Bootstrap hooks on-demand block-type registration to woocommerce_short_description before do_blocks.
 	 */
 	public function test_short_description_registration_is_hooked_before_do_blocks(): void {

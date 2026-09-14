@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clamp NumberSpinControl precision so scientific-notation steps cannot exceed toFixed limits.

@@ -54,7 +54,8 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/shopper-lists @woocommerce/rubik
 
 # Stock notifications (back-in-stock)
-/plugins/woocommerce/src/Internal/StockNotifications/ @woocommerce/rubik
+/plugins/woocommerce/src/Internal/StockNotifications/ @woocommerce/somewherewarm
+/plugins/woocommerce/src/Internal/DataStores/StockNotifications/ @woocommerce/somewherewarm
 
 # Customer email verification
 /plugins/woocommerce/src/Internal/CustomerEmailVerification/ @woocommerce/rubik

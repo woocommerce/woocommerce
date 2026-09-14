@@ -105,6 +105,15 @@ class PaymentsExtensionSuggestions {
 	private ?array $extensions_base_details_memo = null;
 
 	/**
+	 * The memoized processed country extensions to avoid rebuilding the list multiple times during a request.
+	 *
+	 * Keyed by user, country code, and context. Cleared via clear_cache().
+	 *
+	 * @var array
+	 */
+	private array $country_extensions_memo = array();
+
+	/**
 	 * The payment extension list for each country.
 	 *
 	 * The order is important as it will be used to determine the priority of the suggestions.
@@ -180,7 +189,6 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -217,7 +225,6 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
-			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -2868,6 +2875,8 @@ class PaymentsExtensionSuggestions {
 	/**
 	 * Get the list of payment extensions details for a specific country.
 	 *
+	 * The list is memoized per user, country, and context for the duration of the request. Use clear_cache() to force a rebuild.
+	 *
 	 * @param string $country_code The two-letter country code.
 	 * @param string $context      Optional. The context ID of where these extensions are being used.
 	 *
@@ -2878,10 +2887,17 @@ class PaymentsExtensionSuggestions {
 	public function get_country_extensions( string $country_code, string $context = '' ): array {
 		$country_code = strtoupper( $country_code );
 
+		// Key on the user since incentive visibility and dismissals are user-specific.
+		$memo_key = get_current_user_id() . '__' . $country_code . '__' . $context;
+		if ( isset( $this->country_extensions_memo[ $memo_key ] ) ) {
+			return $this->country_extensions_memo[ $memo_key ];
+		}
+
 		if ( empty( $this->country_extensions[ $country_code ] ) ||
 			! is_array( $this->country_extensions[ $country_code ] ) ) {
 
-			return array();
+			$this->country_extensions_memo[ $memo_key ] = array();
+			return $this->country_extensions_memo[ $memo_key ];
 		}
 
 		// Process the extensions.
@@ -2929,6 +2945,8 @@ class PaymentsExtensionSuggestions {
 
 			$processed_extensions[] = $this->standardize_extension_details( $extension_details );
 		}
+
+		$this->country_extensions_memo[ $memo_key ] = $processed_extensions;
 
 		return $processed_extensions;
 	}
@@ -3015,6 +3033,24 @@ class PaymentsExtensionSuggestions {
 	 */
 	public function dismiss_incentive( string $incentive_id, string $suggestion_id, string $context = 'all' ): bool {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+	}
+
+	/**
+	 * Clear the cached extension suggestions data.
+	 *
+	 * Call after changing store state that influences the suggestions list during a request.
+	 * Also useful for testing purposes.
+	 *
+	 * This only clears this class's memos, not the incentives provider's own caches.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->country_extensions_memo      = array();
+		$this->extensions_base_details_memo = null;
 	}
 
 	/**

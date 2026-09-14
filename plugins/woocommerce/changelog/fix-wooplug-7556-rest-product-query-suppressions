@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace legacy WPCS suppression comments on REST product and variation meta queries with explicit phpcs:ignore annotations that record why postmeta remains the correct path.

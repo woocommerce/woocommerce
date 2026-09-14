@@ -101,10 +101,16 @@ class Media_Text extends Abstract_Block_Renderer {
 		);
 
 		// Apply class and style attributes to the wrapper table.
+		//
+		// Intentionally omit the `align` attribute. `align="left"` (or "right") on a table renders as
+		// `float: left` in email clients, taking the block out of normal flow — the block that follows
+		// then fails to clear it and overlaps it, so a following button paints its background across
+		// the media & text block above. Horizontal alignment is already carried by the `text-align`
+		// declaration in $block_styles['css'], so dropping the attribute preserves alignment while
+		// keeping the block in normal flow. Same fix as the gallery wrapper.
 		$table_attrs = array(
 			'class' => 'email-block-media-text ' . $original_wrapper_classname,
 			'style' => $block_styles['css'],
-			'align' => $rendering_context->get_default_text_align(),
 			'width' => '100%',
 		);
 

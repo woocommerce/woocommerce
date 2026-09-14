@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Use GTIN, UPC, EAN, or ISBN as the match key for existing product and variation CSV updates when ID and SKU are absent, and let a variation row identified only by one create a new variation.

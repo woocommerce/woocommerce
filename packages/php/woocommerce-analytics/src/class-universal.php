@@ -82,7 +82,8 @@ class Universal {
 		?>
 		<script type="text/javascript">
 			(function() {
-				window.wcAnalytics = window.wcAnalytics || {};
+				// Always start from a fresh object: a `||` fallback would keep a same-named DOM element alive.
+				window.wcAnalytics = {};
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set the assets URL for webpack to find the split assets.
@@ -547,7 +548,7 @@ class Universal {
 		if ( is_search() ) {
 			global $wp_query;
 			$this->enqueue_event(
-				'search',
+				'search_performed',
 				array(
 					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,

@@ -57,6 +57,13 @@ class Assets_Manager {
 	private Email_Editor_Logger $logger;
 
 	/**
+	 * Whether the email editor HTML has been rendered.
+	 *
+	 * @var bool
+	 */
+	private bool $editor_html_rendered = false;
+
+	/**
 	 * Assets Manager constructor with all dependencies.
 	 *
 	 * @param Settings_Controller $settings_controller Settings controller instance.
@@ -124,9 +131,18 @@ class Assets_Manager {
 	/**
 	 * Render the email editor's required HTML and admin header.
 	 *
+	 * Renders at most once per instance; repeated calls are no-ops.
+	 *
 	 * @param string $element_id Optional. The ID of the main container element. Default is 'woocommerce-email-editor'.
 	 */
 	public function render_email_editor_html( string $element_id = 'woocommerce-email-editor' ): void {
+		// Integrations render from the `replace_editor` filter, which re-fires while
+		// admin-header.php runs whenever a plugin calls WP_Screen::get() from
+		// admin_enqueue_scripts; a second container echoed inside <head> breaks the page.
+		if ( $this->editor_html_rendered ) {
+			return;
+		}
+		$this->editor_html_rendered = true;
 		// @phpstan-ignore-next-line -- PHPStan tried to check if the file exists.
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 		echo '<div id="' . esc_attr( $element_id ) . '" class="block-editor block-editor__container hide-if-no-js"></div>';

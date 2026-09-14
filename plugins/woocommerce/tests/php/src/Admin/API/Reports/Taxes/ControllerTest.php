@@ -116,6 +116,38 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox prepare_item_for_export formats the taxable amount, exporting unknown values as empty cells.
+	 */
+	public function test_prepare_item_for_export_formats_taxable_amount(): void {
+		$item = array(
+			'tax_rate_id'  => 1,
+			'country'      => 'US',
+			'state'        => 'CA',
+			'name'         => 'State Tax',
+			'priority'     => 1,
+			'tax_rate'     => '8.25',
+			'total_tax'    => 82.50,
+			'order_tax'    => 75.00,
+			'shipping_tax' => 7.50,
+			'orders_count' => 10,
+		);
+
+		// Key absent (column missing during the upgrade window): empty cell.
+		$export_item = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( '', $export_item['taxable_amount'], 'A missing taxable amount should export as an empty cell.' );
+
+		// Zero base under non-zero tax (row recorded before the column existed): empty cell.
+		$item['taxable_amount'] = 0;
+		$export_item            = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( '', $export_item['taxable_amount'], 'An unknown taxable amount should export as an empty cell, not a zero.' );
+
+		// Known value: formatted number.
+		$item['taxable_amount'] = 1000.5;
+		$export_item            = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( Controller::csv_number_format( 1000.5 ), $export_item['taxable_amount'], 'A recorded taxable amount should export as a formatted number.' );
+	}
+
+	/**
 	 * @testdox prepare_item_for_export passes the original item to the filter.
 	 */
 	public function test_prepare_item_for_export_filter_receives_original_item(): void {

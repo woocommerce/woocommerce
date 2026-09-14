@@ -11,6 +11,7 @@ use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\CatalogSortOrder;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
@@ -521,11 +522,13 @@ class QueryBuilder {
 				// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
 				$attribute_value = explode( ',', $attribute_value );
 
-				$acc[] = array(
-					'taxonomy' => str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name ),
-					'field'    => 'slug',
-					'terms'    => $attribute_value,
-					'operator' => 'and' === $attribute_query ? 'AND' : 'IN',
+				$taxonomy = str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name );
+				$acc[]    = array(
+					'taxonomy'        => $taxonomy,
+					'field'           => 'slug',
+					'terms'           => $attribute_value,
+					'operator'        => 'and' === $attribute_query ? 'AND' : 'IN',
+					'filter_taxonomy' => $taxonomy,
 				);
 
 				return $acc;
@@ -698,10 +701,11 @@ class QueryBuilder {
 			}
 
 			$tax_queries[] = array(
-				'taxonomy' => $taxonomy_slug,
-				'field'    => 'slug',
-				'terms'    => $term_slugs,
-				'operator' => 'IN',
+				'taxonomy'        => $taxonomy_slug,
+				'field'           => 'slug',
+				'terms'           => $term_slugs,
+				'operator'        => 'IN',
+				'filter_taxonomy' => $taxonomy_slug,
 			);
 		}
 
@@ -1239,12 +1243,7 @@ class QueryBuilder {
 	 * @return string
 	 */
 	protected function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
