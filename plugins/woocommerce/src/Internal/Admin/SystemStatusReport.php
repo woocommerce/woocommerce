@@ -104,12 +104,12 @@ class SystemStatusReport {
 			<td data-export-label="HPOS order metadata"><?php esc_html_e( 'HPOS order metadata', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( __( 'Approximate database statistics. A high ratio can indicate excessive metadata but does not confirm duplicate or corrupt data.', 'woocommerce' ) ); ?></td>
 			<td>
-				<?php if ( $warning ) : ?>
-					<mark class="error"><span class="dashicons dashicons-warning"></span>
-						<?php esc_html_e( 'Unusually high order metadata volume. Excessive metadata may affect performance. Ask your developer or hosting provider to investigate.', 'woocommerce' ); ?>
-					</mark><br>
-				<?php endif; ?>
-				<?php echo esc_html( $message ); ?>
+				<?php
+				if ( $warning ) {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unusually high order metadata volume. Excessive metadata may affect performance. Ask your developer or hosting provider to investigate.', 'woocommerce' ) . '</mark><br> ';
+				}
+				echo esc_html( $message );
+				?>
 			</td>
 		</tr>
 		<?php
