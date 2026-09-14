@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent recursive feature definition initialization when hooks check WooCommerce features during translation or option callbacks.
