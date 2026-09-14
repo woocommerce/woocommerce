@@ -164,6 +164,59 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the full category tree when no filter is attached.
+	 */
+	public function test_renders_the_full_tree_with_no_filter(): void {
+		$output = $this->render_block();
+
+		foreach ( array( 'Apparel', 'Hats', 'Memberships', 'Events' ) as $name ) {
+			$this->assertStringContainsString( $this->item_name_markup( $name ), $output, "$name should be rendered." );
+		}
+		$this->assertStringContainsString( 'wc-block-product-categories-list--depth-1', $output, 'Hats should be nested under Apparel.' );
+	}
+
+	/**
+	 * @testdox Should show the child of a category with no product count at the top level.
+	 */
+	public function test_child_of_a_zero_count_parent_is_promoted_with_no_filter(): void {
+		delete_term_meta( $this->categories['Apparel'], 'product_count_product_cat' );
+		delete_transient( 'wc_term_counts' );
+		clean_term_cache( array_values( $this->categories ), 'product_cat' );
+
+		$output = $this->render_block();
+
+		$this->assertStringNotContainsString( $this->item_name_markup( 'Apparel' ), $output, 'Apparel has no count and should be dropped.' );
+		$this->assertStringContainsString( $this->item_name_markup( 'Hats' ), $output, 'Hats should still be rendered.' );
+		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $output, 'Hats should be rendered at the top level.' );
+	}
+
+	/**
+	 * @testdox Should show an orphaned grandchild at the top level in children-only mode.
+	 */
+	public function test_children_only_promotes_an_orphaned_grandchild(): void {
+		$caps = $this->create_category( 'Caps', $this->categories['Hats'] );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $caps ) );
+		$product->save();
+
+		wc_recount_all_terms();
+
+		delete_term_meta( $this->categories['Hats'], 'product_count_product_cat' );
+		delete_transient( 'wc_term_counts' );
+		clean_term_cache( array_merge( array_values( $this->categories ), array( $caps ) ), 'product_cat' );
+
+		$this->go_to( get_term_link( $this->categories['Apparel'], 'product_cat' ) );
+		$this->assertTrue( is_product_category(), 'The request should be a product category archive.' );
+
+		$output = $this->render_block( '{"showChildrenOnly":true}' );
+
+		$this->assertStringContainsString( $this->item_name_markup( 'Caps' ), $output, 'Caps should be rendered.' );
+		$this->assertStringNotContainsString( $this->item_name_markup( 'Hats' ), $output, 'Hats has no count and should be dropped.' );
+		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $output, 'Caps should be rendered at the top level.' );
+	}
+
+	/**
 	 * Render the block via do_blocks().
 	 *
 	 * @param string $attrs_json JSON object string for block attributes.
