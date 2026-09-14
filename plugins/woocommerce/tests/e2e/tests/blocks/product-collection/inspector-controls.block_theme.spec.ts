@@ -27,7 +27,9 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 		await pageObject.setNumberOfColumns( 4 );
-		await expect( pageObject.productTemplate ).toContainClass( 'columns-4' );
+		await expect( pageObject.productTemplate ).toContainClass(
+			'columns-4'
+		);
 
 		await page.getByRole( 'button', { name: 'Settings options' } ).click();
 		await page.getByRole( 'menuitemcheckbox', { name: 'Offset' } ).click();
@@ -59,7 +61,9 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			.fill( '2' );
 
 		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTemplate ).toContainClass( 'columns-4' );
+		await expect( pageObject.productTemplate ).toContainClass(
+			'columns-4'
+		);
 		await expect( pageObject.products ).toHaveCount( 3 );
 		await expect( pageObject.productTitles.first() ).toHaveText( 'Beanie' );
 		await expect(
