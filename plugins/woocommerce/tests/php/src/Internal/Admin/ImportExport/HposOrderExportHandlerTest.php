@@ -312,6 +312,23 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honor can_export on the order post type like the core exporter does.
+	 */
+	public function test_honors_can_export_on_the_order_post_type(): void {
+		$this->create_order();
+		$post_type_object = get_post_type_object( 'shop_order' );
+
+		$post_type_object->can_export = false;
+		try {
+			$xml = $this->export( 'shop_order' );
+		} finally {
+			$post_type_object->can_export = true;
+		}
+
+		$this->assertSame( '', $xml );
+	}
+
+	/**
 	 * @testdox Should emit nothing for content types other than orders.
 	 */
 	public function test_ignores_other_content_types(): void {

@@ -137,7 +137,12 @@ class HposOrderExportHandler {
 
 		$statuses = array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) );
 		$types    = 'all' === $args['content'] ? array( 'shop_order', 'shop_order_refund' ) : array( 'shop_order' );
+		$types    = array_values( array_filter( $types, array( self::class, 'post_type_can_be_exported' ) ) );
 		$page     = 1;
+
+		if ( ! $types ) {
+			return;
+		}
 
 		do {
 			/** @var int[] $order_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- IDs because of 'return' => 'ids'.
@@ -164,6 +169,18 @@ class HposOrderExportHandler {
 			$this->release_order_caches( $order_ids );
 			++$page;
 		} while ( self::BATCH_SIZE === $fetched );
+	}
+
+	/**
+	 * Whether core would export posts of this type, honoring the `can_export` registration argument.
+	 *
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	private static function post_type_can_be_exported( string $post_type ): bool {
+		$post_type_object = get_post_type_object( $post_type );
+
+		return $post_type_object instanceof \WP_Post_Type && $post_type_object->can_export;
 	}
 
 	/**
