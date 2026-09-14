@@ -225,13 +225,20 @@ class ProductReviews extends ControllerTestCase {
 	 * @param string $order Sort direction.
 	 * @param int    $offset Number of reviews to skip.
 	 * @param array  $expected_contents Expected review contents in response order.
+	 * @param string $filter_by Whether to scope the request by `product_id` or `category_id`.
 	 */
-	public function test_get_items_sort_and_offset_matrix( string $orderby, string $order, int $offset, array $expected_contents ): void {
+	public function test_get_items_sort_and_offset_matrix( string $orderby, string $order, int $offset, array $expected_contents, string $filter_by = 'product' ): void {
 		$fixtures = new FixtureData();
+		$category = $fixtures->get_product_category(
+			array(
+				'name' => 'Review ordering category',
+			)
+		);
 		$product  = $fixtures->get_simple_product(
 			array(
 				'name'          => 'Review ordering product',
 				'regular_price' => 20,
+				'category_ids'  => array( $category['term_id'] ),
 			)
 		);
 
@@ -264,7 +271,14 @@ class ProductReviews extends ControllerTestCase {
 		);
 
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
-		$request->set_param( 'product_id', (string) $product->get_id() );
+		if ( 'category' === $filter_by ) {
+			// The category holds only this product, so the expected order is the same
+			// as the product-scoped rows. Sorting and filtering are resolved by
+			// different parts of the query, and nothing else pairs them.
+			$request->set_param( 'category_id', (string) $category['term_id'] );
+		} else {
+			$request->set_param( 'product_id', (string) $product->get_id() );
+		}
 		$request->set_param( 'per_page', 10 );
 		$request->set_param( 'orderby', $orderby );
 		$request->set_param( 'order', $order );
@@ -283,33 +297,40 @@ class ProductReviews extends ControllerTestCase {
 	/**
 	 * Data provider for review sort and offset requests.
 	 *
-	 * @return array<string, array{string, string, int, string[]}>
+	 * @return array<string, array{string, string, int, string[], 3?: string}>
 	 */
 	public function get_items_sort_and_offset_data(): array {
 		return array(
-			'recent'             => array(
+			'recent'                                => array(
 				'date_gmt',
 				'desc',
 				0,
 				array( 'Newest three-star review', 'Middle five-star review', 'Oldest one-star review' ),
 			),
-			'rating ascending'   => array(
+			'rating ascending'                      => array(
 				'rating',
 				'asc',
 				0,
 				array( 'Oldest one-star review', 'Newest three-star review', 'Middle five-star review' ),
 			),
-			'rating descending'  => array(
+			'rating descending'                     => array(
 				'rating',
 				'desc',
 				0,
 				array( 'Middle five-star review', 'Newest three-star review', 'Oldest one-star review' ),
 			),
-			'recent with offset' => array(
+			'recent with offset'                    => array(
 				'date_gmt',
 				'desc',
 				1,
 				array( 'Middle five-star review', 'Oldest one-star review' ),
+			),
+			'rating descending, scoped by category' => array(
+				'rating',
+				'desc',
+				0,
+				array( 'Middle five-star review', 'Newest three-star review', 'Oldest one-star review' ),
+				'category',
 			),
 		);
 	}
