@@ -464,7 +464,7 @@ class WC_Meta_Box_Order_Data {
 								?>
 							</label>
 							<?php
-							$found_users = array();
+							$found_users = array( '' );
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
 								$user_id = absint( $order->get_user_id() );
@@ -473,16 +473,18 @@ class WC_Meta_Box_Order_Data {
 								if ( ! is_wp_error( $user ) ) {
 									$customer = new WC_Customer( $user_id );
 									/* translators: 1: user display name 2: user ID 3: user email */
-									$found_users[ $user_id ] = sprintf(
-										/* translators: 1: customer name, 2 customer id, 3: customer email */
-										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-										$customer->get_first_name() . ' ' . $customer->get_last_name(),
-										$customer->get_id(),
-										$customer->get_email()
+									$found_users = array(
+										$user_id => sprintf(
+											/* translators: 1: customer name, 2 customer id, 3: customer email */
+											esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+											$customer->get_first_name() . ' ' . $customer->get_last_name(),
+											$customer->get_id(),
+											$customer->get_email()
+										),
 									);
 								} else {
 									// print customer not available in the current site.
-									$found_users[ $user_id ] = esc_html__( '(Not available)', 'woocommerce' );
+									$found_users = array( $user_id => esc_html__( '(Not available)', 'woocommerce' ) );
 								}
 							}
 							?>
