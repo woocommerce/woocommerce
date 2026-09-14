@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Warn on the Payments settings page when an enabled payment gateway has no Checkout block integration and therefore won't be shown to customers using the Checkout block.
