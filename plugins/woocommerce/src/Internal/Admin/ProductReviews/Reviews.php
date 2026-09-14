@@ -24,9 +24,11 @@ class Reviews {
 	 *
 	 * Kept here to avoid autoloading the admin-only {@see ReviewsListTable} outside admin requests.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @var string
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	const PER_PAGE_USER_OPTION_KEY = 'edit_product_reviews_per_page';
 
@@ -578,13 +580,13 @@ class Reviews {
 	/**
 	 * Registers the screen options for the Reviews page.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @return void
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function add_screen_options(): void {
+	private function add_screen_options(): void {
 		add_screen_option(
 			'per_page',
 			array(
@@ -598,7 +600,7 @@ class Reviews {
 	/**
 	 * Saves the reviews per-page screen option within WordPress's standard `1`–`999` bounds.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param mixed  $screen_option The value to save instead of the option value. Default false (to skip saving the current option).
 	 * @param string $option        The option name.
@@ -624,7 +626,7 @@ class Reviews {
 	/**
 	 * Applies the legacy `edit_comments_per_page` filter to the dedicated reviews per-page value.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param int $per_page Number of reviews to show per page.
 	 * @return int
