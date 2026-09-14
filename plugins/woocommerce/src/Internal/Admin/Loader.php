@@ -70,11 +70,11 @@ class Loader {
 		Settings::get_instance();
 		SiteHealth::get_instance();
 		SystemStatusReport::get_instance();
-		HposOrderExportHandler::get_instance();
 
 		wc_get_container()->get( TaxSettingsRecommendations::class );
 		wc_get_container()->get( Reviews::class );
 		wc_get_container()->get( ReviewsCommentsOverrides::class );
+		wc_get_container()->get( HposOrderExportHandler::class );
 
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
