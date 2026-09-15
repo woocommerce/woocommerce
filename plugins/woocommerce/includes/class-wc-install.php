@@ -3167,10 +3167,7 @@ EOT;
 <!-- /wp:woocommerce/cart-line-items-block -->
 
 <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
-<div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
-<h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
-
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->
 
 <!-- wp:woocommerce/product-template -->
 <!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
