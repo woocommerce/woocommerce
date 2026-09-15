@@ -846,12 +846,14 @@ class Analytics {
 	 *
 	 * @internal
 	 *
-	 * @param int|bool $days          Number of days to import, or false for the full history.
+	 * @param int|bool $days          Number of days to import; anything that is not an integer covers the full history.
 	 * @param bool     $skip_existing Whether the import skips already imported orders.
 	 * @return void
 	 */
 	public function maybe_cancel_refund_double_count_fix_on_regenerate( $days, $skip_existing ): void {
-		if ( false !== $days || $skip_existing ) {
+		// The Import historical data UI omits `days` for "All", so REST passes null rather than false.
+		// OrdersScheduler reads the same value with is_int(), so match it.
+		if ( is_int( $days ) || $skip_existing ) {
 			return;
 		}
 

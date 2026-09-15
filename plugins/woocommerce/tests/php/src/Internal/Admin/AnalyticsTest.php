@@ -495,14 +495,19 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A full import reaches the hook with null rather than false when it comes from the
+	 * Import historical data UI, which omits `days` for "All".
+	 *
 	 * @testdox A full historical import cancels a running fix; windowed or skip-existing imports do not.
 	 * @testWith [false, false, "cancelled"]
+	 *           [null, false, "cancelled"]
 	 *           [30, false, "running"]
+	 *           [0, false, "running"]
 	 *           [false, true, "running"]
 	 *
-	 * @param int|bool $days          Days to import, or false for the full history.
-	 * @param bool     $skip_existing Whether the import skips existing orders.
-	 * @param string   $expected      Expected run status.
+	 * @param int|bool|null $days          Days to import; anything that is not an integer means the full history.
+	 * @param bool          $skip_existing Whether the import skips existing orders.
+	 * @param string        $expected      Expected run status.
 	 */
 	public function test_regenerate_cancels_running_fix_only_for_full_reimport( $days, bool $skip_existing, string $expected ): void {
 		$this->sut->run_refund_double_count_tool();
