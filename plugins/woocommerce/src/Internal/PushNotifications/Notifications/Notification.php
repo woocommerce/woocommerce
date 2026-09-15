@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 
@@ -376,5 +377,21 @@ abstract class Notification {
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
 		return (bool) $pref_value;
+	}
+
+	/**
+	 * Returns which preference stopped this notification going to a user.
+	 *
+	 * Only meaningful after {@see should_send_to_user()} returned false for the
+	 * same value. Subclasses re-run their checks in the same order and return
+	 * the first one that fails, so the reason matches the decision.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string One of the SuppressionReason constants.
+	 *
+	 * @since 11.3.0
+	 */
+	public function get_suppression_reason( $pref_value ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Subclasses read it.
+		return SuppressionReason::TYPE_DISABLED;
 	}
 }

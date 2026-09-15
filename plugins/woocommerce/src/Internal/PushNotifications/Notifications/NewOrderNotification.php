@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Order;
 
@@ -115,6 +116,25 @@ class NewOrderNotification extends Notification {
 		}
 
 		return (float) $order->get_total() >= $min_amount;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return SuppressionReason::TYPE_DISABLED;
+		}
+
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+		if ( ! $order instanceof WC_Order ) {
+			return SuppressionReason::ORDER_MISSING;
+		}
+
+		return SuppressionReason::BELOW_MIN_AMOUNT;
 	}
 
 	/**

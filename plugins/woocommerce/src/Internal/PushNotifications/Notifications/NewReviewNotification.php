@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use WP_Comment;
 
 defined( 'ABSPATH' ) || exit;
@@ -59,6 +60,25 @@ class NewReviewNotification extends Notification {
 		}
 
 		return (int) $rating <= (int) $pref_value['max_rating'];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return SuppressionReason::TYPE_DISABLED;
+		}
+
+		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
+		if ( ! $comment instanceof WP_Comment ) {
+			return SuppressionReason::COMMENT_MISSING;
+		}
+
+		return SuppressionReason::ABOVE_MAX_RATING;
 	}
 
 	/**

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 use WC_Product;
@@ -247,6 +248,20 @@ class StockNotification extends Notification {
 		}
 
 		return (bool) $pref_value[ $this->event_type ];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return SuppressionReason::TYPE_DISABLED;
+		}
+
+		return SuppressionReason::EVENT_TYPE_DISABLED;
 	}
 
 	/**
