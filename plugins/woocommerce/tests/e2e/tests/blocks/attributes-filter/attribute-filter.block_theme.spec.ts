@@ -7,6 +7,7 @@ import {
 	wpCLI,
 	TemplateCompiler,
 	BLOCK_THEME_SLUG,
+	getProductAttributeIds,
 } from '@woocommerce/e2e-utils';
 import type { Page } from '@playwright/test';
 
@@ -27,33 +28,6 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 		await provideTemplateCompiler( compiler );
 	},
 } );
-
-const getSizeAttributeId = async () => {
-	const { stdout } = await wpCLI(
-		'wc product_attribute list --format=json --user=1'
-	);
-	const jsonPayload = stdout.match( /\[[\s\S]*\]/ )?.[ 0 ];
-	if ( ! jsonPayload ) {
-		throw new Error( 'Product attribute CLI output did not contain JSON.' );
-	}
-	const attributes = JSON.parse( jsonPayload ) as Array< {
-		id: number | string;
-		name: string;
-		slug: string;
-	} >;
-	const sizeAttributes = attributes.filter(
-		( attribute ) =>
-			attribute.name === 'Size' && attribute.slug === 'pa_size'
-	);
-
-	expect( sizeAttributes ).toHaveLength( 1 );
-	const attributeId = Number( sizeAttributes[ 0 ].id );
-	expect( Number.isSafeInteger( attributeId ) && attributeId > 0 ).toBe(
-		true
-	);
-
-	return attributeId;
-};
 
 const getProductCollectionTitles = ( page: Page ) =>
 	page.locator(
@@ -173,8 +147,10 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		templateCompiler,
 	} ) => {
 		await page.clock.install();
-		const attributeId = await getSizeAttributeId();
-		const template = await templateCompiler.compile( { attributeId } );
+		const { sizeAttributeId } = await getProductAttributeIds();
+		const template = await templateCompiler.compile( {
+			attributeId: sizeAttributeId,
+		} );
 		const productTitles = getProductCollectionTitles( page );
 
 		await page.goto( '/shop' );
