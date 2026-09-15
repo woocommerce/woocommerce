@@ -47,12 +47,6 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 			'wp_query'         => $wp_query ?? null,
 			'wp_the_query'     => $wp_the_query ?? null,
 		);
-		$original_options = array(
-			'posts_per_page'                      => get_option( 'posts_per_page' ),
-			'woocommerce_default_catalog_orderby' => get_option( 'woocommerce_default_catalog_orderby' ),
-		);
-		$product_ids      = array();
-		$term_ids         = array();
 
 		try {
 			update_option( 'posts_per_page', 20 );
@@ -77,10 +71,10 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 				'product_tag' => $tag_id,
 			);
 
-			$product_ids[] = $this->create_product( 'Parity Shirt A', 30, $category_id, $tag_id );
-			$product_ids[] = $this->create_product( 'Parity Shirt B', 10, $category_id );
-			$product_ids[] = $this->create_product( 'Parity Shirt C', 20, null, $tag_id );
-			$product_ids[] = $this->create_product( 'Parity Catalog D', 40 );
+			$this->create_product( 'Parity Shirt A', 30, $category_id, $tag_id );
+			$this->create_product( 'Parity Shirt B', 10, $category_id );
+			$this->create_product( 'Parity Shirt C', 20, null, $tag_id );
+			$this->create_product( 'Parity Catalog D', 40 );
 
 			$route = $this->get_route_url( $route_label, $term_ids );
 			$this->go_to( $route );
@@ -127,16 +121,6 @@ class RouteContextParityTest extends WC_Unit_Test_Case {
 		} finally {
 			wp_reset_postdata();
 			wc_reset_loop();
-
-			foreach ( $product_ids as $product_id ) {
-				WC_Helper_Product::delete_product( $product_id );
-			}
-			foreach ( $term_ids as $taxonomy => $term_id ) {
-				wp_delete_term( $term_id, $taxonomy );
-			}
-			foreach ( $original_options as $option_name => $option_value ) {
-				update_option( $option_name, $option_value );
-			}
 
 			foreach ( $original_globals as $global_name => $global_value ) {
 				if ( $global_presence[ $global_name ] ) {
