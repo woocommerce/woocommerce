@@ -88,6 +88,12 @@
 		"categoryId": {
 			"type": "number"
 		},
+		"layout": {
+			"type": "string"
+		},
+		"termTaxonomy": {
+			"type": "string"
+		},
 		"overlayColor": {
 			"type": "string",
 			"default": "#000000"
