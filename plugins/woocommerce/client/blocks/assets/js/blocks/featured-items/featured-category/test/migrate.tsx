@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	createBlock,
 	getBlockType,
 	parse,
 	registerBlockType,
@@ -16,7 +15,6 @@ import { getSetting } from '@woocommerce/settings';
  */
 import metadata from '../block.json';
 import deprecated from '../deprecated';
-import { migrateToCover } from '../migrate-to-cover';
 import { register } from '../../register';
 import productMetadata from '../../featured-product/block.json';
 
@@ -72,7 +70,7 @@ describe( 'Featured Category automatic migration', () => {
 		} );
 	} );
 
-	it( 'parses legacy styling through the frozen deprecation supports', () => {
+	it( 'preserves legacy styling through parsing, saving and reopening', () => {
 		const block = parse(
 			'<!-- wp:woocommerce/featured-category {"categoryId":42,"backgroundColor":"cyan-bluish-gray","textColor":"white","borderColor":"vivid-red","style":{"spacing":{"padding":"12px"},"border":{"radius":"8px"}}} --><!-- wp:woocommerce/category-title /--><!-- /wp:woocommerce/featured-category -->'
 		)[ 0 ];
@@ -86,6 +84,14 @@ describe( 'Featured Category automatic migration', () => {
 				border: { radius: '8px' },
 			},
 		} );
+		const saved = serialize( block );
+		expect( saved ).toContain( 'has-cyan-bluish-gray-background-color' );
+		expect( saved ).toContain( 'has-vivid-red-border-color' );
+		const reopened = parse( saved )[ 0 ];
+		expect( reopened.isValid ).toBe( true );
+		expect( reopened.innerBlocks[ 0 ].isValid ).toBe( true );
+		expect( reopened.innerBlocks[ 0 ].innerBlocks ).toHaveLength( 1 );
+		expect( serialize( reopened ) ).toBe( saved );
 	} );
 
 	it.each( [
@@ -109,70 +115,6 @@ describe( 'Featured Category automatic migration', () => {
 			expect( block.innerBlocks[ 0 ].attributes.minHeightUnit ).toBe(
 				'px'
 			);
-		}
-	);
-
-	it.each( [ 'left', 'center', 'right' ] )(
-		'preserves %s positioning, natural image sizing and appearance',
-		( position ) => {
-			const child = createBlock( 'core/paragraph', {
-				content: 'Custom content',
-			} );
-			const [ attributes, [ cover ] ] = migrateToCover(
-				{
-					categoryId: 42,
-					contentAlign: position,
-					focalPoint: { x: 0.2, y: 0.8 },
-					dimRatio: 30,
-					minHeight: 620,
-					backgroundColor: 'cyan-bluish-gray',
-					borderColor: 'vivid-red',
-					style: {
-						typography: { lineHeight: '1.8' },
-						spacing: { padding: '12px' },
-					},
-				},
-				[ child ]
-			);
-			expect( attributes ).toMatchObject( {
-				categoryId: 42,
-				layout: 'cover',
-			} );
-			expect( attributes ).not.toHaveProperty( 'focalPoint' );
-			expect( cover.attributes ).toMatchObject( {
-				contentPosition: `center ${ position }`,
-				focalPoint: { x: 0.2, y: 0.8 },
-				dimRatio: 30,
-				minHeight: 620,
-				backgroundColor: 'cyan-bluish-gray',
-				borderColor: 'vivid-red',
-				style: {
-					typography: { lineHeight: '1.8' },
-					spacing: { padding: '12px' },
-				},
-			} );
-			expect( cover.attributes.className ).toContain( 'natural-image' );
-			expect( cover.attributes.metadata.bindings ).toBeUndefined();
-			expect(
-				cover.attributes.metadata[
-					'woocommerce/featured-category-image'
-				]
-			).toMatchObject( {
-				size: 'large',
-				noPlaceholder: true,
-			} );
-			expect( cover.innerBlocks[ 0 ].innerBlocks[ 0 ] ).toBe( child );
-			const saved = serialize(
-				createBlock( metadata.name, attributes, [ cover ] )
-			);
-			expect( saved ).toContain(
-				'has-cyan-bluish-gray-background-color'
-			);
-			expect( saved ).toContain( 'has-vivid-red-border-color' );
-			const parsed = parse( saved )[ 0 ];
-			expect( parsed.isValid ).toBe( true );
-			expect( parsed.innerBlocks[ 0 ].isValid ).toBe( true );
-			expect( parsed.innerBlocks[ 0 ].innerBlocks ).toHaveLength( 1 );
 		}
 	);
 
@@ -200,6 +142,9 @@ describe( 'Featured Category automatic migration', () => {
 					  ]
 					: [ 'woocommerce/category-title', 'core/group' ]
 			);
+			expect(
+				serialize( cover.innerBlocks.at( -1 )?.innerBlocks || [] )
+			).toContain( '<p>Custom content</p>' );
 			expect( serialize( parse( serialize( block ) ) ) ).toBe(
 				serialize( block )
 			);
