@@ -112,6 +112,7 @@
 		"@wordpress/priority-queue": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
+		"@wordpress/ui": "catalog:wp-bundled",
 		"@wordpress/url": "catalog:wp-min",
 		"clsx": "2.1.x",
 		"deepmerge": "^4.3.1",
