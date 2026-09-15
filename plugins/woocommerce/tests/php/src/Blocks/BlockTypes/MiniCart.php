@@ -555,13 +555,9 @@ class MiniCart extends \WP_UnitTestCase {
 	/**
 	 * Return the identifiers of the currently enqueued script modules.
 	 *
-	 * `WP_Script_Modules` exposes no public accessor for its queue.
-	 *
 	 * @return string[]
 	 */
 	private function get_enqueued_script_module_ids(): array {
-		$queue = new \ReflectionProperty( \WP_Script_Modules::class, 'queue' );
-		$queue->setAccessible( true );
-		return $queue->getValue( wp_script_modules() );
+		return wp_script_modules()->get_queue();
 	}
 }
