@@ -3,6 +3,7 @@
  */
 import moment from 'moment';
 import { getTimezoneOffset } from 'date-fns-tz';
+import { getSettings as getDateSettings } from '@wordpress/date';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -133,6 +134,152 @@ export function toMoment( format: string, str: unknown ) {
 }
 
 /**
+ * Expands moment's localized format tokens ("L", "LL", "ll", ...) into the
+ * underlying format the locale defines for them.
+ *
+ * Moment resolves those tokens only while formatting, so a day rendered through
+ * one is invisible to the day token scan below and the range end would be
+ * dropped. This mirrors moment's own expansion, including its pass limit, so
+ * the expanded format renders exactly what the original one would.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with its localized tokens expanded, leaving
+ *                      escaped and bracketed ones as the literals they are
+ */
+function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
+	// Bracketed sections and backslash escapes are moment's literals, so an "L"
+	// inside one is text; matching them first leaves them untouched, as
+	// `longDateFormat` has no entry for them.
+	const localizedTokens = /\[[^[]*\]|\\?(?:LTS|LT|LL?L?L?|l{1,4})/g;
+	let expanded = format;
+	// An expansion can itself hold localized tokens; moment allows six passes.
+	let passes = 6;
+
+	while ( passes-- > 0 ) {
+		localizedTokens.lastIndex = 0;
+
+		if ( ! localizedTokens.test( expanded ) ) {
+			break;
+		}
+
+		expanded = expanded.replace(
+			localizedTokens,
+			( token ) =>
+				localeData.longDateFormat(
+					token as moment.LongDateFormatKey
+				) || token
+		);
+	}
+
+	return expanded;
+}
+
+/**
+ * Renders the month and weekday names of a moment format string into escaped
+ * literals.
+ *
+ * Moment picks the grammatical form of both names by pattern-testing the
+ * format string while rendering: month choosers look for a day token next to
+ * the month one, and Ukrainian renders the genitive weekday whenever a
+ * bracketed literal sits before "dddd" - exactly the shape the substitutions
+ * here leave behind. Months and weekdays are the only tokens moment resolves
+ * against the format, so rendering every name in one pass, against the format
+ * as the locale received it, settles each choice before any substitution can
+ * flip one.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Moment} date       - date whose month and weekday to render
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with its month and weekday tokens escaped
+ */
+function escapeNameTokens(
+	format: string,
+	date: moment.Moment,
+	localeData: moment.Locale
+) {
+	// Backslash escapes and bracketed sections are moment's literals, so an
+	// "M" or "d" inside one is text. A backslash escapes the whole token that
+	// follows it; the escaped alternatives mirror moment's own tokens. "MM",
+	// "M", "Mo", "do" and "d" render digits, which carry no grammar.
+	return format.replace(
+		/\\(?:Mo|MM?M?M?|ddd?d?|do?)|\\.|\[[^\]]*\]|M{3,4}|d{2,4}/g,
+		( token ) => {
+			if ( token.startsWith( 'M' ) ) {
+				const name =
+					token.length === 4
+						? localeData.months( date, format )
+						: localeData.monthsShort( date, format );
+
+				return `[${ name }]`;
+			}
+
+			if ( ! token.startsWith( 'd' ) ) {
+				return token;
+			}
+
+			if ( token.length === 4 ) {
+				return `[${ localeData.weekdays( date, format ) }]`;
+			}
+
+			const name =
+				token.length === 3
+					? localeData.weekdaysShort( date )
+					: localeData.weekdaysMin( date );
+
+			return `[${ name }]`;
+		}
+	);
+}
+
+/**
+ * Swaps the day of month token of a moment format string for an escaped literal.
+ *
+ * Substituting in the format instead of in the formatted date keeps the value
+ * away from the rest of the localized output: Japanese renders October as
+ * "10月", where replacing the day "1" lands on the month instead, and locales
+ * with non-Latin digits never match a Latin day number at all.
+ *
+ * @param {string}   format      - localized date string format
+ * @param {Function} replacement - builds the literal text to render in place of
+ *                               the day, from the token it replaces
+ * @return {string|null} - format string, or null when it holds no day token
+ */
+function replaceDayToken(
+	format: string,
+	replacement: ( dayToken: string ) => string
+) {
+	let replaced = false;
+	// Backslash escapes and bracketed sections are moment's literals, so a "D"
+	// inside one is text. A backslash escapes the whole token that follows it,
+	// not just its first character; the escaped alternatives mirror moment's
+	// own day tokens, so a longer run of "D"s leaves the rest live.
+	const dayRangeFormat = format.replace(
+		/\\(?:Do|DDDo|DD?D?D?)|\\.|\[[^\]]*\]|D+o?/g,
+		( token ) => {
+			// Runs longer than "DD" are day of year tokens, not day of month.
+			const dayDigits = token.endsWith( 'o' )
+				? token.length - 1
+				: token.length;
+
+			if (
+				replaced ||
+				token.startsWith( '[' ) ||
+				token.startsWith( '\\' ) ||
+				dayDigits > 2
+			) {
+				return token;
+			}
+
+			replaced = true;
+			return `[${ replacement( token ) }]`;
+		}
+	);
+
+	return replaced ? dayRangeFormat : null;
+}
+
+/**
  * Given two dates, derive a string representation
  *
  * @param {moment.Moment} after  - start date
@@ -149,13 +296,29 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
 	} else if ( isSameMonth ) {
-		const afterDate = after.date();
-		return after
-			.format( fullDateFormat )
-			.replace(
-				String( afterDate ),
-				`${ afterDate } - ${ before.date() }`
-			);
+		// Formatting each day through the token it replaces keeps whatever the
+		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
+		// Everything else still renders from `after`, so a weekday, week number
+		// or time in the format stays the one the range starts on.
+		const localeData = after.localeData();
+		const dayRangeFormat = replaceDayToken(
+			escapeNameTokens(
+				expandLocalizedFormat( fullDateFormat, localeData ),
+				after,
+				localeData
+			),
+			( dayToken ) =>
+				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
+		);
+
+		// No day of month token to swap: the format either omits the day or
+		// holds only a day of year token, which is left alone. Either way the
+		// shared month is as much of the range as this format can carry.
+		if ( dayRangeFormat === null ) {
+			return after.format( fullDateFormat );
+		}
+
+		return after.format( dayRangeFormat );
 	} else if ( isSameYear ) {
 		const monthDayFormat = __( 'MMM D', 'woocommerce' );
 		return `${ after.format( monthDayFormat ) } - ${ before.format(
@@ -259,6 +422,34 @@ function anchorRangeToStoreTimeZone( range: DateValue ): DateValue {
 }
 
 /**
+ * Aligns the moment locale's start of the week with the WordPress
+ * "Week Starts On" setting. WordPress core applies the setting to the moment
+ * locale, but `wp.date.setSettings` then redefines the locale without a `week`
+ * key, resetting the start of the week to Sunday; without this correction,
+ * week ranges and calendar layouts ignore the setting.
+ */
+function ensureMomentStartOfWeek() {
+	const startOfWeek = getDateSettings().l10n?.startOfWeek;
+
+	if (
+		typeof startOfWeek !== 'number' ||
+		! Number.isInteger( startOfWeek ) ||
+		startOfWeek < 0 ||
+		startOfWeek > 6
+	) {
+		return;
+	}
+
+	if ( moment.localeData().firstDayOfWeek() !== startOfWeek ) {
+		moment.updateLocale( moment.locale(), {
+			week: { dow: startOfWeek },
+		} );
+	}
+}
+
+ensureMomentStartOfWeek();
+
+/**
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
@@ -269,6 +460,8 @@ export function getLastPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment()
 		.startOf( period )
 		.subtract( 1, period );
@@ -321,6 +514,8 @@ export function getCurrentPeriod(
 	period: moment.DurationInputArg2,
 	compare: string
 ) {
+	ensureMomentStartOfWeek();
+
 	const primaryStart = getStoreTimeZoneMoment().startOf( period );
 	const primaryEnd = getStoreTimeZoneMoment();
 

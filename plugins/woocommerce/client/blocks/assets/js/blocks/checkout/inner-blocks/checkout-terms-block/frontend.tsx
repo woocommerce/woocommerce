@@ -59,9 +59,9 @@ const FrontendBlock = ( {
 			return;
 		}
 		if ( checked ) {
-			clearValidationError( validationErrorId );
+			void clearValidationError( validationErrorId );
 		} else {
-			setValidationErrors( {
+			void setValidationErrors( {
 				[ validationErrorId ]: {
 					message: __(
 						'Please read and accept the terms and conditions.',
@@ -72,7 +72,7 @@ const FrontendBlock = ( {
 			} );
 		}
 		return () => {
-			clearValidationError( validationErrorId );
+			void clearValidationError( validationErrorId );
 		};
 	}, [
 		checkbox,

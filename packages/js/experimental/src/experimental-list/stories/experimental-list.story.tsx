@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { withConsole } from '@storybook/addon-console';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 /**
  * Internal dependencies
  */
@@ -15,7 +14,6 @@ import './style.scss';
 export default {
 	title: 'Experimental/List',
 	component: List,
-	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 	argTypes: {
 		direction: {
 			control: {
@@ -26,7 +24,7 @@ export default {
 	},
 } as Meta;
 
-const Template: Story< ListProps > = ( args ) => (
+const Template: StoryFn< ListProps > = ( args ) => (
 	<List { ...args }>
 		<ListItem disableGutters onClick={ () => {} }>
 			<div>Without gutters no padding is added to the list item.</div>
@@ -50,7 +48,7 @@ Primary.args = {
 	animation: 'slide-right',
 };
 
-export const CollapsibleListExample: Story = ( args ) => {
+export const CollapsibleListExample: StoryFn = ( args ) => {
 	return (
 		<CollapsibleList
 			collapseLabel="Show less"
@@ -94,7 +92,7 @@ export const CollapsibleListExample: Story = ( args ) => {
 
 CollapsibleListExample.storyName = 'List with CollapsibleListItem.';
 
-export const TaskItemExample: Story = ( args ) => (
+export const TaskItemExample: StoryFn = ( args ) => (
 	<List { ...args }>
 		<TaskItem
 			action={ () =>

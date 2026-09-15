@@ -84,8 +84,11 @@ class CouponsController {
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
-		$code   = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$result = $order->apply_coupon( $code );
+		$code = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		// A line total differing from its subtotal is treated as a manual price edit here. That is
+		// the editor's best guess: a difference recorded by REST or an extension is adopted the same way.
+		$result = $order->apply_coupon_using_edited_totals( $code );
 
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );

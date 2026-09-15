@@ -258,7 +258,7 @@ const saveSettingRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, settingId, false ) );
-		dispatch.__unstableReleaseStoreLock( lock );
+		void dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 
@@ -335,7 +335,7 @@ const saveSettingsGroupRequest = async (
 		throw error;
 	} finally {
 		dispatch( setSaving( groupId, null, false ) );
-		dispatch.__unstableReleaseStoreLock( lock );
+		void dispatch.__unstableReleaseStoreLock( lock );
 	}
 };
 

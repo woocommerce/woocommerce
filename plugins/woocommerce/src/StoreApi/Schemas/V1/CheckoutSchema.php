@@ -324,21 +324,17 @@ class CheckoutSchema extends AbstractSchema {
 			)
 			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
 
-		$additional_field_schema = $this->get_additional_fields_schema();
-		foreach ( $fields as $key => $value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
-				unset( $fields[ $key ] );
-				continue;
-			}
+		$response = [];
+		foreach ( $this->get_additional_fields_schema() as $key => $field_schema ) {
 			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
-			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
-				$fields[ $key ] = (bool) $value;
+			if ( isset( $field_schema['type'] ) && 'boolean' === $field_schema['type'] ) {
+				$response[ $key ] = (bool) ( $fields[ $key ] ?? false );
 			} else {
-				$fields[ $key ] = $this->prepare_html_response( $value );
+				$response[ $key ] = $this->prepare_html_response( $fields[ $key ] ?? '' );
 			}
 		}
 
-		return (object) $fields;
+		return (object) $response;
 	}
 
 	/**

@@ -51,17 +51,17 @@ const validateCountry = (
 
 		// No errors, so clear from store if needed
 		if ( hasValidationError ) {
-			dispatch( validationStore ).clearValidationError(
+			void dispatch( validationStore ).clearValidationError(
 				validationErrorId
 			);
 		}
 	} catch ( error ) {
 		if ( hasValidationError ) {
-			dispatch( validationStore ).showValidationError(
+			void dispatch( validationStore ).showValidationError(
 				validationErrorId
 			);
 		} else {
-			dispatch( validationStore ).setValidationErrors( {
+			void dispatch( validationStore ).setValidationErrors( {
 				[ validationErrorId ]: {
 					message: String( error ),
 					hidden: false,

@@ -27,12 +27,21 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	private $service;
 
 	/**
+	 * Previous guest checkout option value.
+	 *
+	 * @var mixed
+	 */
+	private $previous_guest_checkout_option;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->service = wc_get_container()->get( EmailVerificationService::class );
-		$this->sut     = wc_get_container()->get( VerificationController::class );
+		$this->service                        = wc_get_container()->get( EmailVerificationService::class );
+		$this->sut                            = wc_get_container()->get( VerificationController::class );
+		$this->previous_guest_checkout_option = get_option( 'woocommerce_enable_guest_checkout', null );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 	}
 
 	/**
@@ -41,7 +50,23 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
+		$this->restore_option( 'woocommerce_enable_guest_checkout', $this->previous_guest_checkout_option );
 		parent::tearDown();
+	}
+
+	/**
+	 * Restore an option to its previous value.
+	 *
+	 * @param string $option_name    Option name.
+	 * @param mixed  $previous_value Previous option value, or null if it did not exist.
+	 */
+	private function restore_option( string $option_name, $previous_value ): void {
+		if ( null === $previous_value ) {
+			delete_option( $option_name );
+			return;
+		}
+
+		update_option( $option_name, $previous_value );
 	}
 
 	/**
@@ -115,6 +140,50 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox should_show_prompt returns false when guest checkout is disabled.
+	 */
+	public function test_should_show_prompt_returns_false_when_guest_checkout_is_disabled(): void {
+		$user_id = wc_create_new_customer( 'prompt-guest-disabled@example.com', 'promptguestdisabled', 'pw' );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$this->assertFalse( $this->sut->should_show_prompt(), 'The prompt should not show when guest checkout is disabled.' );
+	}
+
+	/**
+	 * @testdox The prompt does not render when the verification email is disabled.
+	 */
+	public function test_prompt_does_not_render_when_verification_email_is_disabled(): void {
+		$user_id = wc_create_new_customer( 'prompt-email-disabled@example.com', 'promptemaildisabled', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$option_name    = 'woocommerce_customer_verify_email_settings';
+		$previous_value = get_option( $option_name, null );
+		$email_settings = is_array( $previous_value ) ? $previous_value : array();
+
+		$email_settings['enabled'] = 'no';
+		update_option( $option_name, $email_settings );
+
+		try {
+			$this->assertSame( '', $this->render_prompt(), 'The prompt should not render when its email is disabled.' );
+		} finally {
+			$this->restore_option( $option_name, $previous_value );
+		}
+	}
+
+	/**
+	 * @testdox should_show_prompt allows filters to override the guest checkout default.
+	 */
+	public function test_should_show_prompt_allows_filter_to_override_guest_checkout_default(): void {
+		$user_id = wc_create_new_customer( 'prompt-guest-disabled-filtered@example.com', 'promptguestdisabledfiltered', 'pw' );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_true' );
+		$this->assertTrue( $this->sut->should_show_prompt(), 'The prompt default should be overrideable by filter.' );
+	}
+
+	/**
 	 * @testdox should_show_prompt returns false for an account using a temporary password.
 	 */
 	public function test_should_show_prompt_returns_false_with_temporary_password(): void {
@@ -135,6 +204,18 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->service->mark_verified( $user_id );
 
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Verified customers should not see the prompt' );
+	}
+
+	/**
+	 * @testdox should_show_prompt never applies the filter for a verified customer.
+	 */
+	public function test_should_show_prompt_ignores_filter_for_verified_customer(): void {
+		$user_id = wc_create_new_customer( 'prompt-verified-filtered@example.com', 'promptverifiedfiltered', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->service->mark_verified( $user_id );
+
+		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_true' );
+		$this->assertFalse( $this->sut->should_show_prompt(), 'A verified customer should never see the prompt, even if a filter tries to force it on.' );
 	}
 
 	// -------------------------------------------------------------------------

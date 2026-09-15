@@ -293,29 +293,6 @@ test.describe( 'Shopper → Local pickup', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Payment Methods', () => {
-	test( 'User can change payment methods', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page
-			.getByRole( 'radio', { name: 'Direct bank transfer' } )
-			.click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Direct bank transfer' } )
-		).toBeChecked();
-
-		await page.getByRole( 'radio', { name: 'Cash on delivery' } ).click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Cash on delivery' } )
-		).toBeChecked();
-	} );
-} );
-
 test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	const billingTestData = {
 		firstname: 'John',

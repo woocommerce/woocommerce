@@ -192,6 +192,7 @@ The following field types are supported:
 - `select`
 - `text`
 - `checkbox`
+- `date`
 
 There are plans to expand this list, but for now these are the types available.
 
@@ -219,7 +220,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `label` | The label shown on your field. This will be the placeholder too. | Yes | `How did you hear about us?` | No default - this must be provided. |
 | `optionalLabel` | The label shown on your field if it is optional. This will be the placeholder too. | No | `How did you hear about us? (Optional)` | The default value will be the value of `label` with `(optional)` appended. |
 | `location` | The location to render your field. | Yes | `contact`, `address`, or `order` | No default - this must be provided. |
-| `type` | The type of field you're rendering. It defaults to `text` and must match one of the supported field types. | No | `text`, `select`, or `checkbox` | `text` |
+| `type` | The type of field you're rendering. It defaults to `text` and must match one of the supported field types. | No | `text`, `select`, `checkbox`, or `date` | `text` |
 | `attributes` | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields. | No | `[	'data-custom-data' => 'my-custom-data' ]` | `[]` |
 | `required` | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
 | `hidden` | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
@@ -248,6 +249,53 @@ These options apply to all field types (except in a few circumstances which are 
 #### Options for `text` fields
 
 Text fields don't have any additional options beyond the general options listed above.
+
+#### Options for `date` fields
+
+As well as the options above, date fields support `min` and `max` options to limit the range of dates a shopper can pick.
+
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
+| `min` | The earliest date the shopper can select. | No | `2026-01-01`, `P0D`, `P1D` | No minimum. |
+| `max` | The latest date the shopper can select. | No | `2026-12-31`, `P30D`, `-P18Y` | No maximum. |
+
+Each one takes either:
+
+- An **absolute** date in `YYYY-MM-DD` format, such as `2026-01-01`. This is the same format the HTML `min` and `max` attributes use.
+- A **duration relative to today**, written in the [ISO 8601-2 duration format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/Duration#iso_8601_duration_format), optionally signed: `P1D` (tomorrow), `-P5D` (five days ago), `P2W`, `P3M`, `-P18Y`. `P0D` means today.
+
+```php
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'my-plugin/delivery-date',
+		'label'    => 'Preferred delivery date',
+		'location' => 'order',
+		'type'     => 'date',
+		'required' => true,
+		'min'      => 'P1D',   // From tomorrow,
+		'max'      => 'P30D',  // up to 30 days out.
+	)
+);
+```
+
+##### Dates only, not times
+
+A date field holds a calendar date with no time component, so only the `Y`, `M`, `W` and `D` parts of a duration are meaningful. A duration carrying a time component, such as `PT1H` or `P1DT12H`, is rejected at registration.
+
+##### Pass the duration, don't resolve it yourself
+
+```php
+// Don't do this.
+'min' => date( 'Y-m-d', strtotime( '+1 day' ) ),
+```
+
+This ends up resolving to a date that may not always be up to date between registration, field rendering, and value submission. Instead, pass P1D, which will be evaluated at input time and submission time.
+
+Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would form an invalid range in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
+
+If mixed dates (absolute and durations) resolve to an invalid range, where min is later than max, WooCommerce will ignore them and the field will be boundless and will emit a log warning.
+
+The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
 #### Options for `select` fields
 
@@ -292,7 +340,7 @@ As well as the options above, checkbox field support showing an error message if
 
 ### Attributes
 
-Adding additional attributes to checkbox and text fields is supported. Adding them to select fields is **not possible for now**.
+Adding additional attributes to checkbox, text, and date fields is supported. Adding them to select fields is **not possible for now**.
 
 These attributes have a 1:1 mapping to the HTML attributes on `input` elements (except `pattern` on checkbox).
 

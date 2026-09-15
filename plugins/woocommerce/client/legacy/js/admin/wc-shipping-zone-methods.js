@@ -437,7 +437,7 @@
 				},
 				highlightOnFocus: function( query ) {
 					const inputs = $( query );
-					inputs.focus( function() {
+					inputs.on( 'focus', function() {
 						$( this ).select();
 					} );
 				},

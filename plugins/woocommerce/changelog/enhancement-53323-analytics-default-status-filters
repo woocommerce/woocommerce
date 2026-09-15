@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce two new PHP filters, woocommerce_analytics_settings_default_excluded_order_statuses and woocommerce_analytics_settings_default_actionable_order_statuses, that let plugins change the default order statuses used by Analytics. The filters apply everywhere, not only to the boxes pre-checked on the Analytics Settings screen: on a store that has never saved these options they also change report totals, the order status enum returned by the reports REST controllers, the Activity Panel orders-to-fulfill count, and the Customer History box.

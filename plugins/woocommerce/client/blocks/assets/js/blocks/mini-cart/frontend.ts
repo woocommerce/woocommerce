@@ -16,15 +16,15 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
+import {
+	formatPriceWithCurrency,
+	normalizeCurrencyResponse,
+} from '@woocommerce/price-format/utils/currency';
 
 /**
  * Internal dependencies
  */
-import {
-	formatPriceWithCurrency,
-	normalizeCurrencyResponse,
-} from '../../../../packages/prices/utils/currency';
-import { CartItem, Currency } from '../../types';
+import type { CartItem, Currency } from '@woocommerce/types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
 	getEntryFieldRaw,

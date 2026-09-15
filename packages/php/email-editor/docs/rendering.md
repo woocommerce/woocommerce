@@ -118,6 +118,45 @@ $html_content = $rendered_email['html'];
 $text_content = $rendered_email['text'];
 ```
 
+#### Rendering without a saved post
+
+Use `render_from_content()` to render block markup that has no database record.
+
+```php
+/**
+ * Renders block markup that has no backing post.
+ *
+ * @param string $content       Block HTML markup to render.
+ * @param string $template_slug Block template slug to render the content with.
+ * @param string $subject Email subject.
+ * @param string $pre_header An email preheader or preview text.
+ * @param string $language Email language.
+ * @param string $meta_robots Optional meta robots value for browser display.
+ * @return array
+ */
+public function render_from_content(
+    string $content,
+    string $template_slug,
+    string $subject,
+    string $pre_header,
+    string $language = 'en',
+    string $meta_robots = ''
+): array
+```
+
+**Example Usage:**
+
+```php
+$rendered_email = $renderer->render_from_content(
+    $block_markup,
+    'my-email-template-slug',
+    'Order Confirmation',
+    'Your order has been confirmed'
+);
+```
+
+Internally the renderer wraps the markup in a synthetic `WP_Post` with `ID === 0`; the rendering pipeline treats that ID as "no database record" and reads everything from the post object.
+
 ### Content_Renderer
 
 The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer` class is responsible for rendering only the HTML of block template content and a post. The block template has to contain a `core/post-content` block.

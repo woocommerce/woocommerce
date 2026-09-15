@@ -13,6 +13,7 @@ jobs:
   check-version:
     name: Check Action Scheduler version
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.get-as-version.outputs.version }}
       should-update: ${{ steps.check-version.outputs.should-update }}
@@ -62,6 +63,7 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should-update == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
     - name: Check out trunk
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0

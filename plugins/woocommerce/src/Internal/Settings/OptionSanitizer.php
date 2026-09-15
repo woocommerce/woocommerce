@@ -34,7 +34,8 @@ class OptionSanitizer {
 				2
 			);
 		}
-		// Cast "Out of stock threshold" field to absolute integer to prevent storing empty value.
+		// Normalize stock threshold settings to non-negative integers.
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_low_stock_amount', 'absint' );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_no_stock_amount', 'absint' );
 	}
 
@@ -63,5 +64,35 @@ class OptionSanitizer {
 		}
 
 		return (string) $value;
+	}
+
+	/**
+	 * Rejects thousand and decimal separators that contain a number.
+	 * On rejection it adds a settings error and returns null, so the stored value is left untouched.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value     Option value.
+	 * @param mixed $raw_value Raw request value, null when the field was not submitted.
+	 * @return mixed
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function sanitize_price_separator_setting( $value, $raw_value ) {
+		if ( null === $raw_value ) {
+			return $value;
+		}
+
+		if ( is_string( $raw_value ) ) {
+			$separator = wp_kses( $raw_value, array() );
+			$decoded   = html_entity_decode( $separator, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+			if ( 0 === preg_match( '/\p{N}/u', $decoded ) ) {
+				return $separator;
+			}
+		}
+
+		\WC_Admin_Settings::add_error( __( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' ) );
+
+		return null;
 	}
 }

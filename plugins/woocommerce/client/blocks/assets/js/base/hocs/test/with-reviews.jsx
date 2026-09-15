@@ -121,6 +121,34 @@ describe( 'withReviews Component', () => {
 		} );
 	} );
 
+	it( 'replaces reviews when the offset changes as the display count increases', async () => {
+		const { getReviews } = mockUtils;
+		getReviews.mockResolvedValue( {
+			reviews: mockReviews,
+			totalReviews: 20,
+		} );
+		await renderComponent( { offset: 5, reviewsToDisplay: 5 } );
+
+		await settle( () =>
+			renderResult.rerender(
+				<TestComponent
+					attributes={ {} }
+					offset={ 0 }
+					order="desc"
+					orderby="date_gmt"
+					productId={ 1 }
+					reviewsToDisplay={ 10 }
+				/>
+			)
+		);
+
+		expect( getReviews ).toHaveBeenNthCalledWith( 2, {
+			...defaultArgs,
+			offset: 0,
+			per_page: 10,
+		} );
+	} );
+
 	describe( 'when the API returns product data', () => {
 		beforeEach( async () => {
 			mockUtils.getReviews.mockImplementation( () =>
@@ -134,9 +162,26 @@ describe( 'withReviews Component', () => {
 
 		it( 'sets reviews based on API response', () => {
 			expect( lastProps.error ).toBeNull();
+			expect( lastProps.hasReviewsHiddenByOffset ).toBe( false );
 			expect( lastProps.isLoading ).toBe( false );
 			expect( lastProps.reviews ).toEqual( mockReviews.slice( 0, 2 ) );
 			expect( lastProps.totalReviews ).toEqual( mockReviews.length );
+		} );
+	} );
+
+	describe( 'when the offset hides all available reviews', () => {
+		beforeEach( async () => {
+			mockUtils.getReviews.mockResolvedValue( {
+				reviews: [],
+				totalReviews: mockReviews.length,
+			} );
+			await renderComponent( { offset: mockReviews.length } );
+		} );
+
+		it( 'indicates that reviews are hidden by the offset', () => {
+			expect( lastProps.hasReviewsHiddenByOffset ).toBe( true );
+			expect( lastProps.reviews ).toEqual( [] );
+			expect( lastProps.totalReviews ).toEqual( 0 );
 		} );
 	} );
 

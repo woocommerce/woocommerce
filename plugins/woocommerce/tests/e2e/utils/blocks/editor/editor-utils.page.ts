@@ -132,6 +132,8 @@ export class Editor extends CoreEditor {
 		const templateCards = this.page.locator(
 			'.dataviews-view-grid .dataviews-view-grid__card'
 		);
+
+		await expect( templateCards.first() ).toBeVisible();
 		const templatesBeforeSearch = await templateCards.count();
 
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
@@ -175,8 +177,14 @@ export class Editor extends CoreEditor {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
+			.locator( '.dataviews-view-grid .dataviews-view-grid__card' )
+			.filter( {
+				has: this.page.getByRole( 'button', {
+					name: templateName,
+					exact: true,
+				} ),
+			} )
 			.getByRole( 'button', { name: 'Actions' } )
-			.first()
 			.click();
 		await this.page
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )

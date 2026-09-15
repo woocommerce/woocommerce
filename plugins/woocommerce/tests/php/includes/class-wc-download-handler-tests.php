@@ -548,6 +548,74 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox readfile_chunked() should emit binary download bytes unchanged.
+	 */
+	public function test_readfile_chunked_emits_binary_data_unchanged(): void {
+		$binary_content = "\x00\xFF\xFE<script>&\x80";
+		$temp_file      = wp_tempnam( 'wc-download-handler-streaming' );
+
+		file_put_contents( $temp_file, $binary_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+
+		$output = '';
+		ob_start(
+			function ( $chunk ) use ( &$output ) {
+				$output .= $chunk;
+				return '';
+			}
+		);
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $temp_file, 0, strlen( $binary_content ) );
+		} finally {
+			ob_end_clean();
+			wp_delete_file( $temp_file );
+		}
+
+		$this->assertTrue( $served, 'A complete binary stream should be reported as served.' );
+		$this->assertSame( $binary_content, $output, 'Binary download bytes must not be escaped or otherwise transformed.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should stop and report failure when a stream read fails.
+	 *
+	 * @dataProvider provider_stream_lengths
+	 *
+	 * @param int $length Requested download length, where zero means until EOF.
+	 */
+	public function test_readfile_chunked_reports_read_failure( int $length ): void {
+		$scheme = 'wc-failing-download';
+
+		FakeRemoteStreamWrapper::$fail_reads = true;
+		stream_wrapper_register( $scheme, FakeRemoteStreamWrapper::class );
+
+		ob_start();
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $scheme . '://fixture', 0, $length );
+		} finally {
+			$output = ob_get_clean();
+			stream_wrapper_unregister( $scheme );
+			FakeRemoteStreamWrapper::$fail_reads = false;
+		}
+
+		$this->assertFalse( $served, 'A failed fread() call should make the download fail.' );
+		$this->assertSame( '', $output, 'A failed read should not append anything to the download response.' );
+		$this->assertTrue( FakeRemoteStreamWrapper::$closed, 'The failed stream should be closed immediately.' );
+	}
+
+	/**
+	 * Download lengths for failed-stream coverage.
+	 *
+	 * @return array<string, array<int>>
+	 */
+	public function provider_stream_lengths(): array {
+		return array(
+			'requested range'       => array( 4 ),
+			'read until stream EOF' => array( 0 ),
+		);
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {
@@ -581,6 +649,62 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$method->invoke( null, 'https://evil.example.com/uc', 'payload.html', true ),
 			'A remote-derived .html filename should not switch the response to text/html.'
 		);
+	}
+
+	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		$string_args = array(
+			'download_file' => '1',
+			'order'         => 'wc_order_x',
+			'key'           => 'k',
+			'email'         => 'a@example.org',
+		);
+
+		$product_was_looked_up = false;
+		$lookup_watcher        = function ( $type ) use ( &$product_was_looked_up ) {
+			$product_was_looked_up = true;
+			return $type;
+		};
+
+		add_filter( 'woocommerce_product_type_query', $lookup_watcher );
+
+		try {
+			foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+				$_GET = $string_args;
+
+				if ( 'uid' === $arg ) {
+					// The UID is only consulted when no email address is supplied.
+					unset( $_GET['email'] );
+				}
+
+				$_GET[ $arg ]          = array( 'x' );
+				$wp_die_message        = '';
+				$product_was_looked_up = false;
+
+				// We do not use expectException() here because every argument is checked in turn.
+				try {
+					WC_Download_Handler::download_product();
+				} catch ( WPDieException $e ) {
+					$wp_die_message = $e->getMessage();
+				}
+
+				$this->assertStringContainsString(
+					'Invalid download link',
+					$wp_die_message,
+					"An array value for the \"$arg\" query argument should render the invalid download link error."
+				);
+
+				$this->assertFalse(
+					$product_was_looked_up,
+					"Array query arguments are rejected before any product lookup, but the \"$arg\" case reached one."
+				);
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $lookup_watcher );
+			$_GET = array();
+		}
 	}
 
 	/**

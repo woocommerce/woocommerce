@@ -254,7 +254,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		// Memory management: Always start with 90%. Eatch batch takes up 20%.
+		// Memory management: Always start with 90%. Each batch takes up 20%.
 		$available_memory = 90;
 		$mock_memory_manager->expects( $this->exactly( $expected_iterations + 1 ) )
 			->method( 'get_available_memory' )

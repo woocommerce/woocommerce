@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Settings registration now runs on `admin_init` at priority 999 instead of the default 10, so it runs after other callbacks on that hook rather than before. Code that unhooks it must match the new priority: `remove_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ), 999 )`; the no-priority form that matches in 11.0.1 and 11.1 silently stops matching.

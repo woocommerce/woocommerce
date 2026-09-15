@@ -15,7 +15,7 @@ WooCommerce currently uses two feature-flag systems in Blocks:
 
 | Flag | Defaults | Current Blocks usage |
 | --- | --- | --- |
-| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items and conditional checkout-field processing in the Store API. It does not determine which block scripts webpack builds or which general block types are registered. |
+| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items. It does not determine which block scripts webpack builds or which general block types are registered. |
 | `rest-api-v4` | Disabled in both development and core build configurations. | Exposed through [`isExperimentalWcRestApiV4Enabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It switches product entities from `/wc/v3/products` to `/wc/v4/products`, registers the settings entity, and enables the v4 product-data paths used by Product Price and Product Button in the editor. |
 
 ### Runtime feature flags
@@ -72,13 +72,13 @@ The checkout-field aliases are implemented in [`functions.php`](https://github.c
 
 | Interface | Status and purpose |
 | --- | --- |
-| `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx). |
-| `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
-| `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
+| `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/product-collection/register-product-collection.tsx). |
+| `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
+| `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
 | `__experimentalRegisterCheckoutFilters` | Deprecated alias for `registerCheckoutFilters`. |
 | `__experimentalApplyCheckoutFilter` | Deprecated alias for `applyCheckoutFilter`. |
 
-The deprecated Checkout Filter aliases are implemented in the [`filter-registry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/filter-registry/index.ts).
+The deprecated Checkout Filter aliases are implemented in the [`filter-registry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/filter-registry/index.ts).
 
 ### SlotFills
 
@@ -89,7 +89,7 @@ The deprecated Checkout Filter aliases are implemented in the [`filter-registry`
 | `ExperimentalOrderLocalPickupPackages` | `__experimentalOrderLocalPickupPackages` | Inside the Checkout pickup options. |
 | `ExperimentalDiscountsMeta` | `__experimentalDiscountsMeta` | Below each discount in the Cart and Checkout totals. |
 
-See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md) and the [checkout components source](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/checkout/components) for their current props and placement.
+See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md) and the [checkout components source](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/components) for their current props and placement.
 
 ### Store events
 

@@ -43,6 +43,8 @@ To re-create the environment for a fresh state:
 
 `pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
+Core and Blocks tests share the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:start:blocks` seeds the Blocks profile on top of whatever the database already holds, and `pnpm test:e2e:*` runs against the environment's current state. The Blocks seed resets the shipping zones, tax classes, and tax settings it relies on, so running it after Core tests is safe for those. Other state a Core run leaves behind can still leak into the Blocks profile. If Blocks tests fail after Core tests ran on the same environment, run `pnpm env:e2e:restart` and then `pnpm env:start:blocks`. To go back to Core tests after Blocks, run `pnpm env:e2e:restart`.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
@@ -167,6 +169,10 @@ Still, here's a few tips to get you started:
 Playwright's Best Practices guide is a good
 read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
+### Gotchas
+
+- **Never run two wp-env commands at once.** Await each `wpCLI` call (or any other helper that shells out to `wp-env`, such as `getInstalledWordPressVersion`) before starting the next, and keep them out of `Promise.all`. Every wp-env command rewrites `wp-env-cache.json` in the environment's work directory without locking, so two overlapping commands can drop its `runtime` key. From then on every wp-env command, `run` and `destroy` included, fails with "Environment not initialized. Run `wp-env start` first." until the environment starts again, so one overlap breaks every later spec in the CI job. Overlapping a single `wpCLI` call with browser work such as `page.goto` is fine, since that doesn't start wp-env.
+
 ## Test helper plugins
 
 Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`.
@@ -180,10 +186,11 @@ Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (curr
 How a helper is wired up depends on when it needs to be active:
 
 - **Always-on helpers** are listed in `.wp-env.e2e.json`'s `plugins` array, which mounts the folder **and auto-activates** it. Do not add a manual `wp plugin activate …` line for these. Current always-on helpers:
-    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering three concerns in one plugin:
+    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering four concerns in one plugin:
         - **Filter setter** — registers WordPress filters from an `e2e-filters` cookie so tests can override filtered values on the fly.
         - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
         - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
+        - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
 - **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
 

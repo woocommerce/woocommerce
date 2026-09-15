@@ -21,6 +21,10 @@ See [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scri
 
 You can get to the settings and features from your top admin bar under the name WC Beta Tester.
 
-For more information about WooCommerce Admin Test Helper usage, click [here](./EXTENDING-WC-ADMIN-HELPER.md).
+For more information, see [Extending WooCommerce Admin Test Helper](./EXTENDING-WC-ADMIN-HELPER.md).
 
 Run `./bin/build-zip.sh` to make a zip file.
+
+## License
+
+Like WooCommerce itself, the WooCommerce Beta Tester plugin is open-source software licensed under the GPL v2 (or later). See [license](../../license.txt).

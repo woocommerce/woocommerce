@@ -16,7 +16,7 @@ const {
  * Internal dependencies
  */
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getResolve } = require( './webpack-helpers' );
+const { getAlias, getResolve } = require( './webpack-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
@@ -73,7 +73,7 @@ module.exports = {
 		module: true,
 	},
 	resolve: {
-		...getResolve(),
+		...getResolve( { alias: getAlias() } ),
 		extensions: [ '.js', '.ts', '.tsx' ],
 	},
 	plugins: [

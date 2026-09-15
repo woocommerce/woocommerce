@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 import { execSync } from 'child_process';
 
 /**
@@ -27,14 +27,13 @@ export default class PackageRelease extends Command {
 	/**
 	 * CLI arguments
 	 */
-	static args = [
-		{
-			name: 'packages',
+	static args = {
+		packages: Args.string( {
 			description:
 				'Package to release, or packages to release separated by commas.',
 			required: false,
-		},
-	];
+		} ),
+	};
 
 	/**
 	 * CLI flags.
@@ -70,13 +69,14 @@ export default class PackageRelease extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( PackageRelease );
+		const packages = args.packages ? args.packages.split( ',' ) : [];
 
 		if ( ! args.packages && ! flags.all ) {
 			this.error( 'No packages supplied.' );
 		}
 
 		if ( ! flags[ 'skip-install' ] ) {
-			CliUx.ux.action.start( 'Installing all dependencies' );
+			ux.action.start( 'Installing all dependencies' );
 
 			execSync( 'pnpm install', {
 				cwd: MONOREPO_ROOT,
@@ -91,15 +91,13 @@ export default class PackageRelease extends Command {
 				stdio: 'inherit',
 			} );
 
-			CliUx.ux.action.stop();
+			ux.action.stop();
 		}
 
 		if ( flags.all ) {
 			this.publishPackages( getAllPackages(), flags );
 			return;
 		}
-
-		const packages = args.packages.split( ',' );
 
 		packages.forEach( ( name: string ) =>
 			validatePackage( name, ( e: string ): void => this.error( e ) )
@@ -125,7 +123,7 @@ export default class PackageRelease extends Command {
 		packages.forEach( ( name ) => {
 			try {
 				const verb = dryRun ? 'Performing dry run of' : 'Publishing';
-				CliUx.ux.action.start( `${ verb } ${ name }` );
+				ux.action.start( `${ verb } ${ name }` );
 				if ( isValidUpdate( name, initialRelease ) ) {
 					const cwd = getFilepathFromPackageName( name );
 					if ( cwd.includes( 'packages/php' ) ) {
@@ -143,9 +141,9 @@ export default class PackageRelease extends Command {
 							stdio: 'inherit',
 						}
 					);
-					CliUx.ux.action.stop( `${ name } successfully published.` );
+					ux.action.stop( `${ name } successfully published.` );
 				} else {
-					CliUx.ux.action.stop(
+					ux.action.stop(
 						`${ name } does not have anything to update.`
 					);
 				}

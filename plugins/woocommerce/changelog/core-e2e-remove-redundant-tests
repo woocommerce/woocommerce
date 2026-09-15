@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove core E2E tests whose coverage exists elsewhere: the duplicated logged-in Checkout Link block, the WordPress-core lost password specs, and seven of eight identical order status filter cases.
