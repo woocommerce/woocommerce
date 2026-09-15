@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
+import { WC_ADMIN_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -193,6 +194,176 @@ test.describe(
 				await expect(
 					page.getByLabel( 'Number of decimals' )
 				).toHaveValue( '2' );
+			} );
+		} );
+
+		test( 'Can complete the core profiler with an extension selected', async ( {
+			page,
+			restApi,
+		} ) => {
+			test.skip(
+				!! process.env.IS_MULTISITE,
+				'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
+			);
+
+			// Installing from WordPress.org would make this title depend on an outside
+			// service and leave real plugins on the shared site, so the two requests the
+			// profiler sends for the selection are answered here with the REST
+			// controller's success shape. What stays under test is the browser half:
+			// the selection reaches those requests, and a successful install finishes
+			// the profiler on the home screen.
+			const slug = 'google-listings-and-ads';
+			const pluginRequests: Array< { path: string; body: unknown } > = [];
+			await page.route(
+				( url ) =>
+					/\/wc-admin\/plugins\/(install|activate)(?:[?&]|$)/.test(
+						decodeURIComponent( url.toString() )
+					),
+				async ( route ) => {
+					const path = /\/wc-admin\/plugins\/activate(?:[?&]|$)/.test(
+						decodeURIComponent( route.request().url() )
+					)
+						? 'activate'
+						: 'install';
+					pluginRequests.push( {
+						path,
+						body: route.request().postDataJSON(),
+					} );
+					const errors = { errors: {}, error_data: {} };
+					await route.fulfill( {
+						json:
+							path === 'install'
+								? {
+										data: {
+											installed: [ slug ],
+											results: { [ slug ]: true },
+											install_time: { [ slug ]: 1 },
+											plugin_details: {},
+										},
+										errors,
+										success: true,
+								  }
+								: {
+										data: {
+											activated: [ slug ],
+											active: [ slug ],
+											plugin_details: {},
+										},
+										errors,
+										success: true,
+								  },
+					} );
+				}
+			);
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+			);
+
+			await test.step( 'Walk the profiler to the extensions step', async () => {
+				await expect(
+					page.getByRole( 'heading', { name: 'Welcome to Woo!' } )
+				).toBeVisible();
+				await page
+					.getByRole( 'checkbox', {
+						name: 'I agree to share my data',
+					} )
+					.uncheck();
+				await page
+					.getByRole( 'button', { name: 'Set up my store' } )
+					.click();
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Which one of these best describes you?',
+					} )
+				).toBeVisible();
+				await page
+					.getByRole( 'radio' )
+					.filter( { hasText: 'just starting my business' } )
+					.click();
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Tell us a bit about your store',
+					} )
+				).toBeVisible();
+				await page
+					.locator(
+						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
+					)
+					.first()
+					.click();
+				await page
+					.getByRole( 'option', { name: 'Clothing and accessories' } )
+					.click();
+				// The location field is required and starts empty.
+				await page.getByRole( 'combobox' ).last().click();
+				await page.getByRole( 'combobox' ).last().fill( 'Australia' );
+				await page
+					.getByRole( 'option', {
+						name: 'Australia — Northern Territory',
+					} )
+					.click();
+				await page
+					.getByPlaceholder( 'wordpress@example.com' )
+					.fill( 'merchant@example.com' );
+				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
+
+			await test.step( 'Select one extension and continue', async () => {
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Get a boost with our free features',
+					} )
+				).toBeVisible();
+				// Every recommendation that is not active starts selected. Clear them all,
+				// then pick one that needs no Jetpack connection, so the profiler ends on
+				// the home screen rather than the Jetpack authorization page.
+				const cards = page.locator(
+					'.woocommerce-profiler-plugins-plugin-card'
+				);
+				await expect( cards.first() ).toBeVisible();
+				for ( const checkbox of await cards
+					.getByRole( 'checkbox' )
+					.all() ) {
+					await checkbox.uncheck();
+				}
+				await expect(
+					cards.locator( 'input[type="checkbox"]:checked' )
+				).toHaveCount( 0 );
+				await cards
+					.and( page.locator( `[data-slug="${ slug }"]` ) )
+					.getByRole( 'checkbox' )
+					.check();
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
+
+			await test.step( 'Confirm the selection was installed and the profiler finished', async () => {
+				await expect(
+					page.getByRole( 'heading', { name: 'Home', exact: true } )
+				).toBeVisible();
+
+				expect( pluginRequests ).toEqual( [
+					{
+						path: 'install',
+						body: {
+							plugins: slug,
+							async: false,
+							source: 'core-profiler',
+						},
+					},
+					{ path: 'activate', body: { plugins: slug } },
+				] );
+
+				// The profiler records what the install reported, which only happens on
+				// the success path: a failed install returns to the extensions step.
+				const { data: profile } = await restApi.get(
+					`${ WC_ADMIN_API_PATH }/onboarding/profile`
+				);
+				expect( profile.business_extensions ).toEqual( [ slug ] );
 			} );
 		} );
 	}
