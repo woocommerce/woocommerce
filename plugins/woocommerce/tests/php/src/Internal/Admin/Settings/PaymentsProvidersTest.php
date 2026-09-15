@@ -1534,7 +1534,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $pref_suggestion, 'Suggestion `id` entry is missing' );
 		$this->assertSame( 'suggestion1', $pref_suggestion['id'] );
 		$this->assertArrayHasKey( '_priority', $pref_suggestion, 'Suggestion `_priority` entry is missing' );
-		$this->assertIsInteger( $pref_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+		$this->assertIsInt( $pref_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 		$this->assertSame( 1, $pref_suggestion['_priority'] );
 		$this->assertArrayHasKey( '_type', $pref_suggestion, 'Suggestion `_type` entry is missing' );
 		$this->assertSame( ExtensionSuggestions::TYPE_PSP, $pref_suggestion['_type'] );
@@ -1565,7 +1565,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $other_suggestion, 'Suggestion `id` entry is missing' );
 		$this->assertSame( 'suggestion5', $other_suggestion['id'] );
 		$this->assertArrayHasKey( '_priority', $other_suggestion, 'Suggestion `_priority` entry is missing' );
-		$this->assertIsInteger( $other_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+		$this->assertIsInt( $other_suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 		$this->assertSame( 5, $other_suggestion['_priority'] );
 		$this->assertArrayHasKey( '_type', $other_suggestion, 'Suggestion `_type` entry is missing' );
 		$this->assertSame( ExtensionSuggestions::TYPE_PSP, $other_suggestion['_type'] );
