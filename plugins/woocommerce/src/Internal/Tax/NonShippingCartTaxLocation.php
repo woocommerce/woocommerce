@@ -41,6 +41,7 @@ class NonShippingCartTaxLocation {
 	 * @param mixed            $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
 	 * @param \WP_REST_Server  $server  Server instance.
 	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return mixed The response to dispatch.
 	 */
 	public function handle_rest_pre_dispatch( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
