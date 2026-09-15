@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.9.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -44,11 +44,13 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 							if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
 							} elseif ( 'method' === $column_id ) {
+								// Custom token types may not set a brand.
+								$brand_label = wc_get_credit_card_type_label( $method['method']['brand'] ?? '' );
 								if ( ! empty( $method['method']['last4'] ) ) {
 									/* translators: 1: credit card type 2: last 4 digits */
-									echo sprintf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
+									printf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( $brand_label ), esc_html( $method['method']['last4'] ) );
 								} else {
-									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
+									echo esc_html( $brand_label );
 								}
 							} elseif ( 'expires' === $column_id ) {
 								echo esc_html( $method['expires'] );
