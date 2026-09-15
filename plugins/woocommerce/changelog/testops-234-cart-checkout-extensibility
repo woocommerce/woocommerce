@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move 4 extension cart update E2E tests to Jest and PHPUnit, covering the extensionCartUpdate wrapper, the cart thunk, the notice context, and the CartExtensions route; keep one browser title per spec.
+
