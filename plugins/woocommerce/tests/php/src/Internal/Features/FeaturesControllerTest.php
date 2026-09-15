@@ -364,6 +364,53 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Block Email Editor setting is visible and persists enablement.
+	 */
+	public function test_block_email_editor_setting_is_visible_and_persists_enablement(): void {
+		$feature_option_name = 'woocommerce_feature_block_email_editor_enabled';
+
+		// setUp() registers this class's own dummy features on this hook. Detach them so the
+		// real controller below sees only the built-in definitions. _restore_hooks() puts the
+		// callback back after the test, the same way the rollback puts the option row back.
+		remove_action( 'woocommerce_register_feature_definitions', array( $this, 'register_dummy_features' ), 11 );
+
+		// `change_feature_enable` reports whether `update_option` wrote anything, so it
+		// returns false when the option already reads `yes`. Start from no option at
+		// all, so the assertion below measures the transition rather than whatever an
+		// earlier test may have committed.
+		delete_option( $feature_option_name );
+
+		$real_sut = new FeaturesController();
+		$real_sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+		$all_settings = $real_sut->add_feature_settings( array(), 'features' );
+		$settings     = array_values(
+			array_filter(
+				$all_settings,
+				function ( $candidate ) use ( $feature_option_name ) {
+					return ( $candidate['id'] ?? null ) === $feature_option_name;
+				}
+			)
+		);
+		$this->assertCount( 1, $settings, 'The Block Email Editor feature should have exactly one settings row.' );
+		$setting = $settings[0];
+
+		$this->assertSame( $feature_option_name, $setting['id'], 'The setting should use the feature enable option.' );
+		$this->assertSame( 'Block Email Editor (alpha)', $setting['title'], 'The setting should use the built-in feature title.' );
+		$this->assertSame( 'checkbox', $setting['type'], 'The setting should render as a checkbox.' );
+		$this->assertSame( 'no', $setting['default'], 'The Block Email Editor feature should be disabled by default.' );
+		$this->assertStringContainsString(
+			'Enable the block-based email editor',
+			$setting['desc'],
+			'The setting should carry the feature description a merchant reads next to the checkbox.'
+		);
+
+		$this->assertTrue( $real_sut->change_feature_enable( 'block_email_editor', true ), 'Enabling the built-in Block Email Editor feature should update its option.' );
+		$this->assertSame( 'yes', get_option( $feature_option_name ), 'Enabling the feature should persist the expected option value.' );
+		$this->assertTrue( $real_sut->feature_is_enabled( 'block_email_editor' ), 'The real feature controller should report the enabled feature as enabled.' );
+	}
+
+	/**
 	 * @testdox 'declare_compatibility' fails when invoked from outside the 'before_woocommerce_init' action.
 	 */
 	public function test_declare_compatibility_outside_before_woocommerce_init_hook() {
