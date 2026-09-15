@@ -45,6 +45,11 @@ class WPPostsImporterTest extends WC_Unit_Test_Case {
 		}
 		$this->registered_taxonomies = array();
 
+		// Invalidate the runtime attribute-IDs cache so that attribute rows
+		// created during this test (and rolled back by the parent) do not
+		// bleed into subsequent tests via wc_get_attribute_taxonomy_ids().
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
 		parent::tearDown();
 	}
 
