@@ -265,6 +265,78 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook for its parent order.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook(): void {
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+
+		$delivered_ids = array();
+		$webhook       = $this->create_active_webhook( 'order.updated' );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertSame( array( $order->get_id() ), $delivered_ids, 'The webhook should be delivered for the parent order.' );
+	}
+
+	/**
+	 * @testdox A refund deletion using the legacy hook signature does not deliver an order.updated webhook.
+	 */
+	public function test_refund_deletion_with_legacy_hook_signature_does_not_deliver_webhook(): void {
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+
+		$delivered_ids = array();
+		$webhook       = $this->create_active_webhook( 'order.updated' );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		do_action( 'woocommerce_delete_order_refund', $refund->get_id() );
+
+		$this->assertSame( array(), $delivered_ids, 'The webhook should not be delivered without a parent order ID.' );
+	}
+
+	/**
 	 * Create an active webhook for integration tests.
 	 *
 	 * @param string $topic Webhook topic.

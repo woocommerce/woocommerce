@@ -78,7 +78,8 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			return;
 		}
 
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $refund->get_parent_id();
+		$parent_order_id  = $refund->get_parent_id();
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $parent_order_id;
 		wp_cache_delete( $refund_cache_key, 'orders' );
 
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
@@ -100,10 +101,12 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		/**
 		 * Fires when a refund is deleted.
 		 *
-		 * @param int $refund_id The refund ID.
 		 * @since 3.0.0
+		 * @since 11.2.0 Added the parent order ID parameter.
+		 * @param int $refund_id       The refund ID.
+		 * @param int $parent_order_id The parent order ID.
 		 */
-		do_action( 'woocommerce_delete_order_refund', $refund_id );
+		do_action( 'woocommerce_delete_order_refund', $refund_id, $parent_order_id );
 	}
 
 	/**
