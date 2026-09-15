@@ -199,7 +199,9 @@ class ReportExporter {
 
 		$exports_status[ $status_key ] = $percentage;
 
-		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
+		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
+		// request, which left the email action reading an old percentage and never sending the download link.
+		update_option( self::EXPORT_STATUS_OPTION, $exports_status, false );
 	}
 
 	/**
