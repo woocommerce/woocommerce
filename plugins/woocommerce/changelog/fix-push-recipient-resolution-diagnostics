@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Log structured diagnostics when push notification recipient resolution produces no eligible tokens.

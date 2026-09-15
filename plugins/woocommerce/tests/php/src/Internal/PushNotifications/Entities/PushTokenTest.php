@@ -12,7 +12,7 @@ use WC_Unit_Test_Case;
 /**
  * PushToken test.
  *
- * @covers PushToken
+ * @covers \Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken
  */
 class PushTokenTest extends WC_Unit_Test_Case {
 	/**
