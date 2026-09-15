@@ -70,7 +70,6 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 			'core/cover',
 			{
 				backgroundType: 'image',
-				className: 'wc-block-featured-category__cover',
 				id: imageId || undefined,
 				url: imageUrl,
 				dimRatio: 50,
