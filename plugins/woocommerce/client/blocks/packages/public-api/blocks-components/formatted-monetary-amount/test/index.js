@@ -277,6 +277,20 @@ describe( 'FormattedMonetaryAmount', () => {
 			suffix: '',
 		};
 
+		const lbpSymbol = 'ل.ل';
+		/** @type {import('@woocommerce/types').Currency} */
+		const lbpCurrency = {
+			code: 'LBP',
+			symbol: lbpSymbol,
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: `${ lbpSymbol } `,
+			suffix: '',
+		};
+
+		const lrm = '‎';
+
 		test( 'renders the price in a bdi with the symbol in its own isolating element, matching wc_price()', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
@@ -296,6 +310,51 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( symbol ).toHaveAttribute( 'dir', 'auto' );
 		} );
 
+		test.each( [
+			[ 'a prefix symbol', eurCurrency, '€', '€ 1.563,45' ],
+			[
+				'a suffix symbol',
+				{ ...eurCurrency, prefix: '', suffix: ' €' },
+				'€',
+				'1.563,45 €',
+			],
+			[
+				'a symbol followed by an entity-encoded non-breaking space',
+				{ ...eurCurrency, prefix: '€&nbsp;' },
+				'€',
+				'€ 1.563,45',
+			],
+			[
+				'an RTL-script prefix symbol',
+				lbpCurrency,
+				lbpSymbol,
+				`${ lbpSymbol } 1,563.45`,
+			],
+			[
+				'a filtered symbol carrying a directional mark',
+				{ ...lbpCurrency, prefix: `${ lrm }${ lbpSymbol } ` },
+				`${ lrm }${ lbpSymbol }`,
+				`${ lrm }${ lbpSymbol } 1,563.45`,
+			],
+		] )(
+			'isolates %s and keeps its spacing outside the isolate',
+			( _case, currency, symbol, text ) => {
+				const { container } = render(
+					<FormattedMonetaryAmount
+						value="156345"
+						currency={ currency }
+					/>
+				);
+
+				expect(
+					container.querySelector( symbolSelector )?.textContent
+				).toBe( symbol );
+				expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
+					text
+				);
+			}
+		);
+
 		test( 'keeps the negative sign inside the bdi, ahead of the symbol', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
@@ -307,24 +366,6 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
 				'-€ 1.563,45'
 			);
-		} );
-
-		test( 'isolates a suffix symbol too', () => {
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ {
-						...eurCurrency,
-						prefix: '',
-						suffix: ' €',
-					} }
-				/>
-			);
-
-			expect(
-				container.querySelector( symbolSelector )?.textContent
-			).toBe( '€' );
-			expect( container ).toHaveTextContent( '1.563,45 €' );
 		} );
 
 		test( 'keeps the symbol in the value when rendering an input', () => {
@@ -362,22 +403,6 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( wrapper ).toHaveAttribute( 'translate', 'no' );
 		} );
 
-		test( 'keeps an entity-encoded non-breaking space outside the isolate', () => {
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ { ...eurCurrency, prefix: '€&nbsp;' } }
-				/>
-			);
-
-			// wc_price() separates the symbol and the amount with `&nbsp;`; the
-			// entity is decoded and split off the symbol like any other spacing.
-			expect(
-				container.querySelector( symbolSelector )?.textContent
-			).toBe( '€' );
-			expect( container ).toHaveTextContent( '€ 1.563,45' );
-		} );
-
 		test( 'forwards getInputRef to the wrapper span in text mode', () => {
 			const getInputRef = jest.fn();
 			const { container } = render(
@@ -407,63 +432,6 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( container.querySelector( 'bdi' ) ).toBeNull();
 			expect( container.querySelector( 'strong' ) ).toHaveTextContent(
 				'€ 1.563,45'
-			);
-		} );
-	} );
-
-	describe( 'RTL-script currency symbols', () => {
-		// Lebanese Pound (LBP). Its symbol is written in Arabic script, so a flat
-		// string lets the bidi algorithm draw a left-positioned symbol on the
-		// right of the amount.
-		const lbpSymbol = 'ل.ل';
-		/** @type {import('@woocommerce/types').Currency} */
-		const lbpCurrency = {
-			code: 'LBP',
-			symbol: lbpSymbol,
-			thousandSeparator: ',',
-			decimalSeparator: '.',
-			minorUnit: 2,
-			prefix: `${ lbpSymbol } `,
-			suffix: '',
-		};
-
-		test( 'isolates an RTL-script prefix so it keeps its position', () => {
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ lbpCurrency }
-				/>
-			);
-
-			expect(
-				container.querySelector( symbolSelector )?.textContent
-			).toBe( lbpSymbol );
-			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
-				`${ lbpSymbol } 1,563.45`
-			);
-		} );
-
-		test( 'keeps a directional mark from a filtered symbol inside the isolate', () => {
-			// Stores work around this bug today by prepending an LRM (U+200E)
-			// to the symbol via the `woocommerce_currency_symbol` filter. The
-			// mark is not whitespace, so it survives the spacing split as part
-			// of the symbol and lands inside the isolate, where it is inert.
-			const lrm = '\u200e';
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ {
-						...lbpCurrency,
-						prefix: `${ lrm }${ lbpSymbol } `,
-					} }
-				/>
-			);
-
-			expect(
-				container.querySelector( symbolSelector )?.textContent
-			).toBe( `${ lrm }${ lbpSymbol }` );
-			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
-				`${ lrm }${ lbpSymbol } 1,563.45`
 			);
 		} );
 	} );
