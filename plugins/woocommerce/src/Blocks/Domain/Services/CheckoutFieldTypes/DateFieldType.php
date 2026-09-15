@@ -16,9 +16,35 @@ use WP_Error;
 class DateFieldType extends AbstractFieldType {
 
 	/**
-	 * Matches a date in YYYY-MM-DD format.
+	 * Matches a YYYY-MM-DD date with valid month and day ranges.
+	 *
+	 * Undelimited because a JSON Schema pattern takes a bare expression; the PHP uses add delimiters.
 	 */
-	private const ABSOLUTE_DATE = '/^\d{4}-\d{2}-\d{2}$/';
+	private const DATE_PATTERN = '\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])';
+
+	/**
+	 * Defaults date comparison schemas to date strings without replacing supplied keywords.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $schema The supplied validation schema.
+	 * @return array The schema with defaults applied.
+	 */
+	public function prepare_validation_schema( array $schema ): array {
+		foreach ( array( 'formatMinimum', 'formatMaximum', 'formatExclusiveMinimum', 'formatExclusiveMaximum' ) as $keyword ) {
+			if ( array_key_exists( $keyword, $schema ) ) {
+				return array_merge(
+					array(
+						'type'   => 'string',
+						'format' => 'date',
+					),
+					$schema
+				);
+			}
+		}
+
+		return $schema;
+	}
 
 	/**
 	 * Processes the options for a date field and returns the new field_options array.
@@ -315,6 +341,6 @@ class DateFieldType extends AbstractFieldType {
 	 * @return bool
 	 */
 	private function is_absolute_date( $value ): bool {
-		return is_string( $value ) && 1 === preg_match( self::ABSOLUTE_DATE, $value );
+		return is_string( $value ) && 1 === preg_match( '/^' . self::DATE_PATTERN . '$/', $value );
 	}
 }
