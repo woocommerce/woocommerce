@@ -672,6 +672,77 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $variation_id ), $remaining, 'The rows of a variation published since its batch was selected are kept.' );
 	}
 
+	/**
+	 * @testdox Migration handles unpublished variations 250 at a time and resumes after the last one it handled.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_in_batches(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+
+		$insert_post = function ( string $post_type, string $status, int $parent_id = 0 ) use ( $wpdb ): int {
+			$wpdb->insert(
+				$wpdb->posts,
+				array(
+					'post_type'   => $post_type,
+					'post_status' => $status,
+					'post_parent' => $parent_id,
+				),
+				array( '%s', '%s', '%d' )
+			);
+			return (int) $wpdb->insert_id;
+		};
+
+		$parent_id       = $insert_post( 'product', ProductStatus::PUBLISH );
+		$unpublished_ids = array();
+		$published_id    = 0;
+		for ( $i = 0; $i < 251; $i++ ) {
+			// A published variation inside the first batch's id range must keep its rows.
+			if ( 125 === $i ) {
+				$published_id = $insert_post( 'product_variation', ProductStatus::PUBLISH, $parent_id );
+			}
+			$unpublished_ids[] = $insert_post( 'product_variation', ProductStatus::PRIVATE, $parent_id );
+		}
+
+		foreach ( array_merge( $unpublished_ids, array( $published_id ) ) as $variation_id ) {
+			$wpdb->insert(
+				$lookup_table,
+				array(
+					'product_id'             => $variation_id,
+					'product_or_parent_id'   => $parent_id,
+					'taxonomy'               => 'pa_size',
+					'term_id'                => 1,
+					'is_variation_attribute' => 1,
+					'in_stock'               => 1,
+				),
+				array( '%d', '%d', '%s', '%d', '%d', '%d' )
+			);
+		}
+
+		$this->assertSame(
+			'251',
+			$wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_status != 'publish'" ),
+			'Only the seeded variations are unpublished, so the batch boundaries are the ones asserted below.'
+		);
+
+		$remaining = function () use ( $wpdb, $lookup_table ): array {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table} ORDER BY product_id" ) );
+		};
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'The first batch leaves work for another run.' );
+		$this->assertSame( array( $published_id, $unpublished_ids[250] ), $remaining(), 'The first batch handles the 250 lowest unpublished ids and skips the published one among them.' );
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'The second batch resumes after the last id of the first one.' );
+		$this->assertSame( array( $published_id ), $remaining(), 'The second batch handles the remaining unpublished variation.' );
+
+		$this->assertFalse( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'An empty batch ends the migration.' );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_unpublished_variation_id' ), 'The batch cursor is cleaned up once the migration is done.' );
+	}
 
 	/**
 	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
