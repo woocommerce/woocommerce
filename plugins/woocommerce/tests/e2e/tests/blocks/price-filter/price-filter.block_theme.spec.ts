@@ -24,7 +24,7 @@ const blockData = {
 };
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
+	templateCompiler: async ( { requestUtils }, use ) => {
 		// Retry the template creation to handle socket hang up errors
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -66,7 +66,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 			throw lastError;
 		}
 
-		await provideTemplateCompiler( compiler );
+		await use( compiler );
 	},
 } );
 
