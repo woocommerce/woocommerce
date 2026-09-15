@@ -22,7 +22,9 @@ test.describe(
 	'Store owner can complete the core profiler',
 	{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 	() => {
-		test.beforeAll( async ( { baseURL } ) => {
+		// Completing the profiler saves the store location, and the location list leaves out
+		// the selected option. Reset it before every test so each one can pick the same location.
+		test.beforeEach( async ( { baseURL } ) => {
 			try {
 				await setOption(
 					request,
@@ -298,7 +300,7 @@ test.describe(
 				await page
 					.getByRole( 'option', { name: 'Clothing and accessories' } )
 					.click();
-				// The location field is required and starts empty.
+				// The location field is required.
 				await page.getByRole( 'combobox' ).last().click();
 				await page.getByRole( 'combobox' ).last().fill( 'Australia' );
 				await page
