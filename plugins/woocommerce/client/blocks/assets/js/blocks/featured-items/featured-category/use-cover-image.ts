@@ -31,11 +31,7 @@ export function useCoverImage(
 	const attributes = cover?.attributes;
 	const metadata = attributes?.metadata;
 	const bindings = metadata?.bindings;
-	const previousBinding =
-		bindings?.url?.source === 'woocommerce/term-image'
-			? bindings.url
-			: undefined;
-	const image = metadata?.[ IMAGE_KEY ] || previousBinding?.args;
+	const image = metadata?.[ IMAGE_KEY ];
 	// A preserved custom attachment wins; otherwise follow the category's current image.
 	const id =
 		image?.attachmentId ||
@@ -51,51 +47,22 @@ export function useCoverImage(
 	);
 
 	useEffect( () => {
-		if (
-			! cover ||
-			! category ||
-			( ! metadata?.[ IMAGE_KEY ] && ! previousBinding )
-		) {
+		if ( ! cover || ! category || ! image ) {
 			return;
 		}
-		const {
-			bindings: savedBindings,
-			[ IMAGE_KEY ]: managedImage,
-			...otherMetadata
-		} = metadata;
-		const {
-			id: idBinding,
-			url: urlBinding,
-			...otherBindings
-		} = savedBindings || {};
-		const nextBindings = {
-			...otherBindings,
-			...( idBinding && idBinding.source !== 'woocommerce/term-image'
-				? { id: idBinding }
-				: {} ),
-			...( urlBinding && urlBinding.source !== 'woocommerce/term-image'
-				? { url: urlBinding }
-				: {} ),
-		};
-		const nextMetadata = {
-			...otherMetadata,
-			...( Object.keys( nextBindings ).length
-				? { bindings: nextBindings }
-				: {} ),
-		};
+		const { [ IMAGE_KEY ]: managedImage, ...nextMetadata } = metadata;
 		// Different from our last image means the user replaced it directly in Cover.
 		const overridden =
-			managedImage &&
-			( ( attributes.id || 0 ) !== ( image.id || 0 ) ||
-				( attributes.url || '' ) !== ( image.url || '' ) );
+			( attributes.id || 0 ) !== ( managedImage.id || 0 ) ||
+			( attributes.url || '' ) !== ( managedImage.url || '' );
 		if (
 			overridden ||
 			attributes.useFeaturedImage ||
 			( attributes.backgroundType &&
 				attributes.backgroundType !== 'image' ) ||
-			nextBindings.id ||
-			nextBindings.url ||
-			nextBindings.__default
+			bindings?.id ||
+			bindings?.url ||
+			bindings?.__default
 		) {
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
@@ -117,11 +84,7 @@ export function useCoverImage(
 			media?.source_url ||
 			( ! image?.attachmentId && getCategoryImageSrc( category ) ) ||
 			getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
-		if (
-			previousBinding ||
-			attributes.id !== ( id || undefined ) ||
-			attributes.url !== url
-		) {
+		if ( attributes.id !== ( id || undefined ) || attributes.url !== url ) {
 			__unstableMarkNextChangeAsNotPersistent();
 			void updateBlockAttributes( cover.clientId, {
 				id: id || undefined,
@@ -136,7 +99,6 @@ export function useCoverImage(
 		cover,
 		category,
 		metadata,
-		previousBinding,
 		bindings,
 		attributes,
 		image,
