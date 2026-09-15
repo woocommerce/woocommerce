@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
@@ -145,6 +146,18 @@ class NotificationTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		$this->assertSame( $expected, $notification->should_send_to_user( $pref_value ) );
+	}
+
+	/**
+	 * @testdox Default get_suppression_reason reports the type as disabled.
+	 */
+	public function test_get_suppression_reason_default_is_type_disabled(): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( SuppressionReason::TYPE_DISABLED, $notification->get_suppression_reason( array( 'enabled' => false ) ) );
 	}
 
 	/**

@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -333,6 +335,54 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$payload = $notification->to_payload();
 
 		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the type toggle when it is off, before any rating check.
+	 */
+	public function test_get_suppression_reason_type_disabled_wins(): void {
+		$notification = new NewReviewNotification( $this->create_review_with_rating( 5 ) );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => false,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::TYPE_DISABLED, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the maximum rating when the review is above it.
+	 */
+	public function test_get_suppression_reason_above_max_rating(): void {
+		$notification = new NewReviewNotification( $this->create_review_with_rating( 5 ) );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::ABOVE_MAX_RATING, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should report a missing comment when it cannot be loaded.
+	 */
+	public function test_get_suppression_reason_comment_missing(): void {
+		$notification = new NewReviewNotification( 999999 );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::COMMENT_MISSING, $reason );
 	}
 
 	/**
