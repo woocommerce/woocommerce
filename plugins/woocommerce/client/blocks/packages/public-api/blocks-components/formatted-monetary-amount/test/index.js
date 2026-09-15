@@ -8,7 +8,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
  */
 import FormattedMonetaryAmount from '../index';
 
-// The element isolating the currency symbol from the amount.
+// The element isolating the currency symbol from the amount. Its text is
+// compared with toBe, since toHaveTextContent trims the spacing whose
+// placement these tests check.
 const symbolSelector =
 	'.wc-block-components-formatted-money-amount__currency-symbol';
 
@@ -32,7 +34,7 @@ describe( 'FormattedMonetaryAmount', () => {
 				<FormattedMonetaryAmount value="156345" />
 			);
 
-			expect( container.textContent ).toBe( '1.563,45 TEST' );
+			expect( container ).toHaveTextContent( '1.563,45 TEST' );
 		} );
 
 		test( 'should add the thousand separator', () => {
@@ -51,7 +53,7 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 
-			expect( container.textContent ).toBe( '1.563,45 €' );
+			expect( container ).toHaveTextContent( '1.563,45 €' );
 		} );
 
 		test( 'should not add thousand separator', () => {
@@ -69,7 +71,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '1563,45 €' );
+			expect( container ).toHaveTextContent( '1563,45 €' );
 		} );
 
 		test( 'should remove the thousand separator when identical to the decimal one', () => {
@@ -88,7 +90,7 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 			expect( console ).toHaveWarned();
-			expect( container.textContent ).toBe( '1563,45 €' );
+			expect( container ).toHaveTextContent( '1563,45 €' );
 		} );
 
 		test( 'should fall back to a period for an empty decimal separator', () => {
@@ -107,7 +109,7 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 			expect( console ).toHaveWarned();
-			expect( container.textContent ).toBe( '1563.45 €' );
+			expect( container ).toHaveTextContent( '1563.45 €' );
 		} );
 
 		test( 'should render when both separators are empty', () => {
@@ -125,7 +127,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '1563.45 €' );
+			expect( container ).toHaveTextContent( '1563.45 €' );
 		} );
 	} );
 	describe( 'suffix/prefix', () => {
@@ -144,7 +146,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '0,15 €' );
+			expect( container ).toHaveTextContent( '0,15 €' );
 		} );
 
 		test( 'should add the currency prefix', () => {
@@ -162,7 +164,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '€ 0,15' );
+			expect( container ).toHaveTextContent( '€ 0,15' );
 		} );
 	} );
 
@@ -241,7 +243,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '15 €' );
+			expect( container ).toHaveTextContent( '15 €' );
 		} );
 
 		test( 'should support strings', () => {
@@ -259,7 +261,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( container.textContent ).toBe( '€ 15' );
+			expect( container ).toHaveTextContent( '€ 15' );
 		} );
 	} );
 
@@ -285,7 +287,7 @@ describe( 'FormattedMonetaryAmount', () => {
 
 			const bdi = container.querySelector( 'bdi' );
 			expect( bdi ).not.toBeNull();
-			expect( bdi?.textContent ).toBe( '€ 1.563,45' );
+			expect( bdi ).toHaveTextContent( '€ 1.563,45' );
 		} );
 
 		test( 'gives the currency symbol its own element', () => {
@@ -311,7 +313,7 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 
-			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
+			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
 				'-€ 1.563,45'
 			);
 		} );
@@ -331,7 +333,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect(
 				container.querySelector( symbolSelector )?.textContent
 			).toBe( '€' );
-			expect( container.textContent ).toBe( '1.563,45 €' );
+			expect( container ).toHaveTextContent( '1.563,45 €' );
 		} );
 
 		test( 'keeps the symbol in the value when rendering an input', () => {
@@ -382,7 +384,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect(
 				container.querySelector( symbolSelector )?.textContent
 			).toBe( '€' );
-			expect( container.textContent ).toBe( '€ 1.563,45' );
+			expect( container ).toHaveTextContent( '€ 1.563,45' );
 		} );
 
 		test( 'forwards getInputRef to the wrapper span in text mode', () => {
@@ -445,7 +447,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect(
 				container.querySelector( symbolSelector )?.textContent
 			).toBe( lbpSymbol );
-			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
+			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
 				`${ lbpSymbol } 1,563.45`
 			);
 		} );
@@ -469,7 +471,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect(
 				container.querySelector( symbolSelector )?.textContent
 			).toBe( `${ lrm }${ lbpSymbol }` );
-			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
+			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
 				`${ lrm }${ lbpSymbol } 1,563.45`
 			);
 		} );
