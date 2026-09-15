@@ -53,6 +53,9 @@ jest.mock( '@woocommerce/settings', () => ( {
 	),
 } ) );
 
+// Native inputs stand in for the real controls, so this suite proves the
+// setAttributes payloads, not the controls themselves. The retained E2E journeys
+// still drive the real inspector.
 jest.mock( '@wordpress/components', () => {
 	const actual = jest.requireActual( '@wordpress/components' );
 	const React = jest.requireActual( 'react' );
