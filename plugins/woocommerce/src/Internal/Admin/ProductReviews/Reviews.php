@@ -62,6 +62,7 @@ class Reviews {
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 
 		add_filter( 'set_screen_option_' . self::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
+		// WordPress also uses the option key as a filter name. Keep `edit_comments_per_page` callbacks without sharing the Comments screen's saved value.
 		add_filter( self::PER_PAGE_USER_OPTION_KEY, array( $this, 'apply_legacy_reviews_per_page_filter' ) );
 	}
 
