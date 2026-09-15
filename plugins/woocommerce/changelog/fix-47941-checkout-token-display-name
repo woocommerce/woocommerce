@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use saved payment tokens' native display names in Checkout without exposing account actions.
+Label saved payment methods in the Checkout block with the token's own display name when no card details are available, and stop passing My Account management actions to the Checkout block.
