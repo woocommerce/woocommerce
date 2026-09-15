@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add bulk CSV import for fulfillments, allowing merchants to create or update fulfillments across many orders at once via a chunked, resumable wizard.
