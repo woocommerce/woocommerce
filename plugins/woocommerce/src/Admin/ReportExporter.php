@@ -107,21 +107,50 @@ class ReportExporter {
 		// Both the report body and its `.headers` companion, but never the directory's
 		// .htaccess and index.html guards.
 		$paths = glob( ReportCSVExporter::get_reports_directory() . '*.csv*' );
-		if ( ! $paths ) {
+
+		if ( $paths ) {
+			foreach ( $paths as $path ) {
+				if ( ! is_file( $path ) ) {
+					continue;
+				}
+
+				$modified = filemtime( $path );
+				if ( $modified && $modified < $expired_before ) {
+					wp_delete_file( $path );
+					self::delete_export_status( $path );
+				}
+			}
+		}
+
+		self::delete_shared_export_status();
+	}
+
+	/**
+	 * Delete the option every export shared before 11.3.0, once none of the exports in it can still be downloaded.
+	 *
+	 * @return void
+	 */
+	private static function delete_shared_export_status() {
+		$exports_status = get_option( self::EXPORT_STATUS_OPTION );
+
+		if ( false === $exports_status ) {
 			return;
 		}
 
-		foreach ( $paths as $path ) {
-			if ( ! is_file( $path ) ) {
-				continue;
-			}
+		if ( is_array( $exports_status ) ) {
+			foreach ( array_keys( $exports_status ) as $status_key ) {
+				list( $report_type, $export_id ) = array_pad( explode( ':', (string) $status_key, 2 ), 2, '' );
 
-			$modified = filemtime( $path );
-			if ( $modified && $modified < $expired_before ) {
-				wp_delete_file( $path );
-				self::delete_export_status( $path );
+				$exporter = new ReportCSVExporter();
+				$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+
+				if ( file_exists( ReportCSVExporter::get_reports_directory() . $exporter->get_filename() ) ) {
+					return;
+				}
 			}
 		}
+
+		delete_option( self::EXPORT_STATUS_OPTION );
 	}
 
 	/**

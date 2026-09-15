@@ -154,6 +154,37 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Daily cleanup deletes the option every export used to share once its exports can no longer be downloaded.
+	 */
+	public function test_cleanup_deletes_the_shared_status_option_once_its_exports_are_gone(): void {
+		$reports_dir = ReportCSVExporter::get_reports_directory();
+		$expired     = $this->create_export( 'wc-orders-report-export-legacyexpired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		$fresh       = $this->create_export( 'wc-orders-report-export-legacyfresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
+
+		update_option(
+			ReportExporter::EXPORT_STATUS_OPTION,
+			array(
+				'orders:legacyexpired' => 100,
+				'orders:legacyfresh'   => 100,
+				'orders:neverwritten'  => 0,
+			)
+		);
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFileDoesNotExist( $reports_dir . $expired );
+		$this->assertFileExists( $reports_dir . $fresh );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'legacyfresh' ), 'The shared option must stay while one of its exports can still be downloaded.' );
+
+		wp_delete_file( $reports_dir . $fresh );
+		wp_delete_file( $reports_dir . $fresh . '.headers' );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'The shared option should be deleted once none of its exports has a file left.' );
+	}
+
+	/**
 	 * @testdox A report's date range is read from the arguments it was exported with.
 	 *
 	 * @testWith ["2025-06-01T00:00:00", "2025-06-30T23:59:59", "2025-06-01", "2025-06-30"]
