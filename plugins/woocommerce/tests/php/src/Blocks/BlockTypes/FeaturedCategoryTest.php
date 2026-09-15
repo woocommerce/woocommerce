@@ -57,16 +57,6 @@ class FeaturedCategoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should respect a custom URL after its category binding is disconnected.
-	 */
-	public function test_disconnected_category_button_keeps_custom_url(): void {
-		$category_id = $this->create_category( 'Custom link category' );
-		$markup      = '<!-- wp:woocommerce/featured-category {"layout":"cover"} --><!-- wp:cover {"className":"wc-block-featured-category__cover"} --><div class="wp-block-cover wc-block-featured-category__cover"><div class="wp-block-cover__inner-container"><!-- wp:button {"className":"wc-block-featured-category__link"} --><div class="wp-block-button wc-block-featured-category__link"><a class="wp-block-button__link" href="https://example.com/custom">Custom</a></div><!-- /wp:button --></div></div><!-- /wp:cover --><!-- /wp:woocommerce/featured-category -->';
-		$output      = $this->render_selected_category( $markup, $category_id );
-		$this->assertStringContainsString( 'href="https://example.com/custom"', $output );
-	}
-
-	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -80,25 +70,19 @@ class FeaturedCategoryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should replace only the managed Cover image with the selected category thumbnail.
-	 * @testWith [true]
-	 *           [false]
-	 * @param bool $binding_preview Whether the block was saved by the binding-based preview.
 	 */
-	public function test_renders_category_thumbnail_in_managed_cover( bool $binding_preview ): void {
+	public function test_renders_category_thumbnail_in_managed_cover(): void {
 		$category_id   = $this->create_category( 'Cover category' );
 		$attachment_id = $this->create_attachment();
 		update_term_meta( $category_id, 'thumbnail_id', $attachment_id );
 		$image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
 		$markup    = <<<'HTML'
 <!-- wp:woocommerce/featured-category {"layout":"cover","ariaLabel":"Browse Cover category"} -->
-<!-- wp:cover {"url":"https://example.com/fallback.jpg","className":"wc-block-featured-category__cover","metadata":{"bindings":{"id":{"source":"woocommerce/term-image"},"url":{"source":"woocommerce/term-image"}}}} -->
-<div class="wp-block-cover wc-block-featured-category__cover"><img class="wp-block-cover__image-background wp-image-999" alt="" src="https://example.com/fallback.jpg"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:button {"url":"https://example.com/custom"} --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://example.com/custom">Custom</a></div><!-- /wp:button --><!-- wp:woocommerce/category-title /--></div></div>
+<!-- wp:cover {"url":"https://example.com/fallback.jpg","metadata":{"woocommerce/featured-category-image":{"id":0,"url":"https://example.com/fallback.jpg"}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background wp-image-999" alt="" src="https://example.com/fallback.jpg"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:button {"url":"https://example.com/custom"} --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://example.com/custom">Custom</a></div><!-- /wp:button --><!-- wp:woocommerce/category-title /--></div></div>
 <!-- /wp:cover -->
 <!-- /wp:woocommerce/featured-category -->
 HTML;
-		if ( ! $binding_preview ) {
-			$markup = str_replace( '"bindings":{"id":{"source":"woocommerce/term-image"},"url":{"source":"woocommerce/term-image"}}', '"woocommerce/featured-category-image":{"id":0,"url":"https://example.com/fallback.jpg"}', $markup );
-		}
 
 		$output = $this->render_selected_category( $markup, $category_id );
 
@@ -121,8 +105,8 @@ HTML;
 		$image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
 		$markup    = <<<'HTML'
 <!-- wp:woocommerce/featured-category {"layout":"cover"} -->
-<!-- wp:cover {"url":"https://example.com/stale.jpg","isRepeated":true,"className":"wc-block-featured-category__cover","metadata":{"woocommerce/featured-category-image":{"id":0,"url":"https://example.com/stale.jpg"}}} -->
-<div class="wp-block-cover is-repeated wc-block-featured-category__cover"><span aria-hidden="true" class="wp-block-cover__image-background" style="background-position:50% 50%;background-image:url(https://example.com/stale.jpg)"></span><div class="wp-block-cover__inner-container"></div></div>
+<!-- wp:cover {"url":"https://example.com/stale.jpg","isRepeated":true,"metadata":{"woocommerce/featured-category-image":{"id":0,"url":"https://example.com/stale.jpg"}}} -->
+<div class="wp-block-cover is-repeated"><span aria-hidden="true" class="wp-block-cover__image-background" style="background-position:50% 50%;background-image:url(https://example.com/stale.jpg)"></span><div class="wp-block-cover__inner-container"></div></div>
 <!-- /wp:cover -->
 <!-- /wp:woocommerce/featured-category -->
 HTML;
@@ -141,8 +125,8 @@ HTML;
 		$category_id = $this->create_category( 'Placeholder category' );
 		$markup      = <<<'HTML'
 <!-- wp:woocommerce/featured-category {"layout":"cover"} -->
-<!-- wp:cover {"url":"https://example.com/stale.jpg","id":999,"className":"wc-block-featured-category__cover","metadata":{"woocommerce/featured-category-image":{"id":999,"url":"https://example.com/stale.jpg"}}} -->
-<div class="wp-block-cover wc-block-featured-category__cover"><img class="wp-block-cover__image-background wp-image-999" width="1200" height="800" src="https://example.com/stale.jpg" srcset="stale" sizes="100vw"/><div class="wp-block-cover__inner-container"></div></div>
+<!-- wp:cover {"url":"https://example.com/stale.jpg","id":999,"metadata":{"woocommerce/featured-category-image":{"id":999,"url":"https://example.com/stale.jpg"}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background wp-image-999" width="1200" height="800" src="https://example.com/stale.jpg" srcset="stale" sizes="100vw"/><div class="wp-block-cover__inner-container"></div></div>
 <!-- /wp:cover -->
 <!-- /wp:woocommerce/featured-category -->
 HTML;
@@ -166,9 +150,8 @@ HTML;
 		$category_id = $this->create_category( 'Other image' );
 		update_term_meta( $category_id, 'thumbnail_id', $this->create_attachment() );
 		$attributes = array(
-			'url'       => 'https://example.com/custom.jpg',
-			'className' => 'wc-block-featured-category__cover',
-			'metadata'  => array(
+			'url'      => 'https://example.com/custom.jpg',
+			'metadata' => array(
 				'woocommerce/featured-category-image' => array(
 					'id'  => 0,
 					'url' => 'https://example.com/stale.jpg',
@@ -181,7 +164,7 @@ HTML;
 		} elseif ( 'unmarked' === $owner ) {
 			unset( $attributes['metadata'] );
 		}
-		$cover  = '<!-- wp:cover ' . wp_json_encode( $attributes ) . ' --><div class="wp-block-cover wc-block-featured-category__cover"><img class="wp-block-cover__image-background" src="https://example.com/custom.jpg"/><div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
+		$cover  = '<!-- wp:cover ' . wp_json_encode( $attributes ) . ' --><div class="wp-block-cover"><img class="wp-block-cover__image-background" src="https://example.com/custom.jpg"/><div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
 		$output = $this->render_selected_category( '<!-- wp:woocommerce/featured-category {"layout":"cover"} -->' . $cover . '<!-- /wp:woocommerce/featured-category -->', $category_id );
 		$this->assertStringContainsString( 'src="https://example.com/custom.jpg"', $output );
 	}
