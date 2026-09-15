@@ -151,6 +151,48 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should dispatch new order notifications before the rest of the batch.
+	 */
+	public function test_dispatch_all_sends_new_orders_first(): void {
+		$dispatched = array();
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$dispatcher->expects( $this->once() )
+			->method( 'dispatch' )
+			->willReturnCallback(
+				function ( array $notifications ) use ( &$dispatched ) {
+					$dispatched = $notifications;
+				}
+			);
+
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher );
+		$store->register();
+		$store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
+		$store->add( $this->create_stock_mock( 43, StockNotification::EVENT_LOW_STOCK ) );
+		$store->add( $this->create_order_mock( 1 ) );
+
+		$store->dispatch_all();
+
+		remove_action( 'shutdown', array( $store, 'dispatch_all' ) );
+
+		$dispatched_order = array_map(
+			function ( $notification ) {
+				return $notification->get_type() . ':' . $notification->get_resource_id();
+			},
+			$dispatched
+		);
+
+		$this->assertSame(
+			array(
+				NewOrderNotification::TYPE . ':1',
+				StockNotification::TYPE . ':42',
+				StockNotification::TYPE . ':43',
+			),
+			$dispatched_order
+		);
+	}
+
+	/**
 	 * @testdox Should not call the dispatcher when there are no pending notifications.
 	 */
 	public function test_dispatch_all_does_not_call_dispatcher_when_empty(): void {
