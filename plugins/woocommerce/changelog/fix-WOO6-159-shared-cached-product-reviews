@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent password-protected product reviews from showing up to wrong users when they were cached
+
+
