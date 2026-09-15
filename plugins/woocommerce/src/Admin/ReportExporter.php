@@ -237,12 +237,16 @@ class ReportExporter {
 	/**
 	 * Get the name of the option an export's progress is stored under.
 	 *
+	 * The key is hashed so the name fits option_name whatever length the export ID has.
+	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @return string Option name.
 	 */
 	protected static function get_status_option_name( $report_type, $export_id ) {
-		return self::EXPORT_STATUS_OPTION . '_' . self::get_status_key( $report_type, $export_id );
+		$status_key = self::get_status_key( $report_type, $export_id );
+
+		return self::EXPORT_STATUS_OPTION . '_' . md5( $status_key );
 	}
 
 	/**

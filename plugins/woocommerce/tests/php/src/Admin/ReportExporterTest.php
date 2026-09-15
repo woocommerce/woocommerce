@@ -544,6 +544,25 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Progress is stored and read back whatever length the export ID has.
+	 *
+	 * The export ID is filterable and unbounded, while option names are limited to 191 characters.
+	 */
+	public function test_export_progress_survives_a_long_export_id(): void {
+		global $wpdb;
+
+		$export_id = str_repeat( 'jane.doe-orders-2026-01-01-to-2026-03-31-', 5 );
+
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 100 );
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:' . $export_id );
+
+		$this->assertLessThanOrEqual( 191, strlen( $option ) );
+		$this->assertSame( '100', $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option ) ), 'The row should be stored under the full name.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ) );
+	}
+
+	/**
 	 * @testdox An export queued before each export had its own option is still emailed from the shared one.
 	 */
 	public function test_export_queued_before_per_export_options_is_emailed(): void {
@@ -614,7 +633,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		ReportExporter::update_export_percentage_complete( 'orders', 'current', 50 );
 
-		$option = ReportExporter::EXPORT_STATUS_OPTION . '_orders:current';
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:current' );
 
 		$this->assertArrayNotHasKey( $option, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
 		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $option ) ) );
@@ -629,8 +648,8 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		ReportExporter::update_export_percentage_complete( 'orders', 'second', 10 );
 
 		// Read back from the database, as the email action and the status endpoint do from their own request.
-		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_orders:first', 'options' );
-		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_orders:second', 'options' );
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:first' ), 'options' );
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:second' ), 'options' );
 
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'first' ), 'Saving a later export must leave an earlier export finished.' );
 		$this->assertSame( 10, ReportExporter::get_export_percentage_complete( 'orders', 'second' ) );
