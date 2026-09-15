@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the `woocommerce_blocks_product_categories_query_args` filter to the Product Categories List block, keep children visible when their parent is missing from the query result, and prevent PHP warnings in children-only mode.
