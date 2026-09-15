@@ -76,6 +76,14 @@ class DocumentObject {
 	protected $request_data = [];
 
 	/**
+	 * Memoized result of get_data(). Rule evaluation calls get_data() once per rule, so the
+	 * assembled data is cached until the cart, customer, or context changes.
+	 *
+	 * @var array|null
+	 */
+	protected $data = null;
+
+	/**
 	 * The constructor.
 	 *
 	 * @param array $request_data Data that overrides the default values.
@@ -96,6 +104,7 @@ class DocumentObject {
 			return;
 		}
 		$this->context = $context;
+		$this->data    = null;
 	}
 
 	/**
@@ -105,6 +114,7 @@ class DocumentObject {
 	 */
 	public function set_customer( WC_Customer $customer ) {
 		$this->customer = $customer;
+		$this->data     = null;
 	}
 
 	/**
@@ -114,6 +124,7 @@ class DocumentObject {
 	 */
 	public function set_cart( WC_Cart $cart ) {
 		$this->cart = $cart;
+		$this->data = null;
 	}
 
 	/**
@@ -208,6 +219,10 @@ class DocumentObject {
 	 * @return array The data for the document object.
 	 */
 	public function get_data() {
+		if ( ! is_null( $this->data ) ) {
+			return $this->data;
+		}
+
 		// Get cart and customer objects before returning data if they are null.
 		if ( is_null( $this->cart ) ) {
 			$this->cart = $this->cart_controller->get_cart_for_response();
@@ -217,11 +232,13 @@ class DocumentObject {
 			$this->customer = ! empty( WC()->customer ) ? WC()->customer : new WC_Customer();
 		}
 
-		return [
+		$this->data = [
 			'cart'     => $this->get_cart_data(),
 			'customer' => $this->get_customer_data(),
 			'checkout' => $this->get_checkout_data(),
 		];
+
+		return $this->data;
 	}
 
 	/**

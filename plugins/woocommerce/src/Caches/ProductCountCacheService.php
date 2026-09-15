@@ -57,6 +57,8 @@ class ProductCountCacheService {
 
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
+		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
+		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
 		}
@@ -79,6 +81,18 @@ class ProductCountCacheService {
 			$this->product_count_cache->flush( $product_type );
 			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( $product_type );
 		}
+	}
+
+	/**
+	 * Flushes the product count cache.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public function flush_cache(): void {
+		$this->product_count_cache->flush( 'product' );
 	}
 
 	/**
