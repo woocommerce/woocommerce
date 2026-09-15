@@ -285,6 +285,32 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should export orders whose status is no longer registered, like the core exporter does.
+	 */
+	public function test_exports_orders_with_unregistered_status(): void {
+		global $wpdb;
+
+		$order = $this->create_order();
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'status' => 'wc-legacy-status' ), array( 'id' => $order->get_id() ) );
+		wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $order->get_id() ) );
+		wp_cache_flush();
+
+		$xml = $this->export( 'shop_order' );
+
+		$this->assertStringContainsString( "<wp:post_id>{$order->get_id()}</wp:post_id>", $xml );
+		$this->assertStringContainsString( '<wp:status><![CDATA[legacy-status]]></wp:status>', $xml );
+	}
+
+	/**
+	 * @testdox Should leave out auto-draft orders, like the core exporter does.
+	 */
+	public function test_ignores_auto_draft_orders(): void {
+		$this->create_order( OrderStatus::AUTO_DRAFT );
+
+		$this->assertSame( '', $this->export( 'shop_order' ) );
+	}
+
+	/**
 	 * @testdox Should page through orders instead of loading them all at once.
 	 */
 	public function test_streams_orders_in_pages(): void {

@@ -135,10 +135,9 @@ class HposOrderExportHandler {
 			return;
 		}
 
-		$statuses = array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) );
-		$types    = 'all' === $args['content'] ? array( 'shop_order', 'shop_order_refund' ) : array( 'shop_order' );
-		$types    = array_values( array_filter( $types, array( self::class, 'post_type_can_be_exported' ) ) );
-		$page     = 1;
+		$types = 'all' === $args['content'] ? array( 'shop_order', 'shop_order_refund' ) : array( 'shop_order' );
+		$types = array_values( array_filter( $types, array( self::class, 'post_type_can_be_exported' ) ) );
+		$page  = 1;
 
 		if ( ! $types ) {
 			return;
@@ -149,7 +148,7 @@ class HposOrderExportHandler {
 			$order_ids = wc_get_orders(
 				array(
 					'type'    => $types,
-					'status'  => $statuses,
+					'status'  => 'all',
 					'limit'   => self::BATCH_SIZE,
 					'page'    => $page,
 					'orderby' => 'id',
@@ -161,9 +160,17 @@ class HposOrderExportHandler {
 
 			foreach ( $order_ids as $order_id ) {
 				$order = wc_get_order( $order_id );
-				if ( $order instanceof \WC_Abstract_Order ) {
-					$this->export_order_to_xml( $order );
+				if ( ! $order instanceof \WC_Abstract_Order ) {
+					continue;
 				}
+
+				// Statuses are not filtered in the query, so orders whose status is no longer registered
+				// (an inactive extension's status) are exported too. Core only leaves out auto-drafts.
+				if ( OrderStatus::AUTO_DRAFT === $order->get_status( 'edit' ) ) {
+					continue;
+				}
+
+				$this->export_order_to_xml( $order );
 			}
 
 			$this->release_order_caches( $order_ids );
