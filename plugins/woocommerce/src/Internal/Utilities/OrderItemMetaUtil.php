@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use WC_Order_Item;
+use WC_Order_Item_Product;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,6 +42,7 @@ final class OrderItemMetaUtil {
 				'cost',
 				'_reduced_stock',
 				'_restock_refunded_items',
+				WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY,
 			)
 		);
 	}

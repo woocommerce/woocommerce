@@ -765,6 +765,133 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create an order containing one color variation.
+	 *
+	 * @return array{WC_Product_Variable, WC_Product_Variation, WC_Order, WC_Order_Item_Product}
+	 */
+	private function create_order_with_variation_line_item(): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'V4 Variation Parent' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'blue', 'green' ) );
+		$attribute->set_variation( true );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'V4-VAR-' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $parent, $variation, $order, $item );
+	}
+
+	/**
+	 * @testdox PUT /orders naming the line item's own variation keeps the attribute meta the order was placed with.
+	 */
+	public function test_orders_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		// Remove the purchased attribute from the current catalog definition.
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+		// The parent save does not invalidate cached variations.
+		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: the variation no longer reports the purchased attribute.'
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => $variation->get_id(),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Re-posting the line item\'s own variation should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The purchased attribute must not be rewritten.' );
+	}
+
+	/**
+	 * @testdox PUT /orders echoing only the variable parent keeps the line item's variation and attribute meta.
+	 */
+	public function test_orders_update_line_item_with_parent_only_keeps_the_variation(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $item->get_id(),
+						'product_id' => $parent->get_id(),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Echoing the parent must preserve the variation.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The item still refers to its variation, so its attribute meta stays.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation ID demotes the line item, attribute meta included.
+	 */
+	public function test_orders_update_line_item_with_zero_variation_id_demotes_the_variation(): void {
+		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => 0,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero is a genuine demotion request.' );
+		$this->assertSame( '', $reloaded->get_meta( 'color' ), 'A demoted item is no longer a variation, so its attribute meta should go too.' );
+		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should go with the attributes it tracked.' );
+	}
+
+	/**
 	 * Test edge case: invalid customer ID.
 	 */
 	public function test_invalid_customer_id(): void {
