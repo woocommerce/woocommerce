@@ -50,7 +50,7 @@ export function getSettingsPage(
 export function getSettingsEntity( page: SettingsPage ) {
 	return {
 		kind: SETTINGS_ENTITY.kind,
-		name: page.id === 'products' ? SETTINGS_ENTITY.name : page.id,
+		name: page.id,
 		baseURL: `/wc/v4/settings/${ encodeURIComponent( page.id ) }`,
 		key: false,
 	};
@@ -62,7 +62,9 @@ export function getLegacySettingsEntity( page: SettingsPage ) {
 	return {
 		kind: 'woo_settings',
 		name: `legacy-${ page.id }`,
-		baseURL: `/wc/v4/settings/${ encodeURIComponent( page.id ) }?legacy-view-config=1`,
+		baseURL: `/wc/v4/settings/${ encodeURIComponent(
+			page.id
+		) }?legacy-view-config=1`,
 		key: false,
 	};
 }
