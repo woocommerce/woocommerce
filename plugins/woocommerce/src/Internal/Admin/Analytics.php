@@ -560,6 +560,7 @@ class Analytics {
 	 * @internal
 	 *
 	 * @return string Result message.
+	 * @throws \Exception On database error. The tools controller reports it to the merchant.
 	 */
 	public function run_refund_double_count_tool() {
 		$state           = self::get_refund_double_count_state();
@@ -679,12 +680,24 @@ class Analytics {
 	 * Highest order_id present in the order stats table (0 when empty).
 	 *
 	 * @return int
+	 * @throws \Exception On database error, so a failed query never becomes a run that
+	 *                    covers no orders and reports that nothing was found.
 	 */
 	private static function get_max_order_stats_id(): int {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return intval( $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" ) );
+		$max_order_id = $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" );
+
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'Highest order stats ID query failed: %s', $wpdb->last_error ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
+			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return intval( $max_order_id );
 	}
 
 	/**

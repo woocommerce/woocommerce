@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Helper_Order;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -17,6 +18,8 @@ use WC_Unit_Test_Case;
  * storage; the suite runs with HPOS both enabled and disabled.
  */
 class AnalyticsTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
 
 	/**
 	 * The System Under Test.
@@ -678,5 +681,56 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$tool_runs = $this->get_events( 'analytics_refund_double_count_tool_run' );
 		$this->assertSame( array( 'started', 'dismissed' ), array_column( $tool_runs, 'outcome' ) );
 		$this->assertSame( array( 'none', 'complete' ), array_column( $tool_runs, 'previous_status' ) );
+	}
+
+	/**
+	 * A failed highest-order-ID query used to read as 0, so the run covered no orders and
+	 * told the merchant that nothing was affected.
+	 *
+	 * @testdox Refuses to start a run when the highest order ID cannot be read.
+	 */
+	public function test_tool_does_not_start_a_run_when_the_max_order_id_query_fails(): void {
+		global $wpdb;
+
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+
+		$break_max_query = function ( $query ) {
+			if ( false !== strpos( $query, 'SELECT MAX(order_id)' ) ) {
+				return 'SELECT MAX(order_id) FROM a_table_that_does_not_exist';
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_max_query );
+
+		$thrown   = null;
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$this->sut->run_refund_double_count_tool();
+		} catch ( \Exception $exception ) {
+			$thrown = $exception;
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break_max_query );
+		}
+
+		$this->assertNotNull( $thrown, 'A failed highest-order-ID query should throw rather than start an empty run' );
+		$this->assertLogged( 'error', 'Highest order stats ID query failed', array( 'source' => 'wc-analytics-order-import' ) );
+		$this->assertSame( '', Analytics::get_refund_double_count_state()['status'], 'No run should be recorded' );
+		$this->assertSame( array(), $this->get_events( 'analytics_refund_double_count_tool_run' ) );
+		$this->assertEmpty(
+			as_get_scheduled_actions(
+				array(
+					'hook'     => Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK,
+					'status'   => \ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 1,
+				)
+			),
+			'No batch should be scheduled'
+		);
+
+		// The tool still offers to run, rather than reporting that nothing was found.
+		$this->assertStringContainsString( 'Check and fix', $this->get_tool()['button'] );
 	}
 }
