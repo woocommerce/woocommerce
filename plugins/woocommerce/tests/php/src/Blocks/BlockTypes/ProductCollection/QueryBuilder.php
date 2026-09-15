@@ -463,7 +463,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Test merging filter by stock status queries.
+	 * Test merging filter by stock status queries.
 	 */
 	public function test_merging_filter_by_attribute_queries() {
 		// Mock the attribute data.
@@ -507,22 +507,20 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'pa_color',
-				'taxonomy'        => 'pa_color',
-				'field'           => 'slug',
-				'terms'           => array( 'blue' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'pa_color',
+				'field'    => 'slug',
+				'terms'    => array( 'blue' ),
+				'operator' => 'IN',
 			),
 			$attribute_queries
 		);
 
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'pa_size',
-				'taxonomy'        => 'pa_size',
-				'field'           => 'slug',
-				'terms'           => array( 'xl', 'xxl' ),
-				'operator'        => 'AND',
+				'taxonomy' => 'pa_size',
+				'field'    => 'slug',
+				'terms'    => array( 'xl', 'xxl' ),
+				'operator' => 'AND',
 			),
 			$attribute_queries
 		);
@@ -1195,7 +1193,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Test merging filter queries by Category Slug (e.g. ?categories=accessories).
+	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
 	 */
 	public function test_merging_filter_by_category_slug() {
 		// Set the URL query variables.
@@ -1208,11 +1206,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Assertions.
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_cat',
-				'taxonomy'        => 'product_cat',
-				'field'           => 'slug',
-				'terms'           => array( 'accessories' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should contain correct product_cat tax query using slug.'
@@ -1223,7 +1220,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Test merging filter queries specifically for Tags.
+	 * Test merging filter queries specifically for Tags.
 	 * Scenario: ?tags=tag-new (Slug)
 	 */
 	public function test_merging_filter_by_tags() {
@@ -1237,11 +1234,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Assertions.
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_tag',
-				'taxonomy'        => 'product_tag',
-				'field'           => 'slug',
-				'terms'           => array( 'tag-new' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should contain correct product_tag tax query with IN operator.'
@@ -1252,7 +1248,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Test merging filter queries for Categories, Tags, and Brands simultaneously.
+	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
 	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
 	 */
 	public function test_merging_filter_by_all_taxonomies_together() {
@@ -1269,11 +1265,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Verify Category.
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_cat',
-				'taxonomy'        => 'product_cat',
-				'field'           => 'slug',
-				'terms'           => array( 'accessories' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should contain correct product_cat tax query.'
@@ -1282,11 +1277,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Verify Tag.
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_tag',
-				'taxonomy'        => 'product_tag',
-				'field'           => 'slug',
-				'terms'           => array( 'tag-new' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should contain correct product_tag tax query.'
@@ -1295,11 +1289,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Verify Brand.
 		$this->assertContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_brand',
-				'taxonomy'        => 'product_brand',
-				'field'           => 'slug',
-				'terms'           => array( 'nike' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_brand',
+				'field'    => 'slug',
+				'terms'    => array( 'nike' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should contain correct product_brand tax query.'
@@ -1312,7 +1305,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Test that the strictly string-based filter logic works and SAFELY ignores arrays.
+	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
 	 * Matches logic: if ( ! is_string($param_value) ) continue;
 	 */
 	public function test_filter_strict_string_handling() {
@@ -1328,11 +1321,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// Assertion: The array input should have been ignored.
 		$this->assertNotContainsEquals(
 			array(
-				'filter_taxonomy' => 'product_cat',
-				'taxonomy'        => 'product_cat',
-				'field'           => 'slug',
-				'terms'           => array( 'hats' ),
-				'operator'        => 'IN',
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'hats' ),
+				'operator' => 'IN',
 			),
 			$filter_clauses,
 			'Should not contain product_cat tax query because array input should be ignored.'
