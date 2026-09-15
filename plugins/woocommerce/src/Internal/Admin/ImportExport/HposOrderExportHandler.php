@@ -497,7 +497,8 @@ class HposOrderExportHandler {
 
 		$rows = array();
 		foreach ( $meta as $meta_key => $meta_value ) {
-			$rows[] = array( $meta_key, self::meta_value_to_string( $meta_value ) );
+			// The data stores persist these internal flags as yes/no.
+			$rows[] = array( $meta_key, self::meta_value_to_string( is_bool( $meta_value ) ? wc_bool_to_string( $meta_value ) : $meta_value ) );
 		}
 
 		// Custom meta can repeat a key, so it is kept as rows rather than keyed.
@@ -515,17 +516,14 @@ class HposOrderExportHandler {
 	/**
 	 * Converts a meta value to the string form the postmeta table would hold.
 	 *
-	 * Strings that already look serialized go through `maybe_serialize()` too, because the meta
-	 * tables store them double-serialized; otherwise the importer would decode them into arrays.
+	 * Scalars are cast the way WordPress stores them (`true` as `1`, `false` and `null` as an empty
+	 * string). Strings that already look serialized go through `maybe_serialize()` too, because the
+	 * meta tables store them double-serialized; otherwise the importer would decode them into arrays.
 	 *
 	 * @param mixed $value Meta value.
 	 * @return string
 	 */
 	private static function meta_value_to_string( $value ): string {
-		if ( is_bool( $value ) ) {
-			return wc_bool_to_string( $value );
-		}
-
 		return (string) maybe_serialize( is_scalar( $value ) || is_null( $value ) ? (string) $value : $value );
 	}
 
