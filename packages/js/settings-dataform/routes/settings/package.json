@@ -2,6 +2,7 @@
 	"name": "@woocommerce-settings-ui-experimental/settings-route",
 	"private": true,
 	"dependencies": {
+		"@wordpress/api-fetch": "catalog:wp-min",
 		"@woocommerce-settings-ui-experimental/settings-ui": "workspace:*",
 		"@wordpress/admin-ui": "2.10.0",
 		"@wordpress/components": "catalog:wp-min",
@@ -12,12 +13,13 @@
 		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/route": "0.21.0",
 		"@wordpress/views": "1.21.0",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
 	},
 	"route": {
-		"path": "/",
+		"path": "/settings/$page",
 		"page": "wc-settings-dataform"
 	}
 }

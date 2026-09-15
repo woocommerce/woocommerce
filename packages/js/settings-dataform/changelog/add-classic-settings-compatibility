@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Combine classic PHP settings with the main settings form by field ID and save edits through the matching core-data records in one DataForm.
