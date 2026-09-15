@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skip push notification scheduling and the loopback request when no push tokens are registered

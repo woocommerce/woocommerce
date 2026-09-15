@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNot
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -17,6 +18,8 @@ use WC_Unit_Test_Case;
  * Tests for the PendingNotificationStore class.
  */
 class PendingNotificationStoreTest extends WC_Unit_Test_Case {
+
+	use PushNotificationsTestTrait;
 
 	/**
 	 * An instance of PendingNotificationStore.
@@ -34,7 +37,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
 
-		$this->store->init( $dispatcher );
+		$this->store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
 		$this->store->register();
 	}
 
@@ -177,11 +180,61 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	public function test_add_does_nothing_when_not_registered(): void {
 		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
 		$store      = new PendingNotificationStore();
-		$store->init( $dispatcher );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
 
 		$store->add( $this->create_order_mock( 42 ) );
 
 		$this->assertSame( 0, $store->count() );
+	}
+
+	/**
+	 * @testdox Should not add notifications when the store has no registered push tokens.
+	 */
+	public function test_add_does_nothing_when_no_tokens_registered(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$store      = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->register();
+
+		$store->add( $this->create_order_mock( 42 ) );
+
+		$this->assertSame( 0, $store->count() );
+	}
+
+	/**
+	 * @testdox Should not schedule a safety net when the store has no registered push tokens.
+	 */
+	public function test_add_does_not_schedule_safety_net_when_no_tokens_registered(): void {
+		$notification = $this->create_order_mock( 42 );
+
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$store      = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->register();
+
+		$store->add( $notification );
+
+		$this->assertFalse(
+			as_has_scheduled_action(
+				NotificationProcessor::SAFETY_NET_HOOK,
+				$notification->get_safety_net_args(),
+				NotificationProcessor::ACTION_SCHEDULER_GROUP
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should not register the shutdown hook when the store has no registered push tokens.
+	 */
+	public function test_add_does_not_register_shutdown_hook_when_no_tokens_registered(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$store      = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->register();
+
+		$store->add( $this->create_order_mock( 42 ) );
+
+		$this->assertFalse( has_action( 'shutdown', array( $store, 'dispatch_all' ) ) );
 	}
 
 	/**
@@ -229,7 +282,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->method( 'dispatch' );
 
 		$store = new PendingNotificationStore();
-		$store->init( $dispatcher );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
 		$store->register();
 		$store->add( $this->create_order_mock( 1 ) );
 
@@ -247,7 +300,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->method( 'dispatch' );
 
 		$store = new PendingNotificationStore();
-		$store->init( $dispatcher );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
 		$store->register();
 
 		$store->dispatch_all();
