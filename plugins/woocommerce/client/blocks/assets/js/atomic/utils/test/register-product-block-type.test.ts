@@ -311,4 +311,23 @@ describe( 'product block registration call sites', () => {
 			expect.objectContaining( { isAvailableOnPostEditor: false } )
 		);
 	} );
+
+	it( 'declares the Product Details block available in the post editor', () => {
+		// The editor components pull in the block editor, which logs a duplicate Yjs
+		// import when loaded inside isolateModules, and they aren't part of registration.
+		jest.doMock( '../../../blocks/product-details/edit', () => () => null );
+		jest.doMock( '../../../blocks/product-details/save', () => () => null );
+
+		jest.isolateModules( () => {
+			jest.requireActual( '../../../blocks/product-details' );
+		} );
+
+		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
+			1
+		);
+		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledWith(
+			expect.objectContaining( { name: 'woocommerce/product-details' } ),
+			expect.objectContaining( { isAvailableOnPostEditor: true } )
+		);
+	} );
 } );
