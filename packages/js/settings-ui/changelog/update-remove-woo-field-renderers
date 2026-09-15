@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Remove the Woo-owned field renderers now that Settings UI fields use DataForm controls.

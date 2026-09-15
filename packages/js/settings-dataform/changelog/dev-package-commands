@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Expose package-level wp-build, watch, and lint commands for Settings DataForm. Replace the custom Core build wrapper with package scripts and the native WordPress builder and watcher.

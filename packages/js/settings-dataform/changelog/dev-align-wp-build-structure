@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Align PHP, TypeScript, and route styles with wp-build's package and route structure.
