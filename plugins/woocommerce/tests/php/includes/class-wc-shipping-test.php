@@ -125,6 +125,45 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox filtered rates that are not WC_Shipping_Rate instances are removed.
+	 *
+	 * @dataProvider provide_invalid_filtered_rates
+	 * @param mixed $invalid_rate Invalid filtered rate.
+	 */
+	public function test_calculate_shipping_rejects_invalid_filtered_rates( $invalid_rate ): void {
+		$valid_rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 5, array(), 'flat_rate' );
+
+		add_filter(
+			'woocommerce_package_rates',
+			fn () => array(
+				'flat_rate:1' => $valid_rate,
+				'invalid'     => $invalid_rate,
+			)
+		);
+
+		$result = $this->sut->calculate_shipping_for_package( $this->get_hide_rates_test_package() );
+
+		$this->assertSame( array( 'flat_rate:1' => $valid_rate ), $result['rates'], 'Only WC_Shipping_Rate instances should remain.' );
+	}
+
+	/**
+	 * Invalid values returned by the package rates filter.
+	 *
+	 * @return array
+	 */
+	public static function provide_invalid_filtered_rates(): array {
+		return array(
+			'null'     => array( null ),
+			'stdClass' => array(
+				(object) array(
+					'id'        => 'local_pickup:1',
+					'method_id' => 'local_pickup',
+				),
+			),
+		);
+	}
+
+	/**
 	 * @testdox package rates filter doesn't cause errors when accessing non-existent rates with arithmetic operations
 	 *
 	 * @dataProvider provide_test_package_rates_filter_error_handling

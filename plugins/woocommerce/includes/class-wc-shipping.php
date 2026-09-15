@@ -374,6 +374,8 @@ class WC_Shipping {
 				$package['rates'] = array();
 			}
 
+			$package['rates'] = array_filter( $package['rates'], static fn( $rate ) => $rate instanceof WC_Shipping_Rate );
+
 			// Hide shipping rates when free shipping is available. Runs after the woocommerce_package_rates filter
 			// so that free shipping only counts as available if it survived filtering; otherwise an extension that
 			// removes free shipping would leave the customer with no rates at all.
