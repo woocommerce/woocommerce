@@ -403,6 +403,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param array      $args Array of args to pass to the delete method.
+	 * @return bool
 	 */
 	public function delete( &$product, $args = array() ) {
 		$id        = $product->get_id();
@@ -416,19 +417,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		if ( ! $id ) {
-			return;
+			return false;
 		}
 
 		if ( $args['force_delete'] ) {
 			do_action( 'woocommerce_before_delete_' . $post_type, $id );
-			wp_delete_post( $id );
+			$result = wp_delete_post( $id );
+			if ( ! $result ) {
+				return false;
+			}
 			$product->set_id( 0 );
 			do_action( 'woocommerce_delete_' . $post_type, $id );
 		} else {
-			wp_trash_post( $id );
+			$result = wp_trash_post( $id );
+			if ( ! $result ) {
+				return false;
+			}
 			$product->set_status( ProductStatus::TRASH );
 			do_action( 'woocommerce_trash_' . $post_type, $id );
 		}
+
+		return true;
 	}
 
 	/*
