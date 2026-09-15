@@ -3859,8 +3859,9 @@ function wc_update_11201_invalidate_analytics_reports_cache() {
  * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
  * and restores the Orders report fallback to the refunded order's value.
  *
- * Batches walk the table by order ID. A database error stops the migration and is logged instead
- * of retried, because the report queries stay correct without the reset.
+ * Batches walk the table by order ID. A database error is logged and stops the migration without a retry.
+ * Customer aggregates still use the order type, but unprocessed refunds keep their stale marker,
+ * so the Orders report can retain an incorrect customer_type until those rows are reset.
  *
  * @since 11.2.0
  *
