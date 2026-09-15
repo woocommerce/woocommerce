@@ -10,32 +10,7 @@
 		},
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
-		"color": {
-			"background": true,
-			"text": true
-		},
-		"html": false,
-		"filter": {
-			"duotone": true
-		},
-		"spacing": {
-			"padding": true,
-			"__experimentalDefaultControls": {
-				"padding": true
-			},
-			"__experimentalSkipSerialization": true
-		},
-		"__experimentalBorder": {
-			"color": true,
-			"radius": true,
-			"width": true,
-			"__experimentalDefaultControls": {
-				"color": true,
-				"radius": true,
-				"width": true
-			},
-			"__experimentalSkipSerialization": true
-		}
+		"html": false
 	},
 	"attributes": {
 		"alt": {
@@ -88,6 +63,12 @@
 		"categoryId": {
 			"type": "number"
 		},
+		"layout": {
+			"type": "string"
+		},
+		"termTaxonomy": {
+			"type": "string"
+		},
 		"overlayColor": {
 			"type": "string",
 			"default": "#000000"
@@ -98,11 +79,6 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
-		}
-	},
-	"selectors": {
-		"filter": {
-			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
 		}
 	},
 	"textdomain": "woocommerce",
