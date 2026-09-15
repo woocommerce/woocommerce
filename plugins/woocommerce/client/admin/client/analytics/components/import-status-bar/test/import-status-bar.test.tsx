@@ -3,7 +3,7 @@
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
-import { useSettings } from '@woocommerce/data';
+import { useSettings, useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -24,7 +24,9 @@ jest.mock( '@wordpress/date', () => ( {
 	...jest.requireActual( '@wordpress/date' ),
 	dateI18n: jest.fn( ( format, date ) => {
 		// Simple mock that returns a date-like string
-		if ( ! date ) return 'Never';
+		if ( ! date ) {
+			return 'Never';
+		}
 		return 'Nov 21 00:00';
 	} ),
 } ) );
@@ -35,6 +37,7 @@ jest.mock( '@woocommerce/data', () => ( {
 			woocommerce_analytics_scheduled_import: 'yes',
 		},
 	} ) ),
+	useUser: jest.fn(),
 } ) );
 
 const mockUseImportStatus = useImportStatus as jest.MockedFunction<
@@ -47,6 +50,7 @@ const mockUseDispatch = useDispatch as jest.MockedFunction<
 const mockUseSettings = useSettings as jest.MockedFunction<
 	typeof useSettings
 >;
+const mockUseUser = useUser as jest.MockedFunction< typeof useUser >;
 
 describe( 'ImportStatusBar', () => {
 	const mockCreateNotice = jest.fn();
@@ -62,6 +66,9 @@ describe( 'ImportStatusBar', () => {
 				woocommerce_analytics_scheduled_import: 'yes',
 			},
 		} as unknown as ReturnType< typeof useSettings > );
+		mockUseUser.mockReturnValue( {
+			currentUserCan: jest.fn().mockReturnValue( true ),
+		} as unknown as ReturnType< typeof useUser > );
 	} );
 
 	const createMockReturn = (
@@ -86,11 +93,24 @@ describe( 'ImportStatusBar', () => {
 				woocommerce_analytics_scheduled_import: 'no',
 			},
 		} as unknown as ReturnType< typeof useSettings > );
-		// Mock useImportStatus to avoid destructuring error even though component returns early
-		mockUseImportStatus.mockReturnValue( createMockReturn() );
 
 		const { container } = render( <ImportStatusBar /> );
 		expect( container ).toBeEmptyDOMElement();
+		expect( mockUseImportStatus ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should not fetch status without manage_woocommerce', () => {
+		const currentUserCan = jest.fn().mockReturnValue( false );
+		mockUseUser.mockReturnValue( {
+			currentUserCan,
+		} as unknown as ReturnType< typeof useUser > );
+
+		const { container } = render( <ImportStatusBar /> );
+
+		expect( container ).toBeEmptyDOMElement();
+		expect( currentUserCan ).toHaveBeenCalledWith( 'manage_woocommerce' );
+		expect( mockUseSettings ).not.toHaveBeenCalled();
+		expect( mockUseImportStatus ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should show spinners when loading', () => {
@@ -123,6 +143,7 @@ describe( 'ImportStatusBar', () => {
 				name: /Manually trigger analytics data import/i,
 			} )
 		).toBeInTheDocument();
+		expect( mockUseImportStatus ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'should disable button when import_in_progress_or_due is true', () => {

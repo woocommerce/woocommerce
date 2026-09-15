@@ -4,7 +4,7 @@
 import { applyFilters } from '@wordpress/hooks';
 import clsx from 'clsx';
 import { WooFooterItem } from '@woocommerce/admin-layout';
-import { optionsStore, userStore } from '@woocommerce/data';
+import { optionsStore, userStore, useUser } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -18,23 +18,12 @@ import './style.scss';
 const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 const QUEUED_NOTICE_FILTER = 'woocommerce_admin_queued_notice_filter';
 
-export function TransientNotices( props ) {
-	const { removeNotice: onRemove } = useDispatch( 'core/notices' );
-	const { createNotice: createNotice2, removeNotice: onRemove2 } =
-		useDispatch( 'core/notices2' );
+const TransientNoticesQueue = () => {
+	const { createNotice: createNotice2 } = useDispatch( 'core/notices2' );
 	const { updateOptions } = useDispatch( optionsStore );
-	const {
-		currentUser = {},
-		notices = [],
-		notices2 = [],
-		noticesQueue = {},
-	} = useSelect( ( select ) => {
-		// NOTE: This uses core/notices2, if this file is copied back upstream
-		// to Gutenberg this needs to be changed back to just core/notices.
+	const { currentUser = {}, noticesQueue = {} } = useSelect( ( select ) => {
 		return {
 			currentUser: select( userStore ).getCurrentUser(),
-			notices: select( 'core/notices' ).getNotices(),
-			notices2: select( 'core/notices2' ).getNotices(),
 			noticesQueue: select( optionsStore ).getOption( QUEUE_OPTION ),
 		};
 	} );
@@ -72,6 +61,22 @@ export function TransientNotices( props ) {
 		} );
 	}, [] );
 
+	return null;
+};
+
+export function TransientNotices( props ) {
+	const { currentUserCan } = useUser();
+	const { removeNotice: onRemove } = useDispatch( 'core/notices' );
+	const { removeNotice: onRemove2 } = useDispatch( 'core/notices2' );
+	const { notices = [], notices2 = [] } = useSelect( ( select ) => {
+		// NOTE: This uses core/notices2, if this file is copied back upstream
+		// to Gutenberg this needs to be changed back to just core/notices.
+		return {
+			notices: select( 'core/notices' ).getNotices(),
+			notices2: select( 'core/notices2' ).getNotices(),
+		};
+	} );
+
 	/**
 	 * Combines the two notices in the component vs in the useSelect, as we don't want to
 	 * create new object references on each useSelect call.
@@ -89,14 +94,20 @@ export function TransientNotices( props ) {
 	const combinedNotices = getNotices();
 
 	return (
-		<WooFooterItem>
-			<SnackbarList
-				notices={ combinedNotices }
-				className={ classes }
-				onRemove={ onRemove }
-				onRemove2={ onRemove2 }
-			/>
-		</WooFooterItem>
+		<>
+			{ ( currentUserCan( 'manage_woocommerce' ) ||
+				currentUserCan( 'edit_others_shop_orders' ) ) && (
+				<TransientNoticesQueue />
+			) }
+			<WooFooterItem>
+				<SnackbarList
+					notices={ combinedNotices }
+					className={ classes }
+					onRemove={ onRemove }
+					onRemove2={ onRemove2 }
+				/>
+			</WooFooterItem>
+		</>
 	);
 }
 
