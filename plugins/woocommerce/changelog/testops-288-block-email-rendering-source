@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Trim block email rendering-source coverage to one browser journey; two rules move to their PHPUnit owners.
+
