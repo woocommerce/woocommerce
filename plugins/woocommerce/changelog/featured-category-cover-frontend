@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Refresh category images in Featured Category Cover layouts while retaining the original rendering for unmigrated blocks.
