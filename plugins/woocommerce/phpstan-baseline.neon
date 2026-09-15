@@ -50957,6 +50957,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:remove_empty_array_recursive\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
+
+		-
 			message: '#^Parameter \#1 \$block of function build_query_vars_from_query_block expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block given\.$#'
 			identifier: argument.type
 			count: 2
@@ -53755,18 +53761,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$template_content of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:inject_theme_attribute_in_content\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \#2 \$blocks of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) expects array\<Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\>, array\<int\|string, array\<string, array\|string\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \$blocks of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
@@ -57293,36 +57287,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_created_via\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_object_read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -57384,12 +57348,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept object\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
@@ -66538,18 +66496,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:is_already_signed_up\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Parameter \#1 \$notification_id of static method Automattic\\WooCommerce\\Internal\\StockNotifications\\Factory\:\:get_notification\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/StockNotifications/Frontend/SignupService.php
 

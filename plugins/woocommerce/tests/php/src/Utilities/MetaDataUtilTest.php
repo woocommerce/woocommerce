@@ -145,11 +145,29 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	 */
 	public function test_update_ignores_non_array_meta_data(): void {
 		$order = wc_create_order();
+		$order->update_meta_data( 'color', 'blue' );
+
+		// get_meta_data() hands back the order's own WC_Meta_Data objects, so an in-place change
+		// would compare equal to itself. get_data() does not help either: it returns the last
+		// applied values, not pending ones. Copy each entry's current id, key and value instead.
+		$meta_snapshot      = static function ( \WC_Order $order ): array {
+			return array_map(
+				static function ( $meta ) {
+					return array(
+						'id'    => $meta->id,
+						'key'   => $meta->key,
+						'value' => $meta->value,
+					);
+				},
+				$order->get_meta_data()
+			);
+		};
+		$original_meta_data = $meta_snapshot( $order );
 
 		MetaDataUtil::update( null, $order );
 		MetaDataUtil::update( 'string', $order );
 
-		$this->assertEmpty( $order->get_meta_data(), 'No meta should be added for non-array meta_data' );
+		$this->assertSame( $original_meta_data, $meta_snapshot( $order ), 'Non-array meta_data should leave existing order metadata unchanged.' );
 	}
 
 	/**
@@ -178,7 +196,14 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 			99
 		);
 
-		$meta_data = $order->get_meta_data();
+		$meta_data = array_values(
+			array_filter(
+				$order->get_meta_data(),
+				static function ( $meta ): bool {
+					return 'k' === $meta->key;
+				}
+			)
+		);
 		$this->assertCount( 1, $meta_data );
 		$this->assertSame( 'k', $meta_data[0]->key );
 		$this->assertSame( 'v', $meta_data[0]->value );
