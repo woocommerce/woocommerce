@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flush the order count cache when a plugin is activated or deactivated, so newly registered order statuses show up in the Orders list right away.

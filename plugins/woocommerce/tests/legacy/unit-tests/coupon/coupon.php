@@ -284,6 +284,13 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 	/**
 	 * Test an item limit for percent discounts.
+	 *
+	 * Defines WOOCOMMERCE_CHECKOUT, which a process cannot undefine, so it stays set
+	 * for every test that runs after this one. Do not reach for process isolation to
+	 * contain that: the forked child re-runs tests/legacy/bootstrap.php, which writes
+	 * woocommerce_custom_orders_table_enabled over its own connection, outside the
+	 * parent's rolled-back transaction, and flips the order store for the rest of the
+	 * run.
 	 */
 	public function test_percent_discount_item_limit() {
 		// Create product.
