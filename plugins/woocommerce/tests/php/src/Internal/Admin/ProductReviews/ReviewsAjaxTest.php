@@ -47,7 +47,7 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Editing a product review uses Woo's registered handler and row renderer.
+	 * @testdox Editing a product review uses Woo's registered handler and row renderer.
 	 */
 	public function test_edit_review_via_registered_ajax_persists_and_returns_woo_row(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -79,7 +79,7 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Non-product comments fall through to WordPress core's registered handler.
+	 * @testdox Non-product comments fall through to WordPress core's registered handler.
 	 */
 	public function test_edit_non_product_comment_via_registered_ajax_falls_through_to_core(): void {
 		$post_id = $this->factory()->post->create();
@@ -111,7 +111,7 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Editing a review without permission is rejected without persistence.
+	 * @testdox Editing a review without permission is rejected without persistence.
 	 */
 	public function test_edit_review_via_registered_ajax_rejects_unauthorized_request(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -132,7 +132,7 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Replying to a product review persists a child and returns Woo's row.
+	 * @testdox Replying to a product review persists a child and returns Woo's row.
 	 */
 	public function test_reply_to_review_via_registered_ajax_persists_child_and_returns_woo_row(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -171,7 +171,7 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Replying without permission is rejected without creating a child.
+	 * @testdox Replying without permission is rejected without creating a child.
 	 */
 	public function test_reply_to_review_via_registered_ajax_rejects_unauthorized_request(): void {
 		$product = WC_Helper_Product::create_simple_product();
