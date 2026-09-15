@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the option name written on new installs so Back in Stock sign-ups are enabled by default as intended.
