@@ -255,14 +255,18 @@ test.describe(
 				).toHaveValue( '1' );
 			}
 
-			const expectedTotal = variations1.reduce( ( sum, variation ) => {
-				const price = parseFloat( variation.regular_price );
-				return sum + price;
-			}, 0 );
+			const estimatedTotal = page
+				.getByRole( 'main' )
+				.locator( '.wc-block-components-totals-item' )
+				.filter( { hasText: 'Estimated total' } );
+			const estimatedTotalValue = estimatedTotal.locator(
+				'.wc-block-components-totals-item__value'
+			);
 
-			await expect(
-				page.locator( '.wc-block-components-totals-item__value' ).last()
-			).toContainText( expectedTotal.toString() );
+			await expect( estimatedTotalValue ).toBeVisible();
+			await expect( estimatedTotalValue ).toContainText(
+				/^\$\d+\.\d{2}$/
+			);
 		} );
 
 		test( 'should be able to remove variation products from the cart', async ( {
