@@ -134,6 +134,33 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		}
 	} );
 
+	test( 'Can send test email', async ( { page } ) => {
+		await accessAndTrackEmailPost( page );
+		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
+		await page
+			.getByRole( 'menuitem', { name: 'Send a test email' } )
+			.click();
+		const sendButton = page.getByRole( 'button', {
+			name: 'Send test email',
+		} );
+		await expect( sendButton ).toBeEnabled();
+
+		// Assert the response, not the error notice: a route path that drifted on
+		// either side answers 404 and still renders the same notice. The test
+		// environment has no mailer, so the real send fails and the route answers 400.
+		const [ response ] = await Promise.all( [
+			page.waitForResponse(
+				( candidate ) =>
+					candidate.request().method() === 'POST' &&
+					decodeURIComponent( candidate.url() ).includes(
+						'/woocommerce-email-editor/v1/send_preview_email'
+					)
+			),
+			sendButton.click(),
+		] );
+		expect( response.status() ).toBe( 400 );
+	} );
+
 	test( 'Can edit and save content', async ( { page } ) => {
 		await accessAndTrackEmailPost( page );
 		await expect(
