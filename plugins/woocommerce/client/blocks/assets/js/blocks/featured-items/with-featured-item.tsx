@@ -31,6 +31,7 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 import {
+	BLOCK_NAMES,
 	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
 	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
 } from './constants';
@@ -91,6 +92,7 @@ interface FeaturedItemRequiredProps< T > {
 			textColor?: string;
 		};
 	isLoading: boolean;
+	effectiveCategoryId?: number;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
@@ -381,6 +383,16 @@ export const withFeaturedItem =
 				</>
 			);
 		};
+
+		if (
+			! item &&
+			isLoading &&
+			name === BLOCK_NAMES.featuredCategory &&
+			! attributes.categoryId &&
+			props.effectiveCategoryId
+		) {
+			return null;
+		}
 
 		if ( isEditingImage ) {
 			return (
