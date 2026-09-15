@@ -1,4 +1,4 @@
-name: 'PHPStan Analysis'
+name: 'PHPStan  Analysis'
 
 on:
     pull_request:
