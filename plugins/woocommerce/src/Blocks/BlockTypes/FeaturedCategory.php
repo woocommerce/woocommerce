@@ -63,15 +63,15 @@ class FeaturedCategory extends FeaturedItem {
 			return '';
 		}
 
-		$is_legacy = 'cover' !== ( $attributes['layout'] ?? '' ) && ! $this->contains_cover( $block->parsed_block['innerBlocks'] ?? array() );
+		$is_legacy = 'cover' !== ( $attributes['layout'] ?? '' );
 		if ( $is_legacy ) {
 			$content = $this->render_legacy_cover( $attributes, $content, $category );
 		}
 		wp_enqueue_style( 'wp-block-cover' );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
-		$cover     = $this->find_managed_cover( $block->parsed_block['innerBlocks'] ?? array() );
-		if ( $cover && $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__cover' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
+		$cover     = $is_legacy ? null : $this->find_managed_cover( $block->parsed_block['innerBlocks'] ?? array() );
+		if ( $cover && $processor->next_tag( array( 'class_name' => 'wp-block-cover' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
 			$image = $cover['attrs']['metadata']['woocommerce/featured-category-image'] ?? $cover['attrs']['metadata']['bindings']['url']['args'] ?? array();
 			$this->update_cover_image_markup( $processor, $category, $image, strpos( $cover['attrs']['className'] ?? '', 'wc-block-featured-category__natural-image' ) !== false );
 		}
@@ -92,21 +92,6 @@ class FeaturedCategory extends FeaturedItem {
 		$classes .= ' ' . ( $attributes['className'] ?? '' );
 		$anchor   = empty( $attributes['anchor'] ) ? '' : ' id="' . esc_attr( $attributes['anchor'] ) . '"';
 		return '<div class="' . esc_attr( trim( $classes ) ) . '"' . $anchor . '>' . $content . '</div>';
-	}
-
-	/**
-	 * Whether saved content already contains the current layout.
-	 *
-	 * @param array[] $blocks Parsed child blocks.
-	 * @return bool
-	 */
-	private static function contains_cover( $blocks ) {
-		foreach ( $blocks as $child ) {
-			if ( 'core/cover' === ( $child['blockName'] ?? '' ) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -198,8 +183,7 @@ class FeaturedCategory extends FeaturedItem {
 			$attributes = $block['attrs'] ?? array();
 			$bindings   = $attributes['metadata']['bindings'] ?? array();
 			$image      = $attributes['metadata']['woocommerce/featured-category-image'] ?? null;
-			$classes    = explode( ' ', $attributes['className'] ?? '' );
-			if ( ! in_array( 'wc-block-featured-category__cover', $classes, true ) || ! empty( $attributes['useFeaturedImage'] ) || 'image' !== ( $attributes['backgroundType'] ?? 'image' ) || isset( $bindings['__default'] ) ) {
+			if ( ! empty( $attributes['useFeaturedImage'] ) || 'image' !== ( $attributes['backgroundType'] ?? 'image' ) || isset( $bindings['__default'] ) ) {
 				return null;
 			}
 			foreach ( array( 'id', 'url' ) as $attribute ) {
@@ -267,12 +251,13 @@ class FeaturedCategory extends FeaturedItem {
 		$processor->set_attribute( 'src', $image_src[0] );
 		$processor->set_attribute( 'width', (string) $image_src[1] );
 		$processor->set_attribute( 'height', (string) $image_src[2] );
-		$processor->add_class( 'wp-image-' . $image_id );
 		if ( $natural ) {
 			$processor->remove_attribute( 'srcset' );
 			$processor->remove_attribute( 'sizes' );
 			return;
 		}
+		// Adding this class for natural images would let WordPress restore srcset later.
+		$processor->add_class( 'wp-image-' . $image_id );
 
 		$srcset = wp_get_attachment_image_srcset( $image_id, $size );
 		$sizes  = wp_get_attachment_image_sizes( $image_id, $size );

@@ -8,6 +8,8 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import {
+	Button,
+	Placeholder,
 	Spinner,
 	ToolbarButton,
 	ToolbarGroup,
@@ -114,8 +116,24 @@ function FeaturedCategory( {
 		clientId,
 		category?.id === attributes.categoryId ? category : undefined
 	);
-	if ( isLoading || ! category ) {
+	if ( isLoading ) {
 		return <Spinner />;
+	}
+	if ( ! category ) {
+		return (
+			<Placeholder
+				icon={ folderStarred }
+				label={ EDIT_MODE_CONFIG.label }
+				instructions={ __(
+					'No product category is selected.',
+					'woocommerce'
+				) }
+			>
+				<Button variant="primary" onClick={ () => setEditMode( true ) }>
+					{ __( 'Select a category', 'woocommerce' ) }
+				</Button>
+			</Placeholder>
+		);
 	}
 
 	return (

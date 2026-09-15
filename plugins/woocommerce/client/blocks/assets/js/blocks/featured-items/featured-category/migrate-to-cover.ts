@@ -64,10 +64,7 @@ export function migrateToCover(
 	attributes: BlockInstance[ 'attributes' ],
 	innerBlocks: BlockInstance[]
 ): [ BlockInstance[ 'attributes' ], BlockInstance[] ] {
-	if (
-		attributes.layout === 'cover' ||
-		innerBlocks.some( ( block ) => block.name === 'core/cover' )
-	) {
+	if ( attributes.layout === 'cover' ) {
 		return [ { ...attributes, layout: 'cover' }, innerBlocks ];
 	}
 	const {
