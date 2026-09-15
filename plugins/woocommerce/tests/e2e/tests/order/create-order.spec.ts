@@ -204,7 +204,7 @@ test.describe(
 			}
 		} );
 
-		test( 'can add a product using the keyboard without a rogue search box', async ( {
+		test( 'can add a product without an extra click or rogue search box', async ( {
 			page,
 			simpleProduct,
 		} ) => {
@@ -218,6 +218,15 @@ test.describe(
 
 			const modal = page.locator( '.wc-backbone-modal-content' );
 			await expect( modal ).toBeVisible();
+
+			const productSearch = page.locator(
+				'span > .select2-search__field'
+			);
+			await expect( productSearch ).toBeFocused();
+
+			// Close the automatically opened search so the existing keyboard
+			// regression still exercises opening the control with Enter.
+			await page.keyboard.press( 'Escape' );
 
 			// Focus the (closed) product-search control and press Enter.
 			// Before the fix this submitted the modal, closing it and
@@ -236,9 +245,7 @@ test.describe(
 			// dropdown; type the query, wait for the result, then press Enter to
 			// choose it with the keyboard (results are loaded first, so this is
 			// not the premature-Enter path).
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( simpleProduct.name );
+			await productSearch.fill( simpleProduct.name );
 			await page
 				.getByRole( 'option', { name: simpleProduct.name } )
 				.first()
@@ -325,6 +332,21 @@ test.describe(
 			await expect( page.getByText( 'Order updated' ) ).toBeVisible();
 
 			await page.goto( editOrderUrl( order.id ) );
+			// The order data meta box links the customer's profile and their other orders.
+			await expect(
+				page.getByRole( 'link', { name: 'Profile →' } )
+			).toHaveAttribute(
+				'href',
+				new RegExp( `user-edit\\.php\\?user_id=${ customer.id }$` )
+			);
+			await expect(
+				page.getByRole( 'link', { name: 'View other orders →' } )
+			).toHaveAttribute(
+				'href',
+				new RegExp(
+					`edit\\.php\\?post_status=all&post_type=shop_order&_customer_user=${ customer.id }$`
+				)
+			);
 			await expect( page.locator( '#_billing_address_1' ) ).toHaveValue(
 				'124 Fake St'
 			);
