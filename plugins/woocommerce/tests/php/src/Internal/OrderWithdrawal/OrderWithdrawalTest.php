@@ -423,9 +423,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$second_state         = $this->sut->process_current_request();
 			$second_error_notices = wc_get_notices( 'error' );
 
-			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
-			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
-			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should remain on the review screen when rate limited.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the rate-limit error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $second_error_notices[0]['notice'], 'Duplicate matched submissions should remain rate limited.' );
 		} finally {
 			$capture['remove']();
 		}
