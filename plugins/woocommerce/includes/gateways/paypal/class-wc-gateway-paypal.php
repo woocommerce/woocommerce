@@ -811,6 +811,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
+		$suffix            = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
 		$buttons           = new PayPalButtons( $this );
@@ -827,7 +828,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
 		wp_enqueue_script( 'paypal-standard-sdk' );
 
-		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/assets/js/gateways/paypal' . $suffix . '.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
 
 		wp_localize_script(
 			'wc-paypal-frontend',
