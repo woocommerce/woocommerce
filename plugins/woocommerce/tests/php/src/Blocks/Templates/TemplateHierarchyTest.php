@@ -10,12 +10,12 @@ use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Integration tests for WooCommerce block template hierarchy filters.
  */
-class TemplateHierarchyTests extends WP_UnitTestCase {
+class TemplateHierarchyTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Original active theme stylesheet.
@@ -34,7 +34,7 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	/**
 	 * Set up isolated hooks and a block theme.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		global $wc_product_attributes, $wp_filter;
@@ -59,7 +59,7 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	 * the hierarchy hooks and the template caches -- goes back with the rollback,
 	 * the hook restore and the cache flush the base class already performs.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		global $wc_product_attributes;
 
 		if ( taxonomy_exists( 'pa_hierarchy' ) ) {
@@ -76,8 +76,8 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 	 * @testdox Product searches prepend the WooCommerce product search template.
 	 */
 	public function test_product_search_hierarchy(): void {
-		$template = new ProductSearchResultsTemplate();
-		$template->init();
+		$sut = new ProductSearchResultsTemplate();
+		$sut->init();
 
 		// go_to() on its own does not produce a product-search query -- the archive
 		// flags come back false -- so the shape has to be built by hand. Nothing below
@@ -180,8 +180,8 @@ class TemplateHierarchyTests extends WP_UnitTestCase {
 
 		register_taxonomy( 'pa_hierarchy', array( 'product' ), array( 'public' => true ) );
 		$wc_product_attributes['pa_hierarchy'] = (object) array( 'attribute_name' => 'hierarchy' );
-		$template                              = new ProductAttributeTemplate();
-		$template->init();
+		$sut                                   = new ProductAttributeTemplate();
+		$sut->init();
 
 		$term = wp_insert_term( 'Hierarchy test attribute', 'pa_hierarchy', array( 'slug' => 'hierarchy-test-attribute' ) );
 		if ( is_wp_error( $term ) ) {

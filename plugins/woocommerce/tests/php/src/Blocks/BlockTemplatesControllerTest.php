@@ -7,13 +7,20 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use WC_Unit_Test_Case;
 use WP_Block_Template;
-use WP_UnitTestCase;
 
 /**
  * Integration tests for the block templates controller.
  */
-class BlockTemplatesControllerTest extends WP_UnitTestCase {
+class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var BlockTemplatesController
+	 */
+	private $sut;
 
 	/**
 	 * Original active theme stylesheet.
@@ -25,11 +32,12 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	/**
 	 * Set up a block theme and isolated template caches.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->original_stylesheet = get_stylesheet();
 		switch_theme( 'twentytwentytwo' );
+		$this->sut = new BlockTemplatesController();
 		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
 	}
 
@@ -39,7 +47,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	 * The posts, terms and object-cache entries this class creates go back with the
 	 * transaction rollback and the cache flush the base class already performs.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		switch_theme( $this->original_stylesheet );
 
 		parent::tearDown();
@@ -82,7 +90,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 				$this->assertNotSame( '', trim( $template->content ) );
 			}
 
-			$controller     = new BlockTemplatesController();
 			$template_slugs = array(
 				'archive-product',
 				'product-search-results',
@@ -93,11 +100,11 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 				'order-confirmation',
 			);
 			foreach ( $template_slugs as $template_slug ) {
-				$this->assert_file_template_contract( $controller, $template_slug, 'wp_template' );
+				$this->assert_file_template_contract( $template_slug, 'wp_template' );
 			}
 
 			foreach ( array( 'mini-cart', 'external-product-add-to-cart-with-options', 'checkout-header' ) as $template_part_slug ) {
-				$this->assert_file_template_contract( $controller, $template_part_slug, 'wp_template_part' );
+				$this->assert_file_template_contract( $template_part_slug, 'wp_template_part' );
 			}
 
 			$plugin_root = dirname( __DIR__, 4 );
@@ -118,7 +125,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	 */
 	public function test_resolves_saved_template_and_part_precedence(): void {
 		$theme_slug = get_stylesheet();
-		$controller = new BlockTemplatesController();
 
 		$template_woo_id        = $this->create_template_post(
 			'archive-product',
@@ -151,7 +157,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 			'slug__in' => array( 'archive-product', 'page-cart', 'product-search-results' ),
 		);
 
-		$template_results = $controller->add_db_templates_with_woo_slug(
+		$template_results = $this->sut->add_db_templates_with_woo_slug(
 			array( $theme_template ),
 			$template_query,
 			'wp_template'
@@ -159,7 +165,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 
 		$this->assert_same_template_sequence(
 			$template_results,
-			$controller->add_db_templates_with_woo_slug( array( $theme_template ), $template_query, 'wp_template' )
+			$this->sut->add_db_templates_with_woo_slug( array( $theme_template ), $template_query, 'wp_template' )
 		);
 		$this->assertSame(
 			array( 'archive-product', 'page-cart', 'product-search-results' ),
@@ -191,7 +197,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 		);
 
 		wp_delete_post( $template_theme_id, true );
-		$template_results_without_theme = $controller->add_db_templates_with_woo_slug(
+		$template_results_without_theme = $this->sut->add_db_templates_with_woo_slug(
 			array(),
 			$template_query,
 			'wp_template'
@@ -229,7 +235,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 		$part_query         = array(
 			'slug__in' => array( 'external-product-add-to-cart-with-options', 'mini-cart' ),
 		);
-		$part_results       = $controller->add_db_templates_with_woo_slug(
+		$part_results       = $this->sut->add_db_templates_with_woo_slug(
 			array( $theme_part ),
 			$part_query,
 			'wp_template_part'
@@ -237,7 +243,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 
 		$this->assert_same_template_sequence(
 			$part_results,
-			$controller->add_db_templates_with_woo_slug( array( $theme_part ), $part_query, 'wp_template_part' )
+			$this->sut->add_db_templates_with_woo_slug( array( $theme_part ), $part_query, 'wp_template_part' )
 		);
 		$this->assertSame(
 			array( 'external-product-add-to-cart-with-options', 'mini-cart' ),
@@ -261,7 +267,7 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 		);
 
 		wp_delete_post( $part_theme_id, true );
-		$part_results_without_theme = $controller->add_db_templates_with_woo_slug(
+		$part_results_without_theme = $this->sut->add_db_templates_with_woo_slug(
 			array(),
 			$part_query,
 			'wp_template_part'
@@ -300,12 +306,11 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 	/**
 	 * Assert a WooCommerce file-backed template contract.
 	 *
-	 * @param BlockTemplatesController $controller Controller instance.
-	 * @param string                   $slug Template slug.
-	 * @param string                   $type Template type.
+	 * @param string $slug Template slug.
+	 * @param string $type Template type.
 	 */
-	private function assert_file_template_contract( BlockTemplatesController $controller, string $slug, string $type ): void {
-		$template = $controller->get_block_file_template(
+	private function assert_file_template_contract( string $slug, string $type ): void {
+		$template = $this->sut->get_block_file_template(
 			null,
 			BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug,
 			$type
