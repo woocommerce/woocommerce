@@ -14935,12 +14935,6 @@ parameters:
 			path: includes/class-wc-shipping.php
 
 		-
-			message: '#^Offset mixed might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: includes/class-wc-shipping.php
-
-		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
 			identifier: phpDoc.parseError
 			count: 1
