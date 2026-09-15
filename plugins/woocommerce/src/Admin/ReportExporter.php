@@ -166,7 +166,7 @@ class ReportExporter {
 	private static function delete_export_status( $path ) {
 		$filename = basename( $path );
 
-		if ( preg_match( '/^wc-([a-z]+)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
+		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
 			$option_name = self::get_status_option_name( $matches[1], $matches[2] );
 			delete_option( $option_name );
 		}

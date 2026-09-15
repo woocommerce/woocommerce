@@ -154,6 +154,18 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Daily cleanup drops the progress of an expired export of an extension's report type.
+	 */
+	public function test_cleanup_deletes_the_progress_of_an_extension_report_type(): void {
+		$this->create_export( 'wc-stock_notifications-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		ReportExporter::update_export_percentage_complete( 'stock_notifications', 'expired', 100 );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'stock_notifications', 'expired' ), 'Report types registered by extensions are not limited to letters.' );
+	}
+
+	/**
 	 * @testdox Daily cleanup deletes the option every export used to share once its exports can no longer be downloaded.
 	 */
 	public function test_cleanup_deletes_the_shared_status_option_once_its_exports_are_gone(): void {
