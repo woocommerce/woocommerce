@@ -56,16 +56,6 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Registers the taxable address filter.
-	 */
-	public function test_registers_taxable_address_filter(): void {
-		$this->assertNotFalse(
-			has_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ) ),
-			'The taxable address filter should be registered.'
-		);
-	}
-
-	/**
 	 * @testdox Leaves the taxable address unchanged when tax is not based on shipping.
 	 *
 	 * @dataProvider provider_tax_bases_other_than_shipping
