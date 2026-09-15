@@ -315,7 +315,9 @@ body {
 	margin: 0
 }
 
-/* Checkbox alignment for reviews form */
+/* Checkbox alignment for reviews form
+ * @todo remove once https://github.com/woocommerce/woocommerce/pull/68696 ships.
+ */
 .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
 	align-items: flex-start;
 }
