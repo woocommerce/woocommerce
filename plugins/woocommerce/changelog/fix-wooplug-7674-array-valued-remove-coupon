@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error on the cart when the remove_coupon request parameter is submitted as an array.

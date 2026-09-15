@@ -648,6 +648,28 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_cart_action() ignores an array-valued remove_coupon instead of fataling.
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 */
+	public function test_update_cart_action_ignores_array_valued_remove_coupon(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC_Helper_Coupon::create_coupon( 'save10' );
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( 'save10' );
+		$this->assertContains( 'save10', WC()->cart->get_applied_coupons(), 'The coupon should be applied before the malformed request.' );
+
+		// An unauthenticated GET can send remove_coupon as an array, which urldecode() would fatal on.
+		$_GET['remove_coupon']     = array( 'save10' );
+		$_REQUEST['remove_coupon'] = array( 'save10' );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertContains( 'save10', WC()->cart->get_applied_coupons(), 'A non-string remove_coupon should be treated as empty and remove nothing.' );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.
