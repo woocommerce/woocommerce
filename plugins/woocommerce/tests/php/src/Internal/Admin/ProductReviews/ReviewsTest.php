@@ -10,6 +10,8 @@ use ReflectionException;
 use stdClass;
 use WC_Unit_Test_Case;
 use WP_Comment;
+use WPDieException;
+use WPAjaxDieContinueException;
 
 /**
  * Tests for the admin reviews handler.
@@ -595,6 +597,74 @@ test2</p></div>',
 	 */
 	public function test_get_reviews_page_url() : void {
 		$this->assertSame( 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
+	}
+
+	/**
+	 * @testdox `handle_reply_to_review` approves the parent review when replying to an unapproved review.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::handle_reply_to_review()
+	 *
+	 * @return void
+	 */
+	public function test_handle_reply_to_review_approves_unapproved_parent_review(): void {
+		$admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$product_id = $this->factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+
+		$parent_review_id = $this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $product_id,
+				'comment_type'     => 'review',
+				'comment_approved' => '0',
+			)
+		);
+
+		$nonce = wp_create_nonce( 'replyto-comment' );
+
+		$request = array(
+			'action'                      => 'replyto-comment',
+			'mode'                        => 'detail',
+			'_ajax_nonce-replyto-comment' => $nonce,
+			'comment_post_ID'             => $product_id,
+			'comment_ID'                  => $parent_review_id,
+			'content'                     => 'Thank you for your review!',
+			'comment_type'                => 'comment',
+			'approve_parent'              => 1,
+			'_wp_unfiltered_html_comment' => wp_create_nonce( 'unfiltered-html-comment' ),
+		);
+
+		$_POST    = $request;
+		$_REQUEST = array_merge( $_REQUEST, $request ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		try {
+			$reviews->handle_reply_to_review();
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} catch ( WPDieException $e ) {
+			unset( $e );
+		} catch ( \Throwable $e ) {
+			// WP_Ajax_Response::send() may fail when headers are already sent in the test environment.
+			unset( $e );
+		}
+
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+
+		$parent = get_comment( $parent_review_id );
+
+		$this->assertSame( '1', $parent->comment_approved );
+
+		wp_set_current_user( 0 );
+		$_POST = array();
 	}
 
 }

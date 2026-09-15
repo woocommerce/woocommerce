@@ -326,7 +326,7 @@ class Reviews {
 		if ( ! empty( $_POST['approve_parent'] ) ) {
 			$parent = get_comment( $comment_parent );
 
-			if ( $parent && '0' === $parent->comment_approved && $parent->comment_post_ID === $comment_post_ID ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+			if ( $parent && '0' === $parent->comment_approved && (int) $parent->comment_post_ID === $comment_post_ID ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 				if ( ! current_user_can( 'edit_comment', $parent->comment_ID ) ) {
 					wp_die( -1 );
 				}
