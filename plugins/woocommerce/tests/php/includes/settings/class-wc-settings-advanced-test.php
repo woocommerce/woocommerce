@@ -174,8 +174,11 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			$sut = new WC_Settings_Advanced();
 			$sut->save();
 
+			// woocommerce_allow_tracking is autoloaded, and get_option() answers autoloaded options
+			// from `alloptions`, so clear that too for both values to be read from the database.
 			wp_cache_delete( $selected_option_id, 'options' );
 			wp_cache_delete( $peer_option_id, 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
 
 			$this->assertSame( 'yes', get_option( $selected_option_id ) );
 			$this->assertSame( 'no', get_option( $peer_option_id ) );
