@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Enable Back in Stock Notifications sign-ups by default on new installs, as intended, instead of leaving the sign-up form off because the install hook wrote the wrong option name.
