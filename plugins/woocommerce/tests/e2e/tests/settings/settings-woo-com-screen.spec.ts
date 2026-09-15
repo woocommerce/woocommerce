@@ -18,8 +18,10 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
  * accessible name, and what makes a privacy control reachable by assistive technology. The API test
  * reads a JSON field and renders nothing.
  *
- * This asserts only that. It deliberately does not save anything: persistence is the PHPUnit
- * test's job.
+ * It also asserts the Save changes button renders, because a section can hide it through
+ * `$hide_save_button` and the browser save tests on other screens would not notice.
+ *
+ * It deliberately does not save anything: persistence is the PHPUnit test's job.
  */
 test.describe(
 	'WooCommerce.com Settings screen',
@@ -45,6 +47,9 @@ test.describe(
 				page.getByRole( 'checkbox', {
 					name: 'Display suggestions within WooCommerce',
 				} )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'button', { name: 'Save changes' } )
 			).toBeVisible();
 		} );
 	}
