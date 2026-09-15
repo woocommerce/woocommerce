@@ -335,7 +335,7 @@ class WC_Data_Store_WP {
 	 * Also accepts a WC_DateTime object.
 	 *
 	 * @since 3.2.0
-	 * @param mixed  $query_var A valid date format.
+	 * @param mixed  $query_var A valid date format. Values that cannot be used as a string fail the query.
 	 * @param string $key meta or db column key.
 	 * @param array  $wp_query_args WP_Query args.
 	 * @return array Modified $wp_query_args
@@ -354,13 +354,29 @@ class WC_Data_Store_WP {
 		$raw_start = '';
 		$raw_end   = '';
 
+		// Validate here so overrides can normalize custom date formats before calling the parent parser.
+		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
+			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+
+			return $wp_query_args;
+		} elseif ( is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
+			try {
+				$query_var = (string) $query_var;
+			} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+
+				return $wp_query_args;
+			}
+		}
+
 		try {
 			// Specific time query with a WC_DateTime.
-			if ( is_a( $query_var, 'WC_DateTime' ) ) {
+			if ( $query_var instanceof WC_DateTime ) {
 				$dates[] = $query_var;
 			} elseif ( is_numeric( $query_var ) ) { // Specific time query with a timestamp.
 				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
-			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) { // Query with operators and possible range of dates.
+			} elseif ( preg_match( $query_parse_regex, (string) $query_var, $sections ) ) {
+				// Query with operators and possible range of dates.
 				if ( ! empty( $sections[1] ) ) {
 					$dates[]   = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
 					$raw_start = $sections[1];
@@ -376,8 +392,8 @@ class WC_Data_Store_WP {
 					$precision = 'day';
 				}
 			} else { // Specific time query with a string.
-				$dates[]   = wc_string_to_datetime( $query_var );
-				$raw_start = $query_var;
+				$dates[]   = wc_string_to_datetime( (string) $query_var );
+				$raw_start = (string) $query_var;
 				$precision = 'day';
 			}
 		} catch ( Exception $e ) {
