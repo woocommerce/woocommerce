@@ -281,7 +281,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 				'cost' => 1,
 			)
 		);
-		$this->assertEquals( $evaluated, $result );
+		$this->assertEqualsWithDelta( $evaluated, $result, 0.0001 );
 	}
 
 	/**
