@@ -637,7 +637,7 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: 'POST',
 				url: get_url( 'apply_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -695,7 +695,7 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: 'POST',
 				url: get_url( 'remove_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				dataType: 'html',
 				success: function ( response ) {
 					$(

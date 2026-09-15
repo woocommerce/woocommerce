@@ -8,6 +8,7 @@
 // code is free text in the cart form. `reference` carries a pre-existing %27
 // to prove the helper does not double-encode.
 const CART_URL = 'https://example.test/cart/';
+const COUPON_CODE = "SAVE'10";
 
 const SHIPPING_FORM_SERIALIZED =
 	'calc_shipping_country=US' +
@@ -49,12 +50,15 @@ describe( 'cart.js request encoding', () => {
 	let findDocumentHandler;
 	let $cartForm;
 	let $shippingForm;
+	let $couponInput;
+	let $removeCouponLink;
 	let clickedSubmitName;
 
 	// Sentinels standing in for the DOM elements jQuery would hand to a
 	// delegated handler as `evt.currentTarget`.
 	const cartFormElement = { id: 'cart-form' };
 	const shippingFormElement = { id: 'shipping-form' };
+	const removeCouponElement = { id: 'remove-coupon' };
 
 	beforeEach( () => {
 		capturedAjaxRequests = [];
@@ -136,6 +140,19 @@ describe( 'cart.js request encoding', () => {
 		$shippingForm.attr = jest.fn( ( name ) => formAttributes[ name ] );
 		$shippingForm.serialize = jest.fn( () => SHIPPING_FORM_SERIALIZED );
 
+		$couponInput = createDefaultMock();
+		$couponInput.length = 1;
+		$couponInput.val = jest.fn( () => COUPON_CODE );
+
+		// remove_coupon_clicked() reads the code off data-coupon and blocks
+		// the closest .cart_totals wrapper.
+		$removeCouponLink = createDefaultMock();
+		$removeCouponLink.length = 1;
+		$removeCouponLink.attr = jest.fn( ( name ) =>
+			name === 'data-coupon' ? COUPON_CODE : undefined
+		);
+		$removeCouponLink.closest = jest.fn( () => createDefaultMock() );
+
 		// cart_submit() routes on which submit button was clicked.
 		const $clickedSubmit = {
 			is: jest.fn(
@@ -167,11 +184,44 @@ describe( 'cart.js request encoding', () => {
 			if ( arg === ':input[type=submit][clicked=true]' ) {
 				return $clickedSubmit;
 			}
+			if ( arg === '#coupon_code' ) {
+				return $couponInput;
+			}
+			if ( arg === removeCouponElement ) {
+				return $removeCouponLink;
+			}
 			return createDefaultMock();
 		} );
 		jQueryMock.ajax = jest.fn( ( options ) => {
 			capturedAjaxRequests.push( options );
 			return { abort: jest.fn() };
+		} );
+		// Mirrors jQuery.param(): encodeURIComponent per field, spaces as `+`,
+		// apostrophes left literal. encodeApostrophes() then turns `'` into %27.
+		jQueryMock.param = jest.fn( ( object ) => {
+			const parts = [];
+			const add = ( key, value ) => {
+				parts.push(
+					encodeURIComponent( key ) +
+						'=' +
+						encodeURIComponent(
+							value === null || value === undefined ? '' : value
+						)
+				);
+			};
+			const buildParams = ( prefix, value ) => {
+				if ( value !== null && typeof value === 'object' ) {
+					Object.keys( value ).forEach( ( nestedKey ) =>
+						buildParams( prefix + '[' + nestedKey + ']', value[ nestedKey ] )
+					);
+					return;
+				}
+				add( prefix, value );
+			};
+			Object.keys( object ).forEach( ( key ) =>
+				buildParams( key, object[ key ] )
+			);
+			return parts.join( '&' ).split( '%20' ).join( '+' );
 		} );
 
 		global.window.jQuery = jQueryMock;
@@ -259,6 +309,47 @@ describe( 'cart.js request encoding', () => {
 		expect( request.data ).toBe( CART_FORM_ENCODED );
 		expect( new URLSearchParams( request.data ).get( 'coupon_code' ) ).toBe(
 			"SAVE'10"
+		);
+	} );
+
+	test( 'should encode apostrophes in apply coupon data', () => {
+		clickedSubmitName = 'apply_coupon';
+		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
+		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
+
+		submit( evt );
+
+		expect( evt.preventDefault ).toHaveBeenCalled();
+
+		const request = capturedAjaxRequests.find( ( options ) =>
+			options.url.includes( 'apply_coupon' )
+		);
+		expect( request ).toBeDefined();
+		expect( request.data ).not.toContain( "'" );
+
+		const body = new URLSearchParams( request.data );
+		expect( body.get( 'coupon_code' ) ).toBe( COUPON_CODE );
+		expect( body.get( 'security' ) ).toBe( 'nonce' );
+	} );
+
+	test( 'should encode apostrophes in remove coupon data', () => {
+		const click = findDocumentHandler( 'click', 'a.woocommerce-remove-coupon' );
+		const evt = {
+			preventDefault: jest.fn(),
+			currentTarget: removeCouponElement,
+		};
+
+		click( evt );
+
+		expect( evt.preventDefault ).toHaveBeenCalled();
+
+		const request = capturedAjaxRequests.find( ( options ) =>
+			options.url.includes( 'remove_coupon' )
+		);
+		expect( request ).toBeDefined();
+		expect( request.data ).not.toContain( "'" );
+		expect( new URLSearchParams( request.data ).get( 'coupon' ) ).toBe(
+			COUPON_CODE
 		);
 	} );
 } );
