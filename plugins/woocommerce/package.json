@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.2.0",
+	"version": "11.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -1165,9 +1165,7 @@
 		"node": "^24.15.0"
 	},
 	"browserslist": [
-		"> 0.1%",
-		"ie 8",
-		"ie 9"
+		"> 0.1%"
 	],
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",

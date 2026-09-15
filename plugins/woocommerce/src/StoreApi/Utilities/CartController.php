@@ -514,12 +514,15 @@ class CartController {
 		 * Fires when cart items are being validated.
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
-		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
-		 * notices and convert to wp errors instead.
+		 *
+		 * This action will be deprecated in the Store API because it encourages wc_add_notice:
+		 * the API has to capture those notices and convert them to WP_Error objects. Prefer
+		 * `woocommerce_store_api_cart_errors`, which passes a WP_Error to callbacks directly.
+		 * Core keeps firing this action from the classic cart and checkout, so it is not
+		 * deprecated there.
 		 *
 		 * @since 7.2.0
 		 *
-		 * @deprecated
 		 * @internal Matches action name in WooCommerce core.
 		 */
 		do_action( 'woocommerce_check_cart_items' );

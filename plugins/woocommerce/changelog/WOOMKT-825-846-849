@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Three small Marketplace fixes: the clear button in the search field only shows when there is text to clear and resets the results, search results get a "Results for" heading, and the WooCommerce.com account menu link reads "Your WooCommerce.com account" and points at My account.

@@ -82,6 +82,11 @@ class PluginsHelper {
 	const DISMISS_CONNECT_NOTICE = 'woo_connect_notice_dismiss';
 
 	/**
+	 * Meta key for dismissing the connected account notice on My Subscriptions
+	 */
+	const DISMISS_CONNECTED_ACCOUNT_NOTICE = 'woo_connected_account_notice_dismiss';
+
+	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {

@@ -578,7 +578,7 @@ class ProductSchema extends AbstractSchema {
 				],
 			],
 			'is_password_protected' => [
-				'description' => __( 'Whether the product requires a password to access its content.', 'woocommerce' ),
+				'description' => __( 'Whether the product or its parent requires a password to access its content.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
@@ -662,10 +662,26 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
-			'is_password_protected' => '' !== $product->get_post_password(),
+			'is_password_protected' => $this->is_password_protected( $product ),
 			self::EXTENDING_KEY     => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
+	}
+
+	/**
+	 * Whether the product or its parent is password-protected.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return bool
+	 */
+	private function is_password_protected( $product ) {
+		if ( '' !== $product->get_post_password() ) {
+			return true;
+		}
+
+		$parent_id = $product->get_parent_id();
+
+		return $parent_id && '' !== get_post_field( 'post_password', $parent_id, 'raw' );
 	}
 
 	/**
@@ -876,7 +892,7 @@ class ProductSchema extends AbstractSchema {
 				continue;
 			}
 
-			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
+			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], (array) $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
 			// Custom attribute names are sanitized to be the array keys.
 			// So when we do the array_key_exists check below we also need to sanitize the attribute names.
 

@@ -47,11 +47,16 @@
 	}
 
 	h2.wc-block-mini-cart__title {
-		@include font-size(larger);
+		font-size: 1.5rem;
+		mask-image: none;
+		// Simulate the space taken by notifications in the frontend.
+		margin-top: $gap;
 
-		.block-editor-block-list__layout {
-			display: flex;
-			align-items: baseline;
+		// Because this block contains a rich editor div inside, it's displayed
+		// as a block. We reset it to inline-block to avoid a line break.
+		.wp-block-woocommerce-mini-cart-title-label-block {
+			display: inline-block;
+			margin-inline-end: 0.25em;
 		}
 	}
 
