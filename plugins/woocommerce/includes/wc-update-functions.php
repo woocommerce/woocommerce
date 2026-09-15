@@ -3991,8 +3991,8 @@ function wc_update_1120_delete_unpublished_variation_lookup_rows() {
 
 	delete_option( $last_id_option );
 
-	// The listeners of the action drop the counts cached from the old rows.
-	$lookup_data_store->announce_table_updated( 0, LookupDataStore::ACTION_DELETE );
+	// The layered nav counts cached from the deleted rows would otherwise be served until they expire, a day later.
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
 
 	return false;
 }

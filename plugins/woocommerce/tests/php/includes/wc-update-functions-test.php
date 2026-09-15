@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
@@ -587,15 +586,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			);
 		}
 
-		$received = array();
-		add_action(
-			'woocommerce_product_attributes_lookup_updated',
-			function ( $product_id, $action ) use ( &$received ) {
-				$received[] = array( $product_id, $action );
-			},
-			10,
-			2
-		);
+		// Saving the variation queued its own invalidation, flush it so that only the migration's is observed.
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$counts_transient = 'wc_layered_nav_counts_pa_size';
+		set_transient( $counts_transient, array( 'query_hash' => array( 1 => 2 ) ) );
 
 		$batches = 0;
 		while ( wc_update_1120_delete_unpublished_variation_lookup_rows() ) {
@@ -607,11 +601,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
 		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation_ids[1] ), $remaining );
 
-		$this->assertSame(
-			array( array( 0, LookupDataStore::ACTION_DELETE ) ),
-			$received,
-			'The migration announces the update once it is done, so the data derived from the table is invalidated.'
-		);
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$this->assertFalse( get_transient( $counts_transient ), 'The layered nav counts cached from the deleted rows are invalidated.' );
 
 		$this->assertFalse(
 			get_option( 'woocommerce_update_1120_last_unpublished_variation_id' ),
