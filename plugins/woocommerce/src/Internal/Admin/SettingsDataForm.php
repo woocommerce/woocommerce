@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\SettingsDataForm\ViewConfig;
+use Automattic\WooCommerce\Internal\Admin\SettingsDataForm\LegacyViewConfig;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -33,6 +34,7 @@ final class SettingsDataForm {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_init' ) );
+		add_filter( 'rest_pre_dispatch', array( new LegacyViewConfig(), 'handle_rest_pre_dispatch' ), 10, 3 );
 	}
 
 	/**

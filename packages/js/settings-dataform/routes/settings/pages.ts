@@ -58,6 +58,17 @@ export function getSettingsEntity( page: SettingsPage ) {
 
 export type SettingsEntity = ReturnType< typeof getSettingsEntity >;
 
+export function getLegacySettingsEntity( page: SettingsPage ) {
+	return {
+		kind: 'woo_settings',
+		name: `legacy-${ page.id }`,
+		baseURL: `/wc/v4/settings/${ encodeURIComponent( page.id ) }?legacy-view-config=1`,
+		key: false,
+	};
+}
+
+export type LegacySettingsEntity = ReturnType< typeof getLegacySettingsEntity >;
+
 export function hasSettingsForm( page: SettingsPage ) {
 	return page.id === 'products';
 }

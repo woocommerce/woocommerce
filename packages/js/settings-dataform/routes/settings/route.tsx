@@ -14,6 +14,7 @@ import {
 	loadSettingsPages,
 	getSettingsPage,
 	getSettingsEntity,
+	getLegacySettingsEntity,
 	hasSettingsForm,
 } from './pages';
 import type { SettingsRouteOptions } from './pages';
@@ -24,6 +25,9 @@ export const route = {
 		const pages = await loadSettingsPages();
 		await dispatch( coreStore ).addEntities(
 			pages.map( getSettingsEntity )
+		);
+		await dispatch( coreStore ).addEntities(
+			pages.map( getLegacySettingsEntity )
 		);
 		const page = getSettingsPage( pages, options );
 		if ( ! page ) {
@@ -36,15 +40,17 @@ export const route = {
 	loader: async ( options: SettingsRouteOptions ) => {
 		const pages = await loadSettingsPages();
 		const page = getSettingsPage( pages, options );
-		if ( ! page || ! hasSettingsForm( page ) ) {
+		if ( ! page ) {
 			return { page };
 		}
 		const { getEntityRecord } = resolveSelect( coreStore );
 		const entity = getSettingsEntity( page );
+		const legacyEntity = getLegacySettingsEntity( page );
 
 		// Let the stage handle request errors and missing form configuration.
 		await Promise.allSettled( [
-			getEntityRecord( entity.kind, entity.name, undefined ),
+			getEntityRecord( legacyEntity.kind, legacyEntity.name, undefined ),
+			...( hasSettingsForm( page ) ? [ getEntityRecord( entity.kind, entity.name, undefined ) ] : [] ),
 		] );
 		return { page };
 	},
