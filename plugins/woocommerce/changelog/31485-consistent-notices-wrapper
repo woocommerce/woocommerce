@@ -1,4 +1,4 @@
 Significance: patch
 Type: enhancement
 
-Render the empty cart message, classic checkout AJAX notices, the `[shop_messages]` shortcode output, and the auth and order withdrawal template notices inside the `woocommerce-notices-wrapper` container, so classic notices share consistent markup.
+Use consistent markup for classic notices by wrapping them all in `woocommerce-notices-wrapper`.
