@@ -413,6 +413,44 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A throw after the row was already repaired is only caught by merging failed imports into
+	 * the unresolved set: the verification query on its own sees a healthy order and would
+	 * count it as fixed.
+	 *
+	 * @testdox Counts an order as unresolved when its import throws after repairing the row.
+	 */
+	public function test_fix_counts_an_order_unresolved_when_its_import_throws_after_repairing_it(): void {
+		$order    = $this->create_refunded_order( array( 20, 30 ) );
+		$order_id = $order->get_id();
+		$this->double_count_latest_refund( $order );
+
+		$explode = function ( $imported_id ) use ( $order_id ) {
+			if ( (int) $imported_id === $order_id ) {
+				throw new \RuntimeException( 'The order was repaired but the import did not finish' );
+			}
+		};
+		add_action( 'woocommerce_order_scheduler_after_import_order', $explode );
+
+		try {
+			$this->run_fix();
+		} finally {
+			remove_action( 'woocommerce_order_scheduler_after_import_order', $explode );
+		}
+
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $order ), 0.001, 'The row is repaired before the throw' );
+
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertSame( 'complete', $state['status'] );
+		$this->assertSame( 0, $state['fixed'], 'An order whose import threw is not a fixed order' );
+		$this->assertSame( 1, $state['unresolved'] );
+		$this->assertLogged(
+			'warning',
+			sprintf( 'Could not fix the double-counted refunds of order %d: The order was repaired but the import did not finish', $order_id ),
+			array( 'source' => 'wc-analytics-order-import' )
+		);
+	}
+
+	/**
 	 * @testdox A batch from an older run does nothing.
 	 */
 	public function test_batch_of_an_older_run_does_nothing(): void {
@@ -739,6 +777,20 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'query', $break_max_query );
 
+		// The real database log handler runs its own query while logging, which resets
+		// $wpdb->last_error. Stand in for it so the error has to be read before logging.
+		$logged = array();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willReturnCallback(
+			function ( $message ) use ( &$logged ) {
+				global $wpdb;
+				$wpdb->get_var( 'SELECT 1' );
+				$logged[] = $message;
+			}
+		);
+		$use_clearing_logger = fn() => $logger;
+		add_filter( 'woocommerce_logging_class', $use_clearing_logger, 20 );
+
 		$thrown   = null;
 		$suppress = $wpdb->suppress_errors( true );
 		try {
@@ -747,13 +799,16 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 			$thrown = $exception;
 		} finally {
 			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'woocommerce_logging_class', $use_clearing_logger, 20 );
 			remove_filter( 'query', $break_max_query );
 		}
 
 		$this->assertNotNull( $thrown, 'A failed highest-order-ID query should throw rather than start an empty run' );
 		// The Tools controller puts this message in front of the merchant, so it cannot be empty.
 		$this->assertStringContainsString( 'a_table_that_does_not_exist', $thrown->getMessage() );
-		$this->assertLogged( 'error', 'Highest order stats ID query failed', array( 'source' => 'wc-analytics-order-import' ) );
+		$this->assertCount( 1, $logged );
+		$this->assertStringContainsString( 'Highest order stats ID query failed', $logged[0] );
+		$this->assertStringContainsString( 'a_table_that_does_not_exist', $logged[0] );
 		$this->assertSame( '', Analytics::get_refund_double_count_state()['status'], 'No run should be recorded' );
 		$this->assertSame( array(), $this->get_events( 'analytics_refund_double_count_tool_run' ) );
 		$this->assertEmpty(
