@@ -281,4 +281,34 @@ describe( 'product block registration call sites', () => {
 			expect.objectContaining( { isAvailableOnPostEditor: false } )
 		);
 	} );
+
+	it( 'declares the deprecated Related Products block unavailable in the post editor and hidden from the inserter', () => {
+		// The editor components load the block editor and the Product Query
+		// variations, which log to the console and aren't part of registration.
+		jest.doMock(
+			'../../blocks/product-elements/related-products/edit',
+			() => () => null
+		);
+		jest.doMock(
+			'../../blocks/product-elements/related-products/save',
+			() => () => null
+		);
+
+		jest.isolateModules( () => {
+			jest.requireActual(
+				'../../blocks/product-elements/related-products'
+			);
+		} );
+
+		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
+			1
+		);
+		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce/related-products',
+				supports: expect.objectContaining( { inserter: false } ),
+			} ),
+			expect.objectContaining( { isAvailableOnPostEditor: false } )
+		);
+	} );
 } );
