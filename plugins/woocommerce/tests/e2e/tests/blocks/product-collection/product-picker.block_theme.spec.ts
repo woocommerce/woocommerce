@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { Page } from '@playwright/test';
 import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
@@ -19,19 +18,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 		await use( pageObject );
 	},
 } );
-
-const getProductReference = async ( page: Page ) =>
-	page.evaluate( () => {
-		const block = window.wp.data
-			.select( 'core/block-editor' )
-			.getBlocks()
-			.find(
-				( candidate: { name: string } ) =>
-					candidate.name === 'woocommerce/product-collection'
-			);
-
-		return block?.attributes.query?.productReference;
-	} );
 
 test.describe( 'Product Collection: Product Picker', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -74,7 +60,9 @@ test.describe( 'Product Collection: Product Picker', () => {
 		);
 		await expect( productPicker ).toBeHidden();
 
-		const selectedProductId = await getProductReference( page );
+		const selectedProductId = (
+			await pageObject.getProductCollectionQuery()
+		).productReference;
 		expect( selectedProductId ).toBe( albumId );
 
 		await pageObject.publishAndGoToFrontend();
@@ -112,7 +100,6 @@ test.describe( 'Product Collection: Product Picker', () => {
 		pageObject,
 		admin,
 		editor,
-		page,
 		requestUtils,
 	} ) => {
 		const matchingProducts = await requestUtils.rest<
@@ -141,25 +128,31 @@ test.describe( 'Product Collection: Product Picker', () => {
 			'Album'
 		);
 		await expect( productPicker ).toBeHidden();
-		const firstProductId = await getProductReference( page );
+		const firstProductId = ( await pageObject.getProductCollectionQuery() )
+			.productReference;
 		expect( firstProductId ).toBe( albumId );
 
 		await pageObject.changeCollectionUsingToolbar(
 			'myCustomCollectionMultipleContexts'
 		);
 		await expect( productPicker ).toBeVisible();
-		expect( await getProductReference( page ) ).toBeUndefined();
+		expect(
+			( await pageObject.getProductCollectionQuery() ).productReference
+		).toBeUndefined();
 
 		await pageObject.chooseProductInEditorProductPickerIfAvailable(
 			editor.canvas
 		);
 		await expect( productPicker ).toBeHidden();
-		const secondProductId = await getProductReference( page );
+		const secondProductId = ( await pageObject.getProductCollectionQuery() )
+			.productReference;
 		expect( secondProductId ).toBe( albumId );
 
 		await pageObject.changeCollectionUsingToolbar( 'featured' );
 		await expect( productPicker ).toBeHidden();
-		expect( await getProductReference( page ) ).toBeUndefined();
+		expect(
+			( await pageObject.getProductCollectionQuery() ).productReference
+		).toBeUndefined();
 		await pageObject.refreshLocators( 'editor' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Cap',

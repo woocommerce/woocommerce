@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { Page } from '@playwright/test';
 import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
@@ -19,19 +18,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 		await use( pageObject );
 	},
 } );
-
-const getProductCollectionQuery = async ( page: Page ) =>
-	page.evaluate( () => {
-		const block = window.wp.data
-			.select( 'core/block-editor' )
-			.getBlocks()
-			.find(
-				( candidate: { name: string } ) =>
-					candidate.name === 'woocommerce/product-collection'
-			);
-
-		return block?.attributes.query ?? {};
-	} );
 
 test.describe( 'Product Collection: Collection Pickers', () => {
 	test.describe( 'Hand-Picked Products', () => {
@@ -61,7 +47,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				.getByRole( 'checkbox', { name: 'Beanie (woo-beanie)' } )
 				.click();
 
-			const selectedQuery = await getProductCollectionQuery( page );
+			const selectedQuery = await pageObject.getProductCollectionQuery();
 			const selectedIds = selectedQuery.woocommerceHandPickedProducts;
 			expect( selectedIds ).toHaveLength( 2 );
 			expect(
@@ -89,7 +75,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				editor.canvas.locator( SELECTORS.productPicker )
 			).toBeHidden();
 			expect(
-				( await getProductCollectionQuery( page ) )
+				( await pageObject.getProductCollectionQuery() )
 					.woocommerceHandPickedProducts
 			).toEqual( selectedIds );
 
@@ -111,7 +97,6 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			pageObject,
 			admin,
 			editor,
-			page,
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollection();
@@ -129,7 +114,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				.click();
 			await expect( doneButton ).toBeEnabled();
 
-			const taxQuery = ( await getProductCollectionQuery( page ) )
+			const taxQuery = ( await pageObject.getProductCollectionQuery() )
 				.taxQuery;
 			expect( Object.keys( taxQuery ) ).toEqual( [ 'product_cat' ] );
 			expect( taxQuery.product_cat ).toHaveLength( 1 );
