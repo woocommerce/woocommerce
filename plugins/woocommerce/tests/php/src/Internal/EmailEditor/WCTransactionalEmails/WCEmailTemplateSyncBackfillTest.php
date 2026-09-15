@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
@@ -263,6 +264,58 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
+	 * @testdox A customized post keeps its content through the backfill, a later core template change, and the sweep and auto-apply that follow.
+	 */
+	public function test_customized_post_survives_backfill_then_core_update_then_sweep(): void {
+		$email_id      = 'wc_test_backfill_core_update_sweep';
+		$email         = $this->register_fixture_email( $email_id );
+		$merchant_body = "<!-- wp:paragraph -->\n<p>Merchant-authored customisations must survive every step.</p>\n<!-- /wp:paragraph -->";
+		$post_id       = $this->create_unstamped_post( $email_id, $merchant_body, false );
+
+		WCEmailTemplateSyncBackfill::run();
+
+		$this->assertSame( $merchant_body, (string) $this->require_post( $post_id )->post_content, 'The backfill must not touch merchant-edited content.' );
+
+		// Ship different canonical content for the same email, as a core update would. The
+		// fixture template keeps its @version header, so the email stays in the sync registry.
+		$canonical_before = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( $post_data, $email_type ) use ( $email_id ) {
+				if ( $email_id === $email_type ) {
+					$post_data['post_content'] .= "\n<!-- wp:paragraph -->\n<p>Core added this paragraph.</p>\n<!-- /wp:paragraph -->";
+				}
+				return $post_data;
+			},
+			10,
+			2
+		);
+		$this->assertNotSame(
+			$canonical_before,
+			WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ),
+			'The core update must change the canonical render, or the steps below prove nothing.'
+		);
+
+		WCEmailTemplateDivergenceDetector::run_sweep();
+
+		$this->assertSame( $merchant_body, (string) $this->require_post( $post_id )->post_content, 'The sweep must not touch merchant-edited content.' );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'After the core update the sweep must still classify the post as customized.'
+		);
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame( $merchant_body, (string) $this->require_post( $post_id )->post_content, 'The auto-applier must not overwrite a customized post.' );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'The auto-applier must leave a customized post flagged for review.'
 		);
 	}
 
