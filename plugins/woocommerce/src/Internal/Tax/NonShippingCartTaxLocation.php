@@ -78,6 +78,11 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
+		$billing_country = $customer->get_billing_country();
+		if ( empty( $billing_country ) ) {
+			return $taxable_address;
+		}
+
 		if ( ! is_cart() && ! is_checkout() && ! end( $this->store_api_cart_or_checkout_request_contexts ) ) {
 			return $taxable_address;
 		}
@@ -87,12 +92,13 @@ class NonShippingCartTaxLocation {
 		}
 
 		$cart = WC()->cart;
-		if ( ! $cart instanceof \WC_Cart || $cart->is_empty() || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
+		if ( ! $cart instanceof \WC_Cart || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
 			return $taxable_address;
 		}
 
-		$billing_country = $customer->get_billing_country();
-		if ( empty( $billing_country ) ) {
+		$cart_contents = $cart->get_cart();
+
+		if ( empty( $cart_contents ) ) {
 			return $taxable_address;
 		}
 
