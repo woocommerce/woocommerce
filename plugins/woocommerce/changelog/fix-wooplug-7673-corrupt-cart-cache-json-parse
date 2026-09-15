@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the Cart, Checkout and Mini-Cart blocks from failing to render when the browser's cached cart data is corrupt.

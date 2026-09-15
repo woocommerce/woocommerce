@@ -44,7 +44,16 @@ export const persistenceLayer = {
 			return null;
 		}
 
-		const parsed = JSON.parse( cached );
+		let parsed;
+		try {
+			parsed = JSON.parse( cached );
+		} catch {
+			// A corrupt cached value would otherwise throw and stop the cart,
+			// checkout and mini-cart blocks from rendering, since get() runs at
+			// store creation. Drop it and fall back to the API, same best-effort
+			// approach as set().
+			return null;
+		}
 
 		if ( ! parsed || typeof parsed !== 'object' ) {
 			return null;
