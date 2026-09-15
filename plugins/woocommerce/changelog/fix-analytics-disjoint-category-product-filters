@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Report nothing instead of everything in Analytics when the category and product filters have no product in common. An empty intersection was indistinguishable from an absent product filter, so both filters were dropped. Affects the products, products/stats, variations, variations/stats and orders/stats report endpoints.

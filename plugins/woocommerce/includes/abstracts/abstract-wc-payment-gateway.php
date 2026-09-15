@@ -566,10 +566,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			plugins_url( '/assets/js/frontend/tokenization-form' . ( Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min' ) . '.js', WC_PLUGIN_FILE ),
 			array( 'jquery' ),
 			WC()->version,
-			array(
-				'in_footer' => true,
-				'strategy'  => 'defer',
-			)
+			false
 		);
 
 		wp_localize_script(

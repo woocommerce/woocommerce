@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the classic-theme block style decision cache from a function-local static to a BlockTypesController instance property so it can be isolated in PHP tests.

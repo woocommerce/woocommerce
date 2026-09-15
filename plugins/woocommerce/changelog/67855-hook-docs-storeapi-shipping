@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Correct the Store API cart and checkout hook docblocks, and say where the local pickup tax filters are documented.

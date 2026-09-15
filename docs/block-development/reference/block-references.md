@@ -262,7 +262,7 @@ Display an input field customers can use to select the number of products to add
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
-- **Supports:** color (background, text), interactivity
+- **Supports:** color (background, text), interactivity, shadow
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
 
@@ -1278,7 +1278,7 @@ Display filter options as chips.
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
+- **Supports:** interactivity, spacing (padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button

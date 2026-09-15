@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add Playwright E2E coverage for the remaining Back in Stock Notifications signup and email branches (signups disabled, account creation on signup, requires-account login flow, logged-in email footer, frontend verify/unsubscribe notices, tampered and expired email links, invalid email/product/nonce rejections).

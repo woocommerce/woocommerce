@@ -47,6 +47,19 @@
 	},
 	"config": {
 		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"css/*.scss",
+					"js/admin/*.js",
+					"js/frontend/*.js",
+					"Gruntfile.js",
+					".stylelintrc"
+				],
+				"ignore": [
+					"css/select2.scss"
+				]
+			},
 			"tests": [
 				{
 					"name": "JavaScript",
