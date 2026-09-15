@@ -203,31 +203,47 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Parses the exported items inside a WXR envelope, the way the WordPress importer would.
+	 *
+	 * @param string $xml Exported items.
+	 * @return \DOMXPath
+	 */
+	private function parse_export( string $xml ): \DOMXPath {
+		$document = new \DOMDocument();
+		$loaded   = $document->loadXML(
+			'<rss xmlns:wp="http://wordpress.org/export/1.2/" xmlns:dc="http://purl.org/dc/elements/1.1/"'
+			. ' xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/">'
+			. '<channel>' . $xml . '</channel></rss>'
+		);
+		$this->assertTrue( $loaded, 'Exported items must be well-formed XML' );
+
+		$xpath = new \DOMXPath( $document );
+		$xpath->registerNamespace( 'wp', 'http://wordpress.org/export/1.2/' );
+
+		return $xpath;
+	}
+
+	/**
 	 * @testdox Should emit notes the WordPress importer can recreate as order notes on the imported order.
 	 */
 	public function test_exported_notes_round_trip_through_comment_insert(): void {
 		$order = $this->create_order();
-		$order->add_order_note( 'On its way', 1 );
+		$order->add_order_note( 'On its way, tracking ]]> included', 1 );
 
-		$xml = $this->export( 'shop_order' );
-		preg_match_all( '#<wp:comment>(.*?)</wp:comment>#s', $xml, $blocks );
-		$customer_blocks = array_filter(
-			$blocks[1],
-			function ( $block ) {
-				return false !== strpos( $block, 'is_customer_note' );
-			}
-		);
-		$this->assertCount( 1, $customer_blocks, 'Exactly one exported comment carries the customer note flag' );
-		preg_match( '#<wp:comment_content><!\[CDATA\[(.*?)\]\]></wp:comment_content>#', reset( $customer_blocks ), $content );
-		preg_match( '#<wp:comment_type><!\[CDATA\[(.*?)\]\]></wp:comment_type>#', reset( $customer_blocks ), $type );
+		$xpath          = $this->parse_export( $this->export( 'shop_order' ) );
+		$customer_notes = $xpath->query( '//wp:comment[wp:commentmeta/wp:meta_key = "is_customer_note"]' );
+		$this->assertSame( 1, $customer_notes->length, 'Exactly one exported comment carries the customer note flag' );
+		$exported_note   = $customer_notes->item( 0 );
+		$comment_content = $xpath->evaluate( 'string(wp:comment_content)', $exported_note );
+		$comment_type    = $xpath->evaluate( 'string(wp:comment_type)', $exported_note );
 
 		// The importer inserts the comment against the new post ID and then writes the comment meta.
 		$target     = $this->create_order();
 		$comment_id = wp_insert_comment(
 			array(
 				'comment_post_ID'  => $target->get_id(),
-				'comment_content'  => $content[1],
-				'comment_type'     => $type[1],
+				'comment_content'  => $comment_content,
+				'comment_type'     => $comment_type,
 				'comment_approved' => 1,
 			)
 		);
@@ -241,7 +257,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $notes );
-		$this->assertSame( 'On its way', $notes[0]->content );
+		$this->assertSame( 'On its way, tracking ]]> included', $notes[0]->content );
 		$this->assertTrue( $notes[0]->customer_note );
 	}
 
