@@ -95,7 +95,10 @@ describe( 'getMorePaymentOptionsUrl', () => {
 	const baseUrl =
 		'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
+	const englishLocale = { siteLocale: 'en_US', userLocale: 'en_US' };
+
 	beforeEach( () => {
+		window.wcSettings.locale = { ...englishLocale };
 		window.wcSettings.countries = {
 			BR: 'Brazil',
 			AS: 'American Samoa',
@@ -106,6 +109,7 @@ describe( 'getMorePaymentOptionsUrl', () => {
 	} );
 
 	afterEach( () => {
+		window.wcSettings.locale = { ...englishLocale };
 		window.wcSettings.countries = {};
 	} );
 
@@ -142,5 +146,15 @@ describe( 'getMorePaymentOptionsUrl', () => {
 
 	it( 'leaves the filter off for a country the list has no name for', () => {
 		expect( getMorePaymentOptionsUrl( 'XK' ) ).toBe( baseUrl );
+	} );
+
+	it( 'leaves the filter off when the admin is not in English', () => {
+		window.wcSettings.locale = {
+			siteLocale: 'pt_BR',
+			userLocale: 'pt_BR',
+		};
+		window.wcSettings.countries = { BR: 'Brasil' };
+
+		expect( getMorePaymentOptionsUrl( 'BR' ) ).toBe( baseUrl );
 	} );
 } );

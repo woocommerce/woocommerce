@@ -515,9 +515,10 @@ const marketplaceCountryNameOverrides: Record< string, string > = {
 /**
  * Build the WooCommerce.com marketplace link for the "More payment options" entry.
  *
- * The marketplace filters payment extensions by the English country name, so the filter only
- * applies while the admin runs in English. A name it doesn't know — a translated one included —
- * leaves the filter off, which is what the link did before.
+ * The marketplace matches the country against its own list of English names and turns whatever
+ * it receives into a search filter, so a name it doesn't know narrows the results rather than
+ * widening them. The country list the admin renders is translated, so the filter is only added
+ * for an English admin — everyone else gets the unfiltered page, exactly as before.
  *
  * @param businessCountryCode The selected business location, as an ISO 3166-1 alpha-2 country code.
  * @return The marketplace URL.
@@ -525,12 +526,16 @@ const marketplaceCountryNameOverrides: Record< string, string > = {
 export const getMorePaymentOptionsUrl = (
 	businessCountryCode: string | null
 ): string => {
-	const countryName = businessCountryCode
-		? marketplaceCountryNameOverrides[ businessCountryCode ] ??
-		  decodeEntities(
-				window.wcSettings?.countries?.[ businessCountryCode ] ?? ''
-		  )
-		: '';
+	const isEnglishAdmin =
+		window.wcSettings?.locale?.userLocale?.startsWith( 'en' ) ?? false;
+
+	const countryName =
+		isEnglishAdmin && businessCountryCode
+			? marketplaceCountryNameOverrides[ businessCountryCode ] ??
+			  decodeEntities(
+					window.wcSettings?.countries?.[ businessCountryCode ] ?? ''
+			  )
+			: '';
 
 	return addQueryArgs(
 		morePaymentOptionsBaseUrl,

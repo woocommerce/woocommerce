@@ -72,6 +72,10 @@ declare global {
 			currentUserId: number;
 			currentThemeIsFSETheme: boolean;
 			countries: Record< string, string >;
+			locale?: {
+				siteLocale?: string;
+				userLocale?: string;
+			};
 			siteTitle: string;
 			homeUrl: string;
 			admin: {
