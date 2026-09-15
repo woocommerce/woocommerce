@@ -86,6 +86,7 @@ class ProductCountCacheService {
 	/**
 	 * Flushes the product count cache.
 	 *
+	 * @internal
 	 * @since 11.2.0
 	 *
 	 * @return void
