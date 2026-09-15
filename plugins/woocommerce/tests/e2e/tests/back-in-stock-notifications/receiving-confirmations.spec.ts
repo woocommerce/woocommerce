@@ -7,6 +7,7 @@ import { customer } from '../../test-data/data';
 import {
 	BIS_EMAIL_FOOTER,
 	BIS_EMAIL_LINKS,
+	BIS_FEATURE_OPTION,
 	bisAdminListUrl,
 	bisEmailBody,
 	bisEmailSubject,
@@ -24,14 +25,16 @@ import {
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail, expectEmailContent } from '../../utils/email';
 import { clearFilters } from '../../utils/filters';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — receiving confirmations',
-	{ tag: [ tags.SERVICES ] },
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
 				doubleOptIn: true,
@@ -41,7 +44,11 @@ test.describe(
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
-			await resetBISOptions( request, baseURL! );
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
 		} );
 
 		test( 'double-opt-in signup dispatches verify email with UTM params', async ( {
