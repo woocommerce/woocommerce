@@ -51,10 +51,10 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			'taxonomy',
 			effectiveTaxonomy,
 			'description',
-			String( termId )
+			termId ? String( termId ) : undefined
 		);
 
-	const isPreviewMode = usePreviewMode();
+	const isPreviewMode = usePreviewMode() && ! termId;
 
 	let displayRawDescription = '';
 	if ( isPreviewMode ) {
@@ -66,6 +66,8 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayFullDescription = '';
 	if ( isPreviewMode ) {
 		displayFullDescription = previewCategories[ 0 ].description;
+	} else if ( typeof fullDescription === 'string' ) {
+		displayFullDescription = fullDescription;
 	} else if (
 		typeof fullDescription === 'object' &&
 		fullDescription !== null &&
@@ -83,7 +85,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
 	);
 
-	if ( termId ) {
+	if ( termId || isPreviewMode ) {
 		descriptionElement = userCanEdit ? (
 			<PlainText
 				tagName="p"

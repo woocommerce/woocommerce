@@ -242,7 +242,10 @@ export const withFeaturedItem =
 			return (
 				<BlockContextProvider
 					value={ {
-						termId: category.id,
+						termId:
+							attributes.categoryId === 'preview'
+								? undefined
+								: category.id,
 						termTaxonomy: 'product_cat',
 						taxonomy: 'product_cat',
 					} }

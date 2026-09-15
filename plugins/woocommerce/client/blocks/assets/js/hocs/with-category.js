@@ -19,9 +19,10 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 	return class WrappedComponent extends Component {
 		constructor() {
 			super( ...arguments );
+			const categoryId = this.getCategoryId();
 			this.state = {
 				error: null,
-				loading: false,
+				loading: !! categoryId && categoryId !== 'preview',
 				category:
 					this.props.attributes.categoryId === 'preview'
 						? this.props.attributes.previewCategory

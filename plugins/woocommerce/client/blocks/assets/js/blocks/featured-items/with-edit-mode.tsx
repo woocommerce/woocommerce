@@ -68,6 +68,7 @@ export const withEditMode =
 			setAttributes,
 			triggerUrlUpdate = () => void null,
 			error,
+			isLoading: isItemLoading,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
@@ -101,10 +102,15 @@ export const withEditMode =
 				? attributes?.productId
 				: attributes?.categoryId || effectiveCategoryId;
 
-		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
+		const {
+			status,
+			isDeleted,
+			isLoading: isStatusLoading,
+		} = useFeaturedItemStatus( {
 			itemId,
 			itemType: name,
 		} );
+		const isLoading = isItemLoading || isStatusLoading;
 
 		const isPreviewMode = usePreviewMode();
 

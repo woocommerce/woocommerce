@@ -6,6 +6,8 @@ import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
+import { escapeHTML } from '@wordpress/escape-html';
 import { WP_REST_API_Category } from 'wp-types';
 import {
 	AlignmentControl,
@@ -83,7 +85,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, effectiveTaxonomy ]
 	);
 
-	const isPreviewMode = usePreviewMode();
+	const isPreviewMode = usePreviewMode() && ! termId;
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
 		effectiveTaxonomy,
@@ -93,14 +95,16 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	let displayRawTitle = '';
 	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].description;
+		displayRawTitle = previewCategories[ 0 ].name;
 	} else if ( typeof rawTitle === 'string' ) {
 		displayRawTitle = rawTitle;
 	}
 
 	let displayFullTitle = '';
 	if ( isPreviewMode ) {
-		displayFullTitle = previewCategories[ 0 ].description;
+		displayFullTitle = escapeHTML( previewCategories[ 0 ].name );
+	} else if ( typeof fullTitle === 'string' ) {
+		displayFullTitle = escapeHTML( decodeEntities( fullTitle ) );
 	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
@@ -138,7 +142,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		__( 'Category title', 'woocommerce' )
 	) as JSX.Element;
 
-	if ( termId ) {
+	if ( termId || isPreviewMode ) {
 		titleElement = userCanEdit ? (
 			<PlainText
 				tagName={ TagName }
