@@ -3,6 +3,7 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useId as mockUseId } from '@wordpress/element';
 import type { ReactNode } from 'react';
 
 /**
@@ -51,7 +52,7 @@ jest.mock( '@wordpress/components', () => ( {
 		onChange: ( value: string ) => void;
 		value: string;
 	} ) => {
-		const id = `select-${ label.toLowerCase().replace( /\W+/g, '-' ) }`;
+		const id = mockUseId();
 		return (
 			<>
 				<label htmlFor={ id }>{ label }</label>
@@ -79,9 +80,7 @@ jest.mock( '@wordpress/components', () => ( {
 		value: string;
 	} ) => {
 		const accessibleLabel = label || placeholder || 'Text field';
-		const id = `text-${ accessibleLabel
-			.toLowerCase()
-			.replace( /\W+/g, '-' ) }`;
+		const id = mockUseId();
 		return (
 			<>
 				<label htmlFor={ id }>{ accessibleLabel }</label>

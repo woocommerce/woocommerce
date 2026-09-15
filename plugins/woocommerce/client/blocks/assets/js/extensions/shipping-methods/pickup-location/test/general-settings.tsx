@@ -4,6 +4,7 @@
 import type { ReactNode } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useId as mockUseId } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,7 +30,7 @@ jest.mock( '@wordpress/components', () => ( {
 		label: string;
 		onChange: ( checked: boolean ) => void;
 	} ) => {
-		const id = `checkbox-${ label.toLowerCase().replace( /\W+/g, '-' ) }`;
+		const id = mockUseId();
 		return (
 			<>
 				<label htmlFor={ id }>{ label }</label>
@@ -64,7 +65,7 @@ jest.mock( '@wordpress/components', () => ( {
 		options: { label: string; value: string }[];
 		value: string;
 	} ) => {
-		const id = `select-${ label.toLowerCase().replace( /\W+/g, '-' ) }`;
+		const id = mockUseId();
 		return (
 			<>
 				<label htmlFor={ id }>{ label }</label>
@@ -95,7 +96,7 @@ jest.mock( '@wordpress/components', () => ( {
 		type?: string;
 		value: string;
 	} ) => {
-		const id = `text-${ label.toLowerCase().replace( /\W+/g, '-' ) }`;
+		const id = mockUseId();
 		return (
 			<>
 				<label htmlFor={ id }>{ label }</label>
