@@ -44,7 +44,7 @@ class Filterer {
 	 * @return bool
 	 */
 	public function filtering_via_lookup_table_is_active() {
-		return $this->data_store->usage_is_enabled();
+		return 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
 	}
 
 	/**

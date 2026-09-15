@@ -213,46 +213,12 @@ class LookupDataStore {
 				}
 				break;
 			case self::ACTION_UPDATE_STOCK:
-				if ( 0 === $this->update_stock_status_for( $product ) ) {
-					return;
-				}
+				$this->update_stock_status_for( $product );
 				break;
 			case self::ACTION_DELETE:
 				$this->delete_data_for( $product_id );
 				break;
 		}
-
-		$this->announce_table_updated( $product_id, $action );
-	}
-
-	/**
-	 * Announce that the lookup table has been updated, so the data derived from it is invalidated.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param int $product_id The product or variation the data was updated for, or 0 for the whole table.
-	 * @param int $action The update that was performed, one of the ACTION_ constants.
-	 *
-	 * @return void
-	 */
-	public function announce_table_updated( int $product_id, int $action ): void {
-		/**
-		 * Fires after the product attributes lookup table has been updated.
-		 *
-		 * Data derived from the lookup table (such as attribute filter counts) should be invalidated on this
-		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
-		 * in a scheduled action.
-		 *
-		 * It also fires after the whole table is regenerated or cleaned up, with a product id of 0. A stock
-		 * update that leaves every row unchanged is not announced; a regeneration that rewrites identical rows
-		 * still is, so listeners must not assume a row changed.
-		 *
-		 * @since 11.2.0
-		 *
-		 * @param int $product_id The product or variation id the data was updated for, or 0 when the whole table was regenerated or cleaned up.
-		 * @param int $action The update that was performed, one of the LookupDataStore::ACTION_ constants.
-		 */
-		do_action( 'woocommerce_product_attributes_lookup_updated', $product_id, $action );
 	}
 
 	/**
@@ -308,14 +274,13 @@ class LookupDataStore {
 	 * Update the stock status of the lookup table entries for a given product.
 	 *
 	 * @param \WC_Product $product The product to update the entries for.
-	 * @return int The number of rows whose in_stock flag changed.
 	 */
-	private function update_stock_status_for( \WC_Product $product ): int {
+	private function update_stock_status_for( \WC_Product $product ) {
 		global $wpdb;
 
 		$in_stock = $product->is_in_stock();
 
-		return (int) $wpdb->query(
+		$wpdb->query(
 			$wpdb->prepare(
 				'UPDATE %i SET in_stock = %d WHERE product_id = %d',
 				$this->lookup_table_name,
@@ -876,19 +841,6 @@ class LookupDataStore {
 		}
 
 		return $settings;
-	}
-
-	/**
-	 * Whether reading the lookup table is enabled (the "Enable table usage" tool, option 'woocommerce_attribute_lookup_enabled').
-	 *
-	 * It's off while a regeneration runs, after an aborted regeneration is cleaned up, and when an admin disabled it.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @return bool
-	 */
-	public function usage_is_enabled(): bool {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
 	}
 
 	/**
