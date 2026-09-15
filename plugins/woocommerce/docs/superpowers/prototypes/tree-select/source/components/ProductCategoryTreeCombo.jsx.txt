@@ -1,0 +1,373 @@
+import { useEffect, useRef, useState } from 'react';
+import { Icon, chevronRight } from '@wordpress/icons';
+import {
+  PRODUCT_CATEGORY_TREE,
+  computeProductCategoryTags,
+  findProductCategoryById,
+  findProductCategoryMatches,
+  findProductCategoryPath,
+  formatProductCategoryPath,
+  getProductCategoryLeaves,
+  getProductCategoryNodeAtPath,
+  getProductCategorySelectionState,
+} from '../data/productCategoryTree.js';
+
+export default function ProductCategoryTreeCombo({
+  value,
+  onChange,
+  label = 'Assign categories',
+  defaultOpen = false,
+  defaultSearchQuery = '',
+  showCounts = true,
+  showPathChips = false,
+  pathFirstSearchResults = false,
+  drillParentOnRowClick = true,
+  defaultActivePathTagId = null,
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [currentPath, setCurrentPath] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(defaultSearchQuery);
+  const [activePathTagId, setActivePathTagId] = useState(defaultActivePathTagId);
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
+  const selected = value instanceof Set ? value : new Set(value || []);
+  const tags = computeProductCategoryTags(selected);
+  const activePathTag = tags.find((tag) => tag.id === activePathTagId && tag.path);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setSearchQuery('');
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  function openPopover() {
+    setIsOpen(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }
+
+  function toggleNode(node) {
+    const leaves = getProductCategoryLeaves(node);
+    const state = getProductCategorySelectionState(node, selected);
+    const next = new Set(selected);
+
+    leaves.forEach((leaf) => {
+      if (state === 'checked') {
+        next.delete(leaf.id);
+      } else {
+        next.add(leaf.id);
+      }
+    });
+
+    onChange(next);
+  }
+
+  function removeTag(tag) {
+    const node = findProductCategoryById(PRODUCT_CATEGORY_TREE, tag.id);
+    if (!node) return;
+
+    const next = new Set(selected);
+    getProductCategoryLeaves(node).forEach((leaf) => next.delete(leaf.id));
+    if (activePathTagId === tag.id) {
+      setActivePathTagId(null);
+    }
+    onChange(next);
+  }
+
+  function togglePathHint(tag) {
+    if (!tag.path) return;
+    setActivePathTagId(activePathTagId === tag.id ? null : tag.id);
+  }
+
+  function selectVisible(shouldSelect) {
+    const visibleNodes = searchQuery
+      ? findProductCategoryMatches(PRODUCT_CATEGORY_TREE, searchQuery).map((match) => match.node)
+      : getProductCategoryNodeAtPath(currentPath)?.children || [];
+    const next = new Set(selected);
+
+    visibleNodes
+      .flatMap((node) => getProductCategoryLeaves(node))
+      .forEach((leaf) => {
+        if (shouldSelect) {
+          next.add(leaf.id);
+        } else {
+          next.delete(leaf.id);
+        }
+      });
+
+    onChange(next);
+  }
+
+  function renderBreadcrumb() {
+    if (searchQuery) {
+      return (
+        <div className="tree-breadcrumb product-tree-breadcrumb">
+          <span className="crumb current">
+            {pathFirstSearchResults
+              ? `Categories matching "${searchQuery}"`
+              : 'Search results'}
+          </span>
+        </div>
+      );
+    }
+
+    const parts = [{ label: 'All categories', depth: 0 }];
+    let node = PRODUCT_CATEGORY_TREE;
+    currentPath.forEach((id, index) => {
+      node = (node.children || []).find((child) => child.id === id);
+      if (node) {
+        parts.push({ label: node.label, depth: index + 1 });
+      }
+    });
+
+    return (
+      <div className="tree-breadcrumb product-tree-breadcrumb">
+        {parts.map((part, index) => (
+          <span className="product-tree-crumb-wrap" key={`${part.label}-${part.depth}`}>
+            {index > 0 && <span className="sep">&gt;</span>}
+            {index < parts.length - 1 ? (
+              <button
+                type="button"
+                className="crumb product-tree-crumb-button"
+                onClick={() => {
+                  setCurrentPath(currentPath.slice(0, part.depth));
+                  setSearchQuery('');
+                }}
+              >
+                {part.label}
+              </button>
+            ) : (
+              <span className="crumb current">{part.label}</span>
+            )}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  function renderToolbar(visibleNodes) {
+    const visibleLeaves = visibleNodes.flatMap((node) => getProductCategoryLeaves(node));
+    const selectedCount = visibleLeaves.filter((leaf) => selected.has(leaf.id)).length;
+    const selectLabel = searchQuery ? 'Select matches' : 'Select all';
+    const clearLabel = searchQuery ? 'Clear matches' : 'Deselect all';
+    const labelText = searchQuery
+      ? `${visibleNodes.length} matching categories`
+      : `${selectedCount} of ${visibleLeaves.length} selected`;
+
+    return (
+      <div className="tree-level-toolbar product-tree-toolbar">
+        <button
+          type="button"
+          onClick={() => selectVisible(true)}
+          disabled={visibleLeaves.length > 0 && selectedCount === visibleLeaves.length}
+        >
+          {selectLabel}
+        </button>
+        <button
+          type="button"
+          onClick={() => selectVisible(false)}
+          disabled={selectedCount === 0}
+        >
+          {clearLabel}
+        </button>
+        <span className="level-count">{labelText}</span>
+      </div>
+    );
+  }
+
+  function renderRow(node, pathLabels = []) {
+    const hasChildren = node.children && node.children.length > 0;
+    const state = getProductCategorySelectionState(node, selected);
+    const leaves = getProductCategoryLeaves(node);
+    const checkedCount = leaves.filter((leaf) => selected.has(leaf.id)).length;
+    const fullPathLabel = [...pathLabels, node.label].join(' > ');
+    const rowName = node.label;
+    const ariaLabelName = searchQuery ? fullPathLabel : rowName;
+    const rawPathLabel = searchQuery
+      ? fullPathLabel
+      : showCounts ? `${checkedCount}/${leaves.length} selected` : formatProductCategoryPath(node.id);
+    const pathLabel = rawPathLabel === rowName ? '' : rawPathLabel;
+    const shouldDrillOnRowClick = drillParentOnRowClick && hasChildren;
+
+    function drillIntoNode() {
+      setCurrentPath(findProductCategoryPath(PRODUCT_CATEGORY_TREE, node.id, []) || [...currentPath, node.id]);
+      setSearchQuery('');
+    }
+
+    return (
+      <div
+        key={node.id}
+        className={`tree-item product-tree-item${shouldDrillOnRowClick ? ' opens-children' : ''}${state === 'checked' ? ' checked' : state === 'indeterminate' ? ' indeterminate' : ''}`}
+      >
+        <button
+          type="button"
+          className="row-toggle product-tree-toggle product-tree-checkbox-toggle"
+          aria-pressed={state === 'checked'}
+          aria-label={`${state === 'checked' ? 'Clear' : 'Select'} ${ariaLabelName}`}
+          onClick={() => toggleNode(node)}
+        >
+          <span className="ck" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          className="product-tree-row-content"
+          aria-label={shouldDrillOnRowClick ? `Open ${node.label}` : `${state === 'checked' ? 'Clear' : 'Select'} ${ariaLabelName}`}
+          onClick={() => {
+            if (shouldDrillOnRowClick) {
+              drillIntoNode();
+              return;
+            }
+            toggleNode(node);
+          }}
+        >
+          <span className="label product-tree-label">
+            <span className="label-name">{rowName}</span>
+            {pathLabel && <span className="path-prefix product-tree-path">{pathLabel}</span>}
+          </span>
+        </button>
+        {hasChildren && (
+          <button
+            type="button"
+            className="drill product-tree-drill"
+            aria-label={`Open ${node.label}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              drillIntoNode();
+            }}
+          >
+            <Icon icon={chevronRight} size={24} />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const currentNode = getProductCategoryNodeAtPath(currentPath);
+  const visibleMatches = searchQuery
+    ? findProductCategoryMatches(PRODUCT_CATEGORY_TREE, searchQuery).slice(0, 40)
+    : [];
+  const visibleNodes = searchQuery
+    ? visibleMatches.map((match) => match.node)
+    : currentNode?.children || [];
+
+  return (
+    <div className="tree-combo product-tree-combo" ref={containerRef}>
+      <label className="tree-combo-label" onClick={openPopover}>
+        {label}
+      </label>
+
+      <div className="product-tree-combo-control">
+        {tags.length > 0 && (
+          <div className="tree-combo-chips">
+            <div className="tree-combo-chip-row">
+              {tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className={`dest-tag product-category-tag${showPathChips && tag.path ? ' has-path' : ''}`}
+                  data-tooltip={!showPathChips && tag.path ? tag.path : undefined}
+                  title={tag.path || tag.label}
+                >
+                  {tag.path ? (
+                    <button
+                      type="button"
+                      className="product-category-tag-main product-category-tag-label"
+                      aria-label={`Show path for ${tag.label}: ${tag.path}`}
+                      aria-pressed={activePathTagId === tag.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        togglePathHint(tag);
+                      }}
+                    >
+                      {tag.type === 'group' && tag.count && showCounts ? `${tag.label} (${tag.count})` : tag.label}
+                    </button>
+                  ) : (
+                    <span className="product-category-tag-main">
+                      {tag.type === 'group' && tag.count && showCounts ? `${tag.label} (${tag.count})` : tag.label}
+                    </span>
+                  )}
+                  {showPathChips && tag.path && (
+                    <span className="product-category-tag-path">
+                      {tag.path.split(' > ').slice(0, -1).join(' > ')}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="tag-remove"
+                    aria-label={`Remove ${tag.path || tag.label}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      removeTag(tag);
+                    }}
+                  >
+                    x
+                  </button>
+                </span>
+              ))}
+            </div>
+            {activePathTag && (
+              <div className="product-category-chip-hint">
+                {activePathTag.path}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="tree-combo-search-row" onClick={() => { if (!isOpen) openPopover(); }}>
+          <span className="tree-combo-search-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </span>
+          <input
+            ref={inputRef}
+            className="tree-combo-search"
+            placeholder={tags.length === 0 ? 'Search categories or browse' : 'Add more categories'}
+            value={searchQuery}
+            aria-expanded={isOpen}
+            aria-label="Search product categories"
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              if (!isOpen) setIsOpen(true);
+            }}
+            onFocus={() => { if (!isOpen) openPopover(); }}
+          />
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="tree-popover product-tree-popover">
+          {renderBreadcrumb()}
+          {renderToolbar(visibleNodes)}
+          <div className="tree-list product-tree-list" role="listbox" aria-multiselectable="true" aria-label="Product category options">
+            {visibleNodes.length > 0 ? (
+              searchQuery
+                ? visibleMatches.map((match) => renderRow(match.node, match.pathLabels))
+                : visibleNodes.map((node) => renderRow(node))
+            ) : (
+              <div className="tree-empty">No categories found.</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
