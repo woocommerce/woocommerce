@@ -35,7 +35,14 @@ export interface SavedPaymentMethod {
 	expires: string;
 	is_default: boolean;
 	tokenId: number;
+	/**
+	 * The token's own display name (`WC_Payment_Token::get_display_name()`). Present since WooCommerce 11.3.0.
+	 */
 	display_name?: string;
+	/**
+	 * @deprecated My Account management actions are no longer included in Checkout data since WooCommerce 11.3.0. Only present in payloads from older WooCommerce versions.
+	 */
+	actions?: ObjectType;
 }
 export type SavedPaymentMethods =
 	| Record< string, SavedPaymentMethod[] >

@@ -102,7 +102,12 @@ describe( 'setDefaultPaymentMethod', () => {
 									},
 									expires: '04/44',
 									is_default: true,
-									display_name: 'Saved card ending in 4242',
+									actions: {
+										delete: {
+											url: 'https://example.com/delete',
+											name: 'Delete',
+										},
+									},
 									tokenId: 2,
 								},
 							],

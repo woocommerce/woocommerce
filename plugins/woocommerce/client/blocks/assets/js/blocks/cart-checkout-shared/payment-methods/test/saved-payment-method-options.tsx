@@ -39,9 +39,11 @@ mockedUseSelect.mockImplementation(
 								{
 									tokenId: 1,
 									expires: '1/2099',
-									display_name: 'Primary Visa ending in 1234',
+									// A wallet-enriched card, as WooPayments produces: the extension label is richer than the token's own name.
+									display_name:
+										'Visa ending in 1234 (expires 1/2099)',
 									method: {
-										brand: 'Visa',
+										brand: 'Google Pay Visa',
 										gateway:
 											'can-pay-true-test-payment-method',
 										last4: '1234',
@@ -70,20 +72,23 @@ mockedUseSelect.mockImplementation(
 								{
 									tokenId: 4,
 									expires: '1/2099',
+									display_name:
+										'Visa ending in 1001 (expires 1/2099)',
 									method: {
-										brand: 'Cartes Bancaires',
+										brand: 'Visa',
+										display_brand: 'Cartes Bancaires',
 										gateway:
 											'can-pay-true-test-payment-method',
 										last4: '1001',
 									},
 								},
 							],
-							wallet: [
+							bank_account: [
 								{
 									tokenId: 5,
-									expires: '',
+									expires: 'N/A',
 									display_name:
-										'Evergreen wallet ending in 2468',
+										'Checkout test account ending in 9876',
 									method: {
 										brand: '',
 										gateway:
@@ -93,7 +98,19 @@ mockedUseSelect.mockImplementation(
 								},
 								{
 									tokenId: 6,
-									expires: '',
+									expires: 'N/A',
+									display_name:
+										'SEPA IBAN ending in 3000 (DE)',
+									method: {
+										brand: 'SEPA IBAN',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '3000',
+									},
+								},
+								{
+									tokenId: 7,
+									expires: 'N/A',
 									display_name: '   ',
 									method: {
 										brand: '',
@@ -103,8 +120,8 @@ mockedUseSelect.mockImplementation(
 									},
 								},
 								{
-									tokenId: 7,
-									expires: '',
+									tokenId: 8,
+									expires: 'N/A',
 									display_name: 2468 as unknown as string,
 									method: {
 										brand: '',
@@ -143,16 +160,14 @@ describe( 'SavedPaymentMethodOptions', () => {
 		} );
 		render( <SavedPaymentMethodOptions /> );
 
-		// First saved token for can-pay-true-test-payment-method.
+		// First saved token for can-pay-true-test-payment-method: the wallet-enriched card label wins over display_name.
 		expect(
 			screen.getByRole( 'radio', {
-				name: 'Primary Visa ending in 1234',
+				name: 'Google Pay Visa ending in 1234 (expires 1/2099)',
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'radio', {
-				name: 'Visa ending in 1234 (expires 1/2099)',
-			} )
+			screen.queryByText( 'Visa ending in 1234 (expires 1/2099)' )
 		).not.toBeInTheDocument();
 
 		// Second saved token for can-pay-true-test-payment-method.
@@ -165,24 +180,36 @@ describe( 'SavedPaymentMethodOptions', () => {
 			screen.queryByText( 'Visa ending in 3456 (expires 1/2099)' )
 		).not.toBeInTheDocument();
 
-		// Fourth saved token for can-pay-true-test-payment-method - co-branded credit card.
-		expect(
-			screen.getByText(
-				'Cartes Bancaires ending in 1001 (expires 1/2099)'
-			)
-		).toBeInTheDocument();
-
-		// Generic saved tokens use a valid native name and otherwise fall back.
+		// Fourth saved token for can-pay-true-test-payment-method - co-branded credit card: display_brand wins over display_name.
 		expect(
 			screen.getByRole( 'radio', {
-				name: 'Evergreen wallet ending in 2468',
+				name: 'Cartes Bancaires ending in 1001 (expires 1/2099)',
 			} )
 		).toBeInTheDocument();
+
+		// Custom token type without brand/last4: the token's own display name labels the radio.
 		expect(
-			screen.getAllByRole( 'radio', {
-				name: 'Saved token for can-pay-true-test-payment-method',
+			screen.getByRole( 'radio', {
+				name: 'Checkout test account ending in 9876',
 			} )
-		).toHaveLength( 2 );
+		).toBeInTheDocument();
+
+		// Custom token type with brand and last4: the extension-provided label wins over display_name.
+		expect(
+			screen.getByRole( 'radio', {
+				name: 'SEPA IBAN ending in 3000',
+			} )
+		).toBeInTheDocument();
+
+		// Blank and non-string display names fall back to the generic label.
+		const fallbackRadios = screen.getAllByRole( 'radio', {
+			name: 'Saved token for can-pay-true-test-payment-method',
+		} );
+		expect(
+			fallbackRadios.map(
+				( radio ) => ( radio as HTMLInputElement ).value
+			)
+		).toEqual( [ '7', '8' ] );
 	} );
 	it( "does not show saved methods when the method's canPay function returns false", () => {
 		registerPaymentMethod( {

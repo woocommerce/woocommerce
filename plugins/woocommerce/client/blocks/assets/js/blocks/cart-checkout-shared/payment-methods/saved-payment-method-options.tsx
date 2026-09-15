@@ -21,7 +21,10 @@ import { isNull } from '@woocommerce/types';
  * Internal dependencies
  */
 import { getCanMakePaymentArg } from '@woocommerce/block-data/payment/utils/check-payment-methods';
-import { CustomerPaymentMethodConfiguration } from '@woocommerce/block-data/payment/types';
+import type {
+	CustomerPaymentMethodConfiguration,
+	SavedPaymentMethod,
+} from '@woocommerce/block-data/payment/types';
 
 /**
  * Returns the option object for a cc or echeck saved payment method token.
@@ -47,9 +50,8 @@ const getCcOrEcheckLabel = ( {
  */
 const getDefaultLabel = ( {
 	method,
-}: {
-	method: CustomerPaymentMethodConfiguration;
-} ): string => {
+	display_name: displayName,
+}: Pick< SavedPaymentMethod, 'method' | 'display_name' > ): string => {
 	/* For saved payment methods with brand & last 4 */
 	if ( method.brand && method.last4 ) {
 		return sprintf(
@@ -58,6 +60,11 @@ const getDefaultLabel = ( {
 			method.brand,
 			method.last4
 		);
+	}
+
+	/* For saved payment methods that provide their own display name. The value comes from public settings data, so only trust an actual string. */
+	if ( typeof displayName === 'string' && displayName.trim() !== '' ) {
+		return displayName.trim();
 	}
 
 	/* For saved payment methods without brand & last 4 */
@@ -116,17 +123,11 @@ const SavedPaymentMethodOptions = () => {
 				}
 				const isCC = type === 'cc' || type === 'echeck';
 				const paymentMethodSlug = paymentMethod.method.gateway;
-				const displayName =
-					typeof paymentMethod.display_name === 'string'
-						? paymentMethod.display_name.trim()
-						: '';
 				return {
 					name: `wc-saved-payment-method-token-${ paymentMethodSlug }`,
-					label:
-						displayName ||
-						( isCC
-							? getCcOrEcheckLabel( paymentMethod )
-							: getDefaultLabel( paymentMethod ) ),
+					label: isCC
+						? getCcOrEcheckLabel( paymentMethod )
+						: getDefaultLabel( paymentMethod ),
 					value: paymentMethod.tokenId.toString(),
 					onChange: ( token: string ) => {
 						const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
