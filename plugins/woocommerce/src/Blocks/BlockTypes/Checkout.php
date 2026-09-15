@@ -592,17 +592,51 @@ class Checkout extends AbstractBlock {
 
 	/**
 	 * Get saved customer payment methods for use in checkout.
+	 *
+	 * Each saved method carries the token's own display name so Checkout can label custom token types.
+	 * My Account management actions (URLs and nonces) are left in place while `woocommerce_payment_methods_list_item`
+	 * runs, so extension callbacks still see the complete item, and are removed only from the data Checkout receives.
 	 */
 	protected function hydrate_customer_payment_methods() {
-		$payment_methods = PaymentUtils::get_saved_payment_methods();
+		if ( $this->asset_data_registry->exists( 'customerPaymentMethods' ) ) {
+			return;
+		}
 
-		if ( ! $payment_methods || $this->asset_data_registry->exists( 'customerPaymentMethods' ) ) {
+		$add_display_name = static function ( $list_item, $token ) {
+			if ( is_array( $list_item ) && $token instanceof \WC_Payment_Token ) {
+				$display_name = $token->get_display_name();
+				if ( is_string( $display_name ) ) {
+					$list_item['display_name'] = $display_name;
+				}
+			}
+			return $list_item;
+		};
+
+		add_filter( 'woocommerce_payment_methods_list_item', $add_display_name, 10, 2 );
+		try {
+			$payment_methods = PaymentUtils::get_saved_payment_methods();
+		} finally {
+			remove_filter( 'woocommerce_payment_methods_list_item', $add_display_name, 10 );
+		}
+
+		if ( ! $payment_methods ) {
 			return;
 		}
 
 		$this->asset_data_registry->add(
 			'customerPaymentMethods',
-			is_array( $payment_methods ) ? $payment_methods['enabled'] : null
+			array_map(
+				static function ( $saved_methods ) {
+					return array_map(
+						static function ( $saved_method ) {
+							unset( $saved_method['actions'] );
+							return $saved_method;
+						},
+						$saved_methods
+					);
+				},
+				$payment_methods['enabled']
+			)
 		);
 	}
 

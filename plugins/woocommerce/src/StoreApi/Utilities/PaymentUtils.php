@@ -31,23 +31,6 @@ class PaymentUtils {
 	}
 
 	/**
-	 * Prepare a saved payment method item for Checkout hydration.
-	 *
-	 * @internal
-	 * @since 11.1.0
-	 *
-	 * @param array             $list_item The saved payment method list item.
-	 * @param \WC_Payment_Token $token     The saved payment token.
-	 * @return array The item with Checkout token fields.
-	 */
-	public static function prepare_payment_method_for_checkout( $list_item, $token ) {
-		$list_item                 = self::include_token_id_with_payment_methods( $list_item, $token );
-		$list_item['display_name'] = $token->get_display_name();
-
-		return $list_item;
-	}
-
-	/**
 	 * Get enabled payment gateways.
 	 *
 	 * @return array
@@ -74,12 +57,11 @@ class PaymentUtils {
 
 		$enabled_payment_gateways = self::get_enabled_payment_gateways();
 
-		add_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'prepare_payment_method_for_checkout' ], 10, 2 );
-
+		add_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'include_token_id_with_payment_methods' ], 10, 2 );
 		try {
 			$saved_payment_methods = wc_get_customer_saved_methods_list( get_current_user_id() );
 		} finally {
-			remove_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'prepare_payment_method_for_checkout' ], 10 );
+			remove_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'include_token_id_with_payment_methods' ], 10 );
 		}
 
 		$payment_methods = [
@@ -89,13 +71,6 @@ class PaymentUtils {
 
 		// Filter out payment methods that are not enabled.
 		foreach ( $saved_payment_methods as $payment_method_group => $saved_payment_methods ) {
-			$saved_payment_methods                               = array_map(
-				static function ( $saved_payment_method ) {
-					unset( $saved_payment_method['actions'] );
-					return $saved_payment_method;
-				},
-				$saved_payment_methods
-			);
 			$payment_methods['enabled'][ $payment_method_group ] = array_values(
 				array_filter(
 					$saved_payment_methods,
