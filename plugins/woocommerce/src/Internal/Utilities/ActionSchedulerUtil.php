@@ -17,7 +17,8 @@ class ActionSchedulerUtil {
 	 * which on such a copy may report only pending actions, not in-progress ones - an accepted trade.
 	 *
 	 * Reports false when Action Scheduler is not loaded at all, indistinguishable from "nothing is
-	 * scheduled". A caller that treats a negative answer as licence to discard state should check
+	 * scheduled", and raises a doing-it-wrong notice so the condition is visible under debugging.
+	 * A caller that treats a negative answer as licence to discard state should check
 	 * {@see self::can_check_scheduled_actions()} first.
 	 *
 	 * @since 11.2.0
@@ -38,6 +39,12 @@ class ActionSchedulerUtil {
 				return (bool) $function( $hook, $args, $group );
 			}
 		}
+
+		wc_doing_it_wrong(
+			__METHOD__,
+			'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.',
+			'11.2.0'
+		);
 
 		return false;
 	}
