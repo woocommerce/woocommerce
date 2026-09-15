@@ -5,10 +5,9 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
-use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 
 /**
- * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
+ * Registers patterns under the `./patterns/` directory and updates their content.
  * Each pattern from core is defined as a PHP file and defines its metadata using plugin-style headers.
  * The minimum required definition is:
  *
@@ -33,8 +32,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
  * @internal
  */
 class BlockPatterns {
-	const CATEGORIES_PREFIXES = [ '_woo_', '_dotcom_imported_' ];
-
 	/**
 	 * Path to the patterns' directory.
 	 *
@@ -50,30 +47,19 @@ class BlockPatterns {
 	private PatternRegistry $pattern_registry;
 
 	/**
-	 * PTKPatternsStore instance.
-	 *
-	 * @var PTKPatternsStore $ptk_patterns_store
-	 */
-	private PTKPatternsStore $ptk_patterns_store;
-
-	/**
 	 * Constructor for class
 	 *
-	 * @param Package          $package An instance of Package.
-	 * @param PatternRegistry  $pattern_registry An instance of PatternRegistry.
-	 * @param PTKPatternsStore $ptk_patterns_store An instance of PTKPatternsStore.
+	 * @param Package         $package An instance of Package.
+	 * @param PatternRegistry $pattern_registry An instance of PatternRegistry.
 	 */
 	public function __construct(
 		Package $package,
-		PatternRegistry $pattern_registry,
-		PTKPatternsStore $ptk_patterns_store
+		PatternRegistry $pattern_registry
 	) {
-		$this->patterns_path      = $package->get_path( 'patterns' );
-		$this->pattern_registry   = $pattern_registry;
-		$this->ptk_patterns_store = $ptk_patterns_store;
+		$this->patterns_path    = $package->get_path( 'patterns' );
+		$this->pattern_registry = $pattern_registry;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-		add_action( 'init', array( $this, 'register_ptk_patterns' ) );
 	}
 
 	/**
@@ -192,89 +178,5 @@ class BlockPatterns {
 		);
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
-	}
-
-	/**
-	 * Register patterns from the Patterns Toolkit.
-	 *
-	 * @return void
-	 */
-	public function register_ptk_patterns() {
-		// Only if the user has allowed tracking, we register the patterns from the PTK.
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
-		if ( ! $allow_tracking ) {
-			return;
-		}
-
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-
-		$patterns = $this->ptk_patterns_store->get_patterns();
-		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
-			// Only log once per day by using a transient.
-			$transient_key = 'wc_ptk_pattern_store_warning';
-			// By only logging when patterns are empty and no fetch is scheduled,
-			// we ensure that warnings are only generated in genuinely problematic situations,
-			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! get_transient( $transient_key ) && ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
-				wc_get_logger()->warning(
-					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
-				);
-				// Set the transient to true to indicate that the warning has been logged in the current day.
-				set_transient( $transient_key, true, DAY_IN_SECONDS );
-			}
-			return;
-		}
-
-		$patterns = $this->parse_categories( $patterns );
-
-		foreach ( $patterns as $pattern ) {
-			$pattern['slug']    = $pattern['name'];
-			$pattern['content'] = $pattern['html'];
-
-			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern );
-		}
-	}
-
-	/**
-	 * Parse prefixed categories from the PTK patterns into the actual WooCommerce categories.
-	 *
-	 * @param array $patterns The patterns to parse.
-	 * @return array The parsed patterns.
-	 */
-	private function parse_categories( array $patterns ) {
-		return array_map(
-			function ( $pattern ) {
-				if ( ! isset( $pattern['categories'] ) ) {
-					$pattern['categories'] = array();
-				}
-
-				$values = array_values( $pattern['categories'] );
-
-				foreach ( $values as $value ) {
-					if ( ! isset( $value['title'] ) || ! isset( $value['slug'] ) ) {
-						$pattern['categories'] = array();
-					}
-				}
-
-				$pattern['categories'] = array_map(
-					function ( $category ) {
-						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
-							if ( strpos( $category['title'], $prefix ) !== false ) {
-								$parsed_category   = str_replace( $prefix, '', $category['title'] );
-								$parsed_category   = str_replace( '_', ' ', $parsed_category );
-								$category['title'] = ucfirst( $parsed_category );
-							}
-						}
-
-						return $category;
-					},
-					$pattern['categories']
-				);
-				return $pattern;
-			},
-			$patterns
-		);
 	}
 }

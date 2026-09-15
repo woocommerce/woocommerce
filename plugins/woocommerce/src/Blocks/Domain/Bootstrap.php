@@ -12,8 +12,6 @@ use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
-use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
-use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
@@ -146,10 +144,6 @@ class Bootstrap {
 			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
-
-			if ( is_admin() || $is_rest ) {
-				$this->container->get( PTKPatternsStore::class );
-			}
 
 			if ( is_admin() ) {
 				$this->container->get( TemplateOptions::class )->init();
@@ -394,24 +388,11 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			PTKClient::class,
-			function () {
-				return new PTKClient();
-			}
-		);
-		$this->container->register(
-			PTKPatternsStore::class,
-			function () {
-				return new PTKPatternsStore( $this->container->get( PTKClient::class ) );
-			}
-		);
-		$this->container->register(
 			BlockPatterns::class,
 			function () {
 				return new BlockPatterns(
 					$this->package,
-					new PatternRegistry(),
-					$this->container->get( PTKPatternsStore::class )
+					new PatternRegistry()
 				);
 			}
 		);
