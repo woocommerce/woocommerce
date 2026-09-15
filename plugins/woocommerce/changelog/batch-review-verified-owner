@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Backfill the verified-owner status for a product's reviews via an off-hours Action Scheduler task (one query per product) instead of a purchase-history query per review on read.
