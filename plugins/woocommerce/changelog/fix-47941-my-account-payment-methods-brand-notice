@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the My Account payment methods template from emitting PHP notices for saved payment methods that have no card brand.

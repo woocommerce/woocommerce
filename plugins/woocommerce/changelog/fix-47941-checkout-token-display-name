@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Label saved payment methods in the Checkout block with the token's own display name when no card details are available, and stop passing My Account management actions to the Checkout block.

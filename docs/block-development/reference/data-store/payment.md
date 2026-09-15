@@ -46,12 +46,7 @@ An example of data held within the Payment Data Store is shown below. This examp
           },
           expires: '12/32',
           is_default: true,
-          actions: {
-            'delete': {
-              url: 'https://store.local/checkout/delete-payment-method/1/?_wpnonce=123456',
-              name: 'Delete'
-            }
-          },
+          display_name: 'Visa ending in 4242 (expires 12/32)',
           tokenId: 1
         }
       ]
@@ -312,7 +307,7 @@ Returns all saved payment methods for the current customer.
 
 #### _Returns_ 
 
--   `object`: The saved payment methods for the current customer. This is an object, it will be specific to each payment method. As an example, Stripe's saved tokens are returned like so:
+-   `object`: The saved payment methods for the current customer. This is an object, it will be specific to each payment method. Each saved method includes `display_name`, the label the token's `WC_Payment_Token::get_display_name()` method returns. Since WooCommerce 11.3.0, the My Account management `actions` (delete and set-default URLs) are not included in Checkout data; they are still part of the My Account payment methods list. As an example, Stripe's saved tokens are returned like so:
 
 ```js
 savedPaymentMethods: {
@@ -325,12 +320,7 @@ savedPaymentMethods: {
 			},
 			expires: '04/24',
 			is_default: true,
-			actions: {
-				wcs_deletion_error: {
-					url: '#choose_default',
-					name: 'Delete',
-				},
-			},
+			display_name: 'Visa ending in 4242 (expires 04/24)',
 			tokenId: 2,
 		},
 	];
@@ -363,12 +353,7 @@ activeSavedPaymentMethods: {
 			},
 			expires: '04/24',
 			is_default: true,
-			actions: {
-				wcs_deletion_error: {
-					url: '#choose_default',
-					name: 'Delete',
-				},
-			},
+			display_name: 'Visa ending in 4242 (expires 04/24)',
 			tokenId: 2,
 		},
 	];
