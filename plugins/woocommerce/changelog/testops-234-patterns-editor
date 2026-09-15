@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce pattern editor E2E tests from 4 to 1; the synced block theme pattern title stays as the pattern editor canary.
+
