@@ -809,7 +809,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * This filter only registers parameters; use `woocommerce_rest_{$taxonomy}_query`
 		 * to map them to `WP_Term_Query` arguments.
 		 *
-		 * @since 11.2.0
+		 * @since 11.3.0
 		 *
 		 * @param array       $params   JSON Schema-formatted collection parameters.
 		 * @param WP_Taxonomy $taxonomy Taxonomy object.
