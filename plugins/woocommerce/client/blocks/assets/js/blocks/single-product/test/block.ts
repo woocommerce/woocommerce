@@ -10,6 +10,7 @@ import { setupServer } from 'msw/node';
  * Internal dependencies
  */
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
+import { textContentMatcher } from '../../../../../tests/utils/find-by-text';
 import '../';
 import '../../../atomic/blocks/product-elements/price';
 import '../../../atomic/blocks/product-elements/summary';
@@ -104,8 +105,9 @@ describe( 'Product block', () => {
 		);
 		expect( productDescription ).toBeInTheDocument();
 
-		const productPrice = await screen.findByText( '20,00 €' );
-		expect( productPrice ).toBeInTheDocument();
+		expect(
+			await screen.findByText( textContentMatcher( '20,00 €' ) )
+		).toBeInTheDocument();
 
 		// wp-6.8: MSW warns about unhandled OPTIONS preflight requests from
 		// @wordpress/core-data in jsdom where there's no real network layer.
@@ -129,7 +131,8 @@ describe( 'Product block', () => {
 		);
 		expect( productDescription ).toBeInTheDocument();
 
-		const productPrice = await screen.findByText( '20,00 €' );
-		expect( productPrice ).toBeInTheDocument();
+		expect(
+			await screen.findByText( textContentMatcher( '20,00 €' ) )
+		).toBeInTheDocument();
 	} );
 } );

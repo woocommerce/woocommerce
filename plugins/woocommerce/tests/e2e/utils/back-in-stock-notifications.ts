@@ -44,19 +44,13 @@ export const BIS_FEATURE_OPTION =
 /**
  * Fail early, with the fix, when the env can't run these specs.
  *
- * Both are provisioned by `bin/test-env-setup.sh`, which only runs on env
- * create or `--update`. On a stale env the feature UI simply never renders and
- * notification batches keep their one-minute delay, so every spec fails as an
- * unexplained timeout.
+ * Provisioned by `bin/test-env-setup.sh`, which only runs on env create or
+ * `--update`. On a stale env the notification batches keep their one-minute
+ * delay, so every spec fails as an unexplained timeout.
  */
 export async function assertBISEnvReady(): Promise< void > {
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
 	const checks = [
-		{
-			command: `wp option get ${ BIS_FEATURE_OPTION }`,
-			expected: /^yes$/m,
-			problem: `the "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders`,
-		},
 		{
 			command: 'wp plugin list --status=active --field=name',
 			expected: /^woocommerce-e2e-test-helper$/m,
@@ -501,7 +495,28 @@ export function bisConsentCheckbox( page: Page ) {
 }
 
 /**
+ * Switch the sign-up rate limiter off for this page's context.
+ *
+ * Core locks a client and an e-mail address out for a while after each
+ * sign-up. The suite submits the form far more often than that from one
+ * customer and one IP, so it is disabled through the `e2e-filters`
+ * cookie the test helper plugin reads.
+ *
+ * @param {Page} page Playwright page whose context will submit the form.
+ */
+export async function disableSignupRateLimit( page: Page ): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+		{ enabled: false }
+	);
+}
+
+/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
+ *
+ * The rate limiter is switched off for the submitting context first, so
+ * back-to-back sign-ups within a spec are not refused.
  *
  * @param {Page}    page           Playwright page on the product detail.
  * @param {Object}  [opts]         Fill options.
@@ -515,6 +530,8 @@ export async function signUpOnProductPage(
 		consent?: boolean;
 	} = {}
 ): Promise< void > {
+	await disableSignupRateLimit( page );
+
 	if ( opts.email !== undefined ) {
 		await page
 			.getByRole( 'textbox', {
