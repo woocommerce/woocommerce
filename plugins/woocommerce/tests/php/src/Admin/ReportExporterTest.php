@@ -538,4 +538,20 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			'The download handler should be registered.'
 		);
 	}
+
+	/**
+	 * @testdox Export progress is saved outside the autoloaded options, and an autoloaded copy is moved out on the next save.
+	 */
+	public function test_export_progress_is_not_autoloaded(): void {
+		global $wpdb;
+
+		update_option( ReportExporter::EXPORT_STATUS_OPTION, array( 'orders:earlier' => 100 ), true );
+
+		ReportExporter::update_export_percentage_complete( 'orders', 'current', 50 );
+
+		$this->assertArrayNotHasKey( ReportExporter::EXPORT_STATUS_OPTION, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
+		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", ReportExporter::EXPORT_STATUS_OPTION ) ) );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'earlier' ), 'Progress of earlier exports should survive the move.' );
+		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', 'current' ) );
+	}
 }
