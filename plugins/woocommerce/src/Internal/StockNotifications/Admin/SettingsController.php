@@ -26,6 +26,12 @@ class SettingsController {
 		// Add the My Account endpoint setting to the Advanced tab.
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_my_account_endpoint_setting' ), 100, 2 );
 
+		// The product edit hooks stay admin-only: process_product_object() reads $_POST and
+		// checks an admin nonce, so it must not run for cron or CLI code that fires the hook.
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		// Display admin notices about incompatible settings combinations.
 		add_action( 'admin_notices', array( $this, 'output_admin_notices' ) );
 

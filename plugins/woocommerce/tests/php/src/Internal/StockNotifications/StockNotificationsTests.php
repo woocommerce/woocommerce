@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use WC_Admin_Settings;
+use WC_Settings_Products;
 
 /**
  * StockNotifications controller tests.
@@ -83,6 +85,32 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 				'Toggling the feature should queue a rewrite rules flush.'
 			);
 		}
+	}
+
+	/**
+	 * @testdox The settings are registered outside admin, so the REST settings API can see them.
+	 */
+	public function test_settings_are_registered_outside_admin(): void {
+		$this->assertFalse( is_admin(), 'This test must run outside the admin context, as REST requests do.' );
+		$this->init_stock_notifications_services();
+
+		$products_page = null;
+		foreach ( WC_Admin_Settings::get_settings_pages() as $page ) {
+			if ( $page instanceof WC_Settings_Products ) {
+				$products_page = $page;
+				break;
+			}
+		}
+		$this->assertNotNull( $products_page, 'The Products settings page should be registered.' );
+
+		$this->assertArrayHasKey( 'customer_stock_notifications', $products_page->get_sections() );
+
+		$setting_ids = array_column( $products_page->get_settings_for_section( 'customer_stock_notifications' ), 'id' );
+		$this->assertContains( 'woocommerce_customer_stock_notifications_allow_signups', $setting_ids );
+		$this->assertContains( 'woocommerce_customer_stock_notifications_require_double_opt_in', $setting_ids );
+		$this->assertContains( 'woocommerce_customer_stock_notifications_require_account', $setting_ids );
+		$this->assertContains( 'woocommerce_customer_stock_notifications_create_account_on_signup', $setting_ids );
+		$this->assertContains( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', $setting_ids );
 	}
 
 	/**

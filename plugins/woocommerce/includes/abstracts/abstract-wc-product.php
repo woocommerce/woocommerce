@@ -2225,16 +2225,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-		$image = '';
-		if ( $this->get_image_id() ) {
-			$image_alt = get_post_meta( $this->get_image_id(), '_wp_attachment_image_alt', true );
+		$image    = '';
+		$image_id = (int) $this->get_image_id();
+		if ( $image_id ) {
+			$image_alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 			$attr      = wp_parse_args(
 				$attr,
 				array(
 					'alt' => $image_alt ? $image_alt : $this->get_name(),
 				)
 			);
-			$image     = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
+			$image     = wp_get_attachment_image( $image_id, $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {
