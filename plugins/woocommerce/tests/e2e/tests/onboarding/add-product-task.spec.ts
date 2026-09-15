@@ -92,7 +92,9 @@ test.describe( 'Add Product Task', () => {
 		// Only this spec's own products are deleted. The site is shared with the rest of the
 		// run, so sweeping every id the products endpoint returns would take other specs'
 		// fixtures with it.
-		const idsToDelete = createdProductIds.splice( 0 );
+		// Copy rather than drain: an id stays tracked until the batch confirms it deleted, so a
+		// later afterEach retries whatever this one could not remove.
+		const idsToDelete = [ ...createdProductIds ];
 		// Every teardown call runs before anything is asserted: a failed delete must not stop
 		// the task list from being unhidden, or the rest of this serial project inherits it.
 		const deleteResponse = idsToDelete.length
@@ -110,7 +112,18 @@ test.describe( 'Add Product Task', () => {
 			// The batch endpoint reports per-item failures in the body and still
 			// returns 200, so the status on its own says nothing about whether the
 			// products actually went.
-			const deleted = deleteResponse.data?.delete ?? [];
+			const deleted: Array< { id?: number; error?: unknown } > =
+				deleteResponse.data?.delete ?? [];
+			const confirmedIds = new Set(
+				deleted
+					.filter( ( item ) => ! item?.error )
+					.map( ( item ) => item.id )
+			);
+			createdProductIds.splice(
+				0,
+				createdProductIds.length,
+				...idsToDelete.filter( ( id ) => ! confirmedIds.has( id ) )
+			);
 			expect( deleted ).toHaveLength( idsToDelete.length );
 			expect(
 				deleted.filter( ( item: { error?: unknown } ) => item?.error )
