@@ -72,6 +72,42 @@ describe( 'hasAllFieldsForShippingRates', () => {
 		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
 	} );
 
+	it( 'treats a partially typed postcode as incomplete', () => {
+		const baseAddress = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'London',
+			country: 'GB',
+			state: '',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+
+		// A single character is not a valid UK postcode yet.
+		const partialPostcode = {
+			...baseAddress,
+			postcode: 'W',
+		};
+		expect( hasAllFieldsForShippingRates( partialPostcode ) ).toBe( false );
+
+		// An invalid postcode for the country is still incomplete.
+		const invalidPostcode = {
+			...baseAddress,
+			postcode: '!!!!',
+		};
+		expect( hasAllFieldsForShippingRates( invalidPostcode ) ).toBe( false );
+
+		// A complete, valid postcode makes the address complete.
+		const completePostcode = {
+			...baseAddress,
+			postcode: 'W1T 4JG',
+		};
+		expect( hasAllFieldsForShippingRates( completePostcode ) ).toBe( true );
+	} );
+
 	it( 'correctly checks complete addresses with optional fields', () => {
 		const address = {
 			first_name: 'John',
