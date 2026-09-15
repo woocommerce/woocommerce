@@ -113,6 +113,40 @@ test.describe( 'WooCommerce Email Settings', () => {
 		}
 	);
 
+	test( 'Send email preview', async ( { page, baseURL } ) => {
+		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
+
+		// Click the "Send a test email" button
+		await page.getByRole( 'button', { name: 'Send a test email' } ).click();
+
+		// Verify that the modal window is open
+		const modal = page.getByRole( 'dialog' );
+		await expect( modal ).toBeVisible();
+
+		// Verify that the "Send test email" button is disabled
+		const sendButton = modal.getByRole( 'button', {
+			name: 'Send test email',
+		} );
+		await expect( sendButton ).toBeDisabled();
+
+		// Fill in the email address field
+		const email = 'test@example.com';
+		const emailInput = modal.getByLabel( 'Send to' );
+		await emailInput.fill( email );
+
+		// Verify the "Send test email" button is now enabled
+		await expect( sendButton ).toBeEnabled();
+		await sendButton.click();
+
+		// Sending fails in the test env (no mail server); the backend returns
+		// `woocommerce_rest_email_preview_not_sent`, which hits the generic fallback in friendlyEmailSendError.
+		const message = modal.locator(
+			"text=Couldn't send the test email. Check your email settings and try again."
+		);
+		await expect( message ).toBeVisible();
+	} );
+
 	test( 'Choose image in email image url field', async ( { page } ) => {
 		const logoImageElement = '.wc-settings-email-logo-image';
 		const uploadIconElement = '.wc-settings-email-select-image-icon';
