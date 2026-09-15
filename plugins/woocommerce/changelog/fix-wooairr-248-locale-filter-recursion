@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop locale filters that read country, state, or continent data from recursing when geographical data is looked up.
