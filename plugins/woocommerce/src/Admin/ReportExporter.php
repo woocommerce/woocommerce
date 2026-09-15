@@ -139,12 +139,16 @@ class ReportExporter {
 
 		if ( is_array( $exports_status ) ) {
 			foreach ( array_keys( $exports_status ) as $status_key ) {
-				list( $report_type, $export_id ) = array_pad( explode( ':', (string) $status_key, 2 ), 2, '' );
+				$key_parts   = explode( ':', (string) $status_key, 2 );
+				$report_type = $key_parts[0];
+				$export_id   = isset( $key_parts[1] ) ? $key_parts[1] : '';
+				$filename    = self::get_export_filename( $report_type, $export_id );
 
 				$exporter = new ReportCSVExporter();
-				$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+				$exporter->set_filename( $filename );
 
-				if ( file_exists( ReportCSVExporter::get_reports_directory() . $exporter->get_filename() ) ) {
+				$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+				if ( file_exists( $path ) ) {
 					return;
 				}
 			}
@@ -160,8 +164,11 @@ class ReportExporter {
 	 * @return void
 	 */
 	private static function delete_export_status( $path ) {
-		if ( preg_match( '/^wc-([a-z]+)-report-export-(.+)\.csv(?:\.headers)?$/', basename( $path ), $matches ) ) {
-			delete_option( self::get_status_option_name( $matches[1], $matches[2] ) );
+		$filename = basename( $path );
+
+		if ( preg_match( '/^wc-([a-z]+)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
+			$option_name = self::get_status_option_name( $matches[1], $matches[2] );
+			delete_option( $option_name );
 		}
 	}
 
@@ -247,9 +254,11 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
+		$option_name = self::get_status_option_name( $report_type, $export_id );
+
 		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
 		// request, which left the email action reading an old percentage and never sending the download link.
-		update_option( self::get_status_option_name( $report_type, $export_id ), $percentage, false );
+		update_option( $option_name, $percentage, false );
 	}
 
 	/**
@@ -260,7 +269,8 @@ class ReportExporter {
 	 * @return bool|int Completion percentage, or false if export not found.
 	 */
 	public static function get_export_percentage_complete( $report_type, $export_id ) {
-		$percentage = get_option( self::get_status_option_name( $report_type, $export_id ) );
+		$option_name = self::get_status_option_name( $report_type, $export_id );
+		$percentage  = get_option( $option_name );
 
 		if ( false === $percentage ) {
 			// Exports queued before 11.3.0 report through the option every export shared.
