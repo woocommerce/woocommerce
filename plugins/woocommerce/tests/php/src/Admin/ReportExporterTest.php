@@ -138,12 +138,17 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$expired     = $this->create_export( 'wc-orders-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
 		$fresh       = $this->create_export( 'wc-orders-report-export-fresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
 
+		ReportExporter::update_export_percentage_complete( 'orders', 'expired', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'fresh', 100 );
+
 		ReportExporter::delete_expired_exports();
 
 		$this->assertFileDoesNotExist( $reports_dir . $expired, 'An expired export should be deleted.' );
 		$this->assertFileDoesNotExist( $reports_dir . $expired . '.headers', 'An expired export header row should be deleted too.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'expired' ), 'An expired export should not keep its progress option around.' );
 		$this->assertFileExists( $reports_dir . $fresh, 'An export inside the retention period should be kept.' );
 		$this->assertFileExists( $reports_dir . $fresh . '.headers', 'An export header row inside the retention period should be kept.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'fresh' ), 'An export inside the retention period should keep its progress.' );
 		$this->assertFileExists( $reports_dir . '.htaccess', 'Cleanup should not touch the directory guards.' );
 		$this->assertFileExists( $reports_dir . 'index.html', 'Cleanup should not touch the directory guards.' );
 	}
@@ -540,18 +545,34 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Export progress is saved outside the autoloaded options, and an autoloaded copy is moved out on the next save.
+	 * @testdox Export progress is saved outside the autoloaded options.
 	 */
 	public function test_export_progress_is_not_autoloaded(): void {
 		global $wpdb;
 
-		update_option( ReportExporter::EXPORT_STATUS_OPTION, array( 'orders:earlier' => 100 ), true );
-
 		ReportExporter::update_export_percentage_complete( 'orders', 'current', 50 );
 
-		$this->assertArrayNotHasKey( ReportExporter::EXPORT_STATUS_OPTION, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
-		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", ReportExporter::EXPORT_STATUS_OPTION ) ) );
-		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'earlier' ), 'Progress of earlier exports should survive the move.' );
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_orders:current';
+
+		$this->assertArrayNotHasKey( $option, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
+		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $option ) ) );
 		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', 'current' ) );
+	}
+
+	/**
+	 * @testdox Each export's progress is stored on its own, so saving one export cannot drop another's.
+	 */
+	public function test_export_progress_is_stored_per_export(): void {
+		ReportExporter::update_export_percentage_complete( 'orders', 'first', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'second', 10 );
+
+		// Read back from the database, as the email action and the status endpoint do from their own request.
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_orders:first', 'options' );
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_orders:second', 'options' );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'first' ), 'Saving a later export must leave an earlier export finished.' );
+		$this->assertSame( 10, ReportExporter::get_export_percentage_complete( 'orders', 'second' ) );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'unknown' ), 'An export that was never queued has no progress.' );
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'Progress must not be written to the option every export used to share.' );
 	}
 }

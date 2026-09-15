@@ -119,7 +119,20 @@ class ReportExporter {
 			$modified = filemtime( $path );
 			if ( $modified && $modified < $expired_before ) {
 				wp_delete_file( $path );
+				self::delete_export_status( $path );
 			}
+		}
+	}
+
+	/**
+	 * Delete the stored progress of an export whose file has been deleted.
+	 *
+	 * @param string $path Path of the deleted export body or its `.headers` companion.
+	 * @return void
+	 */
+	private static function delete_export_status( $path ) {
+		if ( preg_match( '/^wc-([a-z]+)-report-export-(.+)\.csv(?:\.headers)?$/', basename( $path ), $matches ) ) {
+			delete_option( self::get_status_option_name( $matches[1], $matches[2] ) );
 		}
 	}
 
@@ -186,6 +199,17 @@ class ReportExporter {
 	}
 
 	/**
+	 * Get the name of the option an export's progress is stored under.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return string Option name.
+	 */
+	protected static function get_status_option_name( $report_type, $export_id ) {
+		return self::EXPORT_STATUS_OPTION . '_' . self::get_status_key( $report_type, $export_id );
+	}
+
+	/**
 	 * Update the completion percentage of a report export.
 	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
@@ -194,14 +218,9 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
-		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
-		$status_key     = self::get_status_key( $report_type, $export_id );
-
-		$exports_status[ $status_key ] = $percentage;
-
 		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
 		// request, which left the email action reading an old percentage and never sending the download link.
-		update_option( self::EXPORT_STATUS_OPTION, $exports_status, false );
+		update_option( self::get_status_option_name( $report_type, $export_id ), $percentage, false );
 	}
 
 	/**
@@ -212,14 +231,13 @@ class ReportExporter {
 	 * @return bool|int Completion percentage, or false if export not found.
 	 */
 	public static function get_export_percentage_complete( $report_type, $export_id ) {
-		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
-		$status_key     = self::get_status_key( $report_type, $export_id );
+		$percentage = get_option( self::get_status_option_name( $report_type, $export_id ) );
 
-		if ( isset( $exports_status[ $status_key ] ) ) {
-			return $exports_status[ $status_key ];
+		if ( false === $percentage ) {
+			return false;
 		}
 
-		return false;
+		return (int) $percentage;
 	}
 
 	/**
