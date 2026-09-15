@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { getPluginActionErrorMessage, getFailedPluginAction } from '../utils';
+import {
+	getPluginActionErrorMessage,
+	getFailedPluginAction,
+	getMorePaymentOptionsUrl,
+} from '../utils';
 
 describe( 'getPluginActionErrorMessage', () => {
 	const reason =
@@ -84,5 +88,73 @@ describe( 'getFailedPluginAction', () => {
 		expect(
 			getFailedPluginAction( { actionType: 'nope' }, 'activate' )
 		).toBe( 'activate' );
+	} );
+} );
+
+describe( 'getMorePaymentOptionsUrl', () => {
+	const baseUrl =
+		'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
+
+	const englishLocale = { siteLocale: 'en_US', userLocale: 'en_US' };
+
+	beforeEach( () => {
+		window.wcSettings.locale = { ...englishLocale };
+		window.wcSettings.countries = {
+			BR: 'Brazil',
+			AS: 'American Samoa',
+			CC: 'Cocos (Keeling) Islands',
+			CW: 'Cura&ccedil;ao',
+			US: 'United States (US)',
+		};
+	} );
+
+	afterEach( () => {
+		window.wcSettings.locale = { ...englishLocale };
+		window.wcSettings.countries = {};
+	} );
+
+	it( 'filters the marketplace by the business location country name', () => {
+		expect( getMorePaymentOptionsUrl( 'BR' ) ).toBe(
+			`${ baseUrl }&country=Brazil`
+		);
+	} );
+
+	it( 'encodes names with spaces and parentheses', () => {
+		expect( getMorePaymentOptionsUrl( 'AS' ) ).toBe(
+			`${ baseUrl }&country=American%20Samoa`
+		);
+		expect( getMorePaymentOptionsUrl( 'CC' ) ).toBe(
+			`${ baseUrl }&country=Cocos%20(Keeling)%20Islands`
+		);
+	} );
+
+	it( 'decodes the HTML entities the country list carries', () => {
+		expect( getMorePaymentOptionsUrl( 'CW' ) ).toBe(
+			`${ baseUrl }&country=Cura%C3%A7ao`
+		);
+	} );
+
+	it( 'drops the suffix the marketplace does not use', () => {
+		expect( getMorePaymentOptionsUrl( 'US' ) ).toBe(
+			`${ baseUrl }&country=United%20States`
+		);
+	} );
+
+	it( 'leaves the filter off when no business location is selected', () => {
+		expect( getMorePaymentOptionsUrl( null ) ).toBe( baseUrl );
+	} );
+
+	it( 'leaves the filter off for a country the list has no name for', () => {
+		expect( getMorePaymentOptionsUrl( 'XK' ) ).toBe( baseUrl );
+	} );
+
+	it( 'leaves the filter off when the admin is not in English', () => {
+		window.wcSettings.locale = {
+			siteLocale: 'pt_BR',
+			userLocale: 'pt_BR',
+		};
+		window.wcSettings.countries = { BR: 'Brasil' };
+
+		expect( getMorePaymentOptionsUrl( 'BR' ) ).toBe( baseUrl );
 	} );
 } );
