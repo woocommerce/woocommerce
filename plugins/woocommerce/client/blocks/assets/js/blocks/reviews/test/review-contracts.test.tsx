@@ -407,53 +407,70 @@ describe( 'Product Reviews contracts', () => {
 			);
 		} );
 
-		it( 'flows a positive value through serialization, hydration, and the review request', async () => {
-			const setAttributes = jest.fn();
-			const attributes = createAttributes( { categoryIds: [ 9 ] } );
-			const controls = render(
-				<>
-					{ getSharedReviewListControls( attributes, setAttributes, {
-						showOffset: true,
-					} ) }
-				</>
-			);
-
-			fireEvent.change(
-				screen.getByRole( 'spinbutton', { name: 'Offset' } ),
-				{ target: { value: '5' } }
-			);
-			expect( setAttributes ).toHaveBeenCalledWith( { offset: 5 } );
-			controls.unmount();
-
-			const serialized = getDataAttrs( { ...attributes, offset: 5 } );
-			const element = createFrontendElement(
+		it.each( [
+			[
+				'category',
 				'wp-block-woocommerce-reviews-by-category',
-				serialized
-			);
-			mockGetReviews.mockResolvedValue( {
-				reviews: reviews.slice( 0, 2 ),
-				totalReviews: 4,
-			} );
+				{ categoryIds: [ 9 ] },
+				{ category_id: 9 },
+			],
+			[
+				'product',
+				'wp-block-woocommerce-reviews-by-product',
+				{ productId: 9 },
+				{ product_id: '9' },
+			],
+		] )(
+			'flows a positive value through serialization, hydration, and the %s review request',
+			async ( _name, className, selection, filterArgs ) => {
+				const setAttributes = jest.fn();
+				const attributes = createAttributes( selection );
+				const controls = render(
+					<>
+						{ getSharedReviewListControls(
+							attributes,
+							setAttributes,
+							{
+								showOffset: true,
+							}
+						) }
+					</>
+				);
 
-			render(
-				<FrontendContainerBlock
-					attributes={
-						getHydratedAttributes(
-							element
-						) as ReviewBlockAttributes
-					}
-				/>
-			);
+				fireEvent.change(
+					screen.getByRole( 'spinbutton', { name: 'Offset' } ),
+					{ target: { value: '5' } }
+				);
+				expect( setAttributes ).toHaveBeenCalledWith( { offset: 5 } );
+				controls.unmount();
 
-			await waitFor( () =>
-				expect( mockGetReviews ).toHaveBeenCalledWith( {
-					category_id: 9,
-					offset: 5,
-					order: 'desc',
-					orderby: 'date_gmt',
-					per_page: 2,
-				} )
-			);
-		} );
+				const serialized = getDataAttrs( { ...attributes, offset: 5 } );
+				const element = createFrontendElement( className, serialized );
+				mockGetReviews.mockResolvedValue( {
+					reviews: reviews.slice( 0, 2 ),
+					totalReviews: 4,
+				} );
+
+				render(
+					<FrontendContainerBlock
+						attributes={
+							getHydratedAttributes(
+								element
+							) as ReviewBlockAttributes
+						}
+					/>
+				);
+
+				await waitFor( () =>
+					expect( mockGetReviews ).toHaveBeenCalledWith( {
+						...filterArgs,
+						offset: 5,
+						order: 'desc',
+						orderby: 'date_gmt',
+						per_page: 2,
+					} )
+				);
+			}
+		);
 	} );
 } );
