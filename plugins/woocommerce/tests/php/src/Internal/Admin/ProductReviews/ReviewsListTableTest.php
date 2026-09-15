@@ -513,6 +513,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$author = get_comment_author( $review->comment_ID );
 
 		$this->assertStringContainsString( $author, $author_output );
+		$this->assertMatchesRegularExpression(
+			'#<strong>.*' . preg_quote( $author, '#' ) . '</strong>#s',
+			$author_output,
+			'Core comment list script reads the author name for the trash Undo notice from this <strong>.'
+		);
 
 		if ( $should_contain_avatar ) {
 			$this->assertStringContainsString( "<img alt='' src='", $author_output );
