@@ -709,9 +709,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse the "date on sale to" field from a CSV.
 	 *
-	 * When a date-only value (with no time component) is supplied, it is treated as the
-	 * end of that day (23:59:59) to match the behaviour of the product edit screen, where
-	 * the "On sale to" date input is stored with an end-of-day time.
+	 * A value that names a calendar day and nothing else is treated as the end of that
+	 * day (23:59:59), matching the product edit screen, where the "On sale to" date input
+	 * is stored with an end-of-day time. A value that already carries a time, or a relative
+	 * expression such as "now", is left as the caller wrote it.
 	 *
 	 * @since 11.3.0
 	 *
@@ -726,37 +727,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return null;
 		}
 
-		// If the value is numeric (Unix timestamp) it was already normalised to an ISO8601
-		// UTC string with an explicit time component by parse_datetime_field(); leave it alone.
-		if ( is_numeric( $value ) ) {
+		$date = date_parse( $parsed );
+
+		// Only a value that resolves to a bare calendar day gets the end-of-day treatment.
+		// date_parse() reports the time component for every format strtotime() understands,
+		// not just "10:00", and flags relative expressions separately, so a caller who did
+		// say when the sale ends keeps their value.
+		if (
+			false === $date['year'] || false === $date['month'] || false === $date['day']
+			|| false !== $date['hour'] || isset( $date['relative'] )
+		) {
 			return $parsed;
 		}
 
-		// Detect any time component in the original string (e.g. "2023-01-26 10:00",
-		// "2023-01-26T10:00:00Z"). If one is present, preserve the caller's intent.
-		if ( preg_match( '/\d{1,2}:\d{2}/', (string) $value ) ) {
-			return $parsed;
-		}
-
-		// Canonical date-only value (Y-m-d): append end-of-day as a pure string operation.
-		// No timestamp round-trip means no timezone can shift the calendar day. The
-		// timezone-less result is interpreted as site-local by WC_Data::set_date_prop(),
-		// exactly like the value the admin product screen produces.
-		if ( preg_match( '/^\s*(\d{4}-\d{2}-\d{2})\s*$/', (string) $parsed, $matches ) ) {
-			return $matches[1] . ' 23:59:59';
-		}
-
-		// Other date-only formats accepted by strtotime() (e.g. "26-01-2099", "2099/01/26").
-		// strtotime() and date() are deliberately paired here: both use PHP's default
-		// timezone, so the reformat cannot shift the calendar day whatever that timezone
-		// is. This is the same pairing the product edit screen uses when it forces the
-		// sale end date to the end of the day.
-		$timestamp = strtotime( (string) $parsed );
-		if ( false === $timestamp ) {
-			return $parsed;
-		}
-
-		return date( 'Y-m-d 23:59:59', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Paired with strtotime() above so both use the same timezone; see comment.
+		// Built from the parsed calendar day itself, with no timestamp round-trip, so no
+		// timezone can move the date. The timezone-less result is interpreted as site-local
+		// by WC_Data::set_date_prop(), exactly like the value the admin product screen produces.
+		return sprintf( '%04d-%02d-%02d 23:59:59', $date['year'], $date['month'], $date['day'] );
 	}
 
 	/**
