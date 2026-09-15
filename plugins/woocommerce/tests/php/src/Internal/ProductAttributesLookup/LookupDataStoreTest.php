@@ -1304,22 +1304,27 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox `create_data_for_product` creates no entries for variations that are not published.
 	 *
-	 * @testWith [false]
-	 *           [true]
+	 * @testWith ["private", false]
+	 *           ["private", true]
+	 *           ["draft", false]
+	 *           ["draft", true]
+	 *           ["pending", false]
+	 *           ["pending", true]
 	 *
-	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 * @param string $status The status of the variation that is not published.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
 	 */
-	public function test_create_data_for_variable_product_skips_unpublished_variations( bool $use_optimized_db_access ) {
+	public function test_create_data_for_variable_product_skips_unpublished_variations( string $status, bool $use_optimized_db_access ) {
 		list( $product, $published_variation ) = $this->create_variable_product_with_one_variation();
 
-		$disabled_variation = new \WC_Product_Variation();
-		$disabled_variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_2' ) );
-		$disabled_variation->set_stock_status( ProductStockStatus::IN_STOCK );
-		$disabled_variation->set_parent_id( $product->get_id() );
-		$disabled_variation->set_status( ProductStatus::PRIVATE );
-		$disabled_variation->save();
+		$unpublished_variation = new \WC_Product_Variation();
+		$unpublished_variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_2' ) );
+		$unpublished_variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$unpublished_variation->set_parent_id( $product->get_id() );
+		$unpublished_variation->set_status( $status );
+		$unpublished_variation->save();
 
-		$product->set_children( array( $published_variation->get_id(), $disabled_variation->get_id() ) );
+		$product->set_children( array( $published_variation->get_id(), $unpublished_variation->get_id() ) );
 		\WC_Product_Variable::sync( $product );
 		$this->empty_lookup_table();
 
@@ -1331,14 +1336,21 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox `create_data_for_product` creates no entries for a variation that is not published.
 	 *
-	 * @testWith [false]
-	 *           [true]
+	 * @testWith ["private", false]
+	 *           ["private", true]
+	 *           ["draft", false]
+	 *           ["draft", true]
+	 *           ["pending", false]
+	 *           ["pending", true]
+	 *           ["trash", false]
+	 *           ["trash", true]
 	 *
-	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 * @param string $status The status of the variation that is not published.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
 	 */
-	public function test_create_data_for_unpublished_variation_creates_nothing( bool $use_optimized_db_access ) {
+	public function test_create_data_for_unpublished_variation_creates_nothing( string $status, bool $use_optimized_db_access ) {
 		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
-		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->set_status( $status );
 		$variation->save();
 		$this->empty_lookup_table();
 		$this->insert_lookup_table_data( $variation->get_id(), $product->get_id(), self::$attributes[1]['name'], self::$attributes[1]['term_ids'][0], true, true );

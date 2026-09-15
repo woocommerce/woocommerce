@@ -549,8 +549,15 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Migration deletes the lookup rows of unpublished variations and keeps every other row.
+	 *
+	 * @testWith ["private"]
+	 *           ["draft"]
+	 *           ["pending"]
+	 *           ["trash"]
+	 *
+	 * @param string $status The status of the variation that is not published.
 	 */
-	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows(): void {
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows( string $status ): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
@@ -559,9 +566,9 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$variation_ids = $product->get_children();
 		$this->assertGreaterThanOrEqual( 2, count( $variation_ids ) );
 
-		$disabled_variation = wc_get_product( $variation_ids[0] );
-		$disabled_variation->set_status( ProductStatus::PRIVATE );
-		$disabled_variation->save();
+		$unpublished_variation = wc_get_product( $variation_ids[0] );
+		$unpublished_variation->set_status( $status );
+		$unpublished_variation->save();
 
 		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -664,6 +671,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
 		$this->assertSame( array( $variation_id ), $remaining, 'The rows of a variation published since its batch was selected are kept.' );
 	}
+
 
 	/**
 	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
