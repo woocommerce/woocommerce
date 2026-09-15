@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the per-method titles and descriptions of KOMOJU gateways on the Payments settings page instead of replacing them with the generic KOMOJU suggestion details.

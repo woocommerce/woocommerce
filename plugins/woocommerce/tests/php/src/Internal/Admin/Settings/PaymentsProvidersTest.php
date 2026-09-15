@@ -1309,6 +1309,62 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_payment_gateway_details does not override the title and description of KOMOJU's per-method gateways.
+	 *
+	 * KOMOJU registers one gateway per payment method (`komoju_credit_card`, `komoju_konbini`, etc.), each with
+	 * its own method title and description. The generic suggestion details must not replace them.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_komoju_per_method_gateway_titles() {
+		// Arrange.
+		$plugin_slug  = 'komoju-japanese-payments';
+		$fake_gateway = new FakePaymentGateway(
+			'komoju_konbini',
+			array(
+				'enabled'            => true,
+				'title'              => 'Konbini',
+				'method_title'       => 'KOMOJU - Konbini',
+				'description'        => 'Pay at a convenience store.',
+				'method_description' => 'Konbini payments powered by KOMOJU',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'komoju-japanese-payments/index.php',
+			),
+		);
+
+		// Mock the KOMOJU suggestion (which is in the exclusion list).
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::KOMOJU,
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'KOMOJU Payments (Should Not Override)',
+			'description' => 'KOMOJU - Suggestion Description (Should Not Override)',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/komoju-icon.svg',
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'JP' );
+
+		// Assert that the per-method title and description are preserved.
+		$this->assertSame( 'KOMOJU - Konbini', $gateway_details['title'], 'Title should NOT be overridden for KOMOJU per-method gateways' );
+		$this->assertSame( 'Konbini payments powered by KOMOJU', $gateway_details['description'], 'Description should NOT be overridden for KOMOJU per-method gateways' );
+
+		// But icon should still be filled in from suggestion.
+		$this->assertSame( 'http://example.com/komoju-icon.svg', $gateway_details['icon'], 'Icon should be filled from suggestion' );
+
+		// And suggestion ID should be attached.
+		$this->assertSame( ExtensionSuggestions::KOMOJU, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
 	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
 	 *
 	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.

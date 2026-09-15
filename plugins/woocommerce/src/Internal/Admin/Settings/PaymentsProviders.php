@@ -1389,6 +1389,7 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
+					ExtensionSuggestions::KOMOJU,
 					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
