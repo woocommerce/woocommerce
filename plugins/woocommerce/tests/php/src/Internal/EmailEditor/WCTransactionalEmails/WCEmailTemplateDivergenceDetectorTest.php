@@ -533,12 +533,11 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	 * `init`-time hooks (notably `WCEmailTemplateDivergenceDetector::register_meta`)
 	 * register on the global hook table, the `woo_email` post type is registered, and
 	 * `init` fires so the meta-registration callback runs. Swallows the doing-it-wrong
-	 * notices that the full chain triggers when re-registering already-registered
-	 * blocks / integrations during a unit-test process; those notices are unrelated
+	 * notice that the full chain triggers when re-registering already-registered
+	 * integrations during a unit-test process; that notice is unrelated
 	 * to the meta-registration wiring under test.
 	 */
 	private function initialize_email_editor_integration(): void {
-		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
 		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
 
 		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
