@@ -49,4 +49,16 @@ const v1 = {
 	},
 };
 
-export default [ v1 ];
+const v2 = {
+	save,
+	attributes: {
+		...metadata.attributes,
+		isDescendentOfQueryLoop: { type: 'boolean', default: false },
+		isDescendentOfSingleProductBlock: {
+			type: 'boolean',
+			default: false,
+		},
+	},
+};
+
+export default [ v2, v1 ];
