@@ -15,7 +15,7 @@ require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 
 	/**
-	 * Test that the real General settings save path persists the form values.
+	 * @testdox The real General settings save path persists the form values.
 	 */
 	public function test_save_persists_general_setting_values() {
 		$sut                      = new WC_Settings_General();
