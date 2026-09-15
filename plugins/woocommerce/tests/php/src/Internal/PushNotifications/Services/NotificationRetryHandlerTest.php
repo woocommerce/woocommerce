@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
@@ -229,7 +230,13 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		);
 
 		$processor = new NotificationProcessor();
-		$processor->init( $dispatcher, $data_store, $preferences_service, $retry_handler );
+		$processor->init(
+			$dispatcher,
+			$data_store,
+			$preferences_service,
+			$retry_handler,
+			$this->createMock( NotificationStepLogger::class )
+		);
 		wc_get_container()->replace( NotificationProcessor::class, $processor );
 
 		$this->sut->handle_retry( 'store_order', $this->order_id, 2 );

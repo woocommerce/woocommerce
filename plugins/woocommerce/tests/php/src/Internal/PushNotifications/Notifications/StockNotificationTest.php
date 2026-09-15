@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use InvalidArgumentException;
 use WC_Helper_Product;
@@ -367,6 +368,38 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 		$notification = new StockNotification( 1 );
 
 		$this->assertTrue( $notification->should_send_to_user( null ) );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the type toggle when it is off, before the event flag.
+	 */
+	public function test_get_suppression_reason_type_disabled_wins(): void {
+		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'   => false,
+				'low_stock' => false,
+			)
+		);
+
+		$this->assertSame( Notification::SUPPRESSED_TYPE_DISABLED, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the event flag when only that is off.
+	 */
+	public function test_get_suppression_reason_event_type_disabled(): void {
+		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'   => true,
+				'low_stock' => false,
+			)
+		);
+
+		$this->assertSame( StockNotification::SUPPRESSED_EVENT_TYPE_DISABLED, $reason );
 	}
 
 	/**

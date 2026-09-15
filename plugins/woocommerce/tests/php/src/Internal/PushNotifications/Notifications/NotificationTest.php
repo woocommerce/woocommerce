@@ -148,6 +148,18 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Default get_suppression_reason reports the type as disabled.
+	 */
+	public function test_get_suppression_reason_default_is_type_disabled(): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( Notification::SUPPRESSED_TYPE_DISABLED, $notification->get_suppression_reason( array( 'enabled' => false ) ) );
+	}
+
+	/**
 	 * @testdox from_array should call hydrate() on classes that implement it.
 	 */
 	public function test_from_array_hydrates_extra_fields(): void {

@@ -29,6 +29,11 @@ abstract class Notification {
 	);
 
 	/**
+	 * Suppression reason: the user turned this notification type off.
+	 */
+	const SUPPRESSED_TYPE_DISABLED = 'type_disabled';
+
+	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
 	 * ID).
 	 *
@@ -232,5 +237,21 @@ abstract class Notification {
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
 		return (bool) $pref_value;
+	}
+
+	/**
+	 * Returns which preference stopped this notification going to a user.
+	 *
+	 * Only meaningful after {@see should_send_to_user()} returned false for the
+	 * same value. Subclasses re-run their checks in the same order and return
+	 * the first one that fails, so the reason matches the decision.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string One of the SUPPRESSED_* constants.
+	 *
+	 * @since 11.3.0
+	 */
+	public function get_suppression_reason( $pref_value ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Subclasses read it.
+		return self::SUPPRESSED_TYPE_DISABLED;
 	}
 }

@@ -28,6 +28,11 @@ class StockNotification extends Notification {
 	);
 
 	/**
+	 * Suppression reason: the user turned off this stock event type.
+	 */
+	const SUPPRESSED_EVENT_TYPE_DISABLED = 'event_type_disabled';
+
+	/**
 	 * Emoji appended to the notification title, one per stock event type.
 	 */
 	const EMOJI_OUT_OF_STOCK = '🚨';
@@ -257,6 +262,20 @@ class StockNotification extends Notification {
 		}
 
 		return (bool) $pref_value[ $this->event_type ];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return self::SUPPRESSED_TYPE_DISABLED;
+		}
+
+		return self::SUPPRESSED_EVENT_TYPE_DISABLED;
 	}
 
 	/**

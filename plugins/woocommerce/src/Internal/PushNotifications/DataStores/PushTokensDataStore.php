@@ -354,6 +354,23 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Counts every push token on the store, whatever the owner's role.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function count_tokens(): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+	}
+
+	/**
 	 * Determines whether the store has ever registered a push token, including
 	 * tokens that have since been deleted.
 	 *
