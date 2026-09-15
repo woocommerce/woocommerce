@@ -8,25 +8,6 @@
 	width: 100%;
 }
 
-// Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
-[data-rich-text-comment],
-[data-rich-text-format-boundary] {
-	border-radius: 2px;
-}
-
-[data-rich-text-comment] {
-	background-color: var(
-		--wp-components-color-accent,
-		var(--wp-admin-theme-color, #3858e9)
-	);
-
-	span {
-		color: var(--wp-components-color-accent-inverted, #fff);
-		filter: none;
-		padding: 0 2px;
-	}
-}
-
 .woocommerce-settings-panel-preheader-text {
 	margin-top: 9px;
 }
