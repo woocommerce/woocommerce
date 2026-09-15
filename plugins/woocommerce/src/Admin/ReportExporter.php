@@ -234,7 +234,15 @@ class ReportExporter {
 		$percentage = get_option( self::get_status_option_name( $report_type, $export_id ) );
 
 		if ( false === $percentage ) {
-			return false;
+			// Exports queued before 11.3.0 report through the option every export shared.
+			$exports_status = get_option( self::EXPORT_STATUS_OPTION );
+			$status_key     = self::get_status_key( $report_type, $export_id );
+
+			if ( ! is_array( $exports_status ) || ! isset( $exports_status[ $status_key ] ) ) {
+				return false;
+			}
+
+			$percentage = $exports_status[ $status_key ];
 		}
 
 		return (int) $percentage;

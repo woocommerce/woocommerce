@@ -501,6 +501,25 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An export queued before each export had its own option is still emailed from the shared one.
+	 */
+	public function test_export_queued_before_per_export_options_is_emailed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$mailer  = tests_retrieve_phpmailer_instance();
+
+		update_option( ReportExporter::EXPORT_STATUS_OPTION, array( 'products:legacy' => 100 ) );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'products', 'legacy' ), 'Progress saved in the shared option should still be read.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'products', 'other' ), 'The shared option should only answer for exports it holds.' );
+
+		ReportExporter::email_report_download_link( $user_id, 'legacy', 'products' );
+
+		$sent = end( $mailer->mock_sent );
+		$this->assertIsArray( $sent, 'An export finished before the update should still be emailed after it.' );
+		$this->assertStringContainsString( 'filename=wc-products-report-export-legacy', $sent['body'] );
+	}
+
+	/**
 	 * Email the download link for a finished export and return the message that went out.
 	 *
 	 * Dispatched through the hook Action Scheduler fires, so the number of arguments a queued
