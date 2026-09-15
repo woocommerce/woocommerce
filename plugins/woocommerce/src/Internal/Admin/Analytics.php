@@ -76,14 +76,6 @@ class Analytics {
 	private const REFUND_DOUBLE_COUNT_STATUS_CANCELLED = 'cancelled';
 
 	/**
-	 * Receives the fix tool's Tracks events instead of Tracks when set. Tests use it because
-	 * WC_Tracks::record_event() skips PHPUnit users.
-	 *
-	 * @var callable|null
-	 */
-	private static $refund_double_count_event_recorder = null;
-
-	/**
 	 * Class instance.
 	 *
 	 * @var Analytics instance
@@ -881,18 +873,6 @@ class Analytics {
 	}
 
 	/**
-	 * Override where the fix tool's Tracks events go. Intended for tests only.
-	 *
-	 * @internal
-	 *
-	 * @param callable|null $recorder Receives `(string $event_name, array $properties)`. Pass null to send to Tracks again.
-	 * @return void
-	 */
-	public static function set_refund_double_count_event_recorder( ?callable $recorder ): void {
-		self::$refund_double_count_event_recorder = $recorder;
-	}
-
-	/**
 	 * Record a click on the fix tool's button and what it did.
 	 *
 	 * @param string $outcome         One of started, dismissed, refused_running or refused_full_refund_fix.
@@ -943,11 +923,6 @@ class Analytics {
 		$event_name                  = 'analytics_refund_double_count_' . $name;
 
 		try {
-			if ( null !== self::$refund_double_count_event_recorder ) {
-				( self::$refund_double_count_event_recorder )( $event_name, $properties );
-				return;
-			}
-
 			if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
 				wc_admin_record_tracks_event( $event_name, $properties );
 			}

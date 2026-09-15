@@ -29,13 +29,6 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Tracks events recorded by the fix tool, as [ name, properties ] pairs.
-	 *
-	 * @var array
-	 */
-	private $events = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -44,12 +37,8 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
 		update_option( \WC_Install::INITIAL_INSTALLED_VERSION, '10.5.0' );
 
-		$this->events = array();
-		Analytics::set_refund_double_count_event_recorder(
-			function ( string $event_name, array $properties ): void {
-				$this->events[] = array( $event_name, $properties );
-			}
-		);
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$this->clear_tracks_events();
 	}
 
 	/**
@@ -57,7 +46,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			Analytics::set_refund_double_count_event_recorder( null );
+			$this->clear_tracks_events();
 			// Action Scheduler actions are not covered by the options rollback.
 			as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
 			as_unschedule_all_actions( 'woocommerce_analytics_refund_fix_batch' );
@@ -205,11 +194,9 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	 * @return array[]
 	 */
 	private function get_events( string $event_name ): array {
-		return array_values(
-			array_map(
-				fn( $event ) => $event[1],
-				array_filter( $this->events, fn( $event ) => $event_name === $event[0] )
-			)
+		return array_map(
+			fn( $event ) => get_object_vars( $event ),
+			$this->get_tracks_events( 'wcadmin_' . $event_name )
 		);
 	}
 
