@@ -237,6 +237,42 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The email color palette prints the React mount the settings script reads, with the default colors and the theme.json flag.
+	 *
+	 * @testWith ["twentytwentyfour", true]
+	 *           ["storefront", false]
+	 *
+	 * @param string $theme          Theme to activate.
+	 * @param bool   $has_theme_json Whether that theme ships a theme.json.
+	 */
+	public function test_email_color_palette_mount_contract( string $theme, bool $has_theme_json ): void {
+		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+		$original_theme = get_stylesheet();
+
+		// switch_theme() writes options the rollback reverts, but the active theme is
+		// also read back through in-memory caches, so put it back by hand.
+		switch_theme( $theme );
+		// The defaults follow the active theme's palette, so read them while it is active.
+		$expected_colors = EmailColors::get_default_colors( true );
+		ob_start();
+		try {
+			( new WC_Settings_Emails() )->email_color_palette( array( 'title' => 'Color palette' ) );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+			switch_theme( $original_theme );
+		}
+
+		// The method opens a form table for the color fields that follow it.
+		$document = $this->load_html_document( $output . '</table>' );
+		$mount    = $this->get_element_by_id( $document, 'wc_settings_email_color_palette_slotfill' );
+
+		$this->assertSame( $expected_colors, json_decode( $mount->getAttribute( 'data-default-colors' ), true ) );
+		$this->assertSame( $has_theme_json, $mount->hasAttribute( 'data-has-theme-json' ) );
+		$this->assertSame( 'no', $this->get_element_by_id( $document, 'woocommerce_email_auto_sync_with_theme' )->getAttribute( 'value' ) );
+	}
+
+	/**
 	 * @testdox get_settings('') should return reply-to settings when block email editor is enabled.
 	 */
 	public function test_get_default_settings_with_block_email_editor_enabled() {
