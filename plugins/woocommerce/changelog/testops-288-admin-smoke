@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce admin smoke E2E tests from 27 titles to 6; PHPUnit owns the customer redirect policy and the 24 admin destinations become four menu journeys with named steps.
+
