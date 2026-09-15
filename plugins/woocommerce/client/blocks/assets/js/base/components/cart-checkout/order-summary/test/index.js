@@ -8,15 +8,10 @@ import { previewCart } from '@woocommerce/resource-previews';
  * Internal dependencies
  */
 import OrderSummary from '../index';
+import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
 
-// The currency symbol sits in its own element, so the whole price is read at once.
-/**
- * @param {HTMLElement} container
- */
-const getLineSubtotal = ( container ) =>
-	container.querySelector(
-		'.wc-block-components-order-summary-item__total-price bdi'
-	)?.textContent;
+// The screen reader label repeats the price, so only the visible one is queried.
+const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
@@ -31,7 +26,7 @@ jest.mock( '@woocommerce/base-context', () => ( {
 
 describe( 'Order Summary', () => {
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
-		const { container } = render(
+		render(
 			<OrderSummary
 				cartItems={ [
 					{
@@ -50,11 +45,13 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( getLineSubtotal( container ) ).toBe( '16€' );
+		expect(
+			screen.getByText( textContentMatcher( '16€' ), visibleOnly )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders correct cart line subtotal when product price is 0', async () => {
-		const { container } = render(
+		render(
 			<OrderSummary
 				cartItems={ [
 					{
@@ -77,6 +74,8 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( getLineSubtotal( container ) ).toBe( '$0.00' );
+		expect(
+			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
+		).toBeInTheDocument();
 	} );
 } );
