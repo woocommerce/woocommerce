@@ -47,6 +47,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			remove_filter( 'woocommerce_is_checkout', '__return_true' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
 		} finally {
@@ -97,6 +98,8 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 * @testdox Leaves the taxable address unchanged when the cart is empty.
 	 */
 	public function test_leaves_address_unchanged_for_empty_cart(): void {
+		$this->set_checkout_context();
+
 		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'An empty cart should use the configured shipping address.' );
@@ -108,10 +111,100 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_for_cart_without_shipping(): void {
 		$this->add_product_to_cart( true );
 		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A cart without products requiring shipping should use the billing address.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address for Store API cart and checkout requests.
+	 *
+	 * @dataProvider provider_store_api_cart_and_checkout_routes
+	 *
+	 * @param string $route Store API route.
+	 */
+	public function test_uses_billing_address_for_store_api_cart_and_checkout_requests( string $route ): void {
+		$this->add_product_to_cart( true );
+		$request = new \WP_REST_Request( 'GET', $route );
+		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $request );
+
+		try {
+			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
+
+			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A Store API cart request should use the billing address.' );
+		} finally {
+			$this->sut->handle_rest_post_dispatch( null );
+		}
+	}
+
+	/**
+	 * Provides Store API cart and checkout routes that can calculate cart totals.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_store_api_cart_and_checkout_routes(): array {
+		return array(
+			'cart namespace'       => array( '/wc/store/cart' ),
+			'versioned cart'       => array( '/wc/store/v1/cart' ),
+			'add cart item'        => array( '/wc/store/v1/cart/add-item' ),
+			'cart items'           => array( '/wc/store/v1/cart/items' ),
+			'cart item by key'     => array( '/wc/store/v1/cart/items/cart-item-key' ),
+			'apply coupon'         => array( '/wc/store/v1/cart/apply-coupon' ),
+			'cart coupons'         => array( '/wc/store/v1/cart/coupons' ),
+			'remove coupon'        => array( '/wc/store/v1/cart/coupons/coupon-code' ),
+			'remove cart coupon'   => array( '/wc/store/v1/cart/remove-coupon' ),
+			'remove cart item'     => array( '/wc/store/v1/cart/remove-item' ),
+			'select shipping rate' => array( '/wc/store/v1/cart/select-shipping-rate' ),
+			'update cart item'     => array( '/wc/store/v1/cart/update-item' ),
+			'update customer'      => array( '/wc/store/v1/cart/update-customer' ),
+			'cart extension'       => array( '/wc/store/v1/cart/extensions' ),
+			'checkout namespace'   => array( '/wc/store/checkout' ),
+			'versioned checkout'   => array( '/wc/store/v1/checkout' ),
+			'checkout draft order' => array( '/wc/store/v1/checkout/123' ),
+		);
+	}
+
+	/**
+	 * @testdox Leaves the taxable address unchanged for other Store API requests.
+	 */
+	public function test_leaves_address_unchanged_for_other_store_api_requests(): void {
+		$this->add_product_to_cart( true );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $request );
+
+		try {
+			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
+
+			$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'Other Store API requests should not use the billing address.' );
+		} finally {
+			$this->sut->handle_rest_post_dispatch( null );
+		}
+	}
+
+	/**
+	 * @testdox Restores the Store API cart request context after nested requests.
+	 */
+	public function test_restores_store_api_cart_request_context_after_nested_request(): void {
+		$this->add_product_to_cart( true );
+		$cart_request    = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+		$product_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+
+		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $cart_request );
+		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $product_request );
+
+		try {
+			$result_during_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
+			$this->sut->handle_rest_post_dispatch( null );
+			$result_after_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
+
+			$this->assertSame( $taxable_address, $result_during_nested_request, 'Nested non-cart Store API requests should not use the billing address.' );
+			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result_after_nested_request, 'The cart request context should be restored after a nested request.' );
+		} finally {
+			$this->sut->handle_rest_post_dispatch( null );
+		}
 	}
 
 	/**
@@ -120,6 +213,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_for_non_virtual_product_without_shipping(): void {
 		$this->add_product_to_cart( false );
 		add_filter( 'woocommerce_product_needs_shipping', '__return_false' );
+		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -132,6 +226,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function test_leaves_address_unchanged_for_mixed_cart(): void {
 		$this->add_product_to_cart( true );
 		$this->add_product_to_cart( false );
+		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -144,6 +239,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function test_leaves_address_unchanged_when_virtual_product_needs_shipping(): void {
 		$this->add_product_to_cart( true );
 		add_filter( 'woocommerce_product_needs_shipping', '__return_true' );
+		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -155,6 +251,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_leaves_address_unchanged_for_customer_who_does_not_own_cart(): void {
 		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
 		$other_customer = new \WC_Customer();
 		$other_customer->set_billing_location( 'DE', 'BE', '10115', 'Berlin' );
 		$other_customer->set_shipping_location( 'FR', 'IDF', '75001', 'Paris' );
@@ -162,6 +259,30 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$result = $other_customer->get_taxable_address();
 
 		$this->assertSame( array( 'FR', 'IDF', '75001', 'Paris' ), $result, 'The cart should not affect another customer\'s taxable address.' );
+	}
+
+	/**
+	 * @testdox Leaves the taxable address unchanged outside the cart and checkout.
+	 */
+	public function test_leaves_address_unchanged_outside_cart_and_checkout(): void {
+		$this->add_product_to_cart( true );
+
+		$result = $this->customer->get_taxable_address();
+
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'The cart should not affect taxable addresses outside the cart and checkout.' );
+	}
+
+	/**
+	 * @testdox Leaves the taxable address unchanged when the billing country is empty.
+	 */
+	public function test_leaves_address_unchanged_when_billing_country_is_empty(): void {
+		$this->add_product_to_cart( true );
+		$this->customer->set_billing_location( '', 'LND', 'SW1A 1AA', 'London' );
+		$this->set_checkout_context();
+
+		$result = $this->customer->get_taxable_address();
+
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'An empty billing country should not replace the shipping address.' );
 	}
 
 	/**
@@ -175,5 +296,12 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$product->save();
 
 		WC()->cart->add_to_cart( $product->get_id() );
+	}
+
+	/**
+	 * Set the request context to checkout.
+	 */
+	private function set_checkout_context(): void {
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
 	}
 }

@@ -14,6 +14,13 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 class NonShippingCartTaxLocation {
 
 	/**
+	 * Stack of Store API cart and checkout request contexts.
+	 *
+	 * @var bool[]
+	 */
+	private $store_api_cart_or_checkout_request_contexts = array();
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.2.0
@@ -21,6 +28,40 @@ class NonShippingCartTaxLocation {
 	 */
 	final public function init(): void {
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
+		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
+		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ) );
+	}
+
+	/**
+	 * Identify Store API cart and checkout requests before their callbacks run.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param mixed            $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
+	 * @param \WP_REST_Server  $server  Server instance.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @return mixed The response to dispatch.
+	 */
+	public function handle_rest_pre_dispatch( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+		$this->store_api_cart_or_checkout_request_contexts[] = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
+
+		return $result;
+	}
+
+	/**
+	 * Clear the Store API request state after its response is dispatched.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param mixed $response Response generated for the request.
+	 * @return mixed The dispatched response.
+	 */
+	public function handle_rest_post_dispatch( $response ) {
+		array_pop( $this->store_api_cart_or_checkout_request_contexts );
+
+		return $response;
 	}
 
 	/**
@@ -37,8 +78,17 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
+		if ( ! is_cart() && ! is_checkout() && ! end( $this->store_api_cart_or_checkout_request_contexts ) ) {
+			return $taxable_address;
+		}
+
 		$cart = WC()->cart;
 		if ( ! $cart instanceof \WC_Cart || $cart->is_empty() || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
+			return $taxable_address;
+		}
+
+		$billing_country = $customer->get_billing_country();
+		if ( empty( $billing_country ) ) {
 			return $taxable_address;
 		}
 
@@ -50,7 +100,7 @@ class NonShippingCartTaxLocation {
 		}
 
 		return array(
-			$customer->get_billing_country(),
+			$billing_country,
 			$customer->get_billing_state(),
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
