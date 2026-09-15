@@ -103,41 +103,14 @@ describe( 'ProductPrice', () => {
 		);
 		expect( ins ).toHaveAttribute( 'translate', 'no' );
 		expect( discountedLabel.nextElementSibling ).toBe( ins );
-	} );
-
-	test( 'renders the regular price in a del and the sale price in an ins', () => {
-		render(
-			<ProductPrice
-				price={ 50 }
-				regularPrice={ 100 }
-				currency={ currency }
-			/>
-		);
-
-		expect( screen.getByRole( 'deletion' ) ).toHaveTextContent( '£1.00' );
-		expect( screen.getByRole( 'insertion' ) ).toHaveTextContent( '£0.50' );
-	} );
-
-	test( 'renders both sale prices as price elements inside their wrappers', () => {
-		render(
-			<ProductPrice
-				price={ 50 }
-				regularPrice={ 100 }
-				currency={ currency }
-			/>
-		);
 
 		// The wrappers hold a price element rather than a flat string, so the
 		// currency symbol keeps the isolation FormattedMonetaryAmount gives it.
 		expect(
-			within( screen.getByRole( 'deletion' ) ).getByText(
-				textContentMatcher( '£1.00' )
-			)
+			within( del ).getByText( textContentMatcher( '£1.00' ) )
 		).toBeInTheDocument();
 		expect(
-			within( screen.getByRole( 'insertion' ) ).getByText(
-				textContentMatcher( '£0.50' )
-			)
+			within( ins ).getByText( textContentMatcher( '£0.50' ) )
 		).toBeInTheDocument();
 	} );
 

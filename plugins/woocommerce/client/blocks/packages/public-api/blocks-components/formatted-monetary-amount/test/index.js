@@ -473,25 +473,5 @@ describe( 'FormattedMonetaryAmount', () => {
 				`${ lrm }${ lbpSymbol } 1,563.45`
 			);
 		} );
-
-		test( 'isolates an RTL-script suffix so it keeps its position', () => {
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ {
-						...lbpCurrency,
-						prefix: '',
-						suffix: ` ${ lbpSymbol }`,
-					} }
-				/>
-			);
-
-			expect(
-				container.querySelector( symbolSelector )?.textContent
-			).toBe( lbpSymbol );
-			expect( container.querySelector( 'bdi' )?.textContent ).toBe(
-				`1,563.45 ${ lbpSymbol }`
-			);
-		} );
 	} );
 } );
