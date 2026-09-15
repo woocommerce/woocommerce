@@ -18,14 +18,15 @@ class FeaturedCategoryTest extends WC_Unit_Test_Case {
 	private $attachment_ids = array();
 
 	/**
-	 * @testdox Should render untouched legacy content as Cover without changing the stored post.
+	 * @testdox Should retain legacy rendering even when the saved content contains a Cover.
 	 * @testWith [true]
 	 *           [false]
 	 * @param bool $oldest Whether to use the original attribute-only format.
 	 */
-	public function test_legacy_content_uses_cover( bool $oldest ): void {
+	public function test_legacy_content_keeps_original_rendering( bool $oldest ): void {
 		$category_id = $this->create_category( 'Legacy category' );
-		$attributes  = array(
+		wp_update_term( $category_id, 'product_cat', array( 'description' => 'Legacy description' ) );
+		$attributes = array(
 			'categoryId'   => $category_id,
 			'contentAlign' => 'left',
 			'minHeight'    => 650,
@@ -33,26 +34,65 @@ class FeaturedCategoryTest extends WC_Unit_Test_Case {
 		);
 		if ( $oldest ) {
 			$attributes['editMode'] = false;
-			$attributes['showDesc'] = false;
+			$attributes['showDesc'] = true;
 		}
-		$markup  = '<!-- wp:woocommerce/featured-category ' . wp_json_encode( $attributes ) . ' --><!-- wp:paragraph --><p>Custom content</p><!-- /wp:paragraph --><!-- /wp:woocommerce/featured-category -->';
-		$post_id = $this->factory->post->create( array( 'post_content' => $markup ) );
-		$output  = do_blocks( get_post_field( 'post_content', $post_id ) );
-		$this->assertStringContainsString( 'wp-block-cover', $output );
-		$this->assertStringContainsString( 'is-position-center-left', $output );
-		$this->assertStringContainsString( 'natural-image', $output );
+		$inner_cover = '<!-- wp:cover --><div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph --><p>Custom content</p><!-- /wp:paragraph --></div></div><!-- /wp:cover -->';
+		$markup      = '<!-- wp:woocommerce/featured-category ' . wp_json_encode( $attributes ) . ' -->' . $inner_cover . '<!-- /wp:woocommerce/featured-category -->';
+		$post_id     = $this->factory->post->create( array( 'post_content' => $markup ) );
+		$output      = do_blocks( get_post_field( 'post_content', $post_id ) );
+		$this->assertStringContainsString( 'wc-block-featured-category__wrapper', $output );
+		$this->assertStringContainsString( 'has-left-content', $output );
 		$this->assertStringContainsString( 'min-height:650px', $output );
 		$this->assertStringContainsString( 'Custom content', $output );
 		$this->assertStringNotContainsString( 'woocommerce-placeholder', $output );
 		$this->assertSame( $markup, get_post_field( 'post_content', $post_id ) );
 		$processor = new \WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->has_class( 'wc-block-featured-category' ) );
+		$this->assertFalse( $processor->has_class( 'wp-block-cover' ) );
 		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wp-block-cover' ) ) );
-		$this->assertFalse( $processor->has_class( 'is-layout-flow' ), 'Layout spacing must not affect the background layers.' );
-		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wp-block-cover__inner-container' ) ) );
-		$this->assertTrue( $processor->has_class( 'is-layout-flow' ), 'Layout spacing belongs on the inner content container.' );
+		$this->assertFalse( $processor->next_tag( array( 'class_name' => 'wp-block-cover' ) ), 'Only the saved inner Cover should be rendered.' );
 		if ( $oldest ) {
 			$this->assertStringContainsString( 'Legacy category', $output );
+			$this->assertStringContainsString( 'Legacy description', $output );
+		} else {
+			$this->assertStringNotContainsString( 'wc-block-featured-category__title', $output );
 			$this->assertStringNotContainsString( 'wc-block-featured-category__description', $output );
+		}
+	}
+
+	/**
+	 * @testdox Should preserve the original fixed, responsive and natural image rendering.
+	 * @testWith ["fixed"]
+	 *           ["responsive"]
+	 *           ["natural"]
+	 * @param string $mode Legacy image mode.
+	 */
+	public function test_legacy_image_rendering( string $mode ): void {
+		$category_id = $this->create_category( 'Legacy image' );
+		update_term_meta( $category_id, 'thumbnail_id', $this->create_attachment() );
+		$attributes = array(
+			'categoryId'  => $category_id,
+			'imageFit'    => 'natural' === $mode ? 'none' : 'cover',
+			'hasParallax' => 'fixed' === $mode,
+		);
+		$output     = do_blocks( '<!-- wp:woocommerce/featured-category ' . wp_json_encode( $attributes ) . ' /-->' );
+		$processor  = new \WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__background-image' ) ) );
+		if ( 'fixed' === $mode ) {
+			$this->assertSame( 'DIV', $processor->get_tag() );
+			$this->assertTrue( $processor->has_class( 'has-parallax' ) );
+			$this->assertStringContainsString( 'background-repeat: no-repeat;', $processor->get_attribute( 'style' ) );
+			$this->assertStringContainsString( 'background-size: cover;', $processor->get_attribute( 'style' ) );
+		} elseif ( 'responsive' === $mode ) {
+			$this->assertSame( 'IMG', $processor->get_tag() );
+			$this->assertNotEmpty( $processor->get_attribute( 'srcset' ) );
+			$this->assertNotEmpty( $processor->get_attribute( 'width' ) );
+			$this->assertNotEmpty( $processor->get_attribute( 'height' ) );
+		} else {
+			$this->assertSame( 'IMG', $processor->get_tag() );
+			$this->assertNull( $processor->get_attribute( 'srcset' ) );
+			$this->assertStringContainsString( 'object-fit: none;', $processor->get_attribute( 'style' ) );
 		}
 	}
 
