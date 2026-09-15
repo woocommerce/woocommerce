@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -625,6 +625,87 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'geolocation_enabled'            => array(
 							'description' => __( 'Geolocation enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'taxes_enabled'                  => array(
+							'description' => __( 'Are tax rates and calculations enabled?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'prices_include_tax'             => array(
+							'description' => __( 'Are prices entered with tax?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_based_on'                   => array(
+							'description' => __( 'Address type used to calculate tax.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'shipping_tax_class'             => array(
+							'description' => __( 'Tax class used for shipping.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_round_at_subtotal'          => array(
+							'description' => __( 'Is tax rounded at subtotal level?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'additional_tax_classes'         => array(
+							'description' => __( 'Additional tax classes.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'items'       => array(
+								'type' => 'string',
+							),
+						),
+						'tax_display_shop'               => array(
+							'description' => __( 'How prices are displayed in the shop.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_display_cart'               => array(
+							'description' => __( 'How prices are displayed during cart and checkout.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'price_display_suffix'           => array(
+							'description' => __( 'Price display suffix.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_total_display'              => array(
+							'description' => __( 'How tax totals are displayed.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'tax_rate_count'                 => array(
+							'description' => __( 'Number of configured tax rates.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_country'             => array(
+							'description' => __( 'Store base country.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'default_customer_location'      => array(
+							'description' => __( 'Default customer location.', 'woocommerce' ),
+							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
@@ -1446,6 +1527,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_settings() {
+		global $wpdb;
+
 		// Get a list of terms used for product/order taxonomies.
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
@@ -1468,6 +1551,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$tax_rate_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" );
+
 		// Return array of useful settings for debugging.
 		return array(
 			'api_enabled'                    => WC()->legacy_rest_api_is_available(),
@@ -1486,6 +1572,19 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				),
 				true
 			),
+			'taxes_enabled'                  => 'yes' === get_option( 'woocommerce_calc_taxes', 'no' ),
+			'prices_include_tax'             => 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ),
+			'tax_based_on'                   => get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ),
+			'shipping_tax_class'             => get_option( 'woocommerce_shipping_tax_class', 'inherit' ),
+			'tax_round_at_subtotal'          => 'yes' === get_option( 'woocommerce_tax_round_at_subtotal', 'no' ),
+			'additional_tax_classes'         => WC_Tax::get_tax_classes(),
+			'tax_display_shop'               => get_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE ),
+			'tax_display_cart'               => get_option( 'woocommerce_tax_display_cart', TaxDisplayMode::EXCLUSIVE ),
+			'price_display_suffix'           => get_option( 'woocommerce_price_display_suffix', '' ),
+			'tax_total_display'              => get_option( 'woocommerce_tax_total_display', 'itemized' ),
+			'tax_rate_count'                 => absint( $tax_rate_count ),
+			'store_base_country'             => WC()->countries->get_base_country(),
+			'default_customer_location'      => get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE ),
 			'taxonomies'                     => $term_response,
 			'product_visibility_terms'       => $product_visibility_terms,
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',
