@@ -619,6 +619,8 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'Buyer', $saved_order->get_billing_last_name( 'edit' ) );
 		$this->assertSame( 'Guest Co', $saved_order->get_billing_company( 'edit' ) );
 		$this->assertSame( '1 Guest Street', $saved_order->get_billing_address_1( 'edit' ) );
+		$this->assertSame( 'Guestville', $saved_order->get_billing_city( 'edit' ) );
+		$this->assertSame( '90210', $saved_order->get_billing_postcode( 'edit' ) );
 		$this->assertSame( 'guest.buyer@example.com', $saved_order->get_billing_email( 'edit' ) );
 		$this->assertSame( '555-0100', $saved_order->get_billing_phone( 'edit' ) );
 
