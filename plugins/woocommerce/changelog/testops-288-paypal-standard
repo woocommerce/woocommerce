@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Isolate the PayPal Standard E2E fixture's settings per test and reload the settings page after onboarding, so both retained browser titles pass from any starting state; no coverage moves between layers.
+
