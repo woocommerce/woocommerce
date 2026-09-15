@@ -1063,12 +1063,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-product.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
 			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1076,12 +1070,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, array\|WC_Product_Download given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/abstracts/abstract-wc-product.php
@@ -6211,12 +6199,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-
-			message: '#^Parameter \#1 \$post_id of function wp_get_attachment_thumb_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/meta-boxes/views/html-variation-admin.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10680,11 +10662,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-comments.php
 
-		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$countries\.$#'
-			identifier: property.notFound
-			count: 5
-			path: includes/class-wc-countries.php
 
 		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
@@ -15289,12 +15266,6 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-structured-data.php
-
-		-
 			message: '#^Parameter \#1 \$comment of function get_comment_link expects int\|WP_Comment\|null, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -19079,12 +19050,6 @@ parameters:
 			identifier: offsetAccess.invalidOffset
 			count: 1
 			path: includes/export/abstract-wc-csv-exporter.php
-
-		-
-			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
 
 		-
 			message: '#^Argument of an invalid type array\|stdClass supplied for foreach, only iterables are supported\.$#'
@@ -24697,12 +24662,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
-
-		-
 			message: '#^Parameter \#1 \$title of function sanitize_title expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -26864,12 +26823,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
@@ -29524,12 +29477,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_src expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -29543,24 +29490,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$date of method WC_Product\:\:set_date_on_sale_to\(\) expects int\|string\|null, int\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_post expects int\|WP_Post\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_the_title expects int\|WP_Post, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -49150,12 +49079,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractProductGrid.php
 
 		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractProductGrid.php
-
-		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractProductGrid\:\:get_rating_html\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -53842,18 +53765,6 @@ parameters:
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
 		-
-			message: '#^Parameter \#2 \$blocks of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) expects array\<Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\>, array\<int\|string, array\<string, array\|string\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \$blocks of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
 			message: '#^Parameter \$template of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:update_template_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: class.notFound
 			count: 1
@@ -57376,36 +57287,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_created_via\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_object_read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -57467,12 +57348,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept object\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
@@ -63937,12 +63812,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
-
-		-
 			message: '#^Parameter \#1 \$order_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\AbstractLineItemSchema\:\:prepare_taxes\(\) expects Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\WC_Order_Item_Fee\|Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\WC_Order_Item_Product, WC_Order_Item_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -66313,12 +66182,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
 
 		-
-			message: '#^Cannot call method get_user_email\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:maybe_restore_notification_locale\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -66362,12 +66225,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_unsubscribe_key\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifiedEmail.php
-
-		-
-			message: '#^Cannot call method get_user_email\(\) on bool\|object\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifiedEmail.php
@@ -66639,18 +66496,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:is_already_signed_up\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Parameter \#1 \$notification_id of static method Automattic\\WooCommerce\\Internal\\StockNotifications\\Factory\:\:get_notification\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/StockNotifications/Frontend/SignupService.php
 
@@ -68391,12 +68236,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
