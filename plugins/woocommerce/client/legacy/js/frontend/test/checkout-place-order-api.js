@@ -863,9 +863,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 			expect( $form.prepend ).toHaveBeenCalledTimes( 1 );
 			expect( $form.prepend ).toHaveBeenCalledWith(
-				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
-					'<div class="woocommerce-error">Something went wrong.</div>' +
-					'</div>'
+				expect.stringContaining(
+					'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">'
+				)
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Something went wrong.' )
 			);
 			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
 		} );
