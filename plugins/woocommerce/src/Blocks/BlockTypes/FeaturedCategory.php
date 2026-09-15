@@ -48,7 +48,7 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
-	 * Render all Featured Category versions using Cover markup.
+	 * Render Cover layouts while retaining the original renderer for unmigrated blocks.
 	 *
 	 * @since 11.3.0
 	 *
@@ -58,16 +58,16 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( 'cover' !== ( $attributes['layout'] ?? '' ) ) {
+			return parent::render( $attributes, $content, $block );
+		}
+
 		$category = $this->get_item( $attributes );
 		if ( ! $category ) {
 			return '';
 		}
 
-		if ( 'cover' !== ( $attributes['layout'] ?? '' ) ) {
-			$content = $this->render_legacy_cover( $attributes, $content, $category );
-		} else {
-			$content = $this->render_cover( $content, $category, $block );
-		}
+		$content = $this->render_cover( $content, $category, $block );
 		wp_enqueue_style( 'wp-block-cover' );
 
 		if ( ! empty( $attributes['ariaLabel'] ) ) {
@@ -105,130 +105,6 @@ class FeaturedCategory extends FeaturedItem {
 		return $processor->get_updated_html();
 	}
 
-	/**
-	 * Wrap v1's saved inner blocks with their historical spacing.
-	 *
-	 * @param string $content Already rendered inner blocks.
-	 * @return string
-	 */
-	private static function render_v1( $content ) {
-		return '<div class="wp-block-group wc-block-featured-category__inner-blocks" style="padding:0 48px 16px">' . $content . '</div>';
-	}
-
-	/**
-	 * Adapt untouched posts to Cover without rewriting their saved content.
-	 *
-	 * @param array    $attributes Legacy attributes.
-	 * @param string   $content Already rendered inner blocks.
-	 * @param \WP_Term $category Selected category.
-	 * @return string
-	 */
-	private function render_legacy_cover( $attributes, $content, $category ) {
-		$padding = $attributes['style']['spacing']['padding'] ?? null;
-		if ( is_string( $padding ) ) {
-			$attributes['style']['spacing']['padding'] = array_fill_keys( array( 'top', 'right', 'bottom', 'left' ), $padding );
-		}
-
-		$styling = $this->recreate_legacy_styling( $attributes );
-		$image   = $this->render_legacy_image( $attributes, $category );
-		$overlay = $this->render_legacy_overlay( $attributes );
-
-		$historical_content = $this->render_attributes( $category, $attributes );
-		// Core uses the first HTML chunk to locate the inner wrapper for layout spacing.
-		$inner_content = array(
-			'<div class="' . esc_attr( trim( $styling['classes'] ) ) . '" style="' . esc_attr( $styling['styles'] ) . '">' . $image . $overlay . '<div class="wp-block-cover__inner-container">',
-			$historical_content . self::render_v1( $content ),
-			'</div></div>',
-		);
-
-		// Cover's PHP callback expects saved HTML; attributes alone cannot create it.
-		return render_block(
-			array(
-				'blockName'    => 'core/cover',
-				'attrs'        => array(
-					'backgroundType'   => 'image',
-					'useFeaturedImage' => false,
-					'style'            => $attributes['style'] ?? array(),
-				),
-				'innerBlocks'  => array(),
-				'innerHTML'    => implode( '', $inner_content ),
-				'innerContent' => $inner_content,
-			)
-		);
-	}
-
-	/**
-	 * Recreate the legacy Cover's classes and inline styles.
-	 *
-	 * @param array $attributes Legacy attributes with normalized padding.
-	 * @return array{classes: string, styles: string}
-	 */
-	private function recreate_legacy_styling( $attributes ) {
-		$natural  = 'cover' !== ( $attributes['imageFit'] ?? 'none' );
-		$classes  = 'wp-block-cover wc-block-featured-category__legacy';
-		$classes .= $natural ? ' wc-block-featured-category__natural-image' : '';
-		$position = in_array( $attributes['contentAlign'] ?? '', array( 'left', 'right' ), true ) ? $attributes['contentAlign'] : 'center';
-		if ( 'center' !== $position ) {
-			$classes .= ' has-custom-content-position is-position-center-' . $position;
-		}
-		$fixed    = ! empty( $attributes['hasParallax'] );
-		$repeated = ! empty( $attributes['isRepeated'] );
-		$classes .= $fixed ? ' has-parallax' : '';
-		$classes .= $repeated ? ' is-repeated' : '';
-		$classes .= ' ' . \Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
-		$styles   = $this->get_styles( $attributes );
-		$styles  .= isset( $attributes['lineHeight'] ) ? 'line-height:' . esc_attr( $attributes['lineHeight'] ) . ';' : '';
-		$styles  .= isset( $attributes['style']['spacing']['padding'] ) ? '' : 'padding:0;';
-
-		return array(
-			'classes' => $classes,
-			'styles'  => $styles,
-		);
-	}
-
-	/**
-	 * Render the legacy custom image or category thumbnail.
-	 *
-	 * @param array    $attributes Legacy attributes.
-	 * @param \WP_Term $category Selected category.
-	 * @return string
-	 */
-	private function render_legacy_image( $attributes, $category ) {
-		$custom_id = absint( $attributes['mediaId'] ?? 0 );
-		$image_id  = $custom_id ? $custom_id : $this->get_item_image_id( $category );
-		$size      = ( empty( $attributes['align'] ) || 'none' === $attributes['align'] ) && ( $attributes['height'] ?? 500 ) <= 800 ? 'large' : 'full';
-		$image_url = $image_id ? wp_get_attachment_image_url( $image_id, $size ) : ( $attributes['mediaSrc'] ?? '' );
-		if ( ! $image_url ) {
-			return '';
-		}
-
-		$focal     = $attributes['focalPoint'] ?? array(
-			'x' => 0.5,
-			'y' => 0.5,
-		);
-		$focal_css = sprintf( '%s%% %s%%', (float) ( $focal['x'] ?? 0.5 ) * 100, (float) ( $focal['y'] ?? 0.5 ) * 100 );
-		$alt       = $attributes['alt'] ?? '';
-		if ( ! empty( $attributes['hasParallax'] ) || ! empty( $attributes['isRepeated'] ) ) {
-			$image = '<div class="wp-block-cover__image-background wc-block-featured-category__background-image" style="' . esc_attr( 'background-position:' . $focal_css . ';background-image:url("' . esc_url_raw( $image_url ) . '");' ) . '"></div>';
-		} else {
-			$image = '<img class="wp-block-cover__image-background wc-block-featured-category__background-image" src="' . esc_url( $image_url ) . '" alt="' . esc_attr( $alt ) . '" style="object-position:' . esc_attr( $focal_css ) . '" />';
-		}
-		return $image;
-	}
-
-	/**
-	 * Recreate the legacy overlay colour or gradient and opacity.
-	 *
-	 * @param array $attributes Legacy attributes.
-	 * @return string
-	 */
-	private function render_legacy_overlay( $attributes ) {
-		$dim     = max( 0, min( 100, (int) ( $attributes['dimRatio'] ?? 50 ) ) );
-		$overlay = ! empty( $attributes['overlayGradient'] ) ? 'background:' . $attributes['overlayGradient'] : 'background-color:' . ( $attributes['overlayColor'] ?? '#000000' );
-		$overlay = '<span aria-hidden="true" class="wp-block-cover__background has-background-dim" style="' . esc_attr( $overlay . ';opacity:' . $dim / 100 ) . '"></span>';
-
-		return $overlay;
-	}
 
 	/**
 	 * Find the direct Cover whose image is still managed by Featured Category.

@@ -8,13 +8,6 @@
 	@include wc-block-featured-item();
 }
 
-.wc-block-featured-category__legacy {
-	.wc-block-featured-category__title,
-	.wc-block-featured-category__description {
-		box-sizing: border-box;
-	}
-}
-
 .wc-block-featured-category__natural-image {
 	> .wp-block-cover__image-background {
 		object-fit: none;
