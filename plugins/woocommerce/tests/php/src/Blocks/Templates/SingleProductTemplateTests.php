@@ -185,6 +185,92 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should add the $product_type product's body classes through the filter the template installs.
+	 *
+	 * @dataProvider product_type_provider
+	 *
+	 * @param string $product_type Product type to create.
+	 * @param string $type_class   Expected product type class.
+	 */
+	public function test_update_single_product_content_adds_product_body_classes( $product_type, $type_class ) {
+		$product_global_existed = array_key_exists( 'product', $GLOBALS );
+		$product_global         = $product_global_existed ? $GLOBALS['product'] : null;
+		$loop_global_existed    = array_key_exists( 'woocommerce_loop', $GLOBALS );
+		$loop_global            = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
+
+		try {
+			// The template under test installs its own body_class callback, so clear the
+			// stack first to isolate it. _restore_hooks() rebuilds the stack afterwards.
+			remove_all_filters( 'body_class' );
+
+			$product = 'variable' === $product_type
+				? \WC_Helper_Product::create_variation_product()
+				: \WC_Helper_Product::create_simple_product();
+
+			$GLOBALS['product'] = $product;
+			$GLOBALS['post']    = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; tear_down() nulls it again.
+
+			$template          = new \WP_Block_Template();
+			$template->slug    = 'single-product';
+			$template->title   = 'Single Product';
+			$template->content = '<!-- wp:woocommerce/product-price /-->';
+			$template->type    = 'wp_template';
+
+			$seed_classes = array( 'existing-body-class' );
+			wc_reset_loop();
+			$product_classes = wc_get_product_class( '', $product );
+			wc_reset_loop();
+
+			$single_product_template = new SingleProductTemplate();
+
+			// Calling the method directly is what makes the body_class assertions below
+			// deterministic, but on its own it would still pass if init() stopped wiring
+			// the method up at all. Pin the registration separately.
+			$single_product_template->init();
+			$this->assertSame(
+				11,
+				has_filter( 'get_block_templates', array( $single_product_template, 'update_single_product_content' ) ),
+				'init() must register the callback that installs the body_class filter.'
+			);
+
+			$single_product_template->update_single_product_content( array( $template ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
+			$filtered_classes = apply_filters( 'body_class', $seed_classes );
+
+			$this->assertSame( array_merge( $seed_classes, $product_classes ), $filtered_classes );
+			$this->assertContains( 'product', $filtered_classes );
+			$this->assertContains( $type_class, $filtered_classes );
+		} finally {
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
+			// globals it leaves exactly as the test left them.
+			if ( $product_global_existed ) {
+				$GLOBALS['product'] = $product_global;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+
+			if ( $loop_global_existed ) {
+				$GLOBALS['woocommerce_loop'] = $loop_global;
+			} else {
+				unset( $GLOBALS['woocommerce_loop'] );
+			}
+		}
+	}
+
+	/**
+	 * Product types for the Single Product body class contract.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_type_provider() {
+		return array(
+			'simple product'   => array( 'simple', 'product-type-simple' ),
+			'variable product' => array( 'variable', 'product-type-variable' ),
+		);
+	}
+
+	/**
 	 * @testdox Should not add the password form when the template has no Single Product blocks.
 	 */
 	public function test_no_remove_block_when_no_single_product_is_in_the_template() {
