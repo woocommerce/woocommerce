@@ -110,6 +110,50 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The customer filter receives keyed registered customers and the legacy guest value.
+	 */
+	public function test_customer_filter_receives_expected_customer_shapes(): void {
+		$customer = WC_Helper_Customer::create_customer( 'order_data_customer', 'password', 'order-data-customer@example.com' );
+		$customer->set_first_name( 'Order Data' );
+		$customer->set_last_name( 'Customer' );
+		$customer->save();
+
+		$registered_order = wc_create_order( array( 'customer_id' => $customer->get_id() ) );
+		$guest_order      = wc_create_order( array( 'customer_id' => 0 ) );
+		$this->orders[]   = $registered_order;
+		$this->orders[]   = $guest_order;
+
+		$filter_inputs     = array();
+		$customer_filter   = static function ( $found_users ) use ( &$filter_inputs ) {
+			$filter_inputs[] = $found_users;
+
+			return array( array( '' ) === $found_users ? 'Filtered guest customer' : 'Filtered registered customer' );
+		};
+		$render_order_data = static function ( WC_Order $order ): string {
+			$GLOBALS['theorder'] = null;
+
+			ob_start();
+			WC_Meta_Box_Order_Data::output( $order );
+
+			return (string) ob_get_clean();
+		};
+		add_filter( 'woocommerce_json_search_found_customers', $customer_filter );
+
+		try {
+			$registered_output = $render_order_data( $registered_order );
+			$guest_output      = $render_order_data( $guest_order );
+		} finally {
+			remove_filter( 'woocommerce_json_search_found_customers', $customer_filter );
+		}
+
+		$this->assertCount( 2, $filter_inputs, 'The filter should run once for each rendered order.' );
+		$this->assertSame( array( $customer->get_id() ), array_keys( $filter_inputs[0] ), 'The registered customer should be keyed by user ID.' );
+		$this->assertSame( array( '' ), $filter_inputs[1], 'Guest orders should retain the legacy filter value.' );
+		$this->assertStringContainsString( '>Filtered registered customer</option>', $registered_output );
+		$this->assertStringContainsString( '>Filtered guest customer</option>', $guest_output );
+	}
+
+	/**
 	 * @testdox The read-only summary hides persisted shipping details when the order does not need shipping.
 	 */
 	public function test_hides_shipping_details_when_order_does_not_need_shipping(): void {
