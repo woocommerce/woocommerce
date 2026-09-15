@@ -709,10 +709,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse the "date on sale to" field from a CSV.
 	 *
-	 * A value that names a calendar day and nothing else is treated as the end of that
-	 * day (23:59:59), matching the product edit screen, where the "On sale to" date input
-	 * is stored with an end-of-day time. A value that already carries a time, or a relative
-	 * expression such as "now", is left as the caller wrote it.
+	 * A bare calendar day becomes the end of that day (23:59:59), matching the product edit
+	 * screen. A value that already carries a time, or a relative expression such as "now",
+	 * is left as the caller wrote it.
 	 *
 	 * @since 11.3.0
 	 *
@@ -729,10 +728,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$date = date_parse( $parsed );
 
-		// Only a value that resolves to a bare calendar day gets the end-of-day treatment.
-		// date_parse() reports the time component for every format strtotime() understands,
-		// not just "10:00", and flags relative expressions separately, so a caller who did
-		// say when the sale ends keeps their value.
+		// date_parse() reports an hour for every timed format strtotime() understands, not
+		// just "10:00", and flags relative expressions separately.
 		if (
 			false === $date['year'] || false === $date['month'] || false === $date['day']
 			|| false !== $date['hour'] || isset( $date['relative'] )
@@ -740,9 +737,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $parsed;
 		}
 
-		// Built from the parsed calendar day itself, with no timestamp round-trip, so no
-		// timezone can move the date. The timezone-less result is interpreted as site-local
-		// by WC_Data::set_date_prop(), exactly like the value the admin product screen produces.
+		// Built from the parsed day, not a timestamp round-trip, so no timezone can move it.
 		return sprintf( '%04d-%02d-%02d 23:59:59', $date['year'], $date['month'], $date['day'] );
 	}
 

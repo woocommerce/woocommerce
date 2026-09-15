@@ -1761,8 +1761,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( '2099-01-26 10:30:00', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30:00' ) );
 		$this->assertSame( '2099-01-26 10:30', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30' ) );
-		// ISO8601 UTC form — both a plausible CSV value and the exact format this importer
-		// emits for Unix timestamps; must pass through with its UTC marker intact.
+		// Also the exact format this importer emits for Unix timestamps.
 		$this->assertSame( '2099-01-26T10:30:00Z', $importer->parse_date_on_sale_to_field( '2099-01-26T10:30:00Z' ) );
 	}
 
@@ -1773,15 +1772,11 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$csv_file = __DIR__ . '/sample.csv';
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
-		// ISO-8601 basic form.
 		$this->assertSame( '20990126T103000', $importer->parse_date_on_sale_to_field( '20990126T103000' ) );
-		// Hour-only designator.
 		$this->assertSame( '2099-01-26T10', $importer->parse_date_on_sale_to_field( '2099-01-26T10' ) );
-		// Natural-language time.
 		$this->assertSame( 'January 26, 2099 10am', $importer->parse_date_on_sale_to_field( 'January 26, 2099 10am' ) );
-		// Decimal time.
 		$this->assertSame( '2099-01-26 10.30', $importer->parse_date_on_sale_to_field( '2099-01-26 10.30' ) );
-		// Explicit epoch syntax: strtotime()/date_parse() treat it as a relative expression, not a bare calendar day.
+		// Epoch syntax parses as a relative expression, not a bare calendar day.
 		$this->assertSame( '@4073068800', $importer->parse_date_on_sale_to_field( '@4073068800' ) );
 	}
 
@@ -1835,9 +1830,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Importing a CSV with a date-only "date sale price ends" stores end-of-day, matching admin (#35321).
 	 */
 	public function test_import_date_on_sale_to_date_only_is_end_of_day() {
-		// Run under a non-UTC site timezone (UTC+12/+13) so any timezone drift in the
-		// parse → set_date_prop → meta round trip would surface as a wrong calendar day
-		// or time below. WP_UnitTestCase rolls back option changes after each test.
+		// A non-UTC zone so any drift in the parse → set_date_prop → meta round trip shows up below.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
 
 		$product = WC_Helper_Product::create_simple_product();
@@ -1845,17 +1838,12 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_regular_price( '10.00' );
 		$product->save();
 
-		// Second product with explicit times: the preserved (timed) path must reach the
-		// stored props at the exact site-local times, untouched by the end-of-day bump.
 		$timed_product = WC_Helper_Product::create_simple_product();
 		$timed_product->set_sku( 'issue-35321-timed-sku' );
 		$timed_product->set_regular_price( '10.00' );
 		$timed_product->save();
 
-		// file_put_contents/wp_delete_file (not fopen/fputcsv/@unlink) keep this clean
-		// against WooCommerce's phpcs ruleset, which treats warnings as failures.
-		// wp_tempnam() always appends a .tmp extension; the importer requires a
-		// .csv/.txt extension, so rename in place (no leftover stub file).
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
 		$tmp_path = wp_tempnam( 'wc-csv' );
 		$csv_path = $tmp_path . '.csv';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
@@ -1889,15 +1877,12 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
 		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
-		// WC_DateTime::date() renders in the site timezone, so these assert the
-		// site-local (admin-parity) values, not UTC.
+		// WC_DateTime::date() renders site-local, so these assert admin-parity values, not UTC.
 		$this->assertSame( '23:59:59', $date_to->date( 'H:i:s' ), 'date_on_sale_to should be end-of-day (site-local) to match admin' );
 		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ), 'date_on_sale_to calendar day must not drift in a non-UTC site timezone' );
 		$this->assertSame( '00:00:00', $date_from->date( 'H:i:s' ), 'date_on_sale_from should remain start-of-day' );
 		$this->assertSame( '2022-10-25', $date_from->date( 'Y-m-d' ) );
 
-		// Timed values are preserved exactly, interpreted as site-local (like the admin),
-		// enabling sub-day sales (here: a 09:00–10:30 window on specific days).
 		$updated_timed   = wc_get_product( $timed_product->get_id() );
 		$timed_date_to   = $updated_timed->get_date_on_sale_to();
 		$timed_date_from = $updated_timed->get_date_on_sale_from();
@@ -1921,8 +1906,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_regular_price( '10.00' );
 		$product->save();
 
-		// wp_tempnam() always appends a .tmp extension; the importer requires a
-		// .csv/.txt extension, so rename in place (no leftover stub file).
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
 		$tmp_path = wp_tempnam( 'wc-csv' );
 		$csv_path = $tmp_path . '.csv';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
@@ -1950,8 +1934,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			);
 		};
 
-		// wc_schedule_product_sale_events() schedules the exact-time end-of-sale action
-		// with these args/group; args shape per wc-product-functions.php.
+		// Args and group per wc_schedule_product_sale_events() in wc-product-functions.php.
 		$pending_end_actions = function () use ( $product ) {
 			return as_get_scheduled_actions(
 				array(
@@ -1973,9 +1956,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$first_timestamp = $first->getTimestamp();
 		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the first import' );
 
-		// Second, identical import. The parser reads the raw CSV value again (never the
-		// stored value), so the result is byte-identical; unchanged props mean the data
-		// store writes no meta, no meta hook fires, and nothing is rescheduled.
+		// The parser reads the raw CSV value again, never the stored one, so nothing changes.
 		$make_importer()->import();
 		$second = wc_get_product( $product->get_id() )->get_date_on_sale_to();
 
@@ -1994,8 +1975,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_sku( 'issue-35321-upgrade-sku' );
 		$product->set_regular_price( '10.00' );
-		// Set date_on_sale_to as plain midnight, the way the old (pre-#35321) callback
-		// stored a date-only value, rather than trying to un-patch the current importer.
+		// Midnight is what the pre-#35321 callback stored for a date-only value.
 		$product->set_date_on_sale_to( '2099-01-26 00:00:00' );
 		$product->save();
 
@@ -2015,8 +1995,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$before = wc_get_product( $product->get_id() )->get_date_on_sale_to();
 		$this->assertSame( '00:00:00', $before->date( 'H:i:s' ), 'the pre-upgrade value should start at midnight' );
 
-		// wp_tempnam() always appends a .tmp extension; the importer requires a
-		// .csv/.txt extension, so rename in place (no leftover stub file).
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
 		$tmp_path = wp_tempnam( 'wc-csv' );
 		$csv_path = $tmp_path . '.csv';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
