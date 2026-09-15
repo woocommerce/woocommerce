@@ -938,7 +938,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						}
 						return null;
 					}, $analytics_reports );
-					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+					// Reindex so wp_localize_script() encodes a JSON array; gaps make it an object the command palette ignores.
+					$formatted_analytics_reports = array_values( array_filter( $formatted_analytics_reports, 'is_array' ) );
 
 					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(
