@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the daily patterns fetch failing under WP-Cron since 11.1.0, and stop it from being rescheduled on every page load while it keeps failing.

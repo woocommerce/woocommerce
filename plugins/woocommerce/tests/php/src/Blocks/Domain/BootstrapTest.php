@@ -3,7 +3,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
+use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
+use Automattic\WooCommerce\Blocks\Domain\Package as BlocksPackage;
+use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Blocks\Registry\Container;
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -367,5 +372,57 @@ HTML;
 			$registry->is_registered( self::SAMPLE_BLOCK ),
 			'Block types should remain registered and must not be re-registered on demand.'
 		);
+	}
+
+	/**
+	 * @testdox Bootstrap registers the fetch_patterns callback on cron requests while still skipping pattern registration.
+	 */
+	public function test_fetch_patterns_callback_is_registered_on_cron_requests(): void {
+		$store_callbacks_before   = $this->count_hooked_callbacks( PTKPatternsStore::FETCH_PATTERNS_ACTION, PTKPatternsStore::class );
+		$pattern_callbacks_before = $this->count_hooked_callbacks( 'init', BlockPatterns::class );
+
+		add_filter( 'wp_doing_cron', '__return_true' );
+
+		$container = new Container();
+		$container->register(
+			BlocksPackage::class,
+			function () {
+				return new BlocksPackage( 'test', dirname( WC_PLUGIN_FILE ) );
+			}
+		);
+		new Bootstrap( $container );
+
+		$this->assertSame(
+			$store_callbacks_before + 1,
+			$this->count_hooked_callbacks( PTKPatternsStore::FETCH_PATTERNS_ACTION, PTKPatternsStore::class ),
+			'The fetch_patterns callback must be registered on cron requests, or Action Scheduler fails the action with "no callbacks are registered".'
+		);
+		$this->assertSame(
+			$pattern_callbacks_before,
+			$this->count_hooked_callbacks( 'init', BlockPatterns::class ),
+			'Pattern registration should still be skipped on cron requests.'
+		);
+	}
+
+	/**
+	 * Count the callbacks on a hook whose bound object is an instance of the given class.
+	 *
+	 * @param string $hook       Hook name.
+	 * @param string $class_name Fully qualified class name of the bound object.
+	 * @return int
+	 */
+	private function count_hooked_callbacks( string $hook, string $class_name ): int {
+		global $wp_filter;
+
+		$count = 0;
+		foreach ( ( $wp_filter[ $hook ]->callbacks ?? array() ) as $callbacks_at_priority ) {
+			foreach ( $callbacks_at_priority as $callback ) {
+				if ( is_array( $callback['function'] ) && ( $callback['function'][0] ?? null ) instanceof $class_name ) {
+					++$count;
+				}
+			}
+		}
+
+		return $count;
 	}
 }

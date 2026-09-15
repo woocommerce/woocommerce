@@ -35,6 +35,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// Clean up any existing actions before each test.
 		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+		delete_transient( PTKPatternsStore::SCHEDULE_COOLDOWN_TRANSIENT );
 
 		$this->ptk_client    = $this->createMock( PTKClient::class );
 		$this->pattern_store = new PTKPatternsStore( $this->ptk_client );
@@ -519,5 +520,78 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// Restore the original action count.
 		$wp_actions['action_scheduler_init'] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
+	 * @testdox get_patterns should schedule the first fetch immediately but not another one within the cooldown.
+	 */
+	public function test_get_patterns_does_not_reschedule_within_cooldown() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'The first call should schedule a fetch immediately' );
+
+		// A failed run leaves no pending action behind; before the cooldown this let every page load schedule a new one.
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+
+		$this->pattern_store->get_patterns();
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A second call within the cooldown should not schedule another fetch' );
+	}
+
+	/**
+	 * @testdox get_patterns should schedule a fetch again once the cooldown has expired.
+	 */
+	public function test_get_patterns_schedules_again_after_cooldown_expires() {
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+
+		// Simulate the transient timing out.
+		delete_transient( PTKPatternsStore::SCHEDULE_COOLDOWN_TRANSIENT );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch should be scheduled again after the cooldown expires' );
+	}
+
+	/**
+	 * @testdox flush_cached_patterns should clear the cooldown so the next fetch is scheduled immediately.
+	 */
+	public function test_flush_cached_patterns_clears_the_cooldown() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'The first call should schedule a fetch' );
+
+		$this->pattern_store->flush_cached_patterns();
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Flushing should unschedule the pending fetch' );
+
+		$this->pattern_store->flush_or_fetch_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch requested right after a flush should not be held back by the cooldown' );
+	}
+
+	/**
+	 * @testdox Deactivating a plugin other than WooCommerce should keep the cached patterns.
+	 */
+	public function test_deactivating_another_plugin_keeps_the_cached_patterns() {
+		$patterns = array( array( 'ID' => 1 ) );
+		update_option( PTKPatternsStore::OPTION_NAME, $patterns, false );
+
+		do_action( 'deactivated_plugin', 'some-other-plugin/some-other-plugin.php', false );
+
+		$this->assertSame( $patterns, get_option( PTKPatternsStore::OPTION_NAME ), 'Another plugin being deactivated should not flush the WooCommerce patterns cache' );
+	}
+
+	/**
+	 * @testdox Deactivating WooCommerce should flush the cached patterns.
+	 */
+	public function test_deactivating_woocommerce_flushes_the_cached_patterns() {
+		update_option( PTKPatternsStore::OPTION_NAME, array( array( 'ID' => 1 ) ), false );
+
+		do_action( 'deactivate_' . WC_PLUGIN_BASENAME, false );
+
+		$this->assertFalse( get_option( PTKPatternsStore::OPTION_NAME ), 'Deactivating WooCommerce should flush the patterns cache' );
 	}
 }

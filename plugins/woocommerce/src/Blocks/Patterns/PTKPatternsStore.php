@@ -17,6 +17,20 @@ class PTKPatternsStore {
 	 */
 	const FETCH_PATTERNS_ACTION = 'fetch_patterns';
 
+	/**
+	 * Transient set when a fetch is scheduled. While it exists, no further fetch is scheduled.
+	 *
+	 * @since 11.2.0
+	 */
+	const SCHEDULE_COOLDOWN_TRANSIENT = 'wc_ptk_fetch_patterns_cooldown';
+
+	/**
+	 * Minimum time between two scheduled fetches, in seconds.
+	 *
+	 * @since 11.2.0
+	 */
+	const SCHEDULE_COOLDOWN = DAY_IN_SECONDS;
+
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
 	);
@@ -46,7 +60,9 @@ class PTKPatternsStore {
 		// - The WooCommerce plugin is updated.
 		add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
-		add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
+		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
+			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'flush_cached_patterns' ) );
+		}
 		add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
@@ -103,16 +119,27 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an action if it's not already pending.
+	 * Schedule an action if it's not already pending and no fetch was scheduled within the cooldown.
+	 *
+	 * The cooldown guards against a failing fetch being rescheduled on every page load: a failed
+	 * action is not pending, so without it each request that finds the cache empty would queue a
+	 * new one. The first fetch is still scheduled immediately.
+	 *
+	 * @since 11.2.0 Scheduling is skipped while the cooldown transient exists.
 	 *
 	 * @param string $action The action name to schedule.
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
+		if ( get_transient( self::SCHEDULE_COOLDOWN_TRANSIENT ) ) {
+			return;
+		}
+
 		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
 
+		set_transient( self::SCHEDULE_COOLDOWN_TRANSIENT, time(), self::SCHEDULE_COOLDOWN );
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
 	}
 
@@ -184,10 +211,12 @@ class PTKPatternsStore {
 	 * Reset the cached patterns to fetch them again from the PTK.
 	 *
 	 * @since 10.4.1 Unscheduling is deferred if Action Scheduler hasn't initialized yet.
+	 * @since 11.2.0 The scheduling cooldown is cleared so a fetch requested after the flush is not held back.
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
+		delete_transient( self::SCHEDULE_COOLDOWN_TRANSIENT );
 
 		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
 			return;
