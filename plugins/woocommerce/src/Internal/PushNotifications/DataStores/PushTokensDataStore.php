@@ -371,6 +371,28 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Returns the IDs of every push token a user owns.
+	 *
+	 * @since 11.3.0
+	 * @param int $user_id The user.
+	 * @return int[]
+	 */
+	public function get_token_ids_for_user( int $user_id ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' AND post_author = %d ORDER BY ID ASC",
+					PushToken::POST_TYPE,
+					$user_id
+				)
+			)
+		);
+	}
+
+	/**
 	 * Determines whether the store has ever registered a push token, including
 	 * tokens that have since been deleted.
 	 *
