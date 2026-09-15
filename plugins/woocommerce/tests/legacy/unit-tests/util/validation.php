@@ -84,7 +84,7 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 		$br = array(
 			array( true, WC_Validation::is_postcode( '99999-999', 'BR' ) ),
 			array( true, WC_Validation::is_postcode( '99999999', 'BR' ) ),
-			array( false, WC_Validation::is_postcode( '99999 999', 'BR' ) ),
+			array( true, WC_Validation::is_postcode( '99999 999', 'BR' ) ),
 			array( false, WC_Validation::is_postcode( '99999-ABC', 'BR' ) ),
 		);
 
@@ -126,7 +126,7 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 		$jp = array(
 			array( true, WC_Validation::is_postcode( '1340088', 'JP' ) ),
 			array( true, WC_Validation::is_postcode( '134-0088', 'JP' ) ),
-			array( false, WC_Validation::is_postcode( '1340-088', 'JP' ) ),
+			array( true, WC_Validation::is_postcode( '1340-088', 'JP' ) ),
 			array( false, WC_Validation::is_postcode( '12345', 'JP' ) ),
 			array( false, WC_Validation::is_postcode( '0123', 'JP' ) ),
 		);

@@ -13,6 +13,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Utilities\PostcodeValidation;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -680,6 +681,8 @@ class WC_Frontend_Scripts {
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
+					'postcode_rules'            => PostcodeValidation::get_rules_for_countries( array_keys( array_merge( WC()->countries->get_allowed_countries(), WC()->countries->get_shipping_countries() ) ) ),
+					'i18n_postcode_error'       => esc_attr__( 'Please enter a valid postcode / ZIP.', 'woocommerce' ),
 				);
 				break;
 			case 'wc-address-autocomplete-common':
