@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Dispatchers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 
 /**
@@ -32,6 +32,26 @@ class InternalNotificationDispatcher {
 	const JWT_EXPIRY_SECONDS = 30;
 
 	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationStepLogger $step_logger The step logger.
+	 *
+	 * @since 11.3.0
+	 */
+	final public function init( NotificationStepLogger $step_logger ): void {
+		$this->step_logger = $step_logger;
+	}
+
+	/**
 	 * JSON-encodes notifications and fires a non-blocking POST to the internal
 	 * REST endpoint.
 	 *
@@ -49,10 +69,16 @@ class InternalNotificationDispatcher {
 		$body    = wp_json_encode( array( 'notifications' => $encoded ) );
 
 		if ( false === $body ) {
-			wc_get_logger()->error(
-				'Failed to JSON-encode push notification payload.',
-				array( 'source' => PushNotifications::FEATURE_NAME )
-			);
+			foreach ( $notifications as $notification ) {
+				$this->step_logger->log_failure(
+					$notification,
+					'dispatched',
+					'encode_failed',
+					'error',
+					'Failed to JSON-encode push notification payload.',
+					array( 'batch_size' => count( $notifications ) )
+				);
+			}
 			return;
 		}
 
@@ -70,7 +96,7 @@ class InternalNotificationDispatcher {
 		 * If the request fails, the ActionScheduler safety net will pick up
 		 * unsent notifications after 60 seconds.
 		 */
-		wp_remote_post(
+		$response = wp_remote_post(
 			rest_url( self::SEND_ENDPOINT ),
 			array(
 				'blocking' => false,
@@ -82,5 +108,25 @@ class InternalNotificationDispatcher {
 				'body'     => $body,
 			)
 		);
+
+		foreach ( $notifications as $notification ) {
+			if ( is_wp_error( $response ) ) {
+				$this->step_logger->log_failure(
+					$notification,
+					'dispatched',
+					'request_failed',
+					'warning',
+					sprintf( 'Loopback request failed: %s', $response->get_error_message() ),
+					array( 'batch_size' => count( $notifications ) )
+				);
+			} else {
+				$this->step_logger->log_notification_step(
+					$notification,
+					'dispatched',
+					'ok',
+					array( 'batch_size' => count( $notifications ) )
+				);
+			}
+		}
 	}
 }

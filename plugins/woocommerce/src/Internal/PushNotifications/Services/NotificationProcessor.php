@@ -192,7 +192,9 @@ class NotificationProcessor {
 		 */
 		list( $tokens, $held_back ) = $this->filter_tokens_by_preferences( $eligible_tokens, $notification );
 
-		$this->log_recipients( $notification, $eligible_tokens, $tokens, $held_back, $step_context );
+		$write_token_lines = count( $eligible_tokens ) <= self::TOKEN_LINE_CAP;
+
+		$this->log_recipients( $notification, $eligible_tokens, $tokens, $held_back, $write_token_lines, $step_context );
 
 		/**
 		 * There are no recipients to send to (either no tokens at all, or
@@ -207,6 +209,8 @@ class NotificationProcessor {
 		}
 
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
+
+		$this->log_send_outcome( $notification, $tokens, $result, $write_token_lines, $step_context );
 
 		if ( ! empty( $result['success'] ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
@@ -280,11 +284,12 @@ class NotificationProcessor {
 	 * Writes the recipient decision to the step log: one notification line
 	 * with the counts, and one line per device while under the cap.
 	 *
-	 * @param Notification       $notification    The notification being processed.
-	 * @param PushToken[]        $eligible_tokens Tokens whose owner has a role that receives push notifications.
-	 * @param PushToken[]        $recipients      The tokens the notification will be sent to.
-	 * @param array<int, string> $held_back       Dropped tokens as token ID => reason.
-	 * @param array              $step_context    Fields shared by every line of this attempt.
+	 * @param Notification       $notification      The notification being processed.
+	 * @param PushToken[]        $eligible_tokens   Tokens whose owner has a role that receives push notifications.
+	 * @param PushToken[]        $recipients        The tokens the notification will be sent to.
+	 * @param array<int, string> $held_back         Dropped tokens as token ID => reason.
+	 * @param bool               $write_token_lines Whether per-device lines are written for this attempt.
+	 * @param array              $step_context      Fields shared by every line of this attempt.
 	 * @return void
 	 */
 	private function log_recipients(
@@ -292,14 +297,14 @@ class NotificationProcessor {
 		array $eligible_tokens,
 		array $recipients,
 		array $held_back,
+		bool $write_token_lines,
 		array $step_context
 	): void {
 		if ( ! $this->step_logger->is_active() ) {
 			return;
 		}
 
-		$write_token_lines = count( $eligible_tokens ) <= self::TOKEN_LINE_CAP;
-		$recipient_ids     = array_map( fn( PushToken $token ) => (int) $token->get_id(), $recipients );
+		$recipient_ids = array_map( fn( PushToken $token ) => (int) $token->get_id(), $recipients );
 
 		$context = array_merge(
 			$step_context,
@@ -357,6 +362,43 @@ class NotificationProcessor {
 	}
 
 	/**
+	 * Writes one per-device line with the send outcome WPCOM reported. A token
+	 * WPCOM refused is marked as invalid; the rest carry the batch outcome.
+	 *
+	 * @param Notification $notification      The notification being processed.
+	 * @param PushToken[]  $recipients        The tokens the notification was sent to.
+	 * @param array        $result            The dispatcher's return value.
+	 * @param bool         $write_token_lines Whether per-device lines are written for this attempt.
+	 * @param array        $step_context      Fields shared by every line of this attempt.
+	 * @return void
+	 */
+	private function log_send_outcome(
+		Notification $notification,
+		array $recipients,
+		array $result,
+		bool $write_token_lines,
+		array $step_context
+	): void {
+		if ( ! $write_token_lines || ! $this->step_logger->is_active() ) {
+			return;
+		}
+
+		$outcome        = (string) ( $result['outcome'] ?? ( empty( $result['success'] ) ? 'failed' : 'accepted' ) );
+		$invalid_tokens = array_flip( $result['invalid_tokens'] ?? array() );
+
+		foreach ( $recipients as $token ) {
+			$this->step_logger->log_token_step(
+				$notification,
+				(int) $token->get_id(),
+				(int) $token->get_user_id(),
+				'send',
+				isset( $invalid_tokens[ $token->get_token() ] ) ? 'invalid_token' : $outcome,
+				$step_context
+			);
+		}
+	}
+
+	/**
 	 * Cancels the pending safety net ActionScheduler job for a notification.
 	 *
 	 * Called after the processor handles the notification (whether success or
@@ -406,19 +448,30 @@ class NotificationProcessor {
 
 			$notification = Notification::from_array( $data );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_unattributed_failure(
+				'safety_net',
+				'invalid_notification',
+				'error',
 				sprintf( 'Safety net failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+				)
 			);
 			return;
 		}
 
+		$this->step_logger->log_notification_step( $notification, 'safety_net', 'fired' );
+
 		try {
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
-				sprintf( 'Safety net failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+			$this->step_logger->log_failure(
+				$notification,
+				'safety_net',
+				'exception',
+				'error',
+				sprintf( 'Safety net failed: %s', $e->getMessage() )
 			);
 			$this->retry_handler->schedule( $notification, null, 0 );
 		}

@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNot
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Unit_Test_Case;
 
@@ -36,7 +37,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
 
-		$this->store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
+		$this->store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 		$this->store->register();
 	}
 
@@ -88,12 +89,48 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should log the trigger as queued with its safety net, then as a duplicate on a repeat.
+	 */
+	public function test_add_logs_queued_then_duplicate(): void {
+		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
+		$step_logger = $this->createMock( NotificationStepLogger::class );
+		$step_logger->expects( $this->exactly( 2 ) )
+			->method( 'log_notification_step' )
+			->withConsecutive(
+				array( $this->anything(), 'triggered', 'queued', array( 'safety_net' => 'scheduled' ) ),
+				array( $this->anything(), 'triggered', 'duplicate_in_request' )
+			);
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $step_logger );
+		$store->register();
+
+		$store->add( $this->create_order_mock( 42 ) );
+		$store->add( $this->create_order_mock( 42 ) );
+	}
+
+	/**
+	 * @testdox Should log the trigger as finding no tokens when none are registered.
+	 */
+	public function test_add_logs_no_tokens(): void {
+		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
+		$step_logger = $this->createMock( NotificationStepLogger::class );
+		$step_logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with( $this->anything(), 'triggered', 'no_tokens' );
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ), $step_logger );
+		$store->register();
+
+		$store->add( $this->create_order_mock( 42 ) );
+	}
+
+	/**
 	 * @testdox Should not add notifications when store has not been registered.
 	 */
 	public function test_add_does_nothing_when_not_registered(): void {
 		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
 		$store      = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 
 		$store->add( $this->create_order_mock( 42 ) );
 
@@ -106,7 +143,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	public function test_add_does_nothing_when_no_tokens_registered(): void {
 		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
 		$store      = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ), $this->createMock( NotificationStepLogger::class ) );
 		$store->register();
 
 		$store->add( $this->create_order_mock( 42 ) );
@@ -122,7 +159,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 
 		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
 		$store      = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ), $this->createMock( NotificationStepLogger::class ) );
 		$store->register();
 
 		$store->add( $notification );
@@ -142,7 +179,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	public function test_add_does_not_register_shutdown_hook_when_no_tokens_registered(): void {
 		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
 		$store      = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( false ), $this->createMock( NotificationStepLogger::class ) );
 		$store->register();
 
 		$store->add( $this->create_order_mock( 42 ) );
@@ -195,7 +232,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->method( 'dispatch' );
 
 		$store = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 		$store->register();
 		$store->add( $this->create_order_mock( 1 ) );
 
@@ -213,7 +250,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			->method( 'dispatch' );
 
 		$store = new PendingNotificationStore();
-		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 		$store->register();
 
 		$store->dispatch_all();

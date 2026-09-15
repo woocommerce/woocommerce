@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Throwable;
 
 /**
@@ -111,6 +112,53 @@ class NotificationStepLogger {
 	}
 
 	/**
+	 * Records a failure twice: as an error or warning under the module's own
+	 * source, which is the store's error log and is never switched off, and as
+	 * a step in the notification's journey.
+	 *
+	 * The error line carries the same identifying fields as the step, so a
+	 * store whose log threshold drops `info` still has a line the read path can
+	 * join to the notification.
+	 *
+	 * @param Notification $notification The notification the failure belongs to.
+	 * @param string       $step         Machine-readable step name, e.g. `send`.
+	 * @param string       $outcome      Machine-readable outcome, e.g. `request_failed`.
+	 * @param string       $level        `error` or `warning`.
+	 * @param string       $message      Human-readable message for the error log.
+	 * @param array        $context      Extra scalar fields to store with both lines.
+	 * @return void
+	 *
+	 * @since 11.3.0
+	 */
+	public function log_failure( Notification $notification, string $step, string $outcome, string $level, string $message, array $context = array() ): void {
+		$this->write_error( $level, $message, self::identify( $notification, $step, $outcome, $context ) );
+		$this->log_notification_step( $notification, $step, $outcome, $context );
+	}
+
+	/**
+	 * Records a failure that happened before a notification could be
+	 * identified, such as a loopback request that failed authorization.
+	 *
+	 * Written under the module's own source only, since there is no journey to
+	 * attach it to; the read path includes that source for the days in range.
+	 *
+	 * @param string $step    Machine-readable step name, e.g. `received`.
+	 * @param string $outcome Machine-readable outcome, e.g. `auth_failed`.
+	 * @param string $level   `error` or `warning`.
+	 * @param string $message Human-readable message for the error log.
+	 * @param array  $context Extra scalar fields to store with the line.
+	 * @return void
+	 *
+	 * @since 11.3.0
+	 */
+	public function log_unattributed_failure( string $step, string $outcome, string $level, string $message, array $context = array() ): void {
+		$context['step']    = $step;
+		$context['outcome'] = $outcome;
+
+		$this->write_error( $level, $message, $context );
+	}
+
+	/**
 	 * Builds the log source for a notification type.
 	 *
 	 * @param Notification $notification The notification.
@@ -183,23 +231,56 @@ class NotificationStepLogger {
 				return;
 			}
 
-			$context = array_merge(
-				$context,
-				array(
-					'source'         => $source,
-					'identifier'     => $notification->get_identifier(),
-					'type'           => $notification->get_type(),
-					'resource_id'    => $notification->get_resource_id(),
-					'step'           => $step,
-					'outcome'        => $outcome,
-					'remote-logging' => false,
-				)
-			);
+			$context           = self::identify( $notification, $step, $outcome, $context );
+			$context['source'] = $source;
 
 			wc_get_logger()->info( self::format_message( $step, $outcome ), $context );
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Deliberately ignored: a logging failure must not affect the send.
 		}
+	}
+
+	/**
+	 * Writes one line to the module's own error source, swallowing any failure.
+	 *
+	 * @param string $level   `error` or `warning`.
+	 * @param string $message Human-readable message.
+	 * @param array  $context Fields to store with the line.
+	 * @return void
+	 */
+	private function write_error( string $level, string $message, array $context ): void {
+		try {
+			$context['source']         = PushNotifications::FEATURE_NAME;
+			$context['remote-logging'] = false;
+
+			wc_get_logger()->log( $level, $message, $context );
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Deliberately ignored: a logging failure must not affect the send.
+		}
+	}
+
+	/**
+	 * Adds the fields every line needs to be joined back to its notification.
+	 * The caller's context cannot overwrite them.
+	 *
+	 * @param Notification $notification The notification.
+	 * @param string       $step         Machine-readable step name.
+	 * @param string       $outcome      Machine-readable outcome.
+	 * @param array        $context      The caller's context.
+	 * @return array
+	 */
+	private static function identify( Notification $notification, string $step, string $outcome, array $context ): array {
+		return array_merge(
+			$context,
+			array(
+				'identifier'     => $notification->get_identifier(),
+				'type'           => $notification->get_type(),
+				'resource_id'    => $notification->get_resource_id(),
+				'step'           => $step,
+				'outcome'        => $outcome,
+				'remote-logging' => false,
+			)
+		);
 	}
 
 	/**
