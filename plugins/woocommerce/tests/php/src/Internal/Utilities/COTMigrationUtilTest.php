@@ -59,12 +59,13 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	public function test_get_post_or_object_meta() {
 		$order = OrderHelper::create_order();
 		$post  = get_post( $order->get_id() );
-		$order->update_meta_data( 'dummy_meta', 'dummy_value' );
+		$order->update_meta_data( 'dummy_meta', 'order_value' );
 		$order->save();
-		update_post_meta( $order->get_id(), 'dummy_meta', 'dummy_value' );
+		// Give the post a different value, so each read proves which source answered.
+		update_post_meta( $order->get_id(), 'dummy_meta', 'post_value' );
 
-		$this->assertEquals( 'dummy_value', $this->sut->get_post_or_object_meta( $post, $order, 'dummy_meta', true ) );
-		$this->assertEquals( 'dummy_value', $this->sut->get_post_or_object_meta( $post, null, 'dummy_meta', true ) );
+		$this->assertSame( 'order_value', $this->sut->get_post_or_object_meta( $post, $order, 'dummy_meta', true ) );
+		$this->assertSame( 'post_value', $this->sut->get_post_or_object_meta( $post, null, 'dummy_meta', true ) );
 	}
 
 	/**
