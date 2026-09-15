@@ -411,7 +411,10 @@ class HposOrderExportHandler {
 	}
 
 	/**
-	 * Returns the post status the CPT data store would use for the order.
+	 * Returns the post status the order was stored with: prefixed, except for the core statuses that never are.
+	 *
+	 * The prefix is added regardless of whether the status is registered right now, so an order
+	 * holding a status from an inactive extension round-trips as `wc-<status>`, the way it was stored.
 	 *
 	 * @param \WC_Abstract_Order $order The order or refund.
 	 * @return string
@@ -423,7 +426,7 @@ class HposOrderExportHandler {
 			return $status;
 		}
 
-		return in_array( 'wc-' . $status, get_post_stati(), true ) ? 'wc-' . $status : $status;
+		return 'wc-' . $status;
 	}
 
 	/**

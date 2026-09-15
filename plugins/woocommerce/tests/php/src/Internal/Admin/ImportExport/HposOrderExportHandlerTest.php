@@ -315,7 +315,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$xml = $this->export( 'shop_order' );
 
 		$this->assertStringContainsString( "<wp:post_id>{$order->get_id()}</wp:post_id>", $xml );
-		$this->assertStringContainsString( '<wp:status><![CDATA[legacy-status]]></wp:status>', $xml );
+		$this->assertStringContainsString( '<wp:status><![CDATA[wc-legacy-status]]></wp:status>', $xml, 'Stored prefix is kept so the status matches again once its extension is active' );
 	}
 
 	/**
