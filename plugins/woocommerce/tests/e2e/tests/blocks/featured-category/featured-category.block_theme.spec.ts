@@ -74,10 +74,19 @@ test.describe( `${ blockData.slug } Block`, () => {
 					.split( ',' )
 					.filter( Boolean );
 
+				// --porcelain prints only the new term id. Match it on its own line,
+				// like productId above: without that, the last number anywhere in
+				// stdout wins, and this id is force-deleted in the finally below.
 				const categoryCliOutput = await wpCLI(
-					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ media.id } }' --user=1`
+					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ media.id } }' --porcelain --user=1`
 				);
-				categoryId = categoryCliOutput.stdout.match( /\d+/g )?.pop();
+				categoryId =
+					categoryCliOutput.stdout.match( /^[1-9]\d*$/m )?.[ 0 ];
+				if ( ! categoryId ) {
+					throw new Error(
+						`Failed to read the created category id: ${ categoryCliOutput.stdout }`
+					);
+				}
 				await wpCLI(
 					`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
 				);
