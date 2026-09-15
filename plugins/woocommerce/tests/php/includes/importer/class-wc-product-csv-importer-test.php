@@ -1774,7 +1774,34 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
 		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099/01/26' ) );
 		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'January 26, 2099' ) );
+	}
+
+	/**
+	 * @testdox Non-canonical date-only formats keep their calendar day even if PHP's default timezone is not UTC.
+	 */
+	public function test_parse_date_on_sale_to_field_php_timezone_does_not_drift() {
+		// These formats go through the strtotime()/date() fallback rather than the pure
+		// string path. WordPress pins PHP's default timezone to UTC, but the parser is
+		// public and must not silently depend on that: the parse and the reformat have to
+		// share a timezone, whatever it is.
+		$original_timezone = date_default_timezone_get();
+
+		try {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Deliberately exercising a non-UTC default timezone; restored in finally.
+			date_default_timezone_set( 'Asia/Tokyo' );
+
+			$csv_file = __DIR__ . '/sample.csv';
+			$importer = new WC_Product_CSV_Importer( $csv_file );
+
+			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
+			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099/01/26' ) );
+			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'January 26, 2099' ) );
+		} finally {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Restoring the timezone the test changed.
+			date_default_timezone_set( $original_timezone );
+		}
 	}
 
 	/**

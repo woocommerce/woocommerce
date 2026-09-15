@@ -746,15 +746,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $matches[1] . ' 23:59:59';
 		}
 
-		// Other date-only formats accepted by strtotime() (e.g. "26-01-2099"). WordPress
-		// pins PHP's default timezone to UTC, so strtotime() and gmdate() operate in the
-		// same zone and the reformat cannot shift the calendar day.
+		// Other date-only formats accepted by strtotime() (e.g. "26-01-2099", "2099/01/26").
+		// strtotime() and date() are deliberately paired here: both use PHP's default
+		// timezone, so the reformat cannot shift the calendar day whatever that timezone
+		// is. This is the same pairing the product edit screen uses when it forces the
+		// sale end date to the end of the day.
 		$timestamp = strtotime( (string) $parsed );
 		if ( false === $timestamp ) {
 			return $parsed;
 		}
 
-		return gmdate( 'Y-m-d', $timestamp ) . ' 23:59:59';
+		return date( 'Y-m-d 23:59:59', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Paired with strtotime() above so both use the same timezone; see comment.
 	}
 
 	/**
@@ -1285,7 +1287,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Whether a variation row that does not exist yet can be created under its parent product.
 	 *
-	 * @since 11.3.0
+	 * @since 11.1.0
 	 *
 	 * @param array $parsed_data Parsed row data.
 	 * @return true|WP_Error True when the variation can be created, a WP_Error describing the refusal otherwise.
@@ -1346,7 +1348,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * an attribute the parent does not have at all is dropped on save, silently turning the row
 	 * into an "any" variation that matches every combination.
 	 *
-	 * @since 11.3.0
+	 * @since 11.1.0
 	 *
 	 * @param array      $parsed_data    Parsed row data.
 	 * @param WC_Product $parent_product Parent product the variation would be created under.
@@ -1521,7 +1523,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 						 *
 						 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
 						 *
-						 * @since 11.3.0
+						 * @since 11.1.0
 						 *
 						 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
 						 * @param array $parsed_data      Parsed row data.
