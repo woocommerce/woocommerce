@@ -3010,6 +3010,9 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$raw_response = (string) $this->_last_response;
 		$result       = json_decode( $raw_response, true );
+		// A handler can send two payloads under the test die handler: wp_send_json_*() throws
+		// to stop the request, and the handler's own catch block catches that and sends an
+		// error payload after it. Decode the first one, which is all a real request receives.
 		if ( null === $result ) {
 			$second_response_offset = strpos( $raw_response, '}{"success":false' );
 			if ( false !== $second_response_offset ) {
