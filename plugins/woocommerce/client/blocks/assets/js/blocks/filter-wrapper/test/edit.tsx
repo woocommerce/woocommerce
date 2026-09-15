@@ -13,6 +13,7 @@ import FilterWrapperEdit from '../edit';
 import PriceFilterEdit from '../../price-filter/edit';
 import RatingFilterEdit from '../../rating-filter/edit';
 import StockFilterEdit from '../../stock-filter/edit';
+import { textContentMatcher } from '../../../../../tests/utils/find-by-text';
 
 jest.mock( '@wordpress/block-editor', () => ( {
 	...jest.requireActual( '@wordpress/block-editor' ),
@@ -280,8 +281,8 @@ describe( 'legacy filter editor ownership', () => {
 				name: 'Filter products by maximum price',
 			} )
 		).not.toBeInTheDocument();
-		expect( screen.getByText( '$1' ) ).toBeVisible();
-		expect( screen.getByText( '$50' ) ).toBeVisible();
+		expect( screen.getByText( textContentMatcher( '$1' ) ) ).toBeVisible();
+		expect( screen.getByText( textContentMatcher( '$50' ) ) ).toBeVisible();
 
 		setAttributes.mockClear();
 		await user.click(
