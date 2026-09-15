@@ -49997,18 +49997,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedItem.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:update_context\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:\$current_item \(WC_Product\|WP_Term\|null\) does not accept WC_Product\|false\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
