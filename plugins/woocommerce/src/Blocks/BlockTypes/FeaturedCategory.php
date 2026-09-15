@@ -98,7 +98,7 @@ class FeaturedCategory extends FeaturedItem {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 		$cover     = $this->find_managed_cover( $block->parsed_block['innerBlocks'] ?? array() );
 		if ( $cover && $processor->next_tag( array( 'class_name' => 'wp-block-cover' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
-			$image = $cover['attrs']['metadata']['woocommerce/featured-category-image'] ?? $cover['attrs']['metadata']['bindings']['url']['args'] ?? array();
+			$image = $cover['attrs']['metadata']['woocommerce/featured-category-image'];
 			$this->update_cover_image_markup( $processor, $category, $image, strpos( $cover['attrs']['className'] ?? '', 'wc-block-featured-category__natural-image' ) !== false );
 		}
 
@@ -165,7 +165,7 @@ class FeaturedCategory extends FeaturedItem {
 	 */
 	private function recreate_legacy_styling( $attributes ) {
 		$natural  = 'cover' !== ( $attributes['imageFit'] ?? 'none' );
-		$classes  = 'wp-block-cover wc-block-featured-category__cover wc-block-featured-category__legacy';
+		$classes  = 'wp-block-cover wc-block-featured-category__legacy';
 		$classes .= $natural ? ' wc-block-featured-category__natural-image' : '';
 		$position = in_array( $attributes['contentAlign'] ?? '', array( 'left', 'right' ), true ) ? $attributes['contentAlign'] : 'center';
 		if ( 'center' !== $position ) {
@@ -244,19 +244,10 @@ class FeaturedCategory extends FeaturedItem {
 			$attributes = $block['attrs'] ?? array();
 			$bindings   = $attributes['metadata']['bindings'] ?? array();
 			$image      = $attributes['metadata']['woocommerce/featured-category-image'] ?? null;
-			if ( ! empty( $attributes['useFeaturedImage'] ) || 'image' !== ( $attributes['backgroundType'] ?? 'image' ) || isset( $bindings['__default'] ) ) {
+			if ( ! is_array( $image ) || ! empty( $attributes['useFeaturedImage'] ) || 'image' !== ( $attributes['backgroundType'] ?? 'image' ) || isset( $bindings['id'] ) || isset( $bindings['url'] ) || isset( $bindings['__default'] ) ) {
 				return null;
 			}
-			foreach ( array( 'id', 'url' ) as $attribute ) {
-				if ( isset( $bindings[ $attribute ] ) && 'woocommerce/term-image' !== ( $bindings[ $attribute ]['source'] ?? '' ) ) {
-					return null;
-				}
-			}
-			if ( is_array( $image ) ) {
-				return ( $attributes['id'] ?? 0 ) === ( $image['id'] ?? 0 ) && ( $attributes['url'] ?? '' ) === ( $image['url'] ?? '' ) ? $block : null;
-			}
-			// Read previews saved by the binding-based implementation without registering a global source.
-			return 'woocommerce/term-image' === ( $bindings['url']['source'] ?? '' ) ? $block : null;
+			return ( $attributes['id'] ?? 0 ) === ( $image['id'] ?? 0 ) && ( $attributes['url'] ?? '' ) === ( $image['url'] ?? '' ) ? $block : null;
 		}
 
 		return null;
