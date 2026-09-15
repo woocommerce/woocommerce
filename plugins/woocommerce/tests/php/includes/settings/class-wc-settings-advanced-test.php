@@ -5,7 +5,6 @@
  * @package WooCommerce\Tests\Settings
  */
 
-use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -153,13 +152,13 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
 		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
 
-		// Detach the callbacks that react to these two options changing, so seeding and
-		// saving here cannot reach past the settings screen. `_restore_hooks()` puts them
-		// back after the test, the same way the rollback puts the option rows back.
+		// Detach the tracking callbacks that react to woocommerce_allow_tracking changing:
+		// they have side effects the rollback cannot undo. `_restore_hooks()` puts them back
+		// after the test. The marketing-notes callback stays attached, because the notes it
+		// deletes are rows the rollback restores.
 		foreach ( array( 'get_tracking_history', 'handle_tracking_setting_change' ) as $method ) {
 			remove_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10 );
 		}
-		remove_action( 'update_option_woocommerce_show_marketplace_suggestions', array( Notes::class, 'possibly_delete_marketing_notes' ), 10 );
 
 		try {
 			// The peer starts at 'yes' on purpose. Seeding both to 'no' would make the peer
