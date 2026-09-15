@@ -23,6 +23,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
 
 		try {
+			// Post what a browser submits: '1' for a ticked checkbox and nothing for an
+			// unticked one, so woocommerce_enable_coupons is left out on purpose.
 			$_POST                      = array(
 				'woocommerce_store_address'               => '5th Avenue',
 				'woocommerce_store_address_2'             => 'Suite 4',
@@ -35,9 +37,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 				'woocommerce_ship_to_countries'           => 'specific',
 				'woocommerce_specific_ship_to_countries'  => array( 'US' ),
 				'woocommerce_default_customer_address'    => 'geolocation',
-				'woocommerce_calc_taxes'                  => 'yes',
-				'woocommerce_enable_coupons'              => 'no',
-				'woocommerce_calc_discounts_sequentially' => 'yes',
+				'woocommerce_calc_taxes'                  => '1',
+				'woocommerce_calc_discounts_sequentially' => '1',
 				'woocommerce_currency'                    => 'CAD',
 				'woocommerce_currency_pos'                => 'left_space',
 				'woocommerce_price_thousand_sep'          => '.',

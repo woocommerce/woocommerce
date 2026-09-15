@@ -168,8 +168,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			update_option( $selected_option_id, 'no' );
 			update_option( $peer_option_id, 'yes' );
 
+			// Post '1', the value a ticked checkbox submits. save_fields also accepts 'yes', which no
+			// browser sends, so posting 'yes' would not notice the '1' branch breaking.
 			$GLOBALS['current_section'] = 'woocommerce_com';
-			$_POST                      = array( $selected_option_id => 'yes' );
+			$_POST                      = array( $selected_option_id => '1' );
 
 			$sut = new WC_Settings_Advanced();
 			$sut->save();
