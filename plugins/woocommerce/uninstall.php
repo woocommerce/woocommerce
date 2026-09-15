@@ -84,6 +84,14 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits_wrapper' );
 	as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
 	as_unschedule_all_actions( 'generate_category_lookup_table_wrapper' );
+
+	/*
+	 * PTKPatternsStore cancels this itself on `deactivated_plugin`, but it is only instantiated for
+	 * admin and REST requests, so a WP-CLI deactivation never registers that callback and leaves the
+	 * recurring action behind. The group is passed because `fetch_patterns` is not namespaced and an
+	 * unscoped call would cancel another plugin's action of the same name.
+	 */
+	as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
 }
 
 /*
