@@ -19,7 +19,7 @@ jest.mock( '../../base/utils/errors', () => ( {
 } ) );
 
 const mockCategory = { name: 'Clothing' };
-const attributes = /** @type {Record<string, unknown>} */ ( { categoryId: 1 } );
+const attributes = { categoryId: 1 };
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
