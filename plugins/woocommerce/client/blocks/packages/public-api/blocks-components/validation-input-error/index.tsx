@@ -14,12 +14,15 @@ export interface ValidationInputErrorProps {
 	errorMessage?: string;
 	propertyName?: string;
 	elementId?: string;
+	// Id for the message element. Use it when errorMessage does not come from the validation store, so an input can still reference the message.
+	id?: string;
 }
 
 export const ValidationInputError = ( {
 	errorMessage = '',
 	propertyName = '',
 	elementId = '',
+	id = '',
 }: ValidationInputErrorProps ): JSX.Element | null => {
 	const { validationError, validationErrorId } = useSelect(
 		( select ) => {
@@ -43,7 +46,7 @@ export const ValidationInputError = ( {
 
 	return (
 		<div className="wc-block-components-validation-error" role="alert">
-			<p id={ validationErrorId }>
+			<p id={ id || validationErrorId }>
 				<Icon icon={ cautionFilled } />
 				<span>{ errorMessage }</span>
 			</p>

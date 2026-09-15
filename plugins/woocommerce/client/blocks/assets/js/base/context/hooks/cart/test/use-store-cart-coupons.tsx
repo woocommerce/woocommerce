@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { renderHook, act } from '@testing-library/react';
+import { select } from '@wordpress/data';
+import { validationStore } from '@woocommerce/block-data';
 import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
@@ -22,6 +24,9 @@ jest.mock( '@woocommerce/block-data/cart/resolvers', () => {
 	};
 } );
 
+// The stubbed batch responses below are not complete Store API responses, so
+// applyCoupon rejects after the request has been captured. Where only the
+// request is under test, the rejection is ignored.
 type CapturedRequest = {
 	url: string;
 	method: string;
@@ -90,7 +95,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			// Apply a coupon
 			await act( async () => {
-				await result.current.applyCoupon( 'TEST5' );
+				await result.current
+					.applyCoupon( 'TEST5' )
+					.catch( () => undefined );
 			} );
 
 			// Verify the request was made
@@ -148,7 +155,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			// Apply each coupon and verify API calls
 			for ( let i = 0; i < testCoupons.length; i++ ) {
 				await act( async () => {
-					await result.current.applyCoupon( testCoupons[ i ] );
+					await result.current
+						.applyCoupon( testCoupons[ i ] )
+						.catch( () => undefined );
 				} );
 
 				// Verify the API call for this coupon
@@ -184,7 +193,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			} );
 		} );
 
-		it( 'handles API errors correctly without breaking', async () => {
+		it( 'rejects with the server message and leaves the validation store empty', async () => {
 			// Track the request details
 			let capturedRequest: CapturedRequest = {
 				url: '',
@@ -224,11 +233,15 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				useStoreCartCoupons( 'wc/checkout' )
 			);
 
-			// Apply invalid coupon - should not throw error
+			// The failure is reported to the caller, not to the validation store.
 			await act( async () => {
-				const success = await result.current.applyCoupon( 'INVALID' );
-				expect( success ).toBe( false );
+				await expect(
+					result.current.applyCoupon( 'INVALID' )
+				).rejects.toThrow( 'Coupon "INVALID" does not exist!' );
 			} );
+			expect( select( validationStore ).hasValidationErrors() ).toBe(
+				false
+			);
 
 			// Verify the API call was still made
 			expect( capturedRequest ).not.toBeNull();
@@ -272,7 +285,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current.applyCoupon( 'CACHE_TEST' );
+				await result.current
+					.applyCoupon( 'CACHE_TEST' )
+					.catch( () => undefined );
 			} );
 
 			// Verify proper headers are sent
@@ -316,7 +331,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current.applyCoupon( 'BATCH_TEST' );
+				await result.current
+					.applyCoupon( 'BATCH_TEST' )
+					.catch( () => undefined );
 			} );
 
 			// Parse and verify the batch request structure
@@ -415,7 +432,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current.applyCoupon( 'CHECKOUT_CONTEXT' );
+				await result.current
+					.applyCoupon( 'CHECKOUT_CONTEXT' )
+					.catch( () => undefined );
 			} );
 
 			// Verify API call is made regardless of context
@@ -461,11 +480,15 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await checkoutResult.current.applyCoupon( 'CHECKOUT_COUPON' );
+				await checkoutResult.current
+					.applyCoupon( 'CHECKOUT_COUPON' )
+					.catch( () => undefined );
 			} );
 
 			await act( async () => {
-				await cartResult.current.applyCoupon( 'CART_COUPON' );
+				await cartResult.current
+					.applyCoupon( 'CART_COUPON' )
+					.catch( () => undefined );
 			} );
 
 			// Both should make the same API calls
@@ -516,7 +539,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			const specialCoupon = 'COUPON-WITH_SPECIAL@CHARS';
 			await act( async () => {
-				await result.current.applyCoupon( specialCoupon );
+				await result.current
+					.applyCoupon( specialCoupon )
+					.catch( () => undefined );
 			} );
 
 			expect( capturedRequest ).not.toBeNull();
@@ -554,7 +579,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current.applyCoupon( '' );
+				await result.current.applyCoupon( '' ).catch( () => undefined );
 			} );
 
 			expect( capturedRequest ).not.toBeNull();
@@ -590,12 +615,15 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				useStoreCartCoupons( 'wc/checkout' )
 			);
 
-			// Should not throw error even on network failure
+			// A network failure is reported the same way as a rejected coupon.
 			await act( async () => {
-				const success =
-					await result.current.applyCoupon( 'NETWORK_FAIL' );
-				expect( success ).toBe( false );
+				await expect(
+					result.current.applyCoupon( 'NETWORK_FAIL' )
+				).rejects.toThrow();
 			} );
+			expect( select( validationStore ).hasValidationErrors() ).toBe(
+				false
+			);
 
 			expect( capturedRequest ).not.toBeNull();
 			expect( capturedRequest.url ).toContain( '/wc/store/v1/batch' );
