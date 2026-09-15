@@ -69,6 +69,8 @@ describe( 'withReviews Component', () => {
 		} );
 
 	afterEach( () => {
+		renderResult?.unmount();
+		renderResult = undefined;
 		mockUtils.getReviews.mockReset();
 		CapturedComponent.mockClear();
 		lastProps = undefined;
@@ -118,6 +120,72 @@ describe( 'withReviews Component', () => {
 				per_page: 1,
 			} );
 			expect( getReviews ).toHaveBeenCalledTimes( 2 );
+		} );
+	} );
+
+	it.each( [
+		[
+			'category array',
+			{ categoryIds: [ 4, 8 ], productId: undefined },
+			{
+				category_id: '4,8',
+				offset: 0,
+				order: 'desc',
+				orderby: 'date_gmt',
+				per_page: 2,
+			},
+		],
+		[
+			'product',
+			{ productId: 42 },
+			{
+				offset: 0,
+				order: 'desc',
+				orderby: 'date_gmt',
+				per_page: 2,
+				product_id: 42,
+			},
+		],
+	] )( 'requests reviews for a %s filter', async ( _name, props, args ) => {
+		mockUtils.getReviews.mockResolvedValue( {
+			reviews: [],
+			totalReviews: 0,
+		} );
+
+		await renderComponent( props );
+
+		expect( mockUtils.getReviews ).toHaveBeenCalledWith( args );
+	} );
+
+	it( 'combines configured offset with appended review count', async () => {
+		mockUtils.getReviews
+			.mockResolvedValueOnce( {
+				reviews: mockReviews.slice( 0, 2 ),
+				totalReviews: 10,
+			} )
+			.mockResolvedValueOnce( {
+				reviews: mockReviews.slice( 2 ),
+				totalReviews: 10,
+			} );
+		await renderComponent( { offset: 5, reviewsToDisplay: 2 } );
+
+		await settle( () =>
+			renderResult.rerender(
+				<TestComponent
+					attributes={ {} }
+					offset={ 5 }
+					order="desc"
+					orderby="date_gmt"
+					productId={ 1 }
+					reviewsToDisplay={ 4 }
+				/>
+			)
+		);
+
+		expect( mockUtils.getReviews ).toHaveBeenNthCalledWith( 2, {
+			...defaultArgs,
+			offset: 7,
+			per_page: 2,
 		} );
 	} );
 
