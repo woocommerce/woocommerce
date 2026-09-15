@@ -472,12 +472,7 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		$shop_page_id          = $this->prepare_shop_page();
 
 		try {
-			wp_update_post(
-				array(
-					'ID'          => $shop_page_id,
-					'post_status' => 'trash',
-				)
-			);
+			wp_trash_post( $shop_page_id );
 
 			$this->assertSame(
 				'no',
