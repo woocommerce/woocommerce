@@ -65,6 +65,76 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Formatting metadata preserves raw keys and values across repeated calls and saves.
+	 * @testWith ["Finish%20type", "Black%2520White", "Finish type", "Black%20White"]
+	 *           ["finish", "Black%20White", "finish", "Black White"]
+	 *           ["count", 123, "count", "123"]
+	 * @param string     $raw_key Original metadata key.
+	 * @param string|int $raw_value Original metadata value.
+	 * @param string     $display_key Decoded metadata key.
+	 * @param string     $display_value Decoded metadata value.
+	 */
+	public function test_formatting_preserves_raw_metadata( string $raw_key, $raw_value, string $display_key, string $display_value ): void {
+		$sut = $this->item;
+		$sut->add_meta_data( $raw_key, $raw_value, true );
+		$sut->save();
+		$raw_meta = $sut->get_meta( $raw_key, false )[0];
+
+		$first  = $sut->get_formatted_meta_data();
+		$second = $sut->get_formatted_meta_data();
+
+		$this->assertArrayHasKey( $raw_meta->id, $first, 'The saved metadata should be formatted.' );
+		$this->assertSame( $display_key, $first[ $raw_meta->id ]->key, 'Formatted keys should remain URL-decoded.' );
+		$this->assertSame( $display_value, $first[ $raw_meta->id ]->value, 'Formatted values should remain URL-decoded.' );
+		$this->assertSame( $first[ $raw_meta->id ]->value, $second[ $raw_meta->id ]->value, 'Repeated formatting must not decode the value again.' );
+		$this->assertSame( $raw_key, $raw_meta->key, 'Formatting must not change the live metadata key.' );
+		$this->assertSame( $raw_value, $raw_meta->value, 'Formatting must not change the live metadata value or type.' );
+
+		$sut->save();
+		$reloaded = new WC_Order_Item_Product( $sut->get_id() );
+		$this->assertSame( (string) $raw_value, $reloaded->get_meta( $raw_key ), 'Saving after formatting must preserve the original metadata in the database.' );
+	}
+
+	/**
+	 * @testdox Display filters receive decoded metadata without changing the order item.
+	 */
+	public function test_formatting_filters_receive_decoded_metadata(): void {
+		$sut = $this->item;
+		$sut->add_meta_data( 'Finish%20type', 'Black%20White', true );
+		$sut->save();
+		$raw_meta = $sut->get_meta( 'Finish%20type', false )[0];
+		$received = array();
+
+		foreach ( array( 'woocommerce_order_item_display_meta_key', 'woocommerce_order_item_display_meta_value' ) as $hook ) {
+			add_filter(
+				$hook,
+				static function ( $display, $meta, $item ) use ( &$received, $hook ) {
+					$received[ $hook ] = array( $display, $meta, $item );
+					return $display;
+				},
+				10,
+				3
+			);
+		}
+
+		$formatted = $sut->get_formatted_meta_data();
+
+		$this->assertCount( 2, $received, 'Both display filters must still run.' );
+		foreach ( $received as $arguments ) {
+			$this->assertInstanceOf( WC_Meta_Data::class, $arguments[1], 'Display filters must still receive WC_Meta_Data.' );
+			$this->assertSame( $raw_meta->id, $arguments[1]->id, 'The metadata ID must be preserved.' );
+			$this->assertSame( 'Finish type', $arguments[1]->key, 'Filters must receive the decoded key.' );
+			$this->assertSame( 'Black White', $arguments[1]->value, 'Filters must receive the decoded value.' );
+			$this->assertSame( $sut, $arguments[2], 'Filters must receive the original order item.' );
+		}
+		$this->assertSame( 'Finish type', $received['woocommerce_order_item_display_meta_key'][0] );
+		$this->assertSame( 'Black White', $received['woocommerce_order_item_display_meta_value'][0] );
+		$this->assertSame( "<p>Black White</p>\n", $formatted[ $raw_meta->id ]->display_value, 'Rendered output should remain unchanged.' );
+		$this->assertSame( 'Finish%20type', $raw_meta->key, 'Display filters must not be given the live metadata object.' );
+		$this->assertSame( 'Black%20White', $raw_meta->value, 'The order item must retain its original value.' );
+	}
+
+	/**
 	 * Test that backorder meta is excluded from formatted meta data
 	 * for completed orders.
 	 */
