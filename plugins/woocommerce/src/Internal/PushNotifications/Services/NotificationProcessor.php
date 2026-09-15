@@ -177,6 +177,9 @@ class NotificationProcessor {
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
 
 		if ( ! empty( $result['success'] ) ) {
+			// Success only, for the reason {@see PushToken::get_last_sent_at_gmt()} gives.
+			$this->data_store->record_last_sent_at( $tokens );
+
 			$notification->write_meta( self::SENT_META_KEY );
 			$notification->delete_meta( self::CLAIMED_META_KEY );
 			$this->cancel_safety_net( $notification );
