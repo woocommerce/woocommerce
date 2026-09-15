@@ -61,9 +61,9 @@ export function useSettingsForm( main: MainSettingsState, legacy: LegacySettings
 	const unsupportedControls = config?.unsupported.filter(
 		( field ) => ! mainIds.has( field.id )
 	) ?? [];
-	const unsupportedLabels = Array.from( new Set(
-		unsupportedControls.map( ( field ) => field.label || field.id )
-	) );
+	const unsupportedFields = Array.from( new Map(
+		unsupportedControls.map( ( field ) => [ field.id, field ] as const )
+	).values() );
 	const form = useMemo< Form >(
 		() => ( { layout: main.form?.layout ?? config?.form.layout ?? { type: 'regular' },
 			fields: [ ...( main.form?.fields ?? [] ), ...legacyEntries ] } ),
@@ -128,6 +128,6 @@ export function useSettingsForm( main: MainSettingsState, legacy: LegacySettings
 
 	return {
 		form, data, fields, validity, isValid, isDirty, isSaving, onChange, onDiscard,
-		onSave, unsupportedLabels,
+		onSave, unsupportedFields,
 	};
 }

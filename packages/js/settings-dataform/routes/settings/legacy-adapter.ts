@@ -21,7 +21,7 @@ export type LegacyConfig = {
 	form: Form;
 	fields: LegacyField[];
 	values: Record< string, unknown >;
-	unsupported: { id: string; label?: string; type: string; section: string }[];
+	unsupported: { id: string; label?: string | null; type: string; section: string }[];
 };
 
 type FieldEntry = NonNullable< Form[ 'fields' ] >[ number ];

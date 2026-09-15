@@ -36,7 +36,7 @@ function SettingsPageContent( { page, main, legacy }: {
 	const formId = useId();
 	const {
 		form, data, fields, validity, isValid, isDirty, isSaving, onChange, onDiscard,
-		onSave, unsupportedLabels,
+		onSave, unsupportedFields,
 	} = useSettingsForm( main, legacy );
 
 	if ( main.loadError || legacy.loadError ) {
@@ -54,10 +54,12 @@ function SettingsPageContent( { page, main, legacy }: {
 			</> }
 		>
 			<div className="wc-settings-dataform__content">
-				{ unsupportedLabels.length > 0 && <Notice status="warning" isDismissible={ false }>
+				{ unsupportedFields.length > 0 && <Notice status="warning" isDismissible={ false }>
 					<p>{ __( 'These settings are available only in classic settings:', 'woocommerce' ) }</p>
 					<ul className="wc-settings-dataform__unsupported-list">
-						{ unsupportedLabels.map( ( label ) => <li key={ label }>{ label }</li> ) }
+						{ unsupportedFields.map( ( field ) => <li key={ field.id }>
+							{ field.label || <>{ __( 'Setting ID:', 'woocommerce' ) } <code>{ field.id }</code></> }
+						</li> ) }
 					</ul>
 					<a href={ page.url }>{ __( 'Open classic settings', 'woocommerce' ) }</a>
 				</Notice> }

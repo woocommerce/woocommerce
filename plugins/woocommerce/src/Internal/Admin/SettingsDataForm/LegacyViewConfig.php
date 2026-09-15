@@ -162,7 +162,7 @@ final class LegacyViewConfig {
 				if ( '' === $id || isset( $seen_ids[ $id ] ) ) {
 					$unsupported[] = array(
 						'id'      => '' !== $id ? $id : 'legacy-control:' . $section_id . ':' . (string) $setting_index,
-						'label'   => $this->get_setting_label( $setting, '' !== $id ? $id : $type ),
+						'label'   => $this->get_setting_label( $setting ),
 						'type'    => $type,
 						'section' => $section_id,
 					);
@@ -172,7 +172,7 @@ final class LegacyViewConfig {
 				if ( ! $this->is_supported( $setting, $type ) ) {
 					$unsupported[] = array(
 						'id'      => $id,
-						'label'   => $this->get_setting_label( $setting, $id ),
+						'label'   => $this->get_setting_label( $setting ),
 						'type'    => $type,
 						'section' => $section_id,
 					);
@@ -324,14 +324,16 @@ final class LegacyViewConfig {
 	/**
 	 * Name a skipped control using the same plain-text conversion as supported fields.
 	 *
-	 * @param array  $setting Classic definition.
-	 * @param string $fallback Name when the definition has no label.
-	 * @return string
+	 * @param array $setting Classic definition.
+	 * @return string|null
 	 */
-	private function get_setting_label( array $setting, string $fallback ): string {
-		$label = $setting['title'] ?? $setting['desc'] ?? $fallback;
-		$text  = $this->plain_text( is_scalar( $label ) ? (string) $label : $fallback );
-		return '' !== $text ? $text : $fallback;
+	private function get_setting_label( array $setting ): ?string {
+		$label = $setting['title'] ?? $setting['desc'] ?? null;
+		if ( ! is_scalar( $label ) ) {
+			return null;
+		}
+		$text = $this->plain_text( (string) $label );
+		return '' !== $text ? $text : null;
 	}
 
 	/**
