@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
@@ -66,10 +65,6 @@ class ProductCollectionData extends ControllerTestCase {
 
 		$this->created_product_attributes = array();
 		$this->products                   = array_map( 'wc_get_product', self::$product_ids );
-
-		// The attribute counts only read the lookup table while its usage is enabled, and the test
-		// install leaves it disabled.
-		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 	}
 
 	/**
@@ -130,7 +125,14 @@ class ProductCollectionData extends ControllerTestCase {
 	 * Test calculation method.
 	 */
 	public function test_calculate_attribute_counts() {
-		$this->create_filterable_size_product();
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
 
 		// AND query type.
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
@@ -175,7 +177,7 @@ class ProductCollectionData extends ControllerTestCase {
 				array(
 					'attribute' => 'pa_size',
 					'operator'  => 'in',
-					'slug'      => array( 'large-slug' ),
+					'slug'      => array( 'large' ),
 				),
 			)
 		);
@@ -707,7 +709,14 @@ class ProductCollectionData extends ControllerTestCase {
 	 * @testdox Repeated attribute-count requests return stable counts.
 	 */
 	public function test_calculate_attribute_counts_stable_across_repeated_requests(): void {
-		$this->create_filterable_size_product();
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			array(),
+			array(
+				$this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
 
 		$first  = $this->dispatch_collection_data_request(
 			array(
@@ -764,29 +773,6 @@ class ProductCollectionData extends ControllerTestCase {
 		}
 
 		return rest_get_server()->dispatch( $request );
-	}
-
-	/**
-	 * Create a variable product with one published "large" size variation, with its lookup rows written.
-	 */
-	private function create_filterable_size_product(): void {
-		self::with_direct_product_attribute_lookup_updates(
-			function () {
-				$fixtures = new FixtureData();
-				$product  = $fixtures->get_variable_product(
-					array(),
-					array(
-						$this->create_product_attribute( 'size', array( 'large' ) ),
-					)
-				);
-
-				$fixtures->get_variation_product(
-					$product->get_id(),
-					array( 'pa_size' => 'large-slug' ),
-					array( 'status' => ProductStatus::PUBLISH )
-				);
-			}
-		);
 	}
 
 	/**
