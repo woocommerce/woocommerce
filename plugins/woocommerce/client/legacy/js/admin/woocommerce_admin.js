@@ -391,6 +391,15 @@
 				) {
 					event.stopPropagation();
 				}
+			} )
+
+			// Confirm before running the HPOS "Sync orders now" action.
+			.on( 'click', '.wc-hpos-sync-now', function ( event ) {
+				var message = $( this ).data( 'confirm-message' );
+
+				if ( message && ! window.confirm( message ) ) {
+					event.preventDefault();
+				}
 			} );
 
 		// Tooltips
