@@ -332,14 +332,6 @@
 					"link": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
-						},
-						":hover": {
-							"typography": {
-								"textDecoration": "underline"
-							}
-						},
-						"typography": {
-							"textDecoration": "none"
 						}
 					}
 				},
@@ -387,18 +379,6 @@
 					"fontSize": "var(--wp--preset--font-size--xx-large)",
 					"fontWeight": "500",
 					"lineHeight": "1.23"
-				},
-				"elements": {
-					"link": {
-						"typography": {
-							"textDecoration": "none"
-						},
-						":hover": {
-							"typography": {
-								"textDecoration": "underline"
-							}
-						}
-					}
 				}
 			},
 			"core/pullquote": {
@@ -787,11 +767,11 @@
 				},
 				":hover": {
 					"typography": {
-						"textDecoration": "none"
+						"textDecoration": "underline"
 					}
 				},
 				"typography": {
-					"textDecoration": "underline"
+					"textDecoration": "none"
 				}
 			},
 			"textInput": {

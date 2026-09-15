@@ -43,17 +43,6 @@ body {
 	background-color: var(--wp--preset--color--theme-1);
 }
 
-/* Product name links in the mini cart drawer and the cart block are
- * WooCommerce components, not blocks, so the chrome opt-outs in theme.json
- * can't reach them; their context makes them clearly interactive, so skip
- * the content-link underline here too. */
-a.wc-block-components-product-name {
-	text-decoration: none;
-}
-
-a.wc-block-components-product-name:hover {
-	text-decoration: underline;
-}
 
 /* WooCommerce's outlined component buttons (e.g. the mini cart "View cart")
  * use currentColor and a hardcoded #1e1e1e hover; align them with the
