@@ -751,6 +751,8 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertNotNull( $thrown, 'A failed highest-order-ID query should throw rather than start an empty run' );
+		// The Tools controller puts this message in front of the merchant, so it cannot be empty.
+		$this->assertStringContainsString( 'a_table_that_does_not_exist', $thrown->getMessage() );
 		$this->assertLogged( 'error', 'Highest order stats ID query failed', array( 'source' => 'wc-analytics-order-import' ) );
 		$this->assertSame( '', Analytics::get_refund_double_count_state()['status'], 'No run should be recorded' );
 		$this->assertSame( array(), $this->get_events( 'analytics_refund_double_count_tool_run' ) );

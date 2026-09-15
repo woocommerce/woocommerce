@@ -681,12 +681,14 @@ class Analytics {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$max_order_id = $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" );
 
-		if ( $wpdb->last_error ) {
+		// Read the error before logging: the database log handler runs its own query, which clears it.
+		$db_error = $wpdb->last_error;
+		if ( $db_error ) {
 			wc_get_logger()->error(
-				sprintf( 'Highest order stats ID query failed: %s', $wpdb->last_error ),
+				sprintf( 'Highest order stats ID query failed: %s', $db_error ),
 				array( 'source' => 'wc-analytics-order-import' )
 			);
-			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new \Exception( $db_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return intval( $max_order_id );
@@ -740,12 +742,14 @@ class Analytics {
 		);
 		// phpcs:enable
 
-		if ( $wpdb->last_error ) {
+		// Read the error before logging: the database log handler runs its own query, which clears it.
+		$db_error = $wpdb->last_error;
+		if ( $db_error ) {
 			wc_get_logger()->error(
-				sprintf( 'Double-counted refunds query failed: %s', $wpdb->last_error ),
+				sprintf( 'Double-counted refunds query failed: %s', $db_error ),
 				array( 'source' => 'wc-analytics-order-import' )
 			);
-			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new \Exception( $db_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return array_map( 'intval', $parent_ids );
