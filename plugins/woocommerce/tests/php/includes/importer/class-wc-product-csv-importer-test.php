@@ -1742,6 +1742,298 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Date-only "date on sale to" values are stored as end-of-day to match admin behaviour (#35321).
+	 */
+	public function test_parse_date_on_sale_to_field_date_only_is_end_of_day() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099-01-26' ) );
+		$this->assertSame( '2022-10-25 23:59:59', $importer->parse_date_on_sale_to_field( '2022-10-25' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" values that already include a time component are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_time_component() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 10:30:00', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30:00' ) );
+		$this->assertSame( '2099-01-26 10:30', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30' ) );
+		// Also the exact format this importer emits for Unix timestamps.
+		$this->assertSame( '2099-01-26T10:30:00Z', $importer->parse_date_on_sale_to_field( '2099-01-26T10:30:00Z' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" values with a colonless time component are preserved (detection is via date_parse(), not a colon regex).
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_colonless_time_component() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '20990126T103000', $importer->parse_date_on_sale_to_field( '20990126T103000' ) );
+		$this->assertSame( '2099-01-26T10', $importer->parse_date_on_sale_to_field( '2099-01-26T10' ) );
+		$this->assertSame( 'January 26, 2099 10am', $importer->parse_date_on_sale_to_field( 'January 26, 2099 10am' ) );
+		$this->assertSame( '2099-01-26 10.30', $importer->parse_date_on_sale_to_field( '2099-01-26 10.30' ) );
+		// Epoch syntax parses as a relative expression, not a bare calendar day.
+		$this->assertSame( '@4073068800', $importer->parse_date_on_sale_to_field( '@4073068800' ) );
+	}
+
+	/**
+	 * @testdox Relative "date on sale to" expressions are never bumped to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_relative_expressions() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( 'now', $importer->parse_date_on_sale_to_field( 'now' ) );
+		$this->assertSame( '+1 week', $importer->parse_date_on_sale_to_field( '+1 week' ) );
+		$this->assertSame( 'tomorrow', $importer->parse_date_on_sale_to_field( 'tomorrow' ) );
+	}
+
+	/**
+	 * @testdox Date-only "date on sale to" values in non-Y-m-d formats are normalised to Y-m-d end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_alternate_date_formats() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099/01/26' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'January 26, 2099' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" Unix timestamps are normalised to ISO8601 without being shifted to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_unix_timestamp_preserved() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		// The Unix timestamp 4073068800 corresponds to 2099-01-26 00:00:00 UTC.
+		$this->assertSame( '2099-01-26T00:00:00Z', $importer->parse_date_on_sale_to_field( '4073068800' ) );
+	}
+
+	/**
+	 * @testdox Empty / invalid "date on sale to" values are returned as null.
+	 */
+	public function test_parse_date_on_sale_to_field_empty_and_invalid() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertNull( $importer->parse_date_on_sale_to_field( '' ) );
+		$this->assertNull( $importer->parse_date_on_sale_to_field( 'not-a-date' ) );
+	}
+
+	/**
+	 * @testdox Importing a CSV with a date-only "date sale price ends" stores end-of-day, matching admin (#35321).
+	 */
+	public function test_import_date_on_sale_to_date_only_is_end_of_day() {
+		// A non-UTC zone so any drift in the parse → set_date_prop → meta round trip shows up below.
+		update_option( 'timezone_string', 'Pacific/Auckland' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-sku' );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		$timed_product = WC_Helper_Product::create_simple_product();
+		$timed_product->set_sku( 'issue-35321-timed-sku' );
+		$timed_product->set_regular_price( '10.00' );
+		$timed_product->save();
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price starts","date sale price ends","Sale price"',
+			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
+			sprintf( '%d,"2022-10-25 09:00:00","2099-01-26 10:30:00","2.00"', $timed_product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_path,
+			array(
+				'update_existing' => true,
+				'parse'           => true,
+				'mapping'         => array(
+					'ID'                     => 'id',
+					'date sale price starts' => 'date_on_sale_from',
+					'date sale price ends'   => 'date_on_sale_to',
+					'Sale price'             => 'sale_price',
+				),
+			)
+		);
+		$importer->import();
+
+		$updated   = wc_get_product( $product->get_id() );
+		$date_to   = $updated->get_date_on_sale_to();
+		$date_from = $updated->get_date_on_sale_from();
+
+		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
+		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
+		// WC_DateTime::date() renders site-local, so these assert admin-parity values, not UTC.
+		$this->assertSame( '23:59:59', $date_to->date( 'H:i:s' ), 'date_on_sale_to should be end-of-day (site-local) to match admin' );
+		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ), 'date_on_sale_to calendar day must not drift in a non-UTC site timezone' );
+		$this->assertSame( '00:00:00', $date_from->date( 'H:i:s' ), 'date_on_sale_from should remain start-of-day' );
+		$this->assertSame( '2022-10-25', $date_from->date( 'Y-m-d' ) );
+
+		$updated_timed   = wc_get_product( $timed_product->get_id() );
+		$timed_date_to   = $updated_timed->get_date_on_sale_to();
+		$timed_date_from = $updated_timed->get_date_on_sale_from();
+
+		$this->assertNotNull( $timed_date_to, 'timed date_on_sale_to should be set' );
+		$this->assertNotNull( $timed_date_from, 'timed date_on_sale_from should be set' );
+		$this->assertSame( '2099-01-26 10:30:00', $timed_date_to->date( 'Y-m-d H:i:s' ), 'explicit end time must be preserved site-local, not bumped to end-of-day' );
+		$this->assertSame( '2022-10-25 09:00:00', $timed_date_from->date( 'Y-m-d H:i:s' ), 'explicit start time must be preserved site-local' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_product( $timed_product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
+	 * @testdox Re-importing the same CSV is idempotent: the sale-end timestamp is unchanged, the end-of-day bump does not compound, and no duplicate scheduled actions pile up.
+	 */
+	public function test_import_date_on_sale_to_reimport_is_idempotent() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-idempotent-sku' );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price starts","date sale price ends","Sale price"',
+			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$make_importer = function () use ( $csv_path ) {
+			return new WC_Product_CSV_Importer(
+				$csv_path,
+				array(
+					'update_existing' => true,
+					'parse'           => true,
+					'mapping'         => array(
+						'ID'                     => 'id',
+						'date sale price starts' => 'date_on_sale_from',
+						'date sale price ends'   => 'date_on_sale_to',
+						'Sale price'             => 'sale_price',
+					),
+				)
+			);
+		};
+
+		// Args and group per wc_schedule_product_sale_events() in wc-product-functions.php.
+		$pending_end_actions = function () use ( $product ) {
+			return as_get_scheduled_actions(
+				array(
+					'hook'     => 'wc_product_end_scheduled_sale',
+					'args'     => array( 'product_id' => $product->get_id() ),
+					'group'    => 'woocommerce-sales',
+					'status'   => ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 10,
+				),
+				'ids'
+			);
+		};
+
+		$make_importer()->import();
+		$first = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertNotNull( $first, 'date_on_sale_to should be set after the first import' );
+		$this->assertSame( '23:59:59', $first->date( 'H:i:s' ) );
+		$first_timestamp = $first->getTimestamp();
+		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the first import' );
+
+		// The parser reads the raw CSV value again, never the stored one, so nothing changes.
+		$make_importer()->import();
+		$second = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertSame( $first_timestamp, $second->getTimestamp(), 're-import must not change the stored sale-end timestamp' );
+		$this->assertSame( '23:59:59', $second->date( 'H:i:s' ), 'the end-of-day bump must not compound on re-import' );
+		$this->assertCount( 1, $pending_end_actions(), 'still exactly one pending end-sale action after re-import' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
+	 * @testdox The first re-import after upgrading to the end-of-day behaviour is not a no-op: it moves a pre-upgrade midnight value to 23:59:59 and reschedules the sale-end action (#35321).
+	 */
+	public function test_import_date_on_sale_to_first_reimport_after_upgrade_is_not_a_noop() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-upgrade-sku' );
+		$product->set_regular_price( '10.00' );
+		// Midnight is what the pre-#35321 callback stored for a date-only value.
+		$product->set_date_on_sale_to( '2099-01-26 00:00:00' );
+		$product->save();
+
+		$pending_end_actions = function () use ( $product ) {
+			return as_get_scheduled_actions(
+				array(
+					'hook'     => 'wc_product_end_scheduled_sale',
+					'args'     => array( 'product_id' => $product->get_id() ),
+					'group'    => 'woocommerce-sales',
+					'status'   => ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 10,
+				),
+				'ids'
+			);
+		};
+
+		$before = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+		$this->assertSame( '00:00:00', $before->date( 'H:i:s' ), 'the pre-upgrade value should start at midnight' );
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price ends","Sale price"',
+			sprintf( '%d,"2099-01-26","2.00"', $product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_path,
+			array(
+				'update_existing' => true,
+				'parse'           => true,
+				'mapping'         => array(
+					'ID'                   => 'id',
+					'date sale price ends' => 'date_on_sale_to',
+					'Sale price'           => 'sale_price',
+				),
+			)
+		);
+		$importer->import();
+
+		$after = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertNotNull( $after, 'date_on_sale_to should still be set after the re-import' );
+		$this->assertSame( '23:59:59', $after->date( 'H:i:s' ), 'the same date-only value re-imported after upgrade should move to end-of-day' );
+		$this->assertSame( '2099-01-26', $after->date( 'Y-m-d' ), 'the calendar day should not change' );
+		$this->assertNotSame( $before->getTimestamp(), $after->getTimestamp(), 'the stored timestamp must change: this re-import is not a no-op' );
+		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the re-import, rescheduled for the new end-of-day time' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
 	 * @testdox Constructing the importer with a CSV file that cannot be opened should fail with a clear error.
 	 */
 	public function test_unopenable_csv_file_fails_with_clear_error() {

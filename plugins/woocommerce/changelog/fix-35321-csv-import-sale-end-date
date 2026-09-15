@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store date-only "date sale price ends" values from a product CSV as end-of-day (23:59:59) to match the product edit screen, so imported sales no longer end a day early. Values that already include a time are unchanged, and the first re-import after updating moves existing date-only end dates and reschedules their sale-end events.
