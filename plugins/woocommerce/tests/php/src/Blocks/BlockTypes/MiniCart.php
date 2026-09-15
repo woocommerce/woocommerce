@@ -518,4 +518,46 @@ class MiniCart extends \WP_UnitTestCase {
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
+
+	/**
+	 * @testdox Should not enqueue the view script module when rendered on the cart or checkout page.
+	 *
+	 * @testWith [ "woocommerce_is_cart" ]
+	 *           [ "woocommerce_is_checkout" ]
+	 *
+	 * @param string $page_filter Conditional filter forcing the cart or checkout context.
+	 */
+	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_filter ): void {
+		wp_dequeue_script_module( 'woocommerce/mini-cart' );
+		add_filter( $page_filter, '__return_true' );
+
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		$this->assertNotContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should not be enqueued on the cart and checkout pages.' );
+	}
+
+	/**
+	 * @testdox Should enqueue the view script module when rendered outside the cart and checkout pages.
+	 */
+	public function test_view_script_module_is_enqueued_outside_cart_and_checkout(): void {
+		if ( \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CART' ) || \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			$this->markTestSkipped( 'A previous test forced the cart or checkout context for the rest of the process.' );
+		}
+		wp_dequeue_script_module( 'woocommerce/mini-cart' );
+
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		$this->assertContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should be enqueued on regular pages.' );
+	}
+
+	/**
+	 * Return the identifiers of the currently enqueued script modules.
+	 *
+	 * @return string[]
+	 */
+	private function get_enqueued_script_module_ids(): array {
+		return wp_script_modules()->get_queue();
+	}
 }
