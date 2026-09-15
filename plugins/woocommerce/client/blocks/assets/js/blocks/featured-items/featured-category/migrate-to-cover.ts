@@ -87,7 +87,7 @@ export function migrateToCover(
 		attributes.mediaSrc ||
 		getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
 	const cover = createBlock( 'core/cover', {
-		className: clsx( 'wc-block-featured-category__legacy', {
+		className: clsx( {
 			'wc-block-featured-category__natural-image':
 				attributes.imageFit !== 'cover',
 		} ),
