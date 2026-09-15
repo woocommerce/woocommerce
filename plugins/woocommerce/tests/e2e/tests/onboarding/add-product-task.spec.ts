@@ -112,22 +112,26 @@ test.describe( 'Add Product Task', () => {
 			// The batch endpoint reports per-item failures in the body and still
 			// returns 200, so the status on its own says nothing about whether the
 			// products actually went.
-			const deleted: Array< { id?: number; error?: unknown } > =
-				deleteResponse.data?.delete ?? [];
+			// An extension filter can reshape these results, so an entry that is missing,
+			// errored or carries no id counts as not deleted rather than throwing here.
+			const batchDeleteResults = deleteResponse.data?.delete;
+			const deleted: Array< { id?: number; error?: unknown } | null > =
+				Array.isArray( batchDeleteResults ) ? batchDeleteResults : [];
 			const confirmedIds = new Set(
 				deleted
-					.filter( ( item ) => ! item?.error )
-					.map( ( item ) => item.id )
+					.filter( ( item ) => item && ! item.error )
+					.map( ( item ) => item?.id )
+			);
+			const unconfirmedIds = idsToDelete.filter(
+				( id ) => ! confirmedIds.has( id )
 			);
 			createdProductIds.splice(
 				0,
 				createdProductIds.length,
-				...idsToDelete.filter( ( id ) => ! confirmedIds.has( id ) )
+				...unconfirmedIds
 			);
 			expect( deleted ).toHaveLength( idsToDelete.length );
-			expect(
-				deleted.filter( ( item: { error?: unknown } ) => item?.error )
-			).toHaveLength( 0 );
+			expect( unconfirmedIds ).toEqual( [] );
 		}
 		expect( taskListShown ).toBe( true );
 	} );
