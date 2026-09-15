@@ -59,14 +59,14 @@ class Analytics {
 	 *
 	 * @since 11.2.0
 	 */
-	const REFUND_DOUBLE_COUNT_BATCH_SIZE = 100;
+	private const REFUND_DOUBLE_COUNT_BATCH_SIZE = 100;
 
 	/**
 	 * Number of order IDs checked per batch.
 	 *
 	 * @since 11.2.0
 	 */
-	const REFUND_DOUBLE_COUNT_RANGE_SIZE = 50000;
+	private const REFUND_DOUBLE_COUNT_RANGE_SIZE = 50000;
 
 	/**
 	 * Fix run statuses stored in the tool state.
