@@ -32,7 +32,7 @@ class CollectionPresetsTest extends \WP_UnitTestCase {
 	/**
 	 * Set up the real Product Collection query seam.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->block_instance = new ProductCollectionMock();
