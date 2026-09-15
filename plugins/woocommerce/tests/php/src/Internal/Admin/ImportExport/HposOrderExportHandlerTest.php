@@ -165,6 +165,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$order->add_meta_data( '_tracking_number', 'ABC123' );
 		$order->add_meta_data( '_tracking_number', 'DEF456' );
 		$order->add_meta_data( 'gift_wrap', array( 'color' => 'red' ) );
+		$order->add_meta_data( 'looks_serialized', 'a:0:{}' );
 		$order->add_meta_data( '_edit_lock', 'skip me' );
 		$order->save();
 
@@ -182,6 +183,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( $this->postmeta_xml( '_tracking_number', 'ABC123' ), $xml );
 		$this->assertStringContainsString( $this->postmeta_xml( '_tracking_number', 'DEF456' ), $xml, 'Repeated meta keys keep every row' );
 		$this->assertStringContainsString( $this->postmeta_xml( 'gift_wrap', serialize( array( 'color' => 'red' ) ) ), $xml ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$this->assertStringContainsString( $this->postmeta_xml( 'looks_serialized', 's:6:"a:0:{}";' ), $xml, 'A serialized-looking string is double-serialized so the importer keeps it a string' );
 		$this->assertStringNotContainsString( '_edit_lock', $xml, 'Meta skipped by the filter must not be exported' );
 	}
 

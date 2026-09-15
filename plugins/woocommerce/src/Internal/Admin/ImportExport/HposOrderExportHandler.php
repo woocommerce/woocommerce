@@ -515,6 +515,9 @@ class HposOrderExportHandler {
 	/**
 	 * Converts a meta value to the string form the postmeta table would hold.
 	 *
+	 * Strings that already look serialized go through `maybe_serialize()` too, because the meta
+	 * tables store them double-serialized; otherwise the importer would decode them into arrays.
+	 *
 	 * @param mixed $value Meta value.
 	 * @return string
 	 */
@@ -522,11 +525,8 @@ class HposOrderExportHandler {
 		if ( is_bool( $value ) ) {
 			return wc_bool_to_string( $value );
 		}
-		if ( is_array( $value ) || is_object( $value ) ) {
-			return (string) maybe_serialize( $value );
-		}
 
-		return (string) $value;
+		return (string) maybe_serialize( is_scalar( $value ) || is_null( $value ) ? (string) $value : $value );
 	}
 
 	/**
