@@ -233,7 +233,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	/**
 	 * Get the invalid token fields.
 	 *
-	 * @since x.x.x
+	 * @since 11.3.0
 	 *
 	 * @return array<string, mixed> The invalid token fields with the field name as the key and the field value as the value.
 	 */

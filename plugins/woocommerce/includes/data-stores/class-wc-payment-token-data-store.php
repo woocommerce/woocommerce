@@ -176,7 +176,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	/**
 	 * Validate a payment token.
 	 *
-	 * @since x.x.x
+	 * @since 11.3.0
 	 *
 	 * @param WC_Payment_Token $token Payment token object.
 	 * @throws WC_Data_Exception Thrown when the payment token has specific invalid or missing payment token fields.
