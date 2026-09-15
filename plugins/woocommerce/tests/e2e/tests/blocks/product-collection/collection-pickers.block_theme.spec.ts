@@ -43,9 +43,11 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
 				.click();
 			await expect( doneButton ).toBeEnabled();
-			await productPicker
-				.getByRole( 'checkbox', { name: 'Beanie (woo-beanie)' } )
-				.click();
+			const beanieCheckbox = productPicker.getByRole( 'checkbox', {
+				name: 'Beanie (woo-beanie)',
+			} );
+			await beanieCheckbox.click();
+			await expect( beanieCheckbox ).toBeChecked();
 
 			const selectedQuery = await pageObject.getProductCollectionQuery();
 			const selectedIds = selectedQuery.woocommerceHandPickedProducts;
