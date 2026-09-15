@@ -283,6 +283,48 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Feature definition initialization is safe when a translation callback checks a feature.
+	 */
+	public function test_feature_definition_initialization_is_reentrant_safe() {
+		$reflection_class = new \ReflectionClass( $this->sut );
+
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $this->sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $this->sut, array() );
+
+		$reentrant_feature_enabled = null;
+		$translation_count         = 0;
+
+		$gettext_filter = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
+			unset( $text, $domain ); // Avoid parameter not used PHPCS errors.
+
+			++$translation_count;
+
+			if ( null === $reentrant_feature_enabled ) {
+				$reentrant_feature_enabled = $this->sut->feature_is_enabled( 'order_withdrawal' );
+			}
+
+			return $translation;
+		};
+
+		add_filter( 'gettext', $gettext_filter, 10, 3 );
+
+		try {
+			$this->sut->get_features( true, false );
+		} finally {
+			remove_filter( 'gettext', $gettext_filter, 10 );
+		}
+
+		$this->assertFalse( $reentrant_feature_enabled );
+		$this->assertGreaterThan( 0, $translation_count );
+		$this->assertNotNull( $this->sut->get_feature_definition( 'order_withdrawal' ) );
+	}
+
+	/**
 	 * @testdox 'change_feature_enable' does nothing and returns false for an invalid feature id.
 	 */
 	public function test_change_feature_enable_for_non_existing_feature() {
@@ -529,7 +571,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin' );
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin_2', 'the_plugin_3', 'the_plugin_4' ) );
 
@@ -984,11 +1025,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected, $result );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'deactivated_plugin', 'the_plugin_2' );
 		do_action( 'deactivated_plugin', 'the_plugin_4' );
 		do_action( 'deactivated_plugin', 'the_plugin_6' );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->fake_plugin_util->set_active_plugins( array( 'the_plugin', 'the_plugin_3', 'the_plugin_5' ) );
 		$result             = $this->sut->get_compatible_plugins_for_feature( 'mature1', $active_only );
@@ -1352,7 +1391,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
-		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		// doesn't scan the disk, but resolves fake paths for our non-existent plugin.php.
 		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'get_wp_plugin_id' ) )
@@ -1396,7 +1435,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
-		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		// doesn't scan the disk, but resolves fake paths for our non-existent plugin.php.
 		// Also replace get_woocommerce_aware_plugins to simulate deactivation.
 		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
 			->disableOriginalConstructor()
@@ -1455,7 +1494,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
 		$deactivated = true;
-		do_action( 'deactivated_plugin', 'plugin/plugin.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'deactivated_plugin', 'plugin/plugin.php' );
 
 		// Check after: compatibility unset, so moves to 'uncertain' (still in aware list when ! active_only).
 		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );

@@ -18,6 +18,8 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 
 		WC()->session->set( 'wc_notices', null );
+
+		parent::tearDown();
 	}
 
 	/**

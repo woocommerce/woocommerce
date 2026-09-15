@@ -37,7 +37,7 @@ type EmbeddedKycLoadFailure = {
 
 const embeddedKycLoadTimeoutMs = 20000;
 const embeddedKycTroubleshootingUrl =
-	'https://woocommerce.com/document/woopayments/startup-guide/#requirements';
+	'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/#onboarding';
 const embeddedKycFailureMessage = __(
 	"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists.",
 	'woocommerce'

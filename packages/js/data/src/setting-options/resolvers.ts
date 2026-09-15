@@ -61,7 +61,7 @@ export const getSettings =
 			);
 			throw error;
 		} finally {
-			dispatch.__unstableReleaseStoreLock( lock );
+			void dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 
@@ -96,7 +96,7 @@ export const getSetting =
 			);
 			throw error;
 		} finally {
-			dispatch.__unstableReleaseStoreLock( lock );
+			void dispatch.__unstableReleaseStoreLock( lock );
 		}
 	};
 

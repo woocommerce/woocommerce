@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Seed deterministic ratings and sales data for Product Collection Blocks E2E sorting tests.

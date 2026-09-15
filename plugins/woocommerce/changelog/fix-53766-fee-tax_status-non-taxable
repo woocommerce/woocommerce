@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Set tax_status to 'none' when creating fee order items from non-taxable cart fees.

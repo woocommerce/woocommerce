@@ -52,4 +52,3 @@ interface TemplateWooCommerceData {
 		from_name?: string;
 	};
 }
-

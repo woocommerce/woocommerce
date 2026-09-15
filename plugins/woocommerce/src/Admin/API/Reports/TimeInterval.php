@@ -637,13 +637,21 @@ class TimeInterval {
 	/**
 	 * Get dates from a timeframe string.
 	 *
-	 * @param int           $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
-	 * @param DateTime|null $current_date DateTime of current date to compare.
-	 * @return array
+	 * The period is selected from the calendar date of $current_date in its own timezone,
+	 * so the argument should be anchored to the site timezone: the returned strings are
+	 * naive datetimes that downstream consumers parse as site-local. When omitted, it
+	 * defaults to the current time in the site timezone. Note that the passed object is
+	 * modified in place by the date calculations.
+	 *
+	 * @param string         $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
+	 * @param \DateTime|null $current_date DateTime of current date to compare.
+	 * @return array|false Array of start and end dates, or false for an unknown timeframe.
 	 */
 	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
 		if ( ! $current_date ) {
-			$current_date = new \DateTime();
+			// The returned date strings are interpreted in the site timezone (see DataStore::normalize_timezones()),
+			// so the reference "now" must use the site timezone too, not the PHP default (UTC in WordPress).
+			$current_date = new \DateTime( 'now', wp_timezone() );
 		}
 		$current_year  = $current_date->format( 'Y' );
 		$current_month = $current_date->format( 'm' );
@@ -682,7 +690,7 @@ class TimeInterval {
 				case $current_month >= 10 && $current_month <= 12:
 					return array(
 						'start' => $current_year . '-07-01 00:00:00',
-						'end'   => $current_year . '-09-31 23:59:59',
+						'end'   => $current_year . '-09-30 23:59:59',
 					);
 			}
 		}

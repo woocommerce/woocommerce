@@ -47,7 +47,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
 		$GLOBALS['current_screen']   = $this->get_screen_mock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		if ( ! did_action( 'current_screen' ) ) {
-			do_action( 'current_screen', $GLOBALS['current_screen'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'current_screen', $GLOBALS['current_screen'] );
 		}
 
 		$orders_tracking = new WC_Orders_Tracking();
@@ -93,7 +93,6 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->save();
 
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'woocommerce_order_status_changed', $order->get_id(), OrderStatus::PENDING, 'finished', $order );
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_edit_status_change' );
 		$this->assertTracksEventHasRequestTimestampAndNoCache( 'wcadmin_orders_edit_status_change' );
@@ -111,8 +110,6 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$this->toggle_cot_authoritative( $hpos_enabled );
 		$this->setup_screen( 'list' );
 
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-		// phpcs:disable WordPress.NamingConventions.ValidHookName.UseUnderscores
 		do_action( $hpos_enabled ? 'load-woocommerce_page_wc-orders' : 'load-edit.php' );
 
 		$this->assertRecordedTracksEvent( 'wcadmin_orders_view' );

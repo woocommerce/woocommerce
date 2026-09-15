@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Declare the UUID dependency required by WooCommerce Admin builds.

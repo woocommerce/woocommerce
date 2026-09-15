@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Correct PHPCS slow query suppressions for empty product widget query containers.

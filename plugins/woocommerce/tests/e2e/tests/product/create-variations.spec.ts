@@ -26,13 +26,11 @@ test.describe( 'Add variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async ( { browser } ) => {
-		productId_generateVariations = await createVariableProduct(
-			productAttributes
-		);
+		productId_generateVariations =
+			await createVariableProduct( productAttributes );
 
-		productId_addManually = await createVariableProduct(
-			productAttributes
-		);
+		productId_addManually =
+			await createVariableProduct( productAttributes );
 
 		expectedGeneratedVariations =
 			generateVariationsFromAttributes( productAttributes );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Blocks e2e seed re-runnable and fail loudly on a broken step.

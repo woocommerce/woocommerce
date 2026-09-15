@@ -107,7 +107,7 @@ jQuery( function( $ ) {
 				targetIndex = 0;
 			}
 
-			$tabs.eq( targetIndex ).focus();
+			$tabs.eq( targetIndex ).trigger( 'focus' );
 		} )
 		// Review link
 		.on( 'click', 'a.woocommerce-review-link', function() {
@@ -187,12 +187,12 @@ jQuery( function( $ ) {
 			e.stopPropagation();
 
 			if ( next.includes( direction ) ) {
-				$( this ).next().focus().click();
+				$( this ).next().trigger( 'focus' ).click();
 
 				return;
 			}
 
-			$( this ).prev().focus().click();
+			$( this ).prev().trigger( 'focus' ).click();
 		} );
 
 	// Init Tabs and Star Ratings

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stock notifications: return the customer to the page they cancelled a notification from, instead of the first page of the list.

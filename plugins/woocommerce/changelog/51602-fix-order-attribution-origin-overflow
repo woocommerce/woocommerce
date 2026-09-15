@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a long order origin overflowing the Order attribution metabox. The origin now takes the full width of the metabox and is truncated to one line while the details are collapsed, and the details toggle has moved to the bottom of the metabox.

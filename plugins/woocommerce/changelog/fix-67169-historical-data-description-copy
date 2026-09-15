@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the Import historical data description in Analytics settings to stop referencing activating WooCommerce Admin.

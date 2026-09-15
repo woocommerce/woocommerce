@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure low-stock thresholds are stored as non-negative integers.

@@ -25,6 +25,8 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		$this->sut = new LegacyProxy();
 	}
 
@@ -108,7 +110,7 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_global' can be used to get the value of a global.
 	 */
-	public function get_global_can_be_used_to_get_the_value_of_a_global() {
+	public function test_get_global_can_be_used_to_get_the_value_of_a_global() {
 		global $wpdb;
 
 		$result = $this->sut->get_global( 'wpdb' );

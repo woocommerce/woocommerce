@@ -30,6 +30,7 @@ env:
 jobs:
   validate-release:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
@@ -194,6 +195,7 @@ jobs:
 
   update-wporg-stable-tag:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: validate-release
     steps:
       - name: Install SVN
@@ -233,6 +235,7 @@ jobs:
 
   update-gh-stable-tag:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
       fail-fast: false
@@ -245,7 +248,7 @@ jobs:
           fetch-depth: 0
           sparse-checkout: |
             plugins/woocommerce/readme.txt
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -307,6 +310,7 @@ jobs:
 
   notify-release:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
     if: ${{ github.event.inputs.allow-revert != 'true' }}
     steps:

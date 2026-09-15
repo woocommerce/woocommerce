@@ -12,11 +12,12 @@ permissions: {}
 jobs:
     label_project:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             contents: read
             pull-requests: write
         steps:
-            - uses: actions/labeler@3d612d72e6784a1a65365cc6d33b5a001c12bf10 # v3.1.0
+            - uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6.2.0
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   configuration-path: .github/project-pr-labeler.yml
