@@ -1414,6 +1414,9 @@ class QueryBuilder extends \WP_UnitTestCase {
 						);
 					}
 					break;
+				case 'search':
+					$query['search'] = 'Alpha';
+					break;
 				case 'stock':
 					$query['woocommerceStockStatus'] = array( ProductStockStatus::OUT_OF_STOCK );
 					break;
@@ -1538,6 +1541,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			'tag'              => array( 'tag', array( 'Alpha inspector target' ) ),
 			'brand'            => array( 'brand', array( 'Alpha inspector target' ) ),
 			'combined attrs'   => array( 'attributes', array( 'Alpha inspector target' ) ),
+			'keyword search'   => array( 'search', array( 'Alpha inspector target' ) ),
 			'stock'            => array( 'stock', array( 'Alpha inspector target' ) ),
 			'minimum price'    => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
 			'maximum price'    => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
