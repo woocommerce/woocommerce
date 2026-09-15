@@ -760,6 +760,74 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the store has never had tokens when none exist and none were ever registered.
+	 */
+	public function test_has_ever_had_tokens_returns_false_on_a_store_with_no_history(): void {
+		delete_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION );
+
+		$this->assertFalse( ( new PushTokensDataStore() )->has_ever_had_tokens() );
+		$this->assertFalse( get_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION ) );
+	}
+
+	/**
+	 * @testdox Should record the first token registration when a token is created.
+	 */
+	public function test_create_records_the_first_token_registration(): void {
+		delete_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION );
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+
+		( new PushTokensDataStore() )->create( $this->token_data_for( $admin_id ) );
+
+		$this->assertIsInt( get_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION ) );
+		$this->assertTrue( ( new PushTokensDataStore() )->has_ever_had_tokens() );
+	}
+
+	/**
+	 * @testdox Should keep reporting a token history after every token is deleted.
+	 */
+	public function test_has_ever_had_tokens_survives_deleting_every_token(): void {
+		delete_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION );
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+		$token      = $data_store->create( $this->token_data_for( $admin_id ) );
+
+		$data_store->delete( $token->get_id() );
+
+		$this->assertFalse( ( new PushTokensDataStore() )->has_tokens() );
+		$this->assertTrue( ( new PushTokensDataStore() )->has_ever_had_tokens() );
+	}
+
+	/**
+	 * @testdox Should record the first token registration on a store whose tokens predate the option.
+	 */
+	public function test_has_ever_had_tokens_records_pre_existing_tokens(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		( new PushTokensDataStore() )->create( $this->token_data_for( $admin_id ) );
+		delete_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION );
+
+		$this->assertTrue( ( new PushTokensDataStore() )->has_ever_had_tokens() );
+		$this->assertIsInt( get_option( PushTokensDataStore::FIRST_TOKEN_REGISTERED_OPTION ) );
+	}
+
+	/**
+	 * Builds valid creation data for a token owned by the given user.
+	 *
+	 * @param int $user_id The owning user.
+	 * @return array
+	 */
+	private function token_data_for( int $user_id ): array {
+		return array(
+			'user_id'       => $user_id,
+			'token'         => 'token_' . wp_rand(),
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'device-' . wp_rand(),
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
+		);
+	}
+
+	/**
 	 * @testdox Should return tokens for users with matching roles.
 	 */
 	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {

@@ -40,6 +40,14 @@ class PushTokensDataStore {
 	 */
 	private bool $has_tokens = false;
 
+	/**
+	 * Option recording when the store registered its first push token.
+	 *
+	 * Never cleared, so it distinguishes a store that has never used push
+	 * notifications from one whose devices have all since been removed.
+	 */
+	const FIRST_TOKEN_REGISTERED_OPTION = 'woocommerce_push_notifications_first_token_at';
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -88,6 +96,7 @@ class PushTokensDataStore {
 		}
 
 		$push_token->set_id( $id );
+		$this->record_first_token_registered();
 
 		return $push_token;
 	}
@@ -342,6 +351,43 @@ class PushTokensDataStore {
 		);
 
 		return $this->has_tokens;
+	}
+
+	/**
+	 * Determines whether the store has ever registered a push token, including
+	 * tokens that have since been deleted.
+	 *
+	 * Tokens registered before the option existed are picked up by a
+	 * has_tokens() check the first time this runs on such a store.
+	 *
+	 * @since 11.3.0
+	 * @return bool True if a push token has ever been registered.
+	 */
+	public function has_ever_had_tokens(): bool {
+		if ( false !== get_option( self::FIRST_TOKEN_REGISTERED_OPTION, false ) ) {
+			return true;
+		}
+
+		if ( ! $this->has_tokens() ) {
+			return false;
+		}
+
+		$this->record_first_token_registered();
+
+		return true;
+	}
+
+	/**
+	 * Sets the first-token option unless it is already set.
+	 *
+	 * @return void
+	 */
+	private function record_first_token_registered(): void {
+		if ( false !== get_option( self::FIRST_TOKEN_REGISTERED_OPTION, false ) ) {
+			return;
+		}
+
+		update_option( self::FIRST_TOKEN_REGISTERED_OPTION, time(), true );
 	}
 
 	/**
