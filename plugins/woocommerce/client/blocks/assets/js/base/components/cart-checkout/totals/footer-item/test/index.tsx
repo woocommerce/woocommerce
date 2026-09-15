@@ -282,7 +282,7 @@ describe( 'TotalsFooterItem', () => {
 		);
 	} );
 
-	it( 'Isolates the currency symbol of each itemised tax amount', async () => {
+	it( 'Renders each itemised tax amount as its own price element', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
