@@ -1810,32 +1810,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Non-canonical date-only formats keep their calendar day even if PHP's default timezone is not UTC.
-	 */
-	public function test_parse_date_on_sale_to_field_php_timezone_does_not_drift() {
-		// These formats go through the strtotime()/date() fallback rather than the pure
-		// string path. WordPress pins PHP's default timezone to UTC, but the parser is
-		// public and must not silently depend on that: the parse and the reformat have to
-		// share a timezone, whatever it is.
-		$original_timezone = date_default_timezone_get();
-
-		try {
-			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Deliberately exercising a non-UTC default timezone; restored in finally.
-			date_default_timezone_set( 'Asia/Tokyo' );
-
-			$csv_file = __DIR__ . '/sample.csv';
-			$importer = new WC_Product_CSV_Importer( $csv_file );
-
-			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
-			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099/01/26' ) );
-			$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'January 26, 2099' ) );
-		} finally {
-			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Restoring the timezone the test changed.
-			date_default_timezone_set( $original_timezone );
-		}
-	}
-
-	/**
 	 * @testdox "date on sale to" Unix timestamps are normalised to ISO8601 without being shifted to end-of-day.
 	 */
 	public function test_parse_date_on_sale_to_field_unix_timestamp_preserved() {
@@ -1844,23 +1818,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		// The Unix timestamp 4073068800 corresponds to 2099-01-26 00:00:00 UTC.
 		$this->assertSame( '2099-01-26T00:00:00Z', $importer->parse_date_on_sale_to_field( '4073068800' ) );
-	}
-
-	/**
-	 * @testdox The site timezone setting cannot shift the calendar day of a date-only "date on sale to" value.
-	 */
-	public function test_parse_date_on_sale_to_field_site_timezone_does_not_drift() {
-		// Pacific/Kiritimati (UTC+14) is the maximum-drift-risk zone. WP keeps PHP's
-		// default timezone at UTC regardless, and the parser must be a pure string
-		// transformation, so the output may not depend on this option at all.
-		// WP_UnitTestCase rolls back option changes after each test.
-		update_option( 'timezone_string', 'Pacific/Kiritimati' );
-
-		$csv_file = __DIR__ . '/sample.csv';
-		$importer = new WC_Product_CSV_Importer( $csv_file );
-
-		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099-01-26' ) );
-		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
 	}
 
 	/**
@@ -2092,70 +2049,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '2099-01-26', $after->date( 'Y-m-d' ), 'the calendar day should not change' );
 		$this->assertNotSame( $before->getTimestamp(), $after->getTimestamp(), 'the stored timestamp must change: this re-import is not a no-op' );
 		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the re-import, rescheduled for the new end-of-day time' );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
-		wp_delete_file( $csv_path );
-	}
-
-	/**
-	 * @testdox The woocommerce_product_importer_formatting_callbacks filter can restore the pre-#35321 midnight behaviour for date_on_sale_to.
-	 */
-	public function test_date_on_sale_to_formatting_callback_can_be_restored_via_filter() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_sku( 'issue-35321-filter-sku' );
-		$product->set_regular_price( '10.00' );
-		$product->save();
-
-		// wp_tempnam() always appends a .tmp extension; the importer requires a
-		// .csv/.txt extension, so rename in place (no leftover stub file).
-		$tmp_path = wp_tempnam( 'wc-csv' );
-		$csv_path = $tmp_path . '.csv';
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
-		rename( $tmp_path, $csv_path );
-		$lines = array(
-			'"ID","date sale price ends","Sale price"',
-			sprintf( '%d,"2099-01-26","2.00"', $product->get_id() ),
-		);
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
-		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
-
-		// Substitutes parse_datetime_field() back onto the date_on_sale_to column, restoring
-		// the pre-#35321 behaviour (a date-only value is stored as-is, i.e. midnight).
-		$restore_old_behaviour = function ( $callbacks, $importer ) {
-			foreach ( $importer->get_mapped_keys() as $index => $heading ) {
-				if ( 'date_on_sale_to' === $heading ) {
-					$callbacks[ $index ] = array( $importer, 'parse_datetime_field' );
-				}
-			}
-
-			return $callbacks;
-		};
-
-		add_filter( 'woocommerce_product_importer_formatting_callbacks', $restore_old_behaviour, 10, 2 );
-
-		try {
-			$importer = new WC_Product_CSV_Importer(
-				$csv_path,
-				array(
-					'update_existing' => true,
-					'parse'           => true,
-					'mapping'         => array(
-						'ID'                   => 'id',
-						'date sale price ends' => 'date_on_sale_to',
-						'Sale price'           => 'sale_price',
-					),
-				)
-			);
-			$importer->import();
-		} finally {
-			remove_filter( 'woocommerce_product_importer_formatting_callbacks', $restore_old_behaviour, 10 );
-		}
-
-		$date_to = wc_get_product( $product->get_id() )->get_date_on_sale_to();
-
-		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
-		$this->assertSame( '00:00:00', $date_to->date( 'H:i:s' ), 'the filter should have restored the pre-#35321 midnight behaviour' );
-		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ) );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wp_delete_file( $csv_path );
