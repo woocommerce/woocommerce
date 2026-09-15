@@ -110,9 +110,6 @@ const TotalsFooterItem = ( {
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
 
-	// Each amount is a component rather than a formatted string so that the
-	// currency symbol keeps its isolation; a flat string lets the bidi
-	// algorithm move an RTL symbol to the wrong side of the amount.
 	const taxLinesList = (
 		<>
 			{ taxLines?.map( ( { name, price, rate }, index ) => (
