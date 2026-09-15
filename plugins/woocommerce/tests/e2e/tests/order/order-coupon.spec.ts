@@ -120,9 +120,7 @@ test.describe(
 					exact: true,
 				} )
 			).toBeVisible();
-		} );
 
-		test( 'can remove a coupon', async ( { page } ) => {
 			await page.goto(
 				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);

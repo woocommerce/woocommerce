@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
@@ -12,10 +13,7 @@ use WP_UnitTestCase;
 class SingleProductTemplateTests extends WP_UnitTestCase {
 
 	/**
-	 * Test that the Product Catalog template content isn't updated mistakenly.
-	 * In other words, make sure the Single Product template logic doesn't leak
-	 * into other templates.
-	 *
+	 * @testdox Should not update Product Catalog template content so Single Product template logic does not leak into other templates.
 	 */
 	public function test_dont_update_single_product_content_for_other_templates() {
 		$single_product_template                  = new SingleProductTemplate();
@@ -43,9 +41,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the Single Product template content isn't updated if it
-	 * contains the Legacy Template block.
-	 *
+	 * @testdox Should not update Single Product template content when it contains the Legacy Template block.
 	 */
 	public function test_dont_update_single_product_content_with_legacy_template() {
 		$single_product_template                 = new SingleProductTemplate();
@@ -73,9 +69,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the Single Product template content is updated if it doesn't
-	 * contain the Legacy Template block.
-	 *
+	 * @testdox Should update Single Product template content when it does not contain the Legacy Template block.
 	 */
 	public function test_update_single_product_content_with_legacy_template() {
 		$single_product_template                  = new SingleProductTemplate();
@@ -104,23 +98,14 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			),
 		);
 
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template_content
-		);
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result[0]->content );
-
 		$this->assertEquals(
-			$expected_single_product_template_without_whitespace,
-			$result_without_whitespace
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template_content ),
+			TemplateContentUtils::strip_whitespace( $result[0]->content )
 		);
 	}
 
 	/**
-	 * Test that the Single Product template content isn't updated if it
-	 * contains a pattern with the Legacy Template block.
-	 *
+	 * @testdox Should not update Single Product template content when a pattern contains the Legacy Template block.
 	 */
 	public function test_dont_update_single_product_content_with_legacy_template_inside_a_pattern() {
 		register_block_pattern(
@@ -156,9 +141,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the Single Product template content is updated if it doesn't
-	 * contain the Legacy Template block.
-	 *
+	 * @testdox Should update Single Product template content when a pattern does not contain the Legacy Template block.
 	 */
 	public function test_update_single_product_content_with_legacy_template_inside_a_pattern() {
 		register_block_pattern(
@@ -195,22 +178,100 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			),
 		);
 
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template_content
-		);
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result[0]->content );
-
 		$this->assertEquals(
-			$expected_single_product_template_without_whitespace,
-			$result_without_whitespace
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template_content ),
+			TemplateContentUtils::strip_whitespace( $result[0]->content )
 		);
 	}
 
 	/**
-	 * Test that the password form isn't added to the Single Product Template.
+	 * @testdox Should add the $product_type product's body classes through the filter the template installs.
 	 *
+	 * @dataProvider product_type_provider
+	 *
+	 * @param string $product_type Product type to create.
+	 * @param string $type_class   Expected product type class.
+	 */
+	public function test_update_single_product_content_adds_product_body_classes( $product_type, $type_class ) {
+		$product_global_existed = array_key_exists( 'product', $GLOBALS );
+		$product_global         = $product_global_existed ? $GLOBALS['product'] : null;
+		$loop_global_existed    = array_key_exists( 'woocommerce_loop', $GLOBALS );
+		$loop_global            = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
+
+		try {
+			// The template under test installs its own body_class callback, so clear the
+			// stack first to isolate it. _restore_hooks() rebuilds the stack afterwards.
+			remove_all_filters( 'body_class' );
+
+			$product = 'variable' === $product_type
+				? \WC_Helper_Product::create_variation_product()
+				: \WC_Helper_Product::create_simple_product();
+
+			$GLOBALS['product'] = $product;
+			$GLOBALS['post']    = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; tear_down() nulls it again.
+
+			$template          = new \WP_Block_Template();
+			$template->slug    = 'single-product';
+			$template->title   = 'Single Product';
+			$template->content = '<!-- wp:woocommerce/product-price /-->';
+			$template->type    = 'wp_template';
+
+			$seed_classes = array( 'existing-body-class' );
+			wc_reset_loop();
+			$product_classes = wc_get_product_class( '', $product );
+			wc_reset_loop();
+
+			$single_product_template = new SingleProductTemplate();
+
+			// Calling the method directly is what makes the body_class assertions below
+			// deterministic, but on its own it would still pass if init() stopped wiring
+			// the method up at all. Pin the registration separately.
+			$single_product_template->init();
+			$this->assertSame(
+				11,
+				has_filter( 'get_block_templates', array( $single_product_template, 'update_single_product_content' ) ),
+				'init() must register the callback that installs the body_class filter.'
+			);
+
+			$single_product_template->update_single_product_content( array( $template ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
+			$filtered_classes = apply_filters( 'body_class', $seed_classes );
+
+			$this->assertSame( array_merge( $seed_classes, $product_classes ), $filtered_classes );
+			$this->assertContains( 'product', $filtered_classes );
+			$this->assertContains( $type_class, $filtered_classes );
+		} finally {
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
+			// globals it leaves exactly as the test left them.
+			if ( $product_global_existed ) {
+				$GLOBALS['product'] = $product_global;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+
+			if ( $loop_global_existed ) {
+				$GLOBALS['woocommerce_loop'] = $loop_global;
+			} else {
+				unset( $GLOBALS['woocommerce_loop'] );
+			}
+		}
+	}
+
+	/**
+	 * Product types for the Single Product body class contract.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_type_provider() {
+		return array(
+			'simple product'   => array( 'simple', 'product-type-simple' ),
+			'variable product' => array( 'variable', 'product-type-variable' ),
+		);
+	}
+
+	/**
+	 * @testdox Should not add the password form when the template has no Single Product blocks.
 	 */
 	public function test_no_remove_block_when_no_single_product_is_in_the_template() {
 		$default_single_product_template = '
@@ -235,21 +296,14 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
 		$this->assertEquals(
-			$result_without_whitespace,
-			$expected_single_product_template_without_whitespace
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
 		);
 	}
 
 	/**
-	 * Test that the password form is added to the Single Product Template.
+	 * @testdox Should add the password form to the Single Product template.
 	 */
 	public function test_replace_single_product_blocks_with_input_form() {
 		$default_single_product_template = '
@@ -277,33 +331,14 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$result_without_whitespace
-		);
-
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
-		$expected_single_product_template_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$expected_single_product_template_without_whitespace
-		);
-
 		$this->assertEquals(
-			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
 
 	/**
-	 * Test that the password form is added to the Single Product Template with the default template.
+	 * @testdox Should add the password form to the default Single Product template.
 	 */
 	public function test_replace_default_template_single_product_blocks_with_input_form() {
 		$default_single_product_template = '
@@ -408,28 +443,132 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$result_without_whitespace
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
+		);
+	}
+
+	/**
+	 * @testdox Adds the password form when product blocks are at the top level of the template.
+	 */
+	public function test_replace_top_level_single_product_blocks_with_input_form() {
+		$default_single_product_template = '
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:woocommerce/product-image-gallery /-->
+	<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true} /-->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = sprintf(
+			'
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:html -->%s<!-- /wp:html -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->',
+			get_the_password_form()
 		);
 
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
-		$expected_single_product_template_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$expected_single_product_template_without_whitespace
+		$result = SingleProductTemplate::add_password_form(
+			$default_single_product_template
 		);
 
 		$this->assertEquals(
-			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
+		);
+	}
+
+	/**
+	 * @testdox Adds the password form when a pattern contains Single Product blocks.
+	 */
+	public function test_replace_pattern_with_single_product_blocks_with_input_form() {
+		register_block_pattern(
+			'test-single-product-pattern',
+			array(
+				'title'       => 'Test Single Product Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:woocommerce/product-price /-->',
+			)
+		);
+
+		$default_single_product_template = '
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:pattern {"slug":"test-single-product-pattern"} /-->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = sprintf(
+			'
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:html -->%s<!-- /wp:html -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->',
+			get_the_password_form()
+		);
+
+		$result = SingleProductTemplate::add_password_form(
+			$default_single_product_template
+		);
+
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
+		);
+	}
+
+	/**
+	 * @testdox Adds the password form when generic and product-related blocks are on the template.
+	 */
+	public function test_replace_single_product_blocks_next_to_paragraph_with_input_form() {
+		$default_single_product_template = '
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:column -->
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true} /-->
+			<!-- wp:paragraph -->
+			<p>Additional information.</p>
+			<!-- /wp:paragraph -->
+			<!-- wp:woocommerce/add-to-cart-form /-->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = sprintf(
+			'
+	<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:html -->%s<!-- /wp:html -->
+		</div>
+		<!-- /wp:column -->
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:paragraph -->
+			<p>Additional information.</p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+	<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->',
+			get_the_password_form()
+		);
+
+		$result = SingleProductTemplate::add_password_form(
+			$default_single_product_template
+		);
+
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
 }

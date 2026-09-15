@@ -358,6 +358,7 @@ class WC_Install {
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
 			'wc_update_11202_reset_refund_returning_customer_markers',
+			'wc_update_11203_normalize_stock_notification_emails',
 		),
 	);
 
@@ -1339,7 +1340,7 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
-		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 	}
 
 	/**
