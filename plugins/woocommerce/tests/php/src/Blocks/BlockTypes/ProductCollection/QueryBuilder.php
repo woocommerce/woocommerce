@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -344,6 +345,73 @@ class QueryBuilder extends \WP_UnitTestCase {
 		);
 
 		set_query_var( 'filter_stock_status', '' );
+	}
+
+	/**
+	 * @testdox Rating filters return the matching published product identity.
+	 */
+	public function test_filter_by_rating_returns_exact_products(): void {
+		$fixtures = new FixtureData();
+
+		$matching_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'One-star query target',
+				'regular_price' => '10',
+				'status'        => 'publish',
+			)
+		);
+		$fixtures->add_product_review( $matching_product->get_id(), 1 );
+
+		$non_matching_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Five-star query distractor',
+				'regular_price' => '10',
+				'status'        => 'publish',
+			)
+		);
+		$fixtures->add_product_review( $non_matching_product->get_id(), 5 );
+
+		set_query_var( 'rating_filter', '1' );
+
+		$merged_query      = Utils::initialize_merged_query( $this->block_instance );
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The one-star target should be returned.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The five-star distractor should be excluded.' );
+	}
+
+	/**
+	 * @testdox Stock filters return the matching published product identity.
+	 */
+	public function test_filter_by_stock_status_returns_exact_products(): void {
+		$fixtures = new FixtureData();
+
+		$matching_product     = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Out-of-stock query target',
+				'regular_price' => '10',
+				'status'        => 'publish',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+		$non_matching_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'In-stock query distractor',
+				'regular_price' => '10',
+				'status'        => 'publish',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		set_query_var( 'filter_stock_status', ProductStockStatus::OUT_OF_STOCK );
+
+		$merged_query      = Utils::initialize_merged_query( $this->block_instance );
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The out-of-stock target should be returned.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The in-stock distractor should be excluded.' );
 	}
 
 	/**
