@@ -82,6 +82,10 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
+		if ( $this->is_tax_based_on_local_pickup() ) {
+			return $taxable_address;
+		}
+
 		$cart = WC()->cart;
 		if ( ! $cart instanceof \WC_Cart || $cart->is_empty() || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
 			return $taxable_address;
@@ -105,5 +109,35 @@ class NonShippingCartTaxLocation {
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
 		);
+	}
+
+	/**
+	 * Determine whether local pickup requires taxes to use the store base address.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool True when local pickup taxes are based on the store address.
+	 */
+	private function is_tax_based_on_local_pickup(): bool {
+		/**
+		 * Filters local pickup shipping methods.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
+		 */
+		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+
+		/**
+		 * Filters whether tax is based on the store address for local pickup.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param bool $apply_base_tax Whether to apply store-address tax for local pickup.
+		 */
+		$apply_base_tax = true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
+
+		return $apply_base_tax &&
+			count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) ) > 0;
 	}
 }

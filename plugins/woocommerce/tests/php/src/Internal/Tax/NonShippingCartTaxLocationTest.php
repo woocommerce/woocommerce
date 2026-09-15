@@ -286,6 +286,29 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the taxable address unchanged when local pickup uses the store address.
+	 */
+	public function test_leaves_address_unchanged_when_local_pickup_uses_store_address(): void {
+		$this->add_product_to_cart( true );
+		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+		$this->set_checkout_context();
+		$base_location = wc_get_base_location();
+
+		$result = $this->customer->get_taxable_address();
+
+		$this->assertSame(
+			array(
+				$base_location['country'],
+				$base_location['state'],
+				WC()->countries->get_base_postcode(),
+				WC()->countries->get_base_city(),
+			),
+			$result,
+			'Local pickup should use the store address for taxes.'
+		);
+	}
+
+	/**
 	 * Add a product to the cart.
 	 *
 	 * @param bool $virtual Whether the product is virtual.
