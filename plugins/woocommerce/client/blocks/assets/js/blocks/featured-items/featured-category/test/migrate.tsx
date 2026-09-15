@@ -41,6 +41,7 @@ beforeAll( () => {
 	}
 	register( () => null, { attributes: {} }, metadata, {
 		deprecated,
+		supports: metadata.supports,
 		category: 'text',
 	} );
 	register( () => null, { attributes: {} }, productMetadata, {
@@ -49,7 +50,7 @@ beforeAll( () => {
 } );
 
 describe( 'Featured Category automatic migration', () => {
-	it( 'uses metadata supports without restoring parent styling controls', () => {
+	it( 'keeps category support overrides separate from Featured Product', () => {
 		const category = getBlockType( metadata.name );
 		expect( category.supports ).toMatchObject( metadata.supports );
 		for ( const support of [
@@ -60,9 +61,15 @@ describe( 'Featured Category automatic migration', () => {
 		] ) {
 			expect( category.supports[ support ] ).toBeUndefined();
 		}
-		expect( getBlockType( productMetadata.name ).supports ).toMatchObject(
-			productMetadata.supports
-		);
+		expect( getBlockType( productMetadata.name ).supports ).toMatchObject( {
+			...productMetadata.supports,
+			spacing: {
+				...productMetadata.supports.spacing,
+				__experimentalDefaultControls: {
+					padding: { padding: true },
+				},
+			},
+		} );
 	} );
 
 	it( 'parses legacy styling through the frozen deprecation supports', () => {
