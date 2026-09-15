@@ -108,9 +108,9 @@ trait CheckoutFieldsStorage {
 			$value = apply_filters( "woocommerce_get_default_value_for_{$key}", null, $group, $wc_object );
 		}
 
-		// We cast the value to a boolean if the field is a checkbox.
-		if ( $this->is_field( $key ) && 'checkbox' === $this->additional_fields[ $key ]['type'] ) {
-			return '1' === $value;
+		// Let the field type convert the stored value, e.g. checkboxes cast '1'/'0' back to a boolean.
+		if ( $this->is_field( $key ) ) {
+			$value = $this->get_field_type( $this->additional_fields[ $key ] )->from_storage( $value );
 		}
 
 		if ( null === $value ) {
