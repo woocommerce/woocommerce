@@ -10,12 +10,15 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
+import { addQueryArgs } from '@wordpress/url';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
+	morePaymentOptionsBaseUrl,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -498,4 +501,39 @@ export const getPluginActionErrorMessage = (
 		typeof rejection?.message === 'string' ? rejection.message : '';
 
 	return message || frame;
+};
+
+/**
+ * Country names the marketplace lists without the suffix WooCommerce adds to set them apart
+ * from their territories.
+ */
+const marketplaceCountryNameOverrides: Record< string, string > = {
+	GB: 'United Kingdom',
+	US: 'United States',
+};
+
+/**
+ * Build the WooCommerce.com marketplace link for the "More payment options" entry.
+ *
+ * The marketplace filters payment extensions by the English country name, so the filter only
+ * applies while the admin runs in English. A name it doesn't know — a translated one included —
+ * leaves the filter off, which is what the link did before.
+ *
+ * @param businessCountryCode The selected business location, as an ISO 3166-1 alpha-2 country code.
+ * @return The marketplace URL.
+ */
+export const getMorePaymentOptionsUrl = (
+	businessCountryCode: string | null
+): string => {
+	const countryName = businessCountryCode
+		? marketplaceCountryNameOverrides[ businessCountryCode ] ??
+		  decodeEntities(
+				window.wcSettings?.countries?.[ businessCountryCode ] ?? ''
+		  )
+		: '';
+
+	return addQueryArgs(
+		morePaymentOptionsBaseUrl,
+		countryName ? { country: countryName } : {}
+	);
 };

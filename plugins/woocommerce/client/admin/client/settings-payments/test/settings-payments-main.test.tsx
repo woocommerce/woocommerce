@@ -89,4 +89,27 @@ describe( 'SettingsPaymentsMain', () => {
 			expect.stringContaining( 'noreferrer' )
 		);
 	} );
+
+	it( 'should filter the marketplace link by the selected business location', () => {
+		window.wcSettings.admin.woocommerce_payments_nox_profile = {
+			business_country_code: 'BR',
+		};
+		window.wcSettings.countries = { BR: 'Brazil' };
+
+		render(
+			<Router>
+				<SettingsPaymentsMain />
+			</Router>
+		);
+
+		expect(
+			screen.getByText( 'More payment options' ).closest( 'a' )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=Brazil'
+		);
+
+		delete window.wcSettings.admin.woocommerce_payments_nox_profile;
+		window.wcSettings.countries = {};
+	} );
 } );
