@@ -1,0 +1,11 @@
+{
+	"name": "@woocommerce-settings-ui-experimental/index-route",
+	"private": true,
+	"dependencies": {
+		"@wordpress/route": "0.21.0"
+	},
+	"route": {
+		"path": "/",
+		"page": "wc-settings-dataform"
+	}
+}

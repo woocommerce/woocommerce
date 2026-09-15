@@ -2325,7 +2325,7 @@ importers:
         specifier: catalog:wp-min
         version: 6.6.1
       '@wordpress/private-apis':
-        specifier: catalog:wp-min
+        specifier: ^1.33.1
         version: 1.48.1
       react:
         specifier: 18.3.1
@@ -2333,6 +2333,12 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
+
+  packages/js/settings-dataform/routes/index:
+    dependencies:
+      '@wordpress/route':
+        specifier: 0.21.0
+        version: 0.21.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   packages/js/settings-dataform/routes/settings:
     dependencies:
@@ -2363,6 +2369,9 @@ importers:
       '@wordpress/i18n':
         specifier: catalog:wp-min
         version: 6.6.1
+      '@wordpress/route':
+        specifier: 0.21.0
+        version: 0.21.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/theme':
         specifier: 2.1.0
         version: 2.1.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))

@@ -9,51 +9,68 @@ import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import type { Field, Form } from '@wordpress/dataviews';
 import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
+import { Link, useParams } from '@wordpress/route';
 import { useViewConfig } from '@wordpress/views';
 import { useId, useMemo } from 'react';
 import {
-	SETTINGS_ENTITY,
-	SETTINGS_ARGS,
 	VIEW_CONFIG_FIELDS,
-	VIEW_CONFIG_ARGS,
 	unlock,
 } from '@woocommerce-settings-ui-experimental/settings-ui';
 import type { Settings } from '@woocommerce-settings-ui-experimental/settings-ui';
+
+/**
+ * Internal dependencies
+ */
+import {
+	SETTINGS_PAGES_ARGS,
+	getSettingsPage,
+	getSettingsEntity,
+	hasSettingsForm,
+} from './pages';
+import type { SettingsEntity, SettingsPage } from './pages';
 
 /**
  * Styles
  */
 import './style.scss';
 
-const { kind, name } = SETTINGS_ENTITY;
-
 function SettingsForm( {
+	entity,
 	settings,
 	fields,
 	form,
 }: {
+	entity: SettingsEntity;
 	settings: Settings;
 	fields: Field< Settings >[];
 	form: Form;
 } ) {
+	const { kind, name } = entity;
 	const formId = useId();
 	const { editEntityRecord, saveEditedEntityRecord } =
 		useDispatch( coreStore );
-	const { data, isDirty, isSaving, saveError } = useSelect( ( select ) => {
-		const {
-			getEditedEntityRecord,
-			hasEditsForEntityRecord,
-			isSavingEntityRecord,
-			getLastEntitySaveError,
-		} = select( coreStore );
+	const { data, isDirty, isSaving, saveError } = useSelect(
+		( select ) => {
+			const {
+				getEditedEntityRecord,
+				hasEditsForEntityRecord,
+				isSavingEntityRecord,
+				getLastEntitySaveError,
+			} = select( coreStore );
 
-		return {
-			data: getEditedEntityRecord( kind, name, undefined ) as Settings,
-			isDirty: hasEditsForEntityRecord( kind, name, undefined ),
-			isSaving: isSavingEntityRecord( kind, name, undefined ),
-			saveError: getLastEntitySaveError( kind, name, undefined ),
-		};
-	}, [] );
+			return {
+				data: getEditedEntityRecord(
+					kind,
+					name,
+					undefined
+				) as Settings,
+				isDirty: hasEditsForEntityRecord( kind, name, undefined ),
+				isSaving: isSavingEntityRecord( kind, name, undefined ),
+				saveError: getLastEntitySaveError( kind, name, undefined ),
+			};
+		},
+		[ kind, name ]
+	);
 	const { validity, isValid } = useFormValidity( data, fields, form );
 
 	const onChange = ( edits: Partial< Settings > ) => {
@@ -143,7 +160,17 @@ function SettingsForm( {
 	);
 }
 
-function SettingsStage() {
+function ProductSettingsStage( { entity }: { entity: SettingsEntity } ) {
+	const { kind, name } = entity;
+	const settingsArgs = useMemo(
+		() => [ kind, name, undefined ] as const,
+		[ kind, name ]
+	);
+	const viewConfigArgs = useMemo(
+		() =>
+			[ kind, name, { fields: VIEW_CONFIG_FIELDS.join( ',' ) } ] as const,
+		[ kind, name ]
+	);
 	const { form } = useViewConfig( {
 		kind,
 		name,
@@ -157,23 +184,23 @@ function SettingsStage() {
 				getResolutionError,
 			} = select( coreStore );
 			return {
-				record: getEntityRecord( ...SETTINGS_ARGS ) as
+				record: getEntityRecord( ...settingsArgs ) as
 					| Settings
 					| undefined,
 				hasResolved: hasFinishedResolution(
 					'getEntityRecord',
-					SETTINGS_ARGS
+					settingsArgs
 				),
 				fields: unlock( select( editorStore ) ).getEntityFields(
 					kind,
 					name
 				) as Field< Settings >[],
 				loadError:
-					getResolutionError( 'getEntityRecord', SETTINGS_ARGS ) ||
-					getResolutionError( 'getViewConfig', VIEW_CONFIG_ARGS ),
+					getResolutionError( 'getEntityRecord', settingsArgs ) ||
+					getResolutionError( 'getViewConfig', viewConfigArgs ),
 			};
 		},
-		[]
+		[ kind, name ]
 	);
 	const availableFields = useMemo(
 		() =>
@@ -198,10 +225,33 @@ function SettingsStage() {
 
 	return (
 		<SettingsForm
+			entity={ entity }
 			settings={ record }
 			fields={ availableFields }
 			form={ form }
 		/>
+	);
+}
+
+function SettingsStage() {
+	const params = useParams( { strict: false } );
+	const pages = useSelect(
+		( select ) =>
+			select( coreStore ).getEntityRecords( ...SETTINGS_PAGES_ARGS ) as
+				| SettingsPage[]
+				| undefined,
+		[]
+	);
+	const page = getSettingsPage( pages ?? [], { params } );
+	if ( ! page ) {
+		return null;
+	}
+	const entity = getSettingsEntity( page );
+
+	return (
+		<>
+			<ProductSettingsStage entity={ entity } />
+		</>
 	);
 }
 

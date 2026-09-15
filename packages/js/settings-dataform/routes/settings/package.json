@@ -12,12 +12,13 @@
 		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/route": "0.21.0",
 		"@wordpress/views": "1.21.0",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
 	},
 	"route": {
-		"path": "/",
+		"path": "/settings/$page",
 		"page": "wc-settings-dataform"
 	}
 }

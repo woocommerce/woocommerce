@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Control
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as SettingsProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Pages\Controller as SettingsPagesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
@@ -239,6 +240,7 @@ class Server {
 			'settings-email'            => EmailSettingsController::class,
 			'settings-emails'           => EmailsSettingsController::class,
 			'settings-products'         => SettingsProductsController::class,
+			'settings-pages'            => SettingsPagesController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
 			'settings-tax'              => TaxSettingsController::class,
 			'settings-account'          => AccountSettingsController::class,
