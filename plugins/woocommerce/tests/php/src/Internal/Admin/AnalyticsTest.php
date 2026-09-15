@@ -383,6 +383,49 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * An order that throws used to abandon the whole batch, so the run never recorded its
+	 * counters or scheduled the next range and the tool stayed on "Checking and fixing".
+	 *
+	 * @testdox Keeps going when re-importing one order throws, and counts it as unresolved.
+	 */
+	public function test_fix_continues_when_importing_an_order_throws(): void {
+		$throwing = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $throwing );
+		$healthy = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $healthy );
+
+		$throwing_id = $throwing->get_id();
+		$explode     = function ( $classname, $order_type, $order_id ) use ( $throwing_id ) {
+			if ( (int) $order_id === $throwing_id ) {
+				throw new \RuntimeException( 'Order storage is unavailable' );
+			}
+
+			return $classname;
+		};
+		add_filter( 'woocommerce_order_class', $explode, 10, 3 );
+
+		try {
+			$batches = $this->run_fix();
+		} finally {
+			remove_filter( 'woocommerce_order_class', $explode, 10 );
+		}
+
+		$this->assertSame( 1, $batches, 'The batch should finish rather than abandon the run' );
+
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertSame( 'complete', $state['status'] );
+		$this->assertSame( 1, $state['fixed'] );
+		$this->assertSame( 1, $state['unresolved'] );
+
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $healthy ), 0.001, 'The order after the failing one should still be fixed' );
+		$this->assertLogged(
+			'warning',
+			sprintf( 'Could not fix the double-counted refunds of order %d: Order storage is unavailable', $throwing_id ),
+			array( 'source' => 'wc-analytics-order-import' )
+		);
+	}
+
+	/**
 	 * @testdox A batch from an older run does nothing.
 	 */
 	public function test_batch_of_an_older_run_does_nothing(): void {

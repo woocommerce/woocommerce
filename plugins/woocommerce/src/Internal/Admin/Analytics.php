@@ -792,8 +792,15 @@ class Analytics {
 			$batch_size
 		);
 
+		// One order that throws must not abandon the run: the batch would never record its
+		// counters or schedule the next range, leaving the tool stuck on "Checking and fixing".
+		$failed_ids = array();
 		foreach ( $parent_ids as $parent_id ) {
-			OrdersScheduler::import( $parent_id );
+			try {
+				OrdersScheduler::import( $parent_id );
+			} catch ( \Throwable $throwable ) {
+				$failed_ids[ $parent_id ] = $throwable->getMessage();
+			}
 		}
 
 		// OrdersScheduler::import() skips some orders silently, so check the result.
@@ -804,9 +811,15 @@ class Analytics {
 			$unfixed_ids = self::get_refund_double_counted_parent_ids( $wpdb->prepare( "o.order_id IN ( {$placeholders} )", $parent_ids ) );
 		}
 
-		if ( $unfixed_ids ) {
+		$unfixed_ids = array_values( array_unique( array_merge( $unfixed_ids, array_keys( $failed_ids ) ) ) );
+
+		foreach ( $unfixed_ids as $unfixed_id ) {
 			wc_get_logger()->warning(
-				sprintf( 'Could not fix the double-counted refunds of orders: %s', implode( ', ', $unfixed_ids ) ),
+				sprintf(
+					'Could not fix the double-counted refunds of order %1$d: %2$s',
+					$unfixed_id,
+					$failed_ids[ $unfixed_id ] ?? 'the order still records more refunds than its own total after re-importing it'
+				),
 				array( 'source' => 'wc-analytics-order-import' )
 			);
 		}
