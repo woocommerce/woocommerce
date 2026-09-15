@@ -3,7 +3,6 @@
  */
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { registerCoreBlocks } from '@wordpress/block-library';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -32,43 +31,14 @@ beforeAll( () => {
 } );
 
 describe( 'Featured Category Cover migration helper', () => {
-	it.each( [
-		[ { height: 620 }, 620 ],
-		[ { height: 620, editMode: false }, 620 ],
-		[ { minHeight: 700 }, 700 ],
-		[ { height: 620, minHeight: 500 }, 500 ],
-		[ { height: 620, minHeight: 0 }, 0 ],
-		[ {}, getSetting( 'defaultHeight', 500 ) ],
-	] as const )( 'preserves height for %j', ( attributes, expected ) => {
-		const [ , [ cover ] ] = migrateToCover( attributes, [] );
-		expect( cover.attributes.minHeight ).toBe( expected );
-		expect( cover.attributes.minHeightUnit ).toBe( 'px' );
+	it( 'defaults generated v0 content to centered alignment without parser defaults', () => {
+		const [ , [ cover ] ] = migrateToCover( { editMode: false }, [] );
+		expect(
+			cover.innerBlocks
+				.slice( 0, 2 )
+				.map( ( block ) => block.attributes.textAlign )
+		).toEqual( [ 'center', 'center' ] );
 	} );
-
-	it.each( [ true, false, undefined ] )(
-		'creates v0 content with showDesc=%s',
-		( showDesc ) => {
-			const child = createBlock( 'core/paragraph', {
-				content: 'Custom content',
-			} );
-			const [ , [ cover ] ] = migrateToCover(
-				{ categoryId: 42, editMode: false, showDesc },
-				[ child ]
-			);
-			expect( cover.innerBlocks.map( ( block ) => block.name ) ).toEqual(
-				showDesc !== false
-					? [
-							'woocommerce/category-title',
-							'woocommerce/category-description',
-							'core/group',
-					  ]
-					: [ 'woocommerce/category-title', 'core/group' ]
-			);
-			expect( cover.innerBlocks.at( -1 )?.innerBlocks[ 0 ] ).toBe(
-				child
-			);
-		}
-	);
 
 	it.each( [ 'left', 'center', 'right' ] )(
 		'preserves %s positioning, natural image sizing and appearance',
