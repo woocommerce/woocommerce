@@ -377,6 +377,8 @@ describe( 'Product Collection inspector control contracts', () => {
 		[ 'offset', 'Offset', 'spinbutton' ],
 		[ 'max-pages-to-show', 'Max pages to show', 'spinbutton' ],
 		[ 'products-per-page', 'Products per page', 'slider' ],
+		[ 'on-sale', 'Show only products on sale', 'checkbox' ],
+		[ 'featured', 'Show only featured products', 'checkbox' ],
 	] as const )(
 		'honors the %s hidden-control contract',
 		( control, label, role ) => {
