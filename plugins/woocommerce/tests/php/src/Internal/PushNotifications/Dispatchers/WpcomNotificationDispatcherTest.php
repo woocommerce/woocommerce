@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -44,12 +45,21 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	private ?string $captured_url;
 
 	/**
+	 * Mock step logger.
+	 *
+	 * @var NotificationStepLogger|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $step_logger;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut              = new WpcomNotificationDispatcher();
+		$this->step_logger = $this->createMock( NotificationStepLogger::class );
+		$this->sut         = new WpcomNotificationDispatcher();
+		$this->sut->init( $this->step_logger );
 		$this->mock_response    = $this->make_response( 200 );
 		$this->captured_request = null;
 		$this->captured_url     = null;
@@ -259,19 +269,149 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report every token accepted when WPCOM queued the batch.
+	 */
+	public function test_dispatch_logs_accepted_when_wpcom_queued_the_batch(): void {
+		$this->mock_response = $this->make_response( 200, array(), '{"queued":1}' );
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				'send',
+				WpcomNotificationDispatcher::OUTCOME_ACCEPTED,
+				array(
+					'recipients'   => 1,
+					'queued'       => 1,
+					'deduplicated' => 0,
+				)
+			);
+
+		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_ACCEPTED, $result['outcome'] );
+		$this->assertSame( array(), $result['invalid_tokens'] );
+	}
+
+	/**
+	 * @testdox Should treat a batch refused by the deduplication window as sent, with a deduplicated outcome.
+	 */
+	public function test_dispatch_logs_deduplicated_when_wpcom_queued_nothing(): void {
+		$this->mock_response = $this->make_response( 200, array(), '{"queued":0,"deduplicated":1}' );
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with( $this->anything(), 'send', WpcomNotificationDispatcher::OUTCOME_DEDUPLICATED );
+
+		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_DEDUPLICATED, $result['outcome'] );
+	}
+
+	/**
+	 * @testdox Should name the refused tokens when WPCOM rejects the batch for an invalid token.
+	 */
+	public function test_dispatch_returns_the_invalid_tokens_wpcom_named(): void {
+		$this->mock_response = $this->make_response(
+			422,
+			array(),
+			'{"code":"invalid_tokens","message":"One or more tokens are invalid.","data":{"status":422,"invalid_tokens":["test-token"]}}'
+		);
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_failure' )
+			->with(
+				$this->anything(),
+				'send',
+				WpcomNotificationDispatcher::OUTCOME_REJECTED_INVALID_TOKEN,
+				'error',
+				'Push notification request returned HTTP 422.',
+				$this->callback(
+					fn( array $context ) => 422 === $context['http_status']
+						&& 'invalid_tokens' === $context['error_code']
+						&& 1 === $context['invalid_tokens']
+				)
+			);
+
+		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+
+		$this->assertFalse( $result['success'] );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_REJECTED_INVALID_TOKEN, $result['outcome'] );
+		$this->assertSame( array( 'test-token' ), $result['invalid_tokens'] );
+	}
+
+	/**
+	 * @testdox Should report a rejected notification, naming no tokens, when WPCOM fails validation.
+	 */
+	public function test_dispatch_reports_rejected_notification_on_rest_invalid_param(): void {
+		$this->mock_response = $this->make_response( 400, array(), '{"code":"rest_invalid_param","message":"Invalid parameter(s): resource_id"}' );
+
+		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+
+		$this->assertFalse( $result['success'] );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_REJECTED_INVALID_NOTIFICATION, $result['outcome'] );
+		$this->assertSame( array(), $result['invalid_tokens'] );
+	}
+
+	/**
+	 * @testdox Should report a plain failure with the status and retry delay on any other error.
+	 */
+	public function test_dispatch_reports_failure_with_status_and_retry_after(): void {
+		$this->mock_response = $this->make_response( 503, array( 'retry-after' => '120' ) );
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_failure' )
+			->with(
+				$this->anything(),
+				'send',
+				WpcomNotificationDispatcher::OUTCOME_FAILED,
+				'error',
+				$this->anything(),
+				$this->callback( fn( array $context ) => 503 === $context['http_status'] && 120 === $context['retry_after'] )
+			);
+
+		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_FAILED, $result['outcome'] );
+		$this->assertSame( 120, $result['retry_after'] );
+	}
+
+	/**
+	 * @testdox Should log the missing site ID and the missing resource as failures.
+	 */
+	public function test_dispatch_logs_failures_before_the_request(): void {
+		$this->step_logger->expects( $this->exactly( 2 ) )
+			->method( 'log_failure' )
+			->withConsecutive(
+				array( $this->anything(), 'send', WpcomNotificationDispatcher::OUTCOME_RESOURCE_MISSING, 'error' ),
+				array( $this->anything(), 'send', WpcomNotificationDispatcher::OUTCOME_REQUEST_FAILED, 'error' )
+			);
+
+		$result = $this->sut->dispatch( $this->create_notification( null ), $this->create_tokens() );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_RESOURCE_MISSING, $result['outcome'] );
+
+		$this->mock_response = new WP_Error( 'http_request_failed', 'Connection timed out' );
+		$result              = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
+		$this->assertSame( WpcomNotificationDispatcher::OUTCOME_REQUEST_FAILED, $result['outcome'] );
+	}
+
+	/**
 	 * Creates a mock HTTP response array.
 	 *
-	 * @param int   $status_code HTTP status code.
-	 * @param array $headers     Response headers.
+	 * @param int    $status_code HTTP status code.
+	 * @param array  $headers     Response headers.
+	 * @param string $body        Response body.
 	 * @return array
 	 */
-	private function make_response( int $status_code, array $headers = array() ): array {
+	private function make_response( int $status_code, array $headers = array(), string $body = '' ): array {
 		return array(
 			'response' => array(
 				'code'    => $status_code,
 				'message' => 'Mock',
 			),
-			'body'     => '',
+			'body'     => $body,
 			'headers'  => $headers,
 		);
 	}

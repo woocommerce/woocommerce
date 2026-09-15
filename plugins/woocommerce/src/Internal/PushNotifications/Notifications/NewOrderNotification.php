@@ -20,6 +20,12 @@ class NewOrderNotification extends Notification {
 	const TYPE = 'store_order';
 
 	/**
+	 * Suppression reasons specific to order notifications.
+	 */
+	const SUPPRESSED_ORDER_MISSING    = 'order_missing';
+	const SUPPRESSED_BELOW_MIN_AMOUNT = 'below_min_amount';
+
+	/**
 	 * An array of emojis to select from when forming the payload.
 	 */
 	const EMOJI_LIST = array( '🎉', '🎊', '🥳', '👏', '🙌' );
@@ -114,6 +120,25 @@ class NewOrderNotification extends Notification {
 		}
 
 		return (float) $order->get_total() >= $min_amount;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return self::SUPPRESSED_TYPE_DISABLED;
+		}
+
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+		if ( ! $order instanceof WC_Order ) {
+			return self::SUPPRESSED_ORDER_MISSING;
+		}
+
+		return self::SUPPRESSED_BELOW_MIN_AMOUNT;
 	}
 
 	/**

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
@@ -42,7 +43,13 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut      = new NotificationRetryHandler();
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'has_ever_had_tokens' )->willReturn( true );
+		$step_logger = new NotificationStepLogger();
+		$step_logger->init( $data_store );
+
+		$this->sut = new NotificationRetryHandler();
+		$this->sut->init( $step_logger );
 		$this->order_id = wc_create_order( array( 'status' => 'processing' ) )->get_id();
 	}
 
@@ -82,6 +89,17 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotFalse( $scheduled, 'A retry action should be scheduled.' );
 		$this->assertEqualsWithDelta( time() + $expected_delay, $scheduled, 2, 'Retry should be scheduled with the correct backoff delay.' );
+		$this->assertLogged(
+			'info',
+			'Retry: scheduled',
+			array(
+				'source'       => 'push-notifications-store-order',
+				'step'         => 'retry',
+				'outcome'      => 'scheduled',
+				'next_attempt' => $expected_next,
+				'delay'        => $expected_delay,
+			)
+		);
 	}
 
 	/**
@@ -125,7 +143,19 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $scheduled, 'No retry should be scheduled after max retries.' );
-		$this->assertLogged( 'error', 'permanently failed after 5 attempts', array( 'source' => PushNotifications::FEATURE_NAME ) );
+		$this->assertLogged(
+			'error',
+			'permanently failed after 5 attempts',
+			array(
+				'source'      => PushNotifications::FEATURE_NAME,
+				'identifier'  => $notification->get_identifier(),
+				'step'        => 'retry',
+				'outcome'     => 'exhausted',
+				'attempt'     => NotificationRetryHandler::MAX_RETRIES,
+				'resource_id' => $this->order_id,
+			)
+		);
+		$this->assertLogged( 'info', 'Retry: exhausted', array( 'source' => 'push-notifications-store-order' ) );
 	}
 
 	/**
@@ -229,7 +259,13 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		);
 
 		$processor = new NotificationProcessor();
-		$processor->init( $dispatcher, $data_store, $preferences_service, $retry_handler );
+		$processor->init(
+			$dispatcher,
+			$data_store,
+			$preferences_service,
+			$retry_handler,
+			$this->createMock( NotificationStepLogger::class )
+		);
 		wc_get_container()->replace( NotificationProcessor::class, $processor );
 
 		$this->sut->handle_retry( 'store_order', $this->order_id, 2 );
@@ -246,6 +282,16 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 	public function test_handle_retry_logs_error_for_unknown_type(): void {
 		$this->sut->handle_retry( 'unknown_type', 1, 1 );
 
-		$this->assertLogged( 'error', 'Retry failed:', array( 'source' => PushNotifications::FEATURE_NAME ) );
+		$this->assertLogged(
+			'error',
+			'Retry failed:',
+			array(
+				'source'  => PushNotifications::FEATURE_NAME,
+				'step'    => 'retry',
+				'outcome' => 'invalid_notification',
+				'type'    => 'unknown_type',
+				'attempt' => 1,
+			)
+		);
 	}
 }

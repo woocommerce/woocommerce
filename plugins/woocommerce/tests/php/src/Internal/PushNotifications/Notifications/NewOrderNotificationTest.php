@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -192,6 +193,56 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$this->assertTrue(
 			$notification->should_send_to_user( array( 'enabled' => true ) )
 		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the type toggle when it is off, before any amount check.
+	 */
+	public function test_get_suppression_reason_type_disabled_wins(): void {
+		$order        = $this->create_order_with_total( 10 );
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => false,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( Notification::SUPPRESSED_TYPE_DISABLED, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the minimum amount when the order total is below it.
+	 */
+	public function test_get_suppression_reason_below_min_amount(): void {
+		$order        = $this->create_order_with_total( 10 );
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( NewOrderNotification::SUPPRESSED_BELOW_MIN_AMOUNT, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should report a missing order when it cannot be loaded.
+	 */
+	public function test_get_suppression_reason_order_missing(): void {
+		$notification = new NewOrderNotification( 999999 );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( NewOrderNotification::SUPPRESSED_ORDER_MISSING, $reason );
 	}
 
 	/**

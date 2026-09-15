@@ -20,6 +20,12 @@ class NewReviewNotification extends Notification {
 	const TYPE = 'store_review';
 
 	/**
+	 * Suppression reasons specific to review notifications.
+	 */
+	const SUPPRESSED_COMMENT_MISSING  = 'comment_missing';
+	const SUPPRESSED_ABOVE_MAX_RATING = 'above_max_rating';
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function get_type(): string {
@@ -59,6 +65,25 @@ class NewReviewNotification extends Notification {
 		}
 
 		return (int) $rating <= (int) $pref_value['max_rating'];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return string
+	 */
+	public function get_suppression_reason( $pref_value ): string {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return self::SUPPRESSED_TYPE_DISABLED;
+		}
+
+		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
+		if ( ! $comment instanceof WP_Comment ) {
+			return self::SUPPRESSED_COMMENT_MISSING;
+		}
+
+		return self::SUPPRESSED_ABOVE_MAX_RATING;
 	}
 
 	/**
