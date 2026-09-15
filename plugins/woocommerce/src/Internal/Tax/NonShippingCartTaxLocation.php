@@ -102,7 +102,7 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		foreach ( $cart->get_cart() as $cart_item ) {
+		foreach ( $cart_contents as $cart_item ) {
 			$product = $cart_item['data'] ?? null;
 			if ( ! $product instanceof \WC_Product || $product->needs_shipping() ) {
 				return $taxable_address;
