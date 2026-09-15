@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ImportExport;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -342,15 +343,18 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should release each exported order's meta cache so a large export does not grow memory.
+	 * @testdox Should release each exported order's caches so a large export does not grow memory.
 	 */
-	public function test_releases_order_meta_cache_while_streaming(): void {
-		$order     = $this->create_order();
-		$cache_key = WC_Order::generate_meta_cache_key( $order->get_id(), 'orders' );
+	public function test_releases_order_caches_while_streaming(): void {
+		$order       = $this->create_order();
+		$cache_key   = WC_Order::generate_meta_cache_key( $order->get_id(), 'orders' );
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		$order_cache->set( $order, $order->get_id() );
 
 		$this->export( 'shop_order' );
 
 		$this->assertFalse( wp_cache_get( $cache_key, 'orders' ), 'Meta cache entry must be gone after the export' );
+		$this->assertFalse( $order_cache->is_cached( $order->get_id() ), 'Order object must be evicted from the order cache' );
 	}
 
 	/**

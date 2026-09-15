@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
@@ -66,6 +67,13 @@ class HposOrderExportHandler {
 	private OrdersTableDataStore $orders_data_store;
 
 	/**
+	 * Order object cache, used to release loaded orders while streaming.
+	 *
+	 * @var OrderCache
+	 */
+	private OrderCache $order_cache;
+
+	/**
 	 * Arguments of the export currently in progress, or null outside of an export.
 	 *
 	 * @var array|null
@@ -99,13 +107,15 @@ class HposOrderExportHandler {
 	 * @param PostsToOrdersMigrationController $posts_to_orders_migrator Posts to HPOS migrator.
 	 * @param CostOfGoodsSoldController        $cogs_controller          Cost of goods sold controller.
 	 * @param OrdersTableDataStore             $orders_data_store        HPOS data store.
+	 * @param OrderCache                       $order_cache              Order object cache.
 	 */
-	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller, OrdersTableDataStore $orders_data_store ): void {
+	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller, OrdersTableDataStore $orders_data_store, OrderCache $order_cache ): void {
 		$this->cot_controller           = $cot_controller;
 		$this->data_synchronizer        = $data_synchronizer;
 		$this->posts_to_orders_migrator = $posts_to_orders_migrator;
 		$this->cogs_controller          = $cogs_controller;
 		$this->orders_data_store        = $orders_data_store;
+		$this->order_cache              = $order_cache;
 	}
 
 	/**
@@ -200,6 +210,7 @@ class HposOrderExportHandler {
 
 		foreach ( $order_ids as $order_id ) {
 			wp_cache_delete( \WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
+			$this->order_cache->remove( $order_id );
 		}
 	}
 
