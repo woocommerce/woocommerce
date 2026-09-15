@@ -1226,6 +1226,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',
@@ -1526,6 +1528,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',

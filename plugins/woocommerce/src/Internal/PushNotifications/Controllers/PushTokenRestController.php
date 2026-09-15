@@ -356,6 +356,18 @@ class PushTokenRestController extends RestApiControllerBase {
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
+					'user_login'            => array(
+						'description' => __( 'The username of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'user_email'            => array(
+						'description' => __( 'The email address of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 					'token'                 => array(
 						'description' => __( 'The push token issued by Apple or Google.', 'woocommerce' ),
 						'type'        => 'string',
