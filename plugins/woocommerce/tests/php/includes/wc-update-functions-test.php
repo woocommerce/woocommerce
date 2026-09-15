@@ -550,7 +550,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration deletes the lookup rows of unpublished variations and keeps every other row.
 	 */
-	public function test_wc_update_1120_delete_unpublished_variation_lookup_rows(): void {
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
@@ -592,7 +592,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		set_transient( $counts_transient, array( 'query_hash' => array( 1 => 2 ) ) );
 
 		$batches = 0;
-		while ( wc_update_1120_delete_unpublished_variation_lookup_rows() ) {
+		while ( wc_update_1130_delete_unpublished_variation_lookup_rows() ) {
 			++$batches;
 			$this->assertLessThan( 10, $batches, 'The migration reschedules itself until every batch is done.' );
 		}
@@ -605,7 +605,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_transient( $counts_transient ), 'The layered nav counts cached from the deleted rows are invalidated.' );
 
 		$this->assertFalse(
-			get_option( 'woocommerce_update_1120_last_unpublished_variation_id' ),
+			get_option( 'woocommerce_update_1130_last_unpublished_variation_id' ),
 			'The batch cursor is cleaned up once the migration is done.'
 		);
 	}
@@ -613,7 +613,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration keeps the rows of a variation that was published after its batch was selected.
 	 */
-	public function test_wc_update_1120_delete_unpublished_variation_lookup_rows_rechecks_the_status_at_delete_time(): void {
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_rechecks_the_status_at_delete_time(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
@@ -655,7 +655,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			}
 		);
 
-		while ( wc_update_1120_delete_unpublished_variation_lookup_rows() ) {
+		while ( wc_update_1130_delete_unpublished_variation_lookup_rows() ) {
 			continue;
 		}
 
