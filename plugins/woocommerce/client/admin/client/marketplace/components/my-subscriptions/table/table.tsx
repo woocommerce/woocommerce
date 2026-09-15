@@ -73,6 +73,10 @@ export function InstalledSubscriptionsTable( props: {
 	const headers = [
 		...tableHeadersDefault,
 		{
+			key: 'auto-updates',
+			label: __( 'Automatic updates', 'woocommerce' ),
+		},
+		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),
 		},

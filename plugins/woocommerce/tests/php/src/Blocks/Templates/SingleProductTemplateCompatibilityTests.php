@@ -38,10 +38,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -73,10 +73,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -156,10 +156,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -191,10 +191,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -226,10 +226,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -293,10 +293,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -322,10 +322,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 
@@ -352,10 +352,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -393,10 +393,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -430,10 +430,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -468,10 +468,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -504,9 +504,9 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $result );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 }

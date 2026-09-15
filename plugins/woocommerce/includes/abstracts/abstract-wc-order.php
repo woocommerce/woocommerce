@@ -46,20 +46,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $data = array(
-		'parent_id'          => 0,
-		'status'             => '',
-		'currency'           => '',
-		'version'            => '',
-		'prices_include_tax' => false,
-		'date_created'       => null,
-		'date_modified'      => null,
-		'discount_total'     => 0,
-		'discount_tax'       => 0,
-		'shipping_total'     => 0,
-		'shipping_tax'       => 0,
-		'cart_tax'           => 0,
-		'total'              => 0,
-		'total_tax'          => 0,
+		'parent_id'      => 0,
+		'status'         => '',
+		'currency'       => '',
+		'version'        => '',
+		'date_created'   => null,
+		'date_modified'  => null,
+		'discount_total' => 0,
+		'discount_tax'   => 0,
+		'shipping_total' => 0,
+		'shipping_tax'   => 0,
+		'cart_tax'       => 0,
+		'total'          => 0,
+		'total_tax'      => 0,
 	);
 
 	/**
@@ -187,6 +186,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
 			$this->data['cogs_total_value'] = 0;
 		}
+
+		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
 
 		parent::__construct( $order );
 
