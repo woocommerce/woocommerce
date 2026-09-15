@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -106,7 +107,9 @@ class PushNotificationRestController {
 	}
 
 	/**
-	 * Validates the JWT from the Authorization header.
+	 * Validates the JWT from the Authorization header, falling back to the
+	 * token query parameter on hosts that strip the header before it reaches
+	 * PHP (see {@see InternalNotificationDispatcher::TOKEN_QUERY_PARAM}).
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -117,15 +120,19 @@ class PushNotificationRestController {
 	public function authorize( WP_REST_Request $request ) {
 		$header = trim( (string) $request->get_header( 'authorization' ) );
 
-		if ( empty( $header ) ) {
+		if ( '' !== $header ) {
+			$token = strncasecmp( $header, 'Bearer ', 7 ) === 0 ? substr( $header, 7 ) : $header;
+		} else {
+			$token = $this->get_token_from_query( $request );
+		}
+
+		if ( '' === $token ) {
 			return new WP_Error(
 				'woocommerce_rest_unauthorized',
-				'Missing authorization header.',
+				'Missing credential: no Authorization header and no token query parameter.',
 				array( 'status' => WP_Http::UNAUTHORIZED )
 			);
 		}
-
-		$token = strncasecmp( $header, 'Bearer ', 7 ) === 0 ? substr( $header, 7 ) : $header;
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
 			return new WP_Error(
@@ -156,5 +163,27 @@ class PushNotificationRestController {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Reads the credential from the query string.
+	 *
+	 * Reads the query parameters directly rather than through
+	 * {@see WP_REST_Request::get_param()}, which searches the JSON body and the
+	 * POST body first and is reorderable by the `rest_request_parameter_order`
+	 * filter. The credential is sent in the URL, so that is the only place it
+	 * should be read from.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return string The token, or an empty string when absent or not a string.
+	 *
+	 * @since 11.2.0
+	 */
+	private function get_token_from_query( WP_REST_Request $request ): string {
+		$params = $request->get_query_params();
+		$token  = $params[ InternalNotificationDispatcher::TOKEN_QUERY_PARAM ] ?? '';
+
+		return is_string( $token ) ? trim( $token ) : '';
 	}
 }
