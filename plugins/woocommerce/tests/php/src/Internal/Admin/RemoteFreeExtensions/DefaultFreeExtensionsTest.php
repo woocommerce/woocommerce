@@ -162,6 +162,53 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Core profiler WooPayments visibility should follow the store country.
+	 * @dataProvider core_profiler_woocommerce_payments_visibility_provider
+	 *
+	 * @param string $country        Store country and optional state.
+	 * @param bool   $should_include Whether WooPayments should be recommended.
+	 */
+	public function test_core_profiler_woocommerce_payments_visibility_by_country( string $country, bool $should_include ): void {
+		update_option( 'woocommerce_default_country', $country );
+		update_option( 'woocommerce_store_address', '1 Test Street' );
+		update_option( 'woocommerce_remote_variant_assignment', 60 );
+		update_option( 'active_plugins', array() );
+		update_option( 'woocommerce_onboarding_profile', array() );
+
+		$results = EvaluateExtension::evaluate_bundles(
+			DefaultFreeExtensions::get_all(),
+			array( 'obw/core-profiler' )
+		);
+
+		$this->assertSame( array(), $results['errors'], 'The real core profiler bundle should evaluate without errors.' );
+		$this->assertCount( 1, $results['bundles'], 'Only the core profiler bundle should be evaluated.' );
+		$plugin_slugs = array_map(
+			static function ( $plugin ) {
+				return $plugin->key;
+			},
+			$results['bundles'][0]['plugins']
+		);
+
+		if ( $should_include ) {
+			$this->assertContains( 'woocommerce-payments', $plugin_slugs );
+		} else {
+			$this->assertNotContains( 'woocommerce-payments', $plugin_slugs );
+		}
+	}
+
+	/**
+	 * Store countries for core profiler WooPayments visibility.
+	 *
+	 * @return array<string, array{string, bool}>
+	 */
+	public function core_profiler_woocommerce_payments_visibility_provider(): array {
+		return array(
+			'AU:NT' => array( 'AU:NT', true ),
+			'AF'    => array( 'AF', false ),
+		);
+	}
+
+	/**
 	 * Evaluates bundles passed as argument and extracts keys of recommended plugins.
 	 *
 	 * @param array $bundles Array of bundles to evaluate.
