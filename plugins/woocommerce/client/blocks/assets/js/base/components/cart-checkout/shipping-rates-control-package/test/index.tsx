@@ -115,7 +115,7 @@ test( 'skips mount selection when disabled but still handles user selection', as
 	await act( async () => {
 		await userEvent.click(
 			screen.getByRole( 'radio', {
-				name: 'Flat rate (premium) $15.00',
+				name: 'Flat rate (premium) $ 15.00',
 			} )
 		);
 	} );
@@ -294,7 +294,7 @@ test( 'Core clears a rejected selection so the shopper can retry it', async () =
 			noResultsMessage={ <span>No rates</span> }
 		/>
 	);
-	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $10.00' } );
+	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $ 10.00' } );
 	expect( flatRate ).toBeChecked();
 
 	// Pickup is filtered out of Shipping, leaving no visible selected rate after rollback.
