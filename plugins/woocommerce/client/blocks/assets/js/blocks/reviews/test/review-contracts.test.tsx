@@ -216,7 +216,9 @@ describe( 'Product Reviews contracts', () => {
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 1 )
 			);
 			await user.click(
-				await screen.findByRole( 'button', { name: /load more/i } )
+				await screen.findByRole( 'button', {
+					name: 'Load more reviews',
+				} )
 			);
 			await waitFor( () =>
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 2 )
