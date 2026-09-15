@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Render existing Featured Category blocks with Cover markup while preserving their content and category images.
