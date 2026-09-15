@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -287,6 +288,279 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$actual_count = $sut->get_order_count( $customer_1 );
 
 		$this->assertEquals( 3, $actual_count );
+	}
+
+	/**
+	 * Create a completed order with a deterministic total and paid date.
+	 *
+	 * @param int    $customer_id Customer ID.
+	 * @param string $date_paid   Paid date in site time.
+	 * @param float  $total       Order total.
+	 */
+	private function create_paid_order( $customer_id, $date_paid, $total ) {
+		$order = WC_Helper_Order::create_order( $customer_id, null, array( 'status' => OrderStatus::COMPLETED ) );
+		$order->set_date_paid( $date_paid );
+		$order->set_total( $total );
+		$order->save();
+	}
+
+	/**
+	 * Assert timeframe totals bypass, but do not replace, the all-time cache.
+	 *
+	 * @param string $cot_enabled Whether custom order tables are enabled.
+	 */
+	private function assert_total_spent_timeframe( $cot_enabled ) {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $cot_enabled );
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$this->create_paid_order( $customer->get_id(), '2024-01-10 12:00:00', 10 );
+			$this->create_paid_order( $customer->get_id(), '2024-02-10 12:00:00', 20 );
+			$this->create_paid_order( $customer->get_id(), '2024-03-10 12:00:00', 30 );
+
+			$sut = new WC_Customer_Data_Store();
+
+			$this->assertEquals( '60.00', $sut->get_total_spent( $customer ) );
+			$this->assertEquals(
+				'20.00',
+				$sut->get_total_spent_for_timeframe(
+					$customer,
+					array(
+						'after'  => new DateTimeImmutable( '2024-01-31 23:59:59', wp_timezone() ),
+						'before' => new DateTimeImmutable( '2024-03-01 00:00:00', wp_timezone() ),
+					)
+				)
+			);
+			$filtered_spent = null;
+			$filtered_args  = null;
+			$filter         = static function ( $spent, $filtered_customer, $args ) use ( &$filtered_spent, &$filtered_args ) {
+				$filtered_spent = $spent;
+				$filtered_args  = $args;
+				return $spent;
+			};
+			add_filter( 'woocommerce_customer_get_total_spent_for_timeframe', $filter, 10, 3 );
+
+			try {
+				$this->assertEquals(
+					'20.00',
+					wc_get_customer_total_spent(
+						$customer->get_id(),
+						array(
+							'after'  => '2024-01-31 23:59:59',
+							'before' => '2024-03-01 00:00:00',
+						)
+					)
+				);
+			} finally {
+				remove_filter( 'woocommerce_customer_get_total_spent_for_timeframe', $filter, 10 );
+			}
+
+			$this->assertEquals( 20.0, (float) $filtered_spent );
+			$this->assertEquals(
+				array(
+					'after'  => '2024-01-31 23:59:59',
+					'before' => '2024-03-01 00:00:00',
+				),
+				$filtered_args
+			);
+			$this->assertEquals(
+				'30.00',
+				$sut->get_total_spent_for_timeframe(
+					$customer,
+					array( 'after' => '2024-02-28 23:59:59' )
+				)
+			);
+			$this->assertEquals(
+				'10.00',
+				$sut->get_total_spent_for_timeframe(
+					$customer,
+					array(
+						'before' => ( new DateTimeImmutable( '2024-02-01 00:00:00', wp_timezone() ) )->getTimestamp(),
+					)
+				)
+			);
+			$this->assertEquals( '60.00', $sut->get_total_spent( $customer ) );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+	}
+
+	/**
+	 * @testdox 'get_total_spent_for_timeframe' filters by paid date when the posts table is used for storing orders.
+	 */
+	public function test_get_total_spent_with_timeframe_not_using_cot() {
+		$this->assert_total_spent_timeframe( 'no' );
+	}
+
+	/**
+	 * Tests the legacy paid-date fallback with CPT order storage.
+	 *
+	 * @testdox 'get_total_spent_for_timeframe' includes orders that only have the legacy paid-date meta.
+	 */
+	public function test_get_total_spent_timeframe_includes_legacy_paid_date_not_using_cot() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$order    = WC_Helper_Order::create_order( $customer->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_total( 20 );
+			$order->save();
+			delete_post_meta( $order->get_id(), '_date_paid' );
+			update_post_meta( $order->get_id(), '_paid_date', '2024-02-10 12:00:00' );
+
+			$sut       = new WC_Customer_Data_Store();
+			$timeframe = array(
+				'after'  => '2024-02-10 11:59:59',
+				'before' => '2024-02-10 12:00:01',
+			);
+			$this->assertSame(
+				'20.00',
+				$sut->get_total_spent_for_timeframe( $customer, $timeframe )
+			);
+
+			add_post_meta( $order->get_id(), '_paid_date', '2024-03-10 12:00:00' );
+			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The first legacy meta value should win without multiplying the order total.' );
+
+			update_post_meta( $order->get_id(), '_date_paid', ( new DateTimeImmutable( '2024-02-10 12:00:00', wp_timezone() ) )->getTimestamp() );
+			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The canonical paid date should count the order only once.' );
+
+			update_post_meta( $order->get_id(), '_date_paid', ( new DateTimeImmutable( '2024-03-10 12:00:00', wp_timezone() ) )->getTimestamp() );
+			$this->assertSame(
+				'0.00',
+				$sut->get_total_spent_for_timeframe( $customer, $timeframe ),
+				'The canonical paid date should take precedence over the legacy value.'
+			);
+
+			delete_post_meta( $order->get_id(), '_date_paid' );
+			delete_post_meta( $order->get_id(), '_paid_date' );
+			add_post_meta( $order->get_id(), '_paid_date', '' );
+			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, array( 'before' => '2024-03-01 00:00:00' ) ), 'An empty legacy paid date should not satisfy a before-only filter.' );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+	}
+
+	/**
+	 * Tests the legacy paid-date fallback after migration to HPOS.
+	 *
+	 * @testdox 'get_total_spent_for_timeframe' includes migrated orders that only had the legacy paid-date meta.
+	 */
+	public function test_get_total_spent_timeframe_includes_migrated_legacy_paid_date_using_cot() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$order    = WC_Helper_Order::create_order( $customer->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_total( 20 );
+			$order->save();
+			delete_post_meta( $order->get_id(), '_date_paid' );
+			update_post_meta( $order->get_id(), '_paid_date', '2024-02-10 12:00:00' );
+
+			$migrator = wc_get_container()->get( PostsToOrdersMigrationController::class );
+			$migrator->migrate_orders( array( $order->get_id() ) );
+			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+			global $wpdb;
+			$migrated_paid_date = $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT meta_value FROM %i WHERE order_id = %d AND meta_key = %s',
+					OrdersTableDataStore::get_meta_table_name(),
+					$order->get_id(),
+					'_paid_date'
+				)
+			);
+			$this->assertSame( '2024-02-10 12:00:00', $migrated_paid_date );
+
+			$sut       = new WC_Customer_Data_Store();
+			$timeframe = array(
+				'after'  => '2024-02-10 11:59:59',
+				'before' => '2024-02-10 12:00:01',
+			);
+			$this->assertSame(
+				'20.00',
+				$sut->get_total_spent_for_timeframe( $customer, $timeframe )
+			);
+
+			$wpdb->insert(
+				OrdersTableDataStore::get_meta_table_name(),
+				array(
+					'order_id'   => $order->get_id(),
+					'meta_key'   => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Creates duplicate legacy meta for the regression fixture.
+					'meta_value' => '2024-03-10 12:00:00', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Creates duplicate legacy meta for the regression fixture.
+				),
+				array( '%d', '%s', '%s' )
+			);
+			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The first migrated legacy meta value should win without multiplying the order total.' );
+
+			$wpdb->update(
+				OrdersTableDataStore::get_operational_data_table_name(),
+				array( 'date_paid_gmt' => '2024-02-10 17:00:00' ),
+				array( 'order_id' => $order->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The canonical migrated paid date should count the order only once.' );
+
+			$wpdb->update(
+				OrdersTableDataStore::get_operational_data_table_name(),
+				array( 'date_paid_gmt' => '2024-03-10 17:00:00' ),
+				array( 'order_id' => $order->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			$this->assertSame(
+				'0.00',
+				$sut->get_total_spent_for_timeframe( $customer, $timeframe ),
+				'The canonical paid date should take precedence over the migrated legacy value.'
+			);
+
+			$wpdb->update(
+				OrdersTableDataStore::get_operational_data_table_name(),
+				array( 'date_paid_gmt' => null ),
+				array( 'order_id' => $order->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			$wpdb->update(
+				OrdersTableDataStore::get_meta_table_name(),
+				array( 'meta_value' => '' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Creates empty legacy meta for the regression fixture.
+				array(
+					'order_id' => $order->get_id(),
+					'meta_key' => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Targets the regression fixture's legacy meta.
+				),
+				array( '%s' ),
+				array( '%d', '%s' )
+			);
+			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, array( 'before' => '2024-03-01 00:00:00' ) ), 'An empty migrated legacy paid date should not satisfy a before-only filter.' );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+	}
+
+	/**
+	 * Tests timeframe totals with HPOS order storage.
+	 *
+	 * @testdox 'get_total_spent_for_timeframe' filters by paid date when the custom orders table is used for storing orders.
+	 */
+	public function test_get_total_spent_with_timeframe_using_cot() {
+		$this->assert_total_spent_timeframe( 'yes' );
+	}
+
+	/**
+	 * @testdox 'get_total_spent_for_timeframe' rejects invalid paid-date filters.
+	 */
+	public function test_get_total_spent_rejects_invalid_timeframe_date() {
+		$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$sut      = new WC_Customer_Data_Store();
+
+		$this->expectException( InvalidArgumentException::class );
+		$sut->get_total_spent_for_timeframe( $customer, array( 'after' => 'not-a-date' ) );
 	}
 
 	/**
