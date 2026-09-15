@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix related products returning one less product when limit is set to -1 (show all).
