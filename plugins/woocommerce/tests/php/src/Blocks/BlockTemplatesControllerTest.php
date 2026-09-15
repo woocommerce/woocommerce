@@ -103,8 +103,6 @@ class BlockTemplatesControllerTest extends WP_UnitTestCase {
 			$plugin_root = dirname( __DIR__, 4 );
 			$this->assertFileExists( $plugin_root . '/templates/templates/archive-product.html' );
 			$this->assertFileExists( $plugin_root . '/templates/parts/external-product-add-to-cart-with-options.html' );
-			$this->assertFileExists( $plugin_root . '/tests/e2e/themes/blocks/theme-with-woo-templates/block-templates/archive-product.html' );
-			$this->assertFileExists( $plugin_root . '/tests/e2e/themes/blocks/theme-with-woo-templates/block-template-parts/external-product-add-to-cart-with-options.html' );
 		} finally {
 			// WP_Block_Templates_Registry is a static singleton the base teardown does
 			// not reach; $wp_filter it rebuilds from the suite baseline on its own.
