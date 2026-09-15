@@ -704,6 +704,62 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report no tokens when none are registered.
+	 */
+	public function test_has_tokens_returns_false_when_no_tokens_exist(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should report tokens once one is registered, regardless of the owner's role.
+	 */
+	public function test_has_tokens_returns_true_when_a_token_exists(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $subscriber_id,
+				'token'         => 'subscriber_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'subscriber-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( ( new PushTokensDataStore() )->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should report tokens after one is created, when an earlier lookup found none.
+	 */
+	public function test_has_tokens_reflects_a_token_created_after_an_earlier_lookup(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( $data_store->has_tokens() );
+		$this->assertCount( 1, $data_store->get_tokens_for_roles( array( 'administrator' ) ) );
+	}
+
+	/**
 	 * @testdox Should return tokens for users with matching roles.
 	 */
 	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {
