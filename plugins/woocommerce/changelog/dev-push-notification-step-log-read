@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add REST endpoints for reading the push notification step log per notification, device and user

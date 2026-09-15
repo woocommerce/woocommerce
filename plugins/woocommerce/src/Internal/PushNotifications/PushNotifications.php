@@ -10,6 +10,7 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\StepLogRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
@@ -82,6 +83,7 @@ class PushNotifications {
 		( new PushTokenRestController() )->register();
 		( new PushNotificationRestController() )->register();
 		( new NotificationPreferencesRestController() )->register();
+		wc_get_container()->get( StepLogRestController::class )->register();
 		( new NewOrderNotificationTrigger() )->register();
 		( new NewReviewNotificationTrigger() )->register();
 		( new StockNotificationTrigger() )->register();

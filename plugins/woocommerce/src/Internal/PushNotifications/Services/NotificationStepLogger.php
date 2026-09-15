@@ -167,7 +167,19 @@ class NotificationStepLogger {
 	 * @since 11.3.0
 	 */
 	public static function get_notification_source( Notification $notification ): string {
-		return sanitize_title( self::NOTIFICATION_SOURCE_PREFIX . str_replace( '_', '-', $notification->get_type() ) );
+		return self::get_notification_source_for_type( $notification->get_type() );
+	}
+
+	/**
+	 * Builds the log source for a notification type name.
+	 *
+	 * @param string $type The notification type, e.g. `store_order`.
+	 * @return string
+	 *
+	 * @since 11.3.0
+	 */
+	public static function get_notification_source_for_type( string $type ): string {
+		return sanitize_title( self::NOTIFICATION_SOURCE_PREFIX . str_replace( '_', '-', $type ) );
 	}
 
 	/**

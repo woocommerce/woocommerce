@@ -810,6 +810,37 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return only the given user's token IDs, oldest first.
+	 */
+	public function test_get_token_ids_for_user_returns_only_that_users_tokens(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$data_store = new PushTokensDataStore();
+		$first      = $data_store->create( $this->token_data_for( $admin_id ) );
+		$data_store->create( $this->token_data_for( $manager_id ) );
+		$second = $data_store->create( $this->token_data_for( $admin_id ) );
+
+		$this->assertSame( array( $first->get_id(), $second->get_id() ), $data_store->get_token_ids_for_user( $admin_id ) );
+		$this->assertSame( array(), $data_store->get_token_ids_for_user( 999999 ) );
+	}
+
+	/**
+	 * @testdox Should count every token whatever the owner's role.
+	 */
+	public function test_count_tokens_counts_every_token(): void {
+		$admin_id      = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$this->assertSame( 0, $data_store->count_tokens() );
+
+		$data_store->create( $this->token_data_for( $admin_id ) );
+		$data_store->create( $this->token_data_for( $subscriber_id ) );
+
+		$this->assertSame( 2, $data_store->count_tokens() );
+	}
+
+	/**
 	 * Builds valid creation data for a token owned by the given user.
 	 *
 	 * @param int $user_id The owning user.
