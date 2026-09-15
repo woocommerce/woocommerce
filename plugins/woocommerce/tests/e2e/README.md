@@ -169,6 +169,10 @@ Still, here's a few tips to get you started:
 Playwright's Best Practices guide is a good
 read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
+### Gotchas
+
+- **Never run two wp-env commands at once.** Await each `wpCLI` call (or any other helper that shells out to `wp-env`, such as `getInstalledWordPressVersion`) before starting the next, and keep them out of `Promise.all`. Every wp-env command rewrites `wp-env-cache.json` in the environment's work directory without locking, so two overlapping commands can drop its `runtime` key. From then on every wp-env command, `run` and `destroy` included, fails with "Environment not initialized. Run `wp-env start` first." until the environment starts again, so one overlap breaks every later spec in the CI job. Overlapping a single `wpCLI` call with browser work such as `page.goto` is fine, since that doesn't start wp-env.
+
 ## Test helper plugins
 
 Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`.
