@@ -539,6 +539,89 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Legacy report consumers write `post_data` column names unqualified as often as they qualify
+	 * them. WooCommerce Subscriptions' "Subscription events by date" report passes exactly this
+	 * shape — a bare `post_status NOT IN ( 'trash', 'auto-draft' )` where-predicate — which used to
+	 * pass through untranslated and emit SQL against a column `wc_orders` does not have.
+	 *
+	 * @testdox Should translate bare post_status, post_parent and post_type where keys to HPOS columns.
+	 */
+	public function test_build_query_translates_bare_post_column_where_keys(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'count',
+						'distinct' => true,
+					),
+				),
+				'where'        => array(
+					array(
+						'key'      => 'post_status',
+						'operator' => 'NOT IN',
+						'value'    => array( 'trash', 'auto-draft' ),
+					),
+					array(
+						'key'      => 'post_parent',
+						'operator' => '>',
+						'value'    => 0,
+					),
+					array(
+						'key'      => 'post_type',
+						'operator' => '=',
+						'value'    => 'shop_subscription',
+					),
+				),
+				'filter_range' => false,
+				'order_types'  => array( 'shop_subscription' ),
+			),
+			0,
+			0
+		);
+
+		$this->assertStringContainsString( "orders.status NOT IN ('trash', 'auto-draft')", $query['where'] );
+		$this->assertStringContainsString( 'orders.parent_order_id >', $query['where'] );
+		$this->assertStringContainsString( "orders.type = 'shop_subscription'", $query['where'] );
+
+		// No bare legacy token survives into SQL that runs against `wc_orders`.
+		$this->assertDoesNotMatchRegularExpression( '/\bpost_status\b/', $query['where'] );
+		$this->assertDoesNotMatchRegularExpression( '/\bpost_parent\b/', $query['where'] );
+		$this->assertDoesNotMatchRegularExpression( '/\bpost_type\b/', $query['where'] );
+	}
+
+	/**
+	 * @testdox Should translate bare post_status and post_type tokens in group_by and order_by fragments.
+	 */
+	public function test_build_query_translates_bare_post_column_group_and_order_fragments(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'count',
+					),
+				),
+				'group_by'     => 'post_status, post_type',
+				'order_by'     => 'post_status ASC',
+				'filter_range' => false,
+				'order_types'  => array( 'shop_order' ),
+			),
+			0,
+			0
+		);
+
+		$this->assertSame( 'GROUP BY orders.status, orders.type', $query['group_by'] );
+		$this->assertSame( 'ORDER BY orders.status ASC', $query['order_by'] );
+	}
+
+	/**
 	 * @testdox Should translate only word-bounded ID and post_date tokens, leaving longer identifiers untouched.
 	 */
 	public function test_translate_legacy_sql_fragment_respects_word_boundaries(): void {
