@@ -186,17 +186,17 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		if ( false === $token->validate() ) {
 			if ( method_exists( $token, 'get_invalid_token_fields' ) ) {
 				$invalid_fields = $token->get_invalid_token_fields();
-				if ( $invalid_fields !== array() ) {
+				if ( array() !== $invalid_fields ) {
 					throw new WC_Data_Exception(
 						'woocommerce_invalid_payment_token_fields',
-						__( 'Invalid or missing payment token fields.', 'woocommerce' ),
+						__( 'Invalid or missing payment token fields.', 'woocommerce' ),  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 						0, // Use 0 for backwards compatibility with the Exception below.
-						array( 'invalid_fields' => $invalid_fields )
+						array( 'invalid_fields' => $invalid_fields ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					);
 				}
 			}
 
-			throw new Exception( __( 'Invalid or missing payment token fields.', 'woocommerce' ) );
+			throw new Exception( __( 'Invalid or missing payment token fields.', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 	}
 

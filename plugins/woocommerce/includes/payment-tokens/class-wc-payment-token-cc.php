@@ -82,7 +82,7 @@ class WC_Payment_Token_CC extends WC_Payment_Token {
 	 */
 	public function validate() {
 		$invalid_fields = $this->get_invalid_token_fields();
-		if ( $invalid_fields !== array() ) {
+		if ( array() !== $invalid_fields ) {
 			return false;
 		}
 
