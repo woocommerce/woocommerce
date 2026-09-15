@@ -8,6 +8,7 @@ import {
 	BASE_URL,
 	wpCLI,
 	BLOCK_THEME_SLUG,
+	flushMacrotask,
 } from '@woocommerce/e2e-utils';
 
 const blockData = {
@@ -377,23 +378,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await deferredMaxPriceInput.dblclick();
 		await deferredMaxPriceInput.fill( '$5' );
 		await page.clock.runFor( 1_001 );
-		await page.evaluate(
-			() =>
-				new Promise< void >( ( resolve ) => {
-					const channel = new MessageChannel();
-					channel.port1.addEventListener(
-						'message',
-						() => {
-							channel.port1.close();
-							channel.port2.close();
-							resolve();
-						},
-						{ once: true }
-					);
-					channel.port1.start();
-					channel.port2.postMessage( null );
-				} )
-		);
+		await flushMacrotask( page );
 		await expect( deferredMaxPriceInput ).toHaveValue( '$5' );
 		const resetPriceFilterButton = page.getByRole( 'button', {
 			name: 'Reset price filter',
@@ -406,23 +391,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( applyButton ).toBeEnabled();
 
 		await page.clock.runFor( 501 );
-		await page.evaluate(
-			() =>
-				new Promise< void >( ( resolve ) => {
-					const channel = new MessageChannel();
-					channel.port1.addEventListener(
-						'message',
-						() => {
-							channel.port1.close();
-							channel.port2.close();
-							resolve();
-						},
-						{ once: true }
-					);
-					channel.port1.start();
-					channel.port2.postMessage( null );
-				} )
-		);
+		await flushMacrotask( page );
 		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 

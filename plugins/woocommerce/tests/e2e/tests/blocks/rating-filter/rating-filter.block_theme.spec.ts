@@ -7,6 +7,7 @@ import {
 	wpCLI,
 	TemplateCompiler,
 	BLOCK_THEME_SLUG,
+	flushMacrotask,
 } from '@woocommerce/e2e-utils';
 
 // The Cap is the only seeded product in this bucket: its reviews are rated 1
@@ -151,23 +152,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await ratingFilterCheckbox.click();
 		await page.clock.runFor( 501 );
-		await page.evaluate(
-			() =>
-				new Promise< void >( ( resolve ) => {
-					const channel = new MessageChannel();
-					channel.port1.addEventListener(
-						'message',
-						() => {
-							channel.port1.close();
-							channel.port2.close();
-							resolve();
-						},
-						{ once: true }
-					);
-					channel.port1.start();
-					channel.port2.postMessage( null );
-				} )
-		);
+		await flushMacrotask( page );
 		await expect( ratingFilterCheckbox ).toBeChecked();
 		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
 		await expect( applyButton ).toBeVisible();
