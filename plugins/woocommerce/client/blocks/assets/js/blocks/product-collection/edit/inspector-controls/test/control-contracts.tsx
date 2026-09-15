@@ -8,14 +8,13 @@ import {
 	screen,
 	waitFor,
 } from '@testing-library/react';
-import { store as coreStore } from '@wordpress/core-data';
-import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import ProductCollectionInspectorControls from '..';
 import { DEFAULT_ATTRIBUTES, DEFAULT_QUERY } from '../../../constants';
+import { mockProductTaxonomies } from '../../../test/utils/contract-setup';
 import type {
 	ProductCollectionContentProps,
 	ProductCollectionAttributes,
@@ -326,32 +325,7 @@ const renderInspector = ( {
 describe( 'Product Collection inspector control contracts', () => {
 	beforeEach( () => {
 		mockIsEmailEditor = false;
-		jest.spyOn(
-			select( coreStore ) as unknown as {
-				getTaxonomies: () => Array< {
-					name: string;
-					slug: string;
-					visibility: { publicly_queryable: boolean };
-				} >;
-			},
-			'getTaxonomies'
-		).mockReturnValue( [
-			{
-				name: 'product categories',
-				slug: 'product_cat',
-				visibility: { publicly_queryable: true },
-			},
-			{
-				name: 'product tags',
-				slug: 'product_tag',
-				visibility: { publicly_queryable: true },
-			},
-			{
-				name: 'product brands',
-				slug: 'product_brand',
-				visibility: { publicly_queryable: true },
-			},
-		] );
+		mockProductTaxonomies();
 	} );
 
 	afterEach( () => {

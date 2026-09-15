@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	getBlockVariations,
-	registerBlockVariation,
-	type BlockVariation,
-	unregisterBlockVariation,
-} from '@wordpress/blocks';
-import { removeFilter } from '@wordpress/hooks';
+import { getBlockVariations, type BlockVariation } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -20,7 +14,6 @@ import cartContents from '../cart-contents';
 import crossSells from '../cross-sells';
 import featured from '../featured';
 import handPicked from '../hand-picked';
-import { registerCollections, registerEmailCollections } from '../index';
 import newArrivals from '../new-arrivals';
 import onSale from '../on-sale';
 import productCatalog from '../product-collection';
@@ -36,6 +29,7 @@ import {
 	INNER_BLOCKS_TEMPLATE,
 	PRODUCT_COLLECTION_BLOCK_NAME,
 } from '../../constants';
+import { registerCoreCollections } from '../../test/utils/contract-setup';
 import { CoreCollectionNames, CoreFilterNames } from '../../types';
 
 const productGrid = {
@@ -347,7 +341,6 @@ const emailRows = [
 ] as const;
 
 const allRows = [ ...collectionRows, ...emailRows ];
-const originalWpDescriptor = Object.getOwnPropertyDescriptor( window, 'wp' );
 
 const getRegisteredCollection = ( name: string ): BlockVariation => {
 	const variation = getBlockVariations( PRODUCT_COLLECTION_BLOCK_NAME )?.find(
@@ -361,34 +354,14 @@ const getRegisteredCollection = ( name: string ): BlockVariation => {
 	return variation;
 };
 
-beforeAll( () => {
-	Object.defineProperty( window, 'wp', {
-		configurable: true,
-		writable: true,
-		value: {
-			...window.wp,
-			blocks: {
-				...window.wp?.blocks,
-				registerBlockVariation,
-			},
-		},
-	} );
+let unregisterCoreCollections: () => void;
 
-	registerCollections();
-	registerEmailCollections();
+beforeAll( () => {
+	unregisterCoreCollections = registerCoreCollections();
 } );
 
 afterAll( () => {
-	for ( const { name } of allRows ) {
-		unregisterBlockVariation( PRODUCT_COLLECTION_BLOCK_NAME, name );
-		removeFilter( 'editor.BlockEdit', name );
-	}
-
-	if ( originalWpDescriptor ) {
-		Object.defineProperty( window, 'wp', originalWpDescriptor );
-	} else {
-		Reflect.deleteProperty( window, 'wp' );
-	}
+	unregisterCoreCollections();
 } );
 
 describe( 'Product Collection built-in collection contracts', () => {

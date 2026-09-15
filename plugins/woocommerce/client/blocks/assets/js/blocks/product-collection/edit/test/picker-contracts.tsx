@@ -7,15 +7,9 @@ import {
 	BlockEditorProvider,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import {
-	type BlockInstance,
-	registerBlockVariation,
-	unregisterBlockVariation,
-} from '@wordpress/blocks';
-import { store as coreStore } from '@wordpress/core-data';
-import { dispatch, select } from '@wordpress/data';
+import { type BlockInstance } from '@wordpress/blocks';
+import { dispatch } from '@wordpress/data';
 import { useState, type ReactNode } from '@wordpress/element';
-import { removeFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -26,14 +20,14 @@ import MultiProductPicker from '../multi-product-picker';
 import SingleProductPicker from '../single-product-picker';
 import TaxonomyPicker from '../taxonomy-picker';
 import {
-	registerCollections,
-	registerEmailCollections,
-} from '../../collections';
-import {
 	DEFAULT_ATTRIBUTES,
 	DEFAULT_QUERY,
 	PRODUCT_COLLECTION_BLOCK_NAME,
 } from '../../constants';
+import {
+	mockProductTaxonomies,
+	registerCoreCollections,
+} from '../../test/utils/contract-setup';
 import {
 	CoreCollectionNames,
 	type ProductCollectionAttributes,
@@ -161,25 +155,6 @@ jest.mock( '@woocommerce/editor-components/utils', () => ( {
 	] ),
 } ) );
 
-const registeredCollectionNames = [
-	CoreCollectionNames.PRODUCT_CATALOG,
-	CoreCollectionNames.FEATURED,
-	CoreCollectionNames.NEW_ARRIVALS,
-	CoreCollectionNames.ON_SALE,
-	CoreCollectionNames.BEST_SELLERS,
-	CoreCollectionNames.TOP_RATED,
-	CoreCollectionNames.HAND_PICKED,
-	CoreCollectionNames.BY_CATEGORY,
-	CoreCollectionNames.BY_TAG,
-	CoreCollectionNames.BY_BRAND,
-	CoreCollectionNames.RELATED,
-	CoreCollectionNames.UPSELLS,
-	CoreCollectionNames.CROSS_SELLS,
-	CoreCollectionNames.CART_CONTENTS,
-];
-
-const originalWpDescriptor = Object.getOwnPropertyDescriptor( window, 'wp' );
-
 const createAttributes = (
 	collection: string,
 	query: Partial< ProductCollectionQuery > = {}
@@ -271,51 +246,15 @@ const click = async (
 	} );
 };
 
-beforeAll( () => {
-	Object.defineProperty( window, 'wp', {
-		configurable: true,
-		writable: true,
-		value: {
-			...window.wp,
-			blocks: {
-				...window.wp?.blocks,
-				registerBlockVariation,
-			},
-		},
-	} );
+let unregisterCoreCollections: () => void;
 
-	registerCollections();
-	registerEmailCollections();
+beforeAll( () => {
+	unregisterCoreCollections = registerCoreCollections();
 } );
 
 beforeEach( () => {
 	dispatch( blockEditorStore ).resetBlocks( [] );
-	jest.spyOn(
-		select( coreStore ) as unknown as {
-			getTaxonomies: () => Array< {
-				name: string;
-				slug: string;
-				visibility: { publicly_queryable: boolean };
-			} >;
-		},
-		'getTaxonomies'
-	).mockReturnValue( [
-		{
-			name: 'product categories',
-			slug: 'product_cat',
-			visibility: { publicly_queryable: true },
-		},
-		{
-			name: 'product tags',
-			slug: 'product_tag',
-			visibility: { publicly_queryable: true },
-		},
-		{
-			name: 'product brands',
-			slug: 'product_brand',
-			visibility: { publicly_queryable: true },
-		},
-	] );
+	mockProductTaxonomies();
 } );
 
 afterEach( () => {
@@ -323,16 +262,7 @@ afterEach( () => {
 } );
 
 afterAll( () => {
-	for ( const name of registeredCollectionNames ) {
-		unregisterBlockVariation( PRODUCT_COLLECTION_BLOCK_NAME, name );
-		removeFilter( 'editor.BlockEdit', name );
-	}
-
-	if ( originalWpDescriptor ) {
-		Object.defineProperty( window, 'wp', originalWpDescriptor );
-	} else {
-		Reflect.deleteProperty( window, 'wp' );
-	}
+	unregisterCoreCollections();
 } );
 
 describe( 'collection-specific picker contracts', () => {
