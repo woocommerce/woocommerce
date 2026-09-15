@@ -71,11 +71,17 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should render the user avatar when a custom avatar is available.
+	 * @testdox Should render a filtered icon with the user avatar when a custom avatar is available.
 	 */
-	public function test_renders_avatar_when_user_has_custom_avatar(): void {
+	public function test_renders_filtered_icon_with_avatar_when_user_has_custom_avatar(): void {
 		wp_set_current_user( $this->user_id );
 
+		add_filter(
+			'woocommerce_blocks_icon_svg',
+			function () {
+				return '<svg class="replacement-account-icon" viewBox="0 0 24 24"><path d="M2 2h20v20H2z" fill="currentColor"/></svg>';
+			}
+		);
 		add_filter(
 			'pre_get_avatar_data',
 			function ( $args ) {
@@ -88,6 +94,8 @@ class CustomerAccountTest extends WP_UnitTestCase {
 			'{"iconClass":"wc-block-customer-account__account-icon"}'
 		);
 
+		$this->assertStringContainsString( 'wc-block-customer-account__visual', $markup );
+		$this->assertStringContainsString( 'replacement-account-icon', $markup );
 		$this->assertStringContainsString( 'wc-block-customer-account__avatar', $markup );
 		$this->assertStringContainsString( 'custom-avatar.jpg', $markup );
 	}
