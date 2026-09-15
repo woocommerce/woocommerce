@@ -277,7 +277,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			suffix: '',
 		};
 
-		test( 'wraps the price in a bdi, matching wc_price()', () => {
+		test( 'renders the price in a bdi with the symbol in its own isolating element, matching wc_price()', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
@@ -285,17 +285,8 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 
-			const bdi = container.querySelector( 'bdi' );
-			expect( bdi ).not.toBeNull();
-			expect( bdi ).toHaveTextContent( '€ 1.563,45' );
-		} );
-
-		test( 'gives the currency symbol its own element', () => {
-			const { container } = render(
-				<FormattedMonetaryAmount
-					value="156345"
-					currency={ eurCurrency }
-				/>
+			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
+				'€ 1.563,45'
 			);
 
 			const symbol = container.querySelector( symbolSelector );
