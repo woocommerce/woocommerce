@@ -84,7 +84,11 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		if ( ! is_cart() && ! is_checkout() && ! end( $this->store_api_cart_or_checkout_request_contexts ) ) {
+		if ( ! empty( $this->store_api_cart_or_checkout_request_contexts ) ) {
+			if ( ! end( $this->store_api_cart_or_checkout_request_contexts ) ) {
+				return $taxable_address;
+			}
+		} elseif ( ! is_cart() && ! is_checkout() ) {
 			return $taxable_address;
 		}
 

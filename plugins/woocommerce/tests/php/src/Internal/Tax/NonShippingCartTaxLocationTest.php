@@ -161,6 +161,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_leaves_address_unchanged_for_other_store_api_requests(): void {
 		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $request );
 
