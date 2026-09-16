@@ -91,12 +91,12 @@ export const useContentValidation = (): ContentValidationData => {
 
 	// Register the validation function with the store
 	useEffect( () => {
-		dispatch( emailEditorStore ).setContentValidation( {
+		void dispatch( emailEditorStore ).setContentValidation( {
 			validateContent,
 		} );
 
 		return () => {
-			dispatch( emailEditorStore ).setContentValidation( undefined );
+			void dispatch( emailEditorStore ).setContentValidation( undefined );
 		};
 	}, [ validateContent ] );
 

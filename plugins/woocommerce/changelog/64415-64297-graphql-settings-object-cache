@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a setting to toggle the ObjectCache-backed parsed-query cache on the GraphQL settings page.

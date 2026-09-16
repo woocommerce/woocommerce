@@ -58,6 +58,16 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
+	 * Returns the featured category image attachment ID.
+	 *
+	 * @param \WP_Term $category Term object.
+	 * @return int
+	 */
+	protected function get_item_image_id( $category ) {
+		return (int) get_term_meta( $category->term_id, 'thumbnail_id', true );
+	}
+
+	/**
 	 * Returns the featured category image URL.
 	 *
 	 * @param \WP_Term $category Term object.
@@ -65,14 +75,13 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function get_item_image( $category, $size = 'full' ) {
-		$image    = '';
-		$image_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+		$image_id = $this->get_item_image_id( $category );
 
 		if ( $image_id ) {
-			$image = wp_get_attachment_image_url( $image_id, $size );
+			return wp_get_attachment_image_url( $image_id, $size );
 		}
 
-		return $image;
+		return '';
 	}
 
 	/**

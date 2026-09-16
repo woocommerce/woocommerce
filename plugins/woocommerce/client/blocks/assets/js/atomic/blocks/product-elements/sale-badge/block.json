@@ -47,8 +47,10 @@
 		"spacing": {
 			"margin": true
 		},
-		"email": true,
-		"__experimentalSelector": ".wc-block-components-product-sale-badge"
+		"email": true
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-sale-badge .wc-block-components-product-sale-badge"
 	},
 	"ancestor": [
 		"woocommerce/single-product",

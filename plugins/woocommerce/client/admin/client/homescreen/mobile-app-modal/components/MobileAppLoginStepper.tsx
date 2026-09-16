@@ -3,31 +3,48 @@
  */
 import React, { useState, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { sprintf, __ } from '@wordpress/i18n';
-import { Stepper, StepperProps } from '@woocommerce/components';
+import { __ } from '@wordpress/i18n';
+import { Stepper, StepperProps, Link } from '@woocommerce/components';
+import interpolateComponents from '@automattic/interpolate-components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { SendMagicLinkButton, SendMagicLinkStates } from './';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { SendMagicLinkStates } from './';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
-import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
+import { QRDirectLoginCode } from '../components/QRDirectLoginCode';
+import type { QRLoginConsumedSnapshot } from '../components/QRDirectLoginCode';
+import { SendMagicLinkButton } from '../components/SendMagicLinkButton';
+import { QRLoginSuccessStep } from '../components/QRLoginSuccessStep';
 
 export const MobileAppLoginStepper = ( {
 	step,
 	isJetpackPluginInstalled,
 	wordpressAccountEmailAddress,
+	signInResult,
 	completeInstallationStepHandler,
 	sendMagicLinkHandler,
 	sendMagicLinkStatus,
+	onSignedIn,
 }: {
-	step: 'first' | 'second';
+	step: 'first' | 'second' | 'third';
 	isJetpackPluginInstalled: boolean;
 	wordpressAccountEmailAddress: string | undefined;
+	/**
+	 * Snapshot of the consumed QR login. Provided when the parent has
+	 * advanced to step `'third'`; rendered by `QRLoginSuccessStep`.
+	 */
+	signInResult: QRLoginConsumedSnapshot | null;
 	completeInstallationStepHandler: () => void;
 	sendMagicLinkHandler: () => void;
 	sendMagicLinkStatus: SendMagicLinkStates;
+	/**
+	 * Fires once the QR component reports a successful exchange. The parent
+	 * uses this to record `signInResult` and advance the stepper to the
+	 * third step.
+	 */
+	onSignedIn: ( snapshot: QRLoginConsumedSnapshot ) => void;
 } ) => {
 	const [ stepsToDisplay, setStepsToDisplay ] = useState<
 		StepperProps[ 'steps' ] | undefined
@@ -65,79 +82,122 @@ export const MobileAppLoginStepper = ( {
 					description: '',
 					content: <></>,
 				},
+				{
+					key: 'third',
+					label: __( 'Signed in', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
 			] );
 		} else if ( step === 'second' ) {
-			if (
+			const hasLinkedWordPressAccount =
 				isJetpackPluginInstalled &&
-				wordpressAccountEmailAddress !== undefined
-			) {
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: 'Sign into the app',
-						description: sprintf(
-							/* translators: Reflecting to the user that the magic link has been sent to their WordPress account email address */
-							__(
-								'We’ll send a magic link to %s. Open it on your smartphone or tablet to sign into your store instantly.',
-								'woocommerce'
-							),
-							wordpressAccountEmailAddress
-						),
-						content: (
-							<SendMagicLinkButton
-								isFetching={
-									sendMagicLinkStatus ===
-									SendMagicLinkStates.FETCHING
-								}
-								onClickHandler={ sendMagicLinkHandler }
+				wordpressAccountEmailAddress !== undefined;
+			setStepsToDisplay( [
+				{
+					key: 'first',
+					label: __( 'App installed', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+				{
+					key: 'second',
+					label: __( 'Sign into the app', 'woocommerce' ),
+					description: __(
+						'Scan the QR code below with your phone to sign in instantly — no password needed.',
+						'woocommerce'
+					),
+					content: (
+						<>
+							<QRDirectLoginCode
+								onConsumed={ onSignedIn }
+								suppressInlinePanels
 							/>
-						),
-					},
-				] );
-			} else {
-				const siteUrl: string = getAdminSetting( 'siteUrl' );
-				const username = getAdminSetting( 'currentUserData' ).username;
-				const loginUrl = `woocommerce://app-login?siteUrl=${ encodeURIComponent(
-					siteUrl
-				) }&username=${ encodeURIComponent( username ) }`;
-				const description = loginUrl
-					? __(
-							'Scan the QR code below and enter the wp-admin password in the app.',
-							'woocommerce'
-					  )
-					: __(
-							'Follow the instructions in the app to sign in.',
-							'woocommerce'
-					  );
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: 'Sign into the app',
-						description,
-						content: <MobileAppLoginInfo loginUrl={ loginUrl } />,
-					},
-				] );
-			}
+							{ hasLinkedWordPressAccount && (
+								<div className="mobile-app-login-magic-link-secondary">
+									<p className="mobile-app-login-magic-link-secondary__label">
+										{ __(
+											'Or get a WordPress.com sign-in link by email:',
+											'woocommerce'
+										) }
+									</p>
+									<SendMagicLinkButton
+										onClickHandler={ sendMagicLinkHandler }
+										isFetching={
+											sendMagicLinkStatus ===
+											SendMagicLinkStates.FETCHING
+										}
+									/>
+								</div>
+							) }
+							<div className="mobile-app-login-faq">
+								{ interpolateComponents( {
+									mixedString: __(
+										'Any troubles signing in? Check out the {{link}}FAQ{{/link}}.',
+										'woocommerce'
+									),
+									components: {
+										link: (
+											<Link
+												href="https://woocommerce.com/document/android-ios-apps-login-help-faq/"
+												target="_blank"
+												type="external"
+												onClick={ () => {
+													recordEvent(
+														'onboarding_app_login_faq_click'
+													);
+												} }
+											/>
+										),
+									},
+								} ) }
+							</div>
+						</>
+					),
+				},
+				{
+					key: 'third',
+					label: __( 'Signed in', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+			] );
+		} else if ( step === 'third' ) {
+			setStepsToDisplay( [
+				{
+					key: 'first',
+					label: __( 'App installed', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+				{
+					key: 'second',
+					label: __( 'Sign-in complete', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+				{
+					key: 'third',
+					label: __( 'Signed in successfully', 'woocommerce' ),
+					description: '',
+					content: (
+						<QRLoginSuccessStep
+							apUuid={ signInResult?.apUuid ?? null }
+							deviceInfo={ signInResult?.deviceInfo ?? null }
+						/>
+					),
+				},
+			] );
 		}
 	}, [
 		step,
 		isJetpackPluginInstalled,
 		wordpressAccountEmailAddress,
+		signInResult,
 		completeInstallationStepHandler,
 		sendMagicLinkHandler,
 		sendMagicLinkStatus,
+		onSignedIn,
 	] );
 
 	return (

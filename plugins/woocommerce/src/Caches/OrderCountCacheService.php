@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class OrderCountCacheService {
 
-	const BACKGROUND_EVENT_HOOK = 'woocommerce_refresh_order_count_cache';
+	public const BACKGROUND_EVENT_HOOK = 'woocommerce_refresh_order_count_cache';
 
 	/**
 	 * OrderCountCache instance.
@@ -26,15 +26,17 @@ class OrderCountCacheService {
 
 	/**
 	 * Array of order ids with their last transitioned status as key value pairs.
+	 * Guarantees idempotency for order status transitions when multiple hooks fire for the same order.
 	 *
-	 * @var array
+	 * @var array<int,string>
 	 */
 	private $order_statuses = array();
 
 	/**
 	 * Array of order ids with their initial status as key value pairs.
+	 * Guarantees idempotency for order status transitions when multiple hooks fire for the same order.
 	 *
-	 * @var array
+	 * @var array<int,string>
 	 */
 	private $initial_order_statuses = array();
 
@@ -50,6 +52,8 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
+		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
+		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
@@ -64,6 +68,7 @@ class OrderCountCacheService {
 	 * @deprecated 10.7.0 Was used for handling `woocommerce_refresh_order_count_cache` actions.
 	 *
 	 * @param string $order_type The order type.
+	 *
 	 * @return void
 	 */
 	public function refresh_cache( $order_type ) {
@@ -79,6 +84,7 @@ class OrderCountCacheService {
 	 * @since 10.7.0
 	 *
 	 * @param string $order_type The order type.
+	 *
 	 * @return void
 	 */
 	public function prime_cache_if_cold( $order_type ) {
@@ -86,6 +92,20 @@ class OrderCountCacheService {
 		if ( wp_using_ext_object_cache() && null === $this->order_count_cache->get( $order_type ) ) {
 			$this->order_count_cache->flush( $order_type );
 			OrderUtil::get_count_for_type( $order_type );
+		}
+	}
+
+	/**
+	 * Flush the order count cache for all order types.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public function flush_cache() {
+		foreach ( wc_get_order_types( 'order-count' ) as $order_type ) {
+			$this->order_count_cache->flush( $order_type );
 		}
 	}
 
@@ -108,6 +128,8 @@ class OrderCountCacheService {
 	 *
 	 * @since 10.0.0
 	 * @internal
+	 *
+	 * @return void
 	 */
 	public function unschedule_background_actions() {
 		WC()->queue()->cancel_all( self::BACKGROUND_EVENT_HOOK );
@@ -117,7 +139,9 @@ class OrderCountCacheService {
 	 * Update the cache when a new order is made.
 	 *
 	 * @param int      $order_id Order id.
-	 * @param WC_Order $order The order.
+	 * @param WC_Order $order    The order.
+	 *
+	 * @return void
 	 */
 	public function update_on_new_order( $order_id, $order ) {
 		$order_type   = $order->get_type();
@@ -146,7 +170,9 @@ class OrderCountCacheService {
 	 * Update the cache when an order is trashed.
 	 *
 	 * @param int      $order_id Order id.
-	 * @param WC_Order $order The order.
+	 * @param WC_Order $order    The order.
+	 *
+	 * @return void
 	 */
 	public function update_on_order_trashed( $order_id, $order ) {
 		$order_type   = $order->get_type();
@@ -163,10 +189,12 @@ class OrderCountCacheService {
 	}
 
 	/**
-	 * Update the cache when an order is deleted.
+	 * Update the cache when an order is permanently deleted.
 	 *
 	 * @param int      $order_id Order id.
-	 * @param WC_Order $order The order.
+	 * @param WC_Order $order    The order.
+	 *
+	 * @return void
 	 */
 	public function update_on_order_deleted( $order_id, $order ) {
 		$order_type   = $order->get_type();
@@ -180,12 +208,14 @@ class OrderCountCacheService {
 	}
 
 	/**
-	 * Update the cache whenver an order status changes.
+	 * Update the cache whenever an order status changes.
 	 *
-	 * @param int      $order_id Order id.
-	 * @param string   $previous_status the old WooCommerce order status.
-	 * @param string   $next_status the new WooCommerce order status.
-	 * @param WC_Order $order The order.
+	 * @param int      $order_id        Order id.
+	 * @param string   $previous_status The old WooCommerce order status.
+	 * @param string   $next_status     The new WooCommerce order status.
+	 * @param WC_Order $order           The order.
+	 *
+	 * @return void
 	 */
 	public function update_on_order_status_changed( $order_id, $previous_status, $next_status, $order ) {
 		$order_type = $order->get_type();
@@ -203,7 +233,7 @@ class OrderCountCacheService {
 		}
 
 		$this->order_statuses[ $order_id ] = $next_status;
-		$was_decremented                   = $this->order_count_cache->decrement( $order_type, $this->get_prefixed_status( $previous_status ) );
+		$was_decremented                   = false !== $this->order_count_cache->decrement( $order_type, $this->get_prefixed_status( $previous_status ) );
 		$this->order_count_cache->increment( $order_type, $this->get_prefixed_status( $next_status ) );
 
 		// Set the initial order status in case this is a new order and the previous status should not be decremented.

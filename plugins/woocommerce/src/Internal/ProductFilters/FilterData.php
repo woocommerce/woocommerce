@@ -145,25 +145,29 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			foreach ( $statuses as $status ) {
-				$stock_status_count_sql = "
-					SELECT COUNT( DISTINCT posts.ID ) as status_count
-					FROM {$wpdb->posts} as posts
-					INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-					AND postmeta.meta_key = '_stock_status'
-					AND postmeta.meta_value = '" . esc_sql( $status ) . "'
-					WHERE posts.ID IN ( {$product_ids} )
+			if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+				// Optimization note: this serves as a fallback while wc_product_meta_lookup is being populated and is bypassed most of the time.
+				$sql = "
+					SELECT meta_value AS stock_status, COUNT( DISTINCT post_id ) AS status_count
+					FROM {$wpdb->postmeta}
+					WHERE post_id IN ( {$product_ids} ) AND meta_key = '_stock_status'
+					GROUP BY meta_value
 				";
+			} else {
+				// Optimization note: this is the main performance driver as the database processes fewer rows than when scanning the posts meta table.
+				$sql = "
+					SELECT stock_status, COUNT( DISTINCT product_id ) as status_count
+					FROM {$wpdb->wc_product_meta_lookup}
+					WHERE product_id IN ( {$product_ids} )
+					GROUP BY stock_status
+				";
+			}
 
-				/**
-				* We can't use $wpdb->prepare() here because using %s with
-				* $wpdb->prepare() for a subquery won't work as it will escape the
-				* SQL query.
-				* We're using the query as is, same as Core does.
-				*/
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				$result             = $wpdb->get_row( $stock_status_count_sql );
-				$results[ $status ] = $result->status_count;
+			$results = array_fill_keys( $statuses, 0 );
+			foreach ( $wpdb->get_results( $sql ) as $row ) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				if ( isset( $results[ $row->stock_status ] ) ) {
+					$results[ $row->stock_status ] = (int) $row->status_count;
+				}
 			}
 		}
 
@@ -266,14 +270,15 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
+			// Optimization note: We evaluated using wc_product_attributes_lookup but decided against it, as removing
+			// the posts table join in the query below produced better benchmarking results and required minimal changes.
 			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
 			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
-				FROM {$wpdb->posts} AS posts
-				INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
+				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
+				FROM {$wpdb->term_relationships} AS term_relationships
 				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-				WHERE posts.ID IN ( {$product_ids} )
+				WHERE term_relationships.object_id IN ( {$product_ids} )
 				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
 				GROUP BY terms.term_id
 			";

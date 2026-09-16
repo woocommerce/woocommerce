@@ -31,6 +31,18 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	protected static string $transient_files_dir;
 
 	/**
+	 * The scheme registered by the stream wrapper used to simulate S3-Uploads/VIP style uploads directories.
+	 */
+	private const STREAM_SCHEME = 'wctransienttest';
+
+	/**
+	 * The local directory that the test stream wrapper maps its paths onto.
+	 *
+	 * @var string
+	 */
+	private string $stream_root;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -38,8 +50,42 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->reset_container_resolutions();
 
 		self::rmdir_recursive( self::$transient_files_dir, false );
+
+		$this->stream_root = sys_get_temp_dir() . '/wc-stream-uploads-' . wp_generate_uuid4();
+		wp_mkdir_p( $this->stream_root . '/uploads' );
+		TransientFilesTestStreamWrapper::register( self::STREAM_SCHEME, $this->stream_root );
+
 		$this->sut = $this->get_instance_of( TransientFilesEngine::class );
 		$this->sut->register();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		TransientFilesTestStreamWrapper::unregister( self::STREAM_SCHEME );
+		self::rmdir_recursive( $this->stream_root, true );
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Get the wrapper path of the uploads directory served by the test stream wrapper.
+	 *
+	 * @return string The wrapper path, e.g. "wctransienttest://uploads".
+	 */
+	private function stream_uploads_dir(): string {
+		return self::STREAM_SCHEME . '://uploads';
+	}
+
+	/**
+	 * Get the local path that a wrapper path maps onto, for asserting against the real filesystem.
+	 *
+	 * @param string $relative_path Path relative to the wrapper root, without a leading slash.
+	 * @return string The equivalent local path.
+	 */
+	private function local_path_for( string $relative_path ): string {
+		return $this->stream_root . '/' . $relative_path;
 	}
 
 	/**
@@ -113,10 +159,13 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox create_transient_file throws an exception if the transient file can't be created.
 	 */
 	public function test_create_transient_file_throws_if_file_cant_be_created() {
+		// Point the engine at a directory that does not exist on disk and bypass mkdir
+		// so put_contents (native @file_put_contents under WP_Filesystem_Direct) fails.
+		$nonexistent_base = sys_get_temp_dir() . '/wc-transient-nonexistent-' . wp_generate_uuid4();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path ) => '/real' . $path,
+				'wp_upload_dir' => fn() => array( 'basedir' => $nonexistent_base ),
+				'realpath'      => fn( $path ) => $path,
 				'is_dir'        => fn() => true,
 				'random_bytes'  => fn( $length ) => implode( array_map( 'chr', array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ),
 				'gmdate'        => fn( $format, $date = null ) =>
@@ -124,22 +173,8 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			),
 		);
 
-		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
-		$fake_wp_filesystem = new class() {
-			public function put_contents( string $file, string $contents, $mode = false ): bool {
-				return false;
-			}
-		};
-		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
-
-		$this->register_legacy_proxy_global_mocks(
-			array(
-				'wp_filesystem' => $fake_wp_filesystem,
-			)
-		);
-
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( "Can't create file: /real/wordpress/uploads/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f" );
+		$this->expectExceptionMessage( "Can't create file: " . $nonexistent_base . '/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f' );
 
 		$this->sut->create_transient_file( 'foobar', '2023-12-02' );
 	}
@@ -247,43 +282,199 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox get_transient_files_directory creates the default base directory if it doesn't exist and the woocommerce_transient_files_directory filter is not used.
 	 */
 	public function test_get_transient_files_directory_creates_default_directory_if_it_does_not_exist() {
-		$created_dir = null;
+		// Use a real temp upload base so put_contents (which now goes through
+		// WP_Filesystem_Direct → native @file_put_contents) can actually write.
+		$upload_base   = sys_get_temp_dir() . '/wc-transient-create-' . wp_generate_uuid4();
+		$transient_dir = $upload_base . '/woocommerce_transient_files';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path ) => false,
-				'wp_mkdir_p'    => function( $directory ) use ( &$created_dir ) {
-					$created_dir = $directory;
-					return true; },
+				'wp_upload_dir' => fn() => array( 'basedir' => $upload_base ),
+				// First realpath() call returns false to force the create branch; rely on
+				// the real wp_mkdir_p afterward so the second realpath() (unmocked) succeeds.
+				'realpath'      => function ( $path ) {
+					static $first_call = true;
+					if ( $first_call ) {
+						$first_call = false;
+						return false;
+					}
+					return realpath( $path );
+				},
+				'wp_mkdir_p'    => fn( $directory ) => wp_mkdir_p( $directory ),
 			)
 		);
 
-		// phpcs:disable Squiz.Commenting
-		$fake_wp_filesystem = new class() {
-			public $created_files = array();
+		try {
+			$result = $this->sut->get_transient_files_directory();
 
-			public function put_contents( string $file, string $contents, $mode = false ): int {
-				$this->created_files[ $file ] = $contents;
-				return strlen( $contents );
-			}
-		};
-		// phpcs:enable Squiz.Commenting
+			$this->assertEquals( realpath( $transient_dir ), $result );
+			$this->assertDirectoryExists( $transient_dir );
+			$this->assertFileExists( $transient_dir . '/.htaccess' );
+			$this->assertEquals( 'deny from all', file_get_contents( $transient_dir . '/.htaccess' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$this->assertFileExists( $transient_dir . '/index.html' );
+			$this->assertEquals( '', file_get_contents( $transient_dir . '/index.html' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		} finally {
+			self::rmdir_recursive( $upload_base, true );
+		}
+	}
 
-		$this->register_legacy_proxy_global_mocks(
+	/**
+	 * @testdox get_transient_files_directory keeps the scheme of stream wrapper uploads directories (S3-Uploads, VIP).
+	 */
+	public function test_get_transient_files_directory_preserves_stream_wrapper_scheme() {
+		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_filesystem' => $fake_wp_filesystem,
+				'wp_upload_dir' => fn() => array( 'basedir' => $this->stream_uploads_dir() ),
 			)
 		);
+
+		$result = $this->sut->get_transient_files_directory();
+
+		$this->assertEquals( $this->stream_uploads_dir() . '/woocommerce_transient_files', $result );
+		$this->assertDirectoryExists( $this->local_path_for( 'uploads/woocommerce_transient_files' ) );
+		$this->assertFalse( realpath( $result ), 'realpath is expected to fail on wrapper paths; that is the bug being guarded against' );
+	}
+
+	/**
+	 * @testdox get_transient_files_directory uses realpath for scheme-shaped paths that have no wrapper registered.
+	 */
+	public function test_get_transient_files_directory_uses_realpath_when_no_wrapper_is_registered() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => 'notregistered://bucket/uploads' ),
+				'realpath'      => fn( $path ) => '/real/' . $path,
+			)
+		);
+
+		$result = $this->sut->get_transient_files_directory();
+
+		$this->assertEquals( '/real/notregistered://bucket/uploads/woocommerce_transient_files', $result );
+	}
+
+	/**
+	 * @testdox get_transient_files_directory throws if a stream wrapper directory supplied via hook doesn't exist.
+	 */
+	public function test_get_transient_files_directory_throws_if_stream_wrapper_directory_does_not_exist() {
+		$missing_dir = self::STREAM_SCHEME . '://custom-dir';
+		add_filter( 'woocommerce_transient_files_directory', fn() => $missing_dir );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => $this->stream_uploads_dir() ),
+			)
+		);
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "The base transient files directory doesn't exist: $missing_dir" );
+
+		try {
+			$this->sut->get_transient_files_directory();
+		} finally {
+			remove_all_filters( 'woocommerce_transient_files_directory' );
+		}
+	}
+
+	/**
+	 * @testdox get_transient_files_directory throws if the created directory still can't be resolved.
+	 */
+	public function test_get_transient_files_directory_throws_if_created_directory_cannot_be_resolved() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
+				'realpath'      => fn() => false,
+				'wp_mkdir_p'    => fn() => true,
+			)
+		);
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( "The directory was created but can't be resolved: /wordpress/uploads/woocommerce_transient_files" );
 
 		$this->sut->get_transient_files_directory();
-		$this->assertEquals( '/wordpress/uploads/woocommerce_transient_files', $created_dir );
+	}
 
-		$expected_created_files = array(
-			'/wordpress/uploads/woocommerce_transient_files/.htaccess' => 'deny from all',
-			'/wordpress/uploads/woocommerce_transient_files/index.html' => '',
+	/**
+	 * @testdox create_transient_file writes the file inside the uploads directory on stream wrapper uploads directories.
+	 */
+	public function test_create_transient_file_writes_inside_stream_wrapper_uploads_directory() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => $this->stream_uploads_dir() ),
+				'random_bytes'  => fn() => implode( array_map( 'chr', array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ),
+				'gmdate'        => fn( $format, $date = null ) =>
+					is_null( $date ) && 'Y-m-d' === $format ? '2023-12-01' : gmdate( $format, $date ),
+			)
 		);
-		$this->assertEquals( $expected_created_files, $fake_wp_filesystem->created_files );
+
+		$result = $this->sut->create_transient_file( 'foobar', '2023-12-02' );
+
+		$this->assertEquals( '7e7c02000102030405060708090a0b0c0d0e0f', $result );
+
+		$expected_wrapper_path = $this->stream_uploads_dir() . '/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f';
+		$this->assertEquals( $expected_wrapper_path, $this->sut->get_transient_file_path( $result ) );
+
+		$local_path = $this->local_path_for( 'uploads/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f' );
+		$this->assertFileExists( $local_path );
+		$this->assertEquals( 'foobar', file_get_contents( $local_path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	}
+
+	/**
+	 * @testdox delete_expired_files deletes expired files on stream wrapper uploads directories.
+	 */
+	public function test_delete_expired_files_works_on_stream_wrapper_uploads_directory() {
+		$today = '2023-12-01';
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => $this->stream_uploads_dir() ),
+				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
+					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
+				},
+			)
+		);
+
+		$expired_file     = $this->sut->create_transient_file( 'expired', '2023-12-01' );
+		$not_expired_file = $this->sut->create_transient_file( 'not expired', '2023-12-31' );
+
+		$today = '2023-12-15';
+
+		$result = $this->sut->delete_expired_files();
+
+		$this->assertEquals( 1, $result['deleted_count'], 'The expired file should have been deleted' );
+		$this->assertFalse( $result['files_remain'] );
+		$this->assertNull( $this->sut->get_transient_file_path( $expired_file ) );
+		$this->assertNotNull( $this->sut->get_transient_file_path( $not_expired_file ) );
+		$this->assertDirectoryDoesNotExist( $this->local_path_for( 'uploads/woocommerce_transient_files/2023-12-01' ) );
+		$this->assertDirectoryExists( $this->local_path_for( 'uploads/woocommerce_transient_files/2023-12-31' ) );
+	}
+
+	/**
+	 * @testdox delete_expired_files ignores directories that aren't named after an expiration date.
+	 */
+	public function test_delete_expired_files_ignores_non_date_directories_on_stream_wrapper() {
+		$today = '2023-12-01';
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => $this->stream_uploads_dir() ),
+				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
+					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
+				},
+			)
+		);
+
+		$this->sut->create_transient_file( 'expired', '2023-12-01' );
+
+		$base_dir = $this->local_path_for( 'uploads/woocommerce_transient_files' );
+		wp_mkdir_p( $base_dir . '/not-a-date' );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Direct write is fine in a test fixture.
+		file_put_contents( $base_dir . '/not-a-date/keepme', 'keep' );
+
+		$today = '2023-12-15';
+
+		$result = $this->sut->delete_expired_files();
+
+		$this->assertEquals( 1, $result['deleted_count'] );
+		$this->assertFileExists( $base_dir . '/not-a-date/keepme' );
 	}
 
 	/**
@@ -555,7 +746,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -585,7 +775,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_delete_expired_transient_files_interval', fn( $interval ) => HOUR_IN_SECONDS );
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -628,7 +817,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$today = '2023-12-03';
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -702,7 +890,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = $file_name;
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();
@@ -755,7 +942,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = 'NOT_EXISTING';
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();
@@ -810,7 +996,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = $file_name;
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();

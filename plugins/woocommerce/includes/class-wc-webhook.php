@@ -210,16 +210,22 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
-		// Only deliver deleted/restored event for coupons, orders, and products.
-		if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
+		if ( ( ! is_int( $arg ) && ! ( is_string( $arg ) && ctype_digit( $arg ) ) ) || 0 >= (int) $arg ) {
 			return false;
 		}
 
-		// Check if is delivering for the correct resource.
-		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
-			return false;
-		}
-		return true;
+		$post_id               = absint( $arg );
+		$post_type_to_resource = array_merge(
+			array(
+				'product'           => 'product',
+				'product_variation' => 'product',
+				'shop_coupon'       => 'coupon',
+			),
+			array_fill_keys( wc_get_order_types( 'order-webhooks' ), 'order' )
+		);
+		$post_type             = get_post_type( $post_id );
+
+		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
 	}
 
 	/**
@@ -547,12 +553,23 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
 
-		$logger->info(
-			wc_print_r( $message, true ),
-			array(
-				'source' => 'webhooks-delivery',
-			)
-		);
+		/**
+		 * Filter to disable webhook delivery logging.
+		 *
+		 * @since 11.1.0
+		 * @param bool $enable_logging Whether to log the delivery. Default true.
+		 * @param int  $webhook_id     The webhook ID.
+		 */
+		$enable_logging = apply_filters( 'woocommerce_webhook_enable_delivery_log', true, $this->get_id() );
+
+		if ( $enable_logging ) {
+			$logger->info(
+				wc_print_r( $message, true ),
+				array(
+					'source' => 'webhooks-delivery',
+				)
+			);
+		}
 
 		// Track failures.
 		// Check for a success, which is a 2xx, 301 or 302 Response Code.

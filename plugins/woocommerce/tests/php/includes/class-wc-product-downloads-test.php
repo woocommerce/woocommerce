@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 /**
  * Class WC_Product_Download_Test
  */
@@ -9,31 +10,37 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 	 * Test for file without extension.
 	 */
 	public function test_is_allowed_filetype_with_no_extension() {
+		$filesystem                  = FilesystemUtil::get_wp_filesystem();
 		$upload_dir                  = trailingslashit( wp_upload_dir()['basedir'] );
-		$file_path_with_no_extension = $upload_dir . 'upload_file';
-		if ( ! file_exists( $file_path_with_no_extension ) ) {
-			// Copy an existing file without extension.
-			$this->assertTrue( touch( $file_path_with_no_extension ), 'Unable to create file without extension.' );
+		$file_path_with_no_extension = $upload_dir . 'upload_file-' . wp_generate_uuid4();
+		$this->assertTrue( $filesystem->touch( $file_path_with_no_extension ), 'Unable to create file without extension.' );
+
+		try {
+			$download = new WC_Product_Download();
+			$download->set_file( $file_path_with_no_extension );
+			$this->assertEquals( true, $download->is_allowed_filetype() );
+		} finally {
+			$filesystem->delete( $file_path_with_no_extension );
 		}
-		$download = new WC_Product_Download();
-		$download->set_file( $file_path_with_no_extension );
-		$this->assertEquals( true, $download->is_allowed_filetype() );
 	}
 
 	/**
 	 * Simulates test condition for windows when filename ends with a period.
 	 */
 	public function test_is_allowed_filetype_on_windows_with_period_at_end() {
+		$filesystem                   = FilesystemUtil::get_wp_filesystem();
 		$upload_dir                   = trailingslashit( wp_upload_dir()['basedir'] );
-		$file_path_with_period_at_end = $upload_dir . 'upload_file.';
-		if ( ! file_exists( $file_path_with_period_at_end ) ) {
-			// Copy an existing file without extension.
-			$this->assertTrue( touch( $file_path_with_period_at_end ), 'Unable to create file with period at the end.' );
+		$file_path_with_period_at_end = $upload_dir . 'upload_file-' . wp_generate_uuid4() . '.';
+		$this->assertTrue( $filesystem->touch( $file_path_with_period_at_end ), 'Unable to create file with period at the end.' );
+
+		try {
+			\Automattic\Jetpack\Constants::set_constant( 'PHP_OS', 'winnt' );
+			$download = new WC_Product_Download();
+			$download->set_file( $file_path_with_period_at_end );
+			$this->assertEquals( false, $download->is_allowed_filetype() );
+		} finally {
+			$filesystem->delete( $file_path_with_period_at_end );
 		}
-		\Automattic\Jetpack\Constants::set_constant( 'PHP_OS', 'winnt' );
-		$download = new WC_Product_Download();
-		$download->set_file( $file_path_with_period_at_end );
-		$this->assertEquals( false, $download->is_allowed_filetype() );
 	}
 
 	/**
@@ -181,6 +188,39 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 			$invalid_directory->getMessage(),
 			$file_does_not_exist->getMessage(),
 			'We use the same error message when the file does not exist as when the directory is invalid.'
+		);
+	}
+
+	/**
+	 * @testdox get_absolute_file_path() resolves real content-dir paths but matches the content dir only at a path-segment boundary.
+	 */
+	public function test_get_absolute_file_path_matches_content_dir_only_at_a_boundary() {
+		$download = new WC_Product_Download();
+
+		// get_absolute_file_path() is private and reads the raw WP_CONTENT_DIR/ABSPATH constants,
+		// so we invoke it directly to assert its boundary matching deterministically.
+		$resolve = new ReflectionMethod( WC_Product_Download::class, 'get_absolute_file_path' );
+		$resolve->setAccessible( true );
+
+		$content_name = wp_basename( WP_CONTENT_DIR );
+
+		// A genuine path into the content directory is treated as content-relative: it is resolved
+		// against WP_CONTENT_DIR (realpath() of a non-existent file yields false), not returned as-is.
+		$content_path = '/' . $content_name . '/uploads/does-not-exist.zip';
+		$this->assertNotSame(
+			$content_path,
+			$resolve->invoke( $download, $content_path ),
+			'A genuine content-directory path should be resolved against WP_CONTENT_DIR, not returned unchanged.'
+		);
+
+		// A sibling whose name merely starts with the content-dir name (e.g. "/app" vs "/application")
+		// must NOT be treated as content-relative; the reference is returned unchanged rather than being
+		// mis-mapped under WP_CONTENT_DIR.
+		$prefix_sibling = '/' . $content_name . 'X/decoy.zip';
+		$this->assertSame(
+			$prefix_sibling,
+			$resolve->invoke( $download, $prefix_sibling ),
+			'A path that only shares the content-dir name prefix must not be mapped under WP_CONTENT_DIR.'
 		);
 	}
 }

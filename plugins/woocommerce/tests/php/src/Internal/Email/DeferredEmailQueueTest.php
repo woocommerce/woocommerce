@@ -6,12 +6,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Email;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification as StockNotification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the DeferredEmailQueue class.
  */
 class DeferredEmailQueueTest extends WC_Unit_Test_Case {
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -32,6 +34,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->sut = new DeferredEmailQueue();
 		$this->reset_queue_singleton();
 		add_filter(
@@ -55,6 +58,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
 		$this->set_wc_emails_deferred_queue( null );
 		$this->delete_stock_notifications();
+		$this->restore_stock_notifications_feature_option();
 		$this->reset_queue_singleton();
 		parent::tearDown();
 	}
@@ -193,7 +197,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 
 		$this->set_wc_emails_deferred_queue( $this->sut );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Test-only hooks.
 		add_action( 'woocommerce_deferred_email_test_unknown_object', array( \WC_Emails::class, 'queue_transactional_email' ) );
 		add_action(
 			'woocommerce_deferred_email_test_unknown_object_notification',
@@ -203,7 +206,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		);
 
 		do_action( 'woocommerce_deferred_email_test_unknown_object', $object );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->sut->dispatch();
 
@@ -222,7 +224,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 
 		$this->set_wc_emails_deferred_queue( $this->sut );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Test-only hooks.
 		add_action( 'woocommerce_deferred_email_test_unsaved_product', array( \WC_Emails::class, 'queue_transactional_email' ) );
 		add_action(
 			'woocommerce_deferred_email_test_unsaved_product_notification',
@@ -232,7 +233,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		);
 
 		do_action( 'woocommerce_deferred_email_test_unsaved_product', $product );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->sut->dispatch();
 
@@ -469,8 +469,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$this->sut->push( $filter, $args );
 		$this->sut->dispatch();
 
-		$queue         = $this->get_test_queue();
-		$scheduled_arg = $queue->actions[0]['args'];
+		$scheduled_arg = $this->get_scheduled_email_action()['args'];
 		$encoded_arg   = wp_json_encode( $scheduled_arg );
 
 		$this->assert_queued_object_reference( $scheduled_arg[1][ $wrapped_position ], $expected_type, $expected_id );
@@ -526,6 +525,30 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			},
 			10,
 			3
+		);
+	}
+
+	/**
+	 * Get the scheduled Action Scheduler email action from the test queue.
+	 *
+	 * Other fixture setup can enqueue unrelated actions before the email queue
+	 * dispatches, so object round-trip assertions must target the email action.
+	 *
+	 * @return array{timestamp: int, hook: string, args: array, group: string}
+	 */
+	private function get_scheduled_email_action(): array {
+		foreach ( $this->get_test_queue()->actions as $action ) {
+			if ( 'woocommerce_send_queued_transactional_email' === $action['hook'] ) {
+				return $action;
+			}
+		}
+
+		$this->fail( 'Expected a queued transactional email action to be scheduled.' );
+		return array(
+			'timestamp' => 0,
+			'hook'      => '',
+			'args'      => array(),
+			'group'     => '',
 		);
 	}
 

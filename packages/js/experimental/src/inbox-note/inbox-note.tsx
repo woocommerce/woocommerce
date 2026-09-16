@@ -206,4 +206,4 @@ const InboxNoteCard = ( {
 	);
 };
 
-export { InboxNoteCard, InboxNote, InboxNoteAction };
+export { InboxNoteCard, type InboxNote, type InboxNoteAction };

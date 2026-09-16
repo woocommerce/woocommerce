@@ -1,10 +1,7 @@
-/**
- * External dependencies
- */
-import { reviewsStore } from '@woocommerce/data';
-
 export const REVIEW_PAGE_LIMIT = 5;
 
+// Still used for the Reviews panel's own cache invalidation — the count
+// itself now comes from activityPanelStore's getActivityPanelCounts().
 export const unapprovedReviewsQuery = {
 	page: 1,
 	per_page: 1,
@@ -12,20 +9,3 @@ export const unapprovedReviewsQuery = {
 	_embed: 1,
 	_fields: [ 'id' ],
 };
-export function getUnapprovedReviews( select ) {
-	const { getReviewsTotalCount, getReviewsError, isResolving } =
-		select( reviewsStore );
-
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const totalReviews = getReviewsTotalCount( unapprovedReviewsQuery );
-	const isError = Boolean( getReviewsError( unapprovedReviewsQuery ) );
-	const isRequesting = isResolving( 'getReviewsTotalCount', [
-		unapprovedReviewsQuery,
-	] );
-
-	if ( isError || ( isRequesting && totalReviews === undefined ) ) {
-		return null;
-	}
-
-	return totalReviews;
-}

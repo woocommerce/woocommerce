@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Render an empty-state thank-you view on the customer Review Order page when no actionable rows remain (every eligible item is already reviewed or skipped because reviews are disabled).

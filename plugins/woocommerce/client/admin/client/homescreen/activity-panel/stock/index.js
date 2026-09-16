@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { Section } from '@woocommerce/components';
-import { itemsStore } from '@woocommerce/data';
+import { activityPanelStore, itemsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -39,7 +39,11 @@ export class StockPanel extends Component {
 	}
 
 	async updateStock( product, quantity ) {
-		const { invalidateResolution, updateProductStock } = this.props;
+		const {
+			invalidateResolution,
+			invalidateActivityPanel,
+			updateProductStock,
+		} = this.props;
 		const success = await updateProductStock( product, quantity );
 
 		if ( success ) {
@@ -53,6 +57,7 @@ export class StockPanel extends Component {
 				getLowStockCountQuery,
 				null,
 			] );
+			invalidateActivityPanel( 'getActivityPanelCounts', [] );
 		}
 
 		return success;
@@ -135,11 +140,14 @@ export default compose(
 	withDispatch( ( dispatch ) => {
 		const { invalidateResolution, updateProductStock } =
 			dispatch( itemsStore );
+		const { invalidateResolution: invalidateActivityPanel } =
+			dispatch( activityPanelStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			invalidateResolution,
+			invalidateActivityPanel,
 			updateProductStock,
 		};
 	} )

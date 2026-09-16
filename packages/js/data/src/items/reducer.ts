@@ -24,7 +24,7 @@ const reducer: Reducer< ItemsState, Action > = (
 	action
 ) => {
 	switch ( action.type ) {
-		case TYPES.SET_ITEM:
+		case TYPES.SET_ITEM: {
 			const itemData = state.data[ action.itemType ] || {};
 			return {
 				...state,
@@ -39,7 +39,22 @@ const reducer: Reducer< ItemsState, Action > = (
 					},
 				},
 			};
-		case TYPES.SET_ITEMS:
+		}
+		case TYPES.SET_ITEMS: {
+			const resourceName = getResourceName(
+				action.itemType,
+				action.query
+			);
+			if ( action.itemType === 'leaderboards' ) {
+				return {
+					...state,
+					items: {
+						...state.items,
+						[ resourceName ]: { data: action.items },
+					},
+				};
+			}
+
 			const ids: Array< ItemID > = [];
 			const nextItems = action.items.reduce< Record< ItemID, Item > >(
 				( result, theItem ) => {
@@ -48,10 +63,6 @@ const reducer: Reducer< ItemsState, Action > = (
 					return result;
 				},
 				{}
-			);
-			const resourceName = getResourceName(
-				action.itemType,
-				action.query
 			);
 			return {
 				...state,
@@ -67,6 +78,7 @@ const reducer: Reducer< ItemsState, Action > = (
 					},
 				},
 			};
+		}
 		case TYPES.SET_ITEMS_TOTAL_COUNT:
 			const totalResourceName = getTotalCountResourceName(
 				action.itemType,

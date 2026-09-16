@@ -68,8 +68,10 @@
 			"__experimentalDefaultControls": {
 				"fontSize": true
 			}
-		},
-		"__experimentalSelector": ".wc-block-components-product-summary"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-summary.wc-block-components-product-summary, .wp-block-woocommerce-product-summary .wc-block-components-product-summary"
 	},
 	"ancestor": [
 		"woocommerce/all-products",

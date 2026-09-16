@@ -103,7 +103,7 @@ const InstallWooPaymentsStep = ( {
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null;
 
-	let buttonText = __( 'Install', 'woocommerce' );
+	let buttonText = __< string >( 'Install', 'woocommerce' );
 
 	if ( isPluginInstalled && ! isPluginInstalling ) {
 		buttonText = __( 'Enable', 'woocommerce' );
@@ -149,7 +149,7 @@ const InstallWooPaymentsStep = ( {
 						wooPaymentsProvider?.onboarding?._links?.preload?.href
 					) {
 						// We don't need to await this call or handle its response.
-						apiFetch( {
+						void apiFetch( {
 							url: wooPaymentsProvider?.onboarding?._links
 								?.preload?.href,
 							method: 'POST',

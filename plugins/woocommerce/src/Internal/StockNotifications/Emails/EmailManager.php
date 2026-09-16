@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
@@ -103,7 +104,7 @@ class EmailManager {
 	public function maybe_restore_customer_tax_location_data( $notification ) {
 
 		// No need if stores displaying price excluding tax.
-		if ( 'incl' !== get_option( 'woocommerce_tax_display_shop' ) ) {
+		if ( TaxDisplayMode::INCLUSIVE !== get_option( 'woocommerce_tax_display_shop' ) ) {
 			return;
 		}
 

@@ -1,1 +1,1 @@
-import '@woocommerce/internal-ts-config/types/@wordpress/data';
+import '@woocommerce/internal-build/type-overrides/@wordpress/data';

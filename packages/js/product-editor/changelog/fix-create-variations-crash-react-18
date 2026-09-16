@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Addressed issues causing variations tab to crash when generating variations with React 18.

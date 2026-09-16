@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -41,7 +42,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		$this->register_autoloader_for_testing_tools();
 
-		$this->initialize_code_hacker();
+		$this->maybe_initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
@@ -70,6 +71,9 @@ class WC_Unit_Tests_Bootstrap {
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
+		// Keep the shared DB update queue clean outside the variation gallery package tests.
+		tests_add_filter( 'init', array( $this, 'cancel_variation_gallery_migration_action' ), 21 );
+
 		// Speed things up by turning down the password hashing cost.
 		tests_add_filter(
 			'wp_hash_password_options',
@@ -87,8 +91,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
-
-		$this->maybe_announce_skipped_graphql_infra_tests();
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
@@ -145,7 +147,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize the code hacker.
+	 * Initialize the code hacker unless the WC_TEST_DISABLE_CODE_HACKER environment variable is set.
+	 *
+	 * The code hacker owns PHP's file stream wrapper, so tools that need that wrapper
+	 * themselves (for example mutation testers, which swap mutated files in at include
+	 * time) cannot run alongside it.
+	 */
+	private function maybe_initialize_code_hacker() {
+		if ( empty( getenv( 'WC_TEST_DISABLE_CODE_HACKER' ) ) ) {
+			$this->initialize_code_hacker();
+			return;
+		}
+
+		echo 'Not enabling the code hacker (WC_TEST_DISABLE_CODE_HACKER is set). Tests that mock functions or static methods, or that subclass final classes, will fail.' . PHP_EOL;
+	}
+
+	/**
+	 * Initialize the code hacker and register the hacks.
 	 *
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
@@ -177,27 +195,6 @@ class WC_Unit_Tests_Bootstrap {
 	private function maybe_initialize_hpos() {
 		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
-	}
-
-	/**
-	 * Echo a "Not running GraphQL infrastructure tests" message when the
-	 * current invocation does not include the `wc-phpunit-graphql-infra` suite,
-	 * mirroring the "Not running ajax tests" line printed by WP's own bootstrap
-	 * for the `ajax`, `ms-files` and `external-http` groups.
-	 *
-	 * The GraphQL infrastructure tests live in their own suite because they
-	 * require PHP 8.1+ and are excluded from the default suite.
-	 */
-	private function maybe_announce_skipped_graphql_infra_tests() {
-		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
-		foreach ( $argv as $arg ) {
-			if ( 'wc-phpunit-graphql-infra' === $arg || 'wc-phpunit-full' === $arg
-				|| '--testsuite=wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
-				return;
-			}
-		}
-
-		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
 	}
 
 	/**
@@ -238,12 +235,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Default Back In Stock alpha to enabled during tests when no
-		// per-suite override has been set.
-		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		}
-
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -271,6 +262,13 @@ class WC_Unit_Tests_Bootstrap {
 
 		WC_Install::install();
 
+		// Run the test suite with product object caching enabled (the new-install default).
+		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
+		// the product CRUD/cache interfaces (e.g. raw SQL or direct postmeta writes without
+		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
+		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
@@ -280,6 +278,20 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
+	}
+
+	/**
+	 * Cancel the variation gallery migration scheduled during test bootstrap.
+	 *
+	 * The package scheduler is covered directly by its own tests. Leaving its
+	 * bootstrap action pending leaks into unrelated tests of the shared DB update queue.
+	 */
+	public function cancel_variation_gallery_migration_action(): void {
+		WC()->queue()->cancel_all(
+			'woocommerce_run_update_callback',
+			array( 'update_callback' => array( VariationGalleryMigration::class, 'run' ) ),
+			'woocommerce-db-updates'
+		);
 	}
 
 	/**
@@ -324,6 +336,8 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
 	}
 
 	/**

@@ -30,7 +30,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
 		$this->assertArrayHasKey( 'args', $payload['message'] );
-		$this->assertArrayHasKey( 'icon', $payload );
+		$this->assertArrayNotHasKey( 'icon', $payload );
 		$this->assertArrayHasKey( 'meta', $payload );
 		$this->assertArrayHasKey( 'order_id', $payload['meta'] );
 	}
@@ -89,5 +89,121 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewOrderNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when order total exceeds min_amount.
+	 */
+	public function test_should_send_to_user_when_order_total_above_threshold(): void {
+		$order = $this->create_order_with_total( 100 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'min_amount' => 50,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when order total equals min_amount.
+	 */
+	public function test_should_send_to_user_when_order_total_equals_threshold(): void {
+		$order = $this->create_order_with_total( 50 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'min_amount' => 50,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when order total is below min_amount.
+	 */
+	public function test_should_not_send_to_user_when_order_total_below_threshold(): void {
+		$order = $this->create_order_with_total( 30 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'min_amount' => 50,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when min_amount is null (no threshold).
+	 */
+	public function test_should_send_to_user_when_min_amount_is_null(): void {
+		$order = $this->create_order_with_total( 1 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'min_amount' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when notification is disabled, regardless of amount.
+	 */
+	public function test_should_not_send_to_user_when_disabled(): void {
+		$order = $this->create_order_with_total( 1000 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => false,
+					'min_amount' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when min_amount key is missing (backwards compat).
+	 */
+	public function test_should_send_to_user_when_min_amount_missing(): void {
+		$order = $this->create_order_with_total( 1 );
+
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$this->assertTrue(
+			$notification->should_send_to_user( array( 'enabled' => true ) )
+		);
+	}
+
+	/**
+	 * Creates an order with a specific total.
+	 *
+	 * @param float $total The order total.
+	 * @return \WC_Order
+	 */
+	private function create_order_with_total( float $total ): \WC_Order {
+		$order = wc_create_order( array( 'status' => 'processing' ) );
+		$order->set_total( (string) $total );
+		$order->save();
+		return $order;
 	}
 }

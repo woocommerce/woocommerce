@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Customers;
 
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -124,7 +123,8 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function create_order_for( \WC_Customer $customer ): \WC_Order {
-		$order = OrderHelper::create_order( $customer->get_id() );
+		$order = new \WC_Order();
+		$order->set_customer_id( $customer->get_id() );
 		$order->set_billing_email( $customer->get_billing_email( 'edit' ) );
 		$order->save();
 		return $order;

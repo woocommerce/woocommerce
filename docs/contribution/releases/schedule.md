@@ -37,7 +37,7 @@ At this stage, various testing processes take place:
 - (Internally) Regression testing with Woo-maintained extensions, regression testing in multiple environments, and exploratory testing (including by contributing teams).
 - (Community) The pre-release is announced so the community can [begin testing](/docs/contribution/testing/beta-testing/).
 
-Any issues found during the beta period are addressed either directly against the release branch or by backporting fixes from `trunk` (preferred). Refer to the [backporting guide](/docs/contribution/releases/backporting) for more details.
+Any issues found during the beta period are addressed either directly against the release branch or by backporting fixes from `trunk` (preferred). Refer to the [cherry-picking guide](/docs/contribution/releases/backporting) for more details.
 
 `release/x.y` remains the source of truth for anything going into the upcoming release.
 
@@ -58,12 +58,7 @@ At this point, the Developer Advocacy team publishes release highlights that are
 
 ### Point/Patch Releases
 
-Patch releases are used to ship important bug fixes to our users, which were  detected after the final release. They are versioned `x.y.z` where `z` is non-zero.
-
-We follow the same convention as during the beta and RC phases for merging any fixes:
-
-- Bugs that are only present on the release branch are fixed against the release branch `release/x.y`.
-- Bugs that have a working fix on `trunk` are [backported](/docs/contribution/releases/backporting).
+Patch releases ship important bug fixes detected after the final release. They are versioned `x.y.z` where `z` is non-zero. See the [Point Releases guide](/docs/contribution/releases/point-releases) for the full process, including how a patch is evaluated, prepared, and shipped.
 
 
 ## Delays
@@ -72,4 +67,4 @@ Due to business needs or any critical bugs discovered during testing, the releas
 
 We do not take this decision lightly and only do so to guarantee the stability of a release. When this happens, we will always communicate the situation ([example](https://developer.woocommerce.com/2025/06/02/woocommerce-9-9-release-is-delayed/)) and update the release calendar.
 
-For details on how a delay is managed, refer to the [release troubleshooting guide](/docs/contribution/releases/troubleshooting#release-delay).
+For details on how a delay is managed, refer to the [release troubleshooting guide](/docs/contribution/releases/troubleshooting/#the-release-needs-to-be-delayed-what-should-we-do).

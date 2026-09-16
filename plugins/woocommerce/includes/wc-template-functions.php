@@ -1457,6 +1457,17 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			return;
 		}
 
+		$attributes = array(
+			'data-product_id'  => $product->get_id(),
+			'data-product_sku' => $product->get_sku(),
+			'aria-label'       => $product->add_to_cart_description(),
+			'rel'              => '',
+		);
+
+		if ( $product->get_permalink() !== $product->add_to_cart_url() ) {
+			$attributes['rel'] = 'nofollow';
+		}
+
 		$defaults = array(
 			'quantity'              => 1,
 			'class'                 => implode(
@@ -1472,12 +1483,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 				)
 			),
 			'aria-describedby_text' => $product->add_to_cart_aria_describedby(),
-			'attributes'            => array(
-				'data-product_id'  => $product->get_id(),
-				'data-product_sku' => $product->get_sku(),
-				'aria-label'       => $product->add_to_cart_description(),
-				'rel'              => 'nofollow',
-			),
+			'attributes'            => $attributes,
 		);
 
 		if ( is_a( $product, 'WC_Product_Simple' ) ) {
@@ -1771,8 +1777,21 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 		);
 
 		if ( ! wc_get_loop_prop( 'is_shortcode' ) ) {
-			$args['format'] = '';
-			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+			global $wp_rewrite;
+
+			$args['base'] = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+
+			if ( $wp_rewrite->using_permalinks() ) {
+				$args['format'] = user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' );
+
+				if ( ! $wp_rewrite->use_trailing_slashes ) {
+					$args['format'] = '/' . ltrim( $args['format'], '/' );
+				}
+			} else {
+				$args['format'] = false !== strpos( $args['base'], '?paged=%#%' ) ? '?paged=%#%' : '&paged=%#%';
+			}
+
+			$args['base'] = str_replace( $args['format'], '%_%', $args['base'] );
 		}
 
 		wc_get_template( 'loop/pagination.php', $args );
@@ -1868,6 +1887,136 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 	);
 
 	return '<div data-thumb="' . esc_url( isset( $thumbnail_src[0] ) ? $thumbnail_src[0] : '' ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( isset( $thumbnail_srcset ) ? $thumbnail_srcset : '' ) . '"  data-thumb-sizes="' . esc_attr( isset( $thumbnail_sizes ) ? $thumbnail_sizes : '' ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( isset( $full_src[0] ) ? $full_src[0] : '' ) . '">' . $image . '</a></div>';
+}
+
+/**
+ * Get HTML for a complete product gallery.
+ *
+ * Delegates to the `single-product/product-image.php` template so themes that
+ * override that template are honored, and so any extensions hooked on
+ * `woocommerce_product_thumbnails` or `woocommerce_single_product_image_thumbnail_html`
+ * still fire on variation gallery swaps.
+ *
+ * @since 10.8.0
+ *
+ * @param WC_Product $product   Product used for gallery context.
+ * @param array|null $image_ids Ordered image IDs to render. When null, the
+ *                              template renders the product's own featured
+ *                              image and gallery; otherwise the supplied IDs
+ *                              are presented to the template as if they were
+ *                              the product's own images (the first ID becomes
+ *                              the featured slot, the rest the gallery).
+ * @return string
+ */
+function wc_get_product_gallery_html( $product, $image_ids = null ) {
+	if ( ! $product instanceof WC_Product ) {
+		return '';
+	}
+
+	if ( null === $image_ids ) {
+		return wc_render_product_image_template_for( $product );
+	}
+
+	return wc_render_product_image_template_for_image_ids( $product, $image_ids );
+}
+
+/**
+ * Render the `single-product/product-image.php` template for a given product.
+ *
+ * Temporarily promotes $product into `$GLOBALS['product']` so the template,
+ * which reads from globals, sees the right object. Restores the previous
+ * global before returning.
+ *
+ * @since 10.8.0
+ * @internal
+ *
+ * @param WC_Product $product Product to render.
+ * @return string
+ */
+function wc_render_product_image_template_for( WC_Product $product ): string {
+	$had_previous_product = array_key_exists( 'product', $GLOBALS );
+	$previous_product     = $had_previous_product ? $GLOBALS['product'] : null;
+	$GLOBALS['product']   = $product;
+
+	try {
+		return trim( wc_get_template_html( 'single-product/product-image.php' ) );
+	} finally {
+		if ( $had_previous_product ) {
+			$GLOBALS['product'] = $previous_product;
+		} else {
+			unset( $GLOBALS['product'] );
+		}
+	}
+}
+
+/**
+ * Render the product-image template using a caller-supplied image set instead
+ * of the product's stored featured + gallery.
+ *
+ * Used by the variation gallery swap path: the variation has its own ordered
+ * list of images, but we still want the parent product's gallery template to
+ * render them so theme overrides and `woocommerce_product_thumbnails` hooks
+ * apply uniformly. We achieve this by hooking the product's
+ * `get_image_id` / `get_gallery_image_ids` filters for the duration of the
+ * render; the template sees the substituted values and is none the wiser.
+ *
+ * @since 10.8.0
+ * @internal
+ *
+ * @param WC_Product $product   Product being rendered.
+ * @param mixed      $image_ids Image IDs to substitute. Will be normalized.
+ * @return string
+ */
+function wc_render_product_image_template_for_image_ids( WC_Product $product, $image_ids ): string {
+	$normalized  = array_values( array_unique( array_map( 'intval', array_filter( (array) $image_ids ) ) ) );
+	$featured_id = $normalized[0] ?? 0;
+	$gallery_ids = array_slice( $normalized, 1 );
+
+	$remove_overrides = wc_apply_product_image_overrides( $product, $featured_id, $gallery_ids );
+
+	try {
+		return wc_render_product_image_template_for( $product );
+	} finally {
+		$remove_overrides();
+	}
+}
+
+/**
+ * Hook get_image_id / get_gallery_image_ids on a single product instance and
+ * return a callable that removes the hooks. Each filter only fires for the
+ * specified product ID — other product objects in the same render pass are
+ * unaffected.
+ *
+ * @since 10.8.0
+ * @internal
+ *
+ * @param WC_Product $product     Product to scope the override to.
+ * @param int        $featured_id Image ID to return from get_image_id.
+ * @param int[]      $gallery_ids Image IDs to return from get_gallery_image_ids.
+ * @return callable Invocation of the returned callable removes both filters.
+ */
+function wc_apply_product_image_overrides( WC_Product $product, int $featured_id, array $gallery_ids ): callable {
+	$product_id = $product->get_id();
+
+	$featured_filter = static function ( $value, $instance ) use ( $product_id, $featured_id ) {
+		return ( $instance instanceof WC_Product && $instance->get_id() === $product_id )
+			? $featured_id
+			: $value;
+	};
+
+	$gallery_filter = static function ( $value, $instance ) use ( $product_id, $gallery_ids ) {
+		return ( $instance instanceof WC_Product && $instance->get_id() === $product_id )
+			? $gallery_ids
+			: $value;
+	};
+
+	add_filter( 'woocommerce_product_get_image_id', $featured_filter, 10, 2 );
+	add_filter( 'woocommerce_product_get_gallery_image_ids', $gallery_filter, 10, 2 );
+
+	return static function () use ( $featured_filter, $gallery_filter ) {
+		remove_filter( 'woocommerce_product_get_image_id', $featured_filter, 10 );
+		remove_filter( 'woocommerce_product_get_gallery_image_ids', $gallery_filter, 10 );
+	};
 }
 
 if ( ! function_exists( 'woocommerce_get_alt_from_product_title_and_position' ) ) {
@@ -2066,6 +2215,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 	 */
 	function woocommerce_variable_add_to_cart() {
 		global $product;
+		static $attached_gallery_defaults = array();
 
 		if ( ! ( $product instanceof WC_Product ) ) {
 			return;
@@ -2073,6 +2223,21 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 
 		// Enqueue variation scripts.
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
+
+		// Attach the reset snapshot once per product.
+		if ( ! isset( $attached_gallery_defaults[ $product->get_id() ] ) ) {
+			wp_add_inline_script(
+				'wc-add-to-cart-variation',
+				sprintf(
+					'(window.wc_variation_gallery_defaults = window.wc_variation_gallery_defaults || {})[%d] = %s;',
+					$product->get_id(),
+					wp_json_encode( wc_get_product_gallery_html( $product ) )
+				),
+				'before'
+			);
+
+			$attached_gallery_defaults[ $product->get_id() ] = true;
+		}
 
 		// Get Available variations?
 		$get_variations = count( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
@@ -2562,7 +2727,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			array(
 				'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of up-sells.php.
+				// Not used now, but used in previous version of cross-sells.php.
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
 				'columns'        => $columns,
@@ -2966,20 +3131,27 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
-			$product_categories = get_categories(
-				apply_filters(
-					'woocommerce_product_subcategories_args',
-					array(
-						'parent'       => $parent_id,
-						'hide_empty'   => 0,
-						'hierarchical' => 1,
-						'taxonomy'     => 'product_cat',
-						'pad_counts'   => 1,
-					)
+			/**
+			 * Filters the arguments used to retrieve product subcategories.
+			 *
+			 * @since 11.1.0
+			 *
+			 * @param array $args Array of arguments for get_categories().
+			 */
+			$args = apply_filters(
+				'woocommerce_product_subcategories_args',
+				array(
+					'parent'       => $parent_id,
+					'hide_empty'   => 0,
+					'hierarchical' => 1,
+					'taxonomy'     => 'product_cat',
+					'pad_counts'   => 1,
 				)
 			);
 
-			if ( $cache_key ) {
+			$product_categories = get_categories( $args );
+
+			if ( $cache_key && is_array( $args ) && ! empty( $args['taxonomy'] ) ) {
 				wp_cache_set( $cache_key, $product_categories, 'product_cat' );
 			}
 		}
@@ -4109,7 +4281,7 @@ function wc_display_product_attributes( $product ) {
 			foreach ( $attribute_values as $attribute_value ) {
 				$value_name = esc_html( $attribute_value->name );
 
-				if ( $attribute_taxonomy->attribute_public ) {
+				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
 					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
@@ -4347,17 +4519,27 @@ function wc_get_theme_slug_for_templates() {
  * Gets and formats a list of cart item data + variations for display on the frontend.
  *
  * @since 3.3.0
- * @param array $cart_item Cart item object.
- * @param bool  $flat Should the data be returned flat or in a list.
+ * @since 11.2.0 Added the `$product_name` parameter.
+ * @param array       $cart_item   Cart item object.
+ * @param bool        $flat        Should the data be returned flat or in a list.
+ * @param string|null $product_name Product name displayed for the cart item, used to avoid
+ *                                  duplicating variation attributes. Defaults to the stored product name.
  * @return string
  */
-function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
+function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_name = null ) {
 	$item_data = array();
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
 	// This is because variation titles display the attributes.
 	if ( $cart_item['data']->is_type( ProductType::VARIATION ) && is_array( $cart_item['variation'] ) ) {
+		$product_name = is_string( $product_name ) ? $product_name : $cart_item['data']->get_name();
+		$product_name = wp_specialchars_decode( wp_strip_all_tags( $product_name ), ENT_QUOTES );
+
 		foreach ( $cart_item['variation'] as $name => $value ) {
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+			$value    = (string) $value;
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
 			if ( taxonomy_exists( $taxonomy ) ) {
@@ -4373,8 +4555,18 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 			}
 
-			// Check the nicename against the title.
-			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+			// The option-name filter can return anything; skip values that cannot be rendered.
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+
+			// Variation values can be stored URL-encoded, while variation titles are built
+			// from decoded values by wc_get_formatted_variation(). Decode here so an encoded
+			// value is matched against the title and displayed the same way the title shows it.
+			$value = rawurldecode( (string) $value );
+
+			// Check the display value against the title.
+			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
 				continue;
 			}
 
@@ -4391,13 +4583,28 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	if ( is_array( $item_data ) ) {
 		// Format item data ready to display.
 		foreach ( $item_data as $key => $data ) {
+			if ( ! is_array( $data ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
 			// Set hidden to true to not display meta on cart.
 			if ( ! empty( $data['hidden'] ) ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
+			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
+
+			$label_is_renderable   = is_scalar( $label ) || ( is_object( $label ) && method_exists( $label, '__toString' ) );
+			$display_is_renderable = is_scalar( $display ) || ( is_object( $display ) && method_exists( $display, '__toString' ) );
+
+			if ( ! $label_is_renderable || ! $display_is_renderable ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
+
+			$item_data[ $key ]['key']     = (string) $label;
+			$item_data[ $key ]['display'] = (string) $display;
 		}
 
 		// Output flat or in list format.
@@ -4584,7 +4791,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 		}
 	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
 		/*
-		 * When switching from a block theme to a clasic theme, check if we have set the option to
+		 * When switching from a block theme to a classic theme, check if we have set the option to
 		 * re-enable the store notice. If so, re-enable it.
 		 */
 		$enable_store_notice_in_classic_theme = wc_string_to_bool( get_option( $enable_store_notice_in_classic_theme_option, 'no' ) );

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 
 /**
@@ -52,6 +53,7 @@ final class DependencyDetection {
 		'blocksComponents'      => 'wc-blocks-components',
 		'wcTypes'               => 'wc-types',
 		'sanitize'              => 'wc-sanitize',
+		'wcEntities'            => 'wc-entities',
 	);
 
 	/**
@@ -194,10 +196,8 @@ final class DependencyDetection {
 				// Skip malformed src.
 				continue;
 			}
-			if ( ! preg_match( '|^(https?:)?//|', $src ) ) {
-				// Relative URL - make it absolute.
-				$src = $wp_scripts->base_url . $src;
-			}
+			// Resolve relative URLs to absolute the same way WordPress core does.
+			$src = Utils::get_absolute_script_url( $src );
 
 			// Skip WooCommerce's own scripts - we don't need to check those.
 			if ( $this->is_woocommerce_script( $src ) ) {

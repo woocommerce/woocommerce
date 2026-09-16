@@ -5,24 +5,50 @@ namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use WC_Helper_Order;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * OrderActionsRestController API controller test.
  *
  * @class OrderActionsRestController
  */
-class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
+class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @var OrderActionsRestController
 	 */
 	protected $controller;
 
 	/**
+	 * REST server used to dispatch order action requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * User fixture IDs keyed by role.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_user = array();
+
+	/**
 	 * @var int[] Associative array of user IDs.
 	 */
 	private $user = array();
+
+	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_user['shop_manager'] = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_user['customer']     = $factory->user->create( array( 'role' => 'customer' ) );
+	}
 
 	/**
 	 * Set up test.
@@ -31,10 +57,12 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		$this->controller = new OrderActionsRestController();
-		$this->controller->register_routes();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
-		$this->user['shop_manager'] = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->user['customer']     = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->user = self::$fixture_user;
 
 		// Load and instantiate POS email classes to register their filter hooks.
 		// WP_UnitTestCase restores hooks between tests, so this must run each setUp().
@@ -43,6 +71,16 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-refunded-order.php';
 		new \WC_Email_Customer_POS_Completed_Order();
 		new \WC_Email_Customer_POS_Refunded_Order();
+	}
+
+	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -695,6 +733,24 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove notes added by EmailLogger so endpoint-specific assertions are not affected by the
+	 * private "Email ... sent." notes the logger adds whenever a transactional email fires.
+	 *
+	 * @param array $notes Order notes to filter.
+	 * @return array Notes with EmailLogger-added entries removed (re-indexed).
+	 */
+	private function filter_out_email_logger_notes( array $notes ): array {
+		return array_values(
+			array_filter(
+				$notes,
+				static function ( $note ) {
+					return 0 !== strpos( $note->content, 'Email "' );
+				}
+			)
+		);
+	}
+
+	/**
 	 * Test sending order details email.
 	 */
 	public function test_send_order_details() {
@@ -715,9 +771,10 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Order details sent to customer@email.com.', $data['message'] );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$this->assertCount( 1, $notes );
-		$this->assertEquals( 'Order details sent to customer@email.com.', $notes[0]->content );
+		$notes          = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$endpoint_notes = $this->filter_out_email_logger_notes( $notes );
+		$this->assertCount( 1, $endpoint_notes );
+		$this->assertEquals( 'Order details sent to customer@email.com.', $endpoint_notes[0]->content );
 	}
 
 	/**
@@ -796,10 +853,11 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Billing email updated to another@email.com. Order details sent to another@email.com.', $data['message'] );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$this->assertCount( 2, $notes );
+		$notes          = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$endpoint_notes = $this->filter_out_email_logger_notes( $notes );
+		$this->assertCount( 2, $endpoint_notes );
 
-		$notes_content = wp_list_pluck( $notes, 'content' );
+		$notes_content = wp_list_pluck( $endpoint_notes, 'content' );
 		$this->assertContainsEquals( 'Billing email updated to another@email.com.', $notes_content );
 		$this->assertContainsEquals( 'Order details sent to another@email.com.', $notes_content );
 	}

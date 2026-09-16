@@ -1,0 +1,16 @@
+.wc-block-dropdown__skeleton-option {
+	height: 1.75em;
+	border-radius: 2px;
+	background: color-mix(in srgb, currentColor 8%, transparent);
+	animation: wc-block-dropdown-pulse 1.2s ease-in-out infinite
+		alternate;
+}
+
+@keyframes wc-block-dropdown-pulse {
+	from {
+		opacity: 0.55;
+	}
+	to {
+		opacity: 1;
+	}
+}

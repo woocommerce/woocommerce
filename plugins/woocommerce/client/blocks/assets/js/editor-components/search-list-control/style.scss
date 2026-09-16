@@ -211,6 +211,10 @@
 			margin: 0;
 		}
 
+		> label:has(.woocommerce-search-list__item-label) {
+			display: contents;
+		}
+		
 		.woocommerce-search-list__item-label {
 			display: flex;
 			flex: 1;

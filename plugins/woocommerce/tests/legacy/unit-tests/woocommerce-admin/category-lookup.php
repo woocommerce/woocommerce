@@ -140,4 +140,22 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 		$this->assertCount( 2, $parent_parent_ids );
 		$this->assertContains( $this->parent2_term_id, $parent_parent_ids );
 	}
+
+	/**
+	 * Test resetting report data preserves the test transaction.
+	 *
+	 * @testdox Resetting report data preserves the test transaction.
+	 */
+	public function test_reset_stats_dbs_preserves_transaction() {
+		global $wpdb;
+
+		$wpdb->query( 'SAVEPOINT before_reset_stats_dbs' );
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$child_parent_ids = $this->get_category_parent_id( $this->child_term_id );
+		$this->assertCount( 2, $child_parent_ids );
+		$this->assertContains( $this->parent_term_id, $child_parent_ids );
+		$this->assertNotFalse( $wpdb->query( 'ROLLBACK TO SAVEPOINT before_reset_stats_dbs' ) );
+	}
 }

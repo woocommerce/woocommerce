@@ -1,6 +1,7 @@
 ---
 post_title: Email editor logging
 sidebar_label: Email editor logging
+sidebar_position: 3
 ---
 
 # Email Editor Logging

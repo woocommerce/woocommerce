@@ -234,7 +234,7 @@ class File {
 	 */
 	public function is_readable(): bool {
 		try {
-			$filesystem  = FilesystemUtil::get_wp_filesystem();
+			$filesystem  = FilesystemUtil::get_wp_filesystem_direct();
 			$is_readable = $filesystem->is_file( $this->path ) && $filesystem->is_readable( $this->path );
 		} catch ( Exception $exception ) {
 			return false;
@@ -250,7 +250,7 @@ class File {
 	 */
 	public function is_writable(): bool {
 		try {
-			$filesystem  = FilesystemUtil::get_wp_filesystem();
+			$filesystem  = FilesystemUtil::get_wp_filesystem_direct();
 			$is_writable = $filesystem->is_file( $this->path ) && $filesystem->is_writable( $this->path );
 		} catch ( Exception $exception ) {
 			return false;
@@ -375,7 +375,7 @@ class File {
 	 */
 	public function get_modified_timestamp() {
 		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 			$timestamp  = $filesystem->mtime( $this->path );
 		} catch ( Exception $exception ) {
 			return false;
@@ -391,7 +391,7 @@ class File {
 	 */
 	public function get_file_size() {
 		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 
 			if ( ! $filesystem->is_readable( $this->path ) ) {
 				return false;
@@ -412,7 +412,7 @@ class File {
 	 */
 	protected function create(): bool {
 		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 			$created    = $filesystem->touch( $this->path );
 			$modded     = $filesystem->chmod( $this->path );
 		} catch ( Exception $exception ) {
@@ -501,7 +501,7 @@ class File {
 		$new_path     = str_replace( $old_filename, $new_filename, $this->path );
 
 		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 			$moved      = $filesystem->move( $this->path, $new_path, true );
 		} catch ( Exception $exception ) {
 			return false;
@@ -524,7 +524,7 @@ class File {
 	 */
 	public function delete(): bool {
 		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 			$deleted    = $filesystem->delete( $this->path, false, 'f' );
 		} catch ( Exception $exception ) {
 			return false;

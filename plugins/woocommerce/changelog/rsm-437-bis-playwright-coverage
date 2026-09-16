@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Playwright e2e coverage for the Back in Stock Notifications signup, email, and admin management flows.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a regression test covering that the stock notifications My Account endpoint slug is sanitized when saved through the REST settings API.

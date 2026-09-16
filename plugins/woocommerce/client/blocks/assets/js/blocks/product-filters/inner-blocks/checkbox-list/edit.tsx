@@ -26,6 +26,10 @@ import './style.scss';
 import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
@@ -49,7 +53,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const selectableItems = context?.woocommerceSelectableItems ?? {};
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
 	const isLoading = selectableItems.isLoading ?? false;
 	const items = Array.isArray( selectableItems.items )
 		? selectableItems.items
@@ -122,23 +126,20 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											/>
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
-											{ item.color !== undefined && (
+											{ item.visual !== undefined && (
 												<span
 													className={ clsx(
 														'wc-block-product-filter-checkbox-list__color-swatch',
 														{
 															'is-empty':
-																! item.color,
+																isVisualAttributeTermEmpty(
+																	item.visual
+																),
 														}
 													) }
-													style={
-														item.color
-															? {
-																	backgroundColor:
-																		item.color,
-															  }
-															: undefined
-													}
+													style={ getVisualAttributeTermStyle(
+														item.visual
+													) }
 													aria-hidden="true"
 												/>
 											) }

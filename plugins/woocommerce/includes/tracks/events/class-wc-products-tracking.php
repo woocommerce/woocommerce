@@ -64,9 +64,16 @@ class WC_Products_Tracking {
 			&& 'product' === wp_unslash( $_GET['post_type'] )
 			&& ! isset( $_GET['_wp_http_referer'] )
 		) {
-			// phpcs:enable
 
 			WC_Tracks::record_event( 'products_view' );
+
+			// Track sorting mode.
+			if (
+				isset( $_GET['orderby'] )
+				&& 'menu_order title' === wc_clean( wp_unslash( $_GET['orderby'] ) )
+			) {
+				WC_Tracks::record_event( 'products_sorting_view' );
+			}
 
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 			if (
@@ -237,7 +244,7 @@ class WC_Products_Tracking {
 							product_type_options_string: productTypeOptionsString,
 							purchase_note:			     $( '#_purchase_note' ).val().length ? 'yes' : 'no',
 							sale_price:				     $( '#_sale_price' ).val() ? 'yes' : 'no',
-							short_description:		     $( '#excerpt' ).val().length ? 'yes' : 'no',
+							short_description:		     $( '#excerpt' ).val() ? 'yes' : 'no',
 							stock_quantity_update:	     ( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
 							tags:					     tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
 							upsells:				     $( '#upsell_ids option' ).length ? 'Yes' : 'No',

@@ -15,23 +15,30 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	function test_get_product_type() {
-		$simple   = WC_Helper_Product::create_simple_product();
-		$external = WC_Helper_Product::create_external_product();
-		$grouped  = WC_Helper_Product::create_grouped_product();
-		$variable = WC_Helper_Product::create_variation_product();
-		$children = $variable->get_children();
-		$child_id = $children[0];
+		$product_ids = array();
 
-		$this->assertEquals( ProductType::SIMPLE, WC()->product_factory->get_product_type( $simple->get_id() ) );
-		$this->assertEquals( ProductType::EXTERNAL, WC()->product_factory->get_product_type( $external->get_id() ) );
-		$this->assertEquals( ProductType::GROUPED, WC()->product_factory->get_product_type( $grouped->get_id() ) );
-		$this->assertEquals( ProductType::VARIABLE, WC()->product_factory->get_product_type( $variable->get_id() ) );
-		$this->assertEquals( ProductType::VARIATION, WC()->product_factory->get_product_type( $child_id ) );
+		foreach ( array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::GROUPED, ProductType::VARIABLE ) as $product_type ) {
+			$product_ids[ $product_type ] = self::factory()->post->create(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+				)
+			);
+			wp_set_object_terms( $product_ids[ $product_type ], $product_type, 'product_type' );
+		}
 
-		$simple->delete( true );
-		$external->delete( true );
-		$grouped->delete( true );
-		$variable->delete( true );
+		$variation_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'product_variation',
+				'post_status' => 'publish',
+			)
+		);
+
+		$this->assertSame( ProductType::SIMPLE, WC()->product_factory->get_product_type( $product_ids[ ProductType::SIMPLE ] ) );
+		$this->assertSame( ProductType::EXTERNAL, WC()->product_factory->get_product_type( $product_ids[ ProductType::EXTERNAL ] ) );
+		$this->assertSame( ProductType::GROUPED, WC()->product_factory->get_product_type( $product_ids[ ProductType::GROUPED ] ) );
+		$this->assertSame( ProductType::VARIABLE, WC()->product_factory->get_product_type( $product_ids[ ProductType::VARIABLE ] ) );
+		$this->assertSame( ProductType::VARIATION, WC()->product_factory->get_product_type( $variation_id ) );
 	}
 
 	/**

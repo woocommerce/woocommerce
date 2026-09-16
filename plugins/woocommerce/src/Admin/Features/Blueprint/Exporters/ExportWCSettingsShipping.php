@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
-use Automattic\WooCommerce\Blueprint\Util;
 
 /**
  * Class ExportWCSettingsShipping
@@ -71,12 +70,12 @@ class ExportWCSettingsShipping extends ExportWCSettings {
 		);
 
 		$classes_steps = array_map(
-			fn( $class_row ) => new RunSql( Util::array_to_insert_sql( $class_row, $wpdb->prefix . 'term_taxonomy', 'replace into' ) ),
+			fn( $class_row ) => RunSql::from_table_row( $class_row, 'term_taxonomy' ),
 			$classes
 		);
 
 		$terms = array_map(
-			fn( $term ) => new RunSql( Util::array_to_insert_sql( $term, $wpdb->prefix . 'terms', 'replace into' ) ),
+			fn( $term ) => RunSql::from_table_row( $term, 'terms' ),
 			$this->get_terms( $classes )
 		);
 
@@ -128,7 +127,7 @@ class ExportWCSettingsShipping extends ExportWCSettings {
 		global $wpdb;
 
 		return array_map(
-			fn( $zone ) => new RunSql( Util::array_to_insert_sql( $zone, $wpdb->prefix . 'woocommerce_shipping_zones', 'replace into' ) ),
+			fn( $zone ) => RunSql::from_table_row( $zone, 'woocommerce_shipping_zones' ),
 			$wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zones", ARRAY_A )
 		);
 	}
@@ -142,7 +141,7 @@ class ExportWCSettingsShipping extends ExportWCSettings {
 		global $wpdb;
 
 		return array_map(
-			fn( $location ) => new RunSql( Util::array_to_insert_sql( $location, $wpdb->prefix . 'woocommerce_shipping_zone_locations', 'replace into' ) ),
+			fn( $location ) => RunSql::from_table_row( $location, 'woocommerce_shipping_zone_locations' ),
 			$wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_locations", ARRAY_A )
 		);
 	}
@@ -164,11 +163,11 @@ class ExportWCSettingsShipping extends ExportWCSettings {
 
 		return array_merge(
 			array_map(
-				fn( $method ) => new RunSql( Util::array_to_insert_sql( $method, $wpdb->prefix . 'woocommerce_shipping_zone_methods', 'replace into' ) ),
+				fn( $method ) => RunSql::from_table_row( $method, 'woocommerce_shipping_zone_methods' ),
 				$methods
 			),
 			array_map(
-				fn( $option ) => new RunSql( Util::array_to_insert_sql( $option, $wpdb->prefix . 'options', 'replace into' ) ),
+				fn( $option ) => RunSql::from_table_row( $option, 'options' ),
 				$method_options
 			)
 		);

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix array to string conversion warning in wc_query_string_form_fields() when URL contains nested query string parameters.

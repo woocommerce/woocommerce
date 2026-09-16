@@ -19,8 +19,8 @@ type ProductImageProps = {
 	/**
 	 * Product or variation object. The image to display will be pulled from
 	 * `product.images` or `variation.image`.
-	 * See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties
-	 * and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
+	 * See https://developer.woocommerce.com/docs/apis/rest-api/v3/products/#product-properties
+	 * and https://developer.woocommerce.com/docs/apis/rest-api/v3/product-variations/#product-variation-properties
 	 */
 	product?: {
 		images?: Array< Image >;

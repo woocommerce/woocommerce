@@ -345,9 +345,18 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			}
 		}
 		$response = array();
-		foreach ( $query_result as $term ) {
-			$data       = $this->prepare_item_for_response( $term, $request );
-			$response[] = $this->prepare_response_for_collection( $data );
+		if ( is_array( $query_result ) ) {
+			$terms          = array_filter( $query_result, static fn( $term ) => $term instanceof \WP_Term );
+			$attachment_ids = array_filter( array_map( static fn( $term ) => (int) get_term_meta( $term->term_id, 'thumbnail_id', true ), $terms ) );
+			if ( ! empty( $attachment_ids ) ) {
+				// Prime caches to reduce future queries.
+				_prime_post_caches( $attachment_ids );
+			}
+
+			foreach ( $query_result as $term ) {
+				$data       = $this->prepare_item_for_response( $term, $request );
+				$response[] = $this->prepare_response_for_collection( $data );
+			}
 		}
 
 		$response = rest_ensure_response( $response );
@@ -783,7 +792,29 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		return $params;
+		$taxonomy_obj = get_taxonomy( $this->taxonomy );
+
+		// Empty for the attribute terms route, which serves every pa_* taxonomy from one registration.
+		if ( ! $taxonomy_obj ) {
+			return $params;
+		}
+
+		/**
+		 * Filter collection parameters for the terms controller.
+		 *
+		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
+		 * Shares its name with the WordPress core hook, so a callback added for a taxonomy served by
+		 * both /wp/v2 and /wc/v3 runs for both.
+		 *
+		 * This filter only registers parameters; use `woocommerce_rest_{$taxonomy}_query`
+		 * to map them to `WP_Term_Query` arguments.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param array       $params   JSON Schema-formatted collection parameters.
+		 * @param WP_Taxonomy $taxonomy Taxonomy object.
+		 */
+		return apply_filters( "rest_{$this->taxonomy}_collection_params", $params, $taxonomy_obj );
 	}
 
 	/**

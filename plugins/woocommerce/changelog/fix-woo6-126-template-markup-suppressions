@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the shipping method label's for attribute so it matches the input ID when a shipping package uses a non-numeric key.

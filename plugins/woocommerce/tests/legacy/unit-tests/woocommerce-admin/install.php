@@ -66,17 +66,17 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * Ensure that a DB version callback is defined when there are updates.
 	 */
 	public function test_db_update_callbacks_exist() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
 		$all_callbacks = \WC_Install::get_db_update_callbacks();
 
 		foreach ( $all_callbacks as $version => $version_callbacks ) {
 			// Verify all callbacks have been defined.
 			foreach ( $version_callbacks as $version_callback ) {
-				if ( strpos( $version_callback, 'wc_admin_update' ) === 0 ) {
-					$this->assertTrue(
-						function_exists( $version_callback ),
-						"Callback {$version_callback}() is not defined."
-					);
-				}
+				$this->assertTrue(
+					function_exists( $version_callback ),
+					"Callback {$version_callback}() is not defined."
+				);
 			}
 		}
 	}
@@ -235,6 +235,22 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
 		// Verify the option remains 'no' (not overwritten).
 		$this->assertEquals( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * Test product object caching is enabled by default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_product_instance_caching_for_new_installation() {
+		// Ensure the feature option doesn't exist before testing.
+		delete_option( 'woocommerce_feature_product_instance_caching_enabled' );
+
+		// Call the method to enable the feature for new installs.
+		WC_Install::enable_product_instance_caching_for_newly_installed();
+
+		// Verify the feature option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_feature_product_instance_caching_enabled' ) );
 	}
 
 	/**

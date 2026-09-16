@@ -324,21 +324,17 @@ class CheckoutSchema extends AbstractSchema {
 			)
 			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
 
-		$additional_field_schema = $this->get_additional_fields_schema();
-		foreach ( $fields as $key => $value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
-				unset( $fields[ $key ] );
-				continue;
-			}
+		$response = [];
+		foreach ( $this->get_additional_fields_schema() as $key => $field_schema ) {
 			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
-			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
-				$fields[ $key ] = (bool) $value;
+			if ( isset( $field_schema['type'] ) && 'boolean' === $field_schema['type'] ) {
+				$response[ $key ] = (bool) ( $fields[ $key ] ?? false );
 			} else {
-				$fields[ $key ] = $this->prepare_html_response( $value );
+				$response[ $key ] = $this->prepare_html_response( $fields[ $key ] ?? '' );
 			}
 		}
 
-		return (object) $fields;
+		return (object) $response;
 	}
 
 	/**
@@ -370,20 +366,10 @@ class CheckoutSchema extends AbstractSchema {
 				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
-			if ( 'select' === $field['type'] ) {
-				$field_schema['enum'] = array_map(
-					function ( $option ) {
-						return $option['value'];
-					},
-					$field['options']
-				);
-				if ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) {
-					$field_schema['enum'][] = '';
-				}
-			}
+			$field_schema = $this->additional_fields_controller->prepare_field_value_schema( $field_schema, $field );
 
-			if ( 'checkbox' === $field['type'] ) {
-				$field_schema['type'] = 'boolean';
+			if ( 'select' === $field['type'] && ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) ) {
+				$field_schema['enum'][] = '';
 			}
 
 			if ( 'checkbox' === $field['type'] && true === $field['required'] ) {
@@ -428,7 +414,7 @@ class CheckoutSchema extends AbstractSchema {
 						return $carry;
 					}
 					$field_schema   = $properties[ $key ];
-					$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+					$rest_sanitized = rest_sanitize_value_from_schema( $fields[ $key ], $field_schema, $key );
 					$rest_sanitized = $this->additional_fields_controller->sanitize_field( $key, $rest_sanitized );
 					$carry[ $key ]  = $rest_sanitized;
 					return $carry;

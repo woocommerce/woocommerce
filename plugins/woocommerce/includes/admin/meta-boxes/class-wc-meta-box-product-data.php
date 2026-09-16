@@ -9,10 +9,10 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSProductVisibilitySync;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -313,7 +313,7 @@ class WC_Meta_Box_Product_Data {
 						// Don't use wc_clean as it destroys sanitized characters.
 						$value = sanitize_title( $value );
 					} else {
-						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // WPCS: sanitization ok.
+						$value = html_entity_decode( wc_clean( $value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 					}
 
 					$attributes[ $attribute_key ] = $value;
@@ -428,9 +428,12 @@ class WC_Meta_Box_Product_Data {
 		// Remove _product_template_id for products that were created with the new product editor.
 		$product->delete_meta_data( '_product_template_id' );
 
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+		// Only sync POS visibility for product types where the "Available for POS" checkbox is rendered,
+		// so unsupported types (downloadable, grouped, external) don't silently acquire the pos-hidden term.
+		$pos_visibility_sync = wc_get_container()->get( POSProductVisibilitySync::class );
+		if ( $product instanceof WC_Product && $pos_visibility_sync->is_product_supported( $product ) ) {
 			$visible_in_pos = isset( $_POST['_visible_in_pos'] ) && 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
-			wc_get_container()->get( POSProductVisibilitySync::class )->set_product_pos_visibility( $post_id, $visible_in_pos );
+			$pos_visibility_sync->set_product_pos_visibility( $post_id, $visible_in_pos );
 		}
 
 		/**
@@ -440,7 +443,13 @@ class WC_Meta_Box_Product_Data {
 		 */
 		do_action( 'woocommerce_admin_process_product_object', $product );
 
+		$previous_product_type = WC_Product_Factory::get_product_type( $post_id );
+
 		$product->save();
+
+		if ( $product instanceof WC_Product && ProductType::EXTERNAL === $product_type && $previous_product_type !== $product_type ) {
+			self::persist_external_product_stock_data( $product );
+		}
 
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			$original_post_title = isset( $_POST['original_post_title'] ) ? wc_clean( wp_unslash( $_POST['original_post_title'] ) ) : '';
@@ -451,6 +460,33 @@ class WC_Meta_Box_Product_Data {
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
 		/* phpcs:enable WordPress.Security.NonceVerification.Missing and WooCommerce.Commenting.CommentHooks.MissingHookComment */
+	}
+
+	/**
+	 * Persist the stock data enforced by the external product class.
+	 *
+	 * External product setters normalize stock values while the existing product data is read. The submitted
+	 * values therefore match the in-memory values and are not detected as changes, leaving stale stock meta,
+	 * lookup, and visibility data behind unless they are synchronized explicitly.
+	 *
+	 * @param WC_Product $product External product object.
+	 */
+	private static function persist_external_product_stock_data( WC_Product $product ): void {
+		update_post_meta( $product->get_id(), '_manage_stock', 'no' );
+		update_post_meta( $product->get_id(), '_stock_status', ProductStockStatus::IN_STOCK );
+		update_post_meta( $product->get_id(), '_backorders', 'no' );
+		wp_remove_object_terms( $product->get_id(), ProductStockStatus::OUT_OF_STOCK, 'product_visibility' );
+
+		/**
+		 * Product data store.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $product->get_data_store();
+		if ( $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
+			$data_store->refresh_product_lookup_table( $product->get_id() );
+		}
 	}
 
 	/**

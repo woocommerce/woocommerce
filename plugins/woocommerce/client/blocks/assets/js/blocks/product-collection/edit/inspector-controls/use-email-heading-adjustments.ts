@@ -51,7 +51,7 @@ const useEmailHeadingAdjustments = ( clientId: string ) => {
 		headingBlocks.forEach( ( headingBlock: Block ) => {
 			if ( headingBlock && headingBlock.clientId ) {
 				try {
-					actions.removeBlock( headingBlock.clientId );
+					void actions.removeBlock( headingBlock.clientId );
 				} catch ( error ) {
 					// Silently handle cases where block might already be removed
 					// or in an inconsistent state during block editor operations

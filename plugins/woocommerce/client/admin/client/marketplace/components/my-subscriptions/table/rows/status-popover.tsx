@@ -13,8 +13,9 @@ import { StatusLevel } from '../../types';
 export default function StatusPopover( props: {
 	text: string;
 	level: StatusLevel;
-	explanation: string | JSX.Element;
+	explanation: string | React.JSX.Element;
 	explanationOnHover?: boolean;
+	icon?: React.JSX.Element;
 } ) {
 	const [ isHovered, setIsHovered ] = useState( false );
 	const [ isClicked, setIsClicked ] = useState( false );
@@ -76,6 +77,7 @@ export default function StatusPopover( props: {
 				`woocommerce-marketplace__my-subscriptions__product-status--${ props.level }`
 			) }
 		>
+			{ props.icon }
 			{ props.text }
 			{ shouldShowExplanation() && (
 				<Popover

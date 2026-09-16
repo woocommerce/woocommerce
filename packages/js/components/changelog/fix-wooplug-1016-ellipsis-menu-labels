@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep EllipsisMenu labels on one line and show focus styles only for keyboard navigation.

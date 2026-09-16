@@ -185,7 +185,7 @@ class CartCheckoutUtils {
 	 * Migrate checkout block field visibility attributes to settings when using the checkout block.
 	 *
 	 * This migration routine is called if the options (woocommerce_checkout_phone_field, woocommerce_checkout_company_field,
-	 * woocommerce_checkout_address_2_field) are not set. They are not set by default; they were orignally set by the
+	 * woocommerce_checkout_address_2_field) are not set. They are not set by default; they were originally set by the
 	 * customizer interface of the legacy shortcode based checkout.
 	 *
 	 * Once migration is initiated, the settings will be updated and will not trigger this routine again.

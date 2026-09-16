@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-attribute",
 	"title": "Attribute Filter",
-	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
+	"description": "Let shoppers filter products by attribute.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",

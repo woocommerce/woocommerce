@@ -55,34 +55,6 @@ class SingleProductTemplate extends AbstractTemplate {
 			$compatibility_layer = new SingleProductTemplateCompatibility();
 			$compatibility_layer->init();
 
-			$valid_slugs         = array( self::SLUG );
-			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
-			if ( $single_product_slug ) {
-				$valid_slugs[] = 'single-product-' . $post->post_name;
-			}
-			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
-
-			if ( count( $templates ) === 0 ) {
-				return;
-			}
-
-			// Use the first template by default.
-			$template = reset( $templates );
-
-			// Check if there is a template matching the slug `single-product-{post_name}`.
-			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
-				foreach ( $templates as $t ) {
-					if ( $single_product_slug === $t->slug ) {
-						$template = $t;
-						break;
-					}
-				}
-			}
-
-			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
 				$consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
@@ -154,13 +126,103 @@ class SingleProductTemplate extends AbstractTemplate {
 	/**
 	 * Replace the first single product template block with the password form. Remove all other single product template blocks.
 	 *
-	 * @param array   $parsed_blocks Array of parsed block objects.
-	 * @param boolean $is_already_replaced If the password form has already been added.
-	 * @return array Parsed blocks
+	 * @param array $parsed_blocks Array of parsed block objects.
+	 * @return array Parsed blocks.
 	 */
-	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks, $is_already_replaced ) {
-		// We want to replace the first single product template block with the password form. We also want to remove all other single product template blocks.
-		// This array doesn't contains all the blocks. For example, it missing the breadcrumbs blocks: it doesn't make sense replace the breadcrumbs with the password form.
+	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks ) {
+		$blocks              = array();
+		$is_already_replaced = false;
+
+		foreach ( $parsed_blocks as $block ) {
+			$processed           = self::process_block_for_password_form( $block, $is_already_replaced );
+			$is_already_replaced = $processed['is_already_replaced'];
+			$blocks              = array_merge( $blocks, $processed['blocks'] );
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * Replace or remove a parsed block when rendering a password-protected product.
+	 *
+	 * @param array $block               Parsed block.
+	 * @param bool  $is_already_replaced If the password form has already been added.
+	 * @return array{blocks: array, is_already_replaced: bool} Replacement blocks (empty when removed).
+	 */
+	private static function process_block_for_password_form( $block, $is_already_replaced ) {
+		if ( self::is_password_protected_replacement_block( $block ) ) {
+			if ( $is_already_replaced ) {
+				return array(
+					'blocks'              => array(),
+					'is_already_replaced' => true,
+				);
+			}
+
+			return array(
+				'blocks'              => array( parse_blocks( '<!-- wp:html -->' . get_the_password_form() . '<!-- /wp:html -->' )[0] ),
+				'is_already_replaced' => true,
+			);
+		}
+
+		if ( empty( $block['innerBlocks'] ) || ! isset( $block['innerContent'] ) || ! is_array( $block['innerContent'] ) ) {
+			return array(
+				'blocks'              => array( $block ),
+				'is_already_replaced' => $is_already_replaced,
+			);
+		}
+
+		$new_inner_blocks  = array();
+		$new_inner_content = array();
+		$inner_block_index = 0;
+
+		foreach ( $block['innerContent'] as $chunk ) {
+			if ( is_string( $chunk ) ) {
+				$new_inner_content[] = $chunk;
+				continue;
+			}
+
+			if ( ! isset( $block['innerBlocks'][ $inner_block_index ] ) ) {
+				continue;
+			}
+
+			$processed           = self::process_block_for_password_form( $block['innerBlocks'][ $inner_block_index ], $is_already_replaced );
+			$is_already_replaced = $processed['is_already_replaced'];
+			++$inner_block_index;
+
+			foreach ( $processed['blocks'] as $processed_block ) {
+				$new_inner_blocks[]  = $processed_block;
+				$new_inner_content[] = null;
+			}
+		}
+
+		if ( count( $new_inner_blocks ) === 0 ) {
+			return array(
+				'blocks'              => array(),
+				'is_already_replaced' => $is_already_replaced,
+			);
+		}
+
+		$block['innerBlocks']  = $new_inner_blocks;
+		$block['innerContent'] = $new_inner_content;
+
+		return array(
+			'blocks'              => array( $block ),
+			'is_already_replaced' => $is_already_replaced,
+		);
+	}
+
+	/**
+	 * Whether this block should be replaced with the password form (or removed after the first replacement).
+	 *
+	 * This list is not every block that can appear on a single product template. Blocks such as breadcrumbs
+	 * stay visible on password-protected products.
+	 *
+	 * @param array $block Parsed block.
+	 * @return bool
+	 */
+	private static function is_password_protected_replacement_block( $block ) {
+		$block_name = $block['blockName'] ?? '';
+
 		$single_product_template_blocks = array(
 			'woocommerce/product-image-gallery',
 			'woocommerce/product-details',
@@ -168,6 +230,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			'woocommerce/product-meta',
 			'woocommerce/product-rating',
 			'woocommerce/product-price',
+			'woocommerce/product-summary',
 			'woocommerce/related-products',
 			'woocommerce/add-to-cart-with-options',
 			'woocommerce/product-gallery',
@@ -176,97 +239,26 @@ class SingleProductTemplate extends AbstractTemplate {
 			'core/post-excerpt',
 		);
 
-		return array_reduce(
-			$parsed_blocks,
-			function ( $carry, $block ) use ( $single_product_template_blocks ) {
-				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) || ( 'core/pattern' === $block['blockName'] && isset( $block['attrs']['slug'] ) && 'woocommerce-blocks/related-products' === $block['attrs']['slug'] ) ) {
-					if ( $carry['is_already_replaced'] ) {
-						return array(
-							'blocks'              => $carry['blocks'],
-							'html_block'          => null,
-							'removed'             => true,
-							'is_already_replaced' => true,
+		if ( in_array( $block_name, $single_product_template_blocks, true ) ) {
+			return true;
+		}
 
-						);
-					}
+		if (
+			'core/pattern' !== $block_name ||
+			! isset( $block['attrs']['slug'] )
+		) {
+			return false;
+		}
 
-					return array(
-						'blocks'              => $carry['blocks'],
-						'html_block'          => parse_blocks( '<!-- wp:html -->' . get_the_password_form() . '<!-- /wp:html -->' )[0],
-						'removed'             => false,
-						'is_already_replaced' => $carry['is_already_replaced'],
-					);
+		$pattern = \WP_Block_Patterns_Registry::get_instance()->get_registered( $block['attrs']['slug'] );
 
-				}
+		if ( empty( $pattern['content'] ) ) {
+			return false;
+		}
 
-				if ( isset( $block['innerBlocks'] ) && count( $block['innerBlocks'] ) > 0 ) {
-					$index              = 0;
-					$new_inner_blocks   = array();
-					$new_inner_contents = $block['innerContent'];
-					foreach ( $block['innerContent'] as $inner_content ) {
-						// Don't process the closing tag of the block.
-						if ( count( $block['innerBlocks'] ) === $index ) {
-							break;
-						}
-
-						$blocks                       = self::replace_first_single_product_template_block_with_password_form( array( $block['innerBlocks'][ $index ] ), $carry['is_already_replaced'] );
-						$new_blocks                   = $blocks['blocks'];
-						$html_block                   = $blocks['html_block'];
-						$is_removed                   = $blocks['removed'];
-						$carry['is_already_replaced'] = $blocks['is_already_replaced'];
-
-						if ( isset( $html_block ) ) {
-							$new_inner_blocks             = array_merge( $new_inner_blocks, $new_blocks, array( $html_block ) );
-							$carry['is_already_replaced'] = true;
-						} else {
-							$new_inner_blocks = array_merge( $new_inner_blocks, $new_blocks );
-						}
-
-						if ( $is_removed ) {
-							unset( $new_inner_contents[ $index ] );
-							// The last element of the inner contents contains the closing tag of the block. We don't want to remove it.
-							if ( $index + 1 < count( $new_inner_contents ) ) {
-								unset( $new_inner_contents[ $index + 1 ] );
-							}
-							$new_inner_contents = array_values( $new_inner_contents );
-						}
-
-						$index++;
-					}
-
-					$block['innerBlocks']  = $new_inner_blocks;
-					$block['innerContent'] = $new_inner_contents;
-
-					if ( count( $new_inner_blocks ) === 0 ) {
-						return array(
-							'blocks'              => $carry['blocks'],
-							'html_block'          => null,
-							'removed'             => true,
-							'is_already_replaced' => $carry['is_already_replaced'],
-						);
-					}
-
-					return array(
-						'blocks'              => array_merge( $carry['blocks'], array( $block ) ),
-						'html_block'          => null,
-						'removed'             => false,
-						'is_already_replaced' => $carry['is_already_replaced'],
-					);
-				}
-
-				return array(
-					'blocks'              => array_merge( $carry['blocks'], array( $block ) ),
-					'html_block'          => null,
-					'removed'             => false,
-					'is_already_replaced' => $carry['is_already_replaced'],
-				);
-			},
-			array(
-				'blocks'              => array(),
-				'html_block'          => null,
-				'removed'             => false,
-				'is_already_replaced' => $is_already_replaced,
-			)
+		return BlockTemplateUtils::has_block_including_patterns(
+			$single_product_template_blocks,
+			parse_blocks( $pattern['content'] )
 		);
 	}
 
@@ -278,8 +270,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 */
 	public static function add_password_form( $content ) {
 		$parsed_blocks     = parse_blocks( $content );
-		$blocks            = self::replace_first_single_product_template_block_with_password_form( $parsed_blocks, false );
-		$serialized_blocks = serialize_blocks( $blocks['blocks'] );
+		$serialized_blocks = serialize_blocks( self::replace_first_single_product_template_block_with_password_form( $parsed_blocks ) );
 
 		return $serialized_blocks;
 	}

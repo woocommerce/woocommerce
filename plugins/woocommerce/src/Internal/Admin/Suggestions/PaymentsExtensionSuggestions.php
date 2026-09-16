@@ -44,7 +44,9 @@ class PaymentsExtensionSuggestions {
 	const AFTERPAY          = 'afterpay';
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
-	const KLARNA_CHECKOUT   = 'klarna_checkout';
+	const KUSTOM_CHECKOUT   = 'kustom_checkout';
+	const HELCIM            = 'helcim';
+	const KOMOJU            = 'komoju';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -62,6 +64,7 @@ class PaymentsExtensionSuggestions {
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
 	const NGENIUS           = 'ngenius';
+	const MASTERCARD        = 'mastercard';
 	const EVERGREEN         = 'evergreen';
 	const MYPOS             = 'mypos';
 
@@ -100,6 +103,15 @@ class PaymentsExtensionSuggestions {
 	 * @var array|null
 	 */
 	private ?array $extensions_base_details_memo = null;
+
+	/**
+	 * The memoized processed country extensions to avoid rebuilding the list multiple times during a request.
+	 *
+	 * Keyed by user, country code, and context. Cleared via clear_cache().
+	 *
+	 * @var array
+	 */
+	private array $country_extensions_memo = array();
 
 	/**
 	 * The payment extension list for each country.
@@ -232,7 +244,7 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::SQUARE          => array(
+			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -250,23 +262,11 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::AFFIRM          => array(
+			self::AFFIRM => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -281,7 +281,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::CLEARPAY,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -316,7 +316,11 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'AD' => array(
-			self::MONEI,
+			self::MONEI         => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYPAL_WALLET => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -339,7 +343,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -349,24 +353,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/at/verkaeufer/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/at/agb/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -520,7 +511,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -530,24 +521,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/dk/erhverv/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/dk/vilkar/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -587,7 +565,8 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::PAYTRAIL,
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -597,23 +576,9 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/fi/yritys/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/fi/ehdot/',
-						),
-					),
-				),
-			),
-			self::PAYTRAIL,
+			self::KUSTOM_CHECKOUT,
 			self::PAYPAL_WALLET,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -716,7 +681,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -726,24 +691,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/de/verkaeufer/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/de/agb/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1001,23 +953,10 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/nl/zakelijk/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1045,23 +984,10 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/no/bedrift/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/no/vilkar/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1260,20 +1186,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/international/enterprise/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/se/villkor/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -1330,12 +1243,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.ar/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1386,9 +1313,24 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.br/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
@@ -1409,22 +1351,50 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.cl/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.co/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1522,7 +1492,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'GY' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'HT' => array(
@@ -1557,15 +1529,30 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.mx/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA       => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1611,12 +1598,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.pe/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1694,12 +1695,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.uy/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1916,6 +1931,8 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::KOMOJU,
+			self::AIRWALLEX,
 			self::VISA,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -1950,6 +1967,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::PAYONEER,
 			self::VISA,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'MV' => array(
@@ -2139,6 +2157,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'TW' => array(
@@ -2314,11 +2333,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'EG' => array(
-			self::PAYMOB => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
@@ -2481,6 +2497,13 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::PAYPAL_WALLET,
 		),
+		'YT' => array(
+			self::VISA => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+		),
 		'MA' => array(
 			self::PAYONEER => array(
 				'_append' => array(
@@ -2515,11 +2538,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NG' => array(
-			self::PAYSTACK => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYSTACK,
 			self::VISA,
 		),
 		'RE' => array(
@@ -2585,11 +2605,8 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::PAYSTACK => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYSTACK,
 			self::PAYPAL_FULL_STACK,
 			self::PAYFAST,
 			self::VISA,
@@ -2668,12 +2685,9 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'BH' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'BT' => array(
@@ -2708,12 +2722,9 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 		),
 		'JO' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
@@ -2726,12 +2737,9 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 		),
 		'KW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'KG' => array(
@@ -2759,11 +2767,8 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'PK' => array(
-			self::PAYONEER => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
 		),
@@ -2775,20 +2780,14 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'QA' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 		),
 		'SA' => array(
-			self::PAYMOB => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
+			self::MASTERCARD,
+			self::PAYMOB,
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::NGENIUS,
@@ -2819,6 +2818,11 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
+			self::MASTERCARD => array(
+				'_remove' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
@@ -2871,6 +2875,8 @@ class PaymentsExtensionSuggestions {
 	/**
 	 * Get the list of payment extensions details for a specific country.
 	 *
+	 * The list is memoized per user, country, and context for the duration of the request. Use clear_cache() to force a rebuild.
+	 *
 	 * @param string $country_code The two-letter country code.
 	 * @param string $context      Optional. The context ID of where these extensions are being used.
 	 *
@@ -2881,10 +2887,17 @@ class PaymentsExtensionSuggestions {
 	public function get_country_extensions( string $country_code, string $context = '' ): array {
 		$country_code = strtoupper( $country_code );
 
+		// Key on the user since incentive visibility and dismissals are user-specific.
+		$memo_key = get_current_user_id() . '__' . $country_code . '__' . $context;
+		if ( isset( $this->country_extensions_memo[ $memo_key ] ) ) {
+			return $this->country_extensions_memo[ $memo_key ];
+		}
+
 		if ( empty( $this->country_extensions[ $country_code ] ) ||
 			! is_array( $this->country_extensions[ $country_code ] ) ) {
 
-			return array();
+			$this->country_extensions_memo[ $memo_key ] = array();
+			return $this->country_extensions_memo[ $memo_key ];
 		}
 
 		// Process the extensions.
@@ -2932,6 +2945,8 @@ class PaymentsExtensionSuggestions {
 
 			$processed_extensions[] = $this->standardize_extension_details( $extension_details );
 		}
+
+		$this->country_extensions_memo[ $memo_key ] = $processed_extensions;
 
 		return $processed_extensions;
 	}
@@ -3018,6 +3033,24 @@ class PaymentsExtensionSuggestions {
 	 */
 	public function dismiss_incentive( string $incentive_id, string $suggestion_id, string $context = 'all' ): bool {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+	}
+
+	/**
+	 * Clear the cached extension suggestions data.
+	 *
+	 * Call after changing store state that influences the suggestions list during a request.
+	 * Also useful for testing purposes.
+	 *
+	 * This only clears this class's memos, not the incentives provider's own caches.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->country_extensions_memo      = array();
+		$this->extensions_base_details_memo = null;
 	}
 
 	/**
@@ -3999,35 +4032,95 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT   => array(
+			self::KUSTOM_CHECKOUT   => array(
 				'_type'       => self::TYPE_PSP,
-				'title'       => esc_html__( 'Klarna Checkout', 'woocommerce' ),
+				'title'       => esc_html__( 'Kustom Checkout', 'woocommerce' ),
 				'description' => esc_html__( 'A full checkout experience embedded on your site that includes all popular payment methods (Pay Now, Pay Later, Financing, Installments).', 'woocommerce' ),
-				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna-checkout.svg', WC_PLUGIN_FILE ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/kustom-checkout.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'klarna-checkout-for-woocommerce',
 				),
 				'links'       => array(
 					array(
-						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
-					),
-					array(
 						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/klarna-checkout/',
+						'url'   => 'https://woocommerce.com/products/kustom-checkout/',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-						'url'   => 'https://www.klarna.com/us/legal/',
+						'url'   => 'https://www.kustom.co/legal',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/klarna-checkout/',
+						'url'   => 'https://woocommerce.com/document/kustom-checkout/',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=kustom-checkout',
+					),
+				),
+			),
+			self::HELCIM            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Helcim', 'woocommerce' ),
+				'description' => esc_html__( 'Accept credit cards and Google Pay directly on your store with zero monthly fees. Save up to 25% using Helcim’s transparent interchange-plus pricing.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/helcim.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'helcim-commerce-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://www.helcim.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://legal.helcim.com/terms-of-service/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+					),
+				),
+			),
+			self::KOMOJU            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'KOMOJU Payments', 'woocommerce' ),
+				'description' => esc_html__( 'Easily add popular Japanese payment methods like konbini, PayPay, and more with KOMOJU’s secure extension to optimize checkout.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/komoju.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'komoju-japanese-payments',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://en.komoju.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://toc.komoju.com/toc/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
 					),
 				),
 			),
@@ -4170,6 +4263,35 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
 				),
+			),
+			self::MASTERCARD        => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Mastercard Merchant Cloud', 'woocommerce' ),
+				'description' => esc_html__( 'A seamless checkout with 35+ payment methods for global needs. Enjoy built-in security and simple integration for a smooth experience.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/mastercard.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mastercard-merchant-cloud',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://developer.mastercard.com/terms-of-use',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mastercard-merchant-cloud',
+					),
+				),
+				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::MYPOS             => array(
 				'_type'  => self::TYPE_PSP,

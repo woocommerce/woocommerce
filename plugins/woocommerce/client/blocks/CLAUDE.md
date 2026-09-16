@@ -47,18 +47,19 @@ client/blocks/
 │   ├── atomic/              # Atomic/primitive blocks (product elements)
 │   ├── base/                # Shared components, context, hooks, stores
 │   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
-│   ├── data/                # WordPress @data stores (Collections, Query State, Schema)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
-│   ├── types/               # Shared TypeScript types
 │   └── utils/               # Utility functions
-├── packages/                # Packages exposed as window.wc.* globals (see below)
-│   ├── checkout/            # Checkout registry, slot/fill, filters
-│   ├── components/          # 23+ shared components
-│   └── prices/              # Price formatting and currency
+├── packages/
+│   ├── public-api/          # Supported package-root extension contracts
+│   │   ├── block-data/      # WordPress @data stores
+│   │   ├── blocks-checkout/ # Checkout registry, slot/fill, filters
+│   │   ├── blocks-components/
+│   │   └── ...              # Events, settings, types, and shared APIs
+│   └── internal/
+│       └── entities/        # Runtime-only external; not an extension API
 ├── tests/
-│   ├── js/                  # Jest unit tests
-│   └── e2e/                 # Playwright E2E tests
+│   └── js/                  # Jest unit tests
 ├── bin/                     # Build scripts (webpack configs, ESLint plugin)
 └── storybook/               # Storybook config
 ```
@@ -132,9 +133,11 @@ $this->asset_data_registry->add('reviewRatingsEnabled', wc_review_ratings_enable
 // Available in JS as window.wcSettings.reviewRatingsEnabled
 ```
 
-### Interactivity API Stores (LOCKED)
+### Interactivity API Stores
 
-All WooCommerce Interactivity API stores use `lock: true`. They are **private by design**:
+Most WooCommerce Interactivity API stores are private by design. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
+
+For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
@@ -157,7 +160,12 @@ Block scripts are only enqueued when the block is actually rendered on the page,
 
 ## Webpack Externals (`window.wc.*`)
 
-Packages in `packages/` and core modules are built as webpack externals, exposed on `window.wc`. The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
+API stability and asset externalization are separate concepts. Supported
+extension contracts live in `packages/public-api/`; runtime-only packages live
+in `packages/internal/`. Both kinds may be built as webpack externals and
+exposed on `window.wc`.
+
+The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
 
 | Import | Global | Script handle |
 | ------ | ------ | ------------- |
@@ -172,9 +180,19 @@ Packages in `packages/` and core modules are built as webpack externals, exposed
 | `@woocommerce/shared-hocs` | `wc.wcBlocksSharedHocs` | `wc-blocks-shared-hocs` |
 | `@woocommerce/types` | `wc.wcTypes` | `wc-types` |
 
-`@woocommerce/blocks-checkout-events` is a pub/sub event emitter for checkout lifecycle hooks (`onCheckoutValidation`, `onCheckoutSuccess`, `onCheckoutFail`). Third-party extensions use it to run validation or react to checkout outcomes. Source: `assets/js/events/`.
+`@woocommerce/blocks-checkout-events` is a pub/sub event emitter for checkout lifecycle hooks (`onCheckoutValidation`, `onCheckoutSuccess`, `onCheckoutFail`). Third-party extensions use it to run validation or react to checkout outcomes. Source: `packages/public-api/blocks-checkout-events/`.
 
-Third-party extensions consume these as externals — changing the public API of these packages is a breaking change.
+Third-party extensions consume these as externals. Stable package-root exports
+are public API, so changing them without a deprecation path is a breaking
+change. Deep imports and exports prefixed with `__experimental` or `__unstable`
+are not stable unless separately documented.
+
+`@woocommerce/entities` is externalized as `wc.wcEntities` to share one runtime
+instance, but it remains internal under `packages/internal/entities/`. Its
+externalized build does not make it public API.
+
+The Blocks `package.json` uses `"private": true` to prevent npm publication.
+That field does not determine whether a browser API is public.
 
 ## Build System
 
@@ -182,7 +200,9 @@ Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
 
 - Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
 
-Build is orchestrated by **wireit** for caching. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+
+`@woocommerce/entities` resolves to pure entity helpers that are bundled into consumers and can be tree-shaken. The `wc-entities` entry registers those entities as a side effect. It temporarily retains deprecated utility exports on `wc.wcEntities` for backward compatibility. Manual registration helpers also remain available as deprecated compatibility wrappers.
 
 ## Testing
 
@@ -195,9 +215,9 @@ Build is orchestrated by **wireit** for caching. TypeScript uses **60+ path alia
 
 ### Playwright E2E Tests
 
-- Config: `tests/e2e/playwright.config.ts`
+- Config: `../../tests/e2e/playwright.config.ts` (Blocks e2e now lives in the core e2e suite)
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
-- Setup script: `tests/e2e/bin/test-env-setup.sh`
+- Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
 - Uses MSW for API mocking, Allure for reporting
 
 ### PHP Tests

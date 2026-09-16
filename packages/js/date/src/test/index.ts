@@ -2,9 +2,19 @@
  * External dependencies
  */
 import moment from 'moment';
-import momentTz from 'moment-timezone';
-import { format as formatDate } from '@wordpress/date';
+import { __ } from '@wordpress/i18n';
+import {
+	format as formatDate,
+	getSettings as getDateSettings,
+	setSettings as setDateSettings,
+} from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
+
+jest.mock( '@wordpress/i18n', () => ( {
+	...jest.requireActual( '@wordpress/i18n' ),
+	__: jest.fn( ( text: string ) => text ),
+} ) );
+
 /**
  * Internal dependencies
  */
@@ -40,13 +50,6 @@ declare global {
 		};
 	}
 }
-
-jest.mock( 'moment', () => {
-	const m = jest.requireActual( 'moment' );
-	m.prototype.tz = jest.fn().mockImplementation( () => m() );
-
-	return m;
-} );
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
@@ -740,6 +743,58 @@ describe( 'getLastPeriod', () => {
 	} );
 } );
 
+describe( 'start of week setting', () => {
+	const originalSettings = getDateSettings();
+	const originalDow = moment.localeData().firstDayOfWeek();
+
+	afterEach( () => {
+		setDateSettings( originalSettings );
+		moment.updateLocale( moment.locale(), {
+			week: { dow: originalDow },
+		} );
+	} );
+
+	it( 'getCurrentPeriod should start the week on the day from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 1 },
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 1 );
+		expect( dateValue.primaryStart.isSameOrBefore( moment(), 'day' ) ).toBe(
+			true
+		);
+	} );
+
+	it( 'getLastPeriod should start and end the week on days from the WordPress setting', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: { ...originalSettings.l10n, startOfWeek: 3 },
+		} );
+
+		const dateValue = getLastPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( 3 );
+		expect( dateValue.primaryEnd.day() ).toBe( 2 );
+	} );
+
+	it( 'should leave the moment default when the setting is invalid', () => {
+		setDateSettings( {
+			...originalSettings,
+			l10n: {
+				...originalSettings.l10n,
+				startOfWeek: 7 as unknown as 0,
+			},
+		} );
+
+		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
+
+		expect( dateValue.primaryStart.day() ).toBe( originalDow );
+	} );
+} );
+
 describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates on the same day', () => {
 		const label = getRangeLabel(
@@ -771,6 +826,511 @@ describe( 'getRangeLabel', () => {
 			moment( '2018-05-15' )
 		);
 		expect( label ).toBe( 'Apr 1, 2017 - May 15, 2018' );
+	} );
+
+	it( 'should fall back to the shared month when the format holds no day token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'YYYY年M月' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( '2024年10月' );
+	} );
+
+	it( 'should keep the range when the format uses a localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'October 1 - 31, 2024' );
+	} );
+
+	it( 'should keep the range when the format uses an abbreviated localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'll' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should leave a bracketed localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[LL] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should leave a backslash escaped localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\LL MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\L\\L MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should keep the zero padding a "DD" format asks for', () => {
+		// Mirrors the Serbian translation of the format.
+		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( '01 - 15. Apr 2018.' );
+	} );
+
+	it( 'should keep the ordinal a "Do" format asks for', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM Do, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Apr 1st - 15th, 2018' );
+	} );
+
+	it( 'should leave a bracketed day literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[Day] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should leave a bracketed month literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[MMMM] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'MMMM Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should leave a backslash escaped day literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\D MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'D Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should not mistake day of year tokens for the day of month', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDD, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '091, 2018' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( 'DDDo, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
+		).toBe( '91st, 2018' );
+	} );
+
+	describe( 'with a locale whose month names contain digits', () => {
+		// Mirrors moment's Japanese locale, which renders October as "10月".
+		const monthNames = Array.from(
+			{ length: 12 },
+			( _, index ) => `${ index + 1 }月`
+		);
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+			moment.defineLocale( 'digit-months', {
+				months: monthNames,
+				monthsShort: monthNames,
+			} );
+			moment.locale( 'digit-months' );
+		} );
+
+		afterAll( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should not expand the day range inside the month name', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-31' )
+			);
+			expect( label ).toBe( '10月 1 - 31, 2024' );
+		} );
+
+		it( 'should not expand the day range inside a month name sharing the day digits', () => {
+			const label = getRangeLabel(
+				moment( '2024-12-12' ),
+				moment( '2024-12-31' )
+			);
+			expect( label ).toBe( '12月 12 - 31, 2024' );
+		} );
+
+		it( 'should leave single day, cross month and cross year labels alone', () => {
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-01' ) )
+			).toBe( '10月 1, 2024' );
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-12-31' ) )
+			).toBe( '10月 1 - 12月 31, 2024' );
+			expect(
+				getRangeLabel( moment( '2023-10-01' ), moment( '2024-12-31' ) )
+			).toBe( '10月 1, 2023 - 12月 31, 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that renders non-Latin digits', () => {
+		// Mirrors moment's Arabic locale, which maps digits when formatting.
+		const arabicDigits = [
+			'٠',
+			'١',
+			'٢',
+			'٣',
+			'٤',
+			'٥',
+			'٦',
+			'٧',
+			'٨',
+			'٩',
+		];
+		const monthNames = [
+			'يناير',
+			'فبراير',
+			'مارس',
+			'أبريل',
+			'مايو',
+			'يونيو',
+			'يوليو',
+			'أغسطس',
+			'سبتمبر',
+			'أكتوبر',
+			'نوفمبر',
+			'ديسمبر',
+		];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+			moment.defineLocale( 'non-latin-digits', {
+				months: monthNames,
+				monthsShort: monthNames,
+				postformat: ( value: string ) =>
+					value.replace(
+						/\d/g,
+						( digit ) => arabicDigits[ Number( digit ) ]
+					),
+			} );
+			moment.locale( 'non-latin-digits' );
+		} );
+
+		afterAll( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep both ends of the range', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-31' )
+			);
+			expect( label ).toBe( 'أكتوبر ١ - ٣١, ٢٠٢٤' );
+		} );
+
+		it( 'should leave a single day label alone', () => {
+			const label = getRangeLabel(
+				moment( '2024-10-01' ),
+				moment( '2024-10-01' )
+			);
+			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
+		} );
+	} );
+	it( 'should leave a whole backslash escaped token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\MMMM MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'MMMM Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DD MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DD Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDo MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDo Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should escape no more of a backslashed day run than moment does', () => {
+		// Moment reads "\DDDDD" as an escaped "DDDD" and a live day of month
+		// token, so the fifth "D" still carries the range.
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDDD MMM YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDD1 - 31 Oct 2024' );
+	} );
+
+	it( 'should render a weekday from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
+
+		// Oct 1 2024 is a Tuesday, Oct 31 a Thursday.
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Tue, Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should render a week number from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM D, YYYY [w]w' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Oct 1 - 31, 2024 w40' );
+	} );
+
+	describe( 'with a locale that inflects the month name', () => {
+		// Moment picks the genitive month name over the nominative one by
+		// testing the format string for a day token next to the month one, and
+		// locales disagree on how: some rely on moment's own regex, some ship a
+		// stricter one, and some replace the month names with a function that
+		// tests the format itself. Each is covered here because a format string
+		// that stops matching renders the wrong grammatical form.
+		const genitive = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-genitive`
+		);
+		const nominative = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-nominative`
+		);
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( "should keep the genitive month name of moment's own format test", () => {
+			moment.defineLocale( 'inflected-months', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that allows only whitespace before the month', () => {
+			// Mirrors the Catalan locale's stricter `isFormat`.
+			moment.defineLocale( 'inflected-months-strict', {
+				months: {
+					format: genitive,
+					standalone: nominative,
+					isFormat: /D[oD]?(\s)+MMMM/,
+				},
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that tests the format itself', () => {
+			// Mirrors the Polish locale, which resolves month names in code.
+			moment.defineLocale( 'inflected-months-fn', {
+				months: ( monthMoment, format ) =>
+					( /D MMMM/.test( format || '' ) ? genitive : nominative )[
+						monthMoment.month()
+					],
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive short month name of a "MMM" format', () => {
+			const shortGenitive = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-genitive`
+			);
+			const shortNominative = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-nominative`
+			);
+			moment.defineLocale( 'inflected-months-abbreviated', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: {
+					format: shortGenitive,
+					standalone: shortNominative,
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 short10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name behind a localized format token', () => {
+			// The WOOAIRR-105 shape itself: the translation resolves to a
+			// localized token, and only its expansion reveals the day sitting
+			// next to the month.
+			moment.defineLocale( 'inflected-months-localized', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'DD/MM/YYYY',
+					LL: 'D MMMM YYYY',
+					LLL: 'D MMMM YYYY HH:mm',
+					LLLL: 'dddd, D MMMM YYYY HH:mm',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the nominative month name when the format holds no day token', () => {
+			moment.defineLocale( 'inflected-months-standalone', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'month10-nominative 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that inflects the weekday name', () => {
+		// Mirrors the Ukrainian locale, which renders the genitive weekday
+		// whenever a bracketed literal precedes "dddd" - exactly the shape the
+		// month and day substitutions leave behind.
+		const weekdayGenitive = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-genitive`
+		);
+		const weekdayNominative = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-nominative`
+		);
+		const weekdays = ( dayMoment: moment.Moment, format?: string ) =>
+			( /\] ?dddd/.test( format || '' )
+				? weekdayGenitive
+				: weekdayNominative )[ dayMoment.day() ];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep the nominative weekday after the month name', () => {
+			moment.defineLocale( 'inflected-weekdays', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMM dddd D YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'Oct weekday2-nominative 1 - 31 2024' );
+		} );
+
+		it( 'should keep the nominative weekday after the day of month', () => {
+			moment.defineLocale( 'inflected-weekdays-after-day', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D dddd MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 weekday2-nominative Oct 2024' );
+		} );
+
+		it( 'should keep the genitive weekday of a format that asks for it', () => {
+			moment.defineLocale( 'inflected-weekdays-literal', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( '[у] dddd, MMM D, YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'у weekday2-genitive, Oct 1 - 31, 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that nests localized format tokens', () => {
+		// `loadLocaleData` below builds "LLL" from a translation that still
+		// holds "LT", so on a real site an expansion can itself hold a
+		// localized token and a single pass is not enough.
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should expand a localized format token that expands to another', () => {
+			moment.defineLocale( 'nested-long-formats', {
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'MM/DD/YYYY',
+					LL: 'LLL',
+					LLL: 'MMMM D, YYYY',
+					LLLL: 'dddd, MMMM D, YYYY',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'October 1 - 31, 2024' );
+		} );
 	} );
 } );
 
@@ -1032,49 +1592,41 @@ describe( 'getChartTypeForQuery', () => {
 } );
 
 describe( 'getStoreTimeZoneMoment', () => {
-	let mockTz: jest.SpyInstance;
-	let utcOffset: jest.SpyInstance;
+	const previousWcSettings = global.window.wcSettings;
 
 	afterEach( () => {
-		mockTz?.mockRestore();
-		utcOffset?.mockRestore();
+		jest.restoreAllMocks();
+		// These tests mutate the global store settings; restore them so a
+		// leaked time zone cannot make later tests order-dependent.
+		global.window.wcSettings = previousWcSettings;
 	} );
 
 	it( 'should return the default moment when no timezone exists', () => {
-		mockTz = jest.spyOn( momentTz, 'tz' );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should use the timezone string when one is set', () => {
+	it( 'should resolve the offset for a named timezone', () => {
 		global.window.wcSettings = {
 			timeZone: 'Asia/Taipei',
 		};
 
-		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
-		getStoreTimeZoneMoment();
-
-		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
-		expect( utcOffset ).not.toHaveBeenCalled();
+		// Taipei is a fixed UTC+8 (no DST) => +480 minutes.
+		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
 	} );
 
 	it( 'should use the utc offset when it is set', () => {
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
+
 		global.window.wcSettings = {
 			timeZone: '+06:00',
 		};
 
-		mockTz = jest.spyOn( momentTz, 'tz' );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
 		getStoreTimeZoneMoment();
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '+06:00' );
 
 		global.window.wcSettings = {
@@ -1083,7 +1635,6 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		getStoreTimeZoneMoment();
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
 	} );
 
@@ -1094,72 +1645,139 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
-		getStoreTimeZoneMoment();
-
-		expect( mockTz ).toHaveBeenCalledWith( 'America/New_York' );
-		expect( utcOffset ).not.toHaveBeenCalled();
+		// New York is UTC-5 (EST) or UTC-4 (EDT) depending on the date.
+		expect( [ -300, -240 ] ).toContain(
+			getStoreTimeZoneMoment().utcOffset()
+		);
 	} );
 
 	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
+		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
+
 		global.window.wcSettings = {
 			admin: {
 				timeZone: '+05:00',
 			},
 		};
 
-		mockTz = jest.spyOn( momentTz, 'tz' );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
 		getStoreTimeZoneMoment();
 
-		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
 	} );
 
 	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
 		global.window.wcSettings = {
-			timeZone: 'Europe/London',
+			timeZone: 'Asia/Taipei',
 			admin: {
 				timeZone: 'America/New_York',
 			},
 		};
 
-		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
-		getStoreTimeZoneMoment();
-
-		expect( mockTz ).toHaveBeenCalledWith( 'Europe/London' );
-		expect( utcOffset ).not.toHaveBeenCalled();
+		// Resolves Taipei (+480), not New York.
+		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
 	} );
 
-	it( 'should use momentTz.tz() static function, not moment().tz() instance method', () => {
-		// Regression test for plugin conflict where a third-party plugin
-		// clobbers window.moment, removing .tz() from new instances.
-		// The fix uses the bundled momentTz.tz() static function which
-		// operates on moment-timezone's closure reference, unaffected
-		// by the global being replaced.
+	it( 'should not rely on the clobberable window.moment.tz (regression for #64020)', () => {
+		// A third-party plugin can replace window.moment with a build that
+		// has no timezone data, removing the `.tz` method. Because the admin
+		// build externalises moment-timezone to window.moment, this used to
+		// crash getStoreTimeZoneMoment with `TypeError: tz is not a function`.
+		// The offset is now resolved via the browser Intl API, so the
+		// missing `.tz` no longer matters.
 		global.window.wcSettings = {
-			timeZone: 'Asia/Taipei',
+			timeZone: 'America/New_York',
 		};
 
-		// Remove .tz from prototype to simulate clobbered moment instances.
-		const originalTz = moment.prototype.tz;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- need to delete typed property to simulate clobbering
-		delete ( moment.prototype as any ).tz;
-
-		// Mock momentTz.tz since its internals also use the shared prototype in tests.
-		// In production, momentTz's closure holds the original moment with .tz intact.
-		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+		const momentWithTz = moment as unknown as { tz?: unknown };
+		const momentProtoWithTz = moment.prototype as unknown as {
+			tz?: unknown;
+		};
+		const originalStaticTz = momentWithTz.tz;
+		const originalProtoTz = momentProtoWithTz.tz;
+		delete momentWithTz.tz;
+		delete momentProtoWithTz.tz;
 
 		try {
-			expect( () => getStoreTimeZoneMoment() ).not.toThrow();
-			expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
+			let result: moment.Moment | undefined;
+
+			expect( () => {
+				result = getStoreTimeZoneMoment();
+			} ).not.toThrow();
+
+			expect( [ -300, -240 ] ).toContain( result?.utcOffset() );
 		} finally {
-			moment.prototype.tz = originalTz;
+			momentWithTz.tz = originalStaticTz;
+			momentProtoWithTz.tz = originalProtoTz;
+		}
+	} );
+
+	it( 'keeps named-zone range boundaries DST-correct across a transition (#64020)', () => {
+		// "Now" is summer (EDT, UTC-4); the previous-year range lands in
+		// winter (EST, UTC-5). A single "now" offset would leave the boundary
+		// an hour off, so each boundary is re-anchored against its own date.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
+
+			// Every boundary lands in winter (EST, -300) even though the
+			// current offset is EDT, and each is anchored against its own date
+			// (not "now"), with its wall-clock preserved.
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+			expect( primaryEnd.utcOffset() ).toBe( -300 );
+			expect( primaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-12-31T23:59:59'
+			);
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -300 );
+			expect( secondaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-12-31T23:59:59'
+			);
+		} finally {
+			jest.useRealTimers();
+		}
+	} );
+
+	it( 'anchors getCurrentPeriod boundaries to their own dates across a DST transition (#64020)', () => {
+		// "Now" is summer (EDT, -240); the year-to-date range opens in winter
+		// (EST, -300). Each boundary must resolve its own date's offset, so a
+		// single "now" offset is not reused across the range. This also covers
+		// getCurrentPeriod, whose boundary math differs from getLastPeriod.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getCurrentPeriod( 'year', 'previous_year' );
+
+			// January is EST (-300); "now" in July is EDT (-240).
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2026-01-01T00:00:00'
+			);
+			expect( primaryEnd.utcOffset() ).toBe( -240 );
+
+			// The previous-year comparison opens in winter and ends in summer,
+			// so its boundaries carry different offsets too.
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -240 );
+		} finally {
+			jest.useRealTimers();
 		}
 	} );
 } );

@@ -1,5 +1,6 @@
 ---
 post_title: How to extend WooCommerce analytics reports
+description: A guide to extending WC-Admin Reports with a basic UI dropdown, added query parameters, and modification of SQL queries and resulting report data.
 sidebar_label: Extend analytics reports
 sidebar_position: 1
 ---

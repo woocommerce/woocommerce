@@ -2,7 +2,9 @@
 // sibling selector can fill stars 1..N without `:has()`.
 
 .woocommerce-review-order {
+
 	&.is-success {
+
 		.woocommerce-review-order__title,
 		.woocommerce-review-order__intro,
 		.woocommerce-review-order__legend,
@@ -37,6 +39,14 @@
 		a {
 			text-decoration: underline;
 		}
+	}
+
+	&__item-variation {
+		display: block;
+		margin-top: 0.25em;
+		font-size: 0.875em;
+		font-weight: 400;
+		opacity: 0.75;
 	}
 
 	&__item-row {
@@ -80,7 +90,7 @@
 	}
 
 	&__item-rating-error {
-		margin: 0.5em 0 0;
+		margin: 0.5em 0 1em;
 		color: var(--wc-red, #a00);
 	}
 
@@ -88,7 +98,7 @@
 		margin: 0.5em 0 0;
 
 		&--ok {
-			color: var(--wc-green, #008a20);
+			color: var(--wc-green, #007518);
 		}
 
 		&--error {
@@ -134,6 +144,7 @@
 	}
 
 	@media (max-width: 600px) {
+
 		&__item-row {
 			flex-direction: column;
 		}
@@ -186,7 +197,7 @@
 		display: inline-flex;
 		padding: 0;
 		margin: 0;
-		color: currentColor;
+		color: currentcolor;
 	}
 
 	&__input + &__star {
@@ -199,7 +210,7 @@
 		display: block;
 		width: 24px;
 		height: 24px;
-		fill: currentColor;
+		fill: currentcolor;
 		opacity: 0.3;
 		transition: opacity 100ms ease-in-out;
 	}
@@ -219,7 +230,7 @@
 	}
 
 	&__input:focus-visible + .woocommerce-star-rating__star {
-		outline: 2px solid currentColor;
+		outline: 2px solid currentcolor;
 		outline-offset: 2px;
 	}
 

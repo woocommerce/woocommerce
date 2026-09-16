@@ -10,12 +10,35 @@
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
 		"woocommerce/product-filter-taxonomy",
-		"woocommerce/product-filter-status"
+		"woocommerce/product-filter-status",
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"woocommerce": {
+			"innerBlockDisplayStyle": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalTextTransform": true
+		},
+		"__experimentalBorder": {
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalSkipSerialization": true
+		}
 	},
-	"usesContext": [ "woocommerceSelectableItems" ],
+	"selectors": {
+		"border": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item",
+		"spacing": {
+			"padding": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item"
+		}
+	},
+	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
 	"attributes": {
 		"chipText": {
 			"type": "string"

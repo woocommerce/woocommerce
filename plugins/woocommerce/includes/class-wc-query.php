@@ -7,7 +7,10 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -313,7 +316,7 @@ class WC_Query {
 	 */
 	private function is_query_var_valid_on_front_page( $query_var ) {
 		return in_array( $query_var, array( 'preview', 'page', 'paged', 'cpage', 'orderby' ), true )
-			|| in_array( $query_var, array( 'min_price', 'max_price', 'rating_filter' ), true )
+			|| in_array( $query_var, wc_get_container()->get( Params::class )->get_param_keys(), true )
 			|| 0 === strpos( $query_var, 'filter_' )
 			|| 0 === strpos( $query_var, 'query_type_' );
 	}
@@ -373,8 +376,11 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
+		$shop_page    = null;
+		$shop_page_id = wc_get_page_id( 'shop' );
+
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === $shop_page_id ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -390,7 +396,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
 			global $wp_post_types;
 
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( $shop_page_id );
 
 			$wp_post_types['product']->ID         = $shop_page->ID;
 			$wp_post_types['product']->post_title = $shop_page->post_title;
@@ -412,6 +418,9 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
+		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && $shop_page_id > 0 ) {
+			// This is a regular shop page (product archive).
+			$shop_page = get_post( $shop_page_id );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			if ( $q->is_search() ) {
@@ -434,6 +443,12 @@ class WC_Query {
 				}
 			}
 			return;
+		}
+
+		// Set queried object for any shop page scenario.
+		if ( $shop_page ) {
+			$q->queried_object    = $shop_page;
+			$q->queried_object_id = $shop_page->ID;
 		}
 
 		$this->product_query( $q );
@@ -566,6 +581,17 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
+		/**
+		 * Filters the number of products shown per page in a product loop.
+		 *
+		 * In WC_Query::product_query() this applies only when the query does not already
+		 * set posts_per_page. Other callers, such as the Product Collection block, apply it
+		 * unconditionally.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $per_page Products per page. Defaults to the store's columns times its rows setting.
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.
@@ -787,7 +813,7 @@ class WC_Query {
 		 * Adjust if the store taxes are not displayed how they are stored.
 		 * Kicks in when prices excluding tax are displayed including tax.
 		 */
-		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		if ( wc_tax_enabled() && TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
@@ -863,12 +889,7 @@ class WC_Query {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**

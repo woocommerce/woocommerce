@@ -3,12 +3,16 @@
 		float: none;
 	}
 
-	label.orderby-label {
+	label {
 		margin-right: 0.25rem;
+		margin-bottom: 0;
+		vertical-align: middle;
 	}
 
 	select.orderby {
+		field-sizing: content;
 		font-size: inherit;
+		vertical-align: middle;
 	}
 
 	&.has-text-color {

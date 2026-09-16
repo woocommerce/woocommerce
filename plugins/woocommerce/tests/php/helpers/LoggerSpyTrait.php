@@ -41,6 +41,16 @@ trait LoggerSpyTrait {
 		$this->captured_logs = array();
 		$this->spy_logger    = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
 
+		$capture = function ( $level ) {
+			return function ( $message, $context = array() ) use ( $level ) {
+				$this->captured_logs[] = array(
+					'level'   => $level,
+					'message' => $message,
+					'context' => $context,
+				);
+			};
+		};
+
 		$this->spy_logger->method( 'log' )->willReturnCallback(
 			function ( $level, $message, $context = array() ) {
 				$this->captured_logs[] = array(
@@ -50,6 +60,10 @@ trait LoggerSpyTrait {
 				);
 			}
 		);
+
+		foreach ( array( 'emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug' ) as $level ) {
+			$this->spy_logger->method( $level )->willReturnCallback( $capture( $level ) );
+		}
 
 		add_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
 	}

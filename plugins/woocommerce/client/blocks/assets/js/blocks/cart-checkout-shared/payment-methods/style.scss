@@ -37,13 +37,6 @@
 			justify-content: flex-start;
 			border-width: 0;
 		}
-		.wc-block-components-radio-control__label img {
-			height: 24px;
-			max-height: 24px;
-			max-width: 100%;
-			object-fit: contain;
-			object-position: left;
-		}
 	}
 
 	.wc-block-components-checkout-step__description-payments-aligned {
@@ -52,6 +45,23 @@
 		padding-top: $gap-small;
 		padding-bottom: $gap-smaller;
 	}
+}
+
+// Default size and alignment for payment method label images (e.g. gateway
+// logos). The whole selector is wrapped in :where() so it stays at (0,0,1) — a
+// low-specificity default that payment methods can override for their own
+// imagery (e.g. logos rendered in a popover) with a single class and without
+// !important, regardless of stylesheet load order.
+:where(
+	.wc-block-checkout__payment-method
+	.wc-block-components-radio-control-accordion-option
+	.wc-block-components-radio-control__label
+) img {
+	height: 24px;
+	max-height: 24px;
+	max-width: 100%;
+	object-fit: contain;
+	object-position: left;
 }
 .wc-block-components-radio-control-accordion-content {
 	@include font-small-locked;

@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 10.9.0
  *
  * @var WC_Order_Item_Product $item            Order line item being rendered.
  * @var WC_Product            $product         Product attached to the line item.
@@ -25,11 +25,16 @@ if ( ! $item instanceof WC_Order_Item_Product || ! $product instanceof WC_Produc
 $existing_rating = isset( $existing_rating ) ? (int) $existing_rating : 0;
 $existing_text   = isset( $existing_text ) ? (string) $existing_text : '';
 
-$item_id         = $item->get_id();
-$product_id      = $product->get_id();
-$product_link    = $product->is_visible() ? get_permalink( $product_id ) : '';
-$product_name    = $item->get_name();
-$image_html      = $product->get_image( 'woocommerce_thumbnail' );
+$item_id      = $item->get_id();
+$product_id   = $product->get_id();
+$product_link = $product->is_visible() ? get_permalink( $product_id ) : '';
+$product_name = $item->get_name();
+$image_html   = $product->get_image( 'woocommerce_thumbnail' );
+
+// Variation attribute summary (e.g. "Size: Small, Colour: Red"). Empty for simple products.
+// Shared with SubmissionHandler so the snapshot stored on the comment matches the label rendered here.
+$variation_summary = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::format_variation_summary( $item );
+
 $rating_label_id = 'woocommerce-review-rating-label-' . $item_id;
 $review_label_id = 'woocommerce-review-text-label-' . $item_id;
 $review_input_id = 'woocommerce-review-text-' . $item_id;
@@ -57,6 +62,9 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 			</a>
 		<?php else : ?>
 			<?php echo esc_html( $product_name ); ?>
+		<?php endif; ?>
+		<?php if ( '' !== $variation_summary ) : ?>
+			<span class="woocommerce-review-order__item-variation"><?php echo esc_html( $variation_summary ); ?></span>
 		<?php endif; ?>
 	</p>
 

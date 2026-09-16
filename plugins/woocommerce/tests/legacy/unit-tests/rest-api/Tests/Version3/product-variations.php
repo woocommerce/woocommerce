@@ -400,7 +400,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 41, count( $properties ) );
+		$this->assertEquals( 42, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -434,6 +434,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'shipping_class', $properties );
 		$this->assertArrayHasKey( 'shipping_class_id', $properties );
 		$this->assertArrayHasKey( 'image', $properties );
+		$this->assertArrayHasKey( 'gallery_image_ids', $properties );
 		$this->assertArrayHasKey( 'attributes', $properties );
 		$this->assertArrayHasKey( 'menu_order', $properties );
 		$this->assertArrayHasKey( 'meta_data', $properties );

@@ -24,14 +24,8 @@ export const filtersPreview = [
 	},
 	{
 		id: 'status_instock',
-		type: __( 'Status', 'woocommerce' ),
+		type: __( 'Availability', 'woocommerce' ),
 		value: 'instock',
 		label: __( 'In stock', 'woocommerce' ),
-	},
-	{
-		id: 'status_onsale',
-		type: __( 'Status', 'woocommerce' ),
-		value: 'onsale',
-		label: __( 'On sale', 'woocommerce' ),
 	},
 ];
