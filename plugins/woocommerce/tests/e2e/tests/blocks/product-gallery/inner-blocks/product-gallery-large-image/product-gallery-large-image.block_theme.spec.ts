@@ -73,6 +73,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
+
 		test( 'should work on frontend when is enabled', async ( {
 			pageObject,
 			editor,
@@ -126,6 +127,7 @@ test.describe( `${ blockData.name }`, () => {
 				expect( styleOnHover.transform ).toBe( '' );
 			} );
 		} );
+
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
 			editor,
@@ -228,6 +230,10 @@ test.describe( `${ blockData.name }`, () => {
 		const parentGalleryImageIds = parentImageIds.slice( 1 );
 		expect( parentGalleryImageIds.length ).toBeGreaterThan( 0 );
 
+		// Parent order is kept; a variation-only image is appended.
+		const getExpectedImageIds = ( variationImageId: string | null ) =>
+			Array.from( new Set( [ ...parentImageIds, variationImageId ] ) );
+
 		const addToCartForm = await pageObject.getClassicAddToCartFormBlock( {
 			page: 'frontend',
 		} );
@@ -247,8 +253,8 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 
 		const firstVariationImageId = await pageObject.getViewerImageId();
-		const firstVariationImageIds = Array.from(
-			new Set( [ firstVariationImageId, ...parentGalleryImageIds ] )
+		const firstVariationImageIds = getExpectedImageIds(
+			firstVariationImageId
 		);
 		// Product Gallery blocks update reactively and may not be ready
 		// instantly hence expect().toPass with custom timeout since it's 0 by default.
@@ -275,9 +281,8 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 
 		const nextVariationImageId = await pageObject.getViewerImageId();
-		const nextVariationImageIds = Array.from(
-			new Set( [ nextVariationImageId, ...parentGalleryImageIds ] )
-		);
+		const nextVariationImageIds =
+			getExpectedImageIds( nextVariationImageId );
 		// Product Gallery blocks update reactively and may not be ready
 		// instantly hence expect().toPass with custom timeout since it's 0 by default.
 		await expect( async () => {

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Product Gallery: keep the selected thumbnail in view when switching variations.
+Product Gallery: keep the gallery order when a variation's image is already in it, and scroll the thumbnails to the selected image instead of jumping.

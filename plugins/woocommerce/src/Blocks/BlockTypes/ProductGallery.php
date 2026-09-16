@@ -259,6 +259,13 @@ class ProductGallery extends AbstractBlock {
 			ProductMediaGallery::get_product_media_gallery_items_for_display( $product )
 		);
 
+		$variation_gallery = ProductGalleryUtils::get_product_variation_gallery( $product );
+
+		if ( ! empty( $variation_gallery['variations'] ) ) {
+			// Show the full lineup from the start so a variation switch never re-orders.
+			$default_media_ids = $variation_gallery['image_ids'];
+		}
+
 		$number_of_media        = count( $default_media_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$initial_media_id       = $number_of_media > 0 ? $default_media_ids[0] : -1;
@@ -300,7 +307,7 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$formatted_variations_data = ProductGalleryUtils::get_product_variation_gallery_data( $product );
+				$formatted_variations_data = $variation_gallery['variations'];
 
 				if ( ! empty( $formatted_variations_data ) ) {
 					wp_interactivity_config(

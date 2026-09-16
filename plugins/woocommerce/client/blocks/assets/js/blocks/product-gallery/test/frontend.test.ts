@@ -54,10 +54,8 @@ type Fixture = {
 };
 
 /**
- * Build a gallery with a thumbnail strip whose layout mirrors what the
- * browser would paint for the wrappers' *current* `hidden` / `order`
- * state: visible wrappers are laid out one slot pitch apart in `order`
- * (falling back to DOM order), hidden ones report an empty rect.
+ * Gallery fixture whose rects follow the wrappers' current `hidden` and
+ * `order` state, one slot pitch apart; hidden wrappers report an empty rect.
  */
 const createGallery = (
 	imageIds: number[],
@@ -137,7 +135,7 @@ const createGallery = (
 	return { gallery, scroller, scrollTo, context, wrappers };
 };
 
-/** Paint the strip the way the `syncThumbnailState` watches would. */
+/** Apply hidden/order the way the thumbnail watches would. */
 const applyLayout = ( { context, wrappers }: Fixture ) => {
 	wrappers.forEach( ( wrapper, imageId ) => {
 		const index = context.imageData.indexOf( imageId );
@@ -165,18 +163,15 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		} );
 	} );
 
-	it( 'centers the slot the selected thumbnail will occupy, not the slot it is leaving', () => {
-		// Parent gallery: 15 images, the strip fits ~4 slots. The Blue
-		// variation's image (39) sits at slot 7 in the parent set.
+	it( 'scrolls to the slot the selected thumbnail will occupy, not the slot it is leaving', () => {
+		// 39 sits at slot 7 in the parent set.
 		const parentIds = [
 			38, 4, 35, 36, 37, 42, 43, 39, 44, 45, 40, 46, 47, 41, 48,
 		];
 		const fixture = createGallery( parentIds );
 		applyLayout( fixture );
 
-		// Selecting the Blue variation moves 39 to slot 0; the watches that
-		// re-slot the DOM haven't run yet, so the wrappers still describe
-		// the parent layout above.
+		// The set puts 39 first; the DOM still shows the parent layout.
 		const blueIds = [
 			39, 4, 35, 36, 37, 42, 43, 44, 45, 40, 46, 47, 41, 48,
 		];
@@ -186,18 +181,53 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		expect( fixture.context.selectedImageId ).toBe( 39 );
 		expect( fixture.scrollTo ).toHaveBeenCalledTimes( 1 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
-			top: 0 * SLOT_PITCH - CENTERING_OFFSET,
-			behavior: 'instant',
+			top: 0 * SLOT_PITCH,
+			behavior: 'smooth',
 		} );
-		// The stale rect would have centered slot 7 instead.
+		// The stale rect would have targeted slot 7 instead.
 		expect( fixture.scrollTo.mock.calls[ 0 ][ 0 ].top ).not.toBe(
-			7 * SLOT_PITCH - CENTERING_OFFSET
+			7 * SLOT_PITCH
 		);
 	} );
 
-	it( 'centers a thumbnail that was hidden before the image set changed', () => {
-		// Variation-only image 39 is rendered but hidden in the parent set,
-		// so its own rect is empty.
+	it( 'shows a thumbnail that joins the set before scrolling to it', () => {
+		const parentIds = [ 38, 4, 35, 36, 37, 42, 43 ];
+		const fixture = createGallery( [ ...parentIds, 39 ] );
+		fixture.context.imageData = [ ...parentIds ];
+		applyLayout( fixture );
+		const joiningWrapper = fixture.wrappers.get( 39 ) as HTMLElement;
+		expect( joiningWrapper.hidden ).toBe( true );
+
+		getActions().setImageData( [ ...parentIds, 39 ], 39 );
+
+		expect( joiningWrapper.hidden ).toBe( false );
+		expect( joiningWrapper.style.order ).toBe( '7' );
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 7 * SLOT_PITCH,
+			behavior: 'smooth',
+		} );
+	} );
+
+	it( 'aligns the selected thumbnail to the start when the set keeps its order', () => {
+		// 46 is in the parent gallery, so only the selection moves.
+		const parentIds = [
+			38, 4, 35, 36, 37, 42, 43, 39, 44, 45, 40, 46, 47, 41, 48,
+		];
+		const fixture = createGallery( parentIds );
+		applyLayout( fixture );
+
+		getActions().setImageData( parentIds, 46 );
+
+		expect( fixture.context.imageData ).toEqual( parentIds );
+		expect( fixture.context.selectedImageId ).toBe( 46 );
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 11 * SLOT_PITCH,
+			behavior: 'smooth',
+		} );
+	} );
+
+	it( 'scrolls to a thumbnail that was hidden before the image set changed', () => {
+		// 39 is rendered but hidden, so its own rect is empty.
 		const fixture = createGallery( [ 38, 4, 35, 36, 37, 42, 39 ] );
 		fixture.context.imageData = [ 38, 4, 35, 36, 37, 42 ];
 		applyLayout( fixture );
@@ -205,8 +235,8 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		getActions().setImageData( [ 38, 4, 35, 36, 37, 42, 39 ], 39 );
 
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
-			top: 6 * SLOT_PITCH - CENTERING_OFFSET,
-			behavior: 'instant',
+			top: 6 * SLOT_PITCH,
+			behavior: 'smooth',
 		} );
 	} );
 
@@ -252,8 +282,8 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		getActions().setImageData( [ 39, 4, 35, 36, 37, 42, 43 ], 39 );
 
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
-			left: 0 * SLOT_PITCH - CENTERING_OFFSET,
-			behavior: 'instant',
+			left: 0 * SLOT_PITCH,
+			behavior: 'smooth',
 		} );
 	} );
 
@@ -275,8 +305,8 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		] );
 		expect( fixture.context.selectedImageId ).toBe( 38 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
-			top: 0 * SLOT_PITCH - CENTERING_OFFSET,
-			behavior: 'instant',
+			top: 0 * SLOT_PITCH,
+			behavior: 'smooth',
 		} );
 	} );
 } );

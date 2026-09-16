@@ -140,11 +140,8 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
-			// Give the Hoodie enough gallery images for the thumbnails strip to
-			// overflow, with the Green variation's image at the very end so a
-			// variation switch moves it from the last slot to the first.
-			// `wpCLI` output starts with the `npm run` banner; the command's
-			// own output is the last line.
+			// Enough gallery images to overflow the strip, Green's image last.
+			// `wpCLI` output ends with the command's own output.
 			const lastLine = ( output: { stdout: string } ) =>
 				output.stdout.trim().split( '\n' ).pop()?.trim() ?? '';
 			const hoodieProductId = lastLine(
@@ -206,6 +203,12 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( thumbnailsBlock ).toHaveClass(
 				/wc-block-product-gallery-thumbnails--overflow-bottom/
 			);
+			const parentThumbnailIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			expect( parentThumbnailIds ).toContain( greenImageId );
+			expect(
+				parentThumbnailIds.indexOf( greenImageId )
+			).toBeGreaterThan( 10 );
 
 			const addToCartBlock = page.locator(
 				'.wp-block-add-to-cart-with-options'
@@ -228,9 +231,11 @@ test.describe( `${ blockData.name }`, () => {
 				);
 			} ).toPass( { timeout: 3_000 } );
 
-			// The selected thumbnail now sits in the first slot; the strip must
-			// be scrolled so that slot is visible, not to where the thumbnail
-			// was before the gallery re-ordered it.
+			// The order is kept; the strip only scrolls to the selected slot.
+			expect( await pageObject.getVisibleThumbnailImageIds() ).toEqual(
+				parentThumbnailIds
+			);
+
 			await expect( async () => {
 				const containerBox = await scrollableContainer.boundingBox();
 				const thumbnailBox = await activeThumbnail.boundingBox();

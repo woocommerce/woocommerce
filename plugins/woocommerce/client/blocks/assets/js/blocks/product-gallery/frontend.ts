@@ -169,7 +169,8 @@ const scrollImageEverywhereIntoView = (
 	behavior: ScrollBehavior = 'smooth'
 ) => {
 	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId, behavior );
+	// Start-aligned so the images after the selected one stay in view.
+	scrollThumbnailIntoView( imageId, 'smooth', 'start' );
 };
 
 /**
@@ -205,7 +206,34 @@ const updateVisibleImageSet = (
 		return;
 	}
 
+	// The watches apply visibility on the next frame; scrolling needs the
+	// final layout now or it clamps to the old scrollable size.
+	syncImageVisibilityNow();
 	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
+};
+
+/** Apply what the image watches will apply, without waiting for them. */
+const syncImageVisibilityNow = () => {
+	const element = getElement()?.ref as HTMLElement | undefined;
+	const galleryContainer = element?.closest( SELECTORS.galleryContainer );
+
+	if ( ! galleryContainer ) {
+		return;
+	}
+
+	galleryContainer
+		.querySelectorAll< HTMLElement >(
+			`${ SELECTORS.largeImageWrapper } [data-image-id]`
+		)
+		.forEach( toggleImageVisibility );
+	galleryContainer
+		.querySelectorAll< HTMLElement >(
+			`${ SELECTORS.thumbnail } [data-image-id]`
+		)
+		.forEach( ( thumbnail ) => {
+			toggleImageVisibility( thumbnail );
+			toggleActiveThumbnailAttributes( thumbnail );
+		} );
 };
 
 /**
@@ -296,11 +324,8 @@ const scrollImageIntoView = (
 };
 
 /**
- * Visible thumbnail wrappers in their current visual order.
- *
- * `toggleImageVisibility` re-slots thumbnails through `style.order`, so the
- * visual order is the numeric `order` once the watches have run and the DOM
- * order before that (server-rendered markup has no inline `order`).
+ * Visible thumbnail wrappers in visual order: `style.order` once set, DOM
+ * order before that.
  */
 const getVisibleThumbnailSlots = ( scrollContainer: HTMLElement ) =>
 	Array.from(
@@ -318,24 +343,21 @@ const getVisibleThumbnailSlots = ( scrollContainer: HTMLElement ) =>
 		.map( ( { wrapper } ) => wrapper );
 
 /**
- * Scrolls the thumbnail strip so the slot the image occupies in `imageData`
- * is centered.
+ * Scrolls the thumbnail strip to the slot the image occupies in `imageData`.
  *
- * The scroll target is derived from the slot index, not from the thumbnail's
- * own bounding rect. Changing `imageData` (e.g. a variation switch) re-slots
- * thumbnails via `style.order`, but the iAPI applies `data-wp-watch` updates
- * on the next frame, so at this point the rect still describes the slot the
- * thumbnail is leaving (or is empty when it was hidden). Slot positions only
- * depend on the index because every wrapper shares the same flex-basis and
- * gap, so measuring two adjacent visible slots gives the pitch for all of
- * them.
+ * Uses slot index times slot pitch rather than the thumbnail's own rect: the
+ * rect still describes the old slot until the watches re-slot the strip on
+ * the next frame. All wrappers share one size and gap, so two adjacent
+ * visible slots give the pitch.
  *
  * @param {number}         imageId  - The ID of the thumbnail to scroll into view.
- * @param {ScrollBehavior} behavior - Scroll behavior; `instant` when swapping image sets.
+ * @param {ScrollBehavior} behavior - Scroll behavior.
+ * @param {string}         align    - `center` or `start`.
  */
 const scrollThumbnailIntoView = (
 	imageId: number,
-	behavior: ScrollBehavior = 'smooth'
+	behavior: ScrollBehavior = 'smooth',
+	align: 'center' | 'start' = 'center'
 ) => {
 	if ( ! imageId ) {
 		return;
@@ -384,19 +406,22 @@ const scrollThumbnailIntoView = (
 
 	const containerRect = scrollContainer.getBoundingClientRect();
 	const firstSlotRect = slots[ 0 ].getBoundingClientRect();
-	// Signed so row-reverse / RTL strips resolve to the correct direction.
+	// Signed, so RTL and row-reverse strips scroll the right way.
 	const slotPitch =
 		slots.length > 1
 			? start( slots[ 1 ].getBoundingClientRect() ) -
 			  start( firstSlotRect )
 			: size( firstSlotRect );
 
-	// Calculate the scroll position to center the target slot
+	const alignmentOffset =
+		align === 'center'
+			? ( size( containerRect ) - size( firstSlotRect ) ) / 2
+			: 0;
 	const scrollOffset =
 		start( firstSlotRect ) +
 		slotIndex * slotPitch -
 		start( containerRect ) -
-		( size( containerRect ) - size( firstSlotRect ) ) / 2;
+		alignmentOffset;
 
 	// Use scrollTo to avoid scrolling the entire page which
 	// happens with scrollIntoView.
@@ -987,7 +1012,9 @@ const productGallery = {
 		// See https://github.com/woocommerce/woocommerce/issues/59810.
 		hideGhostOverflow: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return;
+			if ( ! element ) {
+				return;
+			}
 
 			const { clientWidth, scrollWidth } = element;
 
