@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add Jest coverage for package-validated postcodes and per-form postcode validation.
