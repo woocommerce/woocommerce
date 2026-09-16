@@ -344,13 +344,18 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	 * wp_logout teardown, the customer ID rotation and the session cookie all behave as they do in
 	 * production.
 	 *
+	 * Built directly rather than through WC()->initialize_session(), which keeps whatever handler is
+	 * already in place. Earlier tests in the suite leave a real handler behind, and the WP test case
+	 * restores $wp_filter after each test, so that leftover instance has no hooks by the time this runs.
+	 *
 	 * @return \WC_Session_Handler The live session handler.
 	 */
 	private function use_real_session_handler(): \WC_Session_Handler {
-		remove_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
-		WC()->initialize_session();
+		$session = new \WC_Session_Handler();
+		$session->init();
+		WC()->session = $session;
 
-		return WC()->session;
+		return $session;
 	}
 
 	/**
