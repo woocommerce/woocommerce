@@ -86,10 +86,15 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		'globalStylesColors',
 		{}
 	);
+	const globalBlockGap = getSetting<
+		string | { top?: string; left?: string } | undefined
+	>( 'productFilterChipsBlockGap', undefined );
 	const colorVars = getColorVars( attributes );
 	const borderProps = useBorderProps( attributes );
 	const spacingProps = useSpacingProps( attributes );
-	const itemsGap = getGapCSSValue( attributes.style?.spacing?.blockGap );
+	const itemsGap = getGapCSSValue(
+		attributes.style?.spacing?.blockGap ?? globalBlockGap
+	);
 	const itemsGapStyle = itemsGap ? { gap: itemsGap } : undefined;
 
 	const blockProps = useBlockProps( {

@@ -33,6 +33,12 @@ final class ProductFilterChips extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+			$this->asset_data_registry->add(
+				'productFilterChipsBlockGap',
+				wp_get_global_styles(
+					array( 'blocks', $this->get_full_block_name(), 'spacing', 'blockGap' )
+				)
+			);
 		}
 	}
 
@@ -82,20 +88,7 @@ final class ProductFilterChips extends AbstractBlock {
 			)
 		);
 
-		$block_gap = $attributes['style']['spacing']['blockGap'] ?? null;
-
-		$chips_classes_and_styles = is_string( $block_gap ) && '' !== $block_gap ? wp_parse_args(
-			array(
-				'css' => \WP_Style_Engine::compile_css( array( 'gap' => StyleAttributesUtils::get_spacing_value( $block_gap ) ), '' ),
-			),
-			array(
-				'css'        => '',
-				'classnames' => '',
-			)
-		) : array(
-			'css'        => '',
-			'classnames' => '',
-		);
+		$chips_classes_and_styles = $this->get_chips_gap_styles( $attributes );
 		$wrapper_attributes       = array(
 			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
 			'data-wp-init--colors' => 'callbacks.initColors',
@@ -264,6 +257,64 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get gap classnames and CSS for the chips items container.
+	 *
+	 * Instance styles take priority over block global styles from the site editor and theme.json.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array{css: string, classnames: string}
+	 */
+	private function get_chips_gap_styles( array $attributes ): array {
+		$css = self::get_gap_css( $attributes['style']['spacing']['blockGap'] ?? null );
+
+		if ( '' === $css ) {
+			$css = self::get_gap_css(
+				wp_get_global_styles(
+					array( 'blocks', $this->get_full_block_name(), 'spacing', 'blockGap' )
+				)
+			);
+		}
+
+		return array(
+			'css'        => $css,
+			'classnames' => '',
+		);
+	}
+
+	/**
+	 * Compile CSS gap declarations from a blockGap style value.
+	 *
+	 * @param mixed $block_gap Block gap string or axial array.
+	 * @return string
+	 */
+	private static function get_gap_css( $block_gap ): string {
+		if ( is_string( $block_gap ) && '' !== $block_gap ) {
+			return \WP_Style_Engine::compile_css(
+				array( 'gap' => StyleAttributesUtils::get_spacing_value( $block_gap ) ),
+				''
+			);
+		}
+
+		if ( ! is_array( $block_gap ) ) {
+			return '';
+		}
+
+		$declarations = array();
+		$row          = $block_gap['top'] ?? null;
+		$column       = $block_gap['left'] ?? null;
+
+		if ( is_string( $row ) && '' !== $row ) {
+			$declarations['row-gap'] = StyleAttributesUtils::get_spacing_value( $row );
+		}
+
+		if ( is_string( $column ) && '' !== $column ) {
+			$declarations['column-gap'] = StyleAttributesUtils::get_spacing_value( $column );
+		}
+
+		return $declarations ? \WP_Style_Engine::compile_css( $declarations, '' ) : '';
 	}
 
 	/**
