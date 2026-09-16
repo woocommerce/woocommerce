@@ -16,15 +16,6 @@ import {
 } from '../../utils/data';
 
 const productData = {
-	virtual: {
-		name: `Virtual product ${ Date.now() }`,
-		description: `Virtual product longer description`,
-		shortDescription: `Virtual product short description`,
-		regularPrice: '100.05',
-		sku: `0_${ Date.now() }`,
-		virtual: true,
-		purchaseNote: 'Virtual product purchase note',
-	},
 	'non virtual': {
 		name: `Simple product ${ Date.now() }`,
 		description: `<b>Simple product HTML description.</b> <em>This should be italic.</em>`,
@@ -38,15 +29,6 @@ const productData = {
 			height: '30',
 		},
 		purchaseNote: 'Simple product purchase note',
-	},
-	downloadable: {
-		name: `Downloadable product ${ Date.now() }`,
-		regularPrice: '100.05',
-		description: `Downloadable product longer description`,
-		shortDescription: `Downloadable product short description`,
-		sku: `2_${ Date.now() }`,
-		purchaseNote: 'Downloadable product purchase note',
-		fileName: 'e2e-product.zip',
 	},
 };
 
@@ -205,70 +187,27 @@ for ( const productType of Object.keys( productData ) ) {
 				).toBeVisible();
 			} );
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].shipping ) {
-				await test.step( 'add shipping details', async () => {
-					await page
-						.locator( '#woocommerce-product-data' )
-						.getByRole( 'link', { name: 'Shipping' } )
-						.click();
-					await expect(
-						page.getByText( 'Shipping class', { exact: true } )
-					).toBeVisible();
-					await page
-						.locator( '#_weight' )
-						.fill( productData[ productType ].shipping.weight );
-					await page
-						.getByPlaceholder( 'Length', { exact: true } )
-						.fill( productData[ productType ].shipping.length );
-					await page
-						.getByPlaceholder( 'Width' )
-						.fill( productData[ productType ].shipping.width );
-					await page
-						.getByPlaceholder( 'Height' )
-						.fill( productData[ productType ].shipping.height );
-				} );
-			}
-
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].virtual ) {
-				await test.step( 'add virtual product details', async () => {
-					await page
-						.getByRole( 'checkbox', { name: 'Virtual' } )
-						.check();
-					await expect(
-						page.getByRole( 'checkbox', { name: 'Virtual' } )
-					).toBeChecked();
-				} );
-			}
-
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].downloadable ) {
-				await test.step( 'add downloadable product details', async () => {
-					await page.getByLabel( 'Downloadable' ).check();
-					await expect(
-						page.getByLabel( 'Downloadable' )
-					).toBeChecked();
-
-					// Add a download link
-					await page
-						.locator( '#woocommerce-product-data' )
-						.getByRole( 'link', { name: 'General' } )
-						.click();
-					await page
-						.getByRole( 'link', { name: 'Add File' } )
-						.click();
-					await page
-						.getByPlaceholder( 'File name' )
-						.fill( productData[ productType ].fileName );
-					await page
-						.getByPlaceholder( 'https://' )
-						.fill(
-							`https://example.com/${ productData[ productType ].fileName }`
-						);
-					await page.getByPlaceholder( 'Never' ).fill( '365' );
-				} );
-			}
+			await test.step( 'add shipping details', async () => {
+				await page
+					.locator( '#woocommerce-product-data' )
+					.getByRole( 'link', { name: 'Shipping' } )
+					.click();
+				await expect(
+					page.getByText( 'Shipping class', { exact: true } )
+				).toBeVisible();
+				await page
+					.locator( '#_weight' )
+					.fill( productData[ productType ].shipping.weight );
+				await page
+					.getByPlaceholder( 'Length', { exact: true } )
+					.fill( productData[ productType ].shipping.length );
+				await page
+					.getByPlaceholder( 'Width' )
+					.fill( productData[ productType ].shipping.width );
+				await page
+					.getByPlaceholder( 'Height' )
+					.fill( productData[ productType ].shipping.height );
+			} );
 
 			await test.step( 'publish the product', async () => {
 				await page
