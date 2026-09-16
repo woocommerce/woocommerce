@@ -205,6 +205,55 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Missing checkboxes stay hidden while saved answers are shown.
+	 * @testWith [null, "", null]
+	 *           [false, false, "No"]
+	 *           [true, true, "Yes"]
+	 *
+	 * @param bool|null   $saved_value Checkbox answer, or null for a missing value.
+	 * @param bool|string $expected_value Expected raw value.
+	 * @param string|null $expected_display Expected display value, or null for a hidden field.
+	 */
+	public function test_order_checkbox_values( ?bool $saved_value, $expected_value, ?string $expected_display ): void {
+		$order = new \WC_Order();
+		$key   = 'plugin-namespace/leave-on-porch';
+
+		if ( null !== $saved_value ) {
+			$this->controller->persist_field_for_order( $key, $saved_value, $order, 'other', false );
+		}
+
+		$this->assertSame( $expected_value, $this->controller->get_field_from_object( $key, $order ), 'Missing values must remain distinct from saved unchecked answers.' );
+
+		$fields = $this->controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' );
+		if ( null === $expected_display ) {
+			$this->assertArrayNotHasKey( $key, $fields, 'A missing checkbox must not appear on the order.' );
+		} else {
+			$this->assertArrayHasKey( $key, $fields, 'A saved checkbox must appear on the order.' );
+			$this->assertSame( $expected_display, $fields[ $key ]['value'] );
+		}
+	}
+
+	/**
+	 * @testdox Checkbox defaults still apply when no value is saved.
+	 * @testWith ["0", false]
+	 *           ["1", true]
+	 *
+	 * @param string $default_value Filtered default value.
+	 * @param bool   $expected_value Expected checkbox value.
+	 */
+	public function test_missing_checkbox_uses_filtered_default( string $default_value, bool $expected_value ): void {
+		$key = 'plugin-namespace/leave-on-porch';
+		add_filter(
+			"woocommerce_get_default_value_for_{$key}",
+			static function () use ( $default_value ) {
+				return $default_value;
+			}
+		);
+
+		$this->assertSame( $expected_value, $this->controller->get_field_from_object( $key, new \WC_Order() ), 'The default-value filter must still supply checkbox values.' );
+	}
+
+	/**
 	 * @testdox Date fields can be registered, with their constraints stored as registered.
 	 */
 	public function test_date_fields_can_be_registered() {
