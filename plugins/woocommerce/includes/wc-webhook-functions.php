@@ -34,23 +34,26 @@ function wc_webhook_execute_queue() {
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
 			if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
-				/**
-				 * Filters the Action Scheduler priority of a webhook delivery.
-				 *
-				 * Lower values run first. Action Scheduler accepts 0-255 and the default is 10.
-				 * The priority is only applied when the active queue implements
-				 * WC_Priority_Queue_Interface, which the default queue does.
-				 *
-				 * @since 11.3.0
-				 *
-				 * @param int        $priority The delivery priority. Default 10.
-				 * @param WC_Webhook $webhook  The webhook being delivered.
-				 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
-				 */
-				$priority = (int) apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
-
 				$queue = WC()->queue();
+
 				if ( $queue instanceof WC_Priority_Queue_Interface ) {
+					/**
+					 * Filters the Action Scheduler priority of a webhook delivery.
+					 *
+					 * Lower values run first. Action Scheduler accepts 0-255, clamping anything
+					 * outside that range, and the default is 10. A non-numeric value falls back to
+					 * the default. Only fires when the active queue implements
+					 * WC_Priority_Queue_Interface, which the default queue does.
+					 *
+					 * @since 11.3.0
+					 *
+					 * @param int        $priority The delivery priority. Default 10.
+					 * @param WC_Webhook $webhook  The webhook being delivered.
+					 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
+					 */
+					$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
+					$priority = is_numeric( $priority ) ? (int) $priority : 10;
+
 					$queue->add_with_priority( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', $priority );
 				} else {
 					$queue->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );

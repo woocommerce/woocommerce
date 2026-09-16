@@ -325,20 +325,21 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, defaulting to 10.
-	 * @testWith [null, 10]
+	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, defaulting to 10 when unfiltered or non-numeric.
+	 * @testWith ["unhooked", 10]
 	 *           [3, 3]
 	 *           ["7", 7]
+	 *           [null, 10]
+	 *           ["high", 10]
 	 *
-	 * @param int|string|null $filtered_priority Value returned by the filter, or null to leave the filter unhooked.
-	 * @param int             $expected_priority Priority Action Scheduler is expected to store.
+	 * @param mixed $filtered_priority Value returned by the filter, or "unhooked" to leave the filter unhooked.
+	 * @param int   $expected_priority Priority Action Scheduler is expected to store.
 	 */
 	public function test_wc_webhook_execute_queue_schedules_at_filtered_priority( $filtered_priority, $expected_priority ) {
-		global $wc_queued_webhooks;
 		$webhook = $this->create_webhook( 'action.wc_test_webhook_priority' );
 		$arg     = 123;
 
-		if ( null !== $filtered_priority ) {
+		if ( 'unhooked' !== $filtered_priority ) {
 			add_filter(
 				'woocommerce_webhook_delivery_priority',
 				function ( $priority, $filtered_webhook, $filtered_arg ) use ( $webhook, $arg, $filtered_priority ) {
@@ -349,6 +350,48 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			);
 		}
 
+		$action_id = $this->execute_webhook_queue_for( $webhook, $arg );
+
+		$this->assertSame( $expected_priority, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * @testdox Should not run woocommerce_webhook_delivery_priority when the queue cannot apply a priority.
+	 */
+	public function test_wc_webhook_execute_queue_skips_priority_filter_on_plain_queue() {
+		$webhook     = $this->create_webhook( 'action.wc_test_webhook_priority_plain' );
+		$filter_runs = 0;
+		add_filter(
+			'woocommerce_webhook_delivery_priority',
+			function () use ( &$filter_runs ) {
+				++$filter_runs;
+				return 1;
+			}
+		);
+
+		$queue_instance = new ReflectionProperty( WC_Queue::class, 'instance' );
+		$queue_instance->setAccessible( true );
+		$original_queue = $queue_instance->getValue();
+		$queue_instance->setValue( null, new WC_Action_Queue() );
+		try {
+			$action_id = $this->execute_webhook_queue_for( $webhook, 123 );
+		} finally {
+			$queue_instance->setValue( null, $original_queue );
+		}
+
+		$this->assertSame( 0, $filter_runs, 'The priority filter should not run when the queue cannot apply a priority' );
+		$this->assertSame( 10, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook and return the scheduled action ID.
+	 *
+	 * @param WC_Webhook $webhook The webhook to queue.
+	 * @param mixed      $arg     The delivery argument.
+	 * @return int
+	 */
+	private function execute_webhook_queue_for( $webhook, $arg ) {
+		global $wc_queued_webhooks;
 		$wc_queued_webhooks = array(
 			array(
 				'webhook' => $webhook,
@@ -370,9 +413,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			),
 			'ids'
 		);
-
 		$this->assertCount( 1, $action_ids, 'Exactly one delivery should be scheduled for the webhook' );
-		$this->assertSame( $expected_priority, ActionScheduler::store()->fetch_action( (string) reset( $action_ids ) )->get_priority() );
+
+		return (int) reset( $action_ids );
 	}
 
 	/**
