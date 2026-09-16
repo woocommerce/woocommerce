@@ -12,6 +12,9 @@ import StockPanel from './stock';
 import ReviewsPanel from './reviews';
 
 export function getAllPanels( {
+	canManageReviews,
+	countsEnabled = true,
+	canUpdateStock,
 	lowStockProductsCount,
 	unapprovedReviewsCount,
 	unreadOrdersCount,
@@ -47,14 +50,20 @@ export function getAllPanels( {
 					}
 				>
 					<OrdersPanel
-						unreadOrdersCount={ unreadOrdersCount }
+						// Without the counts endpoint a null count would keep
+						// the panel in its loading state forever; zero lets
+						// the orders list resolve on its own.
+						unreadOrdersCount={
+							countsEnabled ? unreadOrdersCount : 0
+						}
 						orderStatuses={ orderStatuses }
 					/>
 				</ErrorBoundary>
 			),
 			title: __( 'Orders', 'woocommerce' ),
 		},
-		totalOrderCount > 0 &&
+		canUpdateStock &&
+			totalOrderCount > 0 &&
 			publishedProductCount > 0 &&
 			manageStock === 'yes' && {
 				className: 'woocommerce-homescreen-card',
@@ -82,7 +91,8 @@ export function getAllPanels( {
 				),
 				title: __( 'Stock', 'woocommerce' ),
 			},
-		publishedProductCount > 0 &&
+		canManageReviews &&
+			publishedProductCount > 0 &&
 			unapprovedReviewsCount > 0 &&
 			reviewsEnabled === 'yes' && {
 				className: 'woocommerce-homescreen-card',

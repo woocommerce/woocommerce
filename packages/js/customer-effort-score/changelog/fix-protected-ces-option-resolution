@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Defer the protected Customer Effort Score install timestamp request until an authorized user opens a survey.

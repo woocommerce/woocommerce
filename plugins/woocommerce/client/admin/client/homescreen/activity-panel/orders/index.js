@@ -19,7 +19,7 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { ordersStore, itemsStore } from '@woocommerce/data';
+import { ordersStore, itemsStore, useUser } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext, CurrencyFactory } from '@woocommerce/currency';
 
@@ -215,6 +215,11 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 }
 
 function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
+	const { currentUserCan } = useUser();
+	// The customer name lookup runs through a reports endpoint; order
+	// managers without that permission still get the list, just without
+	// customer links — the same output its 403 produced before.
+	const canFetchCustomers = currentUserCan( 'view_woocommerce_reports' );
 	const actionableOrdersQuery = useMemo(
 		() => ( {
 			page: 1,
@@ -277,7 +282,6 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			return { isRequesting: false };
 		}
 
-		/* eslint-disable @wordpress/no-unused-vars-before-return */
 		const actionableOrders = getOrders( actionableOrdersQuery, null );
 
 		const isRequestingActionable = hasFinishedResolution( 'getOrders', [
@@ -298,12 +302,14 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 
 		const { getItems } = select( itemsStore );
 
-		const customers = getItems( 'customers', {
-			users: actionableOrders
-				.map( ( order ) => order.customer_id )
-				.filter( ( id ) => id !== 0 ),
-			_fields: [ 'id', 'name', 'country', 'user_id' ],
-		} );
+		const customers = canFetchCustomers
+			? getItems( 'customers', {
+					users: actionableOrders
+						.map( ( order ) => order.customer_id )
+						.filter( ( id ) => id !== 0 ),
+					_fields: [ 'id', 'name', 'country', 'user_id' ],
+			  } )
+			: undefined;
 
 		return {
 			orders: actionableOrders,
