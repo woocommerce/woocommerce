@@ -63,7 +63,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$notification_management_service->init( $this->email_manager );
 
 		$this->sut = new SignupService();
-		$this->sut->init( $eligibility_service, $notification_management_service, $this->email_manager, new SignupRateLimiter() );
+		$this->sut->init( $eligibility_service, $notification_management_service, $this->email_manager );
 	}
 
 	/**
@@ -78,6 +78,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'woocommerce_customer_stock_notifications_require_double_opt_in' );
+		delete_option( 'woocommerce_customer_stock_notifications_create_account_on_signup' );
 
 		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
 		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
@@ -411,26 +412,35 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should let the signup through when the rate limit window cannot be claimed.
 	 */
-	public function test_signup_proceeds_when_the_rate_limit_cannot_be_claimed() {
-		$rate_limiter = $this->createMock( SignupRateLimiter::class );
-		$rate_limiter->method( 'is_rate_limited' )->willReturn( false );
-		$rate_limiter->method( 'apply' )->willReturn( false );
-
-		$eligibility_service = new EligibilityService();
-		$eligibility_service->init( new StockManagementHelper() );
-
-		$notification_management_service = new NotificationManagementService();
-		$notification_management_service->init( $this->email_manager );
-
-		$sut = new SignupService();
-		$sut->init( $eligibility_service, $notification_management_service, $this->email_manager, $rate_limiter );
+	public function test_signup_proceeds_when_the_rate_limit_cannot_be_claimed(): void {
+		global $wpdb;
 
 		$product = $this->create_out_of_stock_product();
-		$result  = $sut->signup( $product->get_id(), 0, 'guest@example.com' );
+
+		// Break the rate limit write the same way SignupRateLimiterTests does, so apply() fails
+		// for a reason the shopper cannot fix and signup() has to decide whether to fail open.
+		$suppress = $wpdb->suppress_errors( true );
+		$filter   = static function ( $query ) {
+			if ( false !== strpos( $query, 'stock_notifications_signup_email_' ) ) {
+				return 'SELECT 1 FROM a_table_that_does_not_exist';
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $filter );
+
+		try {
+			$result = $this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+		} finally {
+			remove_filter( 'query', $filter );
+			$wpdb->suppress_errors( $suppress );
+		}
 
 		$this->assertNotWPError( $result, 'A signup should not fail because the rate limit window could not be claimed' );
 		$this->assertEquals( SignupService::SIGNUP_SUCCESS, $result->get_code(), 'The signup should report success' );
-		$this->assertInstanceOf( Notification::class, $sut->is_already_signed_up( $product->get_id(), 0, 'guest@example.com' ), 'The notification should have been created' );
+		$this->assertInstanceOf( Notification::class, $this->sut->is_already_signed_up( $product->get_id(), 0, 'guest@example.com' ), 'The notification should have been created' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'guest@example.com' ), 'No partial rate limit window should be left behind' );
 	}
 
 	/**
@@ -486,7 +496,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			array(
 				'wc_bis_product_id' => $product->get_id(),
 				'wc_bis_email'      => ' Guest@Example.COM ',
-				'wc_bis_opt_in'     => 'on',
 			)
 		);
 
@@ -495,41 +504,51 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse() should resolve a guest email to an existing account stored in mixed case and keep the canonical email.
+	 * @testdox parse() should leave a guest sign-up unlinked even when an account with that email exists.
 	 */
-	public function test_parse_resolves_mixed_case_account_email(): void {
-		global $wpdb;
-
+	public function test_parse_does_not_link_guest_to_existing_account(): void {
 		$product = $this->create_out_of_stock_product();
-		$user_id = $this->factory()->user->create( array( 'user_email' => 'Mixed.Case@Example.com' ) );
-
-		// The test database collation is case-insensitive, so capture the value the lookup actually
-		// sends instead of relying on the row being found.
-		$user_queries = array();
-		add_filter(
-			'query',
-			function ( $query ) use ( &$user_queries, $wpdb ) {
-				if ( false !== strpos( $query, "FROM {$wpdb->users} WHERE user_email" ) ) {
-					$user_queries[] = $query;
-				}
-				return $query;
-			}
-		);
-		wp_cache_flush();
+		$this->factory()->user->create( array( 'user_email' => 'existing@example.com' ) );
 
 		$data = $this->sut->parse(
 			array(
 				'wc_bis_product_id' => $product->get_id(),
-				'wc_bis_email'      => 'Mixed.Case@Example.com',
-				'wc_bis_opt_in'     => 'on',
+				'wc_bis_email'      => 'existing@example.com',
 			)
 		);
 
 		$this->assertIsArray( $data );
-		$this->assertSame( $user_id, $data['user_id'] );
-		$this->assertSame( 'mixed.case@example.com', $data['user_email'] );
-		$this->assertCount( 1, $user_queries, 'The account lookup should query the users table' );
-		$this->assertStringContainsString( "'Mixed.Case@Example.com'", $user_queries[0], 'The account lookup should keep the letter case as entered' );
+		$this->assertSame( 0, $data['user_id'] );
+		$this->assertSame( 'existing@example.com', $data['user_email'] );
+	}
+
+	/**
+	 * @testdox A guest signup should never create an account, even with the legacy option enabled.
+	 */
+	public function test_guest_signup_does_not_create_account(): void {
+		update_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+
+		$result = $this->sut->signup( $product->get_id(), 0, 'newguest@example.com' );
+
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$this->assertSame( 0, $result->get_notification()->get_user_id() );
+		$this->assertFalse( get_user_by( 'email', 'newguest@example.com' ) );
+	}
+
+	/**
+	 * @testdox Deprecated account-creation codes should still map to a message.
+	 */
+	public function test_deprecated_account_created_codes_still_resolve(): void {
+		$product      = $this->create_out_of_stock_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+
+		$this->assertStringContainsString( 'a new account has been created', $this->sut->get_signup_user_message( 'success_account_created', $notification ) );
+		$this->assertStringContainsString( 'An account has been created', $this->sut->get_signup_user_message( 'success_account_created_double_opt_in', $notification ) );
+		$this->assertStringContainsString( 'consent to the creation of a new account', $this->sut->get_error_message( 'invalid_opt_in' ) );
 	}
 
 	/**
@@ -548,7 +567,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			array(
 				'wc_bis_product_id' => $product->get_id(),
 				'wc_bis_email'      => $posted_email,
-				'wc_bis_opt_in'     => 'on',
 			)
 		);
 
