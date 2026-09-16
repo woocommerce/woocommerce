@@ -396,11 +396,6 @@ class ProductGalleryUtils {
 	 * @return array<int, array<string, mixed>> Variation gallery data.
 	 */
 	public static function get_product_variation_gallery_data( $product ) {
-		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.8.0' );
-			return array();
-		}
-
 		return self::get_product_variation_gallery( $product )['variations'];
 	}
 
