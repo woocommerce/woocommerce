@@ -72,13 +72,6 @@ class SignupService {
 	private EmailManager $email_manager;
 
 	/**
-	 * Signup rate limiter.
-	 *
-	 * @var SignupRateLimiter
-	 */
-	private SignupRateLimiter $rate_limiter;
-
-	/**
 	 * The logger.
 	 *
 	 * @var \WC_Logger_Interface
@@ -93,18 +86,15 @@ class SignupService {
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 * @param EmailManager                  $email_manager The email manager.
-	 * @param SignupRateLimiter             $rate_limiter The signup rate limiter.
 	 */
 	final public function init(
 		EligibilityService $eligibility_service,
 		NotificationManagementService $notification_management_service,
-		EmailManager $email_manager,
-		SignupRateLimiter $rate_limiter
+		EmailManager $email_manager
 	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
-		$this->rate_limiter                    = $rate_limiter;
 		$this->logger                          = \wc_get_logger();
 	}
 
@@ -184,7 +174,7 @@ class SignupService {
 			}
 		}
 
-		if ( $this->rate_limiter->is_rate_limited( $user_email ) ) {
+		if ( SignupRateLimiter::is_rate_limited( $user_email ) ) {
 			return new \WP_Error( self::ERROR_RATE_LIMITED );
 		}
 
@@ -195,7 +185,7 @@ class SignupService {
 		// A claim only fails when the rate limit table cannot be written to, which a shopper
 		// can neither cause nor resolve. Let the sign-up through rather than turn a broken
 		// limiter into a store-wide sign-up outage.
-		if ( ! $this->rate_limiter->apply( $user_email ) ) {
+		if ( ! SignupRateLimiter::apply( $user_email ) ) {
 			$this->logger->warning(
 				'Could not claim the stock notification sign-up rate limit window. Allowing the sign-up to proceed.',
 				array( 'source' => 'stock-notifications-signup-errors' )
