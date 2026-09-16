@@ -2,7 +2,7 @@
 /**
  * Priority Queue Interface
  *
- * @version 11.2.0
+ * @version 11.3.0
  * @package WooCommerce\Interface
  */
 
@@ -37,14 +37,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Like the WC_Queue_Interface methods, these always schedule non-unique actions. Action
  * Scheduler's $unique argument is not exposed here.
  *
- * @since 11.2.0
+ * @since 11.3.0
  */
 interface WC_Priority_Queue_Interface extends WC_Queue_Interface {
 
 	/**
 	 * Enqueue an action to run one time, as soon as possible, at a given priority.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
@@ -57,7 +57,7 @@ interface WC_Priority_Queue_Interface extends WC_Queue_Interface {
 	/**
 	 * Schedule an action to run once at some time in the future, at a given priority.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param int    $timestamp When the job will run.
 	 * @param string $hook The hook to trigger.
@@ -71,7 +71,7 @@ interface WC_Priority_Queue_Interface extends WC_Queue_Interface {
 	/**
 	 * Schedule a recurring action at a given priority.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param int    $timestamp When the first instance of the job will run.
 	 * @param int    $interval_in_seconds How long to wait between runs.
@@ -86,7 +86,7 @@ interface WC_Priority_Queue_Interface extends WC_Queue_Interface {
 	/**
 	 * Schedule an action that recurs on a cron-like schedule, at a given priority.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param int    $timestamp The schedule will start on or after this time.
 	 * @param string $cron_schedule A cron-like schedule string.
