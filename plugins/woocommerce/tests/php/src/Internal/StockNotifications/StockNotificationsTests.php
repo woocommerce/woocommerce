@@ -177,6 +177,9 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), NotificationQuery::get_notifications( array() ) );
 		$this->assertSame( 0, NotificationQuery::count_notifications( array() ) );
+		$this->assertFalse( NotificationQuery::product_has_active_notifications( array( 1 ) ) );
+		$this->assertFalse( NotificationQuery::notification_exists_by_email( 1, 'shopper@example.com' ) );
+		$this->assertFalse( NotificationQuery::notification_exists_by_user_id( 1, 1 ) );
 	}
 
 	/**
