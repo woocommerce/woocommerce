@@ -175,9 +175,9 @@ const scrollImageEverywhereIntoView = (
 
 /**
  * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores the parent product's gallery from the iAPI
- * config. Also recomputes arrow states and scrolls the active slot into
- * view.
+ * set. Empty input keeps the product's lineup from the iAPI config, with
+ * `selectedImageId` when it is part of it. Also recomputes arrow states
+ * and scrolls the active slot into view.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
@@ -761,9 +761,9 @@ const productGallery = {
 			const variationImageSet =
 				productImageSet.variations?.[ variationId ];
 
-			if ( variationImageSet?.image_ids?.length ) {
+			if ( variationImageSet ) {
 				actions.setImageData(
-					variationImageSet.image_ids,
+					variationImageSet.image_ids ?? [],
 					variationImageSet.image_id
 				);
 				return;
@@ -824,9 +824,9 @@ const productGallery = {
 								currentImageId
 						  );
 
-					if ( variationImageSet?.image_ids?.length ) {
+					if ( variationImageSet ) {
 						actions.setImageData(
-							variationImageSet.image_ids,
+							variationImageSet.image_ids ?? [],
 							currentImageId || variationImageSet.image_id
 						);
 						return;

@@ -287,6 +287,24 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		} );
 	} );
 
+	it( 'keeps the lineup and selects the requested image when a variation has no image set', () => {
+		const lineup = [ 38, 4, 35, 36, 37, 42, 43 ];
+		mockGetConfig.mockReturnValue( {
+			products: { 11: { image_id: 38, image_ids: lineup } },
+		} );
+		const fixture = createGallery( lineup );
+		applyLayout( fixture );
+
+		getActions().setImageData( [], 42 );
+
+		expect( fixture.context.imageData ).toEqual( lineup );
+		expect( fixture.context.selectedImageId ).toBe( 42 );
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 5 * SLOT_PITCH,
+			behavior: 'smooth',
+		} );
+	} );
+
 	it( 'restores the parent image set and scrolls back to its first slot', () => {
 		mockGetConfig.mockReturnValue( {
 			products: {

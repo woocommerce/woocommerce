@@ -371,10 +371,11 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
-				$variation_gallery_data = self::get_product_variation_gallery_data( $product );
+				$variation_gallery   = self::get_product_variation_gallery( $product );
+				$variation_image_ids = $variation_gallery['image_ids'];
 
-				foreach ( $variation_gallery_data as $variation_data ) {
-					$variation_image_ids = array_merge( $variation_image_ids, $variation_data['image_ids'] );
+				foreach ( $variation_gallery['variations'] as $variation_data ) {
+					$variation_image_ids = array_merge( $variation_image_ids, $variation_data['image_ids'] ?? array() );
 				}
 			}
 		} catch ( \Exception $e ) {
@@ -411,12 +412,13 @@ class ProductGalleryUtils {
 	/**
 	 * Build the gallery lineup and the per-variation entries in one pass.
 	 *
-	 * The lineup is the parent featured image and gallery, then the featured
-	 * images of variations without a gallery of their own. Selecting one of
-	 * those variations only changes the selected image; nothing re-orders.
+	 * The lineup is the parent media gallery, then the featured images of
+	 * variations without a gallery of their own. Entries for those variations
+	 * carry only `image_id`: the gallery keeps the lineup and moves the
+	 * selection. Variations with their own gallery return their `image_ids`.
 	 *
 	 * @param \WC_Product $product The variable product.
-	 * @return array{image_ids: int[], variations: array<int, array<string, mixed>>} Empty for other product types.
+	 * @return array{image_ids: int[], variations: array<int, array<string, mixed>>} Both empty for non-variable products.
 	 */
 	public static function get_product_variation_gallery( $product ) {
 		$result = array(
@@ -474,7 +476,7 @@ class ProductGalleryUtils {
 				$images['featured_id'],
 				$images['featured_valid'],
 				$images['gallery_ids'],
-				$lineup
+				$lineup[0]
 			);
 		}
 
@@ -518,21 +520,17 @@ class ProductGalleryUtils {
 	 * - no variation images → lineup, first image selected
 	 * - own featured only → lineup, variation featured selected
 	 * - own featured + gallery → variation images only
-	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
+	 * - gallery only, no own featured (potential AVI shape) → variation gallery, first image selected
 	 *
 	 * @param int   $featured_id           Variation featured image ID (0 if none).
 	 * @param bool  $featured_valid        Whether it is an existing image attachment.
 	 * @param int[] $variation_gallery_ids Valid variation gallery image IDs.
-	 * @param int[] $lineup                Image IDs the gallery always shows.
-	 * @return array<string, mixed>
+	 * @param int   $lineup_first_id       First image of the lineup (0 for the placeholder).
+	 * @return array<string, mixed> `image_ids` is only set when the variation has its own gallery.
 	 */
-	private static function build_variation_gallery_entry( int $featured_id, bool $featured_valid, array $variation_gallery_ids, array $lineup ): array {
-		// No images from variation - lineup, first image selected.
+	private static function build_variation_gallery_entry( int $featured_id, bool $featured_valid, array $variation_gallery_ids, int $lineup_first_id ): array {
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {
-			return array(
-				'image_id'  => $lineup[0],
-				'image_ids' => $lineup,
-			);
+			return array( 'image_id' => $lineup_first_id );
 		}
 
 		// Variation has featured image and gallery - full variation gallery.
@@ -548,11 +546,7 @@ class ProductGalleryUtils {
 			);
 		}
 
-		// Only a featured image - it is in the lineup, so only the selection moves.
-		return array(
-			'image_id'  => $featured_id,
-			'image_ids' => $lineup,
-		);
+		return array( 'image_id' => $featured_id );
 	}
 
 	/**
