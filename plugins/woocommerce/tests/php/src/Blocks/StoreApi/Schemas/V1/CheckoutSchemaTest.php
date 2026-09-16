@@ -79,49 +79,6 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checkout prefills defaults, but order responses only use saved answers.
-	 * @testWith ["contact", "other", "additional_fields"]
-	 *           ["address", "billing", "billing_address"]
-	 *           ["address", "shipping", "shipping_address"]
-	 *
-	 * @param string $location Field location.
-	 * @param string $group Meta group.
-	 * @param string $response_key Response section containing the field.
-	 */
-	public function test_defaults_only_prefill_checkout( string $location, string $group, string $response_key ): void {
-		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
-		$this->field_id = 'plugin-namespace/default-response-field';
-		woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => $this->field_id,
-				'label'    => 'Default field',
-				'location' => $location,
-				'type'     => 'text',
-			)
-		);
-		add_filter(
-			"woocommerce_get_default_value_for_{$this->field_id}",
-			static function () {
-				return 'Default answer';
-			}
-		);
-
-		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
-		$this->assertSame( 'Default answer', ( (array) $response[ $response_key ] )[ $this->field_id ], 'Checkout must still offer defaults.' );
-
-		$meta_key = \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields::get_group_key( $group ) . $this->field_id;
-		WC()->customer->update_meta_data( $meta_key, 'Customer answer' );
-		$order    = new \WC_Order();
-		$item     = (object) array( 'order' => $order );
-		$response = $this->sut->get_item_response( $item );
-		$this->assertSame( '', ( (array) $response[ $response_key ] )[ $this->field_id ], 'An order must not fall back to defaults or current customer values.' );
-
-		$order->update_meta_data( $meta_key, 'Saved answer' );
-		$response = $this->sut->get_item_response( $item );
-		$this->assertSame( 'Saved answer', ( (array) $response[ $response_key ] )[ $this->field_id ], 'Order responses must retain saved answers.' );
-	}
-
-	/**
 	 * @testdox Should preserve a trailing backslash in an additional text field.
 	 */
 	public function test_preserves_trailing_backslash_in_additional_field(): void {

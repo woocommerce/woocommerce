@@ -126,15 +126,12 @@ trait CheckoutFieldsStorage {
 	/**
 	 * Returns an array of all fields values for a given object in a group.
 	 *
-	 * @since 11.3.0 Added the $apply_defaults parameter.
-	 *
 	 * @param WC_Data $wc_object The object or order to get the fields for.
 	 * @param string  $group The group to get the fields for (shipping|billing|other).
 	 * @param bool    $all Whether to return all fields or only the ones that are still registered. Default false.
-	 * @param bool    $apply_defaults Whether to apply default-value filters for missing fields.
 	 * @return array An array of fields.
 	 */
-	public function get_all_fields_from_object( WC_Data $wc_object, string $group = 'other', bool $all = false, bool $apply_defaults = true ) {
+	public function get_all_fields_from_object( WC_Data $wc_object, string $group = 'other', bool $all = false ) {
 		$meta_data = [];
 		$group     = $this->prepare_group_name( $group );
 		$prefix    = self::get_group_key( $group );
@@ -147,10 +144,6 @@ trait CheckoutFieldsStorage {
 					$meta_data[ $key ] = $meta_data_object->value;
 				}
 			}
-		}
-
-		if ( ! $apply_defaults ) {
-			return $meta_data;
 		}
 
 		$missing_fields = array_diff( array_keys( $this->get_fields_for_group( $group ) ), array_keys( $meta_data ) );
@@ -185,7 +178,7 @@ trait CheckoutFieldsStorage {
 	 */
 	public function sync_customer_additional_fields_with_order( WC_Order $order, WC_Customer $customer ) {
 		foreach ( $this->groups as $group ) {
-			$order_additional_fields = $this->get_all_fields_from_object( $order, $group, true, false );
+			$order_additional_fields = $this->get_all_fields_from_object( $order, $group, true );
 
 			// Sync customer additional fields with order additional fields.
 			foreach ( $order_additional_fields as $key => $value ) {
