@@ -538,18 +538,12 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should enqueue the view script module when rendered outside the cart and checkout pages.
+	 * @testdox Should not declare a view script module so WordPress never enqueues it automatically.
 	 */
-	public function test_view_script_module_is_enqueued_outside_cart_and_checkout(): void {
-		if ( \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CART' ) || \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			$this->markTestSkipped( 'A previous test forced the cart or checkout context for the rest of the process.' );
-		}
-		wp_dequeue_script_module( 'woocommerce/mini-cart' );
+	public function test_view_script_module_is_not_declared_on_the_block_type(): void {
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
 
-		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
-		render_block( $block[0] );
-
-		$this->assertContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should be enqueued on regular pages.' );
+		$this->assertSame( array(), $block_type->view_script_module_ids, 'The view script module must only be enqueued explicitly from render().' );
 	}
 
 	/**
