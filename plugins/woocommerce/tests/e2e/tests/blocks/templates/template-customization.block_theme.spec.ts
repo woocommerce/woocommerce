@@ -13,11 +13,22 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
-// One template and one template part keep the modify-and-revert journey, and
+// Two templates and one template part keep the modify-and-revert journey, and
 // one template with a fallback keeps the fallback journey. The registry,
 // precedence and hierarchy rules the other templates repeated are covered by
 // `BlockTemplatesControllerTest` and `TemplateHierarchyTest` in PHPUnit.
-const MODIFY_AND_REVERT_TEMPLATES = [ 'Product Catalog', 'Checkout Header' ];
+//
+// Products by Attribute keeps both. Its fallback title customizes Product
+// Catalog and asserts that text renders on the attribute archive — which is
+// also what renders when a customized attribute template is ignored, so the
+// fallback title alone stays green in the failure it exists to catch. The
+// modify-and-revert journey supplies the missing half by customizing the
+// attribute template itself and requiring its own text on the same route.
+const MODIFY_AND_REVERT_TEMPLATES = [
+	'Product Catalog',
+	'Checkout Header',
+	'Products by Attribute',
+];
 const FALLBACK_TEMPLATES = [ 'Products by Attribute' ];
 
 test.describe( 'Template customization', () => {

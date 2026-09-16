@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
+use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
@@ -98,7 +99,7 @@ class TemplateHierarchyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cart and Checkout pages prepend their classic and registered block template slugs.
+	 * @testdox Cart, Checkout and Order Confirmation pages prepend their classic and registered block template slugs.
 	 */
 	public function test_page_template_hierarchy(): void {
 		$cart_page_id     = $this->create_page( 'hierarchy-test-cart' );
@@ -122,6 +123,30 @@ class TemplateHierarchyTest extends WC_Unit_Test_Case {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Applying the core hierarchy filter is the behavior under test.
 			apply_filters( 'page_template_hierarchy', array( 'page.php', 'singular.php', 'index.php' ) )
 		);
+
+		// Order Confirmation is an endpoint on the checkout page rather than a
+		// page of its own, and it does not override page_template_hierarchy(),
+		// so it contributes one slug through AbstractPageTemplate instead of the
+		// pair CartTemplate and CheckoutTemplate each unshift. The endpoint is
+		// driven through the query var, the way the shortcode checkout and cart
+		// tests drive it.
+		//
+		// The checkout slugs stay in the hierarchy because the request is still
+		// on the checkout page, where CheckoutTemplate is active too. That is
+		// what a real order-received request looks like, and the point of the
+		// assertion is that order-confirmation is unshifted last and so wins.
+		( new OrderConfirmationTemplate() )->init();
+
+		global $wp;
+		$wp->query_vars['order-received'] = 1;
+
+		$this->assertSame(
+			array( 'order-confirmation', 'checkout', 'page-checkout', 'page.php', 'singular.php', 'index.php' ),
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Applying the core hierarchy filter is the behavior under test.
+			apply_filters( 'page_template_hierarchy', array( 'page.php', 'singular.php', 'index.php' ) )
+		);
+
+		unset( $wp->query_vars['order-received'] );
 	}
 
 	/**
