@@ -973,9 +973,7 @@ const productGallery = {
 		// See https://github.com/woocommerce/woocommerce/issues/59810.
 		hideGhostOverflow: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) {
-				return;
-			}
+			if ( ! element ) return;
 
 			const { clientWidth, scrollWidth } = element;
 
