@@ -4064,36 +4064,54 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 		return $datetime ? $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ) : null;
 	};
 
+	// Repaired orders leave the caches (a cached object still has no date and would stamp the current time on its next save)
+	// and get queued for the Analytics import, which skipped them while they had no date.
+	$forget_and_import = function ( array $order_ids ) {
+		if ( ! $order_ids ) {
+			return;
+		}
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $order_ids );
+		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
+		foreach ( $order_ids as $order_id ) {
+			$order_cache->remove( $order_id );
+			\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $order_id ) );
+		}
+	};
+
 	$repaired_ids = array();
 	foreach ( $rows as $row ) {
-		$data = array();
+		$columns = array();
 		if ( ! $row->date_created_gmt || $zero === $row->date_created_gmt ) {
-			$data['date_created_gmt'] = $gmt_from_post( $row->post_date_gmt, $row->post_date );
+			$columns['date_created_gmt'] = $gmt_from_post( $row->post_date_gmt, $row->post_date );
 		}
 		if ( ! $row->date_updated_gmt || $zero === $row->date_updated_gmt ) {
-			$data['date_updated_gmt'] = $gmt_from_post( $row->post_modified_gmt, $row->post_modified );
+			$columns['date_updated_gmt'] = $gmt_from_post( $row->post_modified_gmt, $row->post_modified );
 		}
-		$data = array_filter( $data );
-		if ( empty( $data ) ) {
+		$columns = array_filter( $columns );
+		if ( empty( $columns ) ) {
 			continue;
 		}
-		if ( false === $wpdb->update( $orders_table, $data, array( 'id' => (int) $row->id ), array_fill( 0, count( $data ), '%s' ), array( '%d' ) ) ) {
+		// Each column is written only while it is still empty, so a save that lands between the read and the write wins.
+		$assignments = array();
+		$values      = array();
+		foreach ( $columns as $column => $value ) {
+			$assignments[] = "{$column} = IF( {$column} IS NULL OR {$column} = %s, %s, {$column} )";
+			$values[]      = $zero;
+			$values[]      = $value;
+		}
+		$values[] = (int) $row->id;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are code-defined, values go through prepare().
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$orders_table} SET " . implode( ', ', $assignments ) . ' WHERE id = %d', $values ) );
+		if ( false === $updated ) {
 			wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates at order #%d: %s', (int) $row->id, $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+			$forget_and_import( $repaired_ids );
 			delete_option( $last_id_option );
 			return false;
 		}
 		$repaired_ids[] = (int) $row->id;
 	}
 
-	if ( $repaired_ids ) {
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $repaired_ids );
-		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
-		foreach ( $repaired_ids as $repaired_id ) {
-			// A cached order object still has no date and would stamp the current time over the repaired value on its next save.
-			$order_cache->remove( $repaired_id );
-			\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $repaired_id ) );
-		}
-	}
+	$forget_and_import( $repaired_ids );
 
 	if ( count( $rows ) === $batch_size ) {
 		update_option( $last_id_option, (int) end( $rows )->id, false );
