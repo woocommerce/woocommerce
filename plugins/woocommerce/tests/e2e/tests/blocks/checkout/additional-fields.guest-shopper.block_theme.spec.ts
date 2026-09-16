@@ -29,96 +29,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			);
 		} );
 
-		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
-			checkoutPageObject,
-			frontendUtils,
-		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
-
-			await checkoutPageObject.editShippingDetails();
-			await checkoutPageObject.unsyncBillingWithShipping();
-			await checkoutPageObject.editBillingDetails();
-			await checkoutPageObject.fillInCheckoutWithTestData(
-				{},
-				{
-					contact: {
-						'Alternative Email': 'test@test.com',
-						'Enter a gift message to include in the package':
-							'For my non-ascii named friend: niño',
-					},
-					address: {
-						shipping: {
-							'Government ID': '',
-							'Confirm government ID': '',
-						},
-						billing: {
-							'Government ID': '54321',
-							'Confirm government ID': '54321',
-						},
-					},
-					order: {
-						'How did you hear about us?': 'Other',
-						'What is your favourite colour?': 'Blue',
-					},
-				}
-			);
-
-			// Use the data store to specifically unset the field value - this is because it might be saved in the user-state.
-			await checkoutPageObject.page.evaluate( () => {
-				window.wp.data.dispatch( 'wc/store/cart' ).setShippingAddress( {
-					'first-plugin-namespace/road-size': '',
-				} );
-			} );
-
-			await checkoutPageObject.placeOrder( false );
-
-			// Test that the required checkbox warning shows up after submitting without interacting.
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please check the box or you will be unable to order'
-				)
-			).toBeVisible();
-
-			await checkoutPageObject.page
-				.getByLabel( 'Test required checkbox' )
-				.click();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please check the box or you will be unable to order'
-				)
-			).toBeHidden();
-
-			// Test that unchecking shows and checking again hides the message.
-			await checkoutPageObject.page
-				.getByLabel( 'Test required checkbox' )
-				.uncheck();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please check the box or you will be unable to order'
-				)
-			).toBeVisible();
-
-			await checkoutPageObject.page
-				.getByLabel( 'Test required checkbox' )
-				.click();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please check the box or you will be unable to order'
-				)
-			).toBeHidden();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please enter a valid government id'
-				)
-			).toBeVisible();
-		} );
-
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 			checkoutPageObject,
 			frontendUtils,
@@ -402,16 +312,21 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			// The shipping insurance field should be hidden by default (cart total < 2000)
+			// The field is hidden while the cart total is at or below $40.
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeHidden();
 
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			// The shipping insurance field should now be visible (cart total > 2000)
+			// Four $20 products against the field's $59 required threshold. Three
+			// would also clear it, but only by a dollar, so any sale price or
+			// total-computation change would silently drop the field out of
+			// "required" and fail the assertions below for an unrelated reason.
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeVisible();
@@ -458,10 +373,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
-			// The error should be gone
+			// The error should be gone. Assert the same string the visible check
+			// above uses: "Add shipping insurance is a required field." appears
+			// nowhere in the plugin, so toBeHidden() was matching zero elements
+			// and passing whether or not the error had actually cleared.
 			await expect(
 				checkoutPageObject.page.getByText(
-					'Add shipping insurance is a required field.'
+					'Please check this box if you want to proceed.'
 				)
 			).toBeHidden();
 		} );

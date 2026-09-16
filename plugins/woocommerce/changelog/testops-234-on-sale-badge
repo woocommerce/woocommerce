@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce On-Sale Badge E2E tests from 6 to 1; PHPUnit owns the sale check and the alignment classes.
+

@@ -16,6 +16,9 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 /**
  * Shipping rate class.
+ *
+ * @property string $id        Shipping rate ID.
+ * @property string $method_id Shipping method ID.
  */
 class WC_Shipping_Rate implements JsonSerializable {
 
