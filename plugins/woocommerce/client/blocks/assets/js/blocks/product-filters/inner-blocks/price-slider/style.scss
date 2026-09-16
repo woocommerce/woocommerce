@@ -187,6 +187,7 @@
 				}
 				&::-moz-range-thumb {
 					background-position-x: left;
+					transform: translateY(2px);
 				}
 				&::-ms-thumb {
 					background-position-x: left;
@@ -199,6 +200,7 @@
 				}
 				&::-moz-range-thumb {
 					background-position-x: right;
+					transform: translateY(2px);
 				}
 				&::-ms-thumb {
 					background-position-x: right;
