@@ -110,9 +110,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	/**
 	 * Process a refund deletion as an update to its parent order.
 	 *
+	 * Must be public for action dispatch via add_action() in enqueue().
+	 * Compatibility signature: process_refund_deleted($refund_id, $order_id = 0).
+	 * The optional second argument preserves existing one-argument action calls.
+	 *
 	 * @since 11.2.0
 	 * @param int $refund_id Deleted refund ID.
-	 * @param int $order_id  Parent order ID.
+	 * @param int $order_id  Parent order ID. Optional to maintain backward compatibility.
 	 */
 	public function process_refund_deleted( $refund_id, $order_id = 0 ): void {
 		unset( $refund_id );
