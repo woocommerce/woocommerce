@@ -675,13 +675,20 @@ final class WC_Cart_Session {
 			}
 
 			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
-					$attribute_key = 'attribute_' . sanitize_title( $meta->key );
-					if ( taxonomy_is_product_attribute( $meta->key ) ) {
-						$variations[ $attribute_key ] = sanitize_title( $meta->value );
-					} else {
-						// Preserve literal percent escapes, matching custom values added through the cart and Store API.
-						$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+				$attribute_key = 'attribute_' . sanitize_title( $meta->key );
+				if ( taxonomy_is_product_attribute( $meta->key ) ) {
+					$variations[ $attribute_key ] = sanitize_title( $meta->value );
+				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+					// Preserve literal percent escapes, matching custom values added through the cart and Store API.
+					$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+				} else {
+					// Display formatting can decode a stored value (Black%20White shown as Black White),
+					// so it no longer matches the product's raw option and the variation loses its
+					// attribute on reorder. Resolve it back to the product's option when it still matches
+					// after decoding.
+					$option = $this->match_decoded_custom_attribute( $meta->key, (string) $meta->value, $product_id );
+					if ( null !== $option ) {
+						$variations[ $attribute_key ] = $option;
 					}
 				}
 			}
@@ -758,6 +765,46 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
+	}
+
+	/**
+	 * Resolve a reordered custom attribute value to the product's canonical option.
+	 *
+	 * Display formatting can decode a stored order-item value (Black%20White shown as
+	 * Black White), so the strict comparison in meta_is_product_attribute() no longer
+	 * matches the product's raw option and the variation loses its attribute on reorder.
+	 * Compare percent-decoded forms and return the product's own option so the rebuilt
+	 * variation still validates against the stored variation.
+	 *
+	 * @param string $name       Order-item meta key (attribute name).
+	 * @param string $value      Stored value, possibly decoded for display.
+	 * @param int    $product_id Parent product ID.
+	 * @return string|null Canonical option value, or null when nothing matches.
+	 */
+	private function match_decoded_custom_attribute( $name, $value, $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		if ( ! $product || ! is_callable( array( $product, 'get_variation_attributes' ) ) ) {
+			return null;
+		}
+
+		$attributes = $product->get_attributes();
+
+		if ( ! isset( $attributes[ $name ] ) || ! $attributes[ $name ] instanceof WC_Product_Attribute ) {
+			return null;
+		}
+
+		$variation_attributes = $product->get_variation_attributes();
+		$options              = $variation_attributes[ $attributes[ $name ]->get_name() ] ?? array();
+		$decoded_value        = rawurldecode( $value );
+
+		foreach ( $options as $option ) {
+			if ( rawurldecode( (string) $option ) === $decoded_value ) {
+				return $option;
+			}
+		}
+
+		return null;
 	}
 
 	/**

@@ -734,6 +734,50 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Ordering again recovers a custom attribute value that was decoded on the stored order item.
+	 */
+	public function test_order_again_recovers_decoded_custom_attribute_value(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		WC()->cart->empty_cart();
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// Simulate an order whose stored attribute was decoded for display (Black%20White shown as
+		// Black White), which no longer matches the product's raw option with a strict comparison.
+		$order = wc_create_order( array( 'customer_id' => $user_id ) );
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->add_meta_data( 'finish', 'Black White', true );
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$sut    = new WC_Cart_Session( WC()->cart );
+		$method = new ReflectionMethod( WC_Cart_Session::class, 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$cart = $method->invoke( $sut, $order->get_id(), array() );
+
+		$this->assertCount( 1, $cart, 'The ordered variation should be restored.' );
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The variation ID must survive reordering.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'Reordering must recover the product option even when the stored value was decoded.' );
+	}
+
+	/**
 	 * @testdox Custom attribute values containing a percent escape can be added to the cart.
 	 */
 	public function test_add_to_cart_accepts_custom_attribute_values_containing_percent_escapes() {
