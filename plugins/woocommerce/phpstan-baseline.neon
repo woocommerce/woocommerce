@@ -12662,18 +12662,6 @@ parameters:
 			path: includes/class-wc-order-item-tax.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 3
-			path: includes/class-wc-order-item.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-order-item.php
-
-		-
 			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
