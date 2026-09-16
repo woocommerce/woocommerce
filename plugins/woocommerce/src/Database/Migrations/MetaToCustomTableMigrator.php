@@ -14,6 +14,11 @@ namespace Automattic\WooCommerce\Database\Migrations;
 abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 	/**
+	 * The value MySQL stores for a DATETIME that was never set.
+	 */
+	private const ZERO_DATE = '0000-00-00 00:00:00';
+
+	/**
 	 * Config for tables being migrated and migrated from. See __construct() for detailed config.
 	 *
 	 * @var array
@@ -79,6 +84,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 *  '$source_column_name_1' => array( // $source_column_name_1 is column name in source table, or a select statement.
 	 *      'type' => 'type of value, could be string/int/date/float.',
 	 *      'destination' => 'name of the column in column name where this data should be inserted in.',
+	 *      'fallback_column' => 'optional, for the date type only: source column holding the same datetime in the site timezone, used when the source column is empty or the zero date.',
 	 *  ),
 	 *  '$source_column_name_2' => array(
 	 *          ......
@@ -444,8 +450,11 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) $additio
 			} else {
 				$entity_keys[] = "$source_entity_table.$column_name";
 			}
+			if ( isset( $column_schema['fallback_column'] ) ) {
+				$entity_keys[] = "$source_entity_table.{$column_schema['fallback_column']}";
+			}
 		}
-		$entity_column_string = implode( ', ', $entity_keys );
+		$entity_column_string = implode( ', ', array_unique( $entity_keys ) );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_rel_id_column, $source_destination_rel_id_column etc is escaped for backticks. $where clause and $order_by should already be escaped.
 		$query = $wpdb->prepare(
 			"
@@ -537,6 +546,9 @@ WHERE
 				$custom_table_column_name = $schema['destination'] ?? $column_name;
 				$value                    = $entity->$column_name;
 				$value                    = $this->validate_data( $value, $schema['type'] );
+				if ( null === $value && isset( $schema['fallback_column'] ) ) {
+					$value = $this->local_date_to_gmt( $entity->{$schema['fallback_column']} ?? null );
+				}
 				if ( is_wp_error( $value ) ) {
 					$error_records[ $entity->primary_key_id ][ $custom_table_column_name ] = $value->get_error_code();
 				} else {
@@ -591,7 +603,7 @@ WHERE
 				break;
 			case 'date':
 				try {
-					if ( '' === $value ) {
+					if ( '' === $value || self::ZERO_DATE === $value ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' );
@@ -655,6 +667,9 @@ WHERE
 			$source_select_column         = isset( $schema['select_clause'] ) ? $schema['select_clause'] : "$source_table.$column_name";
 			$source_select_clauses[]      = "$source_select_column as {$source_table}_{$column_name}";
 			$destination_select_clauses[] = "$destination_table.{$schema['destination']} as {$destination_table}_{$schema['destination']}";
+			if ( isset( $schema['fallback_column'] ) ) {
+				$source_select_clauses[] = "$source_table.{$schema['fallback_column']} as {$source_table}_{$schema['fallback_column']}";
+			}
 		}
 
 		foreach ( $this->meta_column_mapping as $meta_key => $schema ) {
@@ -866,11 +881,42 @@ WHERE $where_clause
 			} else {
 				$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );
 			}
-			if ( '0000-00-00 00:00:00' === $row[ $destination_alias ] ) {
+			if ( self::ZERO_DATE === $row[ $destination_alias ] ) {
+				$row[ $destination_alias ] = null;
+			}
+		}
+		if ( 'date' === $schema['type'] ) {
+			if ( '' === $row[ $alias ] || self::ZERO_DATE === $row[ $alias ] ) {
+				$row[ $alias ] = null;
+			}
+			if ( null === $row[ $alias ] && isset( $schema['fallback_column'] ) ) {
+				$fallback_alias = "{$this->schema_config['source']['entity']['table_name']}_{$schema['fallback_column']}";
+				$row[ $alias ]  = $this->local_date_to_gmt( $row[ $fallback_alias ] ?? null );
+			}
+			if ( self::ZERO_DATE === $row[ $destination_alias ] ) {
 				$row[ $destination_alias ] = null;
 			}
 		}
 		return $row;
+	}
+
+	/**
+	 * Convert a datetime string expressed in the site's timezone to its GMT equivalent.
+	 *
+	 * Unlike get_gmt_from_date(), an empty, zero or unparsable value yields null rather than the Unix epoch.
+	 *
+	 * @param string|null $value Datetime string in the site's timezone.
+	 * @return string|null GMT datetime string, or null when there is no usable value.
+	 */
+	private function local_date_to_gmt( ?string $value ): ?string {
+		if ( null === $value || '' === $value || self::ZERO_DATE === $value ) {
+			return null;
+		}
+		$datetime = date_create( $value, wp_timezone() );
+		if ( false === $datetime ) {
+			return null;
+		}
+		return $datetime->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**
