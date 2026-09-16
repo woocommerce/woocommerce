@@ -923,7 +923,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Get additional fields for an order.
+	 * Get saved additional fields for an order without applying checkout defaults.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $location The location to get fields for (address|contact|order).
@@ -939,11 +939,13 @@ class CheckoutFields {
 		$fields_with_values = [];
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $this->get_field_from_object( $field_key, $order, $group );
+			$value = $order->get_meta( self::get_group_key( $group ) . $field_key, true );
 
 			if ( '' === $value || null === $value ) {
 				continue;
 			}
+
+			$value = $this->get_field_type( $field )->from_storage( $value );
 
 			if ( 'view' === $context ) {
 				$value = $this->format_additional_field_value( $value, $field );
