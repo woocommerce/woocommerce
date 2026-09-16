@@ -170,7 +170,7 @@ const scrollImageEverywhereIntoView = (
 ) => {
 	scrollImageIntoView( imageId, behavior );
 	// Start-aligned so the images after the selected one stay in view.
-	scrollThumbnailIntoView( imageId, 'smooth', 'start' );
+	scrollThumbnailIntoView( imageId, 'start' );
 };
 
 /**
@@ -324,39 +324,13 @@ const scrollImageIntoView = (
 };
 
 /**
- * Visible thumbnail wrappers in visual order: `style.order` once set, DOM
- * order before that.
- */
-const getVisibleThumbnailSlots = ( scrollContainer: HTMLElement ) =>
-	Array.from(
-		scrollContainer.querySelectorAll< HTMLElement >( SELECTORS.thumbnail )
-	)
-		.map( ( wrapper, domIndex ) => ( {
-			wrapper,
-			position:
-				wrapper.style.order === ''
-					? domIndex
-					: Number( wrapper.style.order ),
-		} ) )
-		.filter( ( { wrapper } ) => ! wrapper.hidden )
-		.sort( ( a, b ) => a.position - b.position )
-		.map( ( { wrapper } ) => wrapper );
-
-/**
- * Scrolls the thumbnail strip to the slot the image occupies in `imageData`.
+ * Scrolls the thumbnail strip to the image's thumbnail.
  *
- * Uses slot index times slot pitch rather than the thumbnail's own rect: the
- * rect still describes the old slot until the watches re-slot the strip on
- * the next frame. All wrappers share one size and gap, so two adjacent
- * visible slots give the pitch.
- *
- * @param {number}         imageId  - The ID of the thumbnail to scroll into view.
- * @param {ScrollBehavior} behavior - Scroll behavior.
- * @param {string}         align    - `center` or `start`.
+ * @param {number}           imageId - The ID of the thumbnail to scroll into view.
+ * @param {'center'|'start'} align   - Where the thumbnail lands in the strip.
  */
 const scrollThumbnailIntoView = (
 	imageId: number,
-	behavior: ScrollBehavior = 'smooth',
 	align: 'center' | 'start' = 'center'
 ) => {
 	if ( ! imageId ) {
@@ -377,60 +351,47 @@ const scrollThumbnailIntoView = (
 		return;
 	}
 
-	const scrollContainer = galleryContainer.querySelector(
+	const thumbnail = galleryContainer
+		.querySelector(
+			`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId(
+				imageId
+			) }`
+		)
+		?.closest( SELECTORS.thumbnail );
+	const scrollContainer = thumbnail?.closest(
 		SELECTORS.thumbnailsScrollable
 	) as HTMLElement | null;
 
-	if ( ! scrollContainer ) {
+	if ( ! thumbnail || ! scrollContainer ) {
 		return;
 	}
-
-	const { imageData } = getContext();
-	const slotIndex = imageData.indexOf( imageId );
-
-	if ( slotIndex < 0 ) {
-		return;
-	}
-
-	const slots = getVisibleThumbnailSlots( scrollContainer );
-
-	if ( ! slots.length ) {
-		return;
-	}
-
-	const isVertical = window
-		.getComputedStyle( scrollContainer )
-		.flexDirection.startsWith( 'column' );
-	const start = ( rect: DOMRect ) => ( isVertical ? rect.top : rect.left );
-	const size = ( rect: DOMRect ) => ( isVertical ? rect.height : rect.width );
 
 	const containerRect = scrollContainer.getBoundingClientRect();
-	const firstSlotRect = slots[ 0 ].getBoundingClientRect();
-	// Signed, so RTL and row-reverse strips scroll the right way.
-	const slotPitch =
-		slots.length > 1
-			? start( slots[ 1 ].getBoundingClientRect() ) -
-			  start( firstSlotRect )
-			: size( firstSlotRect );
-
-	const alignmentOffset =
+	const thumbnailRect = thumbnail.getBoundingClientRect();
+	const isRtl =
+		window.getComputedStyle( scrollContainer ).direction === 'rtl';
+	const centerTop =
 		align === 'center'
-			? ( size( containerRect ) - size( firstSlotRect ) ) / 2
+			? ( containerRect.height - thumbnailRect.height ) / 2
 			: 0;
-	const scrollOffset =
-		start( firstSlotRect ) +
-		slotIndex * slotPitch -
-		start( containerRect ) -
-		alignmentOffset;
+	const centerLeft =
+		align === 'center'
+			? ( containerRect.width - thumbnailRect.width ) / 2
+			: 0;
+	// In RTL the strip starts at its right edge.
+	const inlineOffset = isRtl
+		? thumbnailRect.right - containerRect.right + centerLeft
+		: thumbnailRect.left - containerRect.left - centerLeft;
 
 	// Use scrollTo to avoid scrolling the entire page which
 	// happens with scrollIntoView.
 	scrollContainer.scrollTo( {
-		[ isVertical ? 'top' : 'left' ]:
-			( isVertical
-				? scrollContainer.scrollTop
-				: scrollContainer.scrollLeft ) + scrollOffset,
-		behavior,
+		top:
+			scrollContainer.scrollTop +
+			( thumbnailRect.top - containerRect.top ) -
+			centerTop,
+		left: scrollContainer.scrollLeft + inlineOffset,
+		behavior: 'smooth',
 	} );
 };
 

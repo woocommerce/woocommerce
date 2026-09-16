@@ -53,13 +53,15 @@ type Fixture = {
 	wrappers: Map< number, HTMLElement >;
 };
 
+type Layout = 'column' | 'row' | 'row-rtl';
+
 /**
  * Gallery fixture whose rects follow the wrappers' current `hidden` and
  * `order` state, one slot pitch apart; hidden wrappers report an empty rect.
  */
 const createGallery = (
 	imageIds: number[],
-	{ direction = 'column' }: { direction?: 'column' | 'row' } = {}
+	{ layout = 'column' }: { layout?: Layout } = {}
 ): Fixture => {
 	document.body.innerHTML = '';
 
@@ -68,18 +70,26 @@ const createGallery = (
 
 	const scroller = document.createElement( 'div' );
 	scroller.className = 'wc-block-product-gallery-thumbnails__scrollable';
-	scroller.style.flexDirection = direction;
+	scroller.style.flexDirection = layout === 'column' ? 'column' : 'row';
+	scroller.style.direction = layout === 'row-rtl' ? 'rtl' : 'ltr';
 	gallery.appendChild( scroller );
 	document.body.appendChild( gallery );
 
-	const isVertical = direction === 'column';
-	const rect = ( start: number, size: number ): DOMRect =>
-		( {
-			top: isVertical ? start : 0,
-			left: isVertical ? 0 : start,
-			height: isVertical ? size : SLOT_SIZE,
-			width: isVertical ? SLOT_SIZE : size,
-		} ) as DOMRect;
+	const isVertical = layout === 'column';
+	const rect = ( start: number, size: number ): DOMRect => {
+		const top = isVertical ? start : 0;
+		const left = isVertical ? 0 : start;
+		const height = isVertical ? size : SLOT_SIZE;
+		const width = isVertical ? SLOT_SIZE : size;
+		return {
+			top,
+			left,
+			height,
+			width,
+			bottom: top + height,
+			right: left + width,
+		} as DOMRect;
+	};
 
 	scroller.getBoundingClientRect = () => rect( 0, STRIP_SIZE );
 
@@ -101,6 +111,12 @@ const createGallery = (
 				wrapper.style.order === ''
 					? domIndex
 					: Number( wrapper.style.order );
+			if ( layout === 'row-rtl' ) {
+				return rect(
+					STRIP_SIZE - SLOT_SIZE - slot * SLOT_PITCH,
+					SLOT_SIZE
+				);
+			}
 			return rect( slot * SLOT_PITCH - scroller.scrollTop, SLOT_SIZE );
 		};
 	} );
@@ -179,15 +195,13 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 
 		expect( fixture.context.imageData ).toEqual( blueIds );
 		expect( fixture.context.selectedImageId ).toBe( 39 );
+		expect( fixture.wrappers.get( 39 )?.style.order ).toBe( '0' );
 		expect( fixture.scrollTo ).toHaveBeenCalledTimes( 1 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 0 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
-		// The stale rect would have targeted slot 7 instead.
-		expect( fixture.scrollTo.mock.calls[ 0 ][ 0 ].top ).not.toBe(
-			7 * SLOT_PITCH
-		);
 	} );
 
 	it( 'shows a thumbnail that joins the set before scrolling to it', () => {
@@ -204,6 +218,7 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		expect( joiningWrapper.style.order ).toBe( '7' );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 7 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
 	} );
@@ -222,6 +237,7 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		expect( fixture.context.selectedImageId ).toBe( 46 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 11 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
 	} );
@@ -236,6 +252,7 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 6 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
 	} );
@@ -250,12 +267,11 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		getActions().selectCurrentImage();
 
 		expect( fixture.context.selectedImageId ).toBe( 43 );
-		expect( fixture.scrollTo ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				top: 6 * SLOT_PITCH - CENTERING_OFFSET,
-				behavior: 'smooth',
-			} )
-		);
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 6 * SLOT_PITCH - CENTERING_OFFSET,
+			left: 0,
+			behavior: 'smooth',
+		} );
 	} );
 
 	it( 'accounts for the current scroll offset of the strip', () => {
@@ -265,24 +281,53 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 
 		getActions().selectImage( 2 );
 
-		expect( fixture.scrollTo ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				top: 2 * SLOT_PITCH - CENTERING_OFFSET,
-				behavior: 'smooth',
-			} )
-		);
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 2 * SLOT_PITCH - CENTERING_OFFSET,
+			left: 0,
+			behavior: 'smooth',
+		} );
 	} );
 
 	it( 'scrolls horizontally when the strip is laid out as a row', () => {
 		const fixture = createGallery( [ 38, 4, 35, 36, 37, 42, 43, 39 ], {
-			direction: 'row',
+			layout: 'row',
 		} );
 		applyLayout( fixture );
 
 		getActions().setImageData( [ 39, 4, 35, 36, 37, 42, 43 ], 39 );
 
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 0,
 			left: 0 * SLOT_PITCH,
+			behavior: 'smooth',
+		} );
+	} );
+
+	it( 'aligns to the right edge of a right-to-left strip', () => {
+		const parentIds = [ 38, 4, 35, 36, 37, 42, 43, 39 ];
+		const fixture = createGallery( parentIds, { layout: 'row-rtl' } );
+		applyLayout( fixture );
+
+		getActions().setImageData( parentIds, 42 );
+
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 0,
+			left: -5 * SLOT_PITCH,
+			behavior: 'smooth',
+		} );
+	} );
+
+	it( 'centers clicked thumbnails in a right-to-left strip', () => {
+		const fixture = createGallery( [ 38, 4, 35, 36, 37, 42, 43, 39 ], {
+			layout: 'row-rtl',
+		} );
+		applyLayout( fixture );
+
+		getActions().selectImage( 5 );
+
+		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
+			top: 0,
+			left: -5 * SLOT_PITCH + CENTERING_OFFSET,
 			behavior: 'smooth',
 		} );
 	} );
@@ -301,6 +346,7 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		expect( fixture.context.selectedImageId ).toBe( 42 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 5 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
 	} );
@@ -324,6 +370,7 @@ describe( 'Product Gallery thumbnails scroll position', () => {
 		expect( fixture.context.selectedImageId ).toBe( 38 );
 		expect( fixture.scrollTo ).toHaveBeenCalledWith( {
 			top: 0 * SLOT_PITCH,
+			left: 0,
 			behavior: 'smooth',
 		} );
 	} );
