@@ -1,0 +1,66 @@
+.woocommerce-item__payment-gateway-placeholder {
+	border-top: 1px solid $gray-200;
+	border-bottom: none; // This way we avoid a double border between items.
+	padding: 0 48px;
+
+	// The header above draws the line that closes it off, so the first row
+	// would stack a second one directly on top of it.
+	&:first-child {
+		border-top: none;
+	}
+
+	// @woocommerce/components' List draws the separator over this one in the
+	// lighter $gray-100, which would leave the skeleton's lines a shade off
+	// from the ones the loaded list settles on.
+	.woocommerce-list > &:not(:first-child) {
+		border-top-color: $gray-200;
+	}
+
+	// Add back the bottom border for the last item.
+	&:nth-last-child(1 of .woocommerce-item__payment-gateway-placeholder) {
+		border-bottom: 1px solid $gray-200;
+	}
+
+	&:hover {
+		background-color: $white;
+	}
+
+	.woocommerce-list__item-inner {
+		padding: $gap-large 0;
+		align-items: flex-start;
+	}
+
+	.drag-handle-wrapper {
+		margin-right: 20px;
+	}
+
+	.list-placeholder {
+		&__title,
+		&__after,
+		&__before,
+		&__content {
+			background-color: $gray-100;
+			border-radius: 4px;
+		}
+
+		&__title {
+			width: 120px;
+			height: 20px;
+		}
+
+		&__after {
+			height: 32px;
+			width: 104px;
+		}
+
+		&__before {
+			width: 40px;
+			height: 40px;
+		}
+
+		&__content {
+			width: 360px;
+			height: 20px;
+		}
+	}
+}

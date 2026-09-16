@@ -1,0 +1,57 @@
+/**
+ * Analytics Report Header Styles
+ *
+ * Container for ReportFilters and ImportStatusBar
+ */
+
+.woocommerce-analytics-report-header {
+	// Only apply this layout when the import status bar is present
+	&:has(> .woocommerce-analytics-import-status-bar-wrapper) {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		gap: $gap;
+
+		.woocommerce-filters {
+			flex: 1; // Allow the filters to grow and take up remaining space
+			width: 100%;
+		}
+
+		.woocommerce-filters-filter {
+			min-width: fit-content;
+		}
+
+		@media screen and ( max-width: $break-wide ) {
+			.woocommerce-filters-filter {
+				width: 100%;
+			}
+
+			.woocommerce-analytics-import-status-bar-wrapper {
+				flex: 1;
+			}
+		}
+
+		@media screen and ( max-width: $break-medium ) {
+			flex-direction: column;
+			gap: 0;
+
+			.woocommerce-filters__basic-filters {
+				margin-bottom: $gap;
+			}
+
+			.woocommerce-analytics-import-status-bar-wrapper {
+				margin-bottom: $gap-large;
+				width: 100%;
+			}
+
+			.woocommerce-analytics-import-status-bar__content {
+				width: 100%;
+				justify-content: space-between;
+			}
+		}
+
+		@media screen and ( max-width: $break-small ) {
+			align-items: center;
+		}
+	}
+}

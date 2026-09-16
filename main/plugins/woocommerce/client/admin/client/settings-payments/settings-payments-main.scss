@@ -1,0 +1,665 @@
+/* *
+ * Internal dependencies
+ */
+/* This is imported here to avoid build errors when importing the same file in multiple places. */
+@import "./components/modals/modals.scss";
+
+// Every Payments screen lays its header title out on a row this tall — the
+// height of the business location control, which is the tallest thing any of
+// these headers carries. Stated once and applied to each header, so the title
+// and the divider below it land in the same place on all of them and nothing
+// shifts when moving between screens.
+$payments-header-row-height: 38px;
+
+/* These keyframes and spinner style are copied from the Stripe Spinner component https://docs.stripe.com/stripe-apps/components/spinner?app-sdk-version=8  */
+@keyframes SpinnerAnimationShow {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes SpinnerAnimationRotation {
+	0% {
+		transform: scaleX(-1) rotateZ(0deg);
+	}
+	50% {
+		transform: scaleX(-1) rotateZ(-180deg);
+	}
+	100% {
+		transform: scaleX(-1) rotateZ(-360deg);
+	}
+}
+
+.stripe-spinner {
+	animation: SpinnerAnimationShow 250ms ease,
+		SpinnerAnimationRotation 0.7s linear infinite; // The timings are exactly like Stripe Spinner component.
+	transition-timing-function: ease;
+	transition-property: opacity, transform;
+	transform-origin: 50% 50%;
+	display: inline-block;
+	vertical-align: middle; // Support stripe loader inside the buttons.
+}
+
+.woocommerce-embed-page {
+	#wpbody .woocommerce-layout,
+	.woocommerce-layout__notice-list-hide + .wrap {
+		padding-top: 0;
+	}
+}
+
+.settings-payments-main__container {
+	margin: 0 -30px;
+	padding-bottom: 32px;
+
+	.settings-payment-gateways {
+		&__header {
+			display: flex;
+			justify-content: space-between;
+			padding: $gap-smaller 48px $gap-large;
+			align-items: center;
+			// Every header on this screen closes itself off with this line,
+			// rather than leaving it to whatever renders below. What renders
+			// below varies — the provider list, or the skeleton while they
+			// load — and each drawing its own top border is how the line ended
+			// up doubled in one state and missing in another.
+			border-bottom: 1px solid $gray-200;
+
+			@media screen and (max-width: $break-xlarge) {
+				padding: $gap-smaller $gap-large $gap-large;
+			}
+
+			@media screen and (max-width: $break-medium) {
+				padding: $gap-smaller $gap $gap-large;
+			}
+
+			@media screen and (max-width: $break-mobile) {
+				display: block;
+			}
+		}
+
+		&__header-title {
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 24px;
+			// Without this it inherits wp-admin's body grey, which is lighter
+			// than every other heading on the screen.
+			color: $gray-900;
+		}
+
+		&__header-select-container {
+			min-width: 280px;
+			min-height: 36px;
+			background-color: #fff;
+			border: 1px solid $gray-300;
+			display: flex;
+			align-items: center;
+			border-radius: 2px;
+			position: relative;
+
+			.components-input-control__prefix {
+				min-width: fit-content;
+				padding-left: 12px;
+				color: $gray-700;
+			}
+
+			.components-select-control__input {
+				min-height: $button-size-compact;
+			}
+
+			.components-base-control__field {
+				margin-bottom: 0;
+			}
+
+			&--indicator {
+				height: 28px;
+				cursor: pointer;
+				padding-top: 8px;
+				// This 1px is the gap the divider is drawn into. It belongs to
+				// the indicator so that it disappears along with it when the
+				// business location matches the store's country.
+				margin-left: 1px;
+				border-radius: 2px;
+				position: relative;
+
+				// Drawn into that gap rather than as a border inside either box.
+				// A border would sit inside this element, pushing the icon
+				// off-centre and leaving the focus ring 1px closer to the
+				// divider than to the other three sides.
+				&::before {
+					content: "";
+					position: absolute;
+					left: -1px;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 1px;
+					height: 20px;
+					background-color: $gray-200;
+				}
+
+				// Matches the select segment's inset so both rings sit clear of
+				// the container border and the divider between them.
+				&:focus {
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
+				}
+
+				&:focus:not(:focus-visible) {
+					outline: none;
+				}
+
+				&:focus-visible {
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
+				}
+
+				&-icon {
+					height: 20px;
+					// Wide enough that the inset ring clears the icon.
+					padding: 0 8px;
+
+					svg {
+						fill: $alert-yellow;
+						width: 20px;
+						height: 20px;
+					}
+				}
+			}
+
+			@media screen and (max-width: $break-mobile) {
+				margin-top: $gap;
+			}
+		}
+	}
+
+	.woocommerce-list__item-recurring-payments-icon:hover {
+		cursor: pointer;
+	}
+
+	.other-payment-gateways__header__title-image-placeholder {
+		width: 24px;
+		height: 24px;
+		background-color: $gray-100;
+		border-radius: 4px;
+	}
+
+	.other-payment-gateways {
+		border: 1px solid $gray-200;
+		border-radius: 4px;
+		margin: 32px 48px 0 48px;
+		padding: $grid-unit-30 24px;
+
+		&__header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: none;
+			border: none;
+			// Nested corners follow inner = outer - gap. The card is 4px and the
+			// ring clears it by more than that, so the ring wants to be square;
+			// 0 here is as close as it gets, since the ring's own radius is this
+			// value plus the 2px offset. Anything larger reads rounder than the
+			// card that contains it.
+			border-radius: 0;
+			cursor: pointer;
+			text-align: left;
+
+			// A ring's corner radius is border-radius + outline-offset, so the
+			// offset cannot be used to buy clearance without also rounding the
+			// ring past the 4px every other control on this screen uses.
+			// Grow the box with padding instead and cancel it with a matching
+			// negative margin, which leaves the title and chevron in place.
+			// $grid-unit-10 of clearance fits inside the card's padding at every
+			// breakpoint, so it needs no responsive override.
+			width: calc(100% + 2 * #{$grid-unit-10});
+			margin: -$grid-unit-10;
+			padding: $grid-unit-10;
+
+			&:focus {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: 2px;
+			}
+
+			&:focus:not(:focus-visible) {
+				outline: none;
+			}
+
+			&:focus-visible {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: 2px;
+			}
+
+			&__title {
+				display: flex;
+				gap: 10px;
+				font-size: 16px;
+				font-weight: 600;
+				line-height: 24px;
+				align-items: center;
+				// The header is a bare <button>, so without this the title
+				// falls to the browser's black rather than the heading colour
+				// used elsewhere on the screen.
+				color: $gray-900;
+
+				&-image {
+					width: $icon-size;
+					height: $icon-size;
+					border-radius: 2px;
+				}
+
+				@media screen and (max-width: $break-medium) {
+					font-weight: 500;
+				}
+			}
+
+			&__arrow {
+				padding: $grid-unit-05;
+			}
+
+			/* Override hover and focus states for the button */
+			.components-button:focus:not(:disabled) {
+				box-shadow: none;
+				outline: none;
+			}
+
+			.components-button {
+				color: $gray-900;
+			}
+
+			/* Screen reader only text for accessibility */
+			.screen-reader-text {
+				border: 0;
+				clip: rect(1px, 1px, 1px, 1px);
+				clip-path: inset(50%);
+				height: 1px;
+				margin: -1px;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				width: 1px;
+				word-wrap: normal !important;
+			}
+		}
+
+		&.is-expanded {
+			.other-payment-gateways__header {
+				// The header's $grid-unit-10 of padding contributes the rest, so
+				// the content still sits $grid-unit-40 below the title.
+				margin-bottom: $grid-unit-30;
+			}
+		}
+
+		&__content {
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+
+			&__category-container {
+				border-bottom: 1px solid $gray-100;
+
+				// The last element with this class.
+				&:nth-last-child(1 of .other-payment-gateways__content__category-container) {
+					border-bottom: none;
+
+					.other-payment-gateways__content__grid {
+						padding-bottom: 0;
+					}
+				}
+			}
+
+			&__title {
+				display: flex;
+				gap: 4px;
+				align-items: center;
+
+				&__h3 {
+					text-transform: uppercase;
+					font-size: 12px;
+					font-weight: 500;
+					color: $gray-900;
+					line-height: 16px;
+					margin: 0;
+				}
+
+				&__icon-container {
+					height: 16px;
+					cursor: pointer;
+					border-radius: 2px;
+
+					&:focus {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
+
+					&:focus:not(:focus-visible) {
+						outline: none;
+					}
+
+					&:focus-visible {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
+				}
+
+				&__icon {
+					color: $gray-700;
+					width: 16px;
+					height: 16px;
+				}
+			}
+
+			&__grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr); /* 3 columns */
+				gap: $gap; /* Space between columns */
+				padding: $gap 0;
+
+				@media screen and (max-width: $break-wide) {
+					grid-template-columns: repeat(2, 1fr); /* 2 columns */
+				}
+
+				@media screen and (max-width: $break-medium) {
+					grid-template-columns: repeat(1, 1fr); /* w columns */
+				}
+			}
+
+			&__grid-item {
+				display: flex; /* Use Flexbox to align image and content */
+				align-items: flex-start; /* Align items to the top */
+				padding: $gap 0;
+
+				@media screen and (min-width: $break-xlarge) {
+					max-width: 480px;
+				}
+
+				&-image {
+					width: 40px;
+					height: 40px;
+					margin-right: 20px; /* Space between image and text */
+					border-radius: 4px;
+
+					@media screen and (max-width: 782px) {
+						width: 24px;
+						height: 24px;
+					}
+				}
+
+				&__content {
+					display: flex;
+					flex-direction: column; /* Stack title, description, and button vertically */
+					gap: 4px;
+
+					&__title {
+						display: inline-flex;
+						flex-wrap: wrap;
+						gap: 10px;
+						align-items: center;
+						font-size: 14px;
+						font-weight: 600;
+						line-height: 20px;
+					}
+
+					&__description {
+						display: block;
+						font-size: 13px;
+						font-weight: 400;
+						line-height: 20px;
+						color: $gray-700;
+					}
+
+					&__actions {
+						display: flex;
+						gap: $gap-smaller; /* Space between buttons */
+						padding-top: 4px; /* Space between description and buttons */
+
+						button {
+							align-self: flex-start; /* Align button to the left */
+						}
+
+						button.components-button.is-link {
+							text-decoration: none;
+							padding-right: 12px; /* This reserves space for the three dots of loading animation */
+						}
+
+						button.components-button.is-link.is-busy {
+							background: none;
+
+							// Loading animation from here https://stackoverflow.com/a/40991531.
+							&::after {
+								display: inline-block;
+								animation: three-dots-loader steps(1, end) 1s infinite;
+								content: "";
+							}
+						}
+
+						@keyframes three-dots-loader {
+							0% {
+								content: "";
+							}
+							25% {
+								content: ".";
+							}
+							50% {
+								content: "..";
+							}
+							75% {
+								content: "...";
+							}
+							100% {
+								content: "";
+							}
+						}
+					}
+				}
+			}
+
+			&__external-icon {
+				padding: $grid-unit-05;
+			}
+		}
+
+		@media screen and (max-width: $break-xlarge) {
+			margin: 32px $gap-large 0 $gap-large;
+		}
+
+		@media screen and (max-width: $break-medium) {
+			margin: 32px $gap 0 $gap;
+			// One step down from the desktop $grid-unit-30, and uniform: the
+			// former $gap-smaller left the title crowded against the top border
+			// while the sides kept a full $gap.
+			padding: $gap;
+		}
+	}
+
+	.woocommerce-status-badge-popover {
+		.components-popover__content-container {
+			width: 236px;
+		}
+	}
+
+	.more-payment-options-link {
+		padding: 0;
+		text-decoration: none;
+
+		img {
+			height: $grid-unit-20;
+			margin-right: $grid-unit-05;
+		}
+	}
+
+	.more-payment-options {
+		padding: 25px 54px;
+	}
+}
+
+@media screen and (max-width: $break-xlarge) {
+	.settings-payments-main__container {
+		.woocommerce-item__payment-gateway-placeholder {
+			padding: 0 $gap-large;
+		}
+	}
+}
+
+@media screen and (max-width: $break-medium) {
+	.settings-payments-main__container {
+		.woocommerce-item__payment-gateway-placeholder {
+			padding: 0 $gap;
+
+			.woocommerce-list__item-inner {
+				display: grid;
+				grid-template-columns: 30px minmax(200px, 1fr) 40px;
+			}
+
+			.woocommerce-list__item-before {
+				margin-right: 0;
+
+				.drag-handle-wrapper {
+					margin-right: 10px;
+				}
+
+				.list-placeholder__before {
+					display: none;
+				}
+			}
+
+			.list-placeholder__content {
+				width: 80%; /* Set the width of the content to 80% to prevent overflowing */
+			}
+
+			.woocommerce-list__item-after {
+				display: none;
+			}
+		}
+
+		.more-payment-options {
+			padding-left: 25px;
+		}
+	}
+}
+
+.woocommerce-official-extension-badge {
+	display: inline-flex;
+	align-items: center;
+	background: none;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+
+	& > .woocommerce-official-extension-badge__container {
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+		padding: 2px 4px 2px 2px;
+		border-radius: 2px;
+
+		&:focus {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
+
+		> img {
+			height: 16px;
+		}
+	}
+}
+
+// Popover styling
+.settings-payment-gateways__header-select-container--indicator-popover,
+.woocommerce-official-extension-badge-popover,
+.woocommerce-status-badge-popover,
+.other-payment-gateways__content__title-popover {
+	.components-popover__content {
+		background: $white;
+		color: $gray-900;
+		padding: $gap-small;
+		border: 1px solid $gray-100;
+		box-shadow: none;
+		border-radius: 3px;
+
+		a {
+			outline: none;
+			text-decoration: underline;
+		}
+	}
+
+	.components-popover__content-container {
+		width: 216px;
+		font-size: 13px;
+		line-height: 20px;
+
+		// The first paragraph doesn't have a top margin.
+		p:first-of-type {
+			margin-top: 0;
+		}
+
+		// The last paragraph doesn't have a bottom margin.
+		p:last-of-type {
+			margin-bottom: 0;
+		}
+	}
+}
+
+.settings-payment-gateways__header-select-container--indicator-popover {
+	.components-popover__content-container {
+		width: 236px;
+	}
+}
+
+.other-payment-gateways__content__title-popover {
+	.components-popover__content-container {
+		width: 256px;
+	}
+}
+
+.settings-payments-offline__container {
+	.settings-payments-offline__header {
+		display: flex;
+		padding: 8px 48px 24px;
+		align-items: center;
+		// Same ownership as the main screen's header: the line belongs to the
+		// header, on both the methods list and an individual method's page.
+		border-bottom: 1px solid $gray-200;
+
+		h1 {
+			// This heading renders outside the floating header, so the shared
+			// header typography doesn't reach it. It occupies the slot the main
+			// screen gives "Payment providers", so it takes that heading's
+			// scale — the floating header's lighter 15px/500 left this h1
+			// smaller than the section headings and list rows beneath it.
+			// The gap to the chevron lives inside the back button, which sits
+			// within this heading.
+			// Laying the title out as a centred flex row, rather than letting
+			// it sit on a text baseline, is what keeps it level with the main
+			// screen's title: the back button is an inline-flex box, so a
+			// baseline would leave the descender gap below it in the heading's
+			// height. Zeroing the padding drops wp-admin's own h1 padding,
+			// which the row height now covers.
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
+			padding: 0;
+			font-size: 16px;
+			font-weight: 600;
+			color: $gray-900;
+
+			.woocommerce-settings-payments-header__title {
+				line-height: 24px;
+			}
+		}
+	}
+}

@@ -1,0 +1,67 @@
+.settings-payments-onboarding-modal {
+	&__step {
+		&--content-finish {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 48px;
+			text-align: center;
+			max-width: 650px;
+			margin: 0 auto;
+
+			&-title {
+				font-size: 20px;
+				line-height: 24px;
+				margin: 0 0 16px;
+				font-weight: 500;
+				color: $gray-900;
+				width: 100%;
+			}
+
+			&-description {
+				font-size: 13px;
+				line-height: 20px;
+				color: $gray-700;
+				margin: 0 0 32px;
+			}
+
+			.divider {
+				display: flex;
+				align-items: center;
+				margin: 20px 0;
+				width: 100%;
+				max-width: 480px;
+			}
+
+			.divider-line {
+				flex: 1;
+				height: 1px;
+				background-color: $gray-200;
+			}
+
+			.divider-text {
+				padding: 0 16px;
+				color: $gray-700;
+				font-size: 12px;
+				text-transform: uppercase;
+			}
+
+			&-primary-button,
+			&-secondary-button {
+				justify-content: center;
+				width: 100%;
+				max-width: 480px;
+
+				@media (max-width: 1024px) {
+					width: 100%;
+				}
+			}
+
+			@media (max-width: 768px) {
+				padding: $gap-large 0;
+				text-align: left;
+			}
+		}
+	}
+}

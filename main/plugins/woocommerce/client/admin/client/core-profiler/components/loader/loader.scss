@@ -1,0 +1,29 @@
+// Loader page
+.woocommerce-onboarding-loader {
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	background-color: #fff;
+
+	.woocommerce-onboarding-loader-wrapper {
+		align-items: flex-start;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		max-width: 520px;
+		min-height: 400px;
+
+		.woocommerce-onboarding-loader-container {
+			text-align: center;
+			min-height: 400px;
+		}
+
+		.loader-hearticon {
+			position: relative;
+			top: 2px;
+			left: 2px;
+		}
+	}
+}
