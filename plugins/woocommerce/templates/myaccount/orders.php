@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.1.0
+ * @version 11.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -36,9 +36,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 			<?php
 			foreach ( $customer_orders->orders as $customer_order ) {
 				$order = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				if ( ! $order instanceof WC_Order ) {
-					continue;
-				}
+
 				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
@@ -114,7 +112,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							 *
 							 * This filter runs from the `myaccount/orders.php` template, so it is
 							 * not available on sites where a theme overrides the template with a
-							 * copy predating version 11.1.0. Registering the legacy action as well
+							 * copy predating version 11.2.0. Registering the legacy action as well
 							 * is not a workaround for that: the action still suppresses the default
 							 * content and this filter then runs over the action's output, so
 							 * callbacks on both hooks emitting the same markup render it twice.
@@ -123,21 +121,9 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							 * @param WC_Order $order          Current order object.
 							 * @param string   $column_id      Current column ID.
 							 *
-							 * @since 11.1.0
+							 * @since 11.2.0
 							 */
-							$filtered_column_content = apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id );
-
-							if ( is_string( $filtered_column_content ) ) {
-								$column_content = $filtered_column_content;
-							} elseif ( is_int( $filtered_column_content ) || is_float( $filtered_column_content ) || ( is_object( $filtered_column_content ) && method_exists( $filtered_column_content, '__toString' ) ) ) {
-								$column_content = (string) $filtered_column_content;
-							} else {
-								wc_doing_it_wrong(
-									'woocommerce_account_orders_column_content_' . $column_id,
-									__( 'Filter callbacks must return a string (or stringable value) of safe, escaped HTML. Return an empty string to render an empty cell. The unfiltered column content was used instead.', 'woocommerce' ),
-									'11.1.0'
-								);
-							}
+							$column_content = (string) apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id );
 
 							echo $column_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains escaped default content or action hook output; filter callbacks must return safe HTML.
 							?>
