@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show additional checkout fields on orders from any checkout and hide checkboxes with no value.
