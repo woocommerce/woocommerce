@@ -877,8 +877,11 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox CPT order queries match a registered status that differs only in case, mirroring WP_Query's sanitize_key normalization.
+	 *
+	 * @dataProvider case_only_status_provider
+	 * @param mixed $status_query The status query var value (array or comma-separated string).
 	 */
-	public function test_cpt_order_queries_match_registered_status_case_insensitively(): void {
+	public function test_cpt_order_queries_match_registered_status_case_insensitively( $status_query ): void {
 		global $wp_post_statuses;
 
 		$this->toggle_cot_feature_and_usage( false );
@@ -902,7 +905,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$queried_order_ids = wc_get_orders(
 			array(
-				'status' => array( 'WC-CUSTOM' ),
+				'status' => $status_query,
 				'limit'  => -1,
 				'return' => 'ids',
 			)
@@ -913,6 +916,18 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		remove_filter( 'wc_order_statuses', $register_custom_status );
 		unset( $wp_post_statuses['wc-custom'] );
 		$order->delete( true );
+	}
+
+	/**
+	 * Provides status query values that differ only in case, covering both the array and comma-separated string code paths.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public function case_only_status_provider(): array {
+		return array(
+			'array'  => array( array( 'WC-CUSTOM' ) ),
+			'string' => array( 'WC-CUSTOM' ),
+		);
 	}
 
 	/**

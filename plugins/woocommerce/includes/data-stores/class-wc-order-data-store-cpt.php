@@ -959,7 +959,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			if ( is_array( $query_vars['post_status'] ) ) {
 				$requested_statuses = array_map( 'sanitize_key', array_unique( $query_vars['post_status'] ) );
 			} else {
-				$requested_statuses = explode( ',', preg_replace( '|[^a-z0-9_,-]|', '', $query_vars['post_status'] ) );
+				$requested_statuses = array_map( 'sanitize_key', explode( ',', $query_vars['post_status'] ) );
 			}
 			$known_statuses = array_merge( array( 'any', 'all' ), get_post_stati() );
 
