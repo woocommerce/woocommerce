@@ -549,6 +549,30 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Renaming and unpublishing a coupon in one update should stop its old code from resolving.
+	 */
+	public function test_renaming_and_unpublishing_a_coupon_in_one_update_rejects_the_old_code_entry(): void {
+		$old_code = 'rename-unpublish-old';
+		$coupon   = WC_Helper_Coupon::create_coupon( $old_code );
+
+		wc_get_coupon_id_by_code( $old_code );
+		$old_key = $this->sut->get_cache_key( $old_code );
+		$this->assertNotFalse( wp_cache_get( $old_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
+
+		wp_update_post(
+			array(
+				'ID'          => $coupon->get_id(),
+				'post_title'  => 'rename-unpublish-new',
+				'post_status' => 'draft',
+			)
+		);
+
+		$this->assertNotFalse( wp_cache_get( $old_key, 'coupons' ), 'The transition hook only sees the new title, so the entry under the old code should be left for the read-time check' );
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $old_code ), 'The old code must not resolve the coupon once it is renamed and unpublished' );
+		$this->assertFalse( wp_cache_get( $old_key, 'coupons' ), 'The stale entry under the old code should be removed from the object cache' );
+	}
+
+	/**
 	 * @testdox is_lookup_entry_stale() should only trust entries whose ids all belong to published coupons.
 	 */
 	public function test_is_lookup_entry_stale(): void {
