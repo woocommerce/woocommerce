@@ -981,8 +981,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		add_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ), 10, 2 );
 		$post_data = array(
 			'ID'                 => $order->get_id(),
-			'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			'post_status'        => $this->get_post_status( $order ),
 			'post_parent'        => $order->get_parent_id(),
 			'edit_date'          => true,
@@ -991,7 +989,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
 			'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 		);
-		$updated   = wp_update_post( $post_data );
+		// An order with no created date keeps whatever dates the post already has.
+		$date_created = $order->get_date_created( 'edit' );
+		if ( ! is_null( $date_created ) ) {
+			$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
+			$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
+		}
+		$updated = wp_update_post( $post_data );
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
 		return $updated;
 	}

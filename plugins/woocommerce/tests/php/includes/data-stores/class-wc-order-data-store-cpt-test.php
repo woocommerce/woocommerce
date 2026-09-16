@@ -58,6 +58,25 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave the post dates untouched when backfilling an order that has no created date.
+	 */
+	public function test_update_order_from_object_keeps_post_dates_for_order_without_created_date(): void {
+		$order    = OrderHelper::create_order();
+		$before   = get_post( $order->get_id() );
+		$dateless = new WC_Order();
+		$dateless->set_id( $order->get_id() );
+		$dateless->set_status( OrderStatus::COMPLETED );
+		$dateless->set_date_created( null );
+
+		$this->assertNotFalse( ( new WC_Order_Data_Store_CPT() )->update_order_from_object( $dateless ) );
+
+		$after = get_post( $order->get_id() );
+		$this->assertSame( $before->post_date, $after->post_date, 'post_date should be kept.' );
+		$this->assertSame( $before->post_date_gmt, $after->post_date_gmt, 'post_date_gmt should be kept.' );
+		$this->assertSame( 'wc-completed', $after->post_status, 'Other fields should still be written.' );
+	}
+
+	/**
 	 * Test that refund cache are invalidated correctly when refund is deleted.
 	 */
 	public function test_refund_cache_invalidation() {
