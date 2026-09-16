@@ -252,6 +252,8 @@ Text fields don't have any additional options beyond the general options listed 
 
 #### Options for `date` fields
 
+Date field values are strings in `YYYY-MM-DD` format. In JSON Schema, use `type: string` and `format: date`. You can use the field's `validation` option to [validate dates and compare them with other date fields](#date-field-validation).
+
 As well as the options above, date fields support `min` and `max` options to limit the range of dates a shopper can pick.
 
 | Option name | Description | Required? | Example | Default value |
@@ -1032,6 +1034,49 @@ Validation can also be against other fields, for example, an alternative email f
 
 In the example above, we used [format keyword](https://github.com/ajv-validator/ajv-formats) and `$data` to refer to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference). We also used the `errorMessage` property to provide a custom error message.
 
+##### Date field validation
+
+A field registered with `'type' => 'date'` holds a string. Its validation schema uses `'type' => 'string'` and `'format' => 'date'` to check for a real calendar date in `YYYY-MM-DD` format.
+
+WooCommerce supports the [AJV date comparison keywords](https://ajv.js.org/packages/ajv-formats.html#keywords-to-compare-values-formatmaximum-formatminimum-and-formatexclusivemaximum-formatexclusiveminimum):
+
+- `formatMinimum`: on or after the given date.
+- `formatMaximum`: on or before the given date.
+- `formatExclusiveMinimum`: after the given date.
+- `formatExclusiveMaximum`: before the given date.
+
+Each bound accepts a date string or a `$data` reference to another field. For example, register these fields on `woocommerce_init` to require check-out to be after check-in:
+
+```php
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'hotel/check-in',
+		'label'    => 'Check-in',
+		'location' => 'order',
+		'type'     => 'date',
+		'required' => true,
+	)
+);
+
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'         => 'hotel/check-out',
+		'label'      => 'Check-out',
+		'location'   => 'order',
+		'type'       => 'date',
+		'required'   => true,
+		'validation' => array(
+			'type'                   => 'string',
+			'format'                 => 'date',
+			'formatExclusiveMinimum' => array( '$data' => '1/hotel~1check-in' ),
+			'errorMessage'           => 'Check-out must be after check-in.',
+		),
+	)
+);
+```
+
+Schema validation is useful when referencing another field (via $data) or when combining conditions (AnyOf, AllOf, OneOf). If you’re validating against a static date or a relative duration, use [min/max](#options-for-date-fields), which also constrain the calendar to the specified range.
+
 #### `$data` keyword and JSON pointers
 
 `$data` keyword is a way in JSON schema to reference another field's value. In the above example, we use it to refer to the billing email via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference).
@@ -1049,6 +1094,7 @@ We support [JSON Schema Draft-07](https://json-schema.org/draft-07), which is si
 
 - `errorMessage`: Custom error message for validation, in AJV, this is `errorMessage` and in Opis, this is `$error`, we only support `errorMessage` and maps that internally for Opis. We also don't support templates in `errorMessage` for now.
 - `$data`: Refers to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference), both Opis and AJV use the same implementation.
+- `formatMinimum`, `formatMaximum`, `formatExclusiveMinimum`, and `formatExclusiveMaximum`: Compare date strings using the [date field validation rules](#date-field-validation).
 
 
 ### Evaluation Logic
