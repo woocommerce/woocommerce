@@ -242,14 +242,10 @@ test.describe( `${ blockData.name }`, () => {
 
 				expect( containerBox ).not.toBeNull();
 				expect( thumbnailBox ).not.toBeNull();
-				expect( thumbnailBox!.y ).toBeGreaterThanOrEqual(
-					containerBox!.y - 1
-				);
+				// Start-aligned: the selected thumbnail is the first visible one.
 				expect(
-					thumbnailBox!.y + thumbnailBox!.height
-				).toBeLessThanOrEqual(
-					containerBox!.y + containerBox!.height + 1
-				);
+					Math.abs( thumbnailBox!.y - containerBox!.y )
+				).toBeLessThanOrEqual( 1 );
 			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
