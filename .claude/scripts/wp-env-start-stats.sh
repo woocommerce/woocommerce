@@ -34,7 +34,7 @@ START_DATE="2026-07-15"
 # afternoon upstream does not read as wp-env instability. Keep in step with classify().
 # `workspace-eacces` is deliberately absent: it reads like a broken branch, but it is our
 # own wp-env mapping left root-owned by Docker, which our retry then cannot clean.
-NOT_OURS="github-api plugin-code"
+NOT_OURS="github-api github-codeload github-releases plugin-code"
 # Workflows that call the reusable ci.yml and therefore run the wp-env start step.
 WORKFLOWS=".github/workflows/ci.yml .github/workflows/tests-on-release.yml .github/workflows/tests-on-demand.yml"
 PARALLEL=6
@@ -99,8 +99,9 @@ classify() {
   local s="$1"
   if   grep -qaiE 'PHP Parse error|Parse error: syntax error' "$s"; then echo plugin-code
   elif grep -qaE  'Could not open input file: /tmp/composer-setup\.php' "$s"; then echo composer-installer
-  # got@11 is only used by wp-env to fetch core, plugin and theme zips from wordpress.org,
-  # so any transport or 5xx error raised through it belongs to that subsystem.
+  # got@11 is wp-env's download client. Most of what it fetches comes from wordpress.org, so
+  # its transport and 5xx errors land there; the GitHub zip in .wp-env.e2e.json has its own
+  # rule below, keyed on GitHub's address range.
   elif grep -qaE  'AggregateError \[ETIMEDOUT\]|RequestError: read ECONNRESET' "$s"; then echo wordpress-org
   elif grep -qaE  'HTTPError: Response code 429' "$s"; then echo wordpress-org-ratelimit
   elif grep -qaE  'HTTPError: Response code 5[0-9][0-9]' "$s"; then echo wordpress-org
@@ -115,14 +116,18 @@ classify() {
   # Composer fetching dists inside the Docker build. Must stay above the buildkit rule:
   # BuildKit reports it as "failed to solve", which hides the upstream that actually failed.
   elif grep -qaE  'api\.github\.com.*file could not be downloaded' "$s"; then echo github-api
-  # Debian dropped a .deb from the pool that the image's cached apt index still names.
-  # wp-env refreshes that index in its own layer (`RUN apt-get -qy update`, separate from
-  # every `RUN apt-get -qy install`), so BuildKit reuses the stale layer and each attempt
-  # asks for the same dead file. Must stay above the buildkit rule, which would otherwise
-  # swallow it as "failed to solve".
-  elif grep -qaE  'E: Failed to fetch http://deb\.debian\.org' "$s"; then echo debian-apt
+  # Debian 11 (bullseye) reached end of life on 2026-08-31. Its security index still names
+  # packages the pool has deleted (404), and on 2026-09-07/08 the index itself expired.
+  # Neither is a stale cache: a fresh `apt-get update` fails the same way. Fixed on trunk
+  # by #68422. Must stay above the buildkit rule, which reports both as "failed to solve".
+  elif grep -qaE  'E: Failed to fetch http://deb\.debian\.org|E: Release file for http://deb\.debian\.org.* is expired' "$s"; then echo debian-apt
   elif grep -qaiE 'failed to solve' "$s"; then echo buildkit
   elif grep -qaiE 'Error while running docker compose command' "$s"; then echo docker-compose
+  # got reports a connect timeout with the address only. 140.82.112.0/20 is GitHub; the one
+  # GitHub download in wp-env's config is the Basic-Auth zip, served by codeload.github.com.
+  elif grep -qaE  'RequestError: connect ETIMEDOUT 140\.82\.' "$s"; then echo github-codeload
+  # install-k6.sh saves GitHub's error body as the archive, then fails the checksum.
+  elif grep -qaF  'Checksum verification failed!' "$s"; then echo github-releases
   else echo unclassified
   fi
 }
@@ -176,7 +181,7 @@ scan_run() {
     grep -qa '##\[warning\]wp-env-start-retry' "$f" || continue
 
     local reason attempts outcome cause job n e slice
-    reason=$(grep -ao '##\[warning\]wp-env-start-retry reason=[a-z]*' "$f" | tail -1 | sed 's/.*reason=//')
+    reason=$(grep -ao '##\[warning\]wp-env-start-retry reason=[a-z-]*' "$f" | tail -1 | sed 's/.*reason=//')
     attempts=$(grep -ac '##\[warning\]wp-env-start-retry' "$f")
     job=$(basename "$f" .txt | sed -E 's/^[0-9]+_//' | tr '\t|' '  ')
 
@@ -471,7 +476,8 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   awk -F'\t' -v repo="$REPO" '
     function retryable(c) {
       if (c == "plugin-code" || c == "workspace-eacces") return "no — the branch is broken"
-      if (c == "composer-installer" || c == "debian-apt") return "no — BuildKit caches the bad layer"
+      if (c == "composer-installer") return "no — BuildKit caches the bad layer"
+      if (c == "debian-apt") return "no — Debian 11 end of life"
       if (c == "unclassified") return "unknown — add a pattern"
       return "yes"
     }
