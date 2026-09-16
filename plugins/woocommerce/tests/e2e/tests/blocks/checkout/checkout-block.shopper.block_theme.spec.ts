@@ -13,6 +13,7 @@ import {
  */
 import {
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
+	SIMPLE_VIRTUAL_PRODUCT_NAME,
 	FREE_SHIPPING_NAME,
 	FREE_SHIPPING_PRICE,
 	FLAT_RATE_SHIPPING_NAME,
@@ -93,6 +94,97 @@ test.describe( 'Shopper → Local pickup', () => {
 			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
+	} );
+
+	test( 'Delivery/pickup toggle is not shown when shipping methods are disabled', async ( {
+		admin,
+		page,
+		frontendUtils,
+		checkoutPageObject,
+	} ) => {
+		// Zone 0 holds the store's only ordinary methods, Flat rate and Free shipping.
+		await admin.visitAdminPage(
+			'admin.php',
+			'page=wc-settings&tab=shipping&zone_id=0'
+		);
+		const enabledMethodToggles = admin.page.getByRole( 'link', {
+			name: 'Yes',
+		} );
+		await expect( enabledMethodToggles ).toHaveCount( 2 );
+		await enabledMethodToggles.first().click();
+		await expect( enabledMethodToggles ).toHaveCount( 1 );
+		await enabledMethodToggles.first().click();
+		await expect( enabledMethodToggles ).toHaveCount( 0 );
+		await admin.saveAdminPage();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+
+		await expect( page.getByLabel( 'Email address' ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
+		).toBeHidden();
+		await expect(
+			page.getByRole( 'radio', { name: 'Ship', exact: true } )
+		).toBeHidden();
+
+		const pickupLocation = page.getByLabel( 'Testing' ).last();
+		await expect( pickupLocation ).toBeVisible();
+		await pickupLocation.check();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
+		).toBeVisible();
+		await checkoutPageObject.verifyBillingDetails();
+	} );
+} );
+
+test.describe( 'Shopper → Place Virtual Order', () => {
+	test( 'Does not see shipping options for digital orders when shipping is enabled', async ( {
+		checkoutPageObject,
+		frontendUtils,
+		localPickupUtils,
+		page,
+	} ) => {
+		await localPickupUtils.enableLocalPickup();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Delivery', { exact: true } )
+		).toBeHidden();
+
+		await frontendUtils.goToCheckout();
+
+		await expect( page.getByLabel( 'Email address' ) ).toBeVisible();
+		// Delivery total in the sidebar.
+		await expect(
+			page.getByText( 'Delivery', { exact: true } )
+		).toBeHidden();
+		// Ship/Pickup method selector.
+		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
+		await expect(
+			page.getByText( 'Pickup', { exact: true } )
+		).toBeHidden();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
 	} );
 } );
 
@@ -184,24 +276,29 @@ test.describe( 'Shopper → Store shipping disabled', () => {
 		} );
 	} );
 
-	test( 'can place a physical order when store shipping is disabled', async ( {
+	// Local Pickup stays on: enabling it once forced store shipping back on (#44405).
+	test( 'can place a physical order when store shipping is disabled and Local Pickup is enabled', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		localPickupUtils,
 		page,
 	} ) => {
-		await localPickupUtils.disableLocalPickup();
+		await localPickupUtils.enableLocalPickup();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
 		await expect(
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+		).toBeVisible();
+		await expect(
 			page.getByText( 'Delivery', { exact: true } )
 		).toBeHidden();
 
 		await frontendUtils.goToCheckout();
 
+		await expect( page.getByLabel( 'Email address' ) ).toBeVisible();
 		// Delivery total in the sidebar.
 		await expect(
 			page.getByText( 'Delivery', { exact: true } )
