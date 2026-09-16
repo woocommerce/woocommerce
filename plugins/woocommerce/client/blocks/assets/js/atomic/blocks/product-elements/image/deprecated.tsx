@@ -14,7 +14,14 @@ import { isTryingToDisplayLegacySaleBadge } from './utils';
 // In v2, we're migrating the `showSaleBadge` attribute to an inner block.
 const v1 = {
 	save,
-	attributes: metadata.attributes,
+	attributes: {
+		...metadata.attributes,
+		isDescendentOfQueryLoop: { type: 'boolean', default: false },
+		isDescendentOfSingleProductBlock: {
+			type: 'boolean',
+			default: false,
+		},
+	},
 	isEligible: ( { showSaleBadge }: BlockAttributes ) =>
 		isTryingToDisplayLegacySaleBadge( showSaleBadge ),
 	migrate: ( attributes: BlockAttributes ) => {
@@ -40,6 +47,20 @@ const v1 = {
 			],
 		];
 	},
+	apiVersion: 3,
 };
 
-export default [ v1 ];
+const v2 = {
+	save,
+	attributes: {
+		...metadata.attributes,
+		isDescendentOfQueryLoop: { type: 'boolean', default: false },
+		isDescendentOfSingleProductBlock: {
+			type: 'boolean',
+			default: false,
+		},
+	},
+	apiVersion: 3,
+};
+
+export default [ v2, v1 ];
