@@ -534,6 +534,42 @@ jQuery( function ( $ ) {
 				$( 'div.shipping_address' ).slideDown();
 			}
 		},
+		/**
+		 * Reload the checkout once when its nonce is rejected.
+		 *
+		 * A 403 from update_order_review means the page was rendered for a different session, typically
+		 * because the browser restored a checkout from before the shopper logged in. Reloading fetches a
+		 * fresh page. The flag stops a second reload when the fresh page is rejected as well.
+		 *
+		 * @return {boolean} Whether a reload was started.
+		 */
+		reload_once_for_stale_nonce: function () {
+			var key = 'wc_checkout_stale_nonce_reload';
+
+			try {
+				if ( window.sessionStorage.getItem( key ) ) {
+					window.sessionStorage.removeItem( key );
+					return false;
+				}
+
+				window.sessionStorage.setItem( key, '1' );
+			} catch ( e ) {
+				// Without storage there is no way to break a reload loop, so let the notice handle it.
+				return false;
+			}
+
+			window.location.reload();
+			return true;
+		},
+		clear_stale_nonce_reload_flag: function () {
+			try {
+				window.sessionStorage.removeItem(
+					'wc_checkout_stale_nonce_reload'
+				);
+			} catch ( e ) {
+				// Nothing to clear.
+			}
+		},
 		reset_update_checkout_timer: function () {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
@@ -760,6 +796,8 @@ jQuery( function ( $ ) {
 						return;
 					}
 
+					wc_checkout_form.clear_stale_nonce_reload_flag();
+
 					// Remove any notices added previously
 					$( '.woocommerce-NoticeGroup-updateOrderReview' ).remove();
 
@@ -919,6 +957,31 @@ jQuery( function ( $ ) {
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
+				},
+				error: function ( jqXHR, textStatus ) {
+					// A request superseded by a newer one is aborted on purpose.
+					if ( 'abort' === textStatus ) {
+						return;
+					}
+
+					if (
+						403 === jqXHR.status &&
+						wc_checkout_form.reload_once_for_stale_nonce()
+					) {
+						return;
+					}
+
+					$(
+						'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
+					).unblock();
+
+					if ( 403 === jqXHR.status ) {
+						wc_checkout_form.submit_error(
+							'<div class="woocommerce-error">' +
+								wc_checkout_params.i18n_checkout_stale +
+								'</div>'
+						);
+					}
 				},
 			} );
 		},

@@ -679,6 +679,7 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
+					'i18n_checkout_stale'       => esc_html__( 'This checkout page is out of date. Please reload it to continue.', 'woocommerce' ),
 					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
 				);
 				break;
