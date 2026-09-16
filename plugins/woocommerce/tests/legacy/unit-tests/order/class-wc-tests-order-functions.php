@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class Functions.
@@ -1912,6 +1913,119 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Should return nothing when searching for nonexistent term.
 		$this->assertEmpty( wc_order_search( 'Nonexistent term' ) );
+	}
+
+	/**
+	 * @testdox wc_order_search() respects configured, filtered, unlimited, and invalid result limits.
+	 *
+	 * @since 11.1.0
+	 */
+	public function test_wc_order_search_limit() {
+		$orders = array(
+			$this->create_order(),
+			$this->create_order(),
+			$this->create_order(),
+		);
+		foreach ( $orders as $index => $order ) {
+			$order->set_date_created( sprintf( '2025-01-%02d 00:00:00', $index + 1 ) );
+			$order->save();
+		}
+
+		$search_limit         = 2;
+		$limit_search_results = static function () use ( &$search_limit ) {
+			return $search_limit;
+		};
+
+		$order_ids = array_map(
+			static function ( $order ) {
+				return $order->get_id();
+			},
+			$orders
+		);
+
+		$posts_per_page = get_option( 'posts_per_page' );
+		try {
+			update_option( 'posts_per_page', 1 );
+			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
+
+			add_filter( 'woocommerce_order_search_limit', $limit_search_results );
+			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+
+			$search_results_filter = OrderUtil::custom_orders_table_usage_is_enabled()
+				? 'woocommerce_cot_shop_order_search_results'
+				: 'woocommerce_shop_order_search_results';
+			$append_search_result = static function ( $search_results ) use ( $order_ids ) {
+				$search_results[] = $order_ids[0];
+				return $search_results;
+			};
+			add_filter( $search_results_filter, $append_search_result );
+			try {
+				$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+			} finally {
+				remove_filter( $search_results_filter, $append_search_result );
+			}
+
+			$search_limit = -1;
+			$this->assertSame( array( $order_ids[2], $order_ids[1], $order_ids[0] ), wc_order_search( 'Jeroen' ) );
+
+			$search_limit = -2;
+			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
+		} finally {
+			remove_filter( 'woocommerce_order_search_limit', $limit_search_results );
+			update_option( 'posts_per_page', $posts_per_page );
+		}
+	}
+
+	/**
+	 * @testdox wc_order_search() excludes newer non-order posts before applying the CPT candidate limit.
+	 *
+	 * @since 11.1.0
+	 */
+	public function test_wc_order_search_limit_excludes_non_order_posts() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'CPT candidate SQL is not used when HPOS is enabled.' );
+		}
+
+		$orders = array(
+			$this->create_order(),
+			$this->create_order(),
+		);
+		foreach ( $orders as $index => $order ) {
+			$order->set_date_created( sprintf( '2025-01-%02d 00:00:00', $index + 1 ) );
+			$order->save();
+		}
+
+		$order_ids = array_map(
+			static function ( $order ) {
+				return $order->get_id();
+			},
+			$orders
+		);
+		$posts_per_page     = get_option( 'posts_per_page' );
+		$non_order_post_id = 0;
+		try {
+			$inserted_post_id = wp_insert_post(
+				array(
+					'post_date'     => '2025-01-03 00:00:00',
+					'post_date_gmt' => '2025-01-03 00:00:00',
+					'post_status'   => 'publish',
+					'post_title'    => 'Jeroen',
+					'post_type'     => 'post',
+				),
+				true
+			);
+			$this->assertNotWPError( $inserted_post_id );
+			$non_order_post_id = absint( $inserted_post_id );
+			update_post_meta( $non_order_post_id, '_billing_last_name', 'Jeroen' );
+
+			update_option( 'posts_per_page', 1 );
+			$this->assertSame( array( $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+		} finally {
+			if ( $non_order_post_id ) {
+				wp_delete_post( $non_order_post_id, true );
+			}
+			update_option( 'posts_per_page', $posts_per_page );
+		}
 	}
 
 	/**
