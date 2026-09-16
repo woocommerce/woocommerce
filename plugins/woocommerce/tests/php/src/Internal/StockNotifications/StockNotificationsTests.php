@@ -207,6 +207,36 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox init_hooks() defers to init when called before it, instead of building the feature definitions early.
+	 */
+	public function test_init_hooks_defers_to_init_when_called_early(): void {
+		global $wp_actions;
+
+		$this->setExpectedDeprecated( StockNotifications::class . '::init_hooks' );
+
+		$controller = wc_get_container()->get( StockNotifications::class );
+		$init_count = $wp_actions['init'] ?? 0;
+		$was_hooked = has_action( 'init', array( $controller, 'maybe_init_services' ) );
+
+		remove_filter( 'woocommerce_data_stores', array( $controller, 'register_data_stores' ) );
+		remove_action( 'init', array( $controller, 'maybe_init_services' ), 1 );
+		// Pretend init has not fired yet; restored in the finally block.
+		unset( $wp_actions['init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			$controller->init_hooks();
+
+			$this->assertSame( 1, has_action( 'init', array( $controller, 'maybe_init_services' ) ), 'maybe_init_services() should be queued on init at priority 1' );
+			$this->assertFalse( has_filter( 'woocommerce_data_stores', array( $controller, 'register_data_stores' ) ), 'Nothing should be wired up before init' );
+		} finally {
+			$wp_actions['init'] = $init_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			if ( false === $was_hooked ) {
+				remove_action( 'init', array( $controller, 'maybe_init_services' ), 1 );
+			}
+		}
+	}
+
+	/**
 	 * @testdox The stock notification data store becomes available once the feature is enabled.
 	 */
 	public function test_maybe_init_services_registers_the_data_store_when_the_feature_is_enabled(): void {

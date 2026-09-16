@@ -58,7 +58,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 * Set up the data retention tasks when WooCommerce is installed or updated.
 	 */
 	public function on_install_or_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 
@@ -144,7 +144,16 @@ class StockNotifications implements RegisterHooksInterface {
 	 */
 	public function init_hooks(): void {
 		wc_deprecated_function( __METHOD__, '11.2.0', __CLASS__ . '::maybe_init_services()' );
-		$this->maybe_init_services();
+
+		if ( did_action( 'init' ) ) {
+			$this->maybe_init_services();
+			return;
+		}
+
+		// Alpha-era callers ran this on plugins_loaded. Defer so the feature check
+		// runs after the textdomain is loaded, or the feature definitions would be
+		// built untranslated and WordPress would flag the early translation call.
+		add_action( 'init', array( $this, 'maybe_init_services' ), 1 );
 	}
 
 	/**
@@ -156,8 +165,10 @@ class StockNotifications implements RegisterHooksInterface {
 	public function register_data_stores( $data_stores ) {
 		// WC_Data_Store::__construct() re-applies this filter on every data store load,
 		// so re-check the feature: it can be switched off after this callback was
-		// attached at `init`.
-		if ( ! self::is_enabled() ) {
+		// attached at `init`. Read the option directly rather than through
+		// feature_is_enabled(): a data store can be loaded before `init`, and building
+		// the translated feature definitions that early is not safe.
+		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) && ! self::is_alpha_enabled() ) {
 			return $data_stores;
 		}
 
@@ -172,15 +183,24 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Check whether the feature is enabled.
 	 *
-	 * Reads the option directly rather than through feature_is_enabled(), which builds
-	 * translated feature definitions on every call. The alpha constant counts as enabled
-	 * too: sites that opted in through it must keep working until, and during, the request
-	 * that runs wc_update_1120_migrate_stock_notifications_alpha_constant().
+	 * Must not run before `init`: feature_is_enabled() builds the translated feature
+	 * definitions on first use. Every caller is hooked at `init` or later.
 	 *
 	 * @return bool
 	 */
 	private static function is_enabled(): bool {
-		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' )
-			|| Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) || self::is_alpha_enabled();
+	}
+
+	/**
+	 * Check whether the site opted in through the alpha constant.
+	 *
+	 * Counts as enabled so those sites keep working until, and during, the request
+	 * that runs wc_update_1120_migrate_stock_notifications_alpha_constant().
+	 *
+	 * @return bool
+	 */
+	private static function is_alpha_enabled(): bool {
+		return Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 	}
 }
