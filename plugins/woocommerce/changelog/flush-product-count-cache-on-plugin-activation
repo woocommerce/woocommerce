@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flush product count cache on plugin (de)activation so custom product statuses appear immediately.

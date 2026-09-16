@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep other packages' shipping selections when one package's selection fails, and leave the rejected rate unselected so the shopper can retry it.

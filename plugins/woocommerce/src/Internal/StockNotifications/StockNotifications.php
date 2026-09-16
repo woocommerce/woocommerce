@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -57,7 +58,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 * Set up the data retention tasks when WooCommerce is installed or updated.
 	 */
 	public function on_install_or_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 
@@ -106,7 +107,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function maybe_init_services(): void {
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 
@@ -135,6 +136,32 @@ class StockNotifications implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Register hooks and services.
+	 *
+	 * Declared without a native return type on purpose: the method it restores had
+	 * none, and adding one would fatal any subclass that overrides it.
+	 *
+	 * @deprecated 11.2.0 Replaced by maybe_init_services().
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function init_hooks() {
+		wc_deprecated_function( __METHOD__, '11.2.0', __CLASS__ . '::maybe_init_services()' );
+
+		if ( did_action( 'init' ) ) {
+			$this->maybe_init_services();
+			return;
+		}
+
+		// Alpha-era callers ran this on plugins_loaded. Defer so the feature check
+		// runs after the textdomain is loaded, or the feature definitions would be
+		// built untranslated and WordPress would flag the early translation call.
+		add_action( 'init', array( $this, 'maybe_init_services' ), 1 );
+	}
+
+	/**
 	 * Register the data stores, unless the feature is disabled.
 	 *
 	 * @param array $data_stores Data stores.
@@ -142,10 +169,11 @@ class StockNotifications implements RegisterHooksInterface {
 	 */
 	public function register_data_stores( $data_stores ) {
 		// WC_Data_Store::__construct() re-applies this filter on every data store load,
-		// so re-check the option: the feature can be switched off after this callback was
+		// so re-check the feature: it can be switched off after this callback was
 		// attached at `init`. Read the option directly rather than through
-		// feature_is_enabled(), which builds translated feature definitions.
-		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) ) {
+		// feature_is_enabled(): a data store can be loaded before `init`, and building
+		// the translated feature definitions that early is not safe.
+		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) && ! self::is_alpha_enabled() ) {
 			return $data_stores;
 		}
 
@@ -155,5 +183,35 @@ class StockNotifications implements RegisterHooksInterface {
 
 		$data_stores['stock_notification'] = wc_get_container()->get( StockNotificationsDataStore::class );
 		return $data_stores;
+	}
+
+	/**
+	 * Check whether the feature is enabled.
+	 *
+	 * Must not run before `init`: feature_is_enabled() builds the translated feature
+	 * definitions on first use. Every caller is hooked at `init` or later.
+	 *
+	 * @return bool
+	 */
+	private static function is_enabled(): bool {
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) || self::is_alpha_enabled();
+	}
+
+	/**
+	 * Check whether the site opted in through the alpha constant.
+	 *
+	 * Only bridges the gap until wc_update_1120_migrate_stock_notifications_alpha_constant()
+	 * has copied the constant into the feature option. The database version is bumped
+	 * after every 11.2.0 callback has run, so once it reaches 11.2.0 the Features screen
+	 * toggle is the only switch.
+	 *
+	 * @return bool
+	 */
+	private static function is_alpha_enabled(): bool {
+		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			return false;
+		}
+
+		return version_compare( (string) get_option( 'woocommerce_db_version', '0' ), '11.2.0', '<' );
 	}
 }
