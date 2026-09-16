@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WC_Product;
 
 /**
  * Starts or ends scheduled sales for a list of products, a batch at a time.
@@ -54,8 +53,8 @@ class ScheduledSaleBatchProcessor {
 	/**
 	 * Apply a sale state to every product in the list, one batch at a time.
 	 *
-	 * @param (int|string|float|WC_Product|object)[] $product_ids Product references, as returned by the product data store.
-	 * @param string                                 $mode        'start' or 'end'.
+	 * @param (int|string)[] $product_ids Product ids, as returned by the product data store.
+	 * @param string         $mode        'start' or 'end'.
 	 */
 	public function process( array $product_ids, string $mode ): void {
 		// product_objects entries are released by id, which reaches a real wp_cache_delete()

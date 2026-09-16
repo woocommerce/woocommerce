@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-use WC_Product;
 
 /**
  * Starts or ends a scheduled sale for one batch of products, then releases the
@@ -59,19 +58,19 @@ class ScheduledSaleBatch {
 	/**
 	 * Initialize a scheduled sale batch.
 	 *
-	 * @param (int|string|float|WC_Product|object)[] $entries             Data-store rows for this batch.
-	 * @param string                                 $mode                'start' or 'end'.
-	 * @param ProductUtil                            $product_util        The product utility.
-	 * @param ProductCache|null                      $product_cache       The product object cache, when the feature is enabled.
-	 * @param bool                                   $flush_shared_groups Whether the products and term-queries groups may be flushed.
+	 * @param (int|string)[]    $product_ids        Product ids for this batch.
+	 * @param string            $mode               'start' or 'end'.
+	 * @param ProductUtil       $product_util       The product utility.
+	 * @param ProductCache|null $product_cache      The product object cache, when the feature is enabled.
+	 * @param bool              $flush_shared_groups Whether the products and term-queries groups may be flushed.
 	 * @throws \InvalidArgumentException When the sale mode is unsupported.
 	 */
-	public function __construct( array $entries, string $mode, ProductUtil $product_util, ?ProductCache $product_cache, bool $flush_shared_groups ) {
+	public function __construct( array $product_ids, string $mode, ProductUtil $product_util, ?ProductCache $product_cache, bool $flush_shared_groups ) {
 		if ( ! in_array( $mode, array( 'start', 'end' ), true ) ) {
 			throw new \InvalidArgumentException( 'Scheduled sale mode must be either start or end.' );
 		}
 
-		$this->product_ids         = $this->normalize_ids( $entries );
+		$this->product_ids         = $this->normalize_ids( $product_ids );
 		$this->mode                = $mode;
 		$this->product_util        = $product_util;
 		$this->product_cache       = $product_cache;
@@ -106,55 +105,13 @@ class ScheduledSaleBatch {
 	}
 
 	/**
-	 * Reduce data-store rows to unique, positive product ids.
+	 * Normalize product ids to unique, positive integers.
 	 *
-	 * The default data store returns ids as strings, and a replaced store may return
-	 * products or post objects. Anything that is not a whole positive number is dropped
-	 * rather than cast, so a malformed row cannot resolve to an unrelated post.
-	 *
-	 * @param array $entries Data-store rows.
+	 * @param (int|string)[] $product_ids Product ids.
 	 * @return int[] Unique product ids, in their original order.
 	 */
-	private function normalize_ids( array $entries ): array {
-		$ids = array();
-
-		foreach ( $entries as $entry ) {
-			if ( $entry instanceof WC_Product ) {
-				$id = $entry->get_id();
-			} elseif ( is_object( $entry ) ) {
-				$id = $this->to_whole_positive_int( $entry->ID ?? null );
-			} else {
-				$id = $this->to_whole_positive_int( $entry );
-			}
-
-			if ( $id > 0 ) {
-				$ids[] = $id;
-			}
-		}
-
-		return array_values( array_unique( $ids ) );
-	}
-
-	/**
-	 * Convert a value to a positive integer only when it already is one.
-	 *
-	 * @param mixed $value Value to convert.
-	 * @return int The value as an integer, or 0 when it is not a whole positive number.
-	 */
-	private function to_whole_positive_int( $value ): int {
-		if ( is_int( $value ) ) {
-			return max( $value, 0 );
-		}
-
-		if ( is_float( $value ) && floor( $value ) === $value ) {
-			return max( (int) $value, 0 );
-		}
-
-		if ( is_string( $value ) && ctype_digit( $value ) ) {
-			return (int) $value;
-		}
-
-		return 0;
+	private function normalize_ids( array $product_ids ): array {
+		return array_values( array_unique( array_filter( array_map( 'absint', $product_ids ) ) ) );
 	}
 
 	/**
