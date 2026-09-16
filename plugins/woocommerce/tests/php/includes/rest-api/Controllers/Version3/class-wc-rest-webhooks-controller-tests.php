@@ -233,6 +233,198 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The offset parameter skips that many webhooks.
+	 */
+	public function test_offset_skips_the_given_number_of_webhooks(): void {
+		wp_set_current_user( 1 );
+		$webhook_ids = $this->create_webhooks( 5 );
+
+		$this->assertSame(
+			array_slice( $webhook_ids, 2, 2 ),
+			$this->listed_webhook_ids(
+				array(
+					'per_page' => 2,
+					'offset'   => 2,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox An offset takes precedence over the page parameter.
+	 */
+	public function test_offset_takes_precedence_over_page(): void {
+		wp_set_current_user( 1 );
+		$webhook_ids = $this->create_webhooks( 5 );
+
+		$this->assertSame(
+			array_slice( $webhook_ids, 2, 2 ),
+			$this->listed_webhook_ids(
+				array(
+					'per_page' => 2,
+					'offset'   => 2,
+					'page'     => 1,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox An offset of zero leaves the page parameter in charge.
+	 */
+	public function test_zero_offset_leaves_paging_to_the_page_parameter(): void {
+		wp_set_current_user( 1 );
+		$webhook_ids = $this->create_webhooks( 5 );
+
+		$this->assertSame(
+			array_slice( $webhook_ids, 2, 2 ),
+			$this->listed_webhook_ids(
+				array(
+					'per_page' => 2,
+					'offset'   => 0,
+					'page'     => 2,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox An offset past the last webhook returns nothing.
+	 */
+	public function test_offset_past_the_end_returns_no_webhooks(): void {
+		wp_set_current_user( 1 );
+		$webhook_ids = $this->create_webhooks( 5 );
+
+		$this->assertSame(
+			array(),
+			$this->listed_webhook_ids(
+				array(
+					'per_page' => 2,
+					'offset'   => count( $webhook_ids ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox An offset request reports the whole result set in its pagination headers.
+	 */
+	public function test_offset_reports_the_full_total_in_its_headers(): void {
+		wp_set_current_user( 1 );
+		$this->create_webhooks( 5 );
+
+		$headers = $this->request_webhooks(
+			array(
+				'per_page' => 2,
+				'offset'   => 2,
+			)
+		)->get_headers();
+
+		$this->assertEquals( 5, $headers['X-WP-Total'] );
+		$this->assertEquals( 3, $headers['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox The links an offset request advertises lead to the pages either side of it.
+	 */
+	public function test_offset_pagination_links_lead_to_the_adjacent_pages(): void {
+		wp_set_current_user( 1 );
+		$webhook_ids = $this->create_webhooks( 5 );
+
+		$headers = $this->request_webhooks(
+			array(
+				'per_page' => 2,
+				'offset'   => 2,
+			)
+		)->get_headers();
+
+		// Offset 2 over pages of 2 is page 2, so the links either side are pages 1 and 3.
+		// Following them has to move: an offset left in the link would win over its page
+		// and hand back the offset-2 slice again.
+		$this->assertSame( array_slice( $webhook_ids, 0, 2 ), $this->follow_link( $headers['Link'], 'prev' ) );
+		$this->assertSame( array_slice( $webhook_ids, 4, 2 ), $this->follow_link( $headers['Link'], 'next' ) );
+	}
+
+	/**
+	 * Create webhooks, returning their IDs in creation order.
+	 *
+	 * @param int $count How many webhooks to create.
+	 * @return int[]
+	 */
+	private function create_webhooks( int $count ): array {
+		$webhook_ids = array();
+
+		for ( $i = 1; $i <= $count; $i++ ) {
+			$webhook = new WC_Webhook();
+			$webhook->set_name( 'paginated webhook ' . $i );
+			$webhook->set_status( 'active' );
+			$webhook->set_topic( 'order.created' );
+			$webhook->set_delivery_url( self::PING_URL_PREFIX . 'paginated-' . $i );
+			$webhook->save();
+			$webhook_ids[] = $webhook->get_id();
+		}
+
+		return $webhook_ids;
+	}
+
+	/**
+	 * List webhooks oldest first, so a slice of the created IDs is the expected result.
+	 *
+	 * @param array $query_params Query parameters to add to the request.
+	 * @return WP_REST_Response
+	 */
+	private function request_webhooks( array $query_params ) {
+		return $this->do_rest_get_request(
+			'webhooks',
+			array_merge(
+				array(
+					'orderby' => 'id',
+					'order'   => 'asc',
+				),
+				$query_params
+			)
+		);
+	}
+
+	/**
+	 * The IDs a webhook list request returns.
+	 *
+	 * @param array $query_params Query parameters to add to the request.
+	 * @return int[]
+	 */
+	private function listed_webhook_ids( array $query_params ): array {
+		$response = $this->request_webhooks( $query_params );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		return wp_list_pluck( $response->get_data(), 'id' );
+	}
+
+	/**
+	 * Request a pagination link and return the webhook IDs it yields.
+	 *
+	 * The header holds one or more `<url>; rel="name"` entries separated by commas.
+	 *
+	 * @param string $link_header The Link header of a list response.
+	 * @param string $rel The link relation to follow, such as `prev` or `next`.
+	 * @return int[]
+	 */
+	private function follow_link( string $link_header, string $rel ): array {
+		$matched = preg_match( '/<(?P<url>[^>]+)>; rel="' . preg_quote( $rel, '/' ) . '"/', $link_header, $matches );
+
+		$this->assertSame( 1, $matched, "The Link header advertises no {$rel} link." );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/webhooks' );
+		$request->set_query_params( wp_parse_args( (string) wp_parse_url( $matches['url'], PHP_URL_QUERY ) ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		return wp_list_pluck( $response->get_data(), 'id' );
+	}
+
+	/**
 	 * Answer a webhook ping with a 200 so no delivery leaves the test.
 	 *
 	 * @param array  $request Request arguments.
