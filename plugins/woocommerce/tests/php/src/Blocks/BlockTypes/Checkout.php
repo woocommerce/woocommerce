@@ -175,11 +175,24 @@ class Checkout extends \WP_UnitTestCase {
 					'tax_status' => 'taxable',
 				)
 			);
+			// Local Pickup only registers as a shipping method when the Checkout block is the store's checkout.
+			$checkout_page_id = self::factory()->post->create(
+				array(
+					'post_type'    => 'page',
+					'post_status'  => 'publish',
+					'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->',
+				)
+			);
+			update_option( 'woocommerce_checkout_page_id', $checkout_page_id );
 
 			$shipping_zone->set_zone_name( 'Checkout asset-data test' );
 			$shipping_zone->save();
 			$shipping_zone->add_shipping_method( 'flat_rate' );
 			$this->flush_shipping_method_cache();
+
+			$shipping_methods = WC()->shipping()->get_shipping_methods();
+			$this->assertArrayHasKey( 'pickup_location', $shipping_methods, 'Local Pickup should be registered when the Checkout block is the store checkout.' );
+			$this->assertSame( 'yes', $shipping_methods['pickup_location']->enabled, 'Local Pickup should be enabled for every topology case.' );
 
 			$data = $this->get_checkout_asset_data();
 			$this->assertFalse(
@@ -211,16 +224,14 @@ class Checkout extends \WP_UnitTestCase {
 			$this->assertFalse( $data['shippingMethodsExist'], 'No ordinary shipping method should be exposed when none is configured.' );
 			$this->assertFalse( $data['shippingEnabled'], 'Globally disabled store shipping should be exposed.' );
 		} finally {
-			// The zone, the method rows and both options are inside the transaction.
-			// The memo on the WC_Shipping singleton is not, and this class extends
-			// WP_UnitTestCase, so nothing else reloads it.
+			// The zone, the method rows, the checkout page and the options are inside the
+			// transaction. The memo on the WC_Shipping singleton is not, and this class
+			// extends WP_UnitTestCase, so nothing else reloads it.
 			//
 			// Drop the memo rather than reloading it. A reload here runs before
-			// tear_down() rolls anything back, so it rebuilds the memo from option
-			// values this test is about to revert. That happens to read back clean
-			// today, because pickup_location is not among the methods registered in
-			// the test environment, but it stays clean by accident rather than by
-			// design. Nulling the memo lets the next reader load from whatever the
+			// tear_down() rolls anything back, so it would rebuild the memo from option
+			// values this test is about to revert, including the enabled Local Pickup
+			// method. Nulling the memo lets the next reader load from whatever the
 			// database says once the transaction is gone.
 			WC()->shipping()->unregister_shipping_methods();
 		}
