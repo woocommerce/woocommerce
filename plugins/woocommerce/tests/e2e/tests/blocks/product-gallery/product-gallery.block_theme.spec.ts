@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Locator } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -133,6 +133,119 @@ test.describe( `${ blockData.name }`, () => {
 				expect( newViewerImageId ).toBe( secondImageThumbnailId );
 				expect( newActiveThumbnailId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
+		} );
+
+		test( 'keeps the active thumbnail in view after switching variations', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			// Give the Hoodie enough gallery images for the thumbnails strip to
+			// overflow, with the Green variation's image at the very end so a
+			// variation switch moves it from the last slot to the first.
+			// `wpCLI` output starts with the `npm run` banner; the command's
+			// own output is the last line.
+			const lastLine = ( output: { stdout: string } ) =>
+				output.stdout.trim().split( '\n' ).pop()?.trim() ?? '';
+			const hoodieProductId = lastLine(
+				await wpCLI(
+					'post list --post_type=product --field=ID --name="Hoodie" --format=ids'
+				)
+			);
+			const greenImageId = lastLine(
+				await wpCLI(
+					'post list --post_type=attachment --field=ID --name="hoodie-green-1.jpg" --format=ids'
+				)
+			);
+			const attachmentIds = lastLine(
+				await wpCLI(
+					'post list --post_type=attachment --post_mime_type=image --field=ID --format=ids'
+				)
+			)
+				.split( /\s+/ )
+				.filter( ( id ) => /^\d+$/.test( id ) && id !== greenImageId );
+
+			expect( hoodieProductId ).toMatch( /^\d+$/ );
+			expect( greenImageId ).toMatch( /^\d+$/ );
+
+			expect( attachmentIds.length ).toBeGreaterThan( 10 );
+
+			await wpCLI(
+				`post meta update ${ hoodieProductId } _product_image_gallery "${ [
+					...attachmentIds,
+					greenImageId,
+				].join( ',' ) }"`
+			);
+
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editor.insertBlock( {
+				name: 'woocommerce/add-to-cart-with-options',
+			} );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( '/product/hoodie/' );
+
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'frontend',
+			} );
+			const scrollableContainer = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
+			const activeThumbnail = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail:not([hidden])',
+				{
+					has: page.locator(
+						'.wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+					),
+				}
+			);
+
+			await expect( thumbnailsBlock ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
+
+			const addToCartBlock = page.locator(
+				'.wp-block-add-to-cart-with-options'
+			);
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Logo' } )
+				.getByRole( 'radio', { name: 'No', exact: true } )
+				.click();
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Green', exact: true } )
+				.click();
+
+			await expect( async () => {
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					greenImageId
+				);
+				expect( await pageObject.getViewerImageId() ).toBe(
+					greenImageId
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			// The selected thumbnail now sits in the first slot; the strip must
+			// be scrolled so that slot is visible, not to where the thumbnail
+			// was before the gallery re-ordered it.
+			await expect( async () => {
+				const containerBox = await scrollableContainer.boundingBox();
+				const thumbnailBox = await activeThumbnail.boundingBox();
+
+				expect( containerBox ).not.toBeNull();
+				expect( thumbnailBox ).not.toBeNull();
+				expect( thumbnailBox!.y ).toBeGreaterThanOrEqual(
+					containerBox!.y - 1
+				);
+				expect(
+					thumbnailBox!.y + thumbnailBox!.height
+				).toBeLessThanOrEqual(
+					containerBox!.y + containerBox!.height + 1
+				);
+			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
 

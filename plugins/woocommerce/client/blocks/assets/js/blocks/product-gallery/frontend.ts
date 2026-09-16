@@ -169,7 +169,7 @@ const scrollImageEverywhereIntoView = (
 	behavior: ScrollBehavior = 'smooth'
 ) => {
 	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId );
+	scrollThumbnailIntoView( imageId, behavior );
 };
 
 /**
@@ -296,11 +296,47 @@ const scrollImageIntoView = (
 };
 
 /**
- * Scrolls the thumbnail into view.
+ * Visible thumbnail wrappers in their current visual order.
  *
- * @param {number} imageId - The ID of the thumbnail to scroll into view.
+ * `toggleImageVisibility` re-slots thumbnails through `style.order`, so the
+ * visual order is the numeric `order` once the watches have run and the DOM
+ * order before that (server-rendered markup has no inline `order`).
  */
-const scrollThumbnailIntoView = ( imageId: number ) => {
+const getVisibleThumbnailSlots = ( scrollContainer: HTMLElement ) =>
+	Array.from(
+		scrollContainer.querySelectorAll< HTMLElement >( SELECTORS.thumbnail )
+	)
+		.map( ( wrapper, domIndex ) => ( {
+			wrapper,
+			position:
+				wrapper.style.order === ''
+					? domIndex
+					: Number( wrapper.style.order ),
+		} ) )
+		.filter( ( { wrapper } ) => ! wrapper.hidden )
+		.sort( ( a, b ) => a.position - b.position )
+		.map( ( { wrapper } ) => wrapper );
+
+/**
+ * Scrolls the thumbnail strip so the slot the image occupies in `imageData`
+ * is centered.
+ *
+ * The scroll target is derived from the slot index, not from the thumbnail's
+ * own bounding rect. Changing `imageData` (e.g. a variation switch) re-slots
+ * thumbnails via `style.order`, but the iAPI applies `data-wp-watch` updates
+ * on the next frame, so at this point the rect still describes the slot the
+ * thumbnail is leaving (or is empty when it was hidden). Slot positions only
+ * depend on the index because every wrapper shares the same flex-basis and
+ * gap, so measuring two adjacent visible slots gives the pitch for all of
+ * them.
+ *
+ * @param {number}         imageId  - The ID of the thumbnail to scroll into view.
+ * @param {ScrollBehavior} behavior - Scroll behavior; `instant` when swapping image sets.
+ */
+const scrollThumbnailIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
 	if ( ! imageId ) {
 		return;
 	}
@@ -319,48 +355,57 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const thumbnailElement = galleryContainer.querySelector(
-		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
-	);
-
-	if ( ! thumbnailElement ) {
-		return;
-	}
-
-	// Find the thumbnail scrollable container
-	const scrollContainer = thumbnailElement.closest(
+	const scrollContainer = galleryContainer.querySelector(
 		SELECTORS.thumbnailsScrollable
-	);
+	) as HTMLElement | null;
 
 	if ( ! scrollContainer ) {
 		return;
 	}
 
-	const thumbnail = thumbnailElement.closest( SELECTORS.thumbnail );
+	const { imageData } = getContext();
+	const slotIndex = imageData.indexOf( imageId );
 
-	if ( ! thumbnail ) {
+	if ( slotIndex < 0 ) {
 		return;
 	}
 
-	// Calculate the scroll position to center the thumbnail
-	const containerRect = scrollContainer.getBoundingClientRect();
-	const thumbnailRect = thumbnail.getBoundingClientRect();
+	const slots = getVisibleThumbnailSlots( scrollContainer );
 
-	const scrollTop =
-		scrollContainer.scrollTop +
-		( thumbnailRect.top - containerRect.top ) -
-		( containerRect.height - thumbnailRect.height ) / 2;
-	const scrollLeft =
-		scrollContainer.scrollLeft +
-		( thumbnailRect.left - containerRect.left ) -
-		( containerRect.width - thumbnailRect.width ) / 2;
+	if ( ! slots.length ) {
+		return;
+	}
+
+	const isVertical = window
+		.getComputedStyle( scrollContainer )
+		.flexDirection.startsWith( 'column' );
+	const start = ( rect: DOMRect ) => ( isVertical ? rect.top : rect.left );
+	const size = ( rect: DOMRect ) => ( isVertical ? rect.height : rect.width );
+
+	const containerRect = scrollContainer.getBoundingClientRect();
+	const firstSlotRect = slots[ 0 ].getBoundingClientRect();
+	// Signed so row-reverse / RTL strips resolve to the correct direction.
+	const slotPitch =
+		slots.length > 1
+			? start( slots[ 1 ].getBoundingClientRect() ) -
+			  start( firstSlotRect )
+			: size( firstSlotRect );
+
+	// Calculate the scroll position to center the target slot
+	const scrollOffset =
+		start( firstSlotRect ) +
+		slotIndex * slotPitch -
+		start( containerRect ) -
+		( size( containerRect ) - size( firstSlotRect ) ) / 2;
 
 	// Use scrollTo to avoid scrolling the entire page which
 	// happens with scrollIntoView.
 	scrollContainer.scrollTo( {
-		top: scrollTop,
-		left: scrollLeft,
-		behavior: 'smooth',
+		[ isVertical ? 'top' : 'left' ]:
+			( isVertical
+				? scrollContainer.scrollTop
+				: scrollContainer.scrollLeft ) + scrollOffset,
+		behavior,
 	} );
 };
 
