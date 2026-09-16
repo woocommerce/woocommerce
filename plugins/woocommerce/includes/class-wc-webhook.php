@@ -121,7 +121,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function process_refund_deleted( $refund_id, $order_id = 0 ): void {
 		unset( $refund_id );
 
-		$order_id = filter_var(	$order_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) )	);
+		$order_id = filter_var( $order_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
 		if ( false === $order_id ) {
 			return;
 		}
