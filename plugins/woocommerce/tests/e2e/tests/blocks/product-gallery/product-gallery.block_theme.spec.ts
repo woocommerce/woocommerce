@@ -140,8 +140,9 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
-			// Enough gallery images to overflow the strip, Green's image last.
-			// `wpCLI` output ends with the command's own output.
+			// Enough gallery images to overflow the strip, Green's image deep
+			// in the list with enough images after it for the strip to scroll
+			// it to the top. `wpCLI` output ends with the command's own output.
 			const lastLine = ( output: { stdout: string } ) =>
 				output.stdout.trim().split( '\n' ).pop()?.trim() ?? '';
 			const hoodieProductId = lastLine(
@@ -165,13 +166,17 @@ test.describe( `${ blockData.name }`, () => {
 			expect( hoodieProductId ).toMatch( /^\d+$/ );
 			expect( greenImageId ).toMatch( /^\d+$/ );
 
-			expect( attachmentIds.length ).toBeGreaterThan( 10 );
+			expect( attachmentIds.length ).toBeGreaterThan( 16 );
 
+			const galleryIds = [
+				...attachmentIds.slice( 0, -5 ),
+				greenImageId,
+				...attachmentIds.slice( -5 ),
+			];
 			await wpCLI(
-				`post meta update ${ hoodieProductId } _product_image_gallery "${ [
-					...attachmentIds,
-					greenImageId,
-				].join( ',' ) }"`
+				`post meta update ${ hoodieProductId } _product_image_gallery "${ galleryIds.join(
+					','
+				) }"`
 			);
 
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
