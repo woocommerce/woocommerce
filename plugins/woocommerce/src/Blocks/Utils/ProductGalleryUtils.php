@@ -383,6 +383,7 @@ class ProductGalleryUtils {
 		}
 
 		$unique_int_ids = array_unique( array_map( 'intval', $variation_image_ids ) );
+		$unique_int_ids = array_filter( $unique_int_ids, 'wp_attachment_is_image' );
 
 		return array_values( array_map( 'strval', $unique_int_ids ) );
 	}
@@ -438,17 +439,8 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
-		// 0 is placeholder image ID.
-		$parent_featured_id = 0;
-		$product_image_id   = (int) $product->get_image_id();
-		if ( $product_image_id && wp_attachment_is_image( $product_image_id ) ) {
-			$parent_featured_id = $product_image_id;
-		}
-
-		$parent_gallery_ids = array_map( 'intval', $product->get_gallery_image_ids() );
-		$parent_gallery_ids = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
-		$lineup             = array_values( array_unique( array_filter( array_merge( array( $parent_featured_id ), $parent_gallery_ids ) ) ) );
-		$variation_images   = array();
+		$lineup           = self::get_parent_media_ids( $product );
+		$variation_images = array();
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( (int) $variation_id );
@@ -489,6 +481,34 @@ class ProductGalleryUtils {
 		$result['image_ids'] = $lineup;
 
 		return $result;
+	}
+
+	/**
+	 * Get the parent product's media IDs: existing images and videos, in gallery order.
+	 *
+	 * @param \WC_Product $product The variable product.
+	 * @return int[]
+	 */
+	private static function get_parent_media_ids( $product ) {
+		$media_items = ProductMediaGallery::get_product_media_gallery_items(
+			$product,
+			array(
+				'deduplicate'           => true,
+				'resolve_video_posters' => false,
+			)
+		);
+		$media_ids   = array();
+
+		foreach ( $media_items as $media_item ) {
+			$media_id = isset( $media_item['id'] ) ? (int) $media_item['id'] : 0;
+			$is_video = 'video' === ( $media_item['media_type'] ?? '' );
+
+			if ( $media_id && ( $is_video || wp_attachment_is_image( $media_id ) ) ) {
+				$media_ids[] = $media_id;
+			}
+		}
+
+		return array_values( array_unique( $media_ids ) );
 	}
 
 	/**

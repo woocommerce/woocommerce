@@ -292,6 +292,72 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should keep media gallery videos in the lineup of a variable product.
+	 */
+	public function test_get_product_variation_gallery_keeps_videos_in_lineup() {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+
+		$variable_product   = \WC_Helper_Product::create_variation_product();
+		$parent_featured_id = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
+		$own_image_id       = $this->create_image_attachment( 'Own Image', 'own.jpg' );
+		$video_id           = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product Video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+				'guid'           => 'https://example.com/product-video.mp4',
+			)
+		);
+
+		$variable_product->set_image_id( $parent_featured_id );
+		$variable_product->save();
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$variable_product,
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variable_product->get_children()[0] );
+		$variation->set_image_id( $own_image_id );
+		$variation->save();
+
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( wc_get_product( $variable_product->get_id() ) );
+
+		$this->assertSame( array( $parent_featured_id, $video_id, $own_image_id ), $gallery['image_ids'] );
+		$this->assertSame( $own_image_id, $gallery['variations'][ $variation->get_id() ]['image_id'] );
+		$this->assertSame( array( (string) $parent_featured_id, (string) $own_image_id ), ProductGalleryUtils::get_product_variation_image_ids( $variable_product ) );
+
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * @testdox Should use the placeholder when neither the parent nor its variations have images.
+	 */
+	public function test_get_product_variation_gallery_uses_placeholder_without_images() {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( $variable_product );
+
+		$this->assertSame( array( 0 ), $gallery['image_ids'] );
+		$this->assertSame( 0, $gallery['variations'][ $variable_product->get_children()[0] ]['image_id'] );
+	}
+
+	/**
+	 * @testdox Should return empty lineup and entries for non-variable products.
+	 */
+	public function test_get_product_variation_gallery_is_empty_for_simple_products() {
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( \WC_Helper_Product::create_simple_product() );
+
+		$this->assertSame( array(), $gallery['image_ids'] );
+		$this->assertSame( array(), $gallery['variations'] );
+	}
+
+	/**
 	 * Variation has no images of its own → the gallery lineup is used with
 	 * the parent featured image selected.
 	 */
