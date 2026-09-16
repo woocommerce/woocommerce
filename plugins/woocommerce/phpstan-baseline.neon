@@ -60215,18 +60215,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot call method get_download_permissions_granted\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1

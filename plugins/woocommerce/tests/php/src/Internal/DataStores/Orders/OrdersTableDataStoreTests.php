@@ -1479,6 +1479,30 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Backfilling an order that has no created date and no post row should create the post instead of failing.
+	 */
+	public function test_backfill_post_record_for_order_without_created_date_or_post() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+		$order = $this->create_complex_cot_order();
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $order->get_id() ) );
+		$wpdb->update( $this->sut::get_orders_table_name(), array( 'date_created_gmt' => null ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		$this->sut->clear_cached_data( array( $order->get_id() ) );
+
+		$dateless = new WC_Order();
+		$dateless->set_id( $order->get_id() );
+		$this->switch_data_store( $dateless, $this->sut );
+		$this->sut->read( $dateless );
+		$this->assertNull( $dateless->get_date_created(), 'Precondition: the order has no created date.' );
+
+		$this->sut->backfill_post_record( $dateless );
+
+		$this->assertInstanceOf( \WP_Post::class, get_post( $order->get_id() ), 'The backup post should exist after the backfill.' );
+	}
+
+	/**
 	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
