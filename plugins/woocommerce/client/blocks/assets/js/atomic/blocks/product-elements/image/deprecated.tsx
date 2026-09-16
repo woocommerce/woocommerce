@@ -47,6 +47,7 @@ const v1 = {
 			],
 		];
 	},
+	apiVersion: 3,
 };
 
 const v2 = {
@@ -59,6 +60,7 @@ const v2 = {
 			default: false,
 		},
 	},
+	apiVersion: 3,
 };
 
 export default [ v2, v1 ];
