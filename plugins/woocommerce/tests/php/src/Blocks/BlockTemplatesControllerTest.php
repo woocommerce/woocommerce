@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Templates\AbstractTemplatePart;
+use Automattic\WooCommerce\Blocks\Templates\AbstractTemplateWithFallback;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use WC_Unit_Test_Case;
 use WP_Block_Template;
@@ -54,7 +56,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox WooCommerce registers its default templates and exposes exact file-backed template and part objects.
+	 * @testdox WooCommerce registers its default templates, wires the taxonomy fallbacks, and exposes exact file-backed template and part objects.
 	 */
 	public function test_registered_template_catalog_and_directories(): void {
 		$wp_registry       = \WP_Block_Templates_Registry::get_instance();
@@ -68,6 +70,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 			'woocommerce//page-checkout',
 			'woocommerce//product-search-results',
 			'woocommerce//single-product',
+			'woocommerce//taxonomy-product_attribute',
 		);
 
 		foreach ( $registered_names as $registered_name ) {
@@ -75,7 +78,8 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		}
 
 		try {
-			( new BlockTemplatesRegistry() )->init();
+			$registry = new BlockTemplatesRegistry();
+			$registry->init();
 
 			foreach ( $registered_names as $registered_name ) {
 				$template = $wp_registry->get_registered( $registered_name );
@@ -88,6 +92,29 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 				$this->assertSame( 'wp_template', $template->type );
 				$this->assertSame( 'publish', $template->status );
 				$this->assertNotSame( '', trim( $template->content ) );
+			}
+
+			// Taxonomy templates skip register_block_template(), so the registry calling
+			// init() on them is their only wiring. Check the hooks that call attaches.
+			$fallback_template_slugs = array(
+				'taxonomy-product_cat',
+				'taxonomy-product_tag',
+				'taxonomy-product_attribute',
+				'taxonomy-product_brand',
+			);
+			foreach ( $fallback_template_slugs as $fallback_template_slug ) {
+				$fallback_template = $registry->get_template( $fallback_template_slug );
+				$this->assertInstanceOf( AbstractTemplateWithFallback::class, $fallback_template, "{$fallback_template_slug} must be in the registry." );
+				$this->assertSame(
+					1,
+					has_filter( 'taxonomy_template_hierarchy', array( $fallback_template, 'template_hierarchy' ) ),
+					"{$fallback_template_slug} must hook taxonomy_template_hierarchy."
+				);
+				$this->assertSame(
+					10,
+					has_action( 'template_redirect', array( $fallback_template, 'render_block_template' ) ),
+					"{$fallback_template_slug} must hook template_redirect."
+				);
 			}
 
 			$template_slugs = array(
@@ -104,6 +131,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 			}
 
 			foreach ( array( 'mini-cart', 'external-product-add-to-cart-with-options', 'checkout-header' ) as $template_part_slug ) {
+				$this->assertInstanceOf( AbstractTemplatePart::class, $registry->get_template( $template_part_slug ), "{$template_part_slug} must be in the registry." );
 				$this->assert_file_template_contract( $template_part_slug, 'wp_template_part' );
 			}
 
