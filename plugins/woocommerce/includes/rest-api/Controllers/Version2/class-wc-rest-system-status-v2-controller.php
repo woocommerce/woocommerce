@@ -635,7 +635,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'readonly'    => true,
 						),
 						'prices_include_tax'             => array(
-							'description' => __( 'Are prices entered with tax?', 'woocommerce' ),
+							'description' => __( 'Are prices treated as including tax?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -699,6 +699,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 						'store_base_country'             => array(
 							'description' => __( 'Store base country.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_state'               => array(
+							'description' => __( 'Store base state.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -1572,8 +1578,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				),
 				true
 			),
-			'taxes_enabled'                  => 'yes' === get_option( 'woocommerce_calc_taxes', 'no' ),
-			'prices_include_tax'             => 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ),
+			'taxes_enabled'                  => wc_tax_enabled(),
+			'prices_include_tax'             => wc_prices_include_tax(),
 			'tax_based_on'                   => get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ),
 			'shipping_tax_class'             => get_option( 'woocommerce_shipping_tax_class', 'inherit' ),
 			'tax_round_at_subtotal'          => 'yes' === get_option( 'woocommerce_tax_round_at_subtotal', 'no' ),
@@ -1584,6 +1590,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'tax_total_display'              => get_option( 'woocommerce_tax_total_display', 'itemized' ),
 			'tax_rate_count'                 => absint( $tax_rate_count ),
 			'store_base_country'             => WC()->countries->get_base_country(),
+			'store_base_state'               => WC()->countries->get_base_state(),
 			'default_customer_location'      => get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE ),
 			'taxonomies'                     => $term_response,
 			'product_visibility_terms'       => $product_visibility_terms,

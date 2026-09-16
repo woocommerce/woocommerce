@@ -50,6 +50,9 @@ if ( $remaining_additional_tax_classes ) {
 $countries                  = WC()->countries->get_countries();
 $store_base_country         = $settings['store_base_country'];
 $store_base_country_display = isset( $countries[ $store_base_country ] ) ? $countries[ $store_base_country ] . ' (' . $store_base_country . ')' : $store_base_country;
+$states                     = WC()->countries->get_states( $store_base_country );
+$store_base_state           = $settings['store_base_state'] ?? '';
+$store_base_state_display   = is_array( $states ) && isset( $states[ $store_base_state ] ) ? $states[ $store_base_state ] . ' (' . $store_base_state . ')' : $store_base_state;
 
 $tax_based_on_labels  = array(
 	TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
@@ -844,8 +847,8 @@ if ( 0 < $mu_plugins_count ) :
 			<td><mark class="<?php echo esc_attr( $settings['taxes_enabled'] ? 'yes' : 'no' ); ?>"><?php echo $settings['taxes_enabled'] ? esc_html__( 'Enabled', 'woocommerce' ) : esc_html__( 'Disabled', 'woocommerce' ); ?></mark></td>
 		</tr>
 		<tr>
-			<td data-export-label="Prices entered with tax"><?php esc_html_e( 'Prices entered with tax', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are product prices entered inclusive of tax?', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Prices include tax"><?php esc_html_e( 'Prices include tax', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether product prices are currently treated as including or excluding tax.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $settings['prices_include_tax'] ? esc_html__( 'Inclusive', 'woocommerce' ) : esc_html__( 'Exclusive', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
@@ -897,6 +900,11 @@ if ( 0 < $mu_plugins_count ) :
 			<td data-export-label="Store base country"><?php esc_html_e( 'Store base country', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The country configured as the store base location.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $store_base_country_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base state"><?php esc_html_e( 'Store base state', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The state or region configured as the store base location.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_state_display ? esc_html( $store_base_state_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Default customer location"><?php esc_html_e( 'Default customer location', 'woocommerce' ); ?>:</td>

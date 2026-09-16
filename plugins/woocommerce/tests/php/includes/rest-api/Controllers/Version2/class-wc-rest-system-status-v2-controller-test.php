@@ -80,6 +80,8 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_tax_total_display', 'single' );
 		update_option( 'woocommerce_default_country', 'IN:MH' );
 		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::GEOLOCATION_AJAX );
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_prices_include_tax', '__return_false' );
 
 		$tax_class = WC_Tax::create_tax_class( 'Diagnostic rate' );
 		if ( is_wp_error( $tax_class ) ) {
@@ -106,8 +108,8 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$settings = $this->sut->get_settings();
 
-		$this->assertFalse( $settings['taxes_enabled'] );
-		$this->assertTrue( $settings['prices_include_tax'] );
+		$this->assertTrue( $settings['taxes_enabled'] );
+		$this->assertFalse( $settings['prices_include_tax'] );
 		$this->assertSame( TaxBasedOn::BILLING, $settings['tax_based_on'] );
 		$this->assertSame( $tax_class_slug, $settings['shipping_tax_class'] );
 		$this->assertTrue( $settings['tax_round_at_subtotal'] );
@@ -118,6 +120,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'single', $settings['tax_total_display'] );
 		$this->assertSame( $tax_rate_count + 1, $settings['tax_rate_count'] );
 		$this->assertSame( 'IN', $settings['store_base_country'] );
+		$this->assertSame( 'MH', $settings['store_base_state'] );
 		$this->assertSame( DefaultCustomerAddress::GEOLOCATION_AJAX, $settings['default_customer_location'] );
 	}
 }
