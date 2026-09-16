@@ -285,4 +285,20 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Suite%20100', $result[ $this->field_id ] );
 	}
+
+	/**
+	 * @testdox Should not run email through sanitize_text_field before sanitize_email.
+	 *
+	 * sanitize_text_field() strips percent-encoded octets like "%41" out of a string. A local
+	 * part such as "user%41b" is valid per is_email() and untouched by sanitize_email(), so
+	 * running it through sanitize_text_field() first would silently change the address.
+	 */
+	public function test_does_not_mangle_email_with_percent_encoded_characters(): void {
+		$email   = 'user%41b@example.com';
+		$address = $this->make_address( array( 'email' => $email ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( sanitize_email( $email ), $result['email'] );
+	}
 }
