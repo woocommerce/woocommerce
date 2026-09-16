@@ -4000,7 +4000,10 @@ function wc_update_11203_normalize_stock_notification_emails() {
  *
  * Earlier migrations copied a zero post_date_gmt verbatim, so the HPOS row ended up with no created date and the next
  * save stamped it with the current time. Only rows whose date is NULL or the zero date are touched, and only when the
- * order's post (a real order post type, not a placeholder) has a usable date. Batched, returns true while rows remain.
+ * order's post has a usable date. Placeholder posts count too: legacy cleanup keeps the date columns when it converts a
+ * post, and placeholders created for new HPOS orders carry the order's own date. Repaired orders are dropped from the
+ * order caches and queued for the Analytics import, which skipped them while they had no date. Batched, returns true
+ * while rows remain.
  *
  * @return bool True to run again.
  */
@@ -4016,7 +4019,8 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 	$batch_size     = 500;
 	$zero           = '0000-00-00 00:00:00';
 	$type_list      = array();
-	foreach ( wc_get_order_types( 'cot-migration' ) as $post_type ) {
+	$post_types     = array_merge( wc_get_order_types( 'cot-migration' ), array( \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) );
+	foreach ( $post_types as $post_type ) {
 		$escaped = esc_sql( $post_type );
 		if ( is_string( $escaped ) ) {
 			$type_list[] = "'" . $escaped . "'";
@@ -4083,6 +4087,12 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 
 	if ( $repaired_ids ) {
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $repaired_ids );
+		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
+		foreach ( $repaired_ids as $repaired_id ) {
+			// A cached order object still has no date and would stamp the current time over the repaired value on its next save.
+			$order_cache->remove( $repaired_id );
+			\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $repaired_id ) );
+		}
 	}
 
 	if ( count( $rows ) === $batch_size ) {

@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -697,12 +699,29 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		);
 		$post = get_post( $order_id );
 
+		// A second order whose legacy data was cleaned up: the post is a placeholder but keeps its date columns.
+		$cleaned_id = OrderHelper::create_complex_wp_post_order();
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $cleaned_id ) );
+		clean_post_cache( $cleaned_id );
+		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $cleaned_id ) );
+		$wpdb->update( $orders_table, array( 'date_created_gmt' => '0000-00-00 00:00:00' ), array( 'id' => $cleaned_id ) );
+		$wpdb->update( $wpdb->posts, array( 'post_type' => DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ), array( 'ID' => $cleaned_id ) );
+		clean_post_cache( $cleaned_id );
+		$cleaned_post = get_post( $cleaned_id );
+
+		// A cached order object without a date must not survive the repair.
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		$order_cache->set( wc_get_order( $order_id ), $order_id );
+
 		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A single small batch should not request another run' );
 
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT date_created_gmt, date_updated_gmt FROM {$orders_table} WHERE id = %d", $order_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertSame( get_gmt_from_date( $post->post_date ), $row->date_created_gmt, 'Created date should come from post_date converted with the site timezone' );
 		$this->assertSame( get_gmt_from_date( $post->post_modified ), $row->date_updated_gmt, 'Updated date should come from post_modified' );
 		$this->assertNotSame( $post->post_date, $row->date_created_gmt, 'The local date must have been converted' );
+		$this->assertSame( get_gmt_from_date( $cleaned_post->post_date ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $cleaned_id ) ), 'A cleaned-up order is repaired from its placeholder post' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertFalse( $order_cache->is_cached( $order_id ), 'The cached order object must be dropped' );
+		$this->assertNotFalse( as_next_scheduled_action( 'wc-admin_import_orders', array( $order_id ) ), 'The Analytics import must be queued for the repaired order' );
 	}
 
 	/**
