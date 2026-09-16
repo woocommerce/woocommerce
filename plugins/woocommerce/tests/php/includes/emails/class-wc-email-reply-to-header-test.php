@@ -195,6 +195,23 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A billing name of "0" is not treated as empty.
+	 */
+	public function test_admin_order_email_billing_name_of_zero_is_kept(): void {
+		$order = $this->getMockBuilder( 'stdClass' )
+			->addMethods( array( 'get_billing_first_name', 'get_billing_last_name', 'get_billing_email' ) )
+			->getMock();
+		$order->method( 'get_billing_first_name' )->willReturn( '0' );
+		$order->method( 'get_billing_last_name' )->willReturn( '' );
+		$order->method( 'get_billing_email' )->willReturn( 'guest@example.com' );
+
+		$email         = new WC_Email_New_Order();
+		$email->object = $order;
+
+		$this->assertSame( "Reply-to: 0 <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+	}
+
+	/**
 	 * @testdox Custom reply-to name falling back to a filtered from-name stays on a single line.
 	 */
 	public function test_custom_reply_to_falls_back_to_from_name_without_injecting_header(): void {

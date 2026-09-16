@@ -76,6 +76,15 @@ class WC_Email_Order_Withdrawal_Requested_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A name made only of a comma produces no Reply-to line.
+	 */
+	public function test_comma_only_submitter_name_produces_no_reply_to(): void {
+		$email = $this->make_email( ',', '', 'guest@example.com' );
+
+		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
+	}
+
+	/**
 	 * @testdox A normal name is left unchanged.
 	 */
 	public function test_normal_submitter_name_is_unchanged(): void {

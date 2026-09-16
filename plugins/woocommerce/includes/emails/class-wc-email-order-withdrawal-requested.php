@@ -158,9 +158,11 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 			$name    = $this->formatter->get_customer_name( $this->withdrawal_data );
 			$email   = $this->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] ?? '';
 
-			if ( '' !== $name && is_email( $email ) ) {
-				// Strip commas so wp_mail doesn't split this into extra Reply-to addresses.
-				$headers .= 'Reply-to: ' . str_replace( ',', '', sanitize_text_field( $name ) ) . ' <' . sanitize_email( $email ) . ">\r\n";
+			// Strip commas so wp_mail doesn't split this into extra Reply-to addresses.
+			$cleaned_name = str_replace( ',', '', sanitize_text_field( $name ) );
+
+			if ( '' !== $cleaned_name && is_email( $email ) ) {
+				$headers .= 'Reply-to: ' . $cleaned_name . ' <' . sanitize_email( $email ) . ">\r\n";
 			}
 
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {

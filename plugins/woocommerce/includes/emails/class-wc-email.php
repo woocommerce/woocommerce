@@ -691,7 +691,7 @@ class WC_Email extends WC_Settings_API {
 				$reply_to_name  = str_replace( ',', '', sanitize_text_field( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() ) );
 				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
 
-				if ( $reply_to_name && $reply_to_email ) {
+				if ( '' !== $reply_to_name && '' !== $reply_to_email ) {
 					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
 				}
 			}
