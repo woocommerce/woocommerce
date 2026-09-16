@@ -151,7 +151,8 @@ const main = async () => {
 	const dryRun = DRY_RUN === '1';
 	const overflow = CI_QUEUE_OVERFLOW === undefined || CI_QUEUE_OVERFLOW === '' ? 'unset' : CI_QUEUE_OVERFLOW;
 	const runs = await fetchActiveRuns();
-	const stale = findStaleRuns( runs, Date.now(), staleAfterMin, GITHUB_RUN_ID );
+	const others = runs.filter( ( run ) => String( run.id ) !== String( GITHUB_RUN_ID ) );
+	const stale = findStaleRuns( others, Date.now(), staleAfterMin, GITHUB_RUN_ID );
 
 	// Outputs go first so the Slack step can still report if a cancel fails.
 	setOutputs( {
@@ -169,7 +170,7 @@ const main = async () => {
 
 	summarize( [
 		'### CI Queue Sentinel watchdog',
-		`- Active sentinel runs: ${ runs.length } (this run excluded: ${ GITHUB_RUN_ID || 'n/a' })`,
+		`- Other active sentinel runs: ${ others.length }`,
 		`- Stale after: ${ staleAfterMin } min${ dryRun ? ' (dry run)' : '' }`,
 		`- CI_QUEUE_OVERFLOW: \`${ overflow }\``,
 		...( results.length
