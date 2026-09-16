@@ -1559,6 +1559,29 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Sync on read should keep the created date when the post's GMT date column holds the zero date.
+	 */
+	public function test_sync_on_read_keeps_created_date_when_post_gmt_date_is_zero() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+		$order   = $this->create_complex_cot_order();
+		$created = $order->get_date_created()->getTimestamp();
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertSame( $created, $refreshed_order->get_date_created()->getTimestamp(), 'The posts reader must agree with HPOS, so nothing is copied back.' );
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', $created ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order->get_id() ) ), 'The HPOS row must keep its date.' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
 	 * @testDox When there are direct writes to posts data, order should synced upon reading.
 	 */
 	public function test_read_multiple_with_direct_write() {
