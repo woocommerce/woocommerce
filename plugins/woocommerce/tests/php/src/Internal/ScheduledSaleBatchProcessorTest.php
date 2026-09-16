@@ -56,13 +56,17 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An unsupported sale mode is rejected.
+	 * @testdox An unsupported sale mode is rejected with or without product ids.
+	 * @testWith [[]]
+	 *           [[1]]
+	 *
+	 * @param int[] $product_ids Product ids.
 	 */
-	public function test_rejects_an_unsupported_mode(): void {
+	public function test_rejects_an_unsupported_mode( array $product_ids ): void {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Scheduled sale mode must be either start or end.' );
 
-		$this->sut->process( array( 1 ), 'invalid' );
+		$this->sut->process( $product_ids, 'invalid' );
 	}
 
 	/**

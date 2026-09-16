@@ -55,8 +55,13 @@ class ScheduledSaleBatchProcessor {
 	 *
 	 * @param (int|string)[] $product_ids Product ids, as returned by the product data store.
 	 * @param string         $mode        'start' or 'end'.
+	 * @throws \InvalidArgumentException When the sale mode is unsupported.
 	 */
 	public function process( array $product_ids, string $mode ): void {
+		if ( ! in_array( $mode, array( 'start', 'end' ), true ) ) {
+			throw new \InvalidArgumentException( 'Scheduled sale mode must be either start or end.' );
+		}
+
 		// product_objects entries are released by id, which reaches a real wp_cache_delete()
 		// on every cache backend. The products and term-queries groups cannot be addressed
 		// by product id, so they are only flushed when the cache is request-local; a shared
