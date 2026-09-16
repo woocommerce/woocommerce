@@ -92,7 +92,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	public function test_product_search_returns_partial_title_match(): void {
 		$target_token = wp_generate_password( 16, false );
 		$search_term  = substr( $target_token, 4, 8 );
-		$target_name  = 'Slice target ' . $target_token;
+		$target_name  = 'Search target ' . $target_token;
 		$control_name = 'Unrelated fixture';
 		$target       = null;
 		$control      = null;
