@@ -432,6 +432,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * WordPress leaves the GMT columns at the zero date for some posts (drafts, imports) and treats the local
 	 * column as the truth. The HPOS migrator applies the same rule, so both stores read the same date.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param string $gmt_date   Datetime in GMT, possibly the zero date.
 	 * @param string $local_date The same datetime in the site timezone.
 	 * @return int|null
