@@ -588,7 +588,7 @@ class DefaultFreeExtensions {
 				'install_priority' => 6,
 			),
 			'snapchat-for-woocommerce'            => array(
-				'label'            => __( 'Find New Customers with Snapchat Ads', 'woocommerce' ),
+				'label'            => __( 'Find new customers with Snapchat Ads', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
