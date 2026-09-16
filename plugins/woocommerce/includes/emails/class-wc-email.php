@@ -687,8 +687,13 @@ class WC_Email extends WC_Settings_API {
 
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			if ( $this->object ) {
+				$reply_to_name  = str_replace( ',', '', sanitize_text_field( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() ) );
+				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
+
+				if ( $reply_to_name && $reply_to_email ) {
+					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
+				}
 			}
 		} else {
 			// Check if custom reply-to is enabled and configured for non-admin notification emails.
@@ -698,9 +703,11 @@ class WC_Email extends WC_Settings_API {
 
 			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
 				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
-				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+				// Keep the name on a single line so it can't add extra headers.
+				$header .= 'Reply-to: ' . str_replace( array( "\r", "\n", ',' ), array( ' ', ' ', '' ), $reply_to_name ) . ' <' . $reply_to_address . ">\r\n";
 			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+				// Keep the name on a single line so it can't add extra headers.
+				$header .= 'Reply-to: ' . str_replace( array( "\r", "\n", ',' ), array( ' ', ' ', '' ), $this->get_from_name() ) . ' <' . $this->get_from_address() . ">\r\n";
 			}
 		}
 
