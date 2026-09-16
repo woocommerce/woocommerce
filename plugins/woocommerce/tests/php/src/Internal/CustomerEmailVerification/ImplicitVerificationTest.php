@@ -46,4 +46,32 @@ class ImplicitVerificationTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Customer should be verified after a password reset' );
 	}
+
+	/**
+	 * @testdox A password reset does not verify an email changed after the reset target was loaded.
+	 */
+	public function test_after_password_reset_does_not_verify_changed_email(): void {
+		$user_id    = wc_create_new_customer( 'reset-target@example.com', 'changedresetuser', 'pw' );
+		$user       = get_user_by( 'id', $user_id );
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed-during-reset@example.com',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		do_action( 'after_password_reset', $user, 'newpassword123' );
+
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'The changed email must not inherit verification from the reset target' );
+		$this->assertSame( 0, $hook_calls, 'Changing the email during reset must not trigger verified-email side effects' );
+
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+	}
 }
