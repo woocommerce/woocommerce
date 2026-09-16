@@ -20,6 +20,13 @@ import {
 import { clearFilters, setFilterValue } from '../../utils/filters';
 import { setOption } from '../../utils/options';
 
+/**
+ * Drop a trailing slash so URL paths compare regardless of permalink trailing.
+ *
+ * @param path URL path to normalize.
+ */
+const trimSlash = ( path: string ) => path.replace( /\/$/, '' );
+
 test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
@@ -341,22 +348,29 @@ test.describe(
 			test( 'logging in from the prompt lets the customer sign up', async ( {
 				page,
 				product,
+				baseURL,
 			} ) => {
 				await page.goto( product.permalink );
 
-				await page.getByRole( 'link', { name: 'log in' } ).click();
+				const accountPath = trimSlash(
+					new URL( 'my-account/', baseURL ).pathname
+				);
+				const loginLink = page.getByRole( 'link', { name: 'log in' } );
 
-				// The prompt's link points at a non-existent endpoint, so
-				// WordPress guesses the 404 back to the account page. Assert
-				// the landing, or a lost guess would only show up as a
-				// timeout on the login form below.
-				await expect( page ).toHaveURL( ( url ) => {
-					const path = url.pathname.endsWith( '/' )
-						? url.pathname.slice( 0, -1 )
-						: url.pathname;
+				// The link has to point at the account page itself. A nested
+				// endpoint such as /my-account/my-account/ still lands there
+				// via WordPress' 404 URL guessing, so only the href tells a
+				// working link apart from a broken one.
+				const href = await loginLink.getAttribute( 'href' );
+				expect( trimSlash( new URL( href!, baseURL ).pathname ) ).toBe(
+					accountPath
+				);
 
-					return path.endsWith( '/my-account' );
-				} );
+				await loginLink.click();
+
+				await expect( page ).toHaveURL(
+					( url ) => trimSlash( url.pathname ) === accountPath
+				);
 
 				await page.locator( '#username' ).fill( customer.username );
 				await page.locator( '#password' ).fill( customer.password );

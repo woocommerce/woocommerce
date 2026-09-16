@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
 import {
 	useBlockProps,
 	InspectorControls,
@@ -17,13 +16,12 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 import type { EditProps, ControlProps } from './types';
 import './editor.scss';
 
@@ -160,8 +158,6 @@ const Edit = ( {
 	} = attributes;
 
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
 
 	let { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
@@ -170,26 +166,18 @@ const Edit = ( {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-				isDescendentOfSingleProductBlock,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-			isDescendentOfSingleProductBlock,
-		]
-	);
-
 	const { product } = useProduct( context.postId );
 
 	return (
 		<div { ...blockProps }>
-			<Block isAdmin={ true } { ...attributes } product={ product } />
+			<Block
+				isAdmin={ true }
+				{ ...attributes }
+				isDescendentOfSingleProductTemplate={
+					isDescendentOfSingleProductTemplate
+				}
+				product={ product }
+			/>
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }
