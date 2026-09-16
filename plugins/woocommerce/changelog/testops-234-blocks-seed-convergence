@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Make the Blocks E2E seed reset the shipping zones, tax classes, and tax settings it depends on, and document switching between the Core and Blocks E2E profiles. Test infrastructure only.
+
