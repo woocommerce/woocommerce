@@ -615,6 +615,41 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The empty-state template renders the nothing-to-review arm, and no form, when the order has no reviewable items.
+	 */
+	public function test_empty_state_template_renders_nothing_to_review(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'nothing@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		// `ItemEligibility::decide()` marks an item SKIP when `comments_open()`
+		// is false, and skipped rows never set `$has_unreviewed_row`. The order
+		// therefore reaches the empty-state template with `$reviewed_count` at
+		// 0, which is the arm the thank-you test above does not exercise.
+		wp_update_post(
+			array(
+				'ID'             => $product->get_id(),
+				'comment_status' => 'closed',
+			)
+		);
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order--empty', $html );
+		$this->assertStringContainsString( 'Nothing to review here', $html );
+		$this->assertStringContainsString( 'There are no products on this order that are open for reviews right now.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
 	 * @testdox A pre-filled row exposes the existing rating and text via data-initial-* attributes so the JS dirty gate can detect edits.
 	 */
 	public function test_row_exposes_data_initial_attributes_for_prefilled_review(): void {
