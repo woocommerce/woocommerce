@@ -254,15 +254,23 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Leaves the taxable address unchanged outside the cart and checkout.
+	 * The "outside cart and checkout" path is not testable in the full suite.
+	 *
+	 * `is_checkout()` short-circuits to true once `WOOCOMMERCE_CHECKOUT` is
+	 * defined, and several legacy cart/checkout tests define it via
+	 * `define()` / `wc_maybe_define_constant()`. PHP constants cannot be
+	 * undefined, so the flag stays set for the rest of the process. The legacy
+	 * suite runs before the main suite (`defaultTestSuite` in `phpunit.xml`),
+	 * which means `is_checkout()` is already true here in CI even though it is
+	 * false when the test runs in isolation locally.
+	 *
+	 * The same early-return branch is covered deterministically by
+	 * `test_leaves_address_unchanged_for_other_store_api_requests` through the
+	 * controllable Store API request-context stack.
+	 *
+	 * @see \Automattic\WooCommerce\Tests\Internal\LegacyAssets\LegacySelect2UsageTrackerTest::get_expected_frontend_page_type()
+	 * @see \Automattic\WooCommerce\Tests\Blocks\BlockTypes\SavedForLaterTests::test_cart_page_has_saved_for_later_flag()
 	 */
-	public function test_leaves_address_unchanged_outside_cart_and_checkout(): void {
-		$this->add_product_to_cart( true );
-
-		$result = $this->customer->get_taxable_address();
-
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'The cart should not affect taxable addresses outside the cart and checkout.' );
-	}
 
 	/**
 	 * @testdox Leaves the taxable address unchanged when the billing country is empty.
