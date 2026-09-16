@@ -1208,7 +1208,7 @@ WHERE
 				"SELECT id FROM {$orders_table} WHERE
 				{$orders_table}.type IN {$order_types_sql}
 				AND {$orders_table}.status = %s
-				AND {$orders_table}.date_updated_gmt < %s",
+				AND ( {$orders_table}.date_updated_gmt < %s OR {$orders_table}.date_updated_gmt IS NULL )",
 				OrderInternalStatus::PENDING,
 				gmdate( 'Y-m-d H:i:s', absint( $gmt_timestamp ) )
 			)

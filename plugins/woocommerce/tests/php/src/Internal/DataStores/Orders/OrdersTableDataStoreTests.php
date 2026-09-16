@@ -1503,6 +1503,21 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Unpaid pending orders with no updated date should still be returned for cancellation.
+	 */
+	public function test_get_unpaid_orders_includes_orders_without_updated_date(): void {
+		global $wpdb;
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_status( OrderInternalStatus::PENDING );
+		$order->save();
+		$wpdb->update( $this->sut::get_orders_table_name(), array( 'date_updated_gmt' => null ), array( 'id' => $order->get_id() ) );
+
+		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Testing a legacy code that does expect the offset timestamp.
+		$this->assertContainsEquals( $order->get_id(), $this->sut->get_unpaid_orders( current_time( 'timestamp', 0 ) ) );
+	}
+
+	/**
 	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
