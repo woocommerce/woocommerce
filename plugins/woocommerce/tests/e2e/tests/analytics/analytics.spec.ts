@@ -671,11 +671,69 @@ test(
 			intervals: [ 1_000, 2_000, 3_000 ],
 		} );
 
+		// Clicking it is the part no other layer owns. `import-status-bar.test.tsx`
+		// mocks `../use-import-status`, so its click reaches a jest.fn() and its
+		// busy case is handed `isTriggeringImport: true` as a prop rather than
+		// reaching that state as a consequence. Break the button-to-hook wiring
+		// and everything below the browser stays green.
+		const triggerResponse = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc-analytics/imports/trigger' ) &&
+				response.ok()
+		);
+
+		await page
+			.getByRole( 'button', {
+				name: 'Manually trigger analytics data import',
+			} )
+			.click();
+
+		await triggerResponse;
+
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Analytics data import in progress',
+			} )
+		).toBeDisabled();
+
 		// Leave the option as this file's beforeAll set it. The afterAll restores
 		// the install default either way; this is for whatever is appended here next.
 		await restApi.post(
 			'wc-analytics/settings/wc_admin/woocommerce_analytics_scheduled_import',
 			{ value: 'no' }
 		);
+	}
+);
+
+test(
+	'loads the overview performance indicators from their own endpoint',
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+	},
+	async ( { page } ) => {
+		// `performance-indicators` has no browser owner otherwise. The Jest
+		// suite mocks `@woocommerce/date` wholesale and answers from a fixture
+		// keyed on its own `appendTimestamp` stub, so a renamed endpoint or a
+		// broken date boundary cannot turn it red.
+		const indicatorsResponse = page.waitForResponse(
+			( response ) =>
+				response
+					.url()
+					.includes(
+						'/wc-analytics/reports/performance-indicators'
+					) && response.ok()
+		);
+
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+		);
+
+		await indicatorsResponse;
+
+		// A tile with a value beside its label, rather than a store-wide figure:
+		// the shared store makes exact totals flaky across parallel specs.
+		await expect(
+			page.getByRole( 'menuitem', { name: /^Orders \d/ } ).first()
+		).toBeVisible();
 	}
 );

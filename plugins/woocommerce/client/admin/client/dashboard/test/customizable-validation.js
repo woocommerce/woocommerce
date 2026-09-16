@@ -1,4 +1,9 @@
 /**
+ * This file is trunk's `customizable.js` moved here whole and otherwise
+ * unchanged, so diffing it against that file shows only the move.
+ */
+
+/**
  * External dependencies
  */
 import { fireEvent, render } from '@testing-library/react';
