@@ -158,6 +158,50 @@ class WC_Priority_Action_Queue_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should skip a unique action and return 0 when a matching action is already pending.
+	 */
+	public function test_unique_action_is_skipped_when_a_match_is_pending(): void {
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$first  = $this->sut->schedule_single_with_priority( $timestamp, 'wc_priority_queue_test_unique_flag', array( 'id' => 1 ), 'wc-priority-queue-test', 5, true );
+		$second = $this->sut->schedule_single_with_priority( $timestamp, 'wc_priority_queue_test_unique_flag', array( 'id' => 1 ), 'wc-priority-queue-test', 5, true );
+
+		$this->assertGreaterThan( 0, $first );
+		$this->assertSame( 0, $second, 'A unique action with the same hook, args and group as a pending one should be skipped' );
+		$this->assertSame( 5, $this->get_stored_priority( $first ) );
+	}
+
+	/**
+	 * @testdox Should schedule a unique action when the pending one has different args.
+	 */
+	public function test_unique_action_is_scheduled_when_args_differ(): void {
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$first  = $this->sut->schedule_single_with_priority( $timestamp, 'wc_priority_queue_test_unique_args', array( 'id' => 1 ), 'wc-priority-queue-test', 5, true );
+		$second = $this->sut->schedule_single_with_priority( $timestamp, 'wc_priority_queue_test_unique_args', array( 'id' => 2 ), 'wc-priority-queue-test', 5, true );
+
+		$this->assertGreaterThan( 0, $first );
+		$this->assertGreaterThan( 0, $second );
+		$this->assertNotEquals( $first, $second );
+	}
+
+	/**
+	 * @testdox Should honour the unique flag on immediate, recurring and cron actions too.
+	 */
+	public function test_unique_flag_applies_to_every_priority_method(): void {
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$this->assertGreaterThan( 0, $this->sut->add_with_priority( 'wc_priority_queue_test_unique_add', array(), 'wc-priority-queue-test', 5, true ) );
+		$this->assertSame( 0, $this->sut->add_with_priority( 'wc_priority_queue_test_unique_add', array(), 'wc-priority-queue-test', 5, true ) );
+
+		$this->assertGreaterThan( 0, $this->sut->schedule_recurring_with_priority( $timestamp, DAY_IN_SECONDS, 'wc_priority_queue_test_unique_recurring', array(), 'wc-priority-queue-test', 5, true ) );
+		$this->assertSame( 0, $this->sut->schedule_recurring_with_priority( $timestamp, DAY_IN_SECONDS, 'wc_priority_queue_test_unique_recurring', array(), 'wc-priority-queue-test', 5, true ) );
+
+		$this->assertGreaterThan( 0, $this->sut->schedule_cron_with_priority( $timestamp, '0 0 * * *', 'wc_priority_queue_test_unique_cron', array(), 'wc-priority-queue-test', 5, true ) );
+		$this->assertSame( 0, $this->sut->schedule_cron_with_priority( $timestamp, '0 0 * * *', 'wc_priority_queue_test_unique_cron', array(), 'wc-priority-queue-test', 5, true ) );
+	}
+
+	/**
 	 * @testdox Should leave the plain scheduling methods at their inherited priority of 10.
 	 */
 	public function test_plain_methods_still_schedule_at_default_priority(): void {

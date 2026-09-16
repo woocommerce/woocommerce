@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add WC_Priority_Queue_Interface and make WC_Priority_Action_Queue the default queue, so WC()->queue() can schedule Action Scheduler actions at a given priority.
+Add WC_Priority_Queue_Interface and make WC_Priority_Action_Queue the default queue, so WC()->queue() can schedule Action Scheduler actions at a given priority and as unique actions.

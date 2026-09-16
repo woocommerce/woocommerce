@@ -37,10 +37,11 @@ class WC_Priority_Action_Queue extends WC_Action_Queue implements WC_Priority_Qu
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
 	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
-	 * @return int The action ID.
+	 * @param bool   $unique Whether the action should be unique: skipped when an action with the same hook, args and group is already pending or in progress.
+	 * @return int The action ID, or 0 when $unique is true and a matching action already exists.
 	 */
-	public function add_with_priority( $hook, $args = array(), $group = '', $priority = 10 ) {
-		return $this->schedule_single_with_priority( time(), $hook, $args, $group, $priority );
+	public function add_with_priority( $hook, $args = array(), $group = '', $priority = 10, $unique = false ) {
+		return $this->schedule_single_with_priority( time(), $hook, $args, $group, $priority, $unique );
 	}
 
 	/**
@@ -53,10 +54,11 @@ class WC_Priority_Action_Queue extends WC_Action_Queue implements WC_Priority_Qu
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
 	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
-	 * @return int The action ID.
+	 * @param bool   $unique Whether the action should be unique: skipped when an action with the same hook, args and group is already pending or in progress.
+	 * @return int The action ID, or 0 when $unique is true and a matching action already exists.
 	 */
-	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_single_action( $timestamp, $hook, $args, $group, false, $priority );
+	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), $group = '', $priority = 10, $unique = false ) {
+		return as_schedule_single_action( $timestamp, $hook, $args, $group, $unique, $priority );
 	}
 
 	/**
@@ -70,10 +72,11 @@ class WC_Priority_Action_Queue extends WC_Action_Queue implements WC_Priority_Qu
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
 	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
-	 * @return int The action ID.
+	 * @param bool   $unique Whether the action should be unique: skipped when an action with the same hook, args and group is already pending or in progress.
+	 * @return int The action ID, or 0 when $unique is true and a matching action already exists.
 	 */
-	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, false, $priority );
+	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $priority = 10, $unique = false ) {
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, $unique, $priority );
 	}
 
 	/**
@@ -88,9 +91,10 @@ class WC_Priority_Action_Queue extends WC_Action_Queue implements WC_Priority_Qu
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
 	 * @param int    $priority Lower values take precedence over higher values. Defaults to 10, with acceptable values falling in the range 0-255.
-	 * @return int The action ID.
+	 * @param bool   $unique Whether the action should be unique: skipped when an action with the same hook, args and group is already pending or in progress.
+	 * @return int The action ID, or 0 when $unique is true and a matching action already exists.
 	 */
-	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, false, $priority );
+	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $priority = 10, $unique = false ) {
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, $unique, $priority );
 	}
 }
