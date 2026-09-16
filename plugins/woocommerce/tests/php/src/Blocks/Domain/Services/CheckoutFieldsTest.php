@@ -274,6 +274,8 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			$this->controller->persist_field_for_order( $key, $saved_value, $order, 'billing', false );
 		}
 
+		$this->assertSame( $expected_edit ?? '', $this->controller->get_field_from_object( $key, $order, 'billing', false ), 'The reader must preserve saved values when defaults are disabled.' );
+
 		$expected_values = array(
 			'edit' => $expected_edit,
 			'view' => $expected_view,

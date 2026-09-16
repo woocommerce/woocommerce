@@ -939,13 +939,11 @@ class CheckoutFields {
 		$fields_with_values = [];
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $order->get_meta( self::get_group_key( $group ) . $field_key, true );
+			$value = $this->get_field_from_object( $field_key, $order, $group, false );
 
 			if ( '' === $value || null === $value ) {
 				continue;
 			}
-
-			$value = $this->get_field_type( $field )->from_storage( $value );
 
 			if ( 'view' === $context ) {
 				$value = $this->format_additional_field_value( $value, $field );

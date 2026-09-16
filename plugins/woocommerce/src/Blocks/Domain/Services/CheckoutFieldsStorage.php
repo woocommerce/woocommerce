@@ -84,18 +84,21 @@ trait CheckoutFieldsStorage {
 	/**
 	 * Returns a field value for a given object.
 	 *
+	 * @since 11.3.0 Added the $apply_defaults parameter.
+	 *
 	 * @param string               $key The field key.
 	 * @param WC_Customer|WC_Order $wc_object The customer or order to get the field value for.
 	 * @param string               $group The group to get the field value for (shipping|billing|other).
+	 * @param bool                 $apply_defaults Whether to apply the default-value filter when no value is set.
 	 *
 	 * @return mixed The field value.
 	 */
-	public function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'other' ) {
+	public function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'other', bool $apply_defaults = true ) {
 		$group    = $this->prepare_group_name( $group );
 		$meta_key = self::get_group_key( $group ) . $key;
 		$value    = $wc_object->get_meta( $meta_key, true );
 
-		if ( ! $value && '0' !== $value ) {
+		if ( $apply_defaults && ! $value && '0' !== $value ) {
 			/**
 			 * Allow providing a default value for additional fields if no value is already set.
 			 *
