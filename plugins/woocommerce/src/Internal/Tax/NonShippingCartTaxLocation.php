@@ -27,6 +27,7 @@ class NonShippingCartTaxLocation {
 	 * @internal
 	 */
 	final public function init(): void {
+		$this->store_api_cart_or_checkout_request_contexts = array();
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
 		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ) );
