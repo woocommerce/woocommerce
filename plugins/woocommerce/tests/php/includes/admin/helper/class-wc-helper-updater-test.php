@@ -47,6 +47,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->cleanup_transients();
+		WC_Helper::flush_local_woo_products_cache();
 	}
 
 	/**
