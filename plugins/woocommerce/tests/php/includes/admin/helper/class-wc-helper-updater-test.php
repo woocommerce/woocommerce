@@ -749,6 +749,27 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Subscription notice is skipped while the last subscriptions fetch is still failing.
+	 */
+	public function test_subscription_notice_is_skipped_while_the_api_is_failing(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 500,
+				'message' => 'Server error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
 	 * @testdox Subscription notice is skipped for a subscription that needs no action.
 	 */
 	public function test_subscription_notice_is_skipped_for_a_healthy_subscription(): void {
@@ -1119,6 +1140,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private function cleanup_plugins_screen(): void {
 		WC_Helper_Options::update( 'auth', array() );
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
 		wp_cache_delete( 'plugins', 'plugins' );
 		delete_site_transient( 'update_plugins' );
 		unset( $GLOBALS['wp_list_table'] );

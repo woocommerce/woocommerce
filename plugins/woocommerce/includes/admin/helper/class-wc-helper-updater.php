@@ -415,6 +415,12 @@ class WC_Helper_Updater {
 			return;
 		}
 
+		// While the last subscriptions fetch is still failing, the list is stale or empty, so a
+		// missing subscription would be a guess rather than a fact.
+		if ( null !== WC_Helper::get_api_error() ) {
+			return;
+		}
+
 		$notice = WC_Helper::has_product_subscription( $product_id )
 			? self::get_renewal_notice_for_plugin_row( $product_id )
 			: self::get_purchase_notice_for_plugin_row( $product_id, $plugin_file );
