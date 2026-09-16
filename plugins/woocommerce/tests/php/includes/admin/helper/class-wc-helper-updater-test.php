@@ -52,14 +52,14 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Tear down after each test.
+	 */
+	public function tearDown(): void {
 		try {
 			// The fixture theme lives on disk and in a global, neither of which the parent teardown resets.
 			$this->cleanup_theme_fixture();
 			$this->cleanup_plugins_screen();
 		} finally {
 			parent::tearDown();
-		}
-	}
 		}
 	}
 
