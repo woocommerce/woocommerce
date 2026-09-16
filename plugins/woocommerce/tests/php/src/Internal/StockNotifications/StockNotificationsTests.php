@@ -18,6 +18,13 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	use StockNotificationsFeatureTrait;
 
 	/**
+	 * Database version to restore after a test that changes it.
+	 *
+	 * @var string|null
+	 */
+	private ?string $original_db_version = null;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -30,6 +37,10 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		if ( null !== $this->original_db_version ) {
+			update_option( 'woocommerce_db_version', $this->original_db_version );
+			$this->original_db_version = null;
+		}
 		wc_get_container()->get( DataRetentionController::class )->clear_daily_task();
 		delete_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold' );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
@@ -190,8 +201,53 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 
 		delete_option( StockNotifications::ENABLE_OPTION_NAME );
 		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		$this->set_db_version( '11.1.0' );
 
 		$this->assertArrayHasKey( 'stock_notification', $controller->register_data_stores( array() ) );
+	}
+
+	/**
+	 * @testdox The alpha constant is ignored once the database has been migrated to 11.2.0.
+	 */
+	public function test_alpha_constant_is_ignored_once_the_database_is_migrated(): void {
+		$controller = wc_get_container()->get( StockNotifications::class );
+
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		$this->set_db_version( '11.2.0' );
+
+		$this->assertArrayNotHasKey( 'stock_notification', $controller->register_data_stores( array() ) );
+
+		wc_get_container()->reset_all_resolved();
+		wc_get_container()->get( StockNotifications::class )->maybe_init_services();
+
+		$this->assertArrayNotHasKey( 'stock-notifications', wc_get_account_menu_items() );
+	}
+
+	/**
+	 * @testdox maybe_init_services() wires the services for alpha sites until the database is migrated.
+	 */
+	public function test_maybe_init_services_honors_the_alpha_constant_until_the_database_is_migrated(): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		$this->set_db_version( '11.1.0' );
+
+		wc_get_container()->reset_all_resolved();
+		wc_get_container()->get( StockNotifications::class )->maybe_init_services();
+
+		$this->assertArrayHasKey( 'stock-notifications', wc_get_account_menu_items() );
+	}
+
+	/**
+	 * Set the stored database version for the current test, remembering the original.
+	 *
+	 * @param string $version Database version to store.
+	 */
+	private function set_db_version( string $version ): void {
+		if ( null === $this->original_db_version ) {
+			$this->original_db_version = (string) get_option( 'woocommerce_db_version', '' );
+		}
+		update_option( 'woocommerce_db_version', $version );
 	}
 
 	/**

@@ -138,11 +138,16 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Register hooks and services.
 	 *
+	 * Declared without a native return type on purpose: the method it restores had
+	 * none, and adding one would fatal any subclass that overrides it.
+	 *
 	 * @deprecated 11.2.0 Replaced by maybe_init_services().
 	 *
 	 * @internal
+	 *
+	 * @return void
 	 */
-	public function init_hooks(): void {
+	public function init_hooks() {
 		wc_deprecated_function( __METHOD__, '11.2.0', __CLASS__ . '::maybe_init_services()' );
 
 		if ( did_action( 'init' ) ) {
@@ -195,12 +200,18 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Check whether the site opted in through the alpha constant.
 	 *
-	 * Counts as enabled so those sites keep working until, and during, the request
-	 * that runs wc_update_1120_migrate_stock_notifications_alpha_constant().
+	 * Only bridges the gap until wc_update_1120_migrate_stock_notifications_alpha_constant()
+	 * has copied the constant into the feature option. The database version is bumped
+	 * after every 11.2.0 callback has run, so once it reaches 11.2.0 the Features screen
+	 * toggle is the only switch.
 	 *
 	 * @return bool
 	 */
 	private static function is_alpha_enabled(): bool {
-		return Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			return false;
+		}
+
+		return version_compare( (string) get_option( 'woocommerce_db_version', '0' ), '11.2.0', '<' );
 	}
 }
