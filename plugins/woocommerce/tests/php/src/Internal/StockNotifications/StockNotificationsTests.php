@@ -3,8 +3,10 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
+use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use WC_Admin_Settings;
 use WC_Settings_Products;
@@ -27,6 +29,7 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	 * Clean up after tests.
 	 */
 	public function tearDown(): void {
+		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		wc_get_container()->get( DataRetentionController::class )->clear_daily_task();
 		delete_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold' );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
@@ -153,6 +156,19 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox NotificationQuery returns empty results instead of throwing while the feature is disabled.
+	 */
+	public function test_notification_query_fails_soft_when_the_feature_is_disabled(): void {
+		$controller = wc_get_container()->get( StockNotifications::class );
+
+		remove_filter( 'woocommerce_data_stores', array( $controller, 'register_data_stores' ) );
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
+
+		$this->assertSame( array(), NotificationQuery::get_notifications( array() ) );
+		$this->assertSame( 0, NotificationQuery::count_notifications( array() ) );
+	}
+
+	/**
 	 * @testdox register_data_stores re-checks the option, so a hooked callback stays inert once the feature is turned off.
 	 */
 	public function test_register_data_stores_ignores_a_hooked_callback_once_the_feature_is_disabled(): void {
@@ -164,6 +180,30 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 		$stores = array( 'product' => 'WC_Product_Data_Store_CPT' );
 
 		$this->assertSame( $stores, $controller->register_data_stores( $stores ) );
+	}
+
+	/**
+	 * @testdox The alpha constant keeps the data store registered while the option is still unset.
+	 */
+	public function test_register_data_stores_falls_back_to_the_alpha_constant(): void {
+		$controller = wc_get_container()->get( StockNotifications::class );
+
+		delete_option( StockNotifications::ENABLE_OPTION_NAME );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		$this->assertArrayHasKey( 'stock_notification', $controller->register_data_stores( array() ) );
+	}
+
+	/**
+	 * @testdox init_hooks() is deprecated and forwards to maybe_init_services().
+	 */
+	public function test_init_hooks_is_deprecated_and_forwards_to_maybe_init_services(): void {
+		$this->setExpectedDeprecated( StockNotifications::class . '::init_hooks' );
+
+		wc_get_container()->reset_all_resolved();
+		wc_get_container()->get( StockNotifications::class )->init_hooks();
+
+		$this->assertArrayHasKey( 'stock-notifications', wc_get_account_menu_items() );
 	}
 
 	/**

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -106,7 +107,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function maybe_init_services(): void {
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 
@@ -135,6 +136,18 @@ class StockNotifications implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Register hooks and services.
+	 *
+	 * @deprecated 11.2.0 Replaced by maybe_init_services().
+	 *
+	 * @internal
+	 */
+	public function init_hooks(): void {
+		wc_deprecated_function( __METHOD__, '11.2.0', __CLASS__ . '::maybe_init_services()' );
+		$this->maybe_init_services();
+	}
+
+	/**
 	 * Register the data stores, unless the feature is disabled.
 	 *
 	 * @param array $data_stores Data stores.
@@ -142,10 +155,9 @@ class StockNotifications implements RegisterHooksInterface {
 	 */
 	public function register_data_stores( $data_stores ) {
 		// WC_Data_Store::__construct() re-applies this filter on every data store load,
-		// so re-check the option: the feature can be switched off after this callback was
-		// attached at `init`. Read the option directly rather than through
-		// feature_is_enabled(), which builds translated feature definitions.
-		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) ) {
+		// so re-check the feature: it can be switched off after this callback was
+		// attached at `init`.
+		if ( ! self::is_enabled() ) {
 			return $data_stores;
 		}
 
@@ -155,5 +167,20 @@ class StockNotifications implements RegisterHooksInterface {
 
 		$data_stores['stock_notification'] = wc_get_container()->get( StockNotificationsDataStore::class );
 		return $data_stores;
+	}
+
+	/**
+	 * Check whether the feature is enabled.
+	 *
+	 * Reads the option directly rather than through feature_is_enabled(), which builds
+	 * translated feature definitions on every call. The alpha constant counts as enabled
+	 * too: sites that opted in through it must keep working until, and during, the request
+	 * that runs wc_update_1120_migrate_stock_notifications_alpha_constant().
+	 *
+	 * @return bool
+	 */
+	private static function is_enabled(): bool {
+		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' )
+			|| Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 	}
 }

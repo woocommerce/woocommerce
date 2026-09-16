@@ -41,12 +41,20 @@ class NotificationQuery {
 	 * Centralised so the `WC_Data_Store::query()` PHPStan suppression in
 	 * `phpstan-baseline.neon` only needs to cover one call site.
 	 *
+	 * Fails soft: the data store is only registered while the feature is enabled, so
+	 * `WC_Data_Store::load()` throws when it is off. Callers get an empty result instead.
+	 *
 	 * @param array $args Query args.
 	 * @return mixed Whatever the data store returns for the requested `return` mode
-	 *               (array of objects/ids, int for `count`).
+	 *               (array of objects/ids, int for `count`), or null on failure.
 	 */
 	private static function run_query( array $args ) {
-		return \WC_Data_Store::load( 'stock_notification' )->query( $args );
+		try {
+			return \WC_Data_Store::load( 'stock_notification' )->query( $args );
+		} catch ( \Exception $e ) {
+			\wc_caught_exception( $e, __METHOD__, array( $args ) );
+			return null;
+		}
 	}
 
 	/**
