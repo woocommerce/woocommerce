@@ -56,6 +56,16 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An unsupported sale mode is rejected.
+	 */
+	public function test_rejects_an_unsupported_mode(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Scheduled sale mode must be either start or end.' );
+
+		$this->sut->process( array( 1 ), 'invalid' );
+	}
+
+	/**
 	 * @testdox An external object cache has only its in-memory copy dropped, never a shared group.
 	 */
 	public function test_drops_only_the_runtime_copy_on_an_external_cache(): void {
