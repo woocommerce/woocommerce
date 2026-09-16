@@ -3994,3 +3994,103 @@ function wc_update_11203_normalize_stock_notification_emails() {
 
 	return false;
 }
+
+/**
+ * Give HPOS orders migrated without a created or updated date the dates their posts still hold.
+ *
+ * Earlier migrations copied a zero post_date_gmt verbatim, so the HPOS row ended up with no created date and the next
+ * save stamped it with the current time. Only rows whose date is NULL or the zero date are touched, and only when the
+ * order's post (a real order post type, not a placeholder) has a usable date. Batched, returns true while rows remain.
+ *
+ * @return bool True to run again.
+ */
+function wc_update_1130_repair_hpos_order_dates_from_posts() {
+	global $wpdb;
+
+	$orders_table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
+	if ( $orders_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_repaired_order_id';
+	$batch_size     = 500;
+	$zero           = '0000-00-00 00:00:00';
+	$type_list      = array();
+	foreach ( wc_get_order_types( 'cot-migration' ) as $post_type ) {
+		$escaped = esc_sql( $post_type );
+		if ( is_string( $escaped ) ) {
+			$type_list[] = "'" . $escaped . "'";
+		}
+	}
+	$type_list = implode( ',', $type_list );
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and the escaped type list cannot be prepared.
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT o.id, o.date_created_gmt, o.date_updated_gmt, p.post_date, p.post_date_gmt, p.post_modified, p.post_modified_gmt
+			FROM {$orders_table} o
+			INNER JOIN {$wpdb->posts} p ON p.ID = o.id AND p.post_type IN ({$type_list})
+			WHERE o.id > %d
+			AND ( o.date_created_gmt IS NULL OR o.date_created_gmt = %s OR o.date_updated_gmt IS NULL OR o.date_updated_gmt = %s )
+			ORDER BY o.id ASC
+			LIMIT %d",
+			(int) get_option( $last_id_option, 0 ),
+			$zero,
+			$zero,
+			$batch_size
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates: %s', $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	// The rule WordPress applies to its own posts: the GMT column, or the local one when the GMT one is the zero date.
+	$gmt_from_post = function ( $gmt_date, $local_date ) use ( $zero ) {
+		if ( $gmt_date && $zero !== $gmt_date ) {
+			return $gmt_date;
+		}
+		if ( ! $local_date || $zero === $local_date ) {
+			return null;
+		}
+		$datetime = date_create( $local_date, wp_timezone() );
+		return $datetime ? $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ) : null;
+	};
+
+	$repaired_ids = array();
+	foreach ( $rows as $row ) {
+		$data = array();
+		if ( ! $row->date_created_gmt || $zero === $row->date_created_gmt ) {
+			$data['date_created_gmt'] = $gmt_from_post( $row->post_date_gmt, $row->post_date );
+		}
+		if ( ! $row->date_updated_gmt || $zero === $row->date_updated_gmt ) {
+			$data['date_updated_gmt'] = $gmt_from_post( $row->post_modified_gmt, $row->post_modified );
+		}
+		$data = array_filter( $data );
+		if ( empty( $data ) ) {
+			continue;
+		}
+		if ( false === $wpdb->update( $orders_table, $data, array( 'id' => (int) $row->id ), array_fill( 0, count( $data ), '%s' ), array( '%d' ) ) ) {
+			wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates at order #%d: %s', (int) $row->id, $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+			delete_option( $last_id_option );
+			return false;
+		}
+		$repaired_ids[] = (int) $row->id;
+	}
+
+	if ( $repaired_ids ) {
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $repaired_ids );
+	}
+
+	if ( count( $rows ) === $batch_size ) {
+		update_option( $last_id_option, (int) end( $rows )->id, false );
+		return true;
+	}
+
+	delete_option( $last_id_option );
+
+	return false;
+}

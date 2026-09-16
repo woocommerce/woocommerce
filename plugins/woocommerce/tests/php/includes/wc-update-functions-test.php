@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\Notes\Note;
@@ -22,9 +26,29 @@ use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGallery
 class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		// Tests that migrate orders leave the two storages out of sync, which would otherwise block restoring the storage setting.
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::create_order_custom_table_if_not_exist();
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		parent::tearDown();
@@ -639,6 +663,75 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		update_post_meta( $variation_id, '_thumbnail_id', $variation_thumbnail_id );
 
 		return $variation_id;
+	}
+
+	/**
+	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should fill HPOS dates that an earlier migration left empty from the order's post.
+	 */
+	public function test_wc_update_1130_repairs_hpos_dates_from_posts(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$order_id = OrderHelper::create_complex_wp_post_order();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date_gmt'     => '0000-00-00 00:00:00',
+				'post_modified_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $order_id )
+		);
+		clean_post_cache( $order_id );
+		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $order_id ) );
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		// The shape earlier migrations left behind.
+		$wpdb->update(
+			$orders_table,
+			array(
+				'date_created_gmt' => '0000-00-00 00:00:00',
+				'date_updated_gmt' => null,
+			),
+			array( 'id' => $order_id )
+		);
+		$post = get_post( $order_id );
+
+		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A single small batch should not request another run' );
+
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT date_created_gmt, date_updated_gmt FROM {$orders_table} WHERE id = %d", $order_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( get_gmt_from_date( $post->post_date ), $row->date_created_gmt, 'Created date should come from post_date converted with the site timezone' );
+		$this->assertSame( get_gmt_from_date( $post->post_modified ), $row->date_updated_gmt, 'Updated date should come from post_modified' );
+		$this->assertNotSame( $post->post_date, $row->date_created_gmt, 'The local date must have been converted' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should leave rows alone when they have dates or their post has none.
+	 */
+	public function test_wc_update_1130_leaves_dated_rows_and_dateless_posts_alone(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$dated_id    = OrderHelper::create_complex_wp_post_order();
+		$dateless_id = OrderHelper::create_complex_wp_post_order();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date'     => '0000-00-00 00:00:00',
+				'post_date_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $dateless_id )
+		);
+		clean_post_cache( $dateless_id );
+		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $dated_id, $dateless_id ) );
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$dated_before = $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dated_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts() );
+
+		$this->assertSame( $dated_before, $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dated_id ) ), 'A dated row must not change' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dateless_id ) ), 'A post with no date gives nothing to repair from' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
