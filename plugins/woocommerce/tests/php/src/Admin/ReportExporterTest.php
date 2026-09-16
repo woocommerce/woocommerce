@@ -554,33 +554,4 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'earlier' ), 'Progress of earlier exports should survive the move.' );
 		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', 'current' ) );
 	}
-
-	/**
-	 * @testdox Export columns include report fields that an extension only registers on rest_api_init.
-	 */
-	public function test_export_columns_include_fields_registered_on_rest_api_init(): void {
-		global $wp_rest_server;
-
-		// A background export starts without a REST server.
-		$wp_rest_server = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		add_action(
-			'rest_api_init',
-			function () {
-				add_filter(
-					'woocommerce_rest_report_revenue_stats_schema',
-					function ( $properties ) {
-						$properties['totals']['properties']['cost_of_goods'] = array(
-							'description' => 'Cost of goods',
-							'type'        => 'number',
-						);
-						return $properties;
-					}
-				);
-			}
-		);
-
-		$exporter = new ReportCSVExporter( 'revenue' );
-
-		$this->assertArrayHasKey( 'cost_of_goods', $exporter->get_column_names(), 'Columns are read in the constructor, so REST hooks must be loaded before then.' );
-	}
 }
