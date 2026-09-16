@@ -22,7 +22,7 @@ use WC_Product;
  *
  * @internal Just for internal use.
  *
- * @since 11.2.0
+ * @since 11.3.0
  */
 class ScheduledSaleBatchProcessor {
 
