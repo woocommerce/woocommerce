@@ -9,34 +9,14 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * @internal
  */
 class MiniCartContents extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'mini-cart-contents';
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		// The frontend script is a dependency of the Mini-Cart block so it's
-		// already lazy-loaded.
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_style() {
-		return [ 'wc-blocks-style', 'wc-blocks-packages-style' ];
-	}
 
 	/**
 	 * Render the markup for the Mini-Cart Contents block.
