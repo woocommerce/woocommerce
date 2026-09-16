@@ -4,7 +4,6 @@
 	"title": "Mini-Cart Contents",
 	"description": "Display a Mini-Cart widget.",
 	"category": "woocommerce",
-	"style": "file:../woocommerce/mini-cart-style.css",
 	"supports": {
 		"align": false,
 		"html": false,
