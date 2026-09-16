@@ -325,6 +325,57 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, defaulting to 10.
+	 * @testWith [null, 10]
+	 *           [3, 3]
+	 *           ["7", 7]
+	 *
+	 * @param int|string|null $filtered_priority Value returned by the filter, or null to leave the filter unhooked.
+	 * @param int             $expected_priority Priority Action Scheduler is expected to store.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_at_filtered_priority( $filtered_priority, $expected_priority ) {
+		global $wc_queued_webhooks;
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_priority' );
+		$arg     = 123;
+
+		if ( null !== $filtered_priority ) {
+			add_filter(
+				'woocommerce_webhook_delivery_priority',
+				function ( $priority, $filtered_webhook, $filtered_arg ) use ( $webhook, $arg, $filtered_priority ) {
+					return $webhook->get_id() === $filtered_webhook->get_id() && $arg === $filtered_arg ? $filtered_priority : $priority;
+				},
+				10,
+				3
+			);
+		}
+
+		$wc_queued_webhooks = array(
+			array(
+				'webhook' => $webhook,
+				'arg'     => $arg,
+			),
+		);
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+
+		$action_ids = as_get_scheduled_actions(
+			array(
+				'hook'   => 'woocommerce_deliver_webhook_async',
+				'args'   => array(
+					'webhook_id' => $webhook->get_id(),
+					'arg'        => $arg,
+				),
+				'group'  => 'woocommerce-webhooks',
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids'
+		);
+
+		$this->assertCount( 1, $action_ids, 'Exactly one delivery should be scheduled for the webhook' );
+		$this->assertSame( $expected_priority, ActionScheduler::store()->fetch_action( (string) reset( $action_ids ) )->get_priority() );
+	}
+
+	/**
 	 * Verify that a webhook that has multiple hooks defined (in WC_Webhook::get_topic_hooks()),
 	 * is only delivered once.
 	 *
