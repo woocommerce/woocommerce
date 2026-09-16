@@ -200,6 +200,11 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 					continue;
 				}
 
+				// The row was read at the top of the pass, so check again before writing.
+				if ( Note::E_WC_ADMIN_NOTE_UNACTIONED !== $note->get_status() ) {
+					continue;
+				}
+
 				$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 				$note->save();
 			}

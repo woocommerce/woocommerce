@@ -18,17 +18,6 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 	private const SLUG = 'phpunit-spec-runner-note';
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		try {
-			Notes::delete_notes_with_name( self::SLUG );
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * @testdox A spec with an end date leaves it on the note.
 	 */
 	public function test_publish_before_time_is_stored_on_the_note(): void {
@@ -94,28 +83,50 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An end date in the spec's content data is not read as the spec's own.
+	 */
+	public function test_publish_before_in_content_data_is_dropped(): void {
+		$note = $this->run_spec(
+			array(
+				array(
+					'type'          => 'publish_after_time',
+					'publish_after' => '2020-01-01 00:00:00',
+				),
+			),
+			array( 'publish_before' => '2999-01-01 00:00:00' )
+		);
+
+		$this->assertFalse(
+			property_exists( $note->get_content_data(), 'publish_before' ),
+			'The end date comes from the spec rules, not from content data.'
+		);
+	}
+
+	/**
 	 * Run a spec with the given rules and return the note it created.
 	 *
-	 * @param array $rules Spec rules.
+	 * @param array $rules        Spec rules.
+	 * @param array $content_data Spec content data.
 	 * @return Note The created note.
 	 */
-	private function run_spec( array $rules ): Note {
+	private function run_spec( array $rules, array $content_data = array() ): Note {
 		$spec = json_decode(
 			(string) wp_json_encode(
 				array(
-					'slug'    => self::SLUG,
-					'type'    => Note::E_WC_ADMIN_NOTE_UPDATE,
-					'status'  => Note::E_WC_ADMIN_NOTE_UNACTIONED,
-					'source'  => 'woocommerce.com',
-					'locales' => array(
+					'slug'         => self::SLUG,
+					'content_data' => (object) $content_data,
+					'type'         => Note::E_WC_ADMIN_NOTE_UPDATE,
+					'status'       => Note::E_WC_ADMIN_NOTE_UNACTIONED,
+					'source'       => 'woocommerce.com',
+					'locales'      => array(
 						array(
 							'locale'  => 'en_US',
 							'title'   => 'Test note',
 							'content' => 'Test content',
 						),
 					),
-					'actions' => array(),
-					'rules'   => $rules,
+					'actions'      => array(),
+					'rules'        => $rules,
 				)
 			)
 		);

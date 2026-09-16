@@ -63,10 +63,16 @@ class SpecRunner {
 		}
 
 		// Keep the end date on the note so it can retire itself if the spec stops being served.
-		$content_data   = isset( $spec->content_data ) ? $spec->content_data : (object) array();
-		$publish_before = self::get_publish_before( $spec );
-		if ( null !== $publish_before ) {
-			$content_data->publish_before = $publish_before;
+		// The field is ours to write, so drop anything the feed put there. A content_data that
+		// isn't an object is left alone for set_content_data() to reject.
+		$content_data = isset( $spec->content_data ) ? $spec->content_data : (object) array();
+		if ( is_object( $content_data ) ) {
+			unset( $content_data->publish_before );
+
+			$publish_before = self::get_publish_before( $spec );
+			if ( null !== $publish_before ) {
+				$content_data->publish_before = $publish_before;
+			}
 		}
 
 		// Set up the note.
