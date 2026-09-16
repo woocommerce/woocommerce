@@ -20,7 +20,7 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	private $original_gateway_enabled = array();
 
 	/**
-	 * Restore the request, query and gateway state touched by this test.
+	 * Restore the request, query, session and gateway state touched by this test.
 	 */
 	public function tearDown(): void {
 		global $wp;
@@ -31,19 +31,24 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		unset( $wp->query_vars['order-pay'] );
 
 		foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
-			$gateway          = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
-			$gateway->enabled = $enabled;
-			$gateway->chosen  = false;
+			WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
 		}
 		$this->original_gateway_enabled = array();
+
+		// The gateway objects are shared singletons, so clear the selection on all of them, not only those this test enabled.
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$gateway->chosen = false;
+		}
+
+		if ( isset( WC()->session ) ) {
+			WC()->session->set( 'chosen_payment_method', null );
+		}
 
 		parent::tearDown();
 	}
 
 	/**
 	 * Enable the given gateways for the test, remembering their previous state.
-	 *
-	 * The gateway objects are shared singletons, so `chosen` is reset too.
 	 *
 	 * @param string[] $gateway_ids Gateway IDs to enable.
 	 */
@@ -52,7 +57,6 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 			$gateway                                       = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
 			$this->original_gateway_enabled[ $gateway_id ] = $gateway->enabled;
 			$gateway->enabled                              = 'yes';
-			$gateway->chosen                               = false;
 		}
 	}
 
@@ -92,12 +96,12 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Assert which payment method radio is checked on rendered pay page markup.
+	 * Get the IDs of the payment method radios that are checked on rendered pay page markup.
 	 *
-	 * @param string $expected_gateway_id Gateway ID expected to be pre-selected.
-	 * @param string $output              Rendered pay page.
+	 * @param string $output Rendered pay page.
+	 * @return string[]
 	 */
-	private function assert_checked_gateway( string $expected_gateway_id, string $output ): void {
+	private function get_checked_gateways( string $output ): array {
 		preg_match_all( '/id="payment_method_([^"]+)"[^>]*\/>/', $output, $radios, PREG_SET_ORDER );
 		$checked = array();
 		foreach ( $radios as $radio ) {
@@ -106,7 +110,7 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 			}
 		}
 
-		$this->assertSame( array( $expected_gateway_id ), $checked, 'Exactly one gateway should be pre-selected on the pay page.' );
+		return $checked;
 	}
 
 	/**
@@ -156,8 +160,21 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
 		$output = $this->render_pay_page( $order );
 
-		$this->assert_checked_gateway( WC_Gateway_Cheque::ID, $output );
+		$this->assertSame( array( WC_Gateway_Cheque::ID ), $this->get_checked_gateways( $output ) );
 		$this->assertStringContainsString( 'id="payment_method_' . WC_Gateway_BACS::ID . '"', $output, 'Other enabled gateways should still be offered.' );
+	}
+
+	/**
+	 * @testdox The pay page should prefer the merchant-assigned method over the one chosen in the shopper's session.
+	 */
+	public function test_order_pay_prefers_merchant_assigned_gateway_over_session_choice(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order = $this->create_pending_order( 'admin', WC_Gateway_Cheque::ID );
+		WC()->session->set( 'chosen_payment_method', WC_Gateway_BACS::ID );
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertSame( array( WC_Gateway_Cheque::ID ), $this->get_checked_gateways( $output ) );
 	}
 
 	/**
@@ -167,9 +184,11 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
 		$order = $this->create_pending_order( 'checkout', WC_Gateway_Cheque::ID );
 
-		$output = $this->render_pay_page( $order );
+		$output  = $this->render_pay_page( $order );
+		$checked = $this->get_checked_gateways( $output );
 
-		$this->assert_checked_gateway( WC_Gateway_BACS::ID, $output );
+		$this->assertCount( 1, $checked, 'Exactly one gateway should be pre-selected on the pay page.' );
+		$this->assertNotContains( WC_Gateway_Cheque::ID, $checked, 'The assigned method should not override the default for orders the shopper placed.' );
 	}
 
 	/**
@@ -179,9 +198,11 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
 		$order = $this->create_pending_order( 'admin', WC_Gateway_Cheque::ID );
 
-		$output = $this->render_pay_page( $order );
+		$output  = $this->render_pay_page( $order );
+		$checked = $this->get_checked_gateways( $output );
 
-		$this->assert_checked_gateway( WC_Gateway_BACS::ID, $output );
+		$this->assertCount( 1, $checked, 'Exactly one gateway should be pre-selected on the pay page.' );
+		$this->assertNotContains( WC_Gateway_Cheque::ID, $checked );
 		$this->assertStringNotContainsString( 'id="payment_method_' . WC_Gateway_Cheque::ID . '"', $output );
 	}
 }
