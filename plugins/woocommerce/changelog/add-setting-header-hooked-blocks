@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a General setting to turn off the cart and account icons WooCommerce automatically adds to block theme headers that haven't been customized.
