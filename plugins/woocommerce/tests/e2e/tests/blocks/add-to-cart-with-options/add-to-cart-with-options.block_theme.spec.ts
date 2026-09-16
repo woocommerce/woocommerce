@@ -125,6 +125,39 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
+	test( 'allows adding products to cart when AJAX add to cart buttons are disabled', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		// The block never reads this option, so markup is identical either way
+		// and a PHP assertion on it cannot fail. What can break is script
+		// availability: `wc-add-to-cart` is enqueued only while the option is
+		// on, so a dependency on that handle would leave the interactive form
+		// dead on every store that turns it off, with the markup unchanged.
+		await wpCLI(
+			'option update woocommerce_enable_ajax_add_to_cart no --user=1'
+		);
+
+		// The option is not restored here. The blocks `page` fixture resets the
+		// database and reimports the snapshot after every test, pass or fail,
+		// so it cannot reach the next one. Another title in this file relies on
+		// the same thing when it sets woocommerce_cart_redirect_after_add.
+		await pageObject.updateSingleProductTemplate();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/beanie' );
+
+		const addToCartButton = page.getByLabel( 'Add to cart: “Beanie”' );
+		await addToCartButton.click();
+
+		// Updated in place, with no navigation: the store still runs.
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+		await expect( page ).toHaveURL( /\/beanie\/?$/ );
+	} );
+
 	test( 'handles rapid add-to-cart clicks correctly', async ( {
 		page,
 		frontendUtils,
@@ -1130,6 +1163,41 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
+	test( 'allows selecting a variation on the front end inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		// The title above passes a variation to createPostWithProductBlock,
+		// whose optional second argument picks it in the editor, so front-end
+		// selection inside a Product block is never exercised. The Jest suite
+		// cannot cover it either: it replaces the products store and hand-feeds
+		// `mainProductInContext`, so it can never show that a Product block
+		// supplies the right product to the selector.
+		await pageObject.createPostWithProductBlock( 'hoodie' );
+
+		// Scoped, so the Related Products block cannot satisfy these locators.
+		const addToCartBlock = page.locator(
+			'.wp-block-add-to-cart-with-options'
+		);
+
+		await addToCartBlock
+			.getByRole( 'radiogroup', { name: 'Color' } )
+			.getByRole( 'radio', { name: 'Blue', exact: true } )
+			.click();
+		await addToCartBlock
+			.getByRole( 'radiogroup', { name: 'Logo' } )
+			.getByRole( 'radio', { name: 'Yes', exact: true } )
+			.click();
+
+		await addToCartBlock
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.click();
 
 		await expect(
 			page.getByRole( 'button', { name: '1 in cart', exact: true } )
