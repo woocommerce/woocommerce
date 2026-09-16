@@ -100,6 +100,10 @@ export const periods = [
 		value: 'previous_year',
 		label: __( 'Previous year', 'woocommerce' ),
 	},
+	{
+		value: 'previous_month',
+		label: __( 'Previous month', 'woocommerce' ),
+	},
 ];
 
 const isValidMomentInput = ( input: unknown ): input is moment.MomentInput =>
@@ -468,7 +472,7 @@ ensureMomentStartOfWeek();
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
- * @param {string}                   compare - `previous_period` or `previous_year`
+ * @param {string}                   compare - `previous_period`, `previous_year` or `previous_month`
  * @return {DateValue} - DateValue data about the selected period
  */
 export function getLastPeriod(
@@ -501,6 +505,10 @@ export function getLastPeriod(
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
 			secondaryShift = 'offset';
 		}
+	} else if ( compare === 'previous_month' ) {
+		secondaryStart = primaryStart.clone().subtract( 1, 'months' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'months' );
+		secondaryShift = 'offset';
 	} else if ( period === 'week' ) {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
 		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' );
@@ -528,7 +536,7 @@ export function getLastPeriod(
  * and ends on the current day.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
- * @param {string}                   compare - `previous_period` or `previous_year`
+ * @param {string}                   compare - `previous_period`, `previous_year` or `previous_month`
  * @return {DateValue} - DateValue data about the selected period
  */
 export function getCurrentPeriod(
@@ -550,6 +558,10 @@ export function getCurrentPeriod(
 		if ( period !== 'year' ) {
 			secondaryShift = 'offset';
 		}
+	} else if ( compare === 'previous_month' ) {
+		secondaryStart = primaryStart.clone().subtract( 1, 'months' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'months' );
+		secondaryShift = 'offset';
 	} else {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
 		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' ).endOf( 'day' );
@@ -568,7 +580,7 @@ export function getCurrentPeriod(
  * dates, for custom dates.
  *
  * @param {string}             period   - the chosen period
- * @param {string}             compare  - `previous_period` or `previous_year`
+ * @param {string}             compare  - `previous_period`, `previous_year` or `previous_month`
  * @param {moment.Moment|null} [after]  - after date if custom period
  * @param {moment.Moment|null} [before] - before date if custom period
  * @return {DateValue} - DateValue data about the selected period
@@ -618,6 +630,15 @@ const getDateValue = memoize<
 						primaryEnd: before,
 						secondaryStart,
 						secondaryEnd,
+						secondaryShift: 'offset',
+					};
+				}
+				if ( compare === 'previous_month' ) {
+					return {
+						primaryStart: after,
+						primaryEnd: before,
+						secondaryStart: after.clone().subtract( 1, 'months' ),
+						secondaryEnd: before.clone().subtract( 1, 'months' ),
 						secondaryShift: 'offset',
 					};
 				}

@@ -126,9 +126,10 @@ class StorePerformance extends Component {
 
 		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
 		const prevLabel =
-			compare === 'previous_period'
-				? __( 'Previous period:', 'woocommerce' )
-				: __( 'Previous year:', 'woocommerce' );
+			{
+				previous_period: __( 'Previous period:', 'woocommerce' ),
+				previous_month: __( 'Previous month:', 'woocommerce' ),
+			}[ compare ] ?? __( 'Previous year:', 'woocommerce' );
 		const { formatAmount, getCurrencyConfig } = this.context;
 		const currency = getCurrencyConfig();
 		return (

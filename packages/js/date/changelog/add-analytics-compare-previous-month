@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `previous_month` compare option that compares a date range to the same dates one month earlier.

@@ -73,6 +73,11 @@ export class ReportSummary extends Component {
 		}
 
 		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
+		const prevLabel =
+			{
+				previous_period: __( 'Previous period:', 'woocommerce' ),
+				previous_month: __( 'Previous month:', 'woocommerce' ),
+			}[ compare ] ?? __( 'Previous year:', 'woocommerce' );
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( ( chart ) => {
@@ -103,11 +108,7 @@ export class ReportSummary extends Component {
 						href={ href }
 						label={ label }
 						reverseTrend={ isReverseTrend }
-						prevLabel={
-							compare === 'previous_period'
-								? __( 'Previous period:', 'woocommerce' )
-								: __( 'Previous year:', 'woocommerce' )
-						}
+						prevLabel={ prevLabel }
 						prevValue={ prevValue }
 						selected={ isSelected }
 						value={ value }

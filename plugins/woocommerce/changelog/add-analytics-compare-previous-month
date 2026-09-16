@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Analytics: add a "Previous month" comparison option to the date range picker, for example to compare today with the same day last month.

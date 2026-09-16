@@ -304,6 +304,17 @@ describe( 'getCurrentPeriod', () => {
 				todayLastYear.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
+
+		it( 'should return correct values for previous_month', () => {
+			const dateValue = getCurrentPeriod( 'day', 'previous_month' );
+
+			expect(
+				todayLastMonth.isSame( dateValue.secondaryStart, 'day' )
+			).toBe( true );
+			expect(
+				todayLastMonth.isSame( dateValue.secondaryEnd, 'day' )
+			).toBe( true );
+		} );
 	} );
 
 	describe( 'week', () => {
@@ -538,6 +549,18 @@ describe( 'getLastPeriod', () => {
 				yesterdayLastYear.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
+
+		it( 'should return correct values for previous_month', () => {
+			const dateValue = getLastPeriod( 'day', 'previous_month' );
+			const yesterdayLastMonth = yesterday.clone().subtract( 1, 'month' );
+
+			expect(
+				yesterdayLastMonth.isSame( dateValue.secondaryStart, 'day' )
+			).toBe( true );
+			expect(
+				yesterdayLastMonth.isSame( dateValue.secondaryEnd, 'day' )
+			).toBe( true );
+		} );
 	} );
 
 	describe( 'week', () => {
@@ -648,6 +671,24 @@ describe( 'getLastPeriod', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
 
 			expect( dateValue.secondaryEnd.date() ).toBe( 29 );
+
+			dateNowSpy.mockRestore();
+		} );
+
+		it( 'should return the full month before last month for previous_month', () => {
+			// March 12, 2021: last month is February, the month before is January.
+			const dateNowSpy = jest
+				.spyOn( Date, 'now' )
+				.mockImplementation( () => 1615587095000 );
+
+			const dateValue = getLastPeriod( 'month', 'previous_month' );
+
+			expect( dateValue.secondaryStart.format( isoDateFormat ) ).toBe(
+				'2021-01-01'
+			);
+			expect( dateValue.secondaryEnd.format( isoDateFormat ) ).toBe(
+				'2021-01-31'
+			);
 
 			dateNowSpy.mockRestore();
 		} );
@@ -1413,6 +1454,23 @@ describe( 'getCurrentDates', () => {
 		);
 		expect( currentDates.secondary.before.format( isoDateFormat ) ).toBe(
 			todayLastYear
+		);
+	} );
+
+	it( 'should compare a custom range to the same dates in the previous month', () => {
+		const currentDates = getCurrentDates( {
+			period: 'custom',
+			compare: 'previous_month',
+			after: '2026-03-31',
+			before: '2026-03-31',
+		} );
+
+		expect( currentDates.secondary.label ).toBe( 'Previous month' );
+		expect( currentDates.secondary.after.format( isoDateFormat ) ).toBe(
+			'2026-02-28'
+		);
+		expect( currentDates.secondary.before.format( isoDateFormat ) ).toBe(
+			'2026-02-28'
 		);
 	} );
 } );

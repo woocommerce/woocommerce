@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Span the last item of a SegmentedSelection across both columns when the number of options is odd.
