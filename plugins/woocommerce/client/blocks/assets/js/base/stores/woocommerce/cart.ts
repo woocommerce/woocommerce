@@ -1168,8 +1168,14 @@ const { actions } = store< Store >(
 			*refreshCartItems(): AsyncAction< void > {
 				// Skip when the server did not provide the interactivity
 				// state this store needs, e.g. when a block imports this
-				// store without loading the shared cart state.
+				// store without loading the shared cart state. Release
+				// pending mutations so they fail visibly instead of
+				// waiting forever for a nonce that will never arrive.
 				if ( ! state.restUrl ) {
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
 					return;
 				}
 
