@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show saved additional checkout fields on orders from any checkout without filling missing or empty values from checkout defaults.
+Only show additional checkout fields with saved values, from any checkout flow.
