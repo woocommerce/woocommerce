@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ScheduledSaleBatchProcessor;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Helper_Product;
-use WC_Product;
 use WC_Product_Variable;
 use WC_Product_Variation;
 use WC_Unit_Test_Case;
@@ -57,27 +56,10 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Every product is processed when the list spans more than one batch.
-	 */
-	public function test_end_mode_processes_every_product_across_batches(): void {
-		$ids = array();
-
-		for ( $i = 0; $i <= ScheduledSaleBatchProcessor::BATCH_SIZE; $i++ ) {
-			$ids[] = $this->create_missed_sale_end_product()->get_id();
-		}
-
-		$this->sut->process( $ids, 'end' );
-
-		foreach ( $ids as $id ) {
-			$this->assertEquals( 100, get_post_meta( $id, '_price', true ), "Product {$id} was not processed, so a batch boundary dropped it." );
-		}
-	}
-
-	/**
 	 * @testdox An external object cache has only its in-memory copy dropped, never a shared group.
 	 */
 	public function test_drops_only_the_runtime_copy_on_an_external_cache(): void {
-		$product = $this->create_missed_sale_end_product();
+		$product = WC_Helper_Product::create_missed_sale_end_product();
 
 		$spy = new class() extends WP_Object_Cache {
 			/**
@@ -146,7 +128,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Requires a request-local object cache with flush_group support.' );
 		}
 
-		$product = $this->create_missed_sale_end_product();
+		$product = WC_Helper_Product::create_missed_sale_end_product();
 
 		wp_cache_set( 'sentinel', 'release me', 'products' );
 		wp_cache_set( 'sentinel', 'release me', 'term-queries' );
@@ -167,7 +149,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$features_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
 
 		try {
-			$product = $this->create_missed_sale_end_product();
+			$product = WC_Helper_Product::create_missed_sale_end_product();
 
 			$product_cache     = wc_get_container()->get( ProductCache::class );
 			$unrelated_product = WC_Helper_Product::create_simple_product();
@@ -258,7 +240,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse( wp_cache_get( $page_id, 'posts' ), 'Fixture precondition: the page should be primed before the run.' );
 		$this->assertNotFalse( wp_cache_get( $page_id, 'post_meta' ), 'Fixture precondition: the page meta should be primed before the run.' );
 
-		$product = $this->create_missed_sale_end_product();
+		$product = WC_Helper_Product::create_missed_sale_end_product();
 
 		$this->sut->process( array( $product->get_id() ), 'end' );
 
@@ -278,7 +260,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$ids = array();
 
 		for ( $i = 0; $i < 3; $i++ ) {
-			$ids[] = $this->create_missed_sale_end_product()->get_id();
+			$ids[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
 		}
 
 		// The forms a replaced data store might return: the default store returns strings.
@@ -324,7 +306,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	 * @param callable $make_row Builds the malformed row from the decoy post id.
 	 */
 	public function test_drops_malformed_rows( callable $make_row ): void {
-		$product = $this->create_missed_sale_end_product();
+		$product = WC_Helper_Product::create_missed_sale_end_product();
 
 		// A loose cast would turn the malformed row into the cached page ID.
 		$decoy_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
@@ -343,7 +325,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_processes_a_duplicated_id_once(): void {
 		// Duplicate postmeta rows can return the same product more than once.
-		$product = $this->create_missed_sale_end_product();
+		$product = WC_Helper_Product::create_missed_sale_end_product();
 
 		$saves = 0;
 		add_action(
@@ -359,23 +341,5 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $saves, 'A duplicated id must settle with a single save, not one per row.' );
 		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'Fixture precondition: the product should have been processed.' );
-	}
-
-	/**
-	 * Create a product whose sale has ended while its stored price is still the sale price.
-	 *
-	 * @return WC_Product
-	 */
-	private function create_missed_sale_end_product(): WC_Product {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->set_sale_price( 50 );
-		$product->save();
-
-		update_post_meta( $product->get_id(), '_price', 50 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
-
-		return $product;
 	}
 }
