@@ -325,10 +325,17 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, defaulting to 10 when unfiltered or non-numeric.
+	 * Overflowing values must be clamped before the int cast: cast first, PHP_INT_MAX + 1 wraps
+	 * to PHP_INT_MIN and lands at 0, the highest priority, instead of 255.
+	 *
+	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, clamped to 0-255, defaulting to 10 when unfiltered, non-numeric or non-finite.
 	 * @testWith ["unhooked", 10]
 	 *           [3, 3]
 	 *           ["7", 7]
+	 *           [-5, 0]
+	 *           [300, 255]
+	 *           [9223372036854775808, 255]
+	 *           ["1e309", 10]
 	 *           [null, 10]
 	 *           ["high", 10]
 	 *

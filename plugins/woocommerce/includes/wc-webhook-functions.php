@@ -40,9 +40,9 @@ function wc_webhook_execute_queue() {
 					/**
 					 * Filters the Action Scheduler priority of a webhook delivery.
 					 *
-					 * Lower values run first. Action Scheduler accepts 0-255, clamping anything
-					 * outside that range, and the default is 10. A non-numeric value falls back to
-					 * the default. Only fires when the active queue implements
+					 * Lower values run first. Action Scheduler accepts 0-255 and the default is 10.
+					 * Values outside that range are clamped; a non-numeric or non-finite value
+					 * falls back to the default. Only fires when the active queue implements
 					 * WC_Priority_Queue_Interface, which the default queue does.
 					 *
 					 * @since 11.3.0
@@ -52,7 +52,9 @@ function wc_webhook_execute_queue() {
 					 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
 					 */
 					$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
-					$priority = is_numeric( $priority ) ? (int) $priority : 10;
+					$priority = is_numeric( $priority ) && is_finite( (float) $priority )
+						? (int) max( 0, min( 255, (float) $priority ) )
+						: 10;
 
 					$queue->add_with_priority( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', $priority );
 				} else {
