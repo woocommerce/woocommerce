@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupRateLimiter;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
@@ -406,6 +407,40 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		$second = $this->sut->signup( $other_product->get_id(), 0, 'guest@example.com' );
 		$this->assertNotWPError( $second, 'Activating an existing pending signup should not consume the rate limit window' );
+	}
+
+	/**
+	 * @testdox Should let the signup through when the rate limit window cannot be claimed.
+	 */
+	public function test_signup_proceeds_when_the_rate_limit_cannot_be_claimed(): void {
+		global $wpdb;
+
+		$product = $this->create_out_of_stock_product();
+
+		// Break the rate limit write the same way SignupRateLimiterTests does, so apply() fails
+		// for a reason the shopper cannot fix and signup() has to decide whether to fail open.
+		$suppress = $wpdb->suppress_errors( true );
+		$filter   = static function ( $query ) {
+			if ( false !== strpos( $query, 'stock_notifications_signup_email_' ) ) {
+				return 'SELECT 1 FROM a_table_that_does_not_exist';
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $filter );
+
+		try {
+			$result = $this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+		} finally {
+			remove_filter( 'query', $filter );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertNotWPError( $result, 'A signup should not fail because the rate limit window could not be claimed' );
+		$this->assertEquals( SignupService::SIGNUP_SUCCESS, $result->get_code(), 'The signup should report success' );
+		$this->assertInstanceOf( Notification::class, $this->sut->is_already_signed_up( $product->get_id(), 0, 'guest@example.com' ), 'The notification should have been created' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'guest@example.com' ), 'No partial rate limit window should be left behind' );
 	}
 
 	/**
