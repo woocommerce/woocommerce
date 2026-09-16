@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scope Product Filter editor data to local Product Collection taxonomy constraints.
