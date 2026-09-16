@@ -168,14 +168,16 @@ const getActions = (): Actions => {
 };
 
 describe( 'Product Gallery thumbnails scroll position', () => {
-	beforeEach( () => {
+	beforeEach( async () => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockGetElement.mockReset();
+		mockGetConfig.mockReset();
+		mockGetConfig.mockReturnValue( {} );
 		mockRegisteredStore = null;
 
-		jest.isolateModules( () => {
-			require( '../frontend' );
+		await jest.isolateModulesAsync( async () => {
+			await import( '../frontend' );
 		} );
 	} );
 
