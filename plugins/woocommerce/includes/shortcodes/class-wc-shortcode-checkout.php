@@ -91,7 +91,7 @@ class WC_Shortcode_Checkout {
 				$order     = wc_get_order( $order_id );
 
 				// Order or payment link is invalid.
-				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+				if ( ! $order instanceof WC_Order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 				}
 
@@ -269,12 +269,12 @@ class WC_Shortcode_Checkout {
 	 * Orders placed through checkout carry the method the shopper picked, so those keep the default selection.
 	 *
 	 * @since 11.3.0
-	 * @param WC_Abstract_Order    $order              Order being paid for.
+	 * @param WC_Order             $order              Order being paid for.
 	 * @param WC_Payment_Gateway[] $available_gateways Gateways available on the pay page, keyed by gateway ID.
 	 * @return WC_Payment_Gateway|null
 	 */
-	private static function get_merchant_assigned_gateway( $order, $available_gateways ) {
-		if ( ! $order instanceof WC_Order || 'admin' !== $order->get_created_via() ) {
+	private static function get_merchant_assigned_gateway( WC_Order $order, array $available_gateways ) {
+		if ( ! $order->is_created_via( 'admin' ) ) {
 			return null;
 		}
 
