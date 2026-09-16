@@ -262,7 +262,7 @@ class ProductGallery extends AbstractBlock {
 		$variation_gallery = ProductGalleryUtils::get_product_variation_gallery( $product );
 
 		if ( ! empty( $variation_gallery['variations'] ) ) {
-			// Show the full lineup from the start so a variation switch never re-orders.
+			// Show the full lineup from the start so selecting a variation only moves the selection.
 			$default_media_ids = $variation_gallery['image_ids'];
 		}
 

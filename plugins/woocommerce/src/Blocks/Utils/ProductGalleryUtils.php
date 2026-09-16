@@ -412,6 +412,8 @@ class ProductGalleryUtils {
 	 * carry only `image_id`: the gallery keeps the lineup and moves the
 	 * selection. Variations with their own gallery return their `image_ids`.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param \WC_Product $product The variable product.
 	 * @return array{image_ids: int[], variations: array<int, array<string, mixed>>} Both empty for non-variable products.
 	 */
@@ -515,7 +517,7 @@ class ProductGalleryUtils {
 	 * - no variation images → lineup, first image selected
 	 * - own featured only → lineup, variation featured selected
 	 * - own featured + gallery → variation images only
-	 * - gallery only, no own featured (potential AVI shape) → variation gallery, first image selected
+	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
 	 * @param int   $featured_id           Variation featured image ID (0 if none).
 	 * @param bool  $featured_valid        Whether it is an existing image attachment.
