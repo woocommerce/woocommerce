@@ -35,8 +35,14 @@ export const setEmailEditorFeatureFlag = async (
  * @param {string} baseURL The base URL.
  * @return {Promise<void>}
  */
-export const enableEmailEditor = async ( baseURL: string ) =>
-	setEmailEditorFeatureFlag( baseURL, 'yes' );
+export const enableEmailEditor = async ( baseURL: string ) => {
+	await deleteOption(
+		request,
+		baseURL,
+		'woocommerce_email_editor_rewrites_flushed'
+	);
+	await setEmailEditorFeatureFlag( baseURL, 'yes' );
+};
 
 /**
  * Disable the email editor feature.

@@ -78,6 +78,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'woocommerce_customer_stock_notifications_require_double_opt_in' );
+		delete_option( 'woocommerce_customer_stock_notifications_create_account_on_signup' );
 
 		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
 		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
@@ -125,6 +126,142 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			->method( 'send_verify_email' );
 
 		$this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+	}
+
+	/**
+	 * @testdox Should detect an existing guest signup when the same email later signs up as a logged-in user.
+	 */
+	public function test_guest_signup_detected_for_logged_in_user_with_same_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+
+		$found = $this->sut->is_already_signed_up( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertInstanceOf( Notification::class, $found );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $found->get_id() );
+	}
+
+	/**
+	 * @testdox Should detect an existing pending guest signup when the same email later signs up as a logged-in user with double opt-in enabled.
+	 */
+	public function test_pending_guest_signup_detected_for_logged_in_user_with_double_opt_in() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS_DOUBLE_OPT_IN, $guest_result->get_code() );
+		$this->assertSame( NotificationStatus::PENDING, $guest_result->get_notification()->get_status() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should detect an existing logged-in signup when the same email later signs up as a guest.
+	 */
+	public function test_logged_in_signup_detected_for_guest_with_same_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $user_result->get_code() );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $guest_result->get_code() );
+		$this->assertSame( $user_result->get_notification()->get_id(), $guest_result->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should detect an existing guest signup when the same email later signs up as a logged-in user with the same attributes.
+	 */
+	public function test_guest_signup_detected_for_logged_in_user_with_same_attributes() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should allow a second signup for the same variation with different posted attributes.
+	 */
+	public function test_different_posted_attributes_are_not_a_duplicate() {
+		$this->disable_signup_rate_limiting();
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com', array( 'attribute_pa_color' => 'red' ) );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $user_result->get_code() );
+		$this->assertNotSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+
+		$found = $this->sut->is_already_signed_up( $product->get_id(), $user_id, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
+		$this->assertInstanceOf( Notification::class, $found );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $found->get_id() );
+	}
+
+	/**
+	 * @testdox Should not let a cancelled notification hide a later active one.
+	 */
+	public function test_cancelled_notification_does_not_hide_active_one() {
+		$this->disable_signup_rate_limiting();
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$first = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' )->get_notification();
+		$first->set_status( NotificationStatus::CANCELLED );
+		$first->save();
+
+		$second = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $second->get_code() );
+		$this->assertNotSame( $first->get_id(), $second->get_notification()->get_id() );
+
+		// The cancelled notification is older, so it must not be the one the third signup finds.
+		$third = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $third->get_code() );
+		$this->assertSame( $second->get_notification()->get_id(), $third->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should not treat a different email as a duplicate when the user ID has no signup.
+	 */
+	public function test_no_false_duplicate_for_different_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+
+		$this->assertNull( $this->sut->is_already_signed_up( $product->get_id(), $user_id, 'customer@example.com' ) );
 	}
 
 	/**
@@ -298,6 +435,19 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Switch the sign-up rate limiter off, for tests that legitimately create two sign-ups in a row.
+	 */
+	private function disable_signup_rate_limiting(): void {
+		add_filter(
+			'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+			static function ( $options ) {
+				$options['enabled'] = false;
+				return $options;
+			}
+		);
+	}
+
+	/**
 	 * Create an out-of-stock simple product for signup.
 	 *
 	 * @return \WC_Product_Simple
@@ -337,7 +487,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			array(
 				'wc_bis_product_id' => $product->get_id(),
 				'wc_bis_email'      => ' Guest@Example.COM ',
-				'wc_bis_opt_in'     => 'on',
 			)
 		);
 
@@ -346,41 +495,51 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse() should resolve a guest email to an existing account stored in mixed case and keep the canonical email.
+	 * @testdox parse() should leave a guest sign-up unlinked even when an account with that email exists.
 	 */
-	public function test_parse_resolves_mixed_case_account_email(): void {
-		global $wpdb;
-
+	public function test_parse_does_not_link_guest_to_existing_account(): void {
 		$product = $this->create_out_of_stock_product();
-		$user_id = $this->factory()->user->create( array( 'user_email' => 'Mixed.Case@Example.com' ) );
-
-		// The test database collation is case-insensitive, so capture the value the lookup actually
-		// sends instead of relying on the row being found.
-		$user_queries = array();
-		add_filter(
-			'query',
-			function ( $query ) use ( &$user_queries, $wpdb ) {
-				if ( false !== strpos( $query, "FROM {$wpdb->users} WHERE user_email" ) ) {
-					$user_queries[] = $query;
-				}
-				return $query;
-			}
-		);
-		wp_cache_flush();
+		$this->factory()->user->create( array( 'user_email' => 'existing@example.com' ) );
 
 		$data = $this->sut->parse(
 			array(
 				'wc_bis_product_id' => $product->get_id(),
-				'wc_bis_email'      => 'Mixed.Case@Example.com',
-				'wc_bis_opt_in'     => 'on',
+				'wc_bis_email'      => 'existing@example.com',
 			)
 		);
 
 		$this->assertIsArray( $data );
-		$this->assertSame( $user_id, $data['user_id'] );
-		$this->assertSame( 'mixed.case@example.com', $data['user_email'] );
-		$this->assertCount( 1, $user_queries, 'The account lookup should query the users table' );
-		$this->assertStringContainsString( "'Mixed.Case@Example.com'", $user_queries[0], 'The account lookup should keep the letter case as entered' );
+		$this->assertSame( 0, $data['user_id'] );
+		$this->assertSame( 'existing@example.com', $data['user_email'] );
+	}
+
+	/**
+	 * @testdox A guest signup should never create an account, even with the legacy option enabled.
+	 */
+	public function test_guest_signup_does_not_create_account(): void {
+		update_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+
+		$result = $this->sut->signup( $product->get_id(), 0, 'newguest@example.com' );
+
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$this->assertSame( 0, $result->get_notification()->get_user_id() );
+		$this->assertFalse( get_user_by( 'email', 'newguest@example.com' ) );
+	}
+
+	/**
+	 * @testdox Deprecated account-creation codes should still map to a message.
+	 */
+	public function test_deprecated_account_created_codes_still_resolve(): void {
+		$product      = $this->create_out_of_stock_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+
+		$this->assertStringContainsString( 'a new account has been created', $this->sut->get_signup_user_message( 'success_account_created', $notification ) );
+		$this->assertStringContainsString( 'An account has been created', $this->sut->get_signup_user_message( 'success_account_created_double_opt_in', $notification ) );
+		$this->assertStringContainsString( 'consent to the creation of a new account', $this->sut->get_error_message( 'invalid_opt_in' ) );
 	}
 
 	/**
@@ -399,7 +558,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 			array(
 				'wc_bis_product_id' => $product->get_id(),
 				'wc_bis_email'      => $posted_email,
-				'wc_bis_opt_in'     => 'on',
 			)
 		);
 
