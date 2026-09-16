@@ -62,6 +62,9 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		self::maybe_create_directory();
 
 		if ( ! empty( $type ) ) {
+			// Start the REST server first: extensions often add report fields and export columns on rest_api_init,
+			// which a background export would otherwise only fire after the columns are read.
+			rest_get_server();
 			$this->set_report_type( $type );
 			$this->set_column_names( $this->get_report_columns() );
 		}
