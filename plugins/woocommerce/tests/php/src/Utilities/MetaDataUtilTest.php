@@ -180,11 +180,29 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `update` passes custom default_id through to normalize.
+	 * @testdox `update` uses default_id for entries without an id, updating that metadata row in place.
 	 */
 	public function test_update_passes_default_id(): void {
 		$order = wc_create_order();
+		$order->add_meta_data( 'original_key', 'original_value' );
+		$order->save();
 
+		$rows_with_key = static function ( \WC_Order $order, string $key ): array {
+			return array_values(
+				array_filter(
+					$order->get_meta_data(),
+					static function ( $meta ) use ( $key ): bool {
+						return $key === $meta->key;
+					}
+				)
+			);
+		};
+		$existing_rows = $rows_with_key( $order, 'original_key' );
+		$this->assertCount( 1, $existing_rows, 'The seeded metadata row should exist before the update.' );
+		$existing_id = $existing_rows[0]->id;
+
+		// The id has to name a real row. An id that matches nothing makes update_meta_data() add
+		// a new row, which is also what it does when no id arrives at all.
 		MetaDataUtil::update(
 			array(
 				array(
@@ -193,19 +211,13 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 				),
 			),
 			$order,
-			99
+			$existing_id
 		);
 
-		$meta_data = array_values(
-			array_filter(
-				$order->get_meta_data(),
-				static function ( $meta ): bool {
-					return 'k' === $meta->key;
-				}
-			)
-		);
-		$this->assertCount( 1, $meta_data );
-		$this->assertSame( 'k', $meta_data[0]->key );
-		$this->assertSame( 'v', $meta_data[0]->value );
+		$updated_rows = $rows_with_key( $order, 'k' );
+		$this->assertCount( 1, $updated_rows );
+		$this->assertSame( $existing_id, $updated_rows[0]->id, 'The entry should update the row named by default_id rather than add a new one.' );
+		$this->assertSame( 'v', $updated_rows[0]->value );
+		$this->assertCount( 0, $rows_with_key( $order, 'original_key' ), 'The row named by default_id should have been rewritten in place.' );
 	}
 }
