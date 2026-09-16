@@ -91,7 +91,7 @@ class WC_Shortcode_Checkout {
 				$order     = wc_get_order( $order_id );
 
 				// Order or payment link is invalid.
-				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+				if ( ! $order instanceof WC_Order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 				}
 
@@ -196,7 +196,14 @@ class WC_Shortcode_Checkout {
 				WC()->customer->save();
 
 				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-				WC()->payment_gateways()->set_current_gateway( $available_gateways );
+				$assigned_gateway   = self::get_merchant_assigned_gateway( $order, $available_gateways );
+
+				// The method a merchant set on an admin-created order is the default selection; the shopper can still pick another.
+				if ( $assigned_gateway ) {
+					$assigned_gateway->set_current();
+				} else {
+					WC()->payment_gateways()->set_current_gateway( $available_gateways );
+				}
 
 				/**
 				 * Allows the text of the submit button on the Pay for Order page to be changed.
@@ -254,6 +261,26 @@ class WC_Shortcode_Checkout {
 		}
 
 		do_action( 'after_woocommerce_pay' );
+	}
+
+	/**
+	 * Get the gateway a merchant assigned to an admin-created order, when the shopper can use it.
+	 *
+	 * Orders placed through checkout carry the method the shopper picked, so those keep the default selection.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Order             $order              Order being paid for.
+	 * @param WC_Payment_Gateway[] $available_gateways Gateways available on the pay page, keyed by gateway ID.
+	 * @return WC_Payment_Gateway|null
+	 */
+	private static function get_merchant_assigned_gateway( WC_Order $order, array $available_gateways ) {
+		if ( ! $order->is_created_via( 'admin' ) ) {
+			return null;
+		}
+
+		$payment_method = $order->get_payment_method();
+
+		return $payment_method && isset( $available_gateways[ $payment_method ] ) ? $available_gateways[ $payment_method ] : null;
 	}
 
 	/**
