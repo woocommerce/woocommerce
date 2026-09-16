@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Cut the product reviews E2E spec from 9 titles to 6; review edit and reply now covered by ReviewsAjaxTest, with a retained browser canary for the approve, spam and trash moderation actions.
+

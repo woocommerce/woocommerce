@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error when structured data is requested without a type filter on a store whose markup uses multiple schema types.

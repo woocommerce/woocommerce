@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Cut the product images E2E spec from 6 titles to 3; image and gallery persistence and rendering now covered by WC_Meta_Box_Product_Images_Test.
+
