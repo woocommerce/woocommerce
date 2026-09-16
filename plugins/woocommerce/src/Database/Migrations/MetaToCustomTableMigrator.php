@@ -603,7 +603,7 @@ WHERE
 				break;
 			case 'date':
 				try {
-					if ( '' === $value || self::ZERO_DATE === $value ) {
+					if ( null === $value || '' === $value || self::ZERO_DATE === $value ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' );
