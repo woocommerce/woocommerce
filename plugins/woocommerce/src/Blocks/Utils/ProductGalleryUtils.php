@@ -400,16 +400,6 @@ class ProductGalleryUtils {
 	}
 
 	/**
-	 * Get the image IDs a variable product's gallery always shows.
-	 *
-	 * @param \WC_Product $product Variable product.
-	 * @return int[] Image IDs (0 for the placeholder); empty for other product types.
-	 */
-	public static function get_product_gallery_lineup_ids( $product ) {
-		return self::get_product_variation_gallery( $product )['image_ids'];
-	}
-
-	/**
 	 * Build the gallery lineup and the per-variation entries in one pass.
 	 *
 	 * The lineup is the parent media gallery, then the featured images of
