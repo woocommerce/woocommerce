@@ -138,7 +138,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that variation gallery data falls back to the variation's own gallery when the variation featured image is stale.
+	 * @testdox Should fall back to the variation gallery when the variation featured image is stale.
 	 */
 	public function test_get_product_variation_gallery_data_falls_back_to_variation_gallery_when_featured_is_stale() {
 		$variable_product     = \WC_Helper_Product::create_variation_product();
@@ -192,8 +192,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Variation has its own featured plus gallery images, so the variation's
-	 * images replace the parent's entirely.
+	 * @testdox Should replace the parent set when the variation has its own featured and gallery images.
 	 */
 	public function test_get_product_variation_gallery_data_case_4_multiple_images_replaces_parent_set() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
@@ -217,9 +216,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * (Edge case - legacy AVI shape): variation has gallery images but no own featured →
-	 * parent featured anchors the set, variation gallery follows. No parent
-	 * gallery extras appear — the variation owns the rest of the lineup.
+	 * @testdox Should anchor a variation gallery without its own featured image on the parent featured image.
 	 */
 	public function test_get_product_variation_gallery_data_case_5_avi_shape_uses_parent_featured_plus_variation_gallery() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
