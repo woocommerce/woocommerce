@@ -32,7 +32,8 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut      = wc_get_container()->get( NonShippingCartTaxLocation::class );
+		$this->sut = wc_get_container()->get( NonShippingCartTaxLocation::class );
+		$this->sut->init();
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
 		$this->customer->set_shipping_location( 'US', 'CA', '90210', 'Beverly Hills' );
