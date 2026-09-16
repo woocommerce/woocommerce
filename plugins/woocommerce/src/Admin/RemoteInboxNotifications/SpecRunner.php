@@ -88,10 +88,9 @@ class SpecRunner {
 	}
 
 	/**
-	 * Get the date from the spec's publish_before_time rule, if it has one.
+	 * Get the date from the spec's top level publish_before_time rule, if it has one.
 	 *
-	 * Only top level rules are read. A rule nested inside an `or` doesn't describe the
-	 * spec's own end date, so it can't stand in for one.
+	 * A rule nested inside an `or` doesn't describe the spec's own end date, so it is ignored.
 	 *
 	 * @param object $spec The spec.
 	 *

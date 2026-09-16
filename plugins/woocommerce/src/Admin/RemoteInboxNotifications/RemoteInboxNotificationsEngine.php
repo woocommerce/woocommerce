@@ -150,15 +150,10 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	/**
 	 * Hide store alerts whose end date has passed.
 	 *
-	 * An alert normally stops showing when its spec's rules are re-evaluated and no longer
-	 * pass, which can only happen while the spec is still being served. Notes created from a
-	 * spec with a publish_before_time rule keep that date, so they can also stop showing on
-	 * their own once the date passes and the spec is gone.
+	 * A note keeps the publish_before date from its spec, so it can stop showing on its own
+	 * once that date passes and the spec is no longer served to re-evaluate its rules.
 	 *
-	 * Only error and update notes are checked, since they are the ones shown as an alert.
-	 * Other note types have never expired on their own.
-	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @return void
 	 */
@@ -171,11 +166,11 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				return;
 			}
 
-			// Read the rows rather than building a Note for each one, which would query the
-			// table again per note. Most runs have nothing to change.
+			// Read the rows rather than building a Note for each one, which queries per note.
 			// @phpstan-ignore-next-line method.notFound -- proxied by WC_Data_Store::__call() and guarded by has_callable() above.
 			$notes = $data_store->lookup_notes(
 				array(
+					// Only these two types render as a store alert.
 					'type'   => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
 					'status' => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
 					'source' => array( 'woocommerce.com' ),
@@ -209,8 +204,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				$note->save();
 			}
 		} catch ( \Throwable $e ) {
-			// run() also fires on plugin activation, where an unusable notes data store would
-			// otherwise break the activation. log_errors() only writes on dev and local.
+			// run() also fires on activation, where an unusable data store would break it.
 			wc_get_logger()->error(
 				'Could not retire expired store alerts: ' . $e->getMessage(),
 				array( 'source' => 'remote-inbox-notifications' )
