@@ -1,6 +1,6 @@
 <?php
 /**
- * Queue Priority Interface
+ * Priority Queue Interface
  *
  * @version 11.2.0
  * @package WooCommerce\Interface
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC Queue Priority Interface
+ * WC Priority Queue Interface
  *
  * Implemented by queues that can pass an Action Scheduler priority through to the actions
  * they schedule. Lower priorities run first, the accepted range is 0-255, and the default
@@ -24,21 +24,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * support before asking for a priority, and fall back to the plain method otherwise:
  *
  *     $queue = WC()->queue();
- *     if ( $queue instanceof WC_Queue_Priority_Interface ) {
+ *     if ( $queue instanceof WC_Priority_Queue_Interface ) {
  *         $queue->schedule_single_with_priority( $timestamp, $hook, $args, $group, 20 );
  *     } else {
  *         $queue->schedule_single( $timestamp, $hook, $args, $group );
  *     }
  *
- * A queue that inherits these methods rather than writing its own may end up ignoring the
- * priority, so treat it as a hint rather than a guarantee.
+ * Action Scheduler has accepted a priority since 3.6.0. If an older copy bundled by another
+ * plugin wins the load race, the priority is ignored and the action is scheduled at the
+ * default.
  *
  * Like the WC_Queue_Interface methods, these always schedule non-unique actions. Action
  * Scheduler's $unique argument is not exposed here.
  *
  * @since 11.2.0
  */
-interface WC_Queue_Priority_Interface extends WC_Queue_Interface {
+interface WC_Priority_Queue_Interface extends WC_Queue_Interface {
 
 	/**
 	 * Enqueue an action to run one time, as soon as possible, at a given priority.
