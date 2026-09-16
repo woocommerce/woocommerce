@@ -876,6 +876,46 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries match a registered status that differs only in case, mirroring WP_Query's sanitize_key normalization.
+	 */
+	public function test_cpt_order_queries_match_registered_status_case_insensitively(): void {
+		global $wp_post_statuses;
+
+		$this->toggle_cot_feature_and_usage( false );
+
+		$register_custom_status = function ( array $statuses ): array {
+			$statuses['wc-custom'] = 'Custom';
+			return $statuses;
+		};
+		register_post_status(
+			'wc-custom',
+			array(
+				'label'               => 'Custom',
+				'exclude_from_search' => false,
+			)
+		);
+		add_filter( 'wc_order_statuses', $register_custom_status );
+
+		$order = new \WC_Order();
+		$order->set_status( 'custom' );
+		$order->save();
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( 'WC-CUSTOM' ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $queried_order_ids, 'A registered status differing only in case should match instead of being rejected as unknown.' );
+
+		remove_filter( 'wc_order_statuses', $register_custom_status );
+		unset( $wp_post_statuses['wc-custom'] );
+		$order->delete( true );
+	}
+
+	/**
 	 * Provides order storage configurations.
 	 *
 	 * @return array<string, array{bool}>

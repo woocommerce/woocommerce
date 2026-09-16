@@ -954,8 +954,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		// WP_Query omits the status clause when none of the requested statuses are registered, which would return all orders.
 		if ( ! empty( $query_vars['post_status'] ) ) {
-			$requested_statuses = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : explode( ',', $query_vars['post_status'] );
-			$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
+			// Normalize the requested statuses the way WP_Query does in parse_query()/get_posts() before comparing
+			// them against registered statuses, so a value differing only in case does not false-positive.
+			if ( is_array( $query_vars['post_status'] ) ) {
+				$requested_statuses = array_map( 'sanitize_key', array_unique( $query_vars['post_status'] ) );
+			} else {
+				$requested_statuses = explode( ',', preg_replace( '|[^a-z0-9_,-]|', '', $query_vars['post_status'] ) );
+			}
+			$known_statuses = array_merge( array( 'any', 'all' ), get_post_stati() );
 
 			if ( ! array_intersect( $requested_statuses, $known_statuses ) ) {
 				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_invalid_order_status' );
