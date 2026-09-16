@@ -310,19 +310,13 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Get the additional fields response.
 	 *
-	 * For an order the response falls back to customer-mirrored values; for a
-	 * customer it reads the customer meta directly.
+	 * Orders use saved values only. Customer responses include defaults for checkout prefilling.
 	 *
 	 * @param \WC_Order|\WC_Customer $wc_object Order or customer to read fields from.
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Data $wc_object ) {
-		$fields = $wc_object instanceof \WC_Order
-			? wp_parse_args(
-				$this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' ),
-				$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
-			)
-			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
+		$fields = $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other', false, $wc_object instanceof \WC_Customer );
 
 		$response = [];
 		foreach ( $this->get_additional_fields_schema() as $key => $field_schema ) {

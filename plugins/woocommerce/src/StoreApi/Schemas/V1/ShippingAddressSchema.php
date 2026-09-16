@@ -42,7 +42,7 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 				$shipping_state = '';
 			}
 
-			$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_object( $address, 'shipping' );
+			$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_object( $address, 'shipping', false, $address instanceof \WC_Customer );
 
 			$address_object = array_merge(
 				[

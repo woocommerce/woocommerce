@@ -256,6 +256,40 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Checkout conditions receive defaults for fields omitted from the request.
+	 * @testWith ["contact", "customer"]
+	 *           ["order", "checkout"]
+	 *
+	 * @param string $location Field location.
+	 * @param string $section Document section containing the field.
+	 */
+	public function test_document_preserves_field_defaults( string $location, string $section ): void {
+		$key = 'namespace/' . $location . '_field';
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $key,
+				'label'    => 'Default field',
+				'location' => $location,
+				'type'     => 'text',
+			)
+		);
+		add_filter(
+			"woocommerce_get_default_value_for_{$key}",
+			static function () {
+				return 'Default answer';
+			}
+		);
+		$this->order = new \WC_Order();
+		$request     = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_param( 'additional_fields', array() );
+		$document = $this->get_document_object_from_rest_request( $request );
+		$data     = $document->get_data();
+
+		$this->assertArrayHasKey( $key, $data[ $section ]['additional_fields'] );
+		$this->assertSame( 'Default answer', $data[ $section ]['additional_fields'][ $key ], 'Checkout conditions must still see default values.' );
+	}
+
+	/**
 	 * Ensures that additional fields in contact locations are under customer and order are under checkout.
 	 */
 	public function test_additional_fields_schema() {
