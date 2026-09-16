@@ -483,6 +483,8 @@ The JSON payload for adding multiple items to the cart would look like this:
 }
 ```
 
+If a cart subrequest fails while loading its session, it returns a `500` response with the `woocommerce_rest_unknown_server_error` error code. Later cart subrequests in the same batch also return `500` instead of using the incomplete cart, while non-cart subrequests continue normally. These failed cart responses do not include `Cart-Token` or `Cart-Hash` headers.
+
 ## Remove Item
 
 Remove an item from the cart and return the full cart response, or an error.
