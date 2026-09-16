@@ -174,61 +174,33 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `apply_legacy_reviews_per_page_filter` re-applies the legacy `edit_comments_per_page` filter.
-	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
-	 *
-	 * @return void
-	 */
-	public function test_apply_legacy_reviews_per_page_filter(): void {
-		$reviews = wc_get_container()->get( Reviews::class );
-
-		// With no legacy filter attached, the value passes through unchanged.
-		$this->assertSame( 20, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
-
-		// With a legacy `edit_comments_per_page` filter attached, its value is applied.
-		$legacy = static function () {
-			return 45;
-		};
-		add_filter( 'edit_comments_per_page', $legacy );
-
-		try {
-			$this->assertSame( 45, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
-		} finally {
-			remove_filter( 'edit_comments_per_page', $legacy );
-		}
-	}
-
-	/**
-	 * @testdox The dedicated reviews per-page filter wins when it registers before the legacy bridge.
+	 * @testdox The legacy filter is bridged and the dedicated reviews filter wins when it registers first.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::__construct()
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
 	 *
 	 * @return void
 	 */
-	public function test_dedicated_reviews_filter_takes_precedence_when_registered_before_legacy_bridge(): void {
-		$sut = wc_get_container()->get( Reviews::class );
-		$sut->__construct();
-
-		$bridge          = array( $sut, 'apply_legacy_reviews_per_page_filter' );
-		$bridge_priority = has_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $bridge );
-
-		$this->assertIsInt( $bridge_priority, 'The legacy reviews per-page bridge should be registered.' );
-		$bridge_priority = (int) $bridge_priority;
-
-		remove_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $bridge, $bridge_priority );
-
-		$dedicated = static function () {
-			return 5;
-		};
+	public function test_reviews_per_page_filter_bridge_and_precedence(): void {
 		$legacy    = static function () {
 			return 10;
 		};
+		$dedicated = static function () {
+			return 5;
+		};
 
-		add_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $dedicated );
-		add_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $bridge, $bridge_priority );
 		add_filter( 'edit_comments_per_page', $legacy );
+
+		$sut = wc_get_container()->get( Reviews::class );
+		$sut->__construct();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises the public Product Reviews per-page filter.
+		$this->assertSame( 10, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
+
+		// Reset the dedicated hook to reproduce an extension loading before WooCommerce.
+		remove_all_filters( Reviews::PER_PAGE_USER_OPTION_KEY );
+		add_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $dedicated );
+		$sut->__construct();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises Product Reviews per-page filter precedence.
 		$this->assertSame( 5, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
