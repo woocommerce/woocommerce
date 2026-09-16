@@ -8,11 +8,8 @@ use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the class_alias shims left at the old V4 refund engine FQCNs.
- *
- * DataUtils and RefundPreviewSchema moved to the version-neutral
- * Automattic\WooCommerce\Internal\RestApi\Refunds namespace in 11.2.0.
- * Shim files at the old paths keep the old names resolving.
+ * Tests for the class_alias shims that keep the old V4 refund engine FQCNs
+ * resolving to the relocated Internal\RestApi\Refunds classes.
  */
 class ClassAliasesTest extends WC_Unit_Test_Case {
 
