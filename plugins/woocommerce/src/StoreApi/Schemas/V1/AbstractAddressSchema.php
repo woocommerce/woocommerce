@@ -138,6 +138,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						break;
 					default:
 						$carry[ $key ] = rest_sanitize_value_from_schema( $address[ $key ], $schema[ $key ], $key );
+						// Additional fields are sanitized separately below, via sanitize_field().
+						if ( ! $this->additional_fields_controller->is_field( $key ) && is_string( $carry[ $key ] ) ) {
+							$carry[ $key ] = sanitize_text_field( $carry[ $key ] );
+						}
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
