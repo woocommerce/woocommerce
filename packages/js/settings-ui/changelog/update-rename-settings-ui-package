@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Rename the package from @woocommerce/settings-ui-sdk to @woocommerce/settings-ui.
