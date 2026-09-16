@@ -1,56 +1,32 @@
-@import "quantity-badge/style";
+@import "../../../base/components/button/style";
+@import "../../../base/components/drawer/style";
+@import "../../../base/components/cart-checkout/cart-line-items-table/style";
+@import "../../../base/components/cart-checkout/payment-method-icons/style";
+@import "../../../base/components/cart-checkout/product-badge/style";
+@import "../../../base/components/cart-checkout/product-details/style";
+@import "../../../base/components/cart-checkout/product-metadata/style";
+@import "../../../base/components/quantity-selector/style";
+@import "../../../base/components/product-name/style";
+@import "../../../base/components/product-price/style";
 
-.wc-block-mini-cart {
-	display: inline-block;
+.wc-block-mini-cart__template-part,
+.wp-block-woocommerce-mini-cart-contents {
+	height: 100%;
 }
 
-.wc-block-mini-cart__button {
-	align-items: center;
-	background-color: transparent;
-	border: none;
-	color: inherit;
-	display: flex;
-	font-size: inherit;
-	font-family: inherit;
-	font-weight: inherit;
-	padding: em($gap-smaller);
-	gap: em($gap-smaller);
-	white-space: nowrap;
-	line-height: 1;
-
-	&:hover:not([disabled]) {
-		cursor: pointer;
+// Remove the stickiness from the footer when there isn't enough room
+// to display the items.
+@media screen and (max-height: 500px) {
+	.wp-block-woocommerce-mini-cart-contents {
+		height: auto;
 	}
-
-	.wc-block-mini-cart__icon {
-		width: em($grid-unit-30);
-		height: em($grid-unit-30);
-		margin: 0;
+	.wc-block-mini-cart__drawer {
+		overflow-y: auto;
 	}
-}
-
-.wc-block-mini-cart--preview {
-	.wc-block-mini-cart__amount {
-		display: initial;
+	.wc-block-mini-cart__footer {
+		position: static;
 	}
 }
-
-.wc-block-mini-cart__tax-label {
-	margin-right: em($gap-smaller);
-}
-
-@media screen and (min-width: 768px) {
-	.wc-block-mini-cart__amount {
-		display: initial;
-		font-size: inherit;
-		font-weight: inherit;
-	}
-}
-
-.drawer-open .wc-block-mini-cart__button {
-	pointer-events: none;
-}
-<<<<<<< HEAD
 
 // Reset font size so it doesn't depend on drawer's ancestors.
 .wc-block-mini-cart__drawer {
@@ -110,18 +86,12 @@
 }
 
 h2.wc-block-mini-cart__title {
-	display: flex;
-	align-items: baseline;
 	background: inherit;
 	padding-bottom: $gap * 2;
 	mask-image: linear-gradient(#000 calc(100% - #{$gap * 1.5}), transparent);
 	z-index: 1;
-	margin: $gap $gap $gap * -2;
-	@include font-size(larger);
-
-	span:first-child {
-		margin-right: $gap-smaller;
-	}
+	margin: $gap-smallest * -0.5 $gap $gap * -2;
+	font-size: 1.5rem;
 }
 
 .wc-block-mini-cart__items {
@@ -219,5 +189,3 @@ h2.wc-block-mini-cart__title {
 		}
 	}
 }
-=======
->>>>>>> caee32ce7d (Fix Mini Cart drawer styles with a separate contents stylesheet (#68788))
