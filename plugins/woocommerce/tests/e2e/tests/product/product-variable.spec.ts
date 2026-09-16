@@ -264,9 +264,27 @@ test.describe(
 			);
 
 			await expect( estimatedTotalValue ).toBeVisible();
-			await expect( estimatedTotalValue ).toContainText(
-				/^\$\d+\.\d{2}$/
+
+			// Assert a floor rather than an exact figure. Estimated total is
+			// cart->get_total(), so it carries shipping and tax on top of the
+			// line items, and this block resets neither. An upper bound would
+			// fail whenever the suite's real 20% tax rate and $10 flat rate
+			// stack, with nothing actually broken. The floor is the part that
+			// matters: the previous currency pattern was satisfied by $0.00,
+			// so a Cart block totals regression passed.
+			const expectedSubtotal = variations1.reduce(
+				( sum, variation ) =>
+					sum + parseFloat( variation.regular_price ),
+				0
 			);
+			const renderedTotal = Number(
+				( ( await estimatedTotalValue.textContent() ) ?? '' ).replace(
+					/[^\d.-]/g,
+					''
+				)
+			);
+
+			expect( renderedTotal ).toBeGreaterThanOrEqual( expectedSubtotal );
 		} );
 
 		test( 'should be able to remove variation products from the cart', async ( {
