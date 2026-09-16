@@ -142,6 +142,84 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
+	 */
+	public function test_shipping_classes_save_changes_generates_slug(): void {
+		$had_current_tab          = array_key_exists( 'current_tab', $GLOBALS );
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_tab     = $GLOBALS['current_tab'] ?? null;
+		$original_current_section = $GLOBALS['current_section'] ?? null;
+		$name                     = 'Poster Pack ' . wp_unique_id();
+		$expected_slug            = sanitize_title( $name );
+		$description              = 'Posters, stickers, and other flat items.';
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_POST    = array(
+				'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+				'changes'                   => array(
+					'new-row' => array(
+						'newRow'      => true,
+						'name'        => $name,
+						'slug'        => '',
+						'description' => $description,
+					),
+				),
+			);
+			$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+			// WC_Shipping::get_shipping_classes() memoizes into a public property that nothing
+			// resets, so a warm cache would omit the new term from the response.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			$response = $this->do_ajax( 'woocommerce_shipping_classes_save_changes' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+
+			$term = get_term_by( 'slug', $expected_slug, 'product_shipping_class' );
+			$this->assertInstanceOf( WP_Term::class, $term, 'The blank-slug request should create a shipping-class term.' );
+			if ( ! $term instanceof WP_Term ) {
+				throw new RuntimeException( 'The shipping-class term could not be reloaded.' );
+			}
+			$term_id = $term->term_id;
+
+			$this->assertSame( $name, $term->name );
+			$this->assertSame( $description, $term->description );
+
+			$response_rows = $response['data']['shipping_classes'] ?? array();
+			$matching_rows = array_values(
+				array_filter(
+					$response_rows,
+					static fn ( array $row ): bool => (int) ( $row['term_id'] ?? 0 ) === $term_id
+				)
+			);
+			$this->assertCount( 1, $matching_rows, 'The AJAX response should contain the new shipping class exactly once.' );
+			$this->assertSame( $expected_slug, $matching_rows[0]['slug'] );
+			$this->assertSame( $name, $matching_rows[0]['name'] );
+			$this->assertSame( $description, $matching_rows[0]['description'] );
+		} finally {
+			// Only state the base lifecycle does not own is restored here.
+			// `WP_Ajax_UnitTestCase::tear_down()` clears `$_POST` and the current
+			// user, `clean_up_global_scope()` clears `$_REQUEST` before the next
+			// test, and the transaction rollback removes the term. What survives
+			// is the shipping class list, which `WC_Shipping` memoizes on a public
+			// property, and the two settings globals the handler assigns before it
+			// fires `woocommerce_update_options`.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			if ( $had_current_tab ) {
+				$GLOBALS['current_tab'] = $original_current_tab;
+			} else {
+				unset( $GLOBALS['current_tab'] );
+			}
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
 	 * Test to verify that term color is saved in AJAX calls, but only for terms belonging to a visual attribute.
 	 *
 	 * @testdox Should save term color only when adding visual attribute terms via AJAX.

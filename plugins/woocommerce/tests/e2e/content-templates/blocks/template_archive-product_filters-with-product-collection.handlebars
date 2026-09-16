@@ -53,7 +53,7 @@
 			<h3 class='wp-block-heading'>Filter by attribute</h3>
 			<!-- /wp:heading -->
 
-			<!-- wp:woocommerce/attribute-filter {"attributeId":2,"heading":"","lock":{"remove":true}} -->
+			<!-- wp:woocommerce/attribute-filter {"attributeId":{{#if attributeId}}{{attributeId}}{{else}}2{{/if}},"heading":"","lock":{"remove":true}} -->
 			<div class="wp-block-woocommerce-attribute-filter is-loading"></div>
 			<!-- /wp:woocommerce/attribute-filter -->
 		</div>
