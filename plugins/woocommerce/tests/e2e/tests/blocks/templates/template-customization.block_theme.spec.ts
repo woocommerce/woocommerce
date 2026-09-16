@@ -13,16 +13,24 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
-test.describe( 'Template customization', () => {
-	const retainedTemplates = CUSTOMIZABLE_WC_TEMPLATES.filter( ( data ) =>
-		[
-			'Product Catalog',
-			'Products by Attribute',
-			'Checkout Header',
-		].includes( data.templateName )
-	);
+// One template and one template part keep the modify-and-revert journey, and
+// one template with a fallback keeps the fallback journey. The registry,
+// precedence and hierarchy rules the other templates repeated are covered by
+// `BlockTemplatesControllerTest` and `TemplateHierarchyTest` in PHPUnit.
+const MODIFY_AND_REVERT_TEMPLATES = [ 'Product Catalog', 'Checkout Header' ];
+const FALLBACK_TEMPLATES = [ 'Products by Attribute' ];
 
-	retainedTemplates.forEach( ( testData ) => {
+test.describe( 'Template customization', () => {
+	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
+		const keepsModifyAndRevert = MODIFY_AND_REVERT_TEMPLATES.includes(
+			testData.templateName
+		);
+		const keepsFallback = FALLBACK_TEMPLATES.includes(
+			testData.templateName
+		);
+		if ( ! keepsModifyAndRevert && ! keepsFallback ) {
+			return;
+		}
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
 		const templateTypeName =
@@ -35,7 +43,7 @@ test.describe( 'Template customization', () => {
 				: 'woocommerce/woocommerce';
 		const templateId = `${ templateOrigin }//${ testData.templatePath }`;
 
-		if ( testData.templateName !== 'Products by Attribute' ) {
+		if ( keepsModifyAndRevert ) {
 			test( `"${ testData.templateName }" template can be modified and reverted`, async ( {
 				admin,
 				frontendUtils,
@@ -43,24 +51,11 @@ test.describe( 'Template customization', () => {
 				page,
 				requestUtils,
 			} ) => {
-				if (
-					'isTaxonomyTemplate' in testData &&
-					testData.isTaxonomyTemplate
-				) {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
-					} );
-
-					await editor.createTemplate( {
-						templateName: testData.templateName,
-					} );
-				} else {
-					await admin.visitSiteEditor( {
-						postId: templateId,
-						postType: testData.templateType,
-						canvas: 'edit',
-					} );
-				}
+				await admin.visitSiteEditor( {
+					postId: templateId,
+					postType: testData.templateType,
+					canvas: 'edit',
+				} );
 
 				await editor.canvas
 					.locator( 'body' )
@@ -109,10 +104,7 @@ test.describe( 'Template customization', () => {
 			} );
 		}
 
-		if (
-			testData.templateName === 'Products by Attribute' &&
-			testData.fallbackTemplate
-		) {
+		if ( keepsFallback && testData.fallbackTemplate ) {
 			const fallbackTemplate = testData.fallbackTemplate;
 
 			test( `"${ testData.templateName }" template defaults to the "${ fallbackTemplate.templateName }" template`, async ( {
@@ -161,10 +153,10 @@ test.describe( 'Template customization', () => {
 	} );
 
 	// Note: `wp_template` hierarchy is tested in `template-priority.block_theme.spec.ts`.
+	// The Mini-Cart part runs this same priority title under a classic theme in
+	// `template-part-customization.classic_theme_with_template_parts_support.spec.ts`.
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
 		( data ) =>
-			data.templateType === 'wp_template_part' &&
-			data.canBeOverriddenByThemes &&
 			data.templateName === 'External Product Add to Cart + Options'
 	);
 

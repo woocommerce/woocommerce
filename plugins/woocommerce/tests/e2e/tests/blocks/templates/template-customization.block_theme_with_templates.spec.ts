@@ -12,7 +12,12 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
-const LIFECYCLE_TEMPLATES = [
+// One theme template and one theme template part keep the modify-and-revert
+// journey, and one template with a fallback keeps the theme-over-fallback
+// journey. The registry, precedence and hierarchy rules the other templates
+// repeated are covered by `BlockTemplatesControllerTest` and
+// `TemplateHierarchyTest` in PHPUnit.
+const MODIFY_AND_REVERT_TEMPLATES = [
 	'Product Catalog',
 	'External Product Add to Cart + Options',
 ];
@@ -27,13 +32,13 @@ test.describe( 'Template customization', () => {
 		if ( ! testData.canBeOverriddenByThemes ) {
 			return;
 		}
-		const retainsLifecycle = LIFECYCLE_TEMPLATES.includes(
+		const keepsModifyAndRevert = MODIFY_AND_REVERT_TEMPLATES.includes(
 			testData.templateName
 		);
-		const retainsFallback = FALLBACK_TEMPLATES.includes(
+		const keepsFallback = FALLBACK_TEMPLATES.includes(
 			testData.templateName
 		);
-		if ( ! retainsLifecycle && ! retainsFallback ) {
+		if ( ! keepsModifyAndRevert && ! keepsFallback ) {
 			return;
 		}
 		const userText = `Hello World in the ${ testData.templateName } template`;
@@ -45,7 +50,7 @@ test.describe( 'Template customization', () => {
 		const templateId = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`;
 
 		test.describe( `${ testData.templateName } template`, () => {
-			if ( retainsLifecycle ) {
+			if ( keepsModifyAndRevert ) {
 				test( "theme template has priority over WooCommerce's and can be modified", async ( {
 					admin,
 					editor,
@@ -117,7 +122,7 @@ test.describe( 'Template customization', () => {
 				} );
 			}
 
-			if ( retainsFallback && testData.fallbackTemplate ) {
+			if ( keepsFallback && testData.fallbackTemplate ) {
 				const fallbackTemplate = testData.fallbackTemplate;
 
 				test( `theme template has priority over user-modified ${ fallbackTemplate.templateName } template`, async ( {
