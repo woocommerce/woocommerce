@@ -95,12 +95,24 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	public function test_unreadable_end_date_keeps_showing(): void {
 		$note_id = $this->create_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, 'whenever' );
 
+		// Rows come back newest first, so this one is reached after the unreadable date.
+		$later_note_id = $this->create_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, self::PAST );
+		$later_note    = new Note( $later_note_id );
+		$later_note->set_date_created( time() - HOUR_IN_SECONDS );
+		$later_note->save();
+
 		RemoteInboxNotificationsEngine::retire_expired_alerts();
 
 		$this->assertSame(
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			( new Note( $note_id ) )->get_status(),
 			'A date that cannot be read should not be treated as passed.'
+		);
+
+		$this->assertSame(
+			Note::E_WC_ADMIN_NOTE_PENDING,
+			( new Note( $later_note_id ) )->get_status(),
+			'One unreadable date should not stop the rest of the pass.'
 		);
 	}
 
@@ -145,7 +157,7 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			( new Note( $note_id ) )->get_status(),
-			'Only notes from woocommerce.com carry a remote inbox end date.'
+			'A note from another source is not ours to retire.'
 		);
 	}
 

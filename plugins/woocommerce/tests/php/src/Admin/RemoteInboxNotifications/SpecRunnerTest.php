@@ -103,6 +103,27 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A spec served again without its end date drops the date from the note.
+	 */
+	public function test_end_date_is_dropped_when_the_spec_stops_carrying_it(): void {
+		$this->run_spec(
+			array(
+				array(
+					'type'           => 'publish_before_time',
+					'publish_before' => '2999-01-01 00:00:00',
+				),
+			)
+		);
+
+		$note = $this->run_spec( array() );
+
+		$this->assertFalse(
+			property_exists( $note->get_content_data(), 'publish_before' ),
+			'A spec that no longer ends should leave no end date behind.'
+		);
+	}
+
+	/**
 	 * Run a spec with the given rules and return the note it created.
 	 *
 	 * @param array $rules        Spec rules.

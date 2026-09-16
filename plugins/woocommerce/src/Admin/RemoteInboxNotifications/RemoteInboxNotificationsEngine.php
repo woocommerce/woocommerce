@@ -161,13 +161,15 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		try {
 			$data_store = Notes::load_data_store();
 
-			// A filtered data store may not have this internal read.
-			if ( ! $data_store->has_callable( 'lookup_notes' ) ) {
+			// A filtered data store may not have this internal read. has_callable() would say yes
+			// for any store with a __call(), so ask the class itself.
+			if ( ! method_exists( $data_store->get_current_class_name(), 'lookup_notes' ) ) {
 				return;
 			}
 
 			// Read the rows rather than building a Note for each one, which queries per note.
-			// @phpstan-ignore-next-line method.notFound -- proxied by WC_Data_Store::__call() and guarded by has_callable() above.
+
+			// @phpstan-ignore method.notFound (proxied by WC_Data_Store::__call(), checked above)
 			$notes = $data_store->lookup_notes(
 				array(
 					// Only these two types render as a store alert.
@@ -177,11 +179,15 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				)
 			);
 
+			if ( ! is_array( $notes ) ) {
+				return;
+			}
+
 			// Read the date the same way a live spec would, so a note behaves the same either way.
 			$rule_processor = new PublishBeforeTimeRuleProcessor();
 
 			foreach ( $notes as $note_row ) {
-				$content_data = json_decode( $note_row->content_data );
+				$content_data = json_decode( (string) $note_row->content_data );
 
 				if ( ! isset( $content_data->publish_before ) ) {
 					continue;
@@ -200,8 +206,11 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 					continue;
 				}
 
-				// The row was read at the top of the pass, so check again before writing.
-				if ( Note::E_WC_ADMIN_NOTE_UNACTIONED !== $note->get_status() ) {
+				// The row was read at the top of the pass, so check again before writing. The type
+				// is re-checked too: woocommerce_note_types is filterable, and a query for types
+				// it no longer allows comes back with no type clause at all.
+				if ( Note::E_WC_ADMIN_NOTE_UNACTIONED !== $note->get_status()
+					|| ! in_array( $note->get_type(), array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ), true ) ) {
 					continue;
 				}
 
@@ -209,9 +218,16 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				$note->save();
 			}
 		} catch ( \Throwable $e ) {
-			// run() also fires on activation, where an unusable data store would break it.
+			// run() is hooked to activated_plugin, so a throw here would surface during any
+			// plugin activation. The file log handler writes the message and drops the context,
+			// so put what is worth reading into the message.
 			wc_get_logger()->error(
-				'Could not retire expired store alerts: ' . $e->getMessage(),
+				sprintf(
+					'Could not retire expired store alerts%s: %s: %s',
+					isset( $note_row->note_id ) ? ' at note ' . $note_row->note_id : '',
+					get_class( $e ),
+					$e->getMessage()
+				),
 				array( 'source' => 'remote-inbox-notifications' )
 			);
 		}
