@@ -790,13 +790,13 @@ jQuery( function ( $ ) {
 					.replace( '%%endpoint%%', 'update_order_review' ),
 				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
+					wc_checkout_form.clear_stale_nonce_reload_flag();
+
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
 						window.location.reload();
 						return;
 					}
-
-					wc_checkout_form.clear_stale_nonce_reload_flag();
 
 					// Remove any notices added previously
 					$( '.woocommerce-NoticeGroup-updateOrderReview' ).remove();
@@ -976,10 +976,11 @@ jQuery( function ( $ ) {
 					).unblock();
 
 					if ( 403 === jqXHR.status ) {
+						// role="alert" announces the notice and tabindex="-1" lets submit_error focus it.
 						wc_checkout_form.submit_error(
-							'<div class="woocommerce-error">' +
+							'<div role="alert"><div class="woocommerce-error" tabindex="-1">' +
 								wc_checkout_params.i18n_checkout_stale +
-								'</div>'
+								'</div></div>'
 						);
 					}
 				},
