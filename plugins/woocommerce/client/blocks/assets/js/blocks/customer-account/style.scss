@@ -78,6 +78,8 @@
 
 	:where(.wc-block-customer-account__avatar) {
 		border-radius: 50%;
+		display: block;
+		object-fit: cover;
 		width: em($grid-unit-30);
 		height: em($grid-unit-30);
 	}
