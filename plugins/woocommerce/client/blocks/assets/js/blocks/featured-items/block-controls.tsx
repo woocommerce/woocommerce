@@ -19,7 +19,6 @@ import type { BlockAlignment } from '@wordpress/blocks';
  */
 import { useBackgroundImage } from './use-background-image';
 import { EditorBlock, GenericBlockUIConfig } from './types';
-import { BLOCK_NAMES } from './constants';
 
 type Media = { id: number; url: string };
 
@@ -29,7 +28,7 @@ interface WithBlockControlsRequiredProps< T > {
 	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
-	effectiveCategoryId?: number;
+	canEditItem: boolean;
 }
 
 interface WithBlockControlsCategoryProps< T >
@@ -49,7 +48,6 @@ type WithBlockControlsProps< T extends EditorBlock< T > > =
 	| ( T & WithBlockControlsProductProps< T > );
 
 type BlockControlRequiredAttributes = {
-	categoryId?: number | 'preview';
 	contentAlign: BlockAlignment;
 	mediaId: number;
 	mediaSrc: string;
@@ -163,13 +161,7 @@ export const withBlockControls =
 		return (
 			<>
 				<BlockControls
-					canEditItem={
-						! (
-							name === BLOCK_NAMES.featuredCategory &&
-							! attributes.categoryId &&
-							props.effectiveCategoryId
-						)
-					}
+					canEditItem={ props.canEditItem }
 					backgroundImageId={ backgroundImageId }
 					backgroundImageSrc={ backgroundImageSrc }
 					contentAlign={ contentAlign }

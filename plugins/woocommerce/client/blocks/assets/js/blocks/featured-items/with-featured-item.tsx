@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { BlockAlignment } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
@@ -31,7 +32,6 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 import {
-	BLOCK_NAMES,
 	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
 	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
 } from './constants';
@@ -92,7 +92,7 @@ interface FeaturedItemRequiredProps< T > {
 			textColor?: string;
 		};
 	isLoading: boolean;
-	effectiveCategoryId?: number;
+	canEditItem: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
@@ -126,6 +126,7 @@ export const withFeaturedItem =
 
 		const {
 			attributes,
+			canEditItem,
 			category,
 			isLoading,
 			isSelected,
@@ -202,7 +203,18 @@ export const withFeaturedItem =
 			[ setAttributes ]
 		);
 
-		const renderNoItemButton = () => {
+		const renderNoItemContent = () => {
+			if ( ! canEditItem ) {
+				return (
+					<p>
+						{ __(
+							'No product category is available.',
+							'woocommerce'
+						) }
+					</p>
+				);
+			}
+
 			return (
 				<>
 					<p>{ emptyMessage }</p>
@@ -271,7 +283,7 @@ export const withFeaturedItem =
 				icon={ <Icon icon={ icon } /> }
 				label={ label }
 			>
-				{ isLoading ? <Spinner /> : renderNoItemButton() }
+				{ isLoading ? <Spinner /> : renderNoItemContent() }
 			</Placeholder>
 		);
 
@@ -384,13 +396,7 @@ export const withFeaturedItem =
 			);
 		};
 
-		if (
-			! item &&
-			isLoading &&
-			name === BLOCK_NAMES.featuredCategory &&
-			! attributes.categoryId &&
-			props.effectiveCategoryId
-		) {
+		if ( ! item && isLoading && ! canEditItem ) {
 			return null;
 		}
 
