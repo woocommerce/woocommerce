@@ -27,14 +27,10 @@ class Params implements FilterUrlParam {
 	 * @return array
 	 */
 	public function get_param_keys(): array {
-		if ( empty( self::$params ) ) {
-			$this->init_params();
-		}
-
 		$keys = array();
-		foreach ( self::$params as $taxonomy => $params ) {
+		foreach ( $this->get_params() as $type => $params ) {
 			$keys = array_merge( $keys, array_values( $params ) );
-			if ( 'attribute' === $taxonomy ) {
+			if ( 'attribute' === $type ) {
 				$query_type_params = array_map(
 					function ( $param ) {
 						return 'query_type_' . $param;
@@ -55,11 +51,42 @@ class Params implements FilterUrlParam {
 	 * @return array
 	 */
 	public function get_param( string $type ): array {
+		return $this->get_params()[ $type ] ?? array();
+	}
+
+	/**
+	 * Get all params, with the taxonomy map passed through its filter.
+	 *
+	 * The cached map is left unfiltered and the filter is applied on read, so that callbacks
+	 * registered after the cache was warmed still take effect.
+	 *
+	 * @return array
+	 */
+	private function get_params(): array {
 		if ( empty( self::$params ) ) {
 			$this->init_params();
 		}
 
-		return self::$params[ $type ] ?? array();
+		$params = self::$params;
+
+		/**
+		 * Filters the URL query parameter that product filters claim for each product taxonomy.
+		 *
+		 * The map is keyed by taxonomy name, with the URL query parameter as the value, for
+		 * example `array( 'product_cat' => 'categories' )`. Use it to rename a parameter that
+		 * collides with one another plugin already owns.
+		 *
+		 * Prefer renaming a parameter over removing its entry: `ProductFilterTaxonomy::render()`
+		 * returns an empty string for a taxonomy that is missing from this map, so releasing a
+		 * parameter also hides the core filter block for that taxonomy.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param array $taxonomy_params Map of taxonomy name to URL query parameter name.
+		 */
+		$params['taxonomy'] = apply_filters( 'woocommerce_product_filter_taxonomy_params', $params['taxonomy'] ?? array() );
+
+		return $params;
 	}
 
 	/**

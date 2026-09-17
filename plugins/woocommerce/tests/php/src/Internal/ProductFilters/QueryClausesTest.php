@@ -357,7 +357,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		$this->assertStringNotContainsString( 'AND 1=0', $where, 'Releasing a taxonomy filter param must not fail-close the main query.' );
 
 		$received_products_name = $this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) );
-		$expected_products_name  = $this->get_data_from_products_array(
+		$expected_products_name = $this->get_data_from_products_array(
 			array_filter(
 				$this->products,
 				function ( \WC_Product $product ) {
@@ -390,8 +390,8 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * }
 	 */
 	private function query_main_products_filtered_by_cat_and_brand(): array {
-		$where          = '';
-		$capture_where  = function ( array $clauses ) use ( &$where ): array {
+		$where         = '';
+		$capture_where = function ( array $clauses ) use ( &$where ): array {
 			$where = $clauses['where'];
 			return $clauses;
 		};

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add the woocommerce_product_filter_taxonomy_params filter so plugins can rename or release the URL query params that Product Filters claims for product taxonomies.
