@@ -73,7 +73,7 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 				id: imageId || undefined,
 				url: imageUrl,
 				dimRatio: 50,
-				minHeight: 500,
+				minHeight: getSetting( 'defaultHeight', 500 ),
 				minHeightUnit: 'px',
 				contentPosition: 'center center',
 				metadata: {
