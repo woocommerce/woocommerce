@@ -803,12 +803,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->use_queue( $this->plain_queue() );
 		$ran = 0;
 
-		$this->sut->when_ready(
+		$ran_now = $this->sut->when_ready(
 			function () use ( &$ran ) {
 				++$ran;
 			}
 		);
 
+		$this->assertTrue( $ran_now, 'when_ready() reports that the callback ran immediately' );
 		$this->assertSame( 1, $ran );
 	}
 
@@ -826,12 +827,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			function () use ( $scheduler, $stock, &$ran ) {
 				$before = $this->count_callbacks( 'action_scheduler_init' );
 
-				$scheduler->when_ready(
+				$ran_now = $scheduler->when_ready(
 					function () use ( &$ran ) {
 						++$ran;
 					}
 				);
 
+				$this->assertFalse( $ran_now, 'when_ready() reports that the callback was deferred' );
 				$this->assertSame( $before + 1, $this->count_callbacks( 'action_scheduler_init' ), 'The callback waits for action_scheduler_init' );
 				$this->assertSame( 0, $ran, 'Nothing runs before the queue is ready' );
 
@@ -854,14 +856,24 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$before = $this->count_callbacks( 'action_scheduler_init' );
 		$ran    = 0;
 
-		$scheduler->when_ready(
+		$ran_now = $scheduler->when_ready(
 			function () use ( &$ran ) {
 				++$ran;
 			}
 		);
 
+		$this->assertFalse( $ran_now, 'A dropped callback is reported as not run' );
 		$this->assertSame( 0, $ran );
 		$this->assertSame( $before, $this->count_callbacks( 'action_scheduler_init' ), 'A fired event is not hooked' );
+	}
+
+	/**
+	 * Build a scheduler of its own for registry tests, so registrations do not persist on the shared container instance.
+	 *
+	 * @return Scheduler
+	 */
+	private function fresh_scheduler(): Scheduler {
+		return $this->scheduler_with_default_queue( wc_get_container()->get( OptionsAwareActionQueue::class ) );
 	}
 
 	/**
@@ -870,13 +882,14 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function test_ensure_recurring_schedules_registrations_on_the_ensure_hook(): void {
 		$queue = $this->options_aware_queue();
 		$this->use_queue( $queue );
+		$scheduler = $this->fresh_scheduler();
 		$timestamp = time() + HOUR_IN_SECONDS;
 
 		$this->with_unfired_hooks(
 			array( 'action_scheduler_ensure_recurring_actions' ),
-			function () use ( $queue, $timestamp ) {
-				$this->sut->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_ensure', array( 'a' => 1 ), 'wc-scheduler-test', array( 'priority' => 5 ) );
-				$this->sut->ensure_cron( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test' );
+			function () use ( $queue, $scheduler, $timestamp ) {
+				$scheduler->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_ensure', array( 'a' => 1 ), 'wc-scheduler-test', array( 'priority' => 5 ) );
+				$scheduler->ensure_cron( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test' );
 
 				$this->assertSame( array(), $queue->calls, 'Registering schedules nothing until Action Scheduler asks' );
 
@@ -912,11 +925,12 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function test_ensure_recurring_schedules_immediately_after_the_hook_fired(): void {
 		$queue = $this->options_aware_queue();
 		$this->use_queue( $queue );
-		$saved = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
+		$scheduler = $this->fresh_scheduler();
+		$saved     = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
 		$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook having fired; restored below.
 
 		try {
-			$this->sut->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_late', array(), 'wc-scheduler-test' );
+			$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_late', array(), 'wc-scheduler-test' );
 		} finally {
 			if ( null === $saved ) {
 				unset( $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] );
@@ -940,17 +954,19 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			'status' => \ActionScheduler_Store::STATUS_PENDING,
 		);
 
+		$scheduler = $this->fresh_scheduler();
+
 		$this->with_unfired_hooks(
 			array( 'action_scheduler_ensure_recurring_actions' ),
-			function () use ( $criteria ) {
-				$this->sut->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_stock', array(), 'wc-scheduler-test' );
-				$this->assertSame( 0, $this->sut->count( $criteria ) );
+			function () use ( $criteria, $scheduler ) {
+				$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_stock', array(), 'wc-scheduler-test' );
+				$this->assertSame( 0, $scheduler->count( $criteria ) );
 
 				do_action( 'action_scheduler_ensure_recurring_actions' );
-				$this->assertSame( 1, $this->sut->count( $criteria ) );
+				$this->assertSame( 1, $scheduler->count( $criteria ) );
 
 				do_action( 'action_scheduler_ensure_recurring_actions' );
-				$this->assertSame( 1, $this->sut->count( $criteria ), 'A second pass does not add a duplicate' );
+				$this->assertSame( 1, $scheduler->count( $criteria ), 'A second pass does not add a duplicate' );
 			}
 		);
 	}

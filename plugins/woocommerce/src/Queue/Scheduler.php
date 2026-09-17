@@ -487,11 +487,22 @@ final class Scheduler {
 	 * @return bool
 	 */
 	public function is_ready( array $options = array() ): bool {
+		return $this->is_ready_for( $options, __FUNCTION__ );
+	}
+
+	/**
+	 * Readiness check shared by `is_ready()` and `when_ready()`, so notices name the method the caller used.
+	 *
+	 * @param array  $options Options as given by the caller.
+	 * @param string $method  Public method being called, named in the notice for an invalid queue.
+	 * @return bool
+	 */
+	private function is_ready_for( array $options, string $method ): bool {
 		if ( ! did_action( 'plugins_loaded' ) ) {
 			return false;
 		}
 
-		return $this->is_queue_ready( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ) );
+		return $this->is_queue_ready( $this->select_queue( $this->normalize_options( $options, $method ) ) );
 	}
 
 	/**
@@ -508,11 +519,12 @@ final class Scheduler {
 	 *
 	 * @param callable $callback Called with no arguments once the queue is ready.
 	 * @param array    $options Only `queue` (a SchedulerQueue value) applies here, to pick the path.
+	 * @return bool True when the callback ran immediately, false when it was deferred or dropped.
 	 */
-	public function when_ready( callable $callback, array $options = array() ): void {
-		if ( $this->is_ready( $options ) ) {
+	public function when_ready( callable $callback, array $options = array() ): bool {
+		if ( $this->is_ready_for( $options, __FUNCTION__ ) ) {
 			$callback();
-			return;
+			return true;
 		}
 
 		$hook = $this->next_readiness_hook( $options );
@@ -522,15 +534,23 @@ final class Scheduler {
 				__( 'The queue is not ready and no event is left in this request to wait for, so the callback was dropped. Check Scheduler::is_ready() first.', 'woocommerce' ),
 				'11.3.0'
 			);
-			return;
+			return false;
 		}
 
+		// Each deferred closure runs once, even if its event fires again in the same request.
+		$handled = false;
 		add_action(
 			$hook,
-			function () use ( $callback, $options ) {
+			function () use ( $callback, $options, &$handled ) {
+				if ( $handled ) {
+					return;
+				}
+				$handled = true;
 				$this->when_ready( $callback, $options );
 			}
 		);
+
+		return false;
 	}
 
 	/**
@@ -571,7 +591,7 @@ final class Scheduler {
 			}
 		}
 
-		$message = __( 'The queue is not ready to accept calls yet. Check Scheduler::is_ready() and call this after init.', 'woocommerce' );
+		$message = __( 'The queue is not ready to accept calls yet. Check Scheduler::is_ready() first, or wrap the call in Scheduler::when_ready().', 'woocommerce' );
 
 		if ( $options['strict'] ) {
 			throw new \RuntimeException( esc_html( $message ) );
