@@ -4075,11 +4075,25 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 		// With Analytics disabled nothing handles the import action, and queueing it would only leave failed actions behind.
 		$import_hook    = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_action( 'import' );
 		$import_handled = is_string( $import_hook ) && has_action( $import_hook );
+		/**
+		 * Filters whether Analytics runs its imports inline instead of queueing them.
+		 *
+		 * @since 4.0.0
+		 * @param bool $disable Whether Action Scheduler is bypassed.
+		 */
+		$import_inline = ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false );
 		foreach ( $order_ids as $order_id ) {
 			$order_cache->remove( $order_id );
-			if ( $import_handled ) {
-				\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $order_id ) );
+			if ( ! $import_handled ) {
+				continue;
 			}
+			if ( $import_inline ) {
+				\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::import( $order_id );
+				continue;
+			}
+			// Queued directly: OrdersScheduler::schedule_action() first searches every pending action for a duplicate, which gets
+			// slower with each order queued here. A duplicate import only rewrites the same stats row.
+			WC()->queue()->schedule_single( time() + 5, $import_hook, array( $order_id ), (string) \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::$group );
 		}
 	};
 
@@ -4113,7 +4127,10 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 			delete_option( $last_id_option );
 			return false;
 		}
-		$repaired_ids[] = (int) $row->id;
+		// Zero rows means a save or another run filled the dates first, and that writer already took care of the rest.
+		if ( $updated > 0 ) {
+			$repaired_ids[] = (int) $row->id;
+		}
 	}
 
 	$forget_and_import( $repaired_ids );

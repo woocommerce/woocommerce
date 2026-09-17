@@ -712,6 +712,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		// A cached order object without a date must not survive the repair.
 		$order_cache = wc_get_container()->get( OrderCache::class );
 		$order_cache->set( wc_get_order( $order_id ), $order_id );
+		// Creating the orders queued their own imports: clear them so the assertion below is about the routine.
+		as_unschedule_all_actions( 'wc-admin_import_orders' );
 
 		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A single small batch should not request another run' );
 
@@ -722,6 +724,30 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( get_gmt_from_date( $cleaned_post->post_date ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $cleaned_id ) ), 'A cleaned-up order is repaired from its placeholder post' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertFalse( $order_cache->is_cached( $order_id ), 'The cached order object must be dropped' );
 		$this->assertNotFalse( as_next_scheduled_action( 'wc-admin_import_orders', array( $order_id ) ), 'The Analytics import must be queued for the repaired order' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should import repaired orders inline when Analytics scheduling is disabled.
+	 */
+	public function test_wc_update_1130_imports_inline_when_analytics_scheduling_is_disabled(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order_id = OrderHelper::create_complex_wp_post_order();
+		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $order_id ) );
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->update( $orders_table, array( 'date_created_gmt' => '0000-00-00 00:00:00' ), array( 'id' => $order_id ) );
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		// Creating the order queued its own import. Start from a clean slate so only the routine's behaviour is measured.
+		as_unschedule_all_actions( 'wc-admin_import_orders' );
+		$wpdb->delete( $wpdb->prefix . 'wc_order_stats', array( 'order_id' => $order_id ) );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		wc_update_1130_repair_hpos_order_dates_from_posts();
+
+		$this->assertFalse( as_next_scheduled_action( 'wc-admin_import_orders', array( $order_id ) ), 'Nothing should be queued when scheduling is disabled' );
+		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ), 'The order should have been imported inline' );
 	}
 
 	/**
