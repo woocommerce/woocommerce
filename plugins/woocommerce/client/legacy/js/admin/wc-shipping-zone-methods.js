@@ -517,7 +517,12 @@
 							// There was an error modifying the decimal, so we leave the original value as-is.
 							return;
 						}
-						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+						// Keep any decimals beyond the store precision, so the stored cost is not rounded on display.
+						const decimals = WCNumberValidation.getDecimalCount( value, config );
+						const formatConfig = decimals > config.precision
+							? Object.assign( {}, config, { precision: decimals } )
+							: config;
+						const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
 
@@ -708,7 +713,12 @@
 
 							$('.wc-shipping-modal-price').on('blur', function() {
 								const value = $(this).val();
-								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+								// Keep any decimals beyond the store precision, so the typed cost is not rounded on blur.
+								const decimals = WCNumberValidation.getDecimalCount( value, config );
+								const formatConfig = decimals > config.precision
+									? Object.assign( {}, config, { precision: decimals } )
+									: config;
+								const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 								$(this).val( formattedValue );
 							});
 						}
