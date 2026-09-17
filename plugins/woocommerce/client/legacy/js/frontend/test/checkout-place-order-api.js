@@ -893,8 +893,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			return request;
 		};
 
-		const failCheckoutUpdate = ( status, textStatus ) => {
-			sendCheckoutUpdate().error( { status }, textStatus || 'error' );
+		const failCheckoutUpdate = ( status, textStatus, errorThrown ) => {
+			sendCheckoutUpdate().error(
+				{ status },
+				textStatus || 'error',
+				errorThrown || ''
+			);
 		};
 
 		test( 'should reload once when the nonce is rejected', () => {
@@ -926,6 +930,21 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( mockBody.trigger ).toHaveBeenCalledWith(
 				'checkout_error',
 				expect.anything()
+			);
+		} );
+
+		test( 'should fall back to the status text when the localized notice is missing', () => {
+			// A woocommerce_get_script_data callback can drop or blank the string.
+			delete global.window.wc_checkout_params.i18n_checkout_stale;
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			failCheckoutUpdate( 403, 'error', 'Forbidden' );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'tabindex="-1">Forbidden</div>' )
+			);
+			expect( $form.prepend ).not.toHaveBeenCalledWith(
+				expect.stringContaining( 'undefined' )
 			);
 		} );
 

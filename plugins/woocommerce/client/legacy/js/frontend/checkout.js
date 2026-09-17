@@ -959,7 +959,7 @@ jQuery( function ( $ ) {
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
 				},
-				error: function ( jqXHR, textStatus ) {
+				error: function ( jqXHR, textStatus, errorThrown ) {
 					// A request superseded by a newer one is aborted on purpose.
 					if ( 'abort' === textStatus ) {
 						return;
@@ -977,10 +977,22 @@ jQuery( function ( $ ) {
 					).unblock();
 
 					if ( 403 === jqXHR.status ) {
+						// The localized string is expected, but fall back to the response's status text
+						// like the place order handler does if something removed it.
+						var errorMessage = errorThrown;
+
+						if (
+							typeof wc_checkout_params.i18n_checkout_stale ===
+								'string' &&
+							wc_checkout_params.i18n_checkout_stale.trim() !== ''
+						) {
+							errorMessage = wc_checkout_params.i18n_checkout_stale;
+						}
+
 						// role="alert" announces the notice and tabindex="-1" lets submit_error focus it.
 						wc_checkout_form.submit_error(
 							'<div role="alert"><div class="woocommerce-error" tabindex="-1">' +
-								wc_checkout_params.i18n_checkout_stale +
+								errorMessage +
 								'</div></div>'
 						);
 					}
