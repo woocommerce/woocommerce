@@ -33,7 +33,8 @@ import { PositionOptions } from './constants';
 
 const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 	const { attributes, setAttributes } = props;
-	const { buttonPosition, buttonUseIcon, showLabel } = attributes;
+	const { buttonPosition, buttonUseIcon, liveResults, showLabel } =
+		attributes;
 	const [ initialPosition, setInitialPosition ] =
 		useState< ButtonPositionProps >( buttonPosition );
 
@@ -47,98 +48,132 @@ const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 	}, [ buttonPosition, initialPosition ] );
 
 	return (
-		<InspectorControls group="styles">
-			<PanelBody title={ __( 'Styles', 'woocommerce' ) }>
-				<RadioControl
-					selected={ getSelectedRadioControlOption( buttonPosition ) }
-					options={ [
-						{
-							label: __( 'Input and button', 'woocommerce' ),
-							value: PositionOptions.INPUT_AND_BUTTON,
-						},
-						{
-							label: __( 'Input only', 'woocommerce' ),
-							value: PositionOptions.NO_BUTTON,
-						},
-						{
-							label: __( 'Button only', 'woocommerce' ),
-							value: PositionOptions.BUTTON_ONLY,
-						},
-					] }
-					onChange={ (
-						selected: Partial< ButtonPositionProps > &
-							PositionOptions.INPUT_AND_BUTTON
-					) => {
-						if ( selected !== PositionOptions.INPUT_AND_BUTTON ) {
-							setAttributes( {
-								buttonPosition: selected,
-							} );
-						} else {
-							const newButtonPosition =
-								getInputAndButtonOption( initialPosition );
-							setAttributes( {
-								buttonPosition: newButtonPosition,
-							} );
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Live results', 'woocommerce' ) }>
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __(
+							'Show products while typing',
+							'woocommerce'
+						) }
+						help={ __(
+							'Show matching products — image, name and price — in a dropdown as the shopper types.',
+							'woocommerce'
+						) }
+						checked={ !! liveResults }
+						onChange={ ( value: boolean ) =>
+							setAttributes( { liveResults: value } )
 						}
-					} }
-				/>
-				{ buttonPosition !== PositionOptions.NO_BUTTON && (
-					<>
-						{ buttonPosition !== PositionOptions.BUTTON_ONLY && (
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<InspectorControls group="styles">
+				<PanelBody title={ __( 'Styles', 'woocommerce' ) }>
+					<RadioControl
+						selected={ getSelectedRadioControlOption(
+							buttonPosition
+						) }
+						options={ [
+							{
+								label: __( 'Input and button', 'woocommerce' ),
+								value: PositionOptions.INPUT_AND_BUTTON,
+							},
+							{
+								label: __( 'Input only', 'woocommerce' ),
+								value: PositionOptions.NO_BUTTON,
+							},
+							{
+								label: __( 'Button only', 'woocommerce' ),
+								value: PositionOptions.BUTTON_ONLY,
+							},
+						] }
+						onChange={ (
+							selected: Partial< ButtonPositionProps > &
+								PositionOptions.INPUT_AND_BUTTON
+						) => {
+							if (
+								selected !== PositionOptions.INPUT_AND_BUTTON
+							) {
+								setAttributes( {
+									buttonPosition: selected,
+								} );
+							} else {
+								const newButtonPosition =
+									getInputAndButtonOption( initialPosition );
+								setAttributes( {
+									buttonPosition: newButtonPosition,
+								} );
+							}
+						} }
+					/>
+					{ buttonPosition !== PositionOptions.NO_BUTTON && (
+						<>
+							{ buttonPosition !==
+								PositionOptions.BUTTON_ONLY && (
+								<ToggleGroupControl
+									label={ __(
+										'BUTTON POSITION',
+										'woocommerce'
+									) }
+									isBlock
+									onChange={ (
+										value: ButtonPositionProps
+									) => {
+										setAttributes( {
+											buttonPosition: value,
+										} );
+									} }
+									value={ getInputAndButtonOption(
+										buttonPosition
+									) }
+								>
+									<ToggleGroupControlOption
+										value={ PositionOptions.INSIDE }
+										label={ __( 'Inside', 'woocommerce' ) }
+									/>
+									<ToggleGroupControlOption
+										value={ PositionOptions.OUTSIDE }
+										label={ __( 'Outside', 'woocommerce' ) }
+									/>
+								</ToggleGroupControl>
+							) }
 							<ToggleGroupControl
-								label={ __( 'BUTTON POSITION', 'woocommerce' ) }
+								label={ __(
+									'BUTTON APPEARANCE',
+									'woocommerce'
+								) }
 								isBlock
-								onChange={ ( value: ButtonPositionProps ) => {
+								onChange={ ( value: boolean ) => {
 									setAttributes( {
-										buttonPosition: value,
+										buttonUseIcon: value,
 									} );
 								} }
-								value={ getInputAndButtonOption(
-									buttonPosition
-								) }
+								value={ buttonUseIcon }
 							>
 								<ToggleGroupControlOption
-									value={ PositionOptions.INSIDE }
-									label={ __( 'Inside', 'woocommerce' ) }
+									value={ false }
+									label={ __( 'Text', 'woocommerce' ) }
 								/>
 								<ToggleGroupControlOption
-									value={ PositionOptions.OUTSIDE }
-									label={ __( 'Outside', 'woocommerce' ) }
+									value={ true }
+									label={ __( 'Icon', 'woocommerce' ) }
 								/>
 							</ToggleGroupControl>
-						) }
-						<ToggleGroupControl
-							label={ __( 'BUTTON APPEARANCE', 'woocommerce' ) }
-							isBlock
-							onChange={ ( value: boolean ) => {
-								setAttributes( {
-									buttonUseIcon: value,
-								} );
-							} }
-							value={ buttonUseIcon }
-						>
-							<ToggleGroupControlOption
-								value={ false }
-								label={ __( 'Text', 'woocommerce' ) }
-							/>
-							<ToggleGroupControlOption
-								value={ true }
-								label={ __( 'Icon', 'woocommerce' ) }
-							/>
-						</ToggleGroupControl>
-					</>
-				) }
-				<ToggleControl
-					label={ __( 'Show input label', 'woocommerce' ) }
-					checked={ showLabel }
-					onChange={ ( showInputLabel: boolean ) =>
-						setAttributes( {
-							showLabel: showInputLabel,
-						} )
-					}
-				/>
-			</PanelBody>
-		</InspectorControls>
+						</>
+					) }
+					<ToggleControl
+						label={ __( 'Show input label', 'woocommerce' ) }
+						checked={ showLabel }
+						onChange={ ( showInputLabel: boolean ) =>
+							setAttributes( {
+								showLabel: showInputLabel,
+							} )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+		</>
 	);
 };
 
