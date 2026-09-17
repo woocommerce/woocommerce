@@ -4072,9 +4072,13 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $order_ids );
 		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
+		// With Analytics disabled nothing handles the import action, and queueing it would only leave failed actions behind.
+		$import_handled = has_action( \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_action( 'import' ) );
 		foreach ( $order_ids as $order_id ) {
 			$order_cache->remove( $order_id );
-			\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $order_id ) );
+			if ( $import_handled ) {
+				\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::schedule_action( 'import', array( $order_id ) );
+			}
 		}
 	};
 
