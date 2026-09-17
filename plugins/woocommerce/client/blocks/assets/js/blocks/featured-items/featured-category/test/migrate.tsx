@@ -48,6 +48,20 @@ beforeAll( () => {
 } );
 
 describe( 'Featured Category automatic migration', () => {
+	it.each( [ {}, { categoryId: 0 } ] )(
+		'keeps an uninitialized block empty after saving and reopening: %j',
+		( attributes ) => {
+			const block = parse(
+				`<!-- wp:woocommerce/featured-category ${ JSON.stringify(
+					attributes
+				) } /-->`
+			)[ 0 ];
+			const reopened = parse( serialize( block ) )[ 0 ];
+			expect( reopened.attributes.layout ).toBe( 'cover' );
+			expect( reopened.innerBlocks ).toEqual( [] );
+		}
+	);
+
 	it( 'keeps category support overrides separate from Featured Product', () => {
 		const category = getBlockType( metadata.name );
 		expect( category.supports ).toMatchObject( metadata.supports );

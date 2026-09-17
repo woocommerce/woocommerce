@@ -32,7 +32,10 @@ beforeAll( () => {
 
 describe( 'Featured Category Cover migration helper', () => {
 	it( 'defaults generated v0 content to centered alignment without parser defaults', () => {
-		const [ , [ cover ] ] = migrateToCover( { editMode: false }, [] );
+		const [ , [ cover ] ] = migrateToCover(
+			{ categoryId: 42, editMode: false },
+			[]
+		);
 		expect(
 			cover.innerBlocks
 				.slice( 0, 2 )

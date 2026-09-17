@@ -77,6 +77,22 @@ export function migrateToCover(
 		className,
 		style = {},
 	} = attributes;
+	const migratedAttributes = {
+		align,
+		ariaLabel,
+		categoryId,
+		metadata,
+		lock,
+		anchor,
+		className,
+		layout: 'cover',
+		termTaxonomy: 'product_cat',
+	};
+	// Leave uninitialized blocks empty so selecting a category creates the default template.
+	if ( ! categoryId && ! innerBlocks.length ) {
+		return [ migratedAttributes, [] ];
+	}
+
 	const customImage = Boolean( attributes.mediaId || attributes.mediaSrc );
 	// Mirrors FeaturedItem::get_image_size() to preserve the old image size.
 	const size =
@@ -140,18 +156,6 @@ export function migrateToCover(
 					},
 			  } ),
 	} );
-	const migratedAttributes = {
-		align,
-		ariaLabel,
-		categoryId,
-		metadata,
-		lock,
-		anchor,
-		className,
-		layout: 'cover',
-		termTaxonomy: 'product_cat',
-	};
-
 	if ( typeof attributes.editMode === 'boolean' ) {
 		cover.innerBlocks = migrateFromV0( attributes, innerBlocks );
 		return [ migratedAttributes, [ cover ] ];
