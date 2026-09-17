@@ -423,11 +423,7 @@ final class Scheduler {
 			return false;
 		}
 
-		if ( ! $queue instanceof OptionsAwareActionQueue ) {
-			return true;
-		}
-
-		return 'unique' === $option ? $queue->supports_unique_actions() : $queue->supports_priority();
+		return (bool) $queue->supports( $option );
 	}
 
 	/**

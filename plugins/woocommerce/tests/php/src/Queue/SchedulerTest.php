@@ -81,12 +81,20 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * Build an options-aware queue double that records every call, including the options it receives.
 	 *
+	 * @param string[] $unsupported Options the double reports as unsupported.
 	 * @return OptionsAwareQueueInterface
 	 */
-	private function options_aware_queue(): OptionsAwareQueueInterface {
-		return new class() implements OptionsAwareQueueInterface {
+	private function options_aware_queue( array $unsupported = array() ): OptionsAwareQueueInterface {
+		return new class( $unsupported ) implements OptionsAwareQueueInterface {
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
 			public $calls = array();
+			private $unsupported;
+			public function __construct( array $unsupported ) {
+				$this->unsupported = $unsupported;
+			}
+			public function supports( $option ) {
+				return in_array( $option, array( 'priority', 'unique' ), true ) && ! in_array( $option, $this->unsupported, true );
+			}
 			public function add( $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'add', func_get_args() );
 				return 21;
@@ -564,5 +572,27 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->use_queue( new class() extends \WC_Action_Queue {} );
 		$this->assertTrue( $this->sut->is_ready(), 'A WC_Action_Queue subclass is checked against Action Scheduler, which is initialised here' );
+	}
+
+	/**
+	 * @testdox Should ask an options-aware queue which options it honours instead of assuming all of them.
+	 */
+	public function test_supports_asks_the_options_aware_queue(): void {
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $this->options_aware_queue( array( 'priority' ) ) ) );
+
+		$this->assertTrue( $this->sut->supports( 'unique' ) );
+		$this->assertFalse( $this->sut->supports( 'priority' ), 'The queue reported no native priority support' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->sut->schedule_single(
+			time() + HOUR_IN_SECONDS,
+			'wc_scheduler_test_oaq_strict',
+			array(),
+			'wc-scheduler-test',
+			array(
+				'priority' => 1,
+				'strict'   => true,
+			)
+		);
 	}
 }

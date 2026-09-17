@@ -243,10 +243,11 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 	 * @testdox Should report support for unique and priority on the bundled Action Scheduler.
 	 */
 	public function test_reports_support_on_bundled_action_scheduler(): void {
-		$this->assertTrue( $this->sut->supports_unique_actions() );
-		$this->assertTrue( $this->sut->supports_priority() );
-		$this->assertFalse( $this->queue_on_old_action_scheduler()->supports_unique_actions() );
-		$this->assertFalse( $this->queue_on_old_action_scheduler()->supports_priority() );
+		$this->assertTrue( $this->sut->supports( 'unique' ) );
+		$this->assertTrue( $this->sut->supports( 'priority' ) );
+		$this->assertFalse( $this->sut->supports( 'mystery' ), 'Unknown options are never supported' );
+		$this->assertFalse( $this->queue_on_old_action_scheduler()->supports( 'unique' ) );
+		$this->assertFalse( $this->queue_on_old_action_scheduler()->supports( 'priority' ) );
 	}
 
 	/**

@@ -168,32 +168,38 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	}
 
 	/**
-	 * Whether the loaded Action Scheduler accepts the `$unique` argument (3.5.0 and newer).
+	 * Whether the loaded Action Scheduler honours a scheduling option.
+	 *
+	 * `unique` needs Action Scheduler 3.5.0 and `priority` needs 3.6.0. The scheduling methods pass
+	 * both arguments regardless, since older copies ignore what they do not declare, so this exists
+	 * for callers deciding whether an option will take effect.
 	 *
 	 * @since 11.3.0
 	 *
+	 * @param string $option The option name.
 	 * @return bool
 	 */
-	public function supports_unique_actions(): bool {
-		$version = $this->get_action_scheduler_version();
-
-		return null !== $version && version_compare( $version, '3.5.0', '>=' );
+	public function supports( $option ): bool {
+		switch ( $option ) {
+			case 'unique':
+				return $this->action_scheduler_is_at_least( '3.5.0' );
+			case 'priority':
+				return $this->action_scheduler_is_at_least( '3.6.0' );
+			default:
+				return false;
+		}
 	}
 
 	/**
-	 * Whether the loaded Action Scheduler accepts the `$priority` argument (3.6.0 and newer).
+	 * Whether the loaded Action Scheduler is at least the given version.
 	 *
-	 * For callers deciding whether a priority will take effect. The scheduling methods pass the
-	 * priority regardless, since older copies simply ignore it.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return bool
+	 * @param string $version The minimum version.
+	 * @return bool False when no version can be determined.
 	 */
-	public function supports_priority(): bool {
-		$version = $this->get_action_scheduler_version();
+	private function action_scheduler_is_at_least( string $version ): bool {
+		$loaded = $this->get_action_scheduler_version();
 
-		return null !== $version && version_compare( $version, '3.6.0', '>=' );
+		return null !== $loaded && version_compare( $loaded, $version, '>=' );
 	}
 
 	/**
@@ -237,7 +243,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 			return false;
 		}
 
-		if ( $this->is_unique_requested( $options ) && ! $this->supports_unique_actions() && as_next_scheduled_action( $hook, $args, $group ) ) {
+		if ( $this->is_unique_requested( $options ) && ! $this->supports( 'unique' ) && as_next_scheduled_action( $hook, $args, $group ) ) {
 			return false;
 		}
 

@@ -103,4 +103,18 @@ interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 	 * @return bool True if a matching action is pending or in progress.
 	 */
 	public function has_scheduled_action( $hook, $args = null, $group = '' );
+
+	/**
+	 * Whether this queue honours a scheduling option natively.
+	 *
+	 * Answers per option, `unique` and `priority` today, and must return false for an option it
+	 * does not know. The scheduler relies on it for `supports()`, for `strict` calls and for the
+	 * system status report, so it should reflect the backend actually in use.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $option The option name.
+	 * @return bool True if the option takes effect natively on this queue.
+	 */
+	public function supports( $option );
 }
