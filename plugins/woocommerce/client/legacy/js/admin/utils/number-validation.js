@@ -102,13 +102,14 @@ function isValidFormattedNumber( value, config ) {
 /**
  * Counts the decimal places in a formatted number string
  *
- * Only a plain number qualifies: digits with optional thousand separators, then the decimal
+ * Only a plain number qualifies: digits and the configured thousand separator, then the decimal
  * separator exactly once, then one or more digits at the end. Formulas, shortcodes, a trailing
  * separator and an empty value count as zero decimals.
  *
  * @param {string} value - The formatted number to inspect
  * @param {Object} config - Configuration object with decimal and thousand separators
  * @param {string} config.decimalSeparator - Decimal separator (e.g., '.' or ',')
+ * @param {string} config.thousandSeparator - Thousand separator (e.g., ',' or ' ' or '.')
  * @returns {number} The number of digits after the decimal separator, or 0
  */
 function getDecimalCount( value, config ) {
@@ -122,8 +123,11 @@ function getDecimalCount( value, config ) {
 		return 0;
 	}
 
+	const thousandSeparator = typeof config.thousandSeparator === 'string' ? config.thousandSeparator : '';
+	const escapeForRegExp = ( text ) => text.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	const plainNumber = new RegExp( '^[\\d' + escapeForRegExp( config.decimalSeparator ) + escapeForRegExp( thousandSeparator ) + ']+$' );
 	const trimmed = value.trim();
-	if ( ! /^[\d\s.,']+$/.test( trimmed ) ) {
+	if ( ! plainNumber.test( trimmed ) ) {
 		return 0;
 	}
 
