@@ -845,7 +845,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 	// A checkout restored by the browser from before the shopper logged in carries the old
 	// session's nonce, so update_order_review answers 403. The first 403 reloads the page once;
-	// a sessionStorage flag turns the second one into a notice instead of a reload loop.
+	// a sessionStorage flag turns every later one into a notice instead of a reload loop.
 	describe( 'Checkout update request failures', () => {
 		const STALE_FLAG = 'wc_checkout_stale_nonce_reload';
 		const STALE_NOTICE = 'This checkout page is out of date.';
@@ -911,7 +911,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			failCheckoutUpdate( 403 );
 
 			expectReloads( 0 );
-			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
 			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
 			expect( $form.prepend ).toHaveBeenCalledWith(
 				expect.stringContaining( STALE_NOTICE )
@@ -926,6 +926,20 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'checkout_error',
 				expect.anything()
 			);
+		} );
+
+		test( 'should keep showing the notice on later rejections instead of reloading again', () => {
+			// Field changes keep sending update_order_review. On a page that is always
+			// rejected, clearing the flag on the notice would reload on every other change.
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			failCheckoutUpdate( 403 );
+			failCheckoutUpdate( 403 );
+			failCheckoutUpdate( 403 );
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
+			expect( $form.prepend ).toHaveBeenCalledTimes( 3 );
 		} );
 
 		test( 'should show the notice without reloading when storage is unavailable', () => {

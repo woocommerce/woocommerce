@@ -539,7 +539,8 @@ jQuery( function ( $ ) {
 		 *
 		 * A 403 from update_order_review means the page was rendered for a different session, typically
 		 * because the browser restored a checkout from before the shopper logged in. Reloading fetches a
-		 * fresh page. The flag stops a second reload when the fresh page is rejected as well.
+		 * fresh page. The flag stays set until an update succeeds, so a page that keeps being rejected
+		 * shows the notice instead of reloading again.
 		 *
 		 * @return {boolean} Whether a reload was started.
 		 */
@@ -548,7 +549,6 @@ jQuery( function ( $ ) {
 
 			try {
 				if ( window.sessionStorage.getItem( key ) ) {
-					window.sessionStorage.removeItem( key );
 					return false;
 				}
 
