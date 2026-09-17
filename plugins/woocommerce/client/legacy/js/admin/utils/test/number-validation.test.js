@@ -74,6 +74,10 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 
 		test.each( [
 			'[weightless min="0.5"]',
+			'[weight-foo]',
+			'[weight.foo]',
+			'[weight-foo min="0.5"]',
+			'[weight.foo max="1.5"]',
 			'[weight min="0.5"',
 			'[weight min="0.5"] + [weightless min="1.5"]',
 			'[weight min="0.5"] + [weight max="1.5"',

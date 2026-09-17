@@ -19,9 +19,9 @@ class WeightPlaceholder {
 	/**
 	 * Matches [weight] along with its optional attributes, e.g. [weight min="1" max="20"].
 	 *
-	 * The word boundary excludes names such as [weightless]. Attributes stop at the first closing bracket.
+	 * Whitespace or "]" must follow "weight". Attributes stop at the first closing bracket.
 	 */
-	private const PLACEHOLDER_PATTERN = '/\[weight\b(?<attributes>[^]]*)]/';
+	private const PLACEHOLDER_PATTERN = '/\[weight(?=\s|\])(?<attributes>[^]]*)]/';
 
 	/**
 	 * Get the total weight of the shippable items in a package, in the store's weight unit.

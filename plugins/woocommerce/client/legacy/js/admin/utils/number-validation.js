@@ -29,9 +29,9 @@ function isValidFormattedNumber( value, config ) {
         return false;
     }
 
-	// The word boundary excludes [weightless]; attributes stop at the first closing bracket.
-	// Only complete tokens bypass locale checks; the server validates their dot-decimal limits on save.
-	value = value.replace( /\[weight\b[^\]]*\]/g, '[weight]' );
+	// Whitespace or "]" must follow "weight", excluding names such as [weight-foo].
+	// Attributes stop at the first closing bracket; the server validates their dot-decimal limits on save.
+	value = value.replace( /\[weight(?=\s|\])[^\]]*\]/g, '[weight]' );
 
 	var decimalSeparator = config.decimalSeparator || '.';
 	var thousandSeparator = config.thousandSeparator || ',';

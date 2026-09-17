@@ -257,6 +257,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			// Invalid characters.
 			'alphabetic string'             => array( 'abc', '.', ',' ),
 			'alphanumeric'                  => array( '10abc', '.', ',' ),
+			'hyphenated weight name'        => array( '[weight-foo]', '.', ',' ),
+			'dotted weight name'            => array( '[weight.foo]', '.', ',' ),
+			'hyphenated weight with limits' => array( '2 * [weight-foo min="1"]', ',', '.' ),
+			'dotted weight with limits'     => array( '2 * [weight.foo max="2"]', ',', '.' ),
 
 			// Divides by zero on any package whose items have no weight set.
 			'weight division'               => array( '10 / [weight]', '.', ',' ),
