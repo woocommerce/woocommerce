@@ -692,9 +692,15 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		// Drop non-string entries — they can't match a registered status and would
-		// cause a TypeError in the string concatenation below.
-		$this->args['status'] = array_filter( $this->args['status'], 'is_string' );
+		// Drop entries that can't be used as strings — arrays and non-Stringable objects
+		// would cause a TypeError in the concatenation below. Keep strings and objects
+		// with __toString(), which trunk's concat handled natively.
+		$this->args['status'] = array_filter(
+			$this->args['status'],
+			static function ( $s ) {
+				return is_string( $s ) || ( is_object( $s ) && method_exists( $s, '__toString' ) );
+			}
+		);
 
 		if ( $status_was_provided && empty( $this->args['status'] ) ) {
 			// All status values were non-string; use a non-matching sentinel so the query

@@ -906,6 +906,36 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders accepts Stringable objects as status values, matching trunk's concat behavior.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_accepts_stringable_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$stringable = new class() {
+			/**
+			 * @return string
+			 */
+			public function __toString(): string {
+				return OrderStatus::COMPLETED;
+			}
+		};
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( $stringable ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A Stringable object representing a known status should match, as it did on trunk via __toString().' );
+	}
+
+	/**
 	 * @testdox CPT order queries support the "$status" special status.
 	 *
 	 * @dataProvider cpt_special_status_provider

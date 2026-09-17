@@ -950,19 +950,24 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				? explode( ',', $query_vars['post_status'] )
 				: (array) $query_vars['post_status'];
 
-			// Drop non-string entries — they can't match a registered status and would
-			// cause a TypeError in strtolower(). On trunk the concat only emitted a warning,
-			// so silently removing them preserves the no-fatal behavior.
-			$statuses = array_filter( $statuses, 'is_string' );
+			// Drop entries that can't be used as strings — arrays would cause a TypeError in
+			// strtolower(), and non-Stringable objects would fatal on trunk too. Keep strings
+			// and objects with __toString(), which trunk's concat handled natively.
+			$statuses = array_filter(
+				$statuses,
+				static function ( $s ) {
+					return is_string( $s ) || ( is_object( $s ) && method_exists( $s, '__toString' ) );
+				}
+			);
 
-			// If all entries were non-string, keep a sentinel so the guard below rejects
-			// the query instead of returning every order.
+			// If nothing remains, keep a sentinel so the guard below rejects the query
+			// instead of returning every order.
 			if ( empty( $statuses ) ) {
 				$statuses = array( '' );
 			}
 
 			foreach ( $statuses as &$status ) {
-				$status = strtolower( $status );
+				$status = strtolower( (string) $status );
 				$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 			}
 
