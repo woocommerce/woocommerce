@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Render Cover-based Featured Category blocks with current category images while preserving unchanged legacy blocks.
