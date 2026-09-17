@@ -5,7 +5,6 @@ import {
 	BlockContextProvider,
 	BlockControls,
 	InnerBlocks,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import {
 	Button,
@@ -17,12 +16,9 @@ import {
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { folderStarred } from '@woocommerce/icons';
-import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withCategory } from '@woocommerce/block-hocs';
-import { getInnerBlockBy } from '@woocommerce/utils';
 import type { WP_REST_API_Category } from 'wp-types';
-import { useDispatch, useRegistry } from '@wordpress/data';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
@@ -31,6 +27,7 @@ import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { FEATURED_CATEGORY_DEFAULT_TEMPLATE } from '../constants';
 import { withEditMode } from '../with-edit-mode';
 import { withApiError } from '../with-api-error';
+import { withUpdateButtonAttributes } from '../with-update-button-attributes';
 import { useCoverImage } from './use-cover-image';
 
 const EDIT_MODE_CONFIG = {
@@ -53,46 +50,12 @@ interface Props {
 
 const withCoverAttributes = ( Component: ComponentType< Props > ) =>
 	function CoverAttributes( props: Props ) {
-		const { attributes, category, clientId, setAttributes } = props;
-		const { updateBlockAttributes } = useDispatch( blockEditorStore );
-		const registry = useRegistry();
-		const previousUrl = useRef< string >();
-
-		useEffect( () => {
-			if (
-				! previousUrl.current ||
-				! category ||
-				category.id !== attributes.categoryId
-			) {
-				return;
-			}
-			const oldUrl = previousUrl.current;
-			previousUrl.current = undefined;
-			const button = getInnerBlockBy(
-				registry.select( blockEditorStore ).getBlock( clientId ),
-				( child ) =>
-					child.name === 'core/button' &&
-					! child.attributes.metadata?.bindings?.url &&
-					child.attributes.url === oldUrl
-			);
-			if ( button && category.permalink ) {
-				void updateBlockAttributes( button.clientId, {
-					url: category.permalink,
-				} );
-			}
-		}, [
-			attributes.categoryId,
-			category,
-			clientId,
-			registry,
-			updateBlockAttributes,
-		] );
+		const { setAttributes } = props;
 
 		return (
 			<Component
 				{ ...props }
 				setAttributes={ ( { categoryId } ) => {
-					previousUrl.current = category?.permalink;
 					setAttributes( {
 						categoryId: Number( categoryId ),
 						layout: 'cover',
@@ -166,6 +129,7 @@ export default compose( [
 	withCategory,
 	withCoverAttributes,
 	withSpokenMessages,
+	withUpdateButtonAttributes,
 	withEditMode( EDIT_MODE_CONFIG ),
 	withApiError,
 ] )( FeaturedCategory );
