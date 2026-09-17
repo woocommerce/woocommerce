@@ -14,6 +14,14 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * The least create_order() needs from a posted classic checkout form, paying by cash on delivery.
+	 */
+	private const COD_POSTED_DATA = array(
+		'payment_method' => WC_Gateway_COD::ID,
+		'billing_email'  => 'customer@example.com',
+	);
+
+	/**
 	 * @var object The system under test.
 	 */
 	private $sut;
@@ -27,6 +35,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
 	 */
 	private $original_session;
+
+	/**
+	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
+	 */
+	private $original_customer;
 
 	/**
 	 * Runs before each test.
@@ -66,8 +79,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->extra_field_filters = array();
 
 		if ( $this->original_session ) {
-			WC()->session           = $this->original_session;
-			$this->original_session = null;
+			WC()->session            = $this->original_session;
+			WC()->customer           = $this->original_customer;
+			$this->original_session  = null;
+			$this->original_customer = null;
 		}
 
 		parent::tearDown();
@@ -796,42 +811,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox create_order() refuses to build a second order when the session order already went through the gateway for the same cart.
-	 */
-	public function test_create_order_refuses_a_second_order_when_the_session_order_went_through(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id() );
-		WC()->cart->calculate_totals();
-		$data = array(
-			'payment_method' => WC_Gateway_COD::ID,
-			'billing_email'  => 'customer@example.com',
-		);
-
-		$first_order_id = $this->sut->create_order( $data );
-		$this->assertNotWPError( $first_order_id );
-		// What a gateway that dies right after its status change leaves behind: the session still points at the order and the cart was never emptied.
-		WC()->session->set( 'order_awaiting_payment', $first_order_id );
-		wc_get_order( $first_order_id )->update_status( OrderStatus::PROCESSING );
-
-		$result = $this->sut->create_order( $data );
-
-		$this->assertWPError( $result, 'A repeat submit for an order that went through must not build a new order.' );
-		$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
-		$this->assertSame( $first_order_id, $result->get_error_data()['order_id'] );
-		$this->assertSame(
-			array( $first_order_id ),
-			wc_get_orders(
-				array(
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			),
-			'No second order should exist.'
-		);
-	}
-
-	/**
-	 * @testdox create_order() reads a repeat submit from the session order's status: "$status" leads to "$expected".
+	 * @testdox create_order() decides a repeat submit by the session order's status: "$status" leads to "$expected".
 	 *
 	 * @testWith ["processing", "refuse"]
 	 *           ["completed", "refuse"]
@@ -844,25 +824,26 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param string $status   Status the session order is in when the form is submitted again.
 	 * @param string $expected What create_order() does with it: refuse, resume or new-order.
 	 */
-	public function test_create_order_reads_a_repeat_submit_from_the_session_order_status( string $status, string $expected ): void {
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id() );
-		WC()->cart->calculate_totals();
-		$data = array(
-			'payment_method' => WC_Gateway_COD::ID,
-			'billing_email'  => 'customer@example.com',
-		);
+	public function test_create_order_decides_a_repeat_submit_by_the_session_order_status( string $status, string $expected ): void {
+		$first_order_id = $this->leave_session_order_in_status( $status );
 
-		$first_order_id = $this->sut->create_order( $data );
-		WC()->session->set( 'order_awaiting_payment', $first_order_id );
-		wc_get_order( $first_order_id )->update_status( $status );
-
-		$result = $this->sut->create_order( $data );
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
 
 		switch ( $expected ) {
 			case 'refuse':
-				$this->assertWPError( $result );
+				$this->assertWPError( $result, 'A repeat submit for an order that went through must not build a new order.' );
 				$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
+				$this->assertSame( $first_order_id, $result->get_error_data()['order_id'] );
+				$this->assertSame(
+					array( $first_order_id ),
+					wc_get_orders(
+						array(
+							'return' => 'ids',
+							'limit'  => -1,
+						)
+					),
+					'No second order should exist.'
+				);
 				break;
 			case 'resume':
 				$this->assertSame( $first_order_id, $result, 'The order awaiting payment should be resumed.' );
@@ -871,13 +852,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				$this->assertNotWPError( $result );
 				$this->assertNotSame( $first_order_id, $result, 'A new order should be built.' );
 				break;
+			default:
+				$this->fail( "Unknown expectation '{$expected}'." );
 		}
 	}
 
 	/**
-	 * @testdox create_order() treats a status the site declares payable as awaiting payment rather than as a repeat submit.
+	 * @testdox create_order() does not treat a status the site declares payable as a repeat submit.
 	 */
-	public function test_create_order_treats_a_site_declared_payable_status_as_awaiting_payment(): void {
+	public function test_create_order_does_not_treat_a_site_declared_payable_status_as_a_repeat_submit(): void {
 		add_filter(
 			'woocommerce_valid_order_statuses_for_payment',
 			function ( $statuses ) {
@@ -886,21 +869,31 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				return $statuses;
 			}
 		);
+		$this->leave_session_order_in_status( OrderStatus::ON_HOLD );
+
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
+
+		$this->assertNotWPError( $result, 'An on-hold order the site still lets the shopper pay for is not a repeat submit.' );
+	}
+
+	/**
+	 * Leave the session the way a gateway that died right after its status change does: the order it points at
+	 * has the cart's hash and the given status, and the cart was never emptied.
+	 *
+	 * @param string $status Status to put the order in.
+	 * @return int The order ID.
+	 */
+	private function leave_session_order_in_status( string $status ): int {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id() );
 		WC()->cart->calculate_totals();
-		$data = array(
-			'payment_method' => WC_Gateway_COD::ID,
-			'billing_email'  => 'customer@example.com',
-		);
 
-		$first_order_id = $this->sut->create_order( $data );
-		WC()->session->set( 'order_awaiting_payment', $first_order_id );
-		wc_get_order( $first_order_id )->update_status( OrderStatus::ON_HOLD );
+		$order_id = $this->sut->create_order( self::COD_POSTED_DATA );
+		$this->assertNotWPError( $order_id );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		wc_get_order( $order_id )->update_status( $status );
 
-		$result = $this->sut->create_order( $data );
-
-		$this->assertNotWPError( $result, 'An on-hold order the site still lets the shopper pay for is not a repeat submit.' );
+		return $order_id;
 	}
 
 	/**
@@ -962,13 +955,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
+	 *
+	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
 	 */
 	private function use_real_session(): void {
-		$this->original_session = WC()->session;
+		$this->original_session  = WC()->session;
+		$this->original_customer = WC()->customer;
 
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();
 		WC()->session->set_customer_session_cookie( true );
+		WC()->customer = new WC_Customer( 0, true );
 	}
 
 	/**
@@ -989,6 +986,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Fill the request the way the classic checkout form posts it, for a guest buying a virtual product.
+	 *
+	 * Call it after use_real_session(): the nonce takes its logged-out user ID from the session, so one created
+	 * before the swap fails verification after it.
 	 *
 	 * @param string $payment_method Gateway ID.
 	 */
