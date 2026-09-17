@@ -1,5 +1,3 @@
 Significance: patch
 Type: fix
-Comment: Fix Product Rating is_descendent checks to fail inside the Product block in product catalog pages
-
-
+Comment: Fix Product Rating linking to the wrong page when used inside the Product block in product catalog pages
