@@ -28,6 +28,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -2262,10 +2263,7 @@ function wc_update_450_sanitize_coupons_code() {
 		ARRAY_A
 	);
 
-	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		return false;
-	}
+	$codes_changed = false;
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
@@ -2288,10 +2286,15 @@ function wc_update_450_sanitize_coupons_code() {
 				)
 			);
 
-			// Clean cache.
+			// Clean post cache.
 			clean_post_cache( $coupon_id );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+			$codes_changed = true;
 		}
+	}
+
+	// Remember the rewrite for the last batch, which is where the lookup cache is cleaned.
+	if ( $codes_changed ) {
+		update_option( 'woocommerce_update_450_codes_changed', 'yes' );
 	}
 
 	// Start the run again.
@@ -2300,6 +2303,19 @@ function wc_update_450_sanitize_coupons_code() {
 	}
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
+
+	/*
+	 * A rewritten code leaves its lookup entry behind under the old spelling, and those keys
+	 * cannot be deleted one by one: wc_get_coupon_id_by_code() hashes the caller's raw input, so
+	 * an entry can be keyed on a representation this function never sees. Rotating the group is
+	 * what reaches all of them, and it runs here, once per migration, rather than in every batch
+	 * that happened to rewrite something.
+	 */
+	if ( 'yes' === get_option( 'woocommerce_update_450_codes_changed' ) ) {
+		delete_option( 'woocommerce_update_450_codes_changed' );
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
+	}
+
 	return false;
 }
 
@@ -3859,8 +3875,9 @@ function wc_update_11201_invalidate_analytics_reports_cache() {
  * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
  * and restores the Orders report fallback to the refunded order's value.
  *
- * Batches walk the table by order ID. A database error stops the migration and is logged instead
- * of retried, because the report queries stay correct without the reset.
+ * Batches walk the table by order ID. A database error is logged and stops the migration without a retry.
+ * Customer aggregates still use the order type, but unprocessed refunds keep their stale marker,
+ * so the Orders report can retain an incorrect customer_type until those rows are reset.
  *
  * @since 11.2.0
  *

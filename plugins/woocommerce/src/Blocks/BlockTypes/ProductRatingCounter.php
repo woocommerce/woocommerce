@@ -22,25 +22,6 @@ class ProductRatingCounter extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'productId'                           => 0,
-			'isDescendentOfQueryLoop'             => false,
-			'textAlign'                           => '',
-			'isDescendentOfSingleProductBlock'    => false,
-			'isDescendentOfSingleProductTemplate' => false,
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
 	 * Overwrite parent method to prevent script registration.
 	 *
 	 * It is necessary to register and enqueues assets during the render
@@ -69,9 +50,9 @@ class ProductRatingCounter extends AbstractBlock {
 	/**
 	 * Include and render the block.
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param string   $content    Block content. Default empty string.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes. Default empty array.
+	 * @param string    $content    Block content. Default empty string.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -87,9 +68,9 @@ class ProductRatingCounter extends AbstractBlock {
 		if ( $product && $product->get_review_count() > 0 ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$parsed_attributes                        = $this->parse_attributes( $attributes );
-			$is_descendent_of_single_product_block    = $parsed_attributes['isDescendentOfSingleProductBlock'];
-			$is_descendent_of_single_product_template = $parsed_attributes['isDescendentOfSingleProductTemplate'];
+			$global_product                           = $GLOBALS['product'] ?? null;
+			$is_descendent_of_single_product_block    = ! isset( $block->context['queryId'] ) && ( ! $global_product instanceof \WC_Product || (int) $post_id !== $global_product->get_id() );
+			$is_descendent_of_single_product_template = ! isset( $block->context['queryId'] ) && ! $is_descendent_of_single_product_block;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );

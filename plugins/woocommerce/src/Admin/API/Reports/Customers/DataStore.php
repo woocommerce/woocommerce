@@ -727,6 +727,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		/**
 		 * Fires when a new report customer is created.
 		 *
+		 * This includes customers created during Analytics import. Rendering the order-edit
+		 * customer history panel uses a read-only lookup and does not fire this action.
+		 *
 		 * @param int $customer_id Customer ID.
 		 * @since 4.0.0
 		 */

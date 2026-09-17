@@ -358,7 +358,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
 				'description' => empty( $field['description'] ) ? '' : $field['description'],
 				'type'        => $field['type'],
-				'value'       => $gateway->settings[ $id ],
+				'value'       => empty( $gateway->settings[ $id ] ) ? '' : $gateway->settings[ $id ],
 				'default'     => empty( $field['default'] ) ? '' : $field['default'],
 				'tip'         => empty( $field['description'] ) ? '' : $field['description'],
 				'placeholder' => empty( $field['placeholder'] ) ? '' : $field['placeholder'],
