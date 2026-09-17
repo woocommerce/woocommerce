@@ -84,7 +84,22 @@ final class Scheduler {
 	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
 	 */
 	public function add( string $hook, array $args = array(), string $group = '', array $options = array() ): int {
-		return $this->schedule_single( time(), $hook, $args, $group, $options );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
+			return 0;
+		}
+		$this->assert_options_supported( $queue, $options );
+
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->add( $hook, $args, $group, $this->extract_queue_options( $options ) );
+		}
+
+		if ( $this->has_pending_match( $queue, $options, $hook, $args, $group ) ) {
+			return 0;
+		}
+
+		return (int) $queue->add( $hook, $args, $group );
 	}
 
 	/**
@@ -102,8 +117,8 @@ final class Scheduler {
 	 */
 	public function schedule_single( int $timestamp, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return 0;
 		}
 		$this->assert_options_supported( $queue, $options );
@@ -135,8 +150,8 @@ final class Scheduler {
 	 */
 	public function schedule_recurring( int $timestamp, int $interval_in_seconds, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return 0;
 		}
 		$this->assert_options_supported( $queue, $options );
@@ -169,8 +184,8 @@ final class Scheduler {
 	 */
 	public function schedule_cron( int $timestamp, string $cron_schedule, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return 0;
 		}
 		$this->assert_options_supported( $queue, $options );
@@ -200,8 +215,8 @@ final class Scheduler {
 	 */
 	public function cancel( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return;
 		}
 
@@ -222,8 +237,8 @@ final class Scheduler {
 	 */
 	public function cancel_all( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return;
 		}
 
@@ -244,8 +259,8 @@ final class Scheduler {
 	 */
 	public function get_next( string $hook, ?array $args = null, string $group = '', array $options = array() ): ?\WC_DateTime {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return null;
 		}
 
@@ -267,8 +282,8 @@ final class Scheduler {
 	 */
 	public function search( array $args = array(), string $return_format = OBJECT, array $options = array() ): array {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return array();
 		}
 
@@ -294,8 +309,8 @@ final class Scheduler {
 	 */
 	public function has_scheduled_action( string $hook, ?array $args = null, string $group = '', array $options = array() ): bool {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->select_queue( $options );
-		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
 			return false;
 		}
 
@@ -386,20 +401,23 @@ final class Scheduler {
 	}
 
 	/**
-	 * Stop a call on a queue that is not ready.
+	 * Pick the queue for a call once it can accept one.
 	 *
-	 * Throws in strict mode. Otherwise raises a doing-it-wrong notice naming the public method and
-	 * returns false so the caller can return its neutral value without touching the queue.
+	 * Checks `plugins_loaded` before touching the queue at all, since choosing it earlier would pin
+	 * the singleton before `woocommerce_queue_class` callbacks are attached. When not ready, a strict
+	 * call throws and a non-strict call raises a notice naming the public method and gets null.
 	 *
-	 * @param \WC_Queue_Interface $queue The selected queue.
-	 * @param array               $options Normalised options.
-	 * @param string              $method The public method being guarded.
-	 * @return bool True when the call can go ahead.
+	 * @param array  $options Normalised options.
+	 * @param string $method  Public method being called, named in the notice.
+	 * @return \WC_Queue_Interface|null The queue to use, or null when not ready.
 	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
-	private function ensure_ready( \WC_Queue_Interface $queue, array $options, string $method ): bool {
-		if ( did_action( 'plugins_loaded' ) && $this->is_queue_ready( $queue ) ) {
-			return true;
+	private function ready_queue( array $options, string $method ): ?\WC_Queue_Interface {
+		if ( did_action( 'plugins_loaded' ) ) {
+			$queue = $this->select_queue( $options );
+			if ( $this->is_queue_ready( $queue ) ) {
+				return $queue;
+			}
 		}
 
 		$message = __( 'The queue is not ready to accept calls yet. Check Scheduler::is_ready() and call this after init.', 'woocommerce' );
@@ -410,7 +428,7 @@ final class Scheduler {
 
 		wc_doing_it_wrong( __CLASS__ . '::' . $method, $message, '11.3.0' );
 
-		return false;
+		return null;
 	}
 
 	/**
@@ -517,6 +535,11 @@ final class Scheduler {
 				$capability,
 				QueueCapability::UNIQUE === $capability ? '3.5.0' : '3.6.0'
 			);
+		}
+
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			/* translators: 1: class name of the active queue, 2: scheduling option name */
+			return sprintf( __( 'the active queue (%1$s) reports no native support for %2$s', 'woocommerce' ), get_class( $queue ), $capability );
 		}
 
 		/* translators: %s: class name of the active queue */

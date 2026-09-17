@@ -279,8 +279,8 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$action_id = $this->sut->add( 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'unique' => true ) );
 
-		$this->assertSame( 12, $action_id, 'add() delegates to schedule_single() at the current time' );
-		$this->assertSame( array( 'get_next', 'schedule_single' ), array_column( $queue->calls, 0 ) );
+		$this->assertSame( 11, $action_id, 'add() calls the queue\'s own add() after the pending-action check' );
+		$this->assertSame( array( 'get_next', 'add' ), array_column( $queue->calls, 0 ) );
 	}
 
 	/**
@@ -691,6 +691,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->supports( 'priority' ), 'The queue reported no native priority support' );
 
 		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'reports no native support for priority' );
 		$this->sut->schedule_single(
 			time() + HOUR_IN_SECONDS,
 			'wc_scheduler_test_oaq_strict',
@@ -701,5 +702,23 @@ class SchedulerTest extends WC_Unit_Test_Case {
 				'strict'   => true,
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should call the queue's own add() so a queue that overrides it keeps intercepting.
+	 */
+	public function test_add_calls_the_queue_add_method(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 21, $this->sut->add( 'wc_scheduler_test_add', array( 'k' => 1 ), 'wc-scheduler-test', array( 'unique' => true ) ) );
+		$this->assertSame( 'add', $queue->calls[0][0] );
+		$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][3] );
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->sut->add( 'wc_scheduler_test_add', array(), 'wc-scheduler-test' );
+		$this->assertSame( 'add', $plain->calls[0][0] );
 	}
 }
