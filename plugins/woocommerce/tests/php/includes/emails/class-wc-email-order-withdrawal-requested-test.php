@@ -28,10 +28,17 @@ class WC_Email_Order_Withdrawal_Requested_Test extends \WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function extract_reply_to_line( string $headers ): string {
-		if ( preg_match( '/Reply-to:[^\r\n]*\r\n/', $headers, $matches ) ) {
-			return $matches[0];
+		$start = strpos( $headers, 'Reply-to:' );
+		if ( false === $start ) {
+			return '';
 		}
-		return '';
+
+		$end = strpos( $headers, "\r\n", $start );
+		if ( false === $end ) {
+			return '';
+		}
+
+		return substr( $headers, $start, $end - $start + strlen( "\r\n" ) );
 	}
 
 	/**

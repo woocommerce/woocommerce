@@ -48,7 +48,8 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function split_headers( string $headers ): array {
-		return preg_split( '/\r\n|\r|\n/', $headers );
+		$normalized = str_replace( array( "\r\n", "\r" ), array( "\n", "\n" ), $headers );
+		return explode( "\n", $normalized );
 	}
 
 	/**
@@ -116,10 +117,17 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function extract_reply_to_line( string $headers ): string {
-		if ( preg_match( '/Reply-to:[^\r\n]*\r\n/', $headers, $matches ) ) {
-			return $matches[0];
+		$start = strpos( $headers, 'Reply-to:' );
+		if ( false === $start ) {
+			return '';
 		}
-		return '';
+
+		$end = strpos( $headers, "\r\n", $start );
+		if ( false === $end ) {
+			return '';
+		}
+
+		return substr( $headers, $start, $end - $start + strlen( "\r\n" ) );
 	}
 
 	/**
