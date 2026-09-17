@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -688,7 +689,7 @@ class WC_Email extends WC_Settings_API {
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
 			if ( $this->object instanceof WC_Order ) {
-				$reply_to_name  = $this->sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
+				$reply_to_name  = EmailHeaders::sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
 				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
 
 				if ( '' !== $reply_to_name && '' !== $reply_to_email ) {
@@ -1099,20 +1100,6 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$reply_to_name = apply_filters( 'woocommerce_email_reply_to_name', get_option( 'woocommerce_email_reply_to_name', '' ), $this, $reply_to_name );
 		return wp_specialchars_decode( sanitize_text_field( $reply_to_name ), ENT_QUOTES );
-	}
-
-	/**
-	 * Clean a customer-provided name for use in a Reply-to header.
-	 *
-	 * Line breaks are collapsed and commas removed, since wp_mail() splits
-	 * Reply-to values on commas.
-	 *
-	 * @since 11.3.0
-	 * @param string $name Name to clean.
-	 * @return string
-	 */
-	protected function sanitize_reply_to_name( $name ) {
-		return str_replace( ',', '', sanitize_text_field( $name ) );
 	}
 
 	/**
