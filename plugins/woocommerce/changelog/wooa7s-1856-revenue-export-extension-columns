@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include report fields that extensions add, such as Cost of Goods, in emailed Analytics revenue report exports.
