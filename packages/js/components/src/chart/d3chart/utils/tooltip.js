@@ -4,6 +4,11 @@
 import { select as d3Select } from 'd3-selection';
 import moment from 'moment';
 
+/**
+ * Internal dependencies
+ */
+import { getDateLabel } from './index';
+
 class ChartTooltip {
 	constructor() {
 		this.ref = null;
@@ -109,10 +114,9 @@ class ChartTooltip {
 	}
 
 	getTooltipRowLabel( d, row ) {
-		if ( d[ row.key ].labelDate ) {
-			return this.labelFormat(
-				moment( d[ row.key ].labelDate ).toDate()
-			);
+		const { labelDate, labelDateEnd } = d[ row.key ];
+		if ( labelDate ) {
+			return getDateLabel( this.labelFormat, labelDate, labelDateEnd );
 		}
 		return row.label || row.key;
 	}

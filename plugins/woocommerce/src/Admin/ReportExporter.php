@@ -107,19 +107,68 @@ class ReportExporter {
 		// Both the report body and its `.headers` companion, but never the directory's
 		// .htaccess and index.html guards.
 		$paths = glob( ReportCSVExporter::get_reports_directory() . '*.csv*' );
-		if ( ! $paths ) {
+
+		if ( $paths ) {
+			foreach ( $paths as $path ) {
+				if ( ! is_file( $path ) ) {
+					continue;
+				}
+
+				$modified = filemtime( $path );
+				if ( $modified && $modified < $expired_before ) {
+					wp_delete_file( $path );
+					self::delete_export_status( $path );
+				}
+			}
+		}
+
+		self::delete_shared_export_status();
+	}
+
+	/**
+	 * Delete the option every export shared before 11.3.0, once none of the exports in it can still be downloaded.
+	 *
+	 * @return void
+	 */
+	private static function delete_shared_export_status() {
+		$exports_status = get_option( self::EXPORT_STATUS_OPTION );
+
+		if ( false === $exports_status ) {
 			return;
 		}
 
-		foreach ( $paths as $path ) {
-			if ( ! is_file( $path ) ) {
-				continue;
-			}
+		if ( is_array( $exports_status ) ) {
+			foreach ( array_keys( $exports_status ) as $status_key ) {
+				$key_parts   = explode( ':', (string) $status_key, 2 );
+				$report_type = $key_parts[0];
+				$export_id   = isset( $key_parts[1] ) ? $key_parts[1] : '';
+				$filename    = self::get_export_filename( $report_type, $export_id );
 
-			$modified = filemtime( $path );
-			if ( $modified && $modified < $expired_before ) {
-				wp_delete_file( $path );
+				$exporter = new ReportCSVExporter();
+				$exporter->set_filename( $filename );
+
+				$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+				if ( file_exists( $path ) ) {
+					return;
+				}
 			}
+		}
+
+		delete_option( self::EXPORT_STATUS_OPTION );
+	}
+
+	/**
+	 * Delete the stored progress of an export whose file has been deleted.
+	 *
+	 * @param string $path Path of the deleted export body or its `.headers` companion.
+	 * @return void
+	 */
+	private static function delete_export_status( $path ) {
+		$filename = basename( $path );
+
+		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
+			$option_name = self::get_status_option_name( $matches[1], $matches[2] );
+			delete_option( $option_name );
 		}
 	}
 
@@ -186,6 +235,21 @@ class ReportExporter {
 	}
 
 	/**
+	 * Get the name of the option an export's progress is stored under.
+	 *
+	 * The key is hashed so the name fits option_name whatever length the export ID has.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return string Option name.
+	 */
+	protected static function get_status_option_name( $report_type, $export_id ) {
+		$status_key = self::get_status_key( $report_type, $export_id );
+
+		return self::EXPORT_STATUS_OPTION . '_' . md5( $status_key );
+	}
+
+	/**
 	 * Update the completion percentage of a report export.
 	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
@@ -194,12 +258,11 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
-		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
-		$status_key     = self::get_status_key( $report_type, $export_id );
+		$option_name = self::get_status_option_name( $report_type, $export_id );
 
-		$exports_status[ $status_key ] = $percentage;
-
-		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
+		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
+		// request, which left the email action reading an old percentage and never sending the download link.
+		update_option( $option_name, $percentage, false );
 	}
 
 	/**
@@ -210,14 +273,22 @@ class ReportExporter {
 	 * @return bool|int Completion percentage, or false if export not found.
 	 */
 	public static function get_export_percentage_complete( $report_type, $export_id ) {
-		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
-		$status_key     = self::get_status_key( $report_type, $export_id );
+		$option_name = self::get_status_option_name( $report_type, $export_id );
+		$percentage  = get_option( $option_name );
 
-		if ( isset( $exports_status[ $status_key ] ) ) {
-			return $exports_status[ $status_key ];
+		if ( false === $percentage ) {
+			// Exports queued before 11.3.0 report through the option every export shared.
+			$exports_status = get_option( self::EXPORT_STATUS_OPTION );
+			$status_key     = self::get_status_key( $report_type, $export_id );
+
+			if ( ! is_array( $exports_status ) || ! isset( $exports_status[ $status_key ] ) ) {
+				return false;
+			}
+
+			$percentage = $exports_status[ $status_key ];
 		}
 
-		return false;
+		return (int) $percentage;
 	}
 
 	/**

@@ -5,8 +5,7 @@ Covers the scenarios from the original plugin test plan that have a target in co
 - `signing-up.spec.ts` — PDP form rendering + signup flow across the settings
   matrix: signups disabled, logged-in single opt-in (with the "Manage
   notifications" CTA and the nonce rejection), guest single and double opt-in,
-  account creation on signup (consent checkbox, welcome email), and the
-  requires-account prompt through to a logged-in signup. Also the server-side
+  and the requires-account prompt through to a logged-in signup. Also the server-side
   rejections for an invalid email and a tampered product id.
 - `receiving-confirmations.spec.ts` — verify email + verified email + unsubscribe
   flow (double opt-in), the frontend verify/unsubscribe notices, the logged-in
@@ -20,6 +19,8 @@ Covers the scenarios from the original plugin test plan that have a target in co
   emails, the back-in-stock email linking back to a fixed-value variation
   pre-selected, and the parent-level signup opt-out removing the form from the
   whole variable product page.
+- `feature-disabled.spec.ts` — with the feature flag off: no signup form on an
+  out-of-stock PDP, no "Customer stock notifications" settings section.
 
 ## Variation notes
 
@@ -59,14 +60,9 @@ Covers the scenarios from the original plugin test plan that have a target in co
   customer and one IP. `signUpOnProductPage()` disables the limiter through the
   same cookie before every submit, so no spec has to opt in.
 - The email templates fork on `$is_guest`, which is "the signup has no
-  `WP_User`", not "the shopper was logged out": a guest signup with an email
-  that already belongs to an account, or one that created an account on signup,
-  also takes the logged-in branch. The specs cover it through the shared
-  `customer` account (`signUpAsCustomer()`).
-- Account-creation tests register a real customer for the guest's address. The
-  address comes from the `accountEmail` fixture, whose teardown looks it up and
-  deletes any account it finds, so a failed assertion (or a retry with a fresh
-  address) doesn't leave the account behind.
+  `WP_User`". A guest signup is never linked to an account by its email
+  address, so only a logged-in signup takes the other branch. The specs cover
+  it through the shared `customer` account (`signUpAsCustomer()`).
 
 ## Skipped scenarios
 
@@ -86,10 +82,13 @@ respective feature tickets:
 ## Prerequisites
 
 - BIS is gated by the `customer_stock_notifications` feature toggle (WooCommerce
-  → Settings → Advanced → Features → Experimental), enabled for the tests env
-  via `plugins/woocommerce/tests/e2e/bin/test-env-setup.sh`. If you bring
-  the env up manually, set `woocommerce_feature_customer_stock_notifications_enabled`
-  to `'yes'`.
+  → Settings → Advanced → Features → Experimental), off by default. Each spec
+  file sets it explicitly in a top-level `beforeAll` (`'yes'` for the enabled
+  suites, `'no'` for `feature-disabled.spec.ts`), and the enabled suites reset
+  it to `'no'` in `afterAll`, through `setOption()` (never `deleteOption()` —
+  that skips the `updated_option` hook the feature's teardown relies on). That
+  toggling is safe only because these specs run serially, single worker — see
+  below.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via the `.wp-env.e2e.json` plugins list).
 - `woocommerce-e2e-test-helper` zeroes

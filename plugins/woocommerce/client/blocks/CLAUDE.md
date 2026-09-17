@@ -23,7 +23,7 @@ pnpm --filter=@woocommerce/block-library test:update                  # Update s
 pnpm --filter=@woocommerce/block-library test:e2e                     # Playwright E2E tests
 
 # Lint (target specific files only)
-npx eslint --fix path/to/file.tsx                                      # Fix JS/TS file
+pnpm --filter=@woocommerce/block-library lint:js path/to/file.tsx --fix  # Fix JS/TS file (path relative to client/blocks; --fix after the path)
 pnpm --filter=@woocommerce/block-library lint:css                      # Stylelint for SCSS
 pnpm --filter=@woocommerce/block-library ts:check                     # TypeScript type checking
 
@@ -228,7 +228,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 
 ## Gotchas
 
-- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `.eslintrc.js`, not the monorepo root
+- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `eslint.config.mjs`, not the monorepo root
 - **`side-effects` in package.json** is extensive - many files cannot be tree-shaken (CSS, block registrations, filters)
 - **StoreApi lives outside Blocks** at `src/StoreApi/`, not `src/Blocks/StoreApi/`
 - **Two DI containers** exist: `src/Blocks/Registry/Container.php` (blocks-specific, legacy) and the main WooCommerce DI container in `src/`
