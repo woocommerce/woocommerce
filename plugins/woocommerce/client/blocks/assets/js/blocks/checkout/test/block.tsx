@@ -152,7 +152,9 @@ describe( 'Testing Checkout', () => {
 	beforeEach( () => {
 		// Store API batch responses call these; stub so success mocks do not
 		// trip @wordpress/jest-console's console.error assertion.
+		// @ts-expect-error setNonce exists but is not typed
 		apiFetch.setNonce = jest.fn();
+		// @ts-expect-error setCartHash exists but is not typed
 		apiFetch.setCartHash = jest.fn();
 
 		// Set up MSW handlers for cart API
