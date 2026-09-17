@@ -15,6 +15,25 @@ WooCommerce's coming soon mode allows you to temporarily make your site invisibl
 
 -   Familiarity with PHP and WordPress development.
 
+## Understanding site visibility states
+
+Site visibility is stored in two options:
+
+| Option | Values | Meaning |
+| --- | --- | --- |
+| `woocommerce_coming_soon` | `yes` / `no` | Whether coming soon mode is active. |
+| `woocommerce_store_pages_only` | `yes` / `no` | When coming soon mode is active, whether it applies only to store pages. Has no effect when `woocommerce_coming_soon` is `no`. |
+
+Together they describe three states:
+
+| State | `woocommerce_coming_soon` | `woocommerce_store_pages_only` | What visitors see |
+| --- | --- | --- | --- |
+| Live | `no` | (no effect) | The whole site. |
+| Coming soon, entire site | `yes` | `no` | A coming soon page everywhere. |
+| Coming soon, store pages only | `yes` | `yes` | A coming soon page on store pages; the rest of the site stays public. |
+
+Most external systems, including many hosting dashboards, model visibility as a single boolean. `woocommerce_coming_soon` on its own does not describe the full state, so read [Syncing when the states do not match](#syncing-when-the-states-do-not-match) before integrating.
+
 ## Step-by-step instructions
 
 ### Clear server cache on site visibility settings change
@@ -81,6 +100,10 @@ function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
 }
 ```
 
+This example reports coming soon mode as a single boolean, which does not distinguish between the entire site and store pages only. If your system needs that distinction, hook `update_option_woocommerce_store_pages_only` as well. If your system cannot represent it, see [Syncing when the states do not match](#syncing-when-the-states-do-not-match).
+
+This example also syncs on every change without checking what state your own system is already in. If your system has a visibility state that WooCommerce cannot express, such as a private mode, syncing like this will overwrite it. See [Syncing when the states do not match](#syncing-when-the-states-do-not-match).
+
 #### Trigger from other plugins
 
 You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directly updating `woocommerce_coming_soon` option:
@@ -92,7 +115,9 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
         wp_die( 'You do not have sufficient permissions to access this page.' );
     }
 
-    // Set coming soon mode.
+    // Set coming soon mode. 'woocommerce_store_pages_only' describes a dimension this
+    // control says nothing about, so it is left alone. See "Syncing when the states do
+    // not match" below.
     if ( isset( $is_enabled ) ) {
         update_option( 'woocommerce_coming_soon', $is_enabled ? 'yes' : 'no' );
     }
@@ -140,6 +165,10 @@ We could also programmatically bind the coming soon option from another plugin b
 
 In the following example, we're binding the coming soon option from another plugin by overriding the `woocommerce_coming_soon` option.
 
+If your system has no equivalent of "Apply to store pages only", override `woocommerce_store_pages_only` as well.
+
+Overriding `woocommerce_coming_soon` on its own leaves whatever the merchant last stored in `woocommerce_store_pages_only` in effect. For a merchant who chose "Apply to store pages only" at any point in the past, that stored value is still `yes`. Your coming soon state would then hide their store pages and leave the rest of their site public.
+
 ```php
 add_filter( 'pre_option_woocommerce_coming_soon', 'override_option_woocommerce_coming_soon' );
 
@@ -147,6 +176,16 @@ function override_option_woocommerce_coming_soon( $current_value ) {
     // Implement your logic to sync coming soon status.
     if ( function_exists( 'your_plugin_is_coming_soon' ) ) {
         return your_plugin_is_coming_soon() ? 'yes' : 'no';
+    }
+    return $current_value;
+}
+
+add_filter( 'pre_option_woocommerce_store_pages_only', 'override_option_woocommerce_store_pages_only' );
+
+function override_option_woocommerce_store_pages_only( $current_value ) {
+    // While your system is driving visibility, coming soon mode covers the entire site.
+    if ( function_exists( 'your_plugin_is_coming_soon' ) && your_plugin_is_coming_soon() ) {
+        return 'no';
     }
     return $current_value;
 }
@@ -165,6 +204,65 @@ function override_update_woocommerce_coming_soon( $new_value, $old_value ) {
     }
 }
 ```
+
+#### Syncing when the states do not match
+
+Visibility is not one switch on either side. Before syncing, work out which dimensions the two systems actually share.
+
+WooCommerce has two:
+
+| Dimension | Option | Values |
+| --- | --- | --- |
+| Whether coming soon mode is on | `woocommerce_coming_soon` | `yes` / `no` |
+| What coming soon mode covers | `woocommerce_store_pages_only` | entire site / store pages only |
+
+Your system almost certainly shares the first. It probably has no equivalent of the second, and it may have a dimension of its own, such as a private or members-only mode, that WooCommerce has no equivalent of.
+
+**Sync the dimensions you share, and never infer the ones you do not.** Both ways this goes wrong in practice are the same mistake: deriving a value for a dimension the other system never described. Both fail quietly. Nothing throws an error, neither interface says the two disagree, and the first sign of it is usually a customer noticing the site is more visible than the merchant intended.
+
+**Reading.** `woocommerce_coming_soon` tells you that coming soon mode is on. It does not tell you how much of the site that covers. For a merchant who has chosen "Apply to store pages only", everything outside the store is still public, so reporting that site as hidden would be wrong. Read both options:
+
+```php
+function your_plugin_get_woocommerce_visibility() {
+    if ( 'yes' !== get_option( 'woocommerce_coming_soon' ) ) {
+        return 'live';
+    }
+
+    return 'yes' === get_option( 'woocommerce_store_pages_only' )
+        ? 'coming-soon-store-pages-only'
+        : 'coming-soon-entire-site';
+}
+```
+
+**Writing.** Write only the dimension your control actually describes. A control that means "hide this site" describes the first dimension and says nothing about the second, so set `woocommerce_coming_soon` and leave `woocommerce_store_pages_only` alone:
+
+```php
+function your_plugin_set_woocommerce_visibility( $is_coming_soon ) {
+    update_option( 'woocommerce_coming_soon', $is_coming_soon ? 'yes' : 'no' );
+
+    // Do not write 'woocommerce_store_pages_only' here. It describes a dimension this
+    // control says nothing about, and the merchant's choice is still in it.
+}
+```
+
+Writing a guess into the second dimension goes wrong in both directions. Setting it to `no` clears a merchant's "Apply to store pages only" choice. Leaving a stale `yes` in place while you turn coming soon on means only the store hides and the rest of the site stays public, which is the opposite of what your control promised.
+
+So if your control does mean the entire site, say so explicitly rather than leaving it to whatever is stored:
+
+```php
+update_option( 'woocommerce_coming_soon', 'yes' );
+update_option( 'woocommerce_store_pages_only', 'no' );
+```
+
+That now describes both dimensions deliberately, and it clears the merchant's previous choice in WooCommerce of "Apply to store pages only". The override filters described above change what WooCommerce reads without changing what is stored, which avoids clearing anything.
+
+**A dimension WooCommerce does not have.** The same rule protects your own states, but it depends on which kind of state you are in, so check before syncing.
+
+If your state is a pre-launch one, the same kind WooCommerce has, a merchant changing WooCommerce's settings is telling you something you can act on. Someone who turns on "Apply to store pages only" is asking for their store to be hidden and the rest of their site to be visible, which they cannot have while you are hiding everything. Following them there is honouring the request, not overriding it.
+
+If your state is access control — private, members only, password protected — WooCommerce has no equivalent for it, and a change in WooCommerce says nothing about it. Take a site in your private mode: the merchant changes something in WooCommerce's settings, your sync handler fires, and the site moves from private to coming soon. It is now more visible than it was, and nobody asked for that. Leave that state where the merchant put it, and consider showing them which system is in control while it is, so WooCommerce's own settings screen does not look like the whole story.
+
+**Reporting visibility.** Displaying one dimension as though it were the whole state is what makes these mismatches hard to notice. When you show a merchant a single status, derive it from every dimension in force and show the most restrictive one, naming what is still public. "Coming soon" on a site whose blog is readable is the report that sends people looking for a bug.
 
 ### Custom exclusions filter
 
