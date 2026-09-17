@@ -1,5 +1,5 @@
 /**
- * Test for isValidFormattedNumber method from utils/number-validation.js
+ * Tests for isValidFormattedNumber and getDecimalCount from utils/number-validation.js
  */
 
 // Import the utility function
@@ -298,6 +298,8 @@ describe( 'Number Validation Utils - getDecimalCount', () => {
 	test( 'should ignore thousand separators and surrounding whitespace', () => {
 		expect( getDecimalCount( '1,234.567', dotConfig ) ).toBe( 3 );
 		expect( getDecimalCount( ' 4.596 ', dotConfig ) ).toBe( 3 );
+		expect( getDecimalCount( '1 234,567', { decimalSeparator: ',', thousandSeparator: ' ' } ) ).toBe( 3 );
+		expect( getDecimalCount( '1_234.567', { decimalSeparator: '.', thousandSeparator: '_' } ) ).toBe( 3 );
 	} );
 
 	test( 'should return 0 for values that are not plain numbers', () => {
