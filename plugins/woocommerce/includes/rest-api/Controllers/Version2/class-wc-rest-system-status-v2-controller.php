@@ -1028,8 +1028,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$queue_class = get_class( WC()->queue() );
 			$scheduler   = wc_get_container()->get( Scheduler::class );
 			if ( $scheduler->is_ready() ) {
-				$queue_unique_support   = $scheduler->supports( 'unique' );
-				$queue_priority_support = $scheduler->supports( 'priority' );
+				$queue_unique_support   = $scheduler->supports( \Automattic\WooCommerce\Enums\QueueCapability::UNIQUE );
+				$queue_priority_support = $scheduler->supports( \Automattic\WooCommerce\Enums\QueueCapability::PRIORITY );
 			}
 		}
 

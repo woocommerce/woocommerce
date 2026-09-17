@@ -350,7 +350,7 @@ final class Scheduler {
 	 * @return array
 	 */
 	private function normalize_options( array $options, string $method ): array {
-		$priority = OptionsAwareActionQueue::normalize_priority( $options['priority'] ?? self::DEFAULT_PRIORITY );
+		$priority = OptionsAwareActionQueue::normalize_priority( $options[ QueueCapability::PRIORITY ] ?? self::DEFAULT_PRIORITY );
 
 		$queue = $options['queue'] ?? SchedulerQueue::ACTIVE;
 		if ( ! in_array( $queue, SchedulerQueue::get_all(), true ) ) {
@@ -359,10 +359,10 @@ final class Scheduler {
 		}
 
 		return array(
-			'priority' => $priority,
-			'unique'   => ! empty( $options['unique'] ),
-			'strict'   => ! empty( $options['strict'] ),
-			'queue'    => $queue,
+			QueueCapability::PRIORITY => $priority,
+			QueueCapability::UNIQUE   => ! empty( $options[ QueueCapability::UNIQUE ] ),
+			'strict'                  => ! empty( $options['strict'] ),
+			'queue'                   => $queue,
 		);
 	}
 
@@ -383,10 +383,10 @@ final class Scheduler {
 		}
 
 		$requested = array();
-		if ( $options['unique'] ) {
+		if ( $options[ QueueCapability::UNIQUE ] ) {
 			$requested[] = QueueCapability::UNIQUE;
 		}
-		if ( self::DEFAULT_PRIORITY !== $options['priority'] ) {
+		if ( self::DEFAULT_PRIORITY !== $options[ QueueCapability::PRIORITY ] ) {
 			$requested[] = QueueCapability::PRIORITY;
 		}
 
@@ -453,8 +453,8 @@ final class Scheduler {
 	 */
 	private function extract_queue_options( array $options ): array {
 		return array(
-			'priority' => $options['priority'],
-			'unique'   => $options['unique'],
+			QueueCapability::PRIORITY => $options[ QueueCapability::PRIORITY ],
+			QueueCapability::UNIQUE   => $options[ QueueCapability::UNIQUE ],
 		);
 	}
 
@@ -472,7 +472,7 @@ final class Scheduler {
 	 * @return bool
 	 */
 	private function has_pending_match( \WC_Queue_Interface $queue, array $options, string $hook, array $args, string $group ): bool {
-		return $options['unique'] && $queue->get_next( $hook, $args, $group ) instanceof \WC_DateTime;
+		return $options[ QueueCapability::UNIQUE ] && $queue->get_next( $hook, $args, $group ) instanceof \WC_DateTime;
 	}
 
 	/**

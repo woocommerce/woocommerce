@@ -259,7 +259,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 * @return bool
 	 */
 	private function is_unique_requested( array $options ): bool {
-		return ! empty( $options['unique'] );
+		return ! empty( $options[ QueueCapability::UNIQUE ] );
 	}
 
 	/**
@@ -269,7 +269,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 * @return int
 	 */
 	private function get_priority( array $options ): int {
-		return self::normalize_priority( $options['priority'] ?? self::DEFAULT_PRIORITY );
+		return self::normalize_priority( $options[ QueueCapability::PRIORITY ] ?? self::DEFAULT_PRIORITY );
 	}
 
 	/**
