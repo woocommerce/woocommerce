@@ -35,11 +35,13 @@ async function getLocations() {
 
 			locations.push( {
 				key,
+				// The country code rather than its name: the filter input is narrow, and a
+				// long label wraps a character at a time in the results list.
 				label: sprintf(
-					/* translators: 1: state name, 2: country name. Example: California, United States (US) */
-					__( '%1$s, %2$s', 'woocommerce' ),
+					/* translators: 1: state name, 2: country code. Example: California (US) */
+					__( '%1$s (%2$s)', 'woocommerce' ),
 					stateName,
-					countryName
+					country.code
 				),
 				country: country.code,
 				keywords: [ key, stateName ],

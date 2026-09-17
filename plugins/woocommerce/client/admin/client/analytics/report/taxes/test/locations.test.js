@@ -43,11 +43,11 @@ describe( 'Taxes report locations', () => {
 		] );
 	} );
 
-	it( 'names a state alongside its country', async () => {
+	it( 'names a state alongside its country code', async () => {
 		const options = await locationsAutocompleter.options();
 		const california = options.find( ( option ) => option.key === 'US:CA' );
 
-		expect( california.label ).toBe( 'California, United States (US)' );
+		expect( california.label ).toBe( 'California (US)' );
 	} );
 
 	it( 'matches a state by its own name and by its country code', async () => {
@@ -62,7 +62,7 @@ describe( 'Taxes report locations', () => {
 	it( 'reads back the labels of a filter restored from the URL', async () => {
 		expect( await getLocationLabels( 'US:CA,DE' ) ).toEqual( [
 			{ key: 'DE', label: 'Germany' },
-			{ key: 'US:CA', label: 'California, United States (US)' },
+			{ key: 'US:CA', label: 'California (US)' },
 		] );
 	} );
 } );
