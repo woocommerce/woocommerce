@@ -76,27 +76,24 @@ const Edit = ( {
 			blockClientId: blockProps?.id,
 		} );
 
+	const showAllControls =
+		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+	const showSaleBadge = showAllControls ? false : attributes.showSaleBadge;
+
+	// Persist this so PHP doesn't render the legacy sale badge alongside the inner block.
 	useEffect( () => {
-		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-				showSaleBadge: false,
-			} );
-		} else {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-			} );
+		if (
+			( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) &&
+			attributes.showSaleBadge !== false
+		) {
+			setAttributes( { showSaleBadge: false } );
 		}
 	}, [
 		isDescendentOfQueryLoop,
 		isDescendentOfSingleProductBlock,
+		attributes.showSaleBadge,
 		setAttributes,
 	] );
-
-	const showAllControls =
-		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
 
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -171,6 +168,7 @@ const Edit = ( {
 			) }
 			<Block
 				{ ...{ ...attributes, ...context } }
+				showSaleBadge={ showSaleBadge }
 				isAdmin={ true }
 				product={ product }
 				isResolving={ isResolving }
