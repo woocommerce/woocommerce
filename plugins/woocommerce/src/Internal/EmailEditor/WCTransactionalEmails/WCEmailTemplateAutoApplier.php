@@ -236,7 +236,7 @@ class WCEmailTemplateAutoApplier {
 	 * @since 10.8.0
 	 */
 	public static function schedule(): void {
-		wc_get_container()->get( Scheduler::class )->add(
+		wc_get_container()->get( Scheduler::class )->enqueue_async(
 			self::AUTO_APPLY_AS_HOOK,
 			array(),
 			self::AUTO_APPLY_AS_GROUP,

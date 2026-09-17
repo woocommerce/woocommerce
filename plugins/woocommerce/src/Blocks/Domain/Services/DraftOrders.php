@@ -226,7 +226,7 @@ class DraftOrders {
 				}
 			}
 			if ( $batch_size === $count ) {
-				$this->get_scheduler()->add( self::DRAFT_CLEANUP_EVENT_HOOK, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
+				$this->get_scheduler()->enqueue_async( self::DRAFT_CLEANUP_EVENT_HOOK, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );

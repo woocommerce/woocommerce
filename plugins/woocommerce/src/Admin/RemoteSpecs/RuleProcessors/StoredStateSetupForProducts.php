@@ -129,6 +129,6 @@ class StoredStateSetupForProducts {
 		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 
 		// Run self::run_remote_notifications asynchronously.
-		wc_get_container()->get( Scheduler::class )->add( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
+		wc_get_container()->get( Scheduler::class )->enqueue_async( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 }

@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\Schedulers;
 
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+
 use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
@@ -371,6 +373,7 @@ trait SchedulerTraits {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		self::scheduler()->cancel_all( '', array(), (string) static::$group );
+		// The store-level cancel this replaces bypassed custom queues, so the stock queue is selected explicitly.
+		self::scheduler()->cancel_all( '', array(), (string) static::$group, array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 }

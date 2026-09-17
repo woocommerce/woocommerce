@@ -183,7 +183,7 @@ class AsyncGenerator {
 		// args and group as a blocker, so a unique enqueue of the next chunk would be rejected while the
 		// current chunk's action is still running. Per-job de-duplication is handled by the cancel in
 		// get_status() instead.
-		$this->get_scheduler()->add(
+		$this->get_scheduler()->enqueue_async(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
 			'woo-product-feed',
