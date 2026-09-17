@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix removing attributes and attribute terms on the classic product edit screen when the list is taller than the viewport.
