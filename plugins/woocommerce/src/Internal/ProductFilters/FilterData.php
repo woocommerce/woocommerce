@@ -42,12 +42,12 @@ class FilterData {
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
-	 * @param Params|null           $params Instance of Params. Resolved from the container when not supplied.
+	 * @param Params                $params Instance of Params.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data, ?Params $params = null ) {
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data, Params $params ) {
 		$this->query_clauses           = $query_clauses;
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
-		$this->params                  = $params ?? wc_get_container()->get( Params::class );
+		$this->params                  = $params;
 	}
 
 	/**

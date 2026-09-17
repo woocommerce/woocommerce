@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
@@ -13,6 +14,16 @@ use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
  * @covers \Automattic\WooCommerce\Internal\ProductFilters\FilterData
  */
 class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Taxonomy param map the stubbed Params returns, so normalisation does not depend on
+	 * which taxonomies happen to be registered when the real Params cache is warmed.
+	 */
+	private const TAXONOMY_PARAMS = array(
+		'product_cat'   => 'categories',
+		'product_tag'   => 'tags',
+		'product_brand' => 'brands',
+	);
 
 	/**
 	 * The private method under test, exposed via reflection.
@@ -37,7 +48,14 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 		$query_clauses           = $this->createMock( QueryClausesGenerator::class );
 		$taxonomy_hierarchy_data = $this->createMock( TaxonomyHierarchyData::class );
 
-		$this->sut = new FilterData( $query_clauses, $taxonomy_hierarchy_data );
+		$params = $this->createMock( Params::class );
+		$params->method( 'get_param' )->willReturnCallback(
+			static function ( string $type ): array {
+				return 'taxonomy' === $type ? self::TAXONOMY_PARAMS : array();
+			}
+		);
+
+		$this->sut = new FilterData( $query_clauses, $taxonomy_hierarchy_data, $params );
 
 		$reflection      = new \ReflectionClass( FilterData::class );
 		$this->normalize = $reflection->getMethod( 'normalize_query_vars' );
@@ -95,22 +113,25 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Built-in taxonomy short-name params (categories, tags, brands) are normalised as sets.
+	 * @testdox Every taxonomy param reported by Params is normalised as a set.
 	 */
 	public function test_taxonomy_set_params_are_normalised(): void {
-		$a = $this->normalize( array( 'categories' => 'shirts,hats' ) );
-		$b = $this->normalize( array( 'categories' => 'hats,shirts' ) );
+		foreach ( self::TAXONOMY_PARAMS as $taxonomy => $param ) {
+			$a = $this->normalize( array( $param => ' Shirts , hats ' ) );
+			$b = $this->normalize( array( $param => 'hats,Shirts' ) );
 
-		$this->assertSame( $a['categories'], $b['categories'] );
-		$this->assertSame( 'hats,shirts', $a['categories'] );
+			$this->assertSame( 'hats,shirts', $a[ $param ], "Values of the {$taxonomy} param ({$param}) should be trimmed, lowercased and sorted." );
+			$this->assertSame( $a[ $param ], $b[ $param ], "Equivalent {$param} values in different orders should normalise identically." );
+		}
+	}
 
-		$a = $this->normalize( array( 'tags' => 'sale,new' ) );
-		$b = $this->normalize( array( 'tags' => 'new,sale' ) );
-		$this->assertSame( $a['tags'], $b['tags'] );
+	/**
+	 * @testdox A taxonomy param absent from the Params map is left unchanged.
+	 */
+	public function test_unknown_taxonomy_set_param_is_not_normalised(): void {
+		$result = $this->normalize( array( 'wc_brands' => 'nike,adidas' ) );
 
-		$a = $this->normalize( array( 'brands' => 'nike,adidas' ) );
-		$b = $this->normalize( array( 'brands' => 'adidas,nike' ) );
-		$this->assertSame( $a['brands'], $b['brands'] );
+		$this->assertSame( 'nike,adidas', $result['wc_brands'], 'Only params reported by Params should be treated as unordered sets.' );
 	}
 
 	/**
