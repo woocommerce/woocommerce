@@ -38,6 +38,21 @@ class PostsToOrdersMigrationController {
 	public const LOGS_SOURCE_NAME = 'posts-to-orders-migration';
 
 	/**
+	 * Option name used as a self-expiring lock around a migration batch. Its value is the lock's release time.
+	 *
+	 * Without it, two processes migrating the same orders (for example the CLI sync and the background sync)
+	 * both see the orders as not migrated yet and both insert their meta, which has no unique key to stop it.
+	 *
+	 * @since 11.3.0
+	 */
+	private const MIGRATION_LOCK_OPTION = 'wc_posts_to_orders_migration_lock';
+
+	/**
+	 * Seconds a held lock stays valid before another process may take it over. Also how long a process waits for it.
+	 */
+	private const MIGRATION_LOCK_TTL = 15.0;
+
+	/**
 	 * PostsToOrdersMigrationController constructor.
 	 */
 	public function __construct() {
@@ -72,6 +87,22 @@ class PostsToOrdersMigrationController {
 	 * @param array $order_post_ids List of post IDs of the orders to migrate.
 	 */
 	public function migrate_orders( array $order_post_ids ): void {
+		$lock = $this->acquire_migration_lock();
+		try {
+			$this->migrate_orders_core( $order_post_ids );
+		} finally {
+			if ( null !== $lock ) {
+				$this->release_migration_lock( $lock );
+			}
+		}
+	}
+
+	/**
+	 * Migrates a set of orders from the posts table to the custom orders tables.
+	 *
+	 * @param array $order_post_ids List of post IDs of the orders to migrate.
+	 */
+	private function migrate_orders_core( array $order_post_ids ): void {
 		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 
 		$data = array();
@@ -106,6 +137,80 @@ class PostsToOrdersMigrationController {
 			$this->commit_transaction();
 		}
 		$this->maybe_clear_order_datastore_cache_for_ids( $order_post_ids );
+	}
+
+	/**
+	 * Take the migration lock, waiting for another process to release it or for it to expire.
+	 *
+	 * The lock is a row in the options table, as in BatchProcessingController: the unique option name makes the
+	 * INSERT fail while another process holds it, and a lock whose release time has passed can be taken over.
+	 *
+	 * @return string|null The lock's release time, needed to release it, or null if it could not be taken in time.
+	 */
+	private function acquire_migration_lock(): ?string {
+		global $wpdb;
+
+		$deadline = microtime( true ) + self::MIGRATION_LOCK_TTL;
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			do {
+				$time   = microtime( true );
+				$now    = number_format( $time, 6, '.', '' );
+				$expiry = number_format( $time + self::MIGRATION_LOCK_TTL, 6, '.', '' );
+
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$acquired = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => self::MIGRATION_LOCK_OPTION,
+						'option_value' => $expiry,
+						'autoload'     => 'no',
+					),
+					array( '%s', '%s', '%s' )
+				);
+
+				if ( ! $acquired ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$acquired = $wpdb->query(
+						$wpdb->prepare(
+							"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s",
+							$expiry,
+							self::MIGRATION_LOCK_OPTION,
+							$now
+						)
+					);
+				}
+
+				if ( $acquired ) {
+					return $expiry;
+				}
+
+				usleep( 50000 );
+			} while ( microtime( true ) < $deadline );
+
+			return null;
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
+	}
+
+	/**
+	 * Release the migration lock, unless it expired and another process took it over.
+	 *
+	 * @param string $expiry The value returned by acquire_migration_lock().
+	 */
+	private function release_migration_lock( string $expiry ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete(
+			$wpdb->options,
+			array(
+				'option_name'  => self::MIGRATION_LOCK_OPTION,
+				'option_value' => $expiry,
+			),
+			array( '%s', '%s' )
+		);
 	}
 
 	/**

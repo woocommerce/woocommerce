@@ -933,4 +933,66 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$cart_discount_tax = $wpdb->get_var( $wpdb->prepare( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
 		$this->assertEquals( 12.37, $cart_discount_tax );
 	}
+
+	/**
+	 * @testdox The migration lock is released once the batch is done.
+	 */
+	public function test_migration_lock_is_released_after_migration(): void {
+		global $wpdb;
+		$order = OrderHelper::create_order();
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$lock_rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" );
+		$this->assertSame( 0, $lock_rows, 'No lock row should be left behind after a migration' );
+		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated' );
+	}
+
+	/**
+	 * @testdox A lock left behind by a process that died is taken over, and removed afterwards.
+	 */
+	public function test_expired_migration_lock_is_taken_over(): void {
+		global $wpdb;
+		$order = OrderHelper::create_order();
+		$this->insert_migration_lock( microtime( true ) - 60 );
+
+		$started = microtime( true );
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertLessThan( 1, microtime( true ) - $started, 'An expired lock should not make the migration wait' );
+		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated' );
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" ), 'The taken-over lock should be released' );
+	}
+
+	/**
+	 * @testdox A migration waits while another process holds the lock, and runs once that lock expires.
+	 */
+	public function test_migration_waits_for_a_held_lock(): void {
+		global $wpdb;
+		$order = OrderHelper::create_order();
+		$this->insert_migration_lock( microtime( true ) + 1 );
+
+		$started = microtime( true );
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertGreaterThanOrEqual( 0.9, microtime( true ) - $started, 'The migration should wait for the held lock' );
+		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated once the lock is free' );
+	}
+
+	/**
+	 * Insert a migration lock row as another process would.
+	 *
+	 * @param float $release_time Unix time at which the lock stops being valid.
+	 */
+	private function insert_migration_lock( float $release_time ): void {
+		global $wpdb;
+		$wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => 'wc_posts_to_orders_migration_lock',
+				'option_value' => number_format( $release_time, 6, '.', '' ),
+				'autoload'     => 'no',
+			)
+		);
+	}
 }
