@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
  * gateways (COD, BACS and Cheque) for use in the block checkout.
  *
  * @internal
- * @since 11.2.0
+ * @since 11.3.0
  */
 trait ShippingRestrictionsSettingsTrait {
 

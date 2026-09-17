@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Gateways;
 
+use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
 use WC_Cache_Helper;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -261,6 +262,32 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 		$new_instance_id = $this->zone->add_shipping_method( 'local_pickup' );
 
 		$this->assertArrayHasKey( 'local_pickup:' . $new_instance_id, ( new WC_Gateway_Cheque() )->get_shipping_method_options()['Local pickup'], 'Changing a zone should refresh the options' );
+	}
+
+	/**
+	 * @testdox Should keep the classic and block local pickup methods under the same option group since they share a title.
+	 */
+	public function test_shipping_method_options_group_block_and_classic_local_pickup_together(): void {
+		$local_pickup_instance_id = $this->zone->add_shipping_method( 'local_pickup' );
+
+		// The block checkout registers its own "Local pickup" method after the classic one; keep the registration to this test.
+		$register_pickup_location = function ( $methods ) {
+			$methods['pickup_location'] = new PickupLocation();
+			return $methods;
+		};
+		add_filter( 'woocommerce_shipping_methods', $register_pickup_location );
+
+		try {
+			WC()->shipping()->load_shipping_methods();
+			$options = ( new WC_Gateway_COD() )->get_shipping_method_options();
+		} finally {
+			remove_filter( 'woocommerce_shipping_methods', $register_pickup_location );
+			WC()->shipping()->load_shipping_methods();
+		}
+
+		$this->assertArrayHasKey( 'local_pickup', $options['Local pickup'], 'The classic "any" option should survive registering the block method' );
+		$this->assertArrayHasKey( 'local_pickup:' . $local_pickup_instance_id, $options['Local pickup'], 'The classic instance should survive registering the block method' );
+		$this->assertArrayHasKey( 'pickup_location', $options['Local pickup'], 'The block "any" option should be listed too' );
 	}
 
 	/**

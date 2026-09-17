@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * `init_shipping_method_restrictions()` after `init_settings()` and merge
  * `get_shipping_method_restrictions_form_fields()` into its form fields.
  *
- * @since 11.2.0
+ * @since 11.3.0
  */
 trait ShippingMethodRestrictionsTrait {
 
@@ -42,7 +42,7 @@ trait ShippingMethodRestrictionsTrait {
 	 *
 	 * Gateways that have never saved these settings default to no restriction.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	protected function init_shipping_method_restrictions(): void {
 		$enable_for_methods = $this->get_option( 'enable_for_methods', array() );
@@ -54,7 +54,7 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Get the form fields for the shipping method restriction settings.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @return array Form fields keyed by setting id.
 	 */
@@ -90,7 +90,7 @@ trait ShippingMethodRestrictionsTrait {
 	 * Check If The Gateway Is Available For Use.
 	 *
 	 * @since 10.7.0 Added early return when gateway is disabled.
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 * @since 11.3.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @return bool
 	 */
@@ -147,7 +147,7 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Checks to see whether or not the admin settings are being accessed by the current request.
 	 *
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 * @since 11.3.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @return bool
 	 */
@@ -181,7 +181,7 @@ trait ShippingMethodRestrictionsTrait {
 	/**
 	 * Loads all of the shipping method options for the enable_for_methods field.
 	 *
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 * @since 11.3.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @return array
 	 */
@@ -202,7 +202,7 @@ trait ShippingMethodRestrictionsTrait {
 	 * the result is cached for the rest of the request and shared by every gateway
 	 * using this trait; saving a shipping zone or method invalidates it.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @return array Options keyed by shipping method title, each an array of rate id => option label.
 	 */
@@ -229,7 +229,10 @@ trait ShippingMethodRestrictionsTrait {
 		$options = array();
 		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
 
-			$options[ $method->get_method_title() ] = array();
+			// Block and classic local pickup share a title, so keep both under one group instead of the later one wiping the earlier.
+			if ( ! isset( $options[ $method->get_method_title() ] ) ) {
+				$options[ $method->get_method_title() ] = array();
+			}
 
 			// Translators: %1$s shipping method name.
 			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
@@ -264,7 +267,7 @@ trait ShippingMethodRestrictionsTrait {
 	 * Indicates whether a rate exists in an array of canonically-formatted rate IDs that activates this gateway.
 	 *
 	 * @since 3.4.0
-	 * @since 11.2.0 Moved here from WC_Gateway_COD.
+	 * @since 11.3.0 Moved here from WC_Gateway_COD.
 	 *
 	 * @param array $rate_ids Rate ids to check.
 	 * @return array
