@@ -24,6 +24,13 @@ use Automattic\WooCommerce\Enums\QueueCapability;
 class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQueueInterface {
 
 	/**
+	 * Parameter names of the loaded `as_schedule_single_action()`, reflected once. Null until read.
+	 *
+	 * @var string[]|null
+	 */
+	private $loaded_api_parameters = null;
+
+	/**
 	 * Priority used when none is requested. Matches Action Scheduler's own default.
 	 *
 	 * @since 11.3.0
@@ -238,10 +245,13 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	}
 
 	/**
-	 * The version of the Action Scheduler copy that won the load race, or null when none is loaded.
+	 * The highest registered Action Scheduler version, or null when none is registered.
 	 *
-	 * Copies register at `plugins_loaded` priority 0, so the answer is null before that hook has
-	 * run. Protected so tests can force the paths that older copies take.
+	 * This is the registry's answer, for reporting. It can differ from the API actually loaded:
+	 * a copy whose functions were defined before `plugins_loaded` keeps answering calls even when a
+	 * newer copy registers afterwards. Capabilities are therefore read from the loaded API, see
+	 * loaded_scheduling_api_accepts(). Null before `plugins_loaded`, when the registry is incomplete.
+	 * Protected so tests can force the paths that older copies take.
 	 *
 	 * @since 11.3.0
 	 *
@@ -272,24 +282,49 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	public function supports( $capability ): bool {
 		switch ( $capability ) {
 			case QueueCapability::UNIQUE:
-				return $this->action_scheduler_is_at_least( '3.5.0' );
+				return $this->loaded_scheduling_api_accepts( 'unique' );
 			case QueueCapability::PRIORITY:
-				return $this->action_scheduler_is_at_least( '3.6.0' );
+				return $this->loaded_scheduling_api_accepts( 'priority' );
 			default:
 				return false;
 		}
 	}
 
 	/**
-	 * Whether the loaded Action Scheduler is at least the given version.
+	 * Whether the loaded Action Scheduler fires `action_scheduler_ensure_recurring_actions`.
 	 *
-	 * @param string $version The minimum version.
-	 * @return bool False when no version can be determined.
+	 * The hook and the class that fires it arrived together in 3.9.3. Checking the class asks the
+	 * loaded copy rather than the registry.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
 	 */
-	private function action_scheduler_is_at_least( string $version ): bool {
-		$loaded = $this->get_action_scheduler_version();
+	public function reasserts_recurring_actions(): bool {
+		return class_exists( \ActionScheduler_RecurringActionScheduler::class );
+	}
 
-		return null !== $loaded && version_compare( $loaded, $version, '>=' );
+	/**
+	 * Whether the scheduling function actually loaded declares a parameter.
+	 *
+	 * Reflects `as_schedule_single_action()` once: `unique` arrived in 3.5.0 and `priority` in 3.6.0,
+	 * and the loaded copy is the one that answers calls, whatever the registry reports. Protected
+	 * so tests can force the paths that older copies take.
+	 *
+	 * @param string $parameter The parameter name.
+	 * @return bool False when the function does not exist.
+	 */
+	protected function loaded_scheduling_api_accepts( string $parameter ): bool {
+		if ( null === $this->loaded_api_parameters ) {
+			$this->loaded_api_parameters = array();
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				foreach ( ( new \ReflectionFunction( 'as_schedule_single_action' ) )->getParameters() as $reflected ) {
+					$this->loaded_api_parameters[] = $reflected->getName();
+				}
+			}
+		}
+
+		return in_array( $parameter, $this->loaded_api_parameters, true );
 	}
 
 	/**

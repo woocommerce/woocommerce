@@ -44,10 +44,32 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 	 */
 	private function queue_on_old_action_scheduler(): OptionsAwareActionQueue {
 		return new class() extends OptionsAwareActionQueue {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 			protected function get_action_scheduler_version(): ?string {
 				return '3.4.0';
 			}
+			protected function loaded_scheduling_api_accepts( string $parameter ): bool {
+				return false;
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Build a stock queue whose registry reports a current version while the loaded API is old.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function queue_with_stale_registry(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			protected function get_action_scheduler_version(): ?string {
+				return '4.1.0';
+			}
+			protected function loaded_scheduling_api_accepts( string $parameter ): bool {
+				return 'unique' === $parameter;
+			}
+			// phpcs:enable
 		};
 	}
 
@@ -268,13 +290,41 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 		$timestamp = time() + HOUR_IN_SECONDS;
 		$options   = array( 'unique' => true );
 
-		$first     = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 1 ), 'wc-oaq-test', $options );
-		$duplicate = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 1 ), 'wc-oaq-test', $options );
-		$other     = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 2 ), 'wc-oaq-test', $options );
-
+		$first = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 1 ), 'wc-oaq-test', $options );
 		$this->assertGreaterThan( 0, $first );
+
+		// From here on, short-circuit Action Scheduler so reaching the native call is observable and
+		// its own uniqueness check cannot mask the emulation.
+		$native_calls = 0;
+		add_filter(
+			'pre_as_schedule_single_action',
+			function () use ( &$native_calls ) {
+				++$native_calls;
+				return 4242;
+			}
+		);
+
+		$duplicate = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 1 ), 'wc-oaq-test', $options );
 		$this->assertSame( 0, $duplicate, 'The emulation should skip a unique action that matches a pending one' );
-		$this->assertGreaterThan( 0, $other, 'The emulation should let a unique action with different args through' );
+		$this->assertSame( 0, $native_calls, 'A duplicate must be rejected before the native call' );
+
+		$other = $sut->schedule_single( $timestamp, 'wc_oaq_test_emulated', array( 'id' => 2 ), 'wc-oaq-test', $options );
+		$this->assertSame( 4242, $other, 'A unique action with different args reaches the native call' );
+		$this->assertSame( 1, $native_calls );
+	}
+
+	/**
+	 * @testdox Should read capabilities from the loaded API even when the registry reports a newer version.
+	 */
+	public function test_capabilities_follow_the_loaded_api_not_the_registry(): void {
+		$stale = $this->queue_with_stale_registry();
+
+		$this->assertTrue( $stale->supports( 'unique' ) );
+		$this->assertFalse( $stale->supports( 'priority' ), 'The registry says 4.1.0 but the loaded API lacks priority' );
+
+		$this->assertTrue( $this->sut->supports( 'unique' ), 'The bundled copy declares the unique parameter' );
+		$this->assertTrue( $this->sut->supports( 'priority' ), 'The bundled copy declares the priority parameter' );
+		$this->assertTrue( $this->sut->reasserts_recurring_actions(), 'The bundled copy fires the ensure-recurring hook' );
 	}
 
 	/**

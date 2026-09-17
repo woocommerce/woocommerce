@@ -412,8 +412,8 @@ final class Scheduler {
 	 * Count the actions matching the given criteria.
 	 *
 	 * An options-aware queue counts in its backend without hydrating actions. A plain queue has no
-	 * count operation, so the count falls back to the size of a `search()` for IDs, which still
-	 * avoids loading each action.
+	 * count operation, so the count falls back to the size of an unbounded `search()` for IDs, which
+	 * still avoids loading each action. Pagination keys in the criteria do not affect the total.
 	 *
 	 * @since 11.3.0
 	 *
@@ -433,7 +433,17 @@ final class Scheduler {
 			return (int) $queue->count( $args );
 		}
 
-		$ids = $queue->search( $args, 'ids' );
+		// A total ignores pagination: the queue's search defaults to one page, so ask for every ID.
+		$ids = $queue->search(
+			array_merge(
+				$args,
+				array(
+					'per_page' => -1,
+					'offset'   => 0,
+				)
+			),
+			'ids'
+		);
 
 		return is_array( $ids ) ? count( $ids ) : 0;
 	}
@@ -484,12 +494,19 @@ final class Scheduler {
 	 * @return bool
 	 */
 	public function supports( string $capability, array $options = array() ): bool {
+		// Selecting the queue before plugins_loaded would pin it before woocommerce_queue_class callbacks attach.
+		if ( ! did_action( 'plugins_loaded' ) ) {
+			return false;
+		}
+
 		return $this->is_supported_by( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ), $capability );
 	}
 
 	/**
-	 * The version of the Action Scheduler copy that won the load race, or null when none is loaded.
+	 * The highest registered Action Scheduler version, or null when none is registered.
 	 *
+	 * For reporting. It can differ from the API actually loaded when a copy defined its functions
+	 * before `plugins_loaded`; capabilities come from `supports()`, which reads the loaded API.
 	 * Copies register at `plugins_loaded` priority 0, so the answer is null before that hook has run.
 	 *
 	 * @since 11.3.0
@@ -734,11 +751,11 @@ final class Scheduler {
 	private function describe_unsupported( \WC_Queue_Interface $queue, string $capability ): string {
 		if ( $queue instanceof OptionsAwareActionQueue ) {
 			return sprintf(
-				/* translators: 1: loaded Action Scheduler version, 2: scheduling option name, 3: the Action Scheduler version that added it */
-				__( 'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s', 'woocommerce' ),
-				$this->get_action_scheduler_version() ?? __( 'unknown version', 'woocommerce' ),
+				/* translators: 1: scheduling option name, 2: the Action Scheduler version that added it, 3: the registered Action Scheduler version */
+				__( 'the loaded Action Scheduler API does not accept %1$s, which arrived in %2$s (registered version: %3$s)', 'woocommerce' ),
 				$capability,
-				QueueCapability::UNIQUE === $capability ? '3.5.0' : '3.6.0'
+				QueueCapability::UNIQUE === $capability ? '3.5.0' : '3.6.0',
+				$this->get_action_scheduler_version() ?? __( 'unknown', 'woocommerce' )
 			);
 		}
 
@@ -820,18 +837,30 @@ final class Scheduler {
 	}
 
 	/**
-	 * Record a recurring registration, or schedule it now if Action Scheduler already asked for
-	 * recurring actions in this request.
+	 * Record a recurring registration. Scheduled now as well when Action Scheduler already asked for
+	 * recurring actions in this request, and through when_ready() when the loaded copy never asks.
 	 *
 	 * @param array $registration The registration as built by ensure_recurring() or ensure_cron().
 	 */
 	private function register_recurring( array $registration ): void {
-		if ( did_action( 'action_scheduler_ensure_recurring_actions' ) ) {
-			$this->schedule_registration( $registration );
+		$this->recurring_registrations[] = $registration;
+
+		// The ensure hook arrived in Action Scheduler 3.9.3. An older loaded copy never fires it,
+		// so the registration is scheduled once the queue is ready instead; unique keeps it idempotent.
+		if ( ! $this->get_default_queue()->reasserts_recurring_actions() ) {
+			$this->when_ready(
+				function () use ( $registration ) {
+					$this->schedule_registration( $registration );
+				},
+				$registration['options']
+			);
 			return;
 		}
 
-		$this->recurring_registrations[] = $registration;
+		// Registered after the hook fired in this request: schedule now, and stay registered for a later firing.
+		if ( did_action( 'action_scheduler_ensure_recurring_actions' ) ) {
+			$this->schedule_registration( $registration );
+		}
 
 		if ( null === $this->recurring_registry_handler ) {
 			$this->recurring_registry_handler = function () {

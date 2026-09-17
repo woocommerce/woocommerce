@@ -155,9 +155,27 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	private function stock_queue_on_old_action_scheduler(): OptionsAwareActionQueue {
 		return new class() extends OptionsAwareActionQueue {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 			protected function get_action_scheduler_version(): ?string {
 				return '3.4.0';
+			}
+			protected function loaded_scheduling_api_accepts( string $parameter ): bool {
+				return false;
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Build a stock queue whose loaded Action Scheduler never fires the ensure-recurring hook.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function stock_queue_without_ensure_hook(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function reasserts_recurring_actions(): bool {
+				return false;
 			}
 		};
 	}
@@ -591,7 +609,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_on_old_action_scheduler() );
 
 		$this->expectException( \RuntimeException::class );
-		$this->expectExceptionMessage( 'predates unique support, which needs 3.5.0' );
+		$this->expectExceptionMessage( 'does not accept unique, which arrived in 3.5.0' );
 
 		$options = array(
 			'unique' => true,
@@ -797,7 +815,21 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
 
 		$this->assertSame( 3, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
-		$this->assertSame( array( 'search', array( array( 'hook' => 'wc_scheduler_test_count' ), 'ids' ) ), $plain->calls[0], 'A plain queue is searched for IDs only' );
+		$this->assertSame(
+			array(
+				'search',
+				array(
+					array(
+						'hook'     => 'wc_scheduler_test_count',
+						'per_page' => -1,
+						'offset'   => 0,
+					),
+					'ids',
+				),
+			),
+			$plain->calls[0],
+			'A plain queue is searched for every ID, ignoring the default page size'
+		);
 	}
 
 	/**
@@ -997,5 +1029,94 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 11, $this->sut->enqueue_async( 'wc_scheduler_test_async', array(), 'wc-scheduler-test' ) );
 		$this->assertSame( 'add', $plain->calls[0][0], 'A plain queue has no async primitive and receives add()' );
+	}
+
+	/**
+	 * @testdox Should not select the queue when supports() is asked before plugins_loaded.
+	 */
+	public function test_supports_does_not_select_the_queue_before_plugins_loaded(): void {
+		$instance = new \ReflectionProperty( \WC_Queue::class, 'instance' );
+		$instance->setAccessible( true );
+		$original = $instance->getValue();
+		$instance->setValue( null, null );
+
+		try {
+			$this->with_unfired_hooks(
+				array( 'plugins_loaded' ),
+				function () use ( $instance ) {
+					$this->assertFalse( $this->sut->supports( 'priority' ), 'Nothing is supported before plugins_loaded' );
+					$this->assertNull( $instance->getValue(), 'The queue singleton must not be created before woocommerce_queue_class callbacks can attach' );
+				}
+			);
+		} finally {
+			$instance->setValue( null, $original );
+		}
+	}
+
+	/**
+	 * @testdox Should count every match through a plain queue, ignoring the search page size.
+	 */
+	public function test_count_through_a_plain_queue_is_unbounded(): void {
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => new \WC_Action_Queue() ) );
+		$timestamp = time() + HOUR_IN_SECONDS;
+		for ( $i = 1; $i <= 7; $i++ ) {
+			$this->sut->schedule_single( $timestamp, 'wc_scheduler_test_plain_count', array( 'n' => $i ), 'wc-scheduler-count' );
+		}
+		$criteria = array(
+			'hook'   => 'wc_scheduler_test_plain_count',
+			'group'  => 'wc-scheduler-count',
+			'status' => \ActionScheduler_Store::STATUS_PENDING,
+		);
+
+		$this->assertSame( 7, $this->sut->count( $criteria ), 'A plain queue search defaults to five results; the count must not' );
+		$this->assertSame( 7, $this->sut->count( array_merge( $criteria, array( 'per_page' => 2 ) ) ), 'Pagination keys do not change the total' );
+		$this->assertSame( 7, $this->sut->count( $criteria, array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The stock path agrees' );
+	}
+
+	/**
+	 * @testdox Should schedule recurring registrations once ready when the loaded Action Scheduler never fires the ensure hook.
+	 */
+	public function test_ensure_recurring_schedules_when_the_ensure_hook_is_unavailable(): void {
+		$queue     = $this->options_aware_queue();
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_without_ensure_hook() );
+		$this->use_queue( $queue );
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $queue, $scheduler, $timestamp ) {
+				$scheduler->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_no_hook', array(), 'wc-scheduler-test' );
+
+				$this->assertCount( 1, $queue->calls, 'Without the ensure hook the registration is scheduled as soon as the queue is ready' );
+				$this->assertSame( 'schedule_recurring', $queue->calls[0][0] );
+				$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][5] );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should keep a late registration for a later ensure event in the same request.
+	 */
+	public function test_ensure_recurring_retains_late_registrations(): void {
+		$queue     = $this->options_aware_queue();
+		$scheduler = $this->fresh_scheduler();
+		$this->use_queue( $queue );
+		$saved = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
+		$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook having fired; restored below.
+
+		try {
+			$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_late_retained', array(), 'wc-scheduler-test' );
+			$this->assertCount( 1, $queue->calls, 'Registered after the hook fired: scheduled at once' );
+
+			do_action( 'action_scheduler_ensure_recurring_actions' );
+			$this->assertCount( 2, $queue->calls, 'A later firing re-asserts the late registration too' );
+			$this->assertSame( 'schedule_recurring', $queue->calls[1][0] );
+		} finally {
+			if ( null === $saved ) {
+				unset( $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] );
+			} else {
+				$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter.
+			}
+		}
 	}
 }
