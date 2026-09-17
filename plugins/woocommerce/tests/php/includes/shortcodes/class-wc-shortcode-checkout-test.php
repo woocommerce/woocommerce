@@ -20,7 +20,34 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	private $original_gateway_enabled = array();
 
 	/**
-	 * Restore the request, query, session and gateway state touched by this test.
+	 * Billing props of `WC()->customer` before the test, since the pay page copies the order's address onto it.
+	 *
+	 * @var array<string, string>
+	 */
+	private $original_customer_billing = array();
+
+	/**
+	 * Callback currently reordering the available gateways, if any.
+	 *
+	 * @var callable|null
+	 */
+	private $gateway_order_filter;
+
+	/**
+	 * Remember the shared customer state this test may change.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->original_customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+		);
+	}
+
+	/**
+	 * Restore the request, query, session, customer and gateway state touched by this test.
 	 */
 	public function tearDown(): void {
 		global $wp;
@@ -30,10 +57,18 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		unset( $wp->query_vars['order-received'] );
 		unset( $wp->query_vars['order-pay'] );
 
+		WC()->customer->set_props( $this->original_customer_billing );
+		WC()->customer->save();
+
 		foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
 			WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
 		}
 		$this->original_gateway_enabled = array();
+
+		if ( $this->gateway_order_filter ) {
+			remove_filter( 'woocommerce_available_payment_gateways', $this->gateway_order_filter );
+			$this->gateway_order_filter = null;
+		}
 
 		// The gateway objects are shared singletons, so clear the selection on all of them, not only those this test enabled.
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
@@ -58,6 +93,19 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 			$this->original_gateway_enabled[ $gateway_id ] = $gateway->enabled;
 			$gateway->enabled                              = 'yes';
 		}
+	}
+
+	/**
+	 * Move a gateway to the front of the available list, so the default selection would land on it.
+	 *
+	 * @param string $gateway_id Gateway ID to list first.
+	 */
+	private function put_gateway_first( string $gateway_id ): void {
+		$this->gateway_order_filter = function ( $gateways ) use ( $gateway_id ) {
+			return isset( $gateways[ $gateway_id ] ) ? array( $gateway_id => $gateways[ $gateway_id ] ) + $gateways : $gateways;
+		};
+
+		add_filter( 'woocommerce_available_payment_gateways', $this->gateway_order_filter );
 	}
 
 	/**
@@ -170,7 +218,23 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	public function test_order_pay_prefers_merchant_assigned_gateway_over_session_choice(): void {
 		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
 		$order = $this->create_pending_order( 'admin', WC_Gateway_Cheque::ID );
+
+		// List the assigned gateway first and pick a different one in the session, so only the session choice could steal the selection.
+		$this->put_gateway_first( WC_Gateway_Cheque::ID );
 		WC()->session->set( 'chosen_payment_method', WC_Gateway_BACS::ID );
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertSame( array( WC_Gateway_Cheque::ID ), $this->get_checked_gateways( $output ) );
+	}
+
+	/**
+	 * @testdox The pay page should clear a selection made by third-party code, so only the merchant-assigned method is expanded.
+	 */
+	public function test_order_pay_clears_gateway_chosen_by_third_party_code(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order = $this->create_pending_order( 'admin', WC_Gateway_Cheque::ID );
+		WC()->payment_gateways()->payment_gateways()[ WC_Gateway_BACS::ID ]->set_current();
 
 		$output = $this->render_pay_page( $order );
 

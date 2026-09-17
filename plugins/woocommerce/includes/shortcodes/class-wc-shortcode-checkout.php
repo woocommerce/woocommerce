@@ -195,12 +195,17 @@ class WC_Shortcode_Checkout {
 				);
 				WC()->customer->save();
 
-				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-				$assigned_gateway   = self::get_merchant_assigned_gateway( $order, $available_gateways );
+				$available_gateways  = WC()->payment_gateways()->get_available_payment_gateways();
+				$preselected_gateway = self::get_order_preselected_gateway( $order, $available_gateways );
 
 				// The method a merchant set on an admin-created order is the default selection; the shopper can still pick another.
-				if ( $assigned_gateway ) {
-					$assigned_gateway->set_current();
+				if ( $preselected_gateway ) {
+					// Third party code may have marked another gateway as current, which would leave two of them expanded on the form.
+					foreach ( $available_gateways as $gateway ) {
+						$gateway->chosen = false;
+					}
+
+					$preselected_gateway->set_current();
 				} else {
 					WC()->payment_gateways()->set_current_gateway( $available_gateways );
 				}
@@ -264,8 +269,9 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
-	 * Get the gateway a merchant assigned to an admin-created order, when the shopper can use it.
+	 * Get the gateway to pre-select on the pay page, when it should differ from the default selection.
 	 *
+	 * A merchant assigns the method when creating an order in admin, so that assignment is the pre-selection.
 	 * Orders placed through checkout carry the method the shopper picked, so those keep the default selection.
 	 *
 	 * @since 11.3.0
@@ -273,7 +279,7 @@ class WC_Shortcode_Checkout {
 	 * @param WC_Payment_Gateway[] $available_gateways Gateways available on the pay page, keyed by gateway ID.
 	 * @return WC_Payment_Gateway|null
 	 */
-	private static function get_merchant_assigned_gateway( WC_Order $order, array $available_gateways ) {
+	private static function get_order_preselected_gateway( WC_Order $order, array $available_gateways ) {
 		if ( ! $order->is_created_via( 'admin' ) ) {
 			return null;
 		}
