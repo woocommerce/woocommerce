@@ -125,8 +125,7 @@ function computeReferences(
 			continue;
 		}
 		const resolution = resolved[ depName ];
-		const resolvedDep =
-			typeof resolution === 'string' ? resolution : resolution?.version;
+		const resolvedDep = resolution?.version;
 		if ( ! resolvedDep || ! resolvedDep.startsWith( 'link:' ) ) {
 			continue;
 		}
