@@ -177,8 +177,6 @@ class PushNotificationRestController {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return string The token, or an empty string when absent or not a string.
-	 *
-	 * @since 11.2.0
 	 */
 	private function get_token_from_query( WP_REST_Request $request ): string {
 		$params = $request->get_query_params();
