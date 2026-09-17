@@ -713,6 +713,21 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not query again once a lookup found no tokens.
+	 */
+	public function test_has_tokens_memoizes_a_negative_result(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->has_tokens();
+
+		$queries_before = $wpdb->num_queries;
+		$data_store->has_tokens();
+
+		$this->assertSame( $queries_before, $wpdb->num_queries );
+	}
+
+	/**
 	 * @testdox Should report tokens once one is registered, regardless of the owner's role.
 	 */
 	public function test_has_tokens_returns_true_when_a_token_exists(): void {

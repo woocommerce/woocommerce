@@ -33,11 +33,11 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
-	 * Memoizes a positive has_tokens() result only. A stale true costs one lookup; a stale false would drop a notification.
+	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
-	 * @var bool
+	 * @var bool|null
 	 */
-	private bool $has_tokens = false;
+	private ?bool $has_tokens = null;
 
 	const SUPPORTED_META = array(
 		'origin',
@@ -87,6 +87,8 @@ class PushTokensDataStore {
 		}
 
 		$push_token->set_id( $id );
+
+		$this->has_tokens = null;
 
 		return $push_token;
 	}
@@ -325,8 +327,8 @@ class PushTokensDataStore {
 	 * @return bool True if at least one push token exists.
 	 */
 	public function has_tokens(): bool {
-		if ( $this->has_tokens ) {
-			return true;
+		if ( null !== $this->has_tokens ) {
+			return $this->has_tokens;
 		}
 
 		global $wpdb;
