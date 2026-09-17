@@ -102,7 +102,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		 * Fires when a refund is deleted.
 		 *
 		 * @since 3.0.0
-		 * @since 11.2.0 Added the parent order ID parameter.
+		 * @since 11.3.0 Added the parent order ID parameter.
 		 * @param int $refund_id       The refund ID.
 		 * @param int $parent_order_id The parent order ID.
 		 */
