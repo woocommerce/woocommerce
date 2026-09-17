@@ -210,23 +210,16 @@ class PushTokensDataStore {
 			return 0;
 		}
 
-		$query = new WP_Query(
-			array(
-				'post_type'      => PushToken::POST_TYPE,
-				'post_status'    => 'private',
-				'author'         => $user_id,
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
+		global $wpdb;
+
+		// Direct query so pre_get_posts filters cannot hide a token, and any status is deleted.
+		$post_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d",
+				PushToken::POST_TYPE,
+				$user_id
 			)
 		);
-
-		/**
-		 * Typehint for PHPStan, specifies these are IDs and not instances of
-		 * WP_Post.
-		 *
-		 * @var int[] $post_ids
-		 */
-		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
 			return 0;
