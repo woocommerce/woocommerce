@@ -93,9 +93,7 @@ class PendingNotificationStore {
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *
-	 * Notifications are dropped when no push token is registered, so neither
-	 * the safety net job nor the loopback request is created for a send that
-	 * has no recipient.
+	 * Notifications are dropped when no push token is registered, so neither the safety net job nor the loopback request is created for a send that has no recipient.
 	 *
 	 * @param Notification $notification The notification to add.
 	 * @return void

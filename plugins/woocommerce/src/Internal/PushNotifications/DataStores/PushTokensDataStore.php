@@ -33,8 +33,7 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
-	 * Memoizes a positive has_tokens() result only. A stale true costs one
-	 * lookup; a stale false would drop a notification.
+	 * Memoizes a positive has_tokens() result only. A stale true costs one lookup; a stale false would drop a notification.
 	 *
 	 * @var bool
 	 */
@@ -320,8 +319,7 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Determines whether any push token exists, ignoring roles and preferences
-	 * so callers can bail out before the cost of get_tokens_for_roles().
+	 * Determines whether any push token exists, ignoring roles and preferences so callers can bail out before the cost of get_tokens_for_roles().
 	 *
 	 * @since 11.2.0
 	 * @return bool True if at least one push token exists.
