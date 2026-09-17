@@ -16,6 +16,13 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Directories and files a test created for a stub asset registry, in creation order.
+	 *
+	 * @var string[]
+	 */
+	private $created_asset_paths = array();
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -28,12 +35,25 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	 * Tear down after each test.
 	 */
 	public function tearDown(): void {
-		unset( $_GET['page'] );
-		wp_dequeue_script( 'woocommerce_admin' );
-		wp_dequeue_script( 'woocommerce_quick-edit' );
-		wp_dequeue_script( 'jquery-ui-datepicker' );
-		wp_dequeue_script( 'heartbeat' );
-		parent::tearDown();
+		try {
+			unset( $_GET['page'] );
+			wp_dequeue_script( 'woocommerce_admin' );
+			wp_dequeue_script( 'woocommerce_quick-edit' );
+			wp_dequeue_script( 'jquery-ui-datepicker' );
+			wp_dequeue_script( 'heartbeat' );
+			// wp_localize_script() appends to a handle's data, and nothing resets wp_scripts() between tests.
+			wp_deregister_script( 'wc-admin-command-palette' );
+			wp_deregister_script( 'wc-admin-command-palette-analytics' );
+			foreach ( array_reverse( $this->created_asset_paths ) as $path ) {
+				if ( is_dir( $path ) ) {
+					rmdir( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				} else {
+					wp_delete_file( $path );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -125,5 +145,79 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertStringContainsString( 'id="wc-lost-connection-notice"', $output );
+	}
+
+	/**
+	 * @testdox Should localize the Analytics reports from Analytics::get_report_pages() for the command palette.
+	 */
+	public function test_enqueue_command_palette_assets_localizes_analytics_reports(): void {
+		$this->ensure_wp_admin_script_asset_registry( 'command-palette' );
+		$this->ensure_wp_admin_script_asset_registry( 'command-palette-analytics' );
+		add_filter(
+			'woocommerce_analytics_report_menu_items',
+			static function () {
+				return array(
+					array(
+						'id'    => 'test-analytics-revenue',
+						'title' => 'Revenue <em>report</em>',
+						'path'  => '/analytics/revenue',
+					),
+					array(
+						'id'    => 'test-analytics-customers',
+						'title' => 'Customers',
+						'path'  => '/customers',
+					),
+				);
+			}
+		);
+
+		$this->sut->enqueue_command_palette_assets();
+
+		$this->assertTrue( wp_script_is( 'wc-admin-command-palette-analytics', 'enqueued' ), 'The Analytics command palette bundle should be enqueued' );
+		$localized = $this->get_localized_object( 'wc-admin-command-palette-analytics', 'wcCommandPaletteAnalytics' );
+		$this->assertIsArray( $localized->reports ?? null, 'Reports should reach JS as an array, the only shape the command palette registers' );
+		$this->assertSame( array( 'Revenue report', 'Customers' ), array_column( $localized->reports, 'title' ), 'Each report title should be passed with its HTML stripped' );
+		$this->assertSame( array( '/analytics/revenue', '/customers' ), array_column( $localized->reports, 'path' ), 'Each report path should be passed unchanged' );
+	}
+
+	/**
+	 * Writes a stub asset registry for a wp-admin-scripts bundle that is not built, as in the CI PHPUnit jobs.
+	 * tearDown() removes every directory and file this creates.
+	 *
+	 * @param string $script_name Bundle name under wp-admin-scripts.
+	 */
+	private function ensure_wp_admin_script_asset_registry( string $script_name ): void {
+		$dir = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts';
+		if ( is_readable( "{$dir}/{$script_name}.asset.php" ) || is_readable( "{$dir}/{$script_name}.min.asset.php" ) ) {
+			return;
+		}
+
+		$missing_dirs = array();
+		$path         = $dir;
+		while ( ! is_dir( $path ) ) {
+			array_unshift( $missing_dirs, $path );
+			$path = dirname( $path );
+		}
+		$this->assertTrue( wp_mkdir_p( $dir ), "{$dir} should be writable for the stub asset registry" );
+		$this->created_asset_paths = array_merge( $this->created_asset_paths, $missing_dirs );
+
+		$file = "{$dir}/{$script_name}.asset.php";
+		file_put_contents( $file, "<?php return array( 'dependencies' => array(), 'version' => 'test' );" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->created_asset_paths[] = $file;
+	}
+
+	/**
+	 * Decodes the JS global a script handle's localized data assigns.
+	 *
+	 * @param string $handle      Script handle.
+	 * @param string $object_name JS global name.
+	 * @return mixed The decoded value.
+	 */
+	private function get_localized_object( string $handle, string $object_name ) {
+		$data   = (string) wp_scripts()->get_data( $handle, 'data' );
+		$prefix = "var {$object_name} = ";
+		$this->assertStringStartsWith( $prefix, $data, "{$handle} should localize {$object_name}" );
+
+		return json_decode( rtrim( substr( $data, strlen( $prefix ) ), ';' ) );
 	}
 }

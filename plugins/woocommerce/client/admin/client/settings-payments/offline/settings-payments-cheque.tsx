@@ -21,6 +21,11 @@ import {
 	TextareaEdit,
 	type OfflineFormValues,
 } from './dataform-controls';
+import {
+	getShippingRestrictionFields,
+	getShippingRestrictionSettings,
+	getShippingRestrictionValues,
+} from './shipping-restriction-fields';
 
 /**
  * This page is used to manage the settings for the Cheque payment gateway.
@@ -62,6 +67,7 @@ export const SettingsPaymentsCheque = () => {
 				title: chequeSettings.settings.title.value,
 				description: chequeSettings.description,
 				instructions: chequeSettings.settings.instructions.value,
+				...getShippingRestrictionValues( chequeSettings ),
 			} );
 		}
 	}, [ chequeSettings ] );
@@ -101,8 +107,12 @@ export const SettingsPaymentsCheque = () => {
 				),
 				Edit: TextareaEdit,
 			},
+			...getShippingRestrictionFields(
+				chequeSettings,
+				__( 'check payments', 'woocommerce' )
+			),
 		],
-		[]
+		[ chequeSettings ]
 	);
 
 	const saveSettings = () => {
@@ -112,9 +122,10 @@ export const SettingsPaymentsCheque = () => {
 
 		setIsSaving( true );
 
-		const settings: Record< string, string > = {
+		const settings: Record< string, string | string[] > = {
 			title: String( formValues.title ),
 			instructions: String( formValues.instructions ),
+			...getShippingRestrictionSettings( formValues ),
 		};
 
 		updatePaymentGateway( 'cheque', {
@@ -167,6 +178,8 @@ export const SettingsPaymentsCheque = () => {
 								<FieldPlaceholder size="medium" />
 								<FieldPlaceholder size="large" />
 								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="small" />
 							</>
 						) : (
 							<DataForm
@@ -179,6 +192,8 @@ export const SettingsPaymentsCheque = () => {
 										'title',
 										'description',
 										'instructions',
+										'enable_for_methods',
+										'enable_for_virtual',
 									],
 								} }
 								onChange={ ( edits: OfflineFormValues ) => {

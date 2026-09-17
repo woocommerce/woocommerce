@@ -67,7 +67,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 			'woocommerce_customer_stock_notifications_allow_signups' => 'checkbox',
 			'woocommerce_customer_stock_notifications_require_double_opt_in' => 'checkbox',
 			'woocommerce_customer_stock_notifications_require_account' => 'checkbox',
-			'woocommerce_customer_stock_notifications_create_account_on_signup' => 'checkbox',
 			'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold' => 'number',
 		);
 

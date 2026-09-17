@@ -23,14 +23,6 @@
 		},
 		"width": {
 			"type": "number"
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {
