@@ -116,7 +116,6 @@
 /plugins/woocommerce/src/Internal/Admin/Orders/ @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-order-*.php @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/views/html-order-*.php @woocommerce/rubik
-/plugins/woocommerce/templates/order/customer-history.php @woocommerce/rubik
 
 # Customer order display templates
 /plugins/woocommerce/templates/order/order-details.php @woocommerce/rubik
