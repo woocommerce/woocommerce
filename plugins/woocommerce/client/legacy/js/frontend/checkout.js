@@ -5,6 +5,11 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	// sessionStorage is shared by every site on an origin, so the key carries the site's own AJAX
+	// path to keep the sites of a subdirectory multisite install from sharing the flag.
+	var stale_nonce_reload_key =
+		'wc_checkout_stale_nonce_reload:' + wc_checkout_params.wc_ajax_url;
+
 	/**
 	 * Percent-encode literal apostrophes in an already URL-encoded request body.
 	 *
@@ -545,14 +550,12 @@ jQuery( function ( $ ) {
 		 * @return {boolean} Whether a reload was started.
 		 */
 		reload_once_for_stale_nonce: function () {
-			var key = 'wc_checkout_stale_nonce_reload';
-
 			try {
-				if ( window.sessionStorage.getItem( key ) ) {
+				if ( window.sessionStorage.getItem( stale_nonce_reload_key ) ) {
 					return false;
 				}
 
-				window.sessionStorage.setItem( key, '1' );
+				window.sessionStorage.setItem( stale_nonce_reload_key, '1' );
 			} catch ( e ) {
 				// Without storage there is no way to break a reload loop, so let the notice handle it.
 				return false;
@@ -563,9 +566,7 @@ jQuery( function ( $ ) {
 		},
 		clear_stale_nonce_reload_flag: function () {
 			try {
-				window.sessionStorage.removeItem(
-					'wc_checkout_stale_nonce_reload'
-				);
+				window.sessionStorage.removeItem( stale_nonce_reload_key );
 			} catch ( e ) {
 				// Nothing to clear.
 			}

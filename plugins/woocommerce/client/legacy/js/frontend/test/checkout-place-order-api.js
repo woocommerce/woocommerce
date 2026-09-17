@@ -847,7 +847,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	// session's nonce, so update_order_review answers 403. The first 403 reloads the page once;
 	// a sessionStorage flag turns every later one into a notice instead of a reload loop.
 	describe( 'Checkout update request failures', () => {
-		const STALE_FLAG = 'wc_checkout_stale_nonce_reload';
+		// The key is suffixed with the site's wc_ajax_url from wc_checkout_params.
+		const STALE_FLAG = 'wc_checkout_stale_nonce_reload:/?wc-ajax=%%endpoint%%';
 		const STALE_NOTICE = 'This checkout page is out of date.';
 
 		// This jsdom seals window.location, so reload() can't be stubbed. It reports
