@@ -56,6 +56,8 @@
 
 # Core order objects, items, and data stores
 /plugins/woocommerce/includes/class-wc-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/abstracts/abstract-wc-order.php @woocommerce/rubik
+/plugins/woocommerce/includes/legacy/abstract-wc-legacy-order.php @woocommerce/rubik
 /plugins/woocommerce/includes/wc-order-functions.php @woocommerce/rubik
 /plugins/woocommerce/includes/wc-order-item-functions.php @woocommerce/rubik
 /plugins/woocommerce/includes/wc-order-step-logger-functions.php @woocommerce/rubik
@@ -116,6 +118,7 @@
 /plugins/woocommerce/src/Internal/Admin/Orders/ @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-order-*.php @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/views/html-order-*.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/list-tables/class-wc-admin-list-table-orders.php @woocommerce/rubik
 
 # Customer order display templates
 /plugins/woocommerce/templates/order/order-details.php @woocommerce/rubik
