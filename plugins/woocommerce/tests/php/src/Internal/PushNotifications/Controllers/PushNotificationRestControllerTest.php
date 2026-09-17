@@ -67,9 +67,9 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject requests without an authorization header.
+	 * @testdox Should reject requests with neither an authorization header nor a token query parameter.
 	 */
-	public function test_authorize_rejects_missing_header(): void {
+	public function test_authorize_rejects_missing_credential(): void {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
 		$request->set_body( '{}' );
 
