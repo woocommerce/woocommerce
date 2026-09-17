@@ -19,6 +19,10 @@ const v1 = {
 			type: 'boolean',
 			default: false,
 		},
+		isDescendentOfSingleProductBlock: {
+			type: 'boolean',
+			default: false,
+		},
 	},
 	save,
 	apiVersion: 3,
