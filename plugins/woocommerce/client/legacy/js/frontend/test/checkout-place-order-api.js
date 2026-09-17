@@ -893,16 +893,24 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			return request;
 		};
 
-		const failCheckoutUpdate = ( status, textStatus, errorThrown ) => {
+		const failCheckoutUpdate = ( jqXHR, textStatus, errorThrown ) => {
 			sendCheckoutUpdate().error(
-				{ status },
+				jqXHR,
 				textStatus || 'error',
 				errorThrown || ''
 			);
 		};
 
+		// What check_ajax_referer() sends back for a bad nonce: wp_die( -1, 403 ).
+		const rejectNonce = ( errorThrown ) =>
+			failCheckoutUpdate(
+				{ status: 403, responseText: '-1' },
+				'error',
+				errorThrown
+			);
+
 		test( 'should reload once when the nonce is rejected', () => {
-			failCheckoutUpdate( 403 );
+			rejectNonce();
 
 			expectReloads( 1 );
 			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
@@ -913,7 +921,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		test( 'should show a notice instead of reloading again when the fresh page is rejected too', () => {
 			window.sessionStorage.setItem( STALE_FLAG, '1' );
 
-			failCheckoutUpdate( 403 );
+			rejectNonce();
 
 			expectReloads( 0 );
 			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
@@ -938,7 +946,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			delete global.window.wc_checkout_params.i18n_checkout_stale;
 			window.sessionStorage.setItem( STALE_FLAG, '1' );
 
-			failCheckoutUpdate( 403, 'error', 'Forbidden' );
+			rejectNonce( 'Forbidden' );
 
 			expect( $form.prepend ).toHaveBeenCalledWith(
 				expect.stringContaining( 'tabindex="-1">Forbidden</div>' )
@@ -953,9 +961,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			// rejected, clearing the flag on the notice would reload on every other change.
 			window.sessionStorage.setItem( STALE_FLAG, '1' );
 
-			failCheckoutUpdate( 403 );
-			failCheckoutUpdate( 403 );
-			failCheckoutUpdate( 403 );
+			rejectNonce();
+			rejectNonce();
+			rejectNonce();
 
 			expectReloads( 0 );
 			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
@@ -970,7 +978,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				} );
 
 			try {
-				failCheckoutUpdate( 403 );
+				rejectNonce();
 			} finally {
 				setItem.mockRestore();
 			}
@@ -982,8 +990,21 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 		} );
 
+		test( 'should treat a 403 that is not a rejected nonce like any other failure', () => {
+			// A firewall or CDN block answers 403 with its own page, not "-1".
+			failCheckoutUpdate( {
+				status: 403,
+				responseText: '<html><body>Access denied</body></html>',
+			} );
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).not.toHaveBeenCalled();
+		} );
+
 		test( 'should unblock without a notice or reload on other failures', () => {
-			failCheckoutUpdate( 500 );
+			failCheckoutUpdate( { status: 500 } );
 
 			expectReloads( 0 );
 			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
@@ -992,7 +1013,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		} );
 
 		test( 'should ignore a request aborted by a newer update', () => {
-			failCheckoutUpdate( 0, 'abort' );
+			failCheckoutUpdate( { status: 0 }, 'abort' );
 
 			expectReloads( 0 );
 			expect( $blockedSections.unblock ).not.toHaveBeenCalled();

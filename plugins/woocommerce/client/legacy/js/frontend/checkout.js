@@ -571,6 +571,21 @@ jQuery( function ( $ ) {
 				// Nothing to clear.
 			}
 		},
+		/**
+		 * Whether a failed update_order_review response is a rejected nonce.
+		 *
+		 * check_ajax_referer() answers a bad nonce with a 403 whose body is "-1". Other 403s, for
+		 * example from a firewall or CDN, carry their own page and are not a reason to reload.
+		 *
+		 * @param {Object} jqXHR The failed request.
+		 * @return {boolean} Whether the nonce was rejected.
+		 */
+		is_stale_nonce_response: function ( jqXHR ) {
+			return (
+				403 === jqXHR.status &&
+				'-1' === String( jqXHR.responseText || '' ).trim()
+			);
+		},
 		reset_update_checkout_timer: function () {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
@@ -965,8 +980,11 @@ jQuery( function ( $ ) {
 						return;
 					}
 
+					var stale_nonce =
+						wc_checkout_form.is_stale_nonce_response( jqXHR );
+
 					if (
-						403 === jqXHR.status &&
+						stale_nonce &&
 						wc_checkout_form.reload_once_for_stale_nonce()
 					) {
 						return;
@@ -976,7 +994,7 @@ jQuery( function ( $ ) {
 						'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
 					).unblock();
 
-					if ( 403 === jqXHR.status ) {
+					if ( stale_nonce ) {
 						// The localized string is expected, but fall back to the response's status text
 						// like the place order handler does if something removed it.
 						var errorMessage = errorThrown;
