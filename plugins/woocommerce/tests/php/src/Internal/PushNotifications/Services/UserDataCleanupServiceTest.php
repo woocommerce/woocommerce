@@ -53,10 +53,6 @@ class UserDataCleanupServiceTest extends WC_Unit_Test_Case {
 		$this->push_tokens_data_store = new PushTokensDataStore();
 		$this->preferences_data_store = new NotificationPreferencesDataStore();
 		$this->sut                    = wc_get_container()->get( UserDataCleanupService::class );
-
-		// Registering here keeps the hooks live for the tests that exercise them
-		// through WordPress rather than by calling the handlers directly.
-		$this->sut->register();
 	}
 
 	/**
