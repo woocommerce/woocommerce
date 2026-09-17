@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -114,9 +116,16 @@ class SystemStatusReport {
 	 * Render daily cron row.
 	 */
 	public function render_daily_cron() {
-		$next_action_time = function_exists( 'as_next_scheduled_action' )
-			? as_next_scheduled_action( 'wc_admin_daily_wrapper', null, 'woocommerce' )
-			: false;
+		$scheduler = wc_get_container()->get( Scheduler::class );
+		$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+		$next      = $scheduler->get_next( 'wc_admin_daily_wrapper', null, 'woocommerce', $options );
+
+		// A pending action gives its timestamp; a running one has no next date, so it shows as running.
+		if ( $next instanceof \WC_DateTime ) {
+			$next_action_time = $next->getTimestamp();
+		} else {
+			$next_action_time = $scheduler->has_scheduled_action( 'wc_admin_daily_wrapper', null, 'woocommerce', $options );
+		}
 		?>
 			<tr>
 				<td data-export-label="Daily Cron">

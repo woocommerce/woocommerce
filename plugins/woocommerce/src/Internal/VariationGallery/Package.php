@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\VariationGallery;
 
+use Automattic\WooCommerce\Queue\Scheduler;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -105,7 +107,7 @@ class Package {
 			return;
 		}
 
-		WC()->queue()->add(
+		wc_get_container()->get( Scheduler::class )->add(
 			self::UPDATE_CALLBACK_HOOK,
 			$args,
 			self::UPDATE_CALLBACK_GROUP
@@ -119,11 +121,12 @@ class Package {
 	 * @return bool
 	 */
 	private static function has_pending_or_running_migration( array $args ): bool {
-		if ( null !== WC()->queue()->get_next( self::UPDATE_CALLBACK_HOOK, $args, self::UPDATE_CALLBACK_GROUP ) ) {
+		$scheduler = wc_get_container()->get( Scheduler::class );
+		if ( null !== $scheduler->get_next( self::UPDATE_CALLBACK_HOOK, $args, self::UPDATE_CALLBACK_GROUP ) ) {
 			return true;
 		}
 
-		$running_actions = WC()->queue()->search(
+		$running_actions = $scheduler->search(
 			array(
 				'hook'     => self::UPDATE_CALLBACK_HOOK,
 				'args'     => $args,

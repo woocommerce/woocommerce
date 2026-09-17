@@ -5,7 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal;
 
+use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +32,15 @@ class DownloadPermissionsAdjuster {
 	final public function init() {
 		$this->downloads_data_store = wc_get_container()->get( LegacyProxy::class )->get_instance_of( \WC_Data_Store::class, 'customer-download' );
 		add_action( 'adjust_download_permissions', array( $this, 'adjust_download_permissions' ), 10, 1 );
+	}
+
+	/**
+	 * Get the scheduler, resolving it on first use.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -61,23 +72,25 @@ class DownloadPermissionsAdjuster {
 
 		$scheduled_action_args = array( $product->get_id() );
 
-		$already_scheduled_actions =
-			WC()->call_function(
-				'as_get_scheduled_actions',
-				array(
-					'hook'   => 'adjust_download_permissions',
-					'args'   => $scheduled_action_args,
-					'status' => \ActionScheduler_Store::STATUS_PENDING,
-				),
-				'ids'
-			);
+		// Only a pending adjustment blocks a new one; a running one has already read the product.
+		$scheduler                 = $this->get_scheduler();
+		$already_scheduled_actions = $scheduler->search(
+			array(
+				'hook'   => 'adjust_download_permissions',
+				'args'   => $scheduled_action_args,
+				'status' => \ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids',
+			array( 'queue' => SchedulerQueue::DEFAULT )
+		);
 
 		if ( empty( $already_scheduled_actions ) ) {
-			WC()->call_function(
-				'as_schedule_single_action',
+			$scheduler->schedule_single(
 				WC()->call_function( 'time' ) + 1,
 				'adjust_download_permissions',
-				$scheduled_action_args
+				$scheduled_action_args,
+				'',
+				array( 'queue' => SchedulerQueue::DEFAULT )
 			);
 		}
 	}

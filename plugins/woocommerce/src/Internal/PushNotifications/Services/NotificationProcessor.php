@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Exception;
 
 /**
@@ -249,10 +251,11 @@ class NotificationProcessor {
 		// Must match the shape PendingNotificationStore::schedule_safety_net() used;
 		// both derive the args from Notification::get_safety_net_args() so the
 		// exact-equality match Action Scheduler performs succeeds.
-		as_unschedule_all_actions(
+		wc_get_container()->get( Scheduler::class )->cancel_all(
 			self::SAFETY_NET_HOOK,
 			$notification->get_safety_net_args(),
-			self::ACTION_SCHEDULER_GROUP
+			self::ACTION_SCHEDULER_GROUP,
+			array( 'queue' => SchedulerQueue::DEFAULT )
 		);
 	}
 

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WC_Product;
 use Exception;
 
@@ -38,11 +39,11 @@ class JobManager {
 	private $logger;
 
 	/**
-	 * The queue instance.
+	 * The scheduler used for notification jobs.
 	 *
-	 * @var \WC_Queue_Interface
+	 * @var Scheduler
 	 */
-	private $queue;
+	private $scheduler;
 
 	/**
 	 * Constructor.
@@ -50,8 +51,8 @@ class JobManager {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->logger = \wc_get_logger();
-		$this->queue  = \WC()->queue();
+		$this->logger    = \wc_get_logger();
+		$this->scheduler = wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -65,7 +66,7 @@ class JobManager {
 
 		try {
 
-			if ( $this->queue->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
+			if ( $this->scheduler->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
 				return false;
 			}
 
@@ -82,7 +83,7 @@ class JobManager {
 			$delay = (int) apply_filters( 'woocommerce_customer_stock_notifications_first_batch_delay', MINUTE_IN_SECONDS, $product_id );
 			$delay = max( 0, $delay );
 
-			$action_id = $this->queue->schedule_single(
+			$action_id = $this->scheduler->schedule_single(
 				time() + $delay,
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,
@@ -119,7 +120,7 @@ class JobManager {
 
 		$args = array( 'product_id' => $product_id );
 
-		if ( $this->queue->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
+		if ( $this->scheduler->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
 			return false;
 		}
 
@@ -135,13 +136,13 @@ class JobManager {
 		$delay = max( 0, $delay );
 
 		if ( 0 === $delay ) {
-			$action_id = $this->queue->add(
+			$action_id = $this->scheduler->add(
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,
 				self::AS_JOB_GROUP
 			);
 		} else {
-			$action_id = $this->queue->schedule_single(
+			$action_id = $this->scheduler->schedule_single(
 				time() + $delay,
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,

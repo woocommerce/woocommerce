@@ -21,7 +21,8 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Class BatchProcessingController
@@ -129,6 +130,15 @@ class BatchProcessingController {
 	}
 
 	/**
+	 * Get the scheduler, resolving it on first use.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
+	}
+
+	/**
 	 * Enqueue a processor so that it will get batch processing requests from within scheduled actions.
 	 *
 	 * @param string $processor_class_name Fully qualified class name of the processor, must implement `BatchProcessorInterface`.
@@ -153,7 +163,7 @@ class BatchProcessingController {
 			);
 		}
 
-		$this->schedule_watchdog_action( false, true );
+		$this->schedule_watchdog_action( false );
 	}
 
 	/**
@@ -367,9 +377,8 @@ class BatchProcessingController {
 	 * Schedule the watchdog action.
 	 *
 	 * @param bool $with_delay Whether to delay the action execution. Should be true when rescheduling, false when enqueueing.
-	 * @param bool $unique     Whether to make the action unique.
 	 */
-	private function schedule_watchdog_action( bool $with_delay = false, bool $unique = false ): void {
+	private function schedule_watchdog_action( bool $with_delay = false ): void {
 		$time = time();
 		if ( $with_delay ) {
 			/**
@@ -382,15 +391,17 @@ class BatchProcessingController {
 			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );
 		}
 
-		if ( ! ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
-			as_schedule_single_action(
-				$time,
-				self::WATCHDOG_ACTION_NAME,
-				array(),
-				self::ACTION_GROUP,
-				$unique
-			);
-		}
+		// A unique action covers the former "already scheduled" pre-check: a pending or running watchdog blocks a duplicate.
+		$this->get_scheduler()->schedule_single(
+			$time,
+			self::WATCHDOG_ACTION_NAME,
+			array(),
+			self::ACTION_GROUP,
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
+		);
 	}
 
 	/**
@@ -556,7 +567,7 @@ class BatchProcessingController {
 	 */
 	private function schedule_batch_processing( string $processor_class_name, bool $with_delay = false ): void {
 		$time = $with_delay ? time() + MINUTE_IN_SECONDS : time();
-		as_schedule_single_action( $time, self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		$this->get_scheduler()->schedule_single( $time, self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -568,7 +579,7 @@ class BatchProcessingController {
 	 * @return bool True if a batch processing action is already scheduled for the processor.
 	 */
 	public function is_scheduled( string $processor_class_name ): bool {
-		return ActionSchedulerUtil::has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		return $this->get_scheduler()->has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -712,9 +723,9 @@ class BatchProcessingController {
 		 * next request, because remove_or_retry_failed_processors() no-ops while any watchdog is already scheduled.
 		 */
 		if ( empty( $remaining_processors ) ) {
-			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
+			$this->get_scheduler()->cancel_all( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 		} else {
-			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+			$this->get_scheduler()->cancel_all( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 		}
 		$this->clear_processor_state( $processor_class_name );
 
@@ -725,8 +736,9 @@ class BatchProcessingController {
 	 * Dequeues and de-schedules all the processors.
 	 */
 	public function force_clear_all_processes(): void {
-		as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
-		as_unschedule_all_actions( self::WATCHDOG_ACTION_NAME );
+		$scheduler = $this->get_scheduler();
+		$scheduler->cancel_all( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
+		$scheduler->cancel_all( self::WATCHDOG_ACTION_NAME, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 		foreach ( $this->get_enqueued_processors() as $processor ) {
 			$this->clear_processor_state( $processor );
@@ -849,13 +861,15 @@ class BatchProcessingController {
 		}
 
 		// Everything below reads "not scheduled" as grounds for recording a failure against a processor
-		// and eventually dropping it from the queue. Action Scheduler being unloaded also reads as
+		// and eventually dropping it from the queue. A queue that is not ready also reads as
 		// "not scheduled", so bail rather than dismantle the queue over a missing dependency.
-		if ( ! ActionSchedulerUtil::can_check_scheduled_actions() ) {
+		$scheduler = $this->get_scheduler();
+		$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+		if ( ! $scheduler->is_ready( $options ) ) {
 			return;
 		}
 
-		if ( ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( $scheduler->has_scheduled_action( self::WATCHDOG_ACTION_NAME, null, '', $options ) ) {
 			return;
 		}
 
