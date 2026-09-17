@@ -74,7 +74,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks
 # Lint the Blocks client.
 pnpm run --filter='@woocommerce/block-library' lint
 # Test the Blocks client.
-pnpm run --filter='@woocommerce/block-library' test
+pnpm run --filter='@woocommerce/block-library' test:js
 ```
 
 ## PHP Code Analysis
