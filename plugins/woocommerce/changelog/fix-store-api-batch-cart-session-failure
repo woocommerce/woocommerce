@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent failed Store API batch requests from clearing the shopper's saved cart.

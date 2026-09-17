@@ -14912,12 +14912,6 @@ parameters:
 			path: includes/class-wc-shipping.php
 
 		-
-			message: '#^Offset mixed might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: includes/class-wc-shipping.php
-
-		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -19052,12 +19046,6 @@ parameters:
 			path: includes/export/abstract-wc-csv-exporter.php
 
 		-
-			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
 			message: '#^Argument of an invalid type array\|stdClass supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -19382,24 +19370,6 @@ parameters:
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Cannot call method get_instance_id\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Cannot call method get_method_id\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -19462,12 +19432,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method WC_Payment_Gateway\:\:get_return_url\(\) expects WC_Order\|null, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Property WC_Gateway_COD\:\:\$enable_for_methods \(array\) does not accept string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
@@ -24668,12 +24632,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
-
-		-
 			message: '#^Parameter \#1 \$title of function sanitize_title expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -26835,12 +26793,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$tax of function get_taxonomy_labels expects WP_Taxonomy, WP_Taxonomy\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
@@ -31025,51 +30977,15 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-cart.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_country\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_postcode\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_checkout_payment_url\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:needs_payment\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
@@ -31110,12 +31026,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$nonce of function wp_verify_nonce expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method WC_Shortcode_Checkout\:\:guest_should_verify_email\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
@@ -50015,18 +49925,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedItem.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:update_context\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:\$current_item \(WC_Product\|WP_Term\|null\) does not accept WC_Product\|false\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -50439,12 +50337,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/OrderConfirmation/ShippingAddress.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order\|false \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Status.php
 
 		-
 			message: '#^Parameter \#1 \$date of function wc_format_datetime expects WC_DateTime, WC_DateTime\|null given\.$#'
@@ -50970,6 +50862,12 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:remove_empty_array_recursive\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
@@ -51803,12 +51701,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_style\(\) should return null but returns array\<mixed, mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -51839,18 +51731,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductRating.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRatingCounter.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRatingCounter\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51865,12 +51745,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRatingCounter.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRatingCounter\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRatingCounter.php
 
@@ -52785,12 +52659,6 @@ parameters:
 			identifier: empty.property
 			count: 1
 			path: src/Blocks/Domain/Services/CheckoutFieldsSchema/DocumentObject.php
-
-		-
-			message: '#^Static property Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFieldsSchema\\Validation\:\:\$meta_schema_json \(string\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFieldsSchema/Validation.php
 
 		-
 			message: '#^Call to an undefined method WC_Session\:\:has_session\(\)\.$#'
@@ -53773,18 +53641,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$template_content of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:inject_theme_attribute_in_content\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \#2 \$blocks of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) expects array\<Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\>, array\<int\|string, array\<string, array\|string\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \$blocks of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
@@ -57311,36 +57167,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_created_via\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_object_read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -57402,12 +57228,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept object\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
@@ -65264,12 +65084,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/PaymentGateways/Schema/AbstractPaymentGatewaySettingsSchema.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/PaymentGateways/Schema/CodGatewaySettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Products\\Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -66560,24 +66374,6 @@ parameters:
 			path: src/Internal/StockNotifications/Frontend/SignupService.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:is_already_signed_up\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Parameter \#1 \$notification_id of static method Automattic\\WooCommerce\\Internal\\StockNotifications\\Factory\:\:get_notification\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -67298,12 +67094,6 @@ parameters:
 			path: src/StoreApi/Legacy.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Legacy.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -67360,24 +67150,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_status\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url_raw expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept array\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept default value of type array\.$#'
-			identifier: property.defaultValue
 			count: 1
 			path: src/StoreApi/Payments/PaymentResult.php
 
@@ -68096,12 +67868,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68296,12 +68062,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:validate_billing_email_matches_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
@@ -68908,12 +68668,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:validate_additional_fields\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
-
-		-
-			message: '#^Parameter \#1 \$payment_details of method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:prepare_payment_details_for_response\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
 
