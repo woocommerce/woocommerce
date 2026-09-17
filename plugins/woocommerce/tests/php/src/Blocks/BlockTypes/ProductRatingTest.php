@@ -178,4 +178,94 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 			'global reviews disabled'  => array( true, 'no', false ),
 		);
 	}
+
+	/**
+	 * @testdox Single Product block links review count to product permalink even when $GLOBALS['product'] equals the block product.
+	 *
+	 * @testWith ["woocommerce/product-rating"]
+	 *           ["woocommerce/product-rating-counter"]
+	 *
+	 * @param string $inner_block_name Inner rating block to render.
+	 */
+	public function test_single_product_block_review_link_ignores_matching_global_product( string $inner_block_name ): void {
+		$had_global_product      = array_key_exists( 'product', $GLOBALS );
+		$previous_global_product = $GLOBALS['product'] ?? null;
+
+		try {
+			$product        = $this->create_rated_product();
+			$permalink_href = 'href="' . esc_url( get_permalink( $product->get_id() ) ) . '#reviews"';
+
+			$markup = do_blocks(
+				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
+				'<!-- wp:' . $inner_block_name . ' /-->' .
+				'<!-- /wp:woocommerce/single-product -->'
+			);
+
+			$this->assertStringContainsString(
+				$permalink_href,
+				$markup,
+				$inner_block_name . ' inside a Single Product block should link to the product permalink plus #reviews, even when the global product matches.'
+			);
+			$this->assertStringNotContainsString(
+				'href="#reviews"',
+				$markup,
+				$inner_block_name . ' inside a Single Product block should not emit a bare #reviews anchor.'
+			);
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$GLOBALS['product'] = $product;
+
+
+			$markup_with_global = do_blocks(
+				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
+				'<!-- wp:' . $inner_block_name . ' /-->' .
+				'<!-- /wp:woocommerce/single-product -->'
+			);
+
+			$this->assertStringContainsString(
+				$permalink_href,
+				$markup_with_global,
+				$inner_block_name . ' inside a Single Product block should link to the product permalink plus #reviews, even when the global product matches.'
+			);
+			$this->assertStringNotContainsString(
+				'href="#reviews"',
+				$markup_with_global,
+				$inner_block_name . ' inside a Single Product block should not emit a bare #reviews anchor.'
+			);
+		} finally {
+			if ( $had_global_product ) {
+				$GLOBALS['product'] = $previous_global_product;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+		}
+	}
+
+	/**
+	 * Create a published product that has one approved review.
+	 *
+	 * @return \WC_Product
+	 */
+	private function create_rated_product(): \WC_Product {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'            => 'Rated product',
+				'regular_price'   => '10',
+				'status'          => 'publish',
+				'reviews_allowed' => true,
+			)
+		);
+		$fixtures->add_product_review( $product->get_id(), 5 );
+
+		$product = wc_get_product( $product->get_id() );
+		if ( ! $product instanceof \WC_Product ) {
+			throw new \RuntimeException( 'The review fixture should remain a loadable product.' );
+		}
+
+		$this->assertGreaterThan( 0, $product->get_review_count(), 'The review fixture must have a real approved review before rendering.' );
+
+		return $product;
+	}
 }
