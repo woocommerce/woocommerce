@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix HPOS migration leaving orders without a created date when the post stores the zero date in post_date_gmt, which then moved them to the current day in Analytics on their next save. Orders already migrated that way get their dates back from their posts on update.
+Fix HPOS migration leaving orders without a created date when the post stores the zero date in post_date_gmt, which then moved them to the current day in Analytics on their next save. Orders already migrated that way get their dates back from their posts on update, unless they were saved since.
