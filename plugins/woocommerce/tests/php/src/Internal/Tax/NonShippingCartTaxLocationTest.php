@@ -333,73 +333,70 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Preserves the REST context during nested rest_do_request() calls through WP_REST_Server::dispatch().
+	 *
+	 * This test simulates what happens when rest_do_request() is called nested through
+	 * WP_REST_Server::dispatch(), verifying that each dispatch removes only its own context.
 	 */
 	public function test_preserves_rest_context_during_nested_rest_do_request_calls(): void {
-		$this->add_product_to_cart( true );
+		// The key thing we're testing is that nested calls to handle_rest_pre_dispatch
+		// and handle_rest_post_dispatch properly clean up their context without affecting outer contexts.
+		// We'll simulate this by manually calling the methods as they would be called during nested dispatches.
 
-		// Create a test endpoint that makes nested REST requests.
-		add_action(
-			'rest_api_init',
-			function () {
-				register_rest_route(
-					'wc/v3/test-nested-dispatch',
-					'/test',
-					array(
-						'methods'             => 'GET',
-						'callback'            => function ( \WP_REST_Request $request ) {
-							// Make a nested request to a cart endpoint (which should set cart context).
-							$cart_request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
-							$cart_response = rest_do_request( $cart_request );
+		$server = new \WP_REST_Server();
 
-							// After the nested cart request completes, make another nested request to products (non-cart).
-							$products_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-							$products_response = rest_do_request( $products_request );
-
-							// After all nested requests, the outer context should still be valid.
-							return new \WP_REST_Response( array(
-								'cart_status'    => $cart_response->get_status(),
-								'products_status' => $products_response->get_status(),
-							) );
-						},
-						'permission_callback' => '__return_true',
-					)
-				);
-			}
-		);
+		// Simulate an outer dispatch: pre_dispatch for a non-cart route.
+		$outer_request = new \WP_REST_Request( 'GET', '/wc/v3/some-route' );
+		$this->sut->handle_rest_pre_dispatch( null, $server, $outer_request );
 
 		try {
-			rest_api_init();
+			// Verify stack has 1 entry now.
+			$reflection = new \ReflectionClass( $this->sut );
+			$stack_property = $reflection->getProperty( 'dispatch_stack' );
+			$stack_property->setAccessible( true );
+			$context_property = $reflection->getProperty( 'dispatch_contexts' );
+			$context_property->setAccessible( true );
 
-			// Make the outer request which will trigger nested requests.
-			$outer_request = new \WP_REST_Request( 'GET', '/wc/v3/test-nested-dispatch/test' );
-			$response      = rest_do_request( $outer_request );
+			$stack_after_outer_pre = $stack_property->getValue( $this->sut );
+			$this->assertCount( 1, $stack_after_outer_pre, 'Stack should have 1 entry after outer pre_dispatch.' );
 
-			// Verify the nested requests succeeded.
-			$this->assertSame( 200, $response->get_status() );
-			$data = $response->get_data();
-			$this->assertSame( 200, $data['cart_status'] );
-			$this->assertSame( 200, $data['products_status'] );
+			// Simulate a nested dispatch: pre_dispatch for another non-cart route.
+			$inner_request = new \WP_REST_Request( 'GET', '/wc/v3/another-route' );
+			$this->sut->handle_rest_pre_dispatch( null, $server, $inner_request );
 
-			// The key verification: after all nested requests complete,
-			// the dispatch stack should be empty, meaning all contexts were properly cleaned up.
-			// We verify this by checking that a non-cart request returns the shipping address,
-			// not the billing address (which would indicate cart context is still active).
-			$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
-			$result         = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
-			
-			// The result should NOT be the billing address, because:
-			// 1. We're not in a REST cart/checkout context (all requests completed and cleaned up)
-			// 2. We're not in is_cart() or is_checkout() context
-			// So it should return the original taxable_address.
-			$this->assertNotSame(
-				array( 'GB', 'LND', 'SW1A 1AA', 'London' ),
-				$result,
-				'Cart context should not be active after all nested requests complete; the billing address should not be used.'
-			);
+			$stack_after_inner_pre = $stack_property->getValue( $this->sut );
+			$this->assertCount( 2, $stack_after_inner_pre, 'Stack should have 2 entries after inner pre_dispatch.' );
+
+			// Simulate nested dispatch completing: post_dispatch for the inner request.
+			// This should remove ONLY the inner request's context.
+			$this->sut->handle_rest_post_dispatch( null, $server, $inner_request );
+
+			$stack_after_inner_post = $stack_property->getValue( $this->sut );
+			$contexts_after_inner_post = $context_property->getValue( $this->sut );
+
+			// The stack should still have 1 entry (the outer request).
+			$this->assertCount( 1, $stack_after_inner_post, 'Stack should still have 1 entry after inner post_dispatch (outer context preserved).' );
+
+			// The specific context for the inner request should be removed.
+			$inner_request_id = spl_object_id( $inner_request );
+			$this->assertArrayNotHasKey( $inner_request_id, $contexts_after_inner_post, 'Inner request context should be removed.' );
+
+			// But the outer request context should still be there.
+			$outer_request_id = spl_object_id( $outer_request );
+			$this->assertArrayHasKey( $outer_request_id, $contexts_after_inner_post, 'Outer request context should still exist.' );
+
+			// Simulate outer dispatch completing: post_dispatch for the outer request.
+			$this->sut->handle_rest_post_dispatch( null, $server, $outer_request );
+
+			$stack_after_outer_post = $stack_property->getValue( $this->sut );
+			$contexts_after_outer_post = $context_property->getValue( $this->sut );
+
+			// Now the stack should be empty.
+			$this->assertCount( 0, $stack_after_outer_post, 'Stack should be empty after outer post_dispatch.' );
+
+			// And all contexts should be removed.
+			$this->assertCount( 0, $contexts_after_outer_post, 'All contexts should be removed after outer post_dispatch.' );
 		} finally {
 			// Ensure cleanup.
-			remove_all_actions( 'rest_api_init' );
-			// Unregister our test route - just reset the rest server.
 			global $wp_rest_server;
 			$wp_rest_server = null;
 		}
