@@ -11,25 +11,26 @@ use WC_Unit_Test_Case;
 class CategoryTermContextTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should read Core taxonomy context while preserving legacy context precedence.
-	 * @testWith ["category-title", {"taxonomy":"category"}]
-	 *           ["category-description", {"taxonomy":"category"}]
-	 *           ["category-title", {"termTaxonomy":"category", "taxonomy":"product_cat"}]
-	 *           ["category-description", {"termTaxonomy":"category", "taxonomy":"product_cat"}]
+	 * @testWith ["category-title", {"taxonomy":"category"}, "Context content: category-title"]
+	 *           ["category-description", {"taxonomy":"category"}, "Context content: category-description"]
+	 *           ["category-title", {"termTaxonomy":"category", "taxonomy":"product_cat"}, "Context content: category-title"]
+	 *           ["category-description", {"termTaxonomy":"category", "taxonomy":"product_cat"}, "Context content: category-description"]
 	 *
 	 * @param string $name Block name without the namespace.
 	 * @param array  $context Available block context.
+	 * @param string $expected_text Expected category text.
 	 */
-	public function test_category_text_context( string $name, array $context ): void {
+	public function test_category_text_context( string $name, array $context, string $expected_text ): void {
 		$context['termId'] = self::factory()->term->create(
 			array(
 				'taxonomy'    => 'category',
-				'name'        => 'Context content',
-				'description' => 'Context content',
+				'name'        => 'Context content: category-title',
+				'description' => 'Context content: category-description',
 			)
 		);
 		$sut               = new \WP_Block( parse_blocks( '<!-- wp:woocommerce/' . $name . ' /-->' )[0], $context );
 
-		$this->assertStringContainsString( 'Context content', $sut->render(), 'The block should render the term from the effective taxonomy.' );
+		$this->assertStringContainsString( $expected_text, $sut->render(), 'The block should render the correct term field from the effective taxonomy.' );
 	}
 
 	/**
