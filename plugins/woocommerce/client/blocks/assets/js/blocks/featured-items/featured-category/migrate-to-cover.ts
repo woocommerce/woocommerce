@@ -5,6 +5,13 @@ import { createBlock, type BlockInstance } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import clsx from 'clsx';
 
+const LEGACY_PADDING = {
+	top: '0px',
+	right: '48px',
+	bottom: '16px',
+	left: '48px',
+};
+
 function migrateFromV1( innerBlocks: BlockInstance[] ): BlockInstance[] {
 	return [
 		createBlock(
@@ -13,12 +20,7 @@ function migrateFromV1( innerBlocks: BlockInstance[] ): BlockInstance[] {
 				className: 'wc-block-featured-category__inner-blocks',
 				style: {
 					spacing: {
-						padding: {
-							top: '0px',
-							right: '48px',
-							bottom: '16px',
-							left: '48px',
-						},
+						padding: LEGACY_PADDING,
 					},
 				},
 				layout: { type: 'default' },
@@ -32,11 +34,8 @@ function migrateFromV0(
 	attributes: BlockInstance[ 'attributes' ],
 	innerBlocks: BlockInstance[]
 ): BlockInstance[] {
-	const legacySpacing = {
-		padding: { top: '0px', right: '48px', bottom: '16px', left: '48px' },
-	};
 	const historicalStyle = {
-		spacing: legacySpacing,
+		spacing: { padding: LEGACY_PADDING },
 		typography: { lineHeight: '1.25' },
 	};
 	// Fallback for v0: title and description weren't saved as inner blocks.
