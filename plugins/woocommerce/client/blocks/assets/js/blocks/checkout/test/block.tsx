@@ -74,6 +74,21 @@ jest.mock( '@wordpress/element', () => {
 	};
 } );
 
+// jsdom never measures the container, and below the large breakpoint the
+// order summary renders twice (#68531). Report a large container so it renders
+// once and queries such as "Add coupons" match a single element.
+jest.mock( '@woocommerce/base-context', () => ( {
+	...jest.requireActual( '@woocommerce/base-context' ),
+	useContainerWidthContext: () => ( {
+		hasContainerWidth: true,
+		containerClassName: 'is-large',
+		isMobile: false,
+		isSmall: false,
+		isMedium: false,
+		isLarge: true,
+	} ),
+} ) );
+
 jest.mock( '../context', () => {
 	return {
 		...jest.requireActual( '../context' ),
