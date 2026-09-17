@@ -344,6 +344,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			);
 
 			$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+			$refund_id = $refund->get_id();
 
 			$payloads = array();
 			$webhook  = $this->create_active_webhook( 'order.updated' );
@@ -369,6 +370,8 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
 			$this->assertArrayHasKey( 'id', $payloads[0] );
 			$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+			$this->assertArrayHasKey( 'refunds', $payloads[0] );
+			$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
 		} finally {
 			OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
 			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
