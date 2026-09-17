@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cover the customer data dirty flag across a completed and a failed customer save
