@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
+require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+
 /**
  * Tests related to QueryClauses service.
  */
@@ -24,13 +26,37 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
+	 * Callback added to the woocommerce_product_filter_taxonomy_params filter during a test.
+	 *
+	 * @var callable|null
+	 */
+	private $taxonomy_params_filter;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		// Ensure brands taxonomy is registered for testing.
+		\WC_Brands::init_taxonomy();
+
 		$container = wc_get_container();
 		$this->sut = $container->get( QueryClauses::class );
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->taxonomy_params_filter ) {
+				remove_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+				$this->taxonomy_params_filter = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -314,5 +340,79 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		foreach ( array( $grandchild, $sibling, $child, $parent ) as $term ) {
 			wp_delete_term( $term['term_id'], 'product_cat' );
 		}
+	}
+
+	/**
+	 * @testdox Releasing a taxonomy filter param must not fail-close the rest of the main query.
+	 */
+	public function test_released_taxonomy_param_is_ignored_on_main_query(): void {
+		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
+			unset( $taxonomy_params['product_brand'] );
+			return $taxonomy_params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		list( $where, $posts ) = $this->query_main_products_filtered_by_cat_and_brand();
+
+		$this->assertStringNotContainsString( 'AND 1=0', $where, 'Releasing a taxonomy filter param must not fail-close the main query.' );
+
+		$received_products_name = $this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) );
+		$expected_products_name  = $this->get_data_from_products_array(
+			array_filter(
+				$this->products,
+				function ( \WC_Product $product ) {
+					$product_terms = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'slugs' ) );
+					return ! is_wp_error( $product_terms ) && in_array( 'cat-1', $product_terms, true );
+				}
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox Without the filter, a taxonomy param with no matching term still fails the main query closed.
+	 */
+	public function test_taxonomy_param_still_fails_closed_without_filter(): void {
+		list( $where, $posts ) = $this->query_main_products_filtered_by_cat_and_brand();
+
+		$this->assertStringContainsString( 'AND 1=0', $where, 'An unmatched taxonomy filter param should still fail the query closed by default.' );
+		$this->assertCount( 0, $posts, 'No products should be returned when the taxonomy filter fails closed.' );
+	}
+
+	/**
+	 * Run a main product query filtered by a valid category and an invalid brand, and capture the
+	 * resulting WHERE clause alongside the returned posts.
+	 *
+	 * @return array {
+	 *     @type string     $0 The final WHERE clause.
+	 *     @type \WP_Post[] $1 The posts returned by the query.
+	 * }
+	 */
+	private function query_main_products_filtered_by_cat_and_brand(): array {
+		$where          = '';
+		$capture_where  = function ( array $clauses ) use ( &$where ): array {
+			$where = $clauses['where'];
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $capture_where, 20 );
+
+		global $wp_the_query;
+		$previous_wp_the_query = $wp_the_query;
+
+		$query        = new \WP_Query();
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$posts        = $query->query(
+			array(
+				'post_type'   => 'product',
+				'product_cat' => 'cat-1',
+				'brands'      => 'no-such-brand',
+			)
+		);
+
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		remove_filter( 'posts_clauses', $capture_where, 20 );
+
+		return array( $where, $posts );
 	}
 }
