@@ -376,15 +376,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			}
 		);
 
-		$queue_instance = new ReflectionProperty( WC_Queue::class, 'instance' );
-		$queue_instance->setAccessible( true );
-		$original_queue = $queue_instance->getValue();
-		$queue_instance->setValue( null, new WC_Action_Queue() );
-		try {
-			$action_id = $this->execute_webhook_queue_for( $webhook, 123 );
-		} finally {
-			$queue_instance->setValue( null, $original_queue );
-		}
+		$this->register_legacy_proxy_class_mocks( array( WC_Queue_Interface::class => new WC_Action_Queue() ) );
+
+		$action_id = $this->execute_webhook_queue_for( $webhook, 123 );
 
 		$this->assertSame( 0, $filter_runs, 'The priority filter should not run when the queue cannot apply a priority' );
 		$this->assertSame( 10, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
