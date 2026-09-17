@@ -518,7 +518,8 @@
 							return;
 						}
 						// Keep any decimals beyond the store precision, so the stored cost is not rounded on display.
-						const decimals = WCNumberValidation.getDecimalCount( value, config );
+						// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+						const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
 						const formatConfig = decimals > config.precision
 							? Object.assign( {}, config, { precision: decimals } )
 							: config;
@@ -714,7 +715,8 @@
 							$('.wc-shipping-modal-price').on('blur', function() {
 								const value = $(this).val();
 								// Keep any decimals beyond the store precision, so the typed cost is not rounded on blur.
-								const decimals = WCNumberValidation.getDecimalCount( value, config );
+								// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+								const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
 								const formatConfig = decimals > config.precision
 									? Object.assign( {}, config, { precision: decimals } )
 									: config;
