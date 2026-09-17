@@ -626,7 +626,7 @@ function wc_create_attribute( $args ) {
 			$wpdb->update(
 				$wpdb->termmeta,
 				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration updates an indexed termmeta key.
 			);
 
 			// Update product attributes which use this taxonomy.
@@ -658,8 +658,8 @@ function wc_create_attribute( $args ) {
 			// Update variations which use this taxonomy.
 			$wpdb->update(
 				$wpdb->postmeta,
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This array key is update data, not a query meta_key argument.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration matches an indexed postmeta key.
 			);
 
 			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
@@ -736,7 +736,7 @@ function wc_update_attribute( $id, $args ) {
  * @return bool
  */
 function wc_delete_attribute( $id ) {
-	global $wpdb;
+	global $wpdb, $wc_product_attributes;
 
 	$name = $wpdb->get_var(
 		$wpdb->prepare(
@@ -776,6 +776,20 @@ function wc_delete_attribute( $id ) {
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			// When the caller defers term counting, any count queued for this taxonomy (by the
+			// deletions above or by the caller itself) resolves the taxonomy by name later, once
+			// it is gone. Flush while it still exists. WordPress drains its whole queue at once.
+			if ( wp_defer_term_counting() ) {
+				wp_update_term_count( array(), '', true );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+
+		unset( $wc_product_attributes[ $taxonomy ] );
+
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );

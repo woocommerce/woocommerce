@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Blocks: Fix JS crash when the store returns a non-Error value in useCollection; convert it to a proper Error instance so the error boundary handles it gracefully.

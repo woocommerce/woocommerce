@@ -75,9 +75,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that feed generation action forwards arguments to mapper.
+	 * @testdox Should forward arguments to the mapper without persisting a download URL.
 	 */
-	public function test_feed_generation_action_forwards_args() {
+	public function test_feed_generation_action_forwards_args(): void {
 		// Make sure at least one product is present. We will not check it here.
 		WC_Helper_Product::create_simple_product();
 
@@ -119,6 +119,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		// Check the final status.
 		$updated_status = get_option( self::OPTION_KEY );
 		$this->assertEquals( AsyncGenerator::STATE_COMPLETED, $updated_status['state'] );
+		$this->assertArrayNotHasKey( 'url', $updated_status );
 	}
 
 	/**
@@ -715,9 +716,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
 		);
 
-		// Simulate the original process: start a feed and keep its exclusive lock held (no flush/end).
+		// Simulate the original process: open a feed and keep its exclusive lock held (no flush/end).
 		$holder       = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier   = $holder->start();
+		$identifier   = $holder->open();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );
 

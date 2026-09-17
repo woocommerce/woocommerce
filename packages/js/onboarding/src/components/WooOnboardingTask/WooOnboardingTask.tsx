@@ -63,7 +63,7 @@ WooOnboardingTask.Slot = ( { id, fillProps }: WooOnboardingTaskSlotProps ) => {
 	// The Slot is a React component and this hook works as expected.
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	useEffect( () => {
-		trackView( id );
+		void trackView( id );
 	}, [ id ] );
 
 	return (

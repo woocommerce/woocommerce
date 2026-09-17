@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove additional WooCommerce data when uninstalling with WC_REMOVE_ALL_DATA: the product_visibility taxonomy terms, the placeholder image attachment, and additional WooCommerce user meta. The Action Scheduler tables can also be removed by additionally defining the WC_REMOVE_ACTION_SCHEDULER constant.

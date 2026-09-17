@@ -29,12 +29,12 @@ const productReviewsStore = {
 
 			yield actions.navigate( ref.href );
 
-			ref.closest(
-				'.wp-block-woocommerce-product-details'
-			)?.scrollIntoView( {
-				behavior: 'smooth',
-				block: 'start',
-			} );
+			ref
+				.closest( '.wp-block-woocommerce-product-details' )
+				?.scrollIntoView( {
+					behavior: 'smooth',
+					block: 'start',
+				} );
 		},
 	},
 };

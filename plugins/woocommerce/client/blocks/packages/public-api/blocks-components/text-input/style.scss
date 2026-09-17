@@ -1,0 +1,252 @@
+.wc-block-components-form .wc-block-components-text-input,
+.wc-block-components-text-input {
+	position: relative;
+	margin-top: $gap-small;
+	white-space: nowrap;
+	// Resetting line-height to avoid any unnecessary space around the input
+	line-height: 0;
+
+	.wc-block-components-text-input__wrapper {
+		position: relative;
+	}
+
+	label {
+		@include reset-color();
+		@include reset-typography();
+		font-size: 16px;
+		line-height: 22px;
+		position: absolute;
+		transform: translateY(-50%);
+		left: $gap-smaller * 1.25;
+		top: 25px;
+		transform-origin: top left;
+		transition: all 200ms ease;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap-small});
+		cursor: text;
+
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	input[type="tel"],
+	input[type="url"],
+	input[type="text"],
+	input[type="number"],
+	input[type="password"],
+	input[type="email"],
+	input[type="date"] {
+		@include reset-typography();
+		@include font-for-inputs-locked();
+		padding: $gap $gap-small;
+		width: 100%;
+		border-radius: $universal-border-radius;
+		border: 1px solid $universal-border-strong;
+
+		margin: 0;
+		box-sizing: border-box;
+		min-height: 0;
+		background-color: $input-background-light;
+		color: $input-text-light;
+
+		height: 50px;
+
+		&:focus {
+			background-color: $input-background-light;
+			color: $input-text-light;
+			border: 1.5px solid currentColor;
+		}
+
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			border-color: $input-border-dark;
+			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+				border: 1.5px solid currentColor;
+			}
+		}
+	}
+
+	&:not(.is-active) input[type="date"] {
+		// Hide browser default mask (dd/mm/YYYY) when a date field is not active (no value, not focused).
+		// Use text-indent here because using transparent would conflict with our calendar icon-hiding hack.
+		text-indent: -9999px;
+
+		&::-webkit-datetime-edit {
+			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
+			opacity: 0;
+			transition: none;
+		}
+	}
+
+	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	input[type="date"]::-webkit-datetime-edit {
+		transition: opacity 150ms ease 150ms;
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		input[type="date"]::-webkit-datetime-edit {
+			transition: none;
+		}
+	}
+
+	// Clean out chrome default padding on segments that makes the field visually off compared to other fields.
+	input[type="date"] {
+		&::-webkit-datetime-edit,
+		&::-webkit-datetime-edit-fields-wrapper {
+			padding: 0;
+		}
+
+		&::-webkit-datetime-edit-day-field,
+		&::-webkit-datetime-edit-month-field,
+		&::-webkit-datetime-edit-year-field,
+		&::-webkit-datetime-edit-text {
+			padding-inline: 0;
+			// Overrides the tabular figures back to normal.
+			font-variant-numeric: normal;
+		}
+	}
+
+	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
+	// The visible icon is our own so that we can control its position freely.
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		padding: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	// Firefox paints its native calendar icon with currentColor and exposes no pseudo-element to hide it,
+	// so we make the color transparent (hiding the icon) and repaint the text via -webkit-text-fill-color.
+	// Both borders derive from currentColor too, so they get explicit colors instead.
+	@supports (-moz-appearance: none) {
+		input[type="date"] {
+			// $universal-border-strong is derived from currentColor, so the resting border needs its own
+			// explicit color. The dark variant already has one.
+			border-color: color-mix(in srgb, $input-text-light 80%, transparent);
+
+			&,
+			&:focus {
+				color: transparent;
+				-webkit-text-fill-color: $input-text-light;
+			}
+
+			&:focus {
+				border-color: $input-text-light;
+			}
+
+			.has-dark-controls & {
+				&,
+				&:focus {
+					color: transparent;
+					-webkit-text-fill-color: $input-text-dark;
+				}
+
+				&:focus {
+					border-color: $input-text-dark;
+				}
+			}
+		}
+	}
+
+	.wc-block-components-text-input__date-icon {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+		// The icon is decorative only, and clicks should pass through to the native hidden calendar button.
+		pointer-events: none;
+		color: $input-text-light;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
+		}
+	}
+
+	input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	input:-webkit-autofill,
+	&.is-active input[type="tel"],
+	&.is-active input[type="url"],
+	&.is-active input[type="text"],
+	&.is-active input[type="number"],
+	&.is-active input[type="password"],
+	&.is-active input[type="email"],
+	&.is-active input[type="date"] {
+		padding: $gap-large $gap-smaller + 1px $gap-smaller;
+
+		&:focus {
+			padding-top: $gap-large;
+			padding-left: $gap-smaller + 0.5px;
+		}
+	}
+
+	&.is-active label,
+	input:-webkit-autofill + label {
+		// We use scale transform as we can animate it.
+		transform: scale(0.82);
+		top: $gap-smaller * 0.75;
+	}
+
+	&.has-error input {
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			border-color: $alert-red;
+		}
+		&:focus {
+			box-shadow: 0 0 0 0.5px $alert-red;
+		}
+
+		.has-dark-controls &,
+		.has-dark-controls &:hover,
+		.has-dark-controls &:focus,
+		.has-dark-controls &:active {
+			border-color: color.adjust($alert-red, $lightness: 30%);
+		}
+
+		.has-dark-controls &:focus {
+			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+
+	&.has-error label {
+		color: $alert-red;
+
+		.has-dark-controls & {
+			color: color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+}

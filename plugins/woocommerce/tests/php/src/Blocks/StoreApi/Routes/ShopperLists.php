@@ -7,12 +7,86 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-
 /**
  * Tests for the /wc/store/v1/shopper-lists/* endpoints.
  */
 class ShopperLists extends ControllerTestCase {
+	/**
+	 * Product ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $product_id;
+
+	/**
+	 * Customer IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $customer_ids = array();
+
+	/**
+	 * Whether the feature option existed before class setup.
+	 *
+	 * @var bool
+	 */
+	private static $had_feature_option;
+
+	/**
+	 * Feature option value before class setup.
+	 *
+	 * @var mixed
+	 */
+	private static $feature_option;
+
+	/**
+	 * Create immutable fixtures before route registration starts.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$feature_option     = get_option( 'woocommerce_cart_save_for_later_enabled' );
+		self::$had_feature_option = false !== self::$feature_option;
+		update_option( 'woocommerce_cart_save_for_later_enabled', 'yes' );
+
+		$product          = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product',
+					'regular_price' => 10,
+				),
+			)
+		)[0];
+		self::$product_id = $product->get_id();
+
+		self::$customer_ids = array(
+			$factory->user->create(
+				array(
+					'role'       => 'customer',
+					'user_email' => 'shopper-lists-1@test.com',
+				)
+			),
+			$factory->user->create(
+				array(
+					'role'       => 'customer',
+					'user_email' => 'shopper-lists-2@test.com',
+				)
+			),
+		);
+	}
+
+	/**
+	 * Delete class fixtures and restore the incoming feature option.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( array( self::$product_id ) );
+
+		if ( self::$had_feature_option ) {
+			update_option( 'woocommerce_cart_save_for_later_enabled', self::$feature_option );
+		} else {
+			delete_option( 'woocommerce_cart_save_for_later_enabled' );
+		}
+	}
 
 	/**
 	 * Test product.
@@ -39,49 +113,11 @@ class ShopperLists extends ControllerTestCase {
 	 * Setup test data.
 	 */
 	protected function setUp(): void {
-		// The shopper-lists routes are gated behind the `cart_save_for_later`
-		// feature flag, which is read inside `do_action( 'rest_api_init' )`
-		// fired by parent::setUp(). The option must be in place before then.
-		update_option( 'woocommerce_cart_save_for_later_enabled', 'yes' );
-
 		parent::setUp();
 
-		$fixtures      = new FixtureData();
-		$this->product = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Test Product',
-				'regular_price' => 10,
-			)
-		);
-
-		$this->customer_id       = $this->factory->user->create(
-			array(
-				'role'       => 'customer',
-				'user_email' => 'shopper-lists-1@test.com',
-			)
-		);
-		$this->other_customer_id = $this->factory->user->create(
-			array(
-				'role'       => 'customer',
-				'user_email' => 'shopper-lists-2@test.com',
-			)
-		);
-	}
-
-	/**
-	 * Tear down test data.
-	 */
-	protected function tearDown(): void {
-		parent::tearDown();
-
-		if ( $this->customer_id ) {
-			wp_delete_user( $this->customer_id );
-		}
-		if ( $this->other_customer_id ) {
-			wp_delete_user( $this->other_customer_id );
-		}
-
-		delete_option( 'woocommerce_cart_save_for_later_enabled' );
+		$this->product           = wc_get_product( self::$product_id );
+		$this->customer_id       = self::$customer_ids[0];
+		$this->other_customer_id = self::$customer_ids[1];
 	}
 
 	/**

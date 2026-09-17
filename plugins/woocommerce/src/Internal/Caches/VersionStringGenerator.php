@@ -32,9 +32,9 @@ class VersionStringGenerator {
 	/**
 	 * Legacy proxy instance.
 	 *
-	 * @var LegacyProxy|null
+	 * @var LegacyProxy
 	 */
-	private ?LegacyProxy $legacy_proxy = null;
+	private LegacyProxy $legacy_proxy;
 
 	/**
 	 * Initialize the class dependencies.
@@ -68,8 +68,13 @@ class VersionStringGenerator {
 	/**
 	 * Get the current version string for an ID.
 	 *
-	 * If no version exists and $generate is true, a new version will be created.
-	 * If no version exists and $generate is false, null will be returned.
+	 * If no valid version exists and $generate is true, a new version will be created.
+	 * If no valid version exists and $generate is false, null will be returned.
+	 *
+	 * Cached values that aren't non-empty strings are treated as invalid and are never
+	 * returned. When $generate is true they are overwritten by the newly generated
+	 * version; when $generate is false they are deleted, which means a call with
+	 * $generate set to false can write to the cache.
 	 *
 	 * @param string $id       The ID to get the version string for.
 	 * @param bool   $generate Whether to generate a new version if one doesn't exist. Default true.
@@ -82,17 +87,31 @@ class VersionStringGenerator {
 		$this->validate_input( $id );
 
 		$cache_key = $this->get_cache_key( $id );
-		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$found     = false;
+		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
-		if ( false === $version ) {
-			if ( ! $generate ) {
-				return null;
+		if ( ! is_string( $version ) || '' === $version ) {
+			$entry_exists = $this->cache_entry_exists( $version, $found );
+
+			if ( $entry_exists ) {
+				$this->log_invalid_cached_value( $id, $version, $generate );
 			}
-			$version = $this->generate_version( $id );
-		} else {
-			// Refresh the cache lifetime.
-			$this->store_version( $id, $version );
+
+			if ( $generate ) {
+				// The new version is written to the same cache key, replacing the invalid
+				// value, so deleting it first would only add a redundant round-trip.
+				return $this->generate_version( $id );
+			}
+
+			if ( $entry_exists ) {
+				wp_cache_delete( $cache_key, self::CACHE_GROUP );
+			}
+
+			return null;
 		}
+
+		// Refresh the cache lifetime.
+		$this->store_version( $id, $version );
 		return $version;
 	}
 
@@ -143,16 +162,58 @@ class VersionStringGenerator {
 
 		// Some object cache implementations may return non-boolean values.
 		// Verify the store by reading the value back.
-		$stored_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$found        = false;
+		$stored_value = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 		if ( $stored_value === $version ) {
 			return true;
 		}
 
 		// The stored value doesn't match; clean up and report failure.
-		if ( false !== $stored_value ) {
+		if ( $this->cache_entry_exists( $stored_value, $found ) ) {
 			wp_cache_delete( $cache_key, self::CACHE_GROUP );
 		}
 		return false;
+	}
+
+	/**
+	 * Tell whether a value read from the cache is evidence that an entry is stored.
+	 *
+	 * Object cache drop-ins replace wp_cache_get() wholesale, so neither the returned
+	 * value nor the found flag is trustworthy on its own: some drop-ins never populate
+	 * $found, and some signal a miss with null rather than false. The value is therefore
+	 * the primary evidence, with $found as a tie-breaker that tells a stored false apart
+	 * from a genuine miss. $found is checked loosely because a drop-in may report it as a
+	 * truthy non-boolean.
+	 *
+	 * @param mixed $value The value returned by wp_cache_get().
+	 * @param mixed $found The found flag as populated by wp_cache_get(), if it populates it at all.
+	 * @return bool True if an entry appears to be stored, false if this looks like a miss.
+	 */
+	private function cache_entry_exists( $value, $found ): bool {
+		return (bool) $found || ( false !== $value && null !== $value );
+	}
+
+	/**
+	 * Log a value found in the version string cache that isn't a usable version string.
+	 *
+	 * This should never happen with a well-behaved object cache, so surface it for
+	 * diagnosis rather than silently self-healing.
+	 *
+	 * @param string $id           The ID the invalid value was cached for.
+	 * @param mixed  $value        The invalid cached value.
+	 * @param bool   $regenerating Whether a replacement version is being generated.
+	 * @return void
+	 */
+	private function log_invalid_cached_value( string $id, $value, bool $regenerating ): void {
+		$this->legacy_proxy->call_function( 'wc_get_logger' )->warning(
+			sprintf(
+				'Discarded an invalid version string cache entry for ID "%1$s" (got %2$s); %3$s.',
+				$id,
+				gettype( $value ),
+				$regenerating ? 'the version will be regenerated' : 'the entry will be deleted'
+			),
+			array( 'source' => 'version-string-generator' )
+		);
 	}
 
 	/**

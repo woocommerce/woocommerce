@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix exception message info leak to non-admin API callers, null dereferences on missing parent product and order, and duplicate date query key in OrdersTableQuery.

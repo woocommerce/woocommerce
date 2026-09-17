@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve cart table accessibility and spacing so screen readers announce line items as rows with the correct column headers.

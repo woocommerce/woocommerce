@@ -37,6 +37,16 @@ class NotificationManagementService {
 	public const RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
+	 * Error code returned by {@see self::resend_verification_email()} when the notification is no longer pending.
+	 */
+	public const RESEND_ERROR_NOT_PENDING = 'wc_bis_resend_not_pending';
+
+	/**
+	 * Error code returned by {@see self::resend_verification_email()} when a send happened too recently.
+	 */
+	public const RESEND_ERROR_RATE_LIMITED = 'wc_bis_resend_rate_limited';
+
+	/**
 	 * Email manager.
 	 *
 	 * @var EmailManager
@@ -112,6 +122,13 @@ class NotificationManagementService {
 			return;
 		}
 
+		// Only the owner may resend a customer-linked notification. Bail silently on a
+		// mismatch so the response doesn't confirm that the id exists.
+		$owner_id = (int) $notification->get_user_id();
+		if ( $owner_id > 0 && is_user_logged_in() && get_current_user_id() !== $owner_id ) {
+			return;
+		}
+
 		$this->ensure_notice_session();
 
 		$redirect_url = $notification->get_product_permalink();
@@ -119,17 +136,37 @@ class NotificationManagementService {
 			$redirect_url = wc_get_page_permalink( 'shop' );
 		}
 
-		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
-			wc_add_notice( esc_html__( 'This notification is already verified or cancelled.', 'woocommerce' ), 'error' );
+		$result = $this->resend_verification_email( $notification );
+		if ( is_wp_error( $result ) ) {
+			$notice_type = self::RESEND_ERROR_RATE_LIMITED === $result->get_error_code() ? 'notice' : 'error';
+			wc_add_notice( esc_html( $result->get_error_message() ), $notice_type );
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 
+		/* translators: %s user email. */
+		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
+	/**
+	 * Send the verification email for a pending notification again.
+	 *
+	 * Pure domain step: checks the status and the rate limit, records the send time,
+	 * and dispatches the email. Callers own authentication, nonces, notices and redirects.
+	 *
+	 * @param Notification $notification The notification to resend for.
+	 * @return true|\WP_Error True on send, or an error carrying one of the `RESEND_ERROR_*` codes.
+	 */
+	public function resend_verification_email( Notification $notification ) {
+		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
+			return new \WP_Error( self::RESEND_ERROR_NOT_PENDING, __( 'This notification is already verified or cancelled.', 'woocommerce' ) );
+		}
+
 		$last_sent_at = (int) $notification->get_meta( self::LAST_VERIFY_EMAIL_SENT_META );
 		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::RESEND_RATE_LIMIT_SECONDS ) {
-			wc_add_notice( esc_html__( 'Please wait a moment before requesting another verification email.', 'woocommerce' ), 'notice' );
-			wp_safe_redirect( $redirect_url );
-			exit;
+			return new \WP_Error( self::RESEND_ERROR_RATE_LIMITED, __( 'Please wait a moment before requesting another verification email.', 'woocommerce' ) );
 		}
 
 		// Persist the rate-limit timestamp before dispatching the email so two near-simultaneous
@@ -139,10 +176,7 @@ class NotificationManagementService {
 
 		$this->email_manager->send_verify_email( $notification );
 
-		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
-		wp_safe_redirect( $redirect_url );
-		exit;
+		return true;
 	}
 
 	/**

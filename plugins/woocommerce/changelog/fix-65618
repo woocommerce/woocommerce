@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed quantity selector plus button size mismatch in Cart and Mini-Cart by replacing the fullwidth plus glyph with a standard plus.

@@ -196,7 +196,7 @@ test.describe( 'Merchant > Customer List', () => {
 			await page.getByRole( 'menu' ).getByText( 'Total spend' ).click();
 
 			// click to close the menu
-			await page.getByText( 'Show:' ).click();
+			await page.getByText( 'Show', { exact: true } ).click();
 
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Username' } )
@@ -219,7 +219,7 @@ test.describe( 'Merchant > Customer List', () => {
 			await page.getByRole( 'menu' ).getByText( 'Total spend' ).click();
 
 			// click to close the menu
-			await page.getByText( 'Show:' ).click();
+			await page.getByText( 'Show', { exact: true } ).click();
 
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Username' } )

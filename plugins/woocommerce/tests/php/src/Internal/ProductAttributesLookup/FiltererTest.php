@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -16,6 +15,13 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Tests related to filtering for WC_Query.
  */
 class FiltererTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Product IDs owned by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $product_ids = array();
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
@@ -32,6 +38,25 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
+
+		foreach ( wc_get_attribute_taxonomy_ids() as $attribute_name => $attribute_id ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			$terms         = get_terms(
+				array(
+					'taxonomy'   => $taxonomy_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy_name );
+				}
+			}
+
+			unregister_taxonomy( $taxonomy_name );
+			wc_delete_attribute( $attribute_id );
+		}
 
 		$wpdb->query(
 			"
@@ -56,50 +81,18 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-
 		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
 
-		parent::tearDown();
-
-		// Unregister all product attributes.
-
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
+		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
 			unregister_taxonomy( $taxonomy_name );
-
-			wc_delete_attribute( $attribute_id );
 		}
 
-		// Remove all products.
-
-		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
-		foreach ( $product_ids as $product_id ) {
-			$product     = wc_get_product( $product_id );
-			$is_variable = $product->is_type( ProductType::VARIABLE );
-
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( empty( $child ) ) {
-					continue;
-				}
-
-				if ( $is_variable ) {
-					$child->delete( true );
-				} else {
-					$child->set_parent_id( 0 );
-					$this->save( $child );
-				}
-			}
-
-			$product->delete( true );
-		}
-
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
-
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
 	}
 
 	/**
@@ -246,6 +239,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$product->set_stock_status( $in_stock ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK );
 
 		$this->save( $product );
+		$this->product_ids[] = $product->get_id();
 
 		if ( empty( $attribute_terms_by_name ) ) {
 			return $product;
@@ -317,6 +311,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->save( $product );
 
 		$product_id = $product->get_id();
+
+		$this->product_ids[] = $product_id;
 
 		// * Now create the variations.
 
@@ -490,12 +486,44 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$_GET[ 'query_type_' . wc_sanitize_taxonomy_name( $name ) ] = $value;
 		}
 
-		return $wp_the_query->query(
-			array(
-				'post_type' => 'product',
-				'fields'    => 'ids',
-			)
+		$include_owned_products = fn() => $this->product_ids;
+		add_filter( 'loop_shop_post_in', $include_owned_products );
+
+		try {
+			return $wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'fields'    => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'loop_shop_post_in', $include_owned_products );
+		}
+	}
+
+	/**
+	 * @testdox Product requests and counters are scoped to fixtures owned by the current test.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $using_lookup_table Whether attribute filtering uses the lookup table.
+	 */
+	public function test_product_requests_are_scoped_to_owned_products( bool $using_lookup_table ): void {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Green' ) );
+
+		$owned_product = $this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Green' ) ), true );
+
+		$this->product_ids = array( $owned_product->get_id() );
+
+		$this->assertSame(
+			array( $owned_product->get_id() ),
+			$this->do_product_request( array( 'Color' => array( 'Blue' ) ), array( 'Color' => 'or' ) )
 		);
+		$this->assert_counters( 'Color', array( 'Blue' ), 'or' );
 	}
 
 	/**
@@ -507,6 +535,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param string $filter_type The filter type in use, "and" or "or".
 	 */
 	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		global $wpdb;
+
 		$widget = new class() extends \WC_Widget_Layered_Nav {
 			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -523,7 +553,19 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
-		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		$scope_to_owned_products = function ( $query ) use ( $wpdb ) {
+			$owned_product_ids = implode( ',', array_map( 'absint', $this->product_ids ) );
+			$query['where']   .= empty( $owned_product_ids ) ? ' AND 1=0' : " AND {$wpdb->posts}.ID IN ({$owned_product_ids})";
+
+			return $query;
+		};
+		add_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+
+		try {
+			$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		} finally {
+			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+		}
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 

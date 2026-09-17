@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix order totals only filling half the width on the admin order screen at mobile widths.

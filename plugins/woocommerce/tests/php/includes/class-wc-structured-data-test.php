@@ -21,6 +21,245 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() preserves scalar @type grouping.
+	 */
+	public function test_get_structured_data_preserves_scalar_type_grouping(): void {
+		$markup = array(
+			'@type' => 'Product',
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => 'Product',
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Scalar structured data should retain its existing grouping and output.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() accepts a valid list of @type values.
+	 *
+	 * @testWith [["Car", "Product"]]
+	 *           [["A"]]
+	 *           [["ABCDEFGHIJKLMNOPQRST"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_accepts_valid_array_type( array $types ): void {
+		$markup = array(
+			'@type' => $types,
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid array @type should be accepted.'
+		);
+		$this->assertSame(
+			array( $markup ),
+			$this->structured_data->get_data(),
+			'A valid list of @type values should retain its values and order.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() normalizes a non-list @type array before storage.
+	 */
+	public function test_set_data_normalizes_non_list_array_type(): void {
+		$markup = array(
+			'@type' => array(
+				0 => 'Product',
+				2 => 'Book',
+			),
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid non-list @type array should be accepted.'
+		);
+		$this->assertSame(
+			array(
+				array(
+					'@type' => array( 'Product', 'Book' ),
+					'name'  => 'Test product',
+				),
+			),
+			$this->structured_data->get_data(),
+			'A non-list @type array should be reindexed so it encodes as a JSON list.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() rejects an invalid array @type.
+	 *
+	 * @testWith [[]]
+	 *           [["Product", ["Review"]]]
+	 *           [["Product", "Invalid-Type"]]
+	 *           [["Product", "ABCDEFGHIJKLMNOPQRSTU"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_rejects_invalid_array_type( array $types ): void {
+		$this->assertFalse(
+			$this->structured_data->set_data( array( '@type' => $types ) ),
+			'Empty arrays, non-string members, and pattern-invalid members should be rejected.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() emits array @type values for matching or unfiltered requests.
+	 *
+	 * @testWith [["Car", "Product"], ["product"]]
+	 *           [["Thing", "CustomType"], ["customtype"]]
+	 *           [["Car", "Product"], []]
+	 *
+	 * @param string[] $schema_types    Schema types stored in the markup.
+	 * @param string[] $requested_types Lower-case output types requested by the caller.
+	 */
+	public function test_get_structured_data_outputs_array_type( array $schema_types, array $requested_types ): void {
+		$markup = array(
+			'@type' => $schema_types,
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => $schema_types,
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'Array @type markup should survive grouping and page-type filtering.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() groups multi-type nodes by requested type priority.
+	 */
+	public function test_get_structured_data_groups_array_type_by_requested_priority(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => 'Product',
+				'name'  => 'Scalar product',
+			)
+		);
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Review', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@graph'   => array(
+					array(
+						'@type' => 'Product',
+						'name'  => 'Scalar product',
+					),
+					array(
+						'@type' => array( 'Review', 'Product' ),
+						'name'  => 'Multi-type product',
+					),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'product', 'review' ) ),
+			'Multi-type nodes should join the group selected by the requested type order.'
+		);
+	}
+
+	/**
+	 * @testdox woocommerce_structured_data_context receives the string grouping key and complete @type array.
+	 */
+	public function test_structured_data_context_receives_array_type_and_string_grouping_key(): void {
+		$markup           = array(
+			'@type' => array( 'Review', 'Product' ),
+			'name'  => 'Multi-type product',
+		);
+		$filter_arguments = array();
+
+		add_filter(
+			'woocommerce_structured_data_context',
+			static function ( $context, $data, $type, $value ) use ( &$filter_arguments ) {
+				$filter_arguments = array(
+					'type'  => $type,
+					'value' => $value,
+				);
+
+				return $context;
+			},
+			10,
+			4
+		);
+
+		$this->structured_data->set_data( $markup );
+		$this->structured_data->get_structured_data( array( 'product', 'review' ) );
+
+		$this->assertSame(
+			array(
+				'type'  => 'product',
+				'value' => array( $markup ),
+			),
+			$filter_arguments,
+			'The context filter should receive the selected string grouping key and the unmodified multi-type node.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() excludes multi-type nodes without a requested type.
+	 */
+	public function test_get_structured_data_excludes_array_type_without_requested_match(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Thing', 'CreativeWork' ),
+				'name'  => 'Unrequested node',
+			)
+		);
+
+		$this->assertSame(
+			array(),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Multi-type nodes without a requested type should be excluded.'
+		);
+	}
+
+	/**
+	 * @testdox Order structured data looks up the product image with an integer attachment ID.
+	 */
+	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product = wc_get_product( $product->save() );
+		$order   = WC_Helper_Order::create_order( 1, $product );
+
+		$received_id = null;
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( &$received_id ) {
+				if ( null === $received_id ) {
+					$received_id = $attachment_id;
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$this->structured_data->generate_order_data( $order );
+
+		$this->assertSame( $image_id, $received_id, 'The attachment ID passed to WordPress should be an integer.' );
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void
@@ -123,6 +362,163 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['price'] );
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is present in product structured data when taxes are enabled.
+	 *
+	 * @return void
+	 */
+	public function test_product_structured_data_includes_vat_when_taxes_enabled(): void {
+		// Enable taxes.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		// Create a simple product with a price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry.
+		$this->assertNotEmpty( $data );
+		$product_data = $data[0];
+
+		// Check that offers exist.
+		$this->assertArrayHasKey( 'offers', $product_data );
+		$this->assertNotEmpty( $product_data['offers'] );
+
+		// Get the first offer.
+		$offer = $product_data['offers'][0];
+
+		// Check that priceSpecification exists and contains valueAddedTaxIncluded.
+		$this->assertArrayHasKey( 'priceSpecification', $offer );
+		$this->assertNotEmpty( $offer['priceSpecification'] );
+
+		$price_spec = $offer['priceSpecification'][0];
+		$this->assertArrayHasKey( 'valueAddedTaxIncluded', $price_spec );
+		$this->assertTrue( $price_spec['valueAddedTaxIncluded'] );
+
+		// Clean up.
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is not present in product structured data when taxes are disabled.
+	 *
+	 * @return void
+	 */
+	public function test_product_structured_data_excludes_vat_when_taxes_disabled(): void {
+		// Disable taxes.
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Create a simple product with a price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry.
+		$this->assertNotEmpty( $data );
+		$product_data = $data[0];
+
+		// Check that offers exist.
+		$this->assertArrayHasKey( 'offers', $product_data );
+		$this->assertNotEmpty( $product_data['offers'] );
+
+		// Get the first offer.
+		$offer = $product_data['offers'][0];
+
+		// Check that priceSpecification exists.
+		$this->assertArrayHasKey( 'priceSpecification', $offer );
+		$this->assertNotEmpty( $offer['priceSpecification'] );
+
+		$price_spec = $offer['priceSpecification'][0];
+
+		// valueAddedTaxIncluded should not be present when taxes are disabled.
+		$this->assertArrayNotHasKey( 'valueAddedTaxIncluded', $price_spec );
+
+		// Clean up.
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is present in order structured data when taxes are enabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_structured_data_includes_vat_when_taxes_enabled(): void {
+		// Enable taxes with prices inclusive of tax.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Create a simple product and order.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_order_data( $order );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry (should be order).
+		$this->assertNotEmpty( $data );
+		$order_data = $data[0];
+
+		// Check that priceSpecification exists and contains valueAddedTaxIncluded as a boolean.
+		$this->assertArrayHasKey( 'priceSpecification', $order_data );
+		$this->assertArrayHasKey( 'valueAddedTaxIncluded', $order_data['priceSpecification'] );
+		$this->assertIsBool( $order_data['priceSpecification']['valueAddedTaxIncluded'] );
+		$this->assertTrue( $order_data['priceSpecification']['valueAddedTaxIncluded'] );
+
+		// Clean up.
+		$order->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is not present in order structured data when taxes are disabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_structured_data_excludes_vat_when_taxes_disabled(): void {
+		// Disable taxes.
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Create a simple product and order.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_order_data( $order );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry (should be order).
+		$this->assertNotEmpty( $data );
+		$order_data = $data[0];
+
+		// Check that priceSpecification exists.
+		$this->assertArrayHasKey( 'priceSpecification', $order_data );
+
+		// valueAddedTaxIncluded should not be present when taxes are disabled.
+		$this->assertArrayNotHasKey( 'valueAddedTaxIncluded', $order_data['priceSpecification'] );
+
+		// Clean up.
+		$order->delete( true );
+		$product->delete( true );
 	}
 
 	/**

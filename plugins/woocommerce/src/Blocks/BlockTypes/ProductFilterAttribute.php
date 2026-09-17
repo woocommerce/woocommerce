@@ -120,10 +120,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		foreach ( $attribute_terms as $term_object ) {
 			$attribute_name = str_replace( 'pa_', '', $term_object->taxonomy );
+			$term_name      = wp_specialchars_decode( $term_object->name, ENT_QUOTES );
 			$items[]        = array(
 				'type'               => 'attribute/' . $attribute_name,
 				'value'              => $term_object->slug,
-				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_object->name ),
+				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_name ),
 				'attributeQueryType' => $query_types[ $attribute_name ] ?? 'or',
 			);
 		}
@@ -208,11 +209,12 @@ final class ProductFilterAttribute extends AbstractBlock {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					$type = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
-					$item = array(
+					$term_name = wp_specialchars_decode( $term['name'], ENT_QUOTES );
+					$type      = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$item      = array(
 						'id'                 => $type . '-' . $term['slug'],
-						'label'              => $term['name'],
-						'ariaLabel'          => $term['name'],
+						'label'              => $term_name,
+						'ariaLabel'          => $term_name,
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'type'               => $type,

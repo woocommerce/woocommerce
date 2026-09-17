@@ -15,6 +15,13 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Custom roles registered during a test.
 	 *
 	 * @var string[]
@@ -35,7 +42,9 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 				'private' => true,
 			)
 		);
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
 	}
 

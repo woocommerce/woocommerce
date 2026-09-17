@@ -88,7 +88,9 @@ export const SettingsButton = ( {
 				// This is necessary to ensure that the page updates correctly with the latest data.
 				// If it's not a Reactified page, we just navigate to the settingsHref directly.
 				if ( isReactifiedPage ) {
-					invalidateResolutionForStoreSelector( 'getPaymentGateway' );
+					void invalidateResolutionForStoreSelector(
+						'getPaymentGateway'
+					);
 					navigate( removeOriginFromURL( settingsHref ) );
 				} else {
 					window.location.href = settingsHref;

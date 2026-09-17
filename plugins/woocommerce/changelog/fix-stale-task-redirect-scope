@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scope the stale task redirect to the Home screen and skip it when task lists have not loaded, so failed fetches or stray task params no longer navigate away.

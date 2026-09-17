@@ -3,6 +3,7 @@
  */
 import type { HTMLElementEvent } from '@woocommerce/types';
 import * as iAPI from '@wordpress/interactivity';
+import type { RangeInputParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import * as iAPI from '@wordpress/interactivity';
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
-import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;

@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove unused `products-catalog-api` feature flag and its mock `WC_REST_Products_Catalog_Controller`, superseded by the `wc/pos/v1/catalog` endpoint.

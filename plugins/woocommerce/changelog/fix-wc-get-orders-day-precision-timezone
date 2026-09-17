@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Anchor day-precision date queries on the store's local midnight instead of UTC midnight, so wc_get_orders() and wc_get_products() match the day a merchant means when filtering on date_paid, date_completed, date_on_sale_from and date_on_sale_to. A `start...end` range now covers the whole of its final day, where before it collapsed that day down to a single second, so range queries return one more day of results than they used to.

@@ -168,15 +168,24 @@ final class ContractFactory {
 	/**
 	 * Build the typed plan snapshot for the origin cycle.
 	 *
+	 * The `pricing_policy` key freezes the discount rules the contract's cycles
+	 * bill under alongside the cadence; it is explicitly `null` when the plan has
+	 * none, so a reader can tell "no pricing policy at signup" apart from a
+	 * snapshot written before the key existed. The payload is schema-free, so the
+	 * additive key needs no format-version bump.
+	 *
 	 * @param Plan $plan The plan whose terms to snapshot.
 	 */
 	private function build_plan_snapshot( Plan $plan ): PlanSnapshot {
+		$pricing_policy = $plan->get_pricing_policy();
+
 		return PlanSnapshot::from_array(
 			array(
 				'selling_plan_id' => $plan->get_id(),
 				'name'            => $plan->get_name(),
 				'category'        => $plan->get_category(),
 				'billing_policy'  => $plan->get_billing_policy()->to_array(),
+				'pricing_policy'  => null !== $pricing_policy ? $pricing_policy->to_array() : null,
 			)
 		);
 	}

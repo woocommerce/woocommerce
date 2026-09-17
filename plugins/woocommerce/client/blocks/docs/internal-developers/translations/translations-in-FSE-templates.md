@@ -31,7 +31,7 @@ Let's take a look at `templates/parts/mini-cart.html`:
 	<div class="wp-block-woocommerce-empty-mini-cart-contents-block">
 		<!-- wp:paragraph {"align":"center"} -->
 		<p class="has-text-align-center">
-			<strong>Your cart is currently empty!</strong>
+			<strong>Your shopping cart is empty</strong>
 		</p>
 		<!-- /wp:paragraph -->
 
@@ -48,21 +48,21 @@ This FSE-template contains the following part:
 
 ```html
 <p class="has-text-align-center">
-	<strong>Your cart is currently empty!</strong>
+	<strong>Your shopping cart is empty</strong>
 </p>
 ```
 
 Having this text hardcoded in a FSE-template causes two problems:
 
 1. This string can only be edited, when a user is using an FSE-theme, such as [Twenty Twenty-Two](https://wordpress.org/themes/twentytwentytwo/). If the user is using a non-FSE-theme, such as [Twenty Twenty-One](https://wordpress.org/themes/twentytwentyone/) or older, this FSE-template cannot be edited.
-2. Even is a user is using an FSE-theme, every user that is using a site language other than the default one, has to manually change the string `Your cart is currently empty!`.
+2. Even if a user is using an FSE-theme, every user who uses a site language other than the default must manually change the string `Your shopping cart is empty`.
 
 To handle translations within FSE-templates, we need to find the following code:
 
 ```html
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center">
-	<strong>Your cart is currently empty!</strong>
+	<strong>Your shopping cart is empty</strong>
 </p>
 <!-- /wp:paragraph -->
 ```
@@ -73,7 +73,7 @@ We then replace this code with the following code:
 <!-- wp:pattern {"slug":"woocommerce/mini-cart-empty-cart-message"} /-->
 ```
 
-In the file, that holds the logic for this FSE-template, in this case `src/BlockTypes/MiniCart.php`, we then register this placeholder as a block pattern:
+In the file, that holds the logic for this FSE-template, in this case `src/Blocks/BlockTypes/MiniCart.php`, we then register this placeholder as a block pattern:
 
 ```php
 /**
@@ -83,9 +83,9 @@ public function register_empty_cart_message_block_pattern() {
     register_block_pattern(
         'woocommerce/mini-cart-empty-cart-message',
         array(
-            'title'    => __( 'Empty Mini-Cart Message', 'woo-gutenberg-products-block' ),
+            'title'    => __( 'Empty Mini-Cart Message', 'woocommerce' ),
             'inserter' => false,
-            'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
+            'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your shopping cart is empty', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
         )
     );
 }

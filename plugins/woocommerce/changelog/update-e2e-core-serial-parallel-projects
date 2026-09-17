@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Split the core E2E Playwright suite into core-serial and core-parallel projects to enable parallel test runs. Test-only change, no production impact.

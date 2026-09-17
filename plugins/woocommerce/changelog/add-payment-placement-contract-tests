@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add per-country, per-section contract tests pinning the Payments settings partner recommendations, replacing two duplicated suggestion-count data providers and several per-country spot tests.

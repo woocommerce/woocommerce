@@ -3,17 +3,16 @@ $thumbnails-gradient-size: 20%;
 $thumbnails-gap: 2%;
 $dialog-padding: 20px;
 
+:where(.wc-block-product-gallery) {
+	--wc-block-product-gallery-large-image-ratio-width: 1;
+	--wc-block-product-gallery-large-image-ratio-height: 1;
+}
+
 :where(.wc-block-product-gallery-large-image) {
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
 	overflow: hidden;
-
-	//When Product Image aspect ratio is auto, we are setting constraints
-	//on the viewer container and display full images in square container.
-	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
-		aspect-ratio: 1/1;
-	}
 
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
@@ -33,10 +32,7 @@ $dialog-padding: 20px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-
-		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
-			aspect-ratio: 1/1;
-		}
+		aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
 	}
 
 	.wc-block-product-gallery-large-image__wrapper[hidden] {

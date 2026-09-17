@@ -6,11 +6,31 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Privacy;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 
 /**
  * PrivacyEraser tests.
  */
 class PrivacyEraserTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->enable_stock_notifications_feature();
+	}
+
+	/**
+	 * Tear down the test.
+	 */
+	public function tearDown(): void {
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
+	}
+
 	/**
 	 * Test that privacy eraser makes notification data anonymous.
 	 */
@@ -28,5 +48,20 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $anonymous_notification->get_user_email(), wp_privacy_anonymize_data( 'email', '' ) );
 		$this->assertEquals( NotificationStatus::CANCELLED, $anonymous_notification->get_status() );
+	}
+
+	/**
+	 * @testdox Should erase a lowercase row when given a mixed-case email.
+	 */
+	public function test_privacy_eraser_matches_case_variants(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 1 );
+		$notification_id = $notification->save();
+
+		$response = PrivacyEraser::erase_notification_data( 'Jon@Doe.COM' );
+
+		$this->assertTrue( $response['items_removed'] );
+		$this->assertEquals( NotificationStatus::CANCELLED, ( new Notification( $notification_id ) )->get_status() );
 	}
 }

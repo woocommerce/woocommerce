@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
-import { Icon, chevronRight } from '@wordpress/icons';
+import { Icon, chevronRight, chevronLeft } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -18,6 +18,10 @@ import LightBulb from './icon/lightbulb_24px.js';
 import PrintfulIcon from './icon/printful.png';
 import Upload from './icon/upload_40px.js';
 
+// The "after" chevron points in the reading direction (forward), so it must
+// flip for RTL locales instead of always pointing right.
+const listItemChevron = <Icon icon={ isRTL() ? chevronLeft : chevronRight } />;
+
 export const productTypes = Object.freeze( [
 	{
 		key: 'physical' as const,
@@ -27,7 +31,7 @@ export const productTypes = Object.freeze( [
 			'woocommerce'
 		),
 		before: <ProductIcon />,
-		after: <Icon icon={ chevronRight } />,
+		after: listItemChevron,
 	},
 	{
 		key: 'digital' as const,
@@ -37,7 +41,7 @@ export const productTypes = Object.freeze( [
 			'woocommerce'
 		),
 		before: <CloudOutlineIcon />,
-		after: <Icon icon={ chevronRight } />,
+		after: listItemChevron,
 	},
 	{
 		key: 'variable' as const,
@@ -47,21 +51,21 @@ export const productTypes = Object.freeze( [
 			'woocommerce'
 		),
 		before: <TypesIcon />,
-		after: <Icon icon={ chevronRight } />,
+		after: listItemChevron,
 	},
 	{
 		key: 'grouped' as const,
 		title: __( 'Grouped product', 'woocommerce' ),
 		content: __( 'A collection of related products.', 'woocommerce' ),
 		before: <Widget />,
-		after: <Icon icon={ chevronRight } />,
+		after: listItemChevron,
 	},
 	{
 		key: 'external' as const,
 		title: __( 'External product', 'woocommerce' ),
 		content: __( 'Link a product to an external website.', 'woocommerce' ),
 		before: <Link />,
-		after: <Icon icon={ chevronRight } />,
+		after: listItemChevron,
 	},
 ] );
 
@@ -73,7 +77,7 @@ export const LoadSampleProductType = {
 		'woocommerce'
 	),
 	before: <LightBulb />,
-	after: <Icon icon={ chevronRight } />,
+	after: listItemChevron,
 	className: 'woocommerce-products-list__item-load-sample-product',
 };
 

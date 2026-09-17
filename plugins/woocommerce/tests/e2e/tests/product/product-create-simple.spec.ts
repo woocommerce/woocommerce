@@ -209,6 +209,7 @@ for ( const productType of Object.keys( productData ) ) {
 			if ( productData[ productType ].shipping ) {
 				await test.step( 'add shipping details', async () => {
 					await page
+						.locator( '#woocommerce-product-data' )
 						.getByRole( 'link', { name: 'Shipping' } )
 						.click();
 					await expect(
@@ -250,7 +251,10 @@ for ( const productType of Object.keys( productData ) ) {
 					).toBeChecked();
 
 					// Add a download link
-					await page.getByRole( 'link', { name: 'General' } ).click();
+					await page
+						.locator( '#woocommerce-product-data' )
+						.getByRole( 'link', { name: 'General' } )
+						.click();
 					await page
 						.getByRole( 'link', { name: 'Add File' } )
 						.click();

@@ -67,10 +67,11 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		foreach ( $terms as $term ) {
 			$taxonomy_object = get_taxonomy( $term->taxonomy );
 			if ( $taxonomy_object ) {
-				$items[] = array(
+				$term_name = wp_specialchars_decode( $term->name, ENT_QUOTES );
+				$items[]   = array(
 					'type'        => 'taxonomy/' . $term->taxonomy,
 					'value'       => $term->slug,
-					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term->name,
+					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term_name,
 				);
 			}//end if
 		}
@@ -243,12 +244,13 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
+					$term_name     = wp_specialchars_decode( $term['name'], ENT_QUOTES );
 
 					$type   = 'taxonomy/' . $taxonomy;
 					$option = array(
 						'id'        => $type . '-' . $term['slug'],
-						'label'     => $term['name'],
-						'ariaLabel' => $term['name'],
+						'label'     => $term_name,
+						'ariaLabel' => $term_name,
 						'value'     => $term['slug'],
 						'selected'  => in_array( $term['slug'], $selected_terms, true ),
 						'type'      => $type,

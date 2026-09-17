@@ -17,6 +17,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DomainException;
+use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
@@ -121,6 +122,32 @@ final class PlanSnapshot {
 		} catch ( DomainException $e ) {
 			// A structurally-invalid stored policy degrades to "no cadence" rather than
 			// fataling the read; snapshots this engine writes always carry a valid policy.
+			unset( $e );
+			return null;
+		}
+	}
+
+	/**
+	 * The frozen pricing policy, reconstructed from the snapshot payload.
+	 *
+	 * Sourced from the `pricing_policy` entry captured at signup, NOT the live plan -
+	 * the same frozen-terms contract as {@see self::get_billing_policy()}. Returns
+	 * null when the payload carries no pricing policy (the plan had none at signup,
+	 * or the snapshot predates the key) or an unreadable one, so a caller degrades
+	 * to "no price adjustments" rather than fataling.
+	 */
+	public function get_pricing_policy(): ?PricingPolicy {
+		$policy = $this->data['pricing_policy'] ?? null;
+		if ( ! is_array( $policy ) ) {
+			return null;
+		}
+
+		try {
+			return PricingPolicy::from_array( self::string_keyed( $policy ) );
+		} catch ( InvalidArgumentException $e ) {
+			// A structurally-invalid stored policy degrades to "no price adjustments"
+			// rather than fataling the read (same fail-soft rationale as the billing
+			// accessor); snapshots this engine writes always carry a valid policy.
 			unset( $e );
 			return null;
 		}

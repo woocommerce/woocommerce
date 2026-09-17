@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Check parent product visibility in get_variation AJAX endpoint before returning variation data

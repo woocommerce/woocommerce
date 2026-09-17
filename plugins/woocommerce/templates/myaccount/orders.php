@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,7 +35,10 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 		<tbody>
 			<?php
 			foreach ( $customer_orders->orders as $customer_order ) {
-				$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$order = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				if ( ! $order instanceof WC_Order ) {
+					continue;
+				}
 				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
@@ -47,6 +50,8 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 						<?php else : ?>
 							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 						<?php endif; ?>
+
+							<?php ob_start(); ?>
 
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
@@ -88,6 +93,54 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								}
 								?>
 							<?php endif; ?>
+
+							<?php
+							$column_content = trim( (string) ob_get_clean() );
+
+							/**
+							 * Filters the content of a My Account orders table column.
+							 *
+							 * The dynamic portion of the hook name, `$column_id`, refers to the
+							 * order table column ID. The filter receives the full cell content:
+							 * the default column HTML or, when callbacks are registered on the
+							 * `woocommerce_my_account_my_orders_column_{$column_id}` action, the
+							 * output of those callbacks. Default content is escaped before this
+							 * filter runs, and callbacks should return safe, escaped HTML.
+							 *
+							 * Callbacks that replace the content rather than append to it should
+							 * carry over the default markup's accessibility affordances: the order
+							 * number link's `aria-label`, the order action `aria-label`s, and the
+							 * order date `<time datetime>` attribute.
+							 *
+							 * This filter runs from the `myaccount/orders.php` template, so it is
+							 * not available on sites where a theme overrides the template with a
+							 * copy predating version 11.1.0. Registering the legacy action as well
+							 * is not a workaround for that: the action still suppresses the default
+							 * content and this filter then runs over the action's output, so
+							 * callbacks on both hooks emitting the same markup render it twice.
+							 *
+							 * @param string   $column_content Current column cell HTML.
+							 * @param WC_Order $order          Current order object.
+							 * @param string   $column_id      Current column ID.
+							 *
+							 * @since 11.1.0
+							 */
+							$filtered_column_content = apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id );
+
+							if ( is_string( $filtered_column_content ) ) {
+								$column_content = $filtered_column_content;
+							} elseif ( is_int( $filtered_column_content ) || is_float( $filtered_column_content ) || ( is_object( $filtered_column_content ) && method_exists( $filtered_column_content, '__toString' ) ) ) {
+								$column_content = (string) $filtered_column_content;
+							} else {
+								wc_doing_it_wrong(
+									'woocommerce_account_orders_column_content_' . $column_id,
+									__( 'Filter callbacks must return a string (or stringable value) of safe, escaped HTML. Return an empty string to render an empty cell. The unfiltered column content was used instead.', 'woocommerce' ),
+									'11.1.0'
+								);
+							}
+
+							echo $column_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Contains escaped default content or action hook output; filter callbacks must return safe HTML.
+							?>
 
 						<?php if ( $is_order_number ) : ?>
 							</th>

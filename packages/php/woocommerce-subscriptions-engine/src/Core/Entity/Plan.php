@@ -36,7 +36,7 @@ final class Plan {
 
 	public const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
 
-	public const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
+	public const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price', 'bogo' );
 
 	/**
 	 * Plan id, or null before it is persisted.
@@ -471,8 +471,11 @@ final class Plan {
 	 * Validate every entry in a pricing policy's policies[] and one_time_fees[].
 	 *
 	 * Rules:
-	 *  - policies[].type is one of percentage, fixed_amount, price.
-	 *  - policies[].value is numeric and non-negative; percentage is capped at 100.
+	 *  - policies[].type is one of percentage, fixed_amount, price, bogo.
+	 *  - policies[].value is numeric and non-negative; percentage is capped at 100;
+	 *    bogo must be exactly 0 (a value-less type - the benefit is an in-kind bonus
+	 *    unit, so a non-zero value is meaningless and rejected rather than silently
+	 *    stored).
 	 *  - policies[].duration_cycles is optional, integer, and positive.
 	 *  - one_time_fees[].amount is numeric and non-negative.
 	 *  - one_time_fees[].taxable is a bool.
@@ -520,6 +523,12 @@ final class Plan {
 			if ( 'percentage' === $type && $value > 100 ) {
 				throw new InvalidArgumentException(
 					sprintf( 'pricing_policy.policies[%d]: percentage must not exceed 100, got %s', (int) $index, $value )
+				);
+			}
+
+			if ( 'bogo' === $type && 0.0 !== $value ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: bogo is value-less; value must be 0 or omitted, got %s', (int) $index, $value )
 				);
 			}
 

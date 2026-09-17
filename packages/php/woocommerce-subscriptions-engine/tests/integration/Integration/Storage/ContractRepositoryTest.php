@@ -227,6 +227,376 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Insert a contract at a given status with the given list-relevant columns, returning its id.
+	 *
+	 * @param string      $status          Contract status (a ContractStatus value).
+	 * @param int         $customer_id     Owning customer id.
+	 * @param string|null $next_payment    Next-payment GMT string, or null.
+	 * @param string      $billing_total   Billing total (decimal string).
+	 * @param string      $start           Start GMT string.
+	 * @param int|null    $origin_order_id Origin order id, or null.
+	 */
+	private function insert_list_contract(
+		string $status,
+		int $customer_id = 42,
+		?string $next_payment = '2026-07-15 00:00:00',
+		string $billing_total = '19.99',
+		string $start = '2026-06-15 00:00:00',
+		?int $origin_order_id = 1001
+	): int {
+		return $this->sut->insert(
+			Contract::create(
+				array(
+					'customer_id'      => $customer_id,
+					'status'           => $status,
+					'currency'         => 'USD',
+					'selling_plan_id'  => 7,
+					'origin_order_id'  => $origin_order_id,
+					'start_gmt'        => $start,
+					'next_payment_gmt' => $next_payment,
+					'billing_total'    => $billing_total,
+				)
+			)
+		);
+	}
+
+	/**
+	 * The ids returned by a query, in result order.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 * @return array<int, int>
+	 */
+	private function query_ids( array $args ): array {
+		return array_map( static fn ( Contract $c ) => (int) $c->get_id(), $this->sut->query( $args ) );
+	}
+
+	/**
+	 * @testdox query filters by a valid status and ignores an invalid or empty status.
+	 */
+	public function test_query_filters_by_status(): void {
+		$active    = $this->insert_list_contract( ContractStatus::ACTIVE );
+		$on_hold   = $this->insert_list_contract( ContractStatus::ON_HOLD );
+		$cancelled = $this->insert_list_contract( ContractStatus::CANCELLED );
+
+		$this->assertSame( array( $active ), $this->query_ids( array( 'status' => ContractStatus::ACTIVE ) ) );
+		$this->assertSame( array( $on_hold ), $this->query_ids( array( 'status' => ContractStatus::ON_HOLD ) ) );
+
+		// An unknown status is ignored (not injected into SQL): all rows come back, newest first.
+		$this->assertSame(
+			array( $cancelled, $on_hold, $active ),
+			$this->query_ids( array( 'status' => 'not-a-status' ) )
+		);
+
+		// An empty status is ignored too.
+		$this->assertSame(
+			array( $cancelled, $on_hold, $active ),
+			$this->query_ids( array( 'status' => '' ) )
+		);
+	}
+
+	/**
+	 * @testdox query sorts by a whitelisted column and direction, defaulting to id DESC.
+	 */
+	public function test_query_sorts_by_whitelisted_orderby_and_order(): void {
+		// Distinct totals and next-payment dates so the ordering is unambiguous.
+		$low  = $this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-09-15 00:00:00', '10.00' );
+		$high = $this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-07-15 00:00:00', '30.00' );
+		$mid  = $this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-08-15 00:00:00', '20.00' );
+
+		// total ASC.
+		$this->assertSame(
+			array( $low, $mid, $high ),
+			$this->query_ids(
+				array(
+					'orderby' => 'total',
+					'order'   => 'ASC',
+				)
+			)
+		);
+
+		// total DESC (order defaults to DESC when omitted).
+		$this->assertSame( array( $high, $mid, $low ), $this->query_ids( array( 'orderby' => 'total' ) ) );
+
+		// next_payment maps to next_payment_gmt: ASC is earliest-first.
+		$this->assertSame(
+			array( $high, $mid, $low ),
+			$this->query_ids(
+				array(
+					'orderby' => 'next_payment',
+					'order'   => 'ASC',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox query falls back to id DESC for an unknown orderby or order (never raw SQL).
+	 */
+	public function test_query_falls_back_for_invalid_sort(): void {
+		$first  = $this->insert_list_contract( ContractStatus::ACTIVE );
+		$second = $this->insert_list_contract( ContractStatus::ACTIVE );
+		$third  = $this->insert_list_contract( ContractStatus::ACTIVE );
+
+		// An unknown orderby column falls back to id, and an unknown order to DESC - no SQL error.
+		$this->assertSame(
+			array( $third, $second, $first ),
+			$this->query_ids(
+				array(
+					'orderby' => 'customer_id; DROP TABLE contracts',
+					'order'   => 'sideways',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox query clamps a negative limit or offset instead of emitting invalid SQL.
+	 */
+	public function test_query_clamps_negative_paging(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+
+		// A negative limit clamps to 0 (LIMIT 0 -> no rows) rather than "LIMIT -n", which is a SQL error.
+		$this->assertSame( array(), $this->query_ids( array( 'limit' => -5 ) ) );
+
+		// A negative offset clamps to 0, so the page is unaffected and no SQL error is raised.
+		$this->assertCount( 2, $this->query_ids( array( 'offset' => -10 ) ) );
+	}
+
+	/**
+	 * @testdox query search matches by contract id or origin order id for a numeric term.
+	 */
+	public function test_query_search_matches_id_and_origin_order_for_a_numeric_term(): void {
+		$by_id     = $this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-07-15 00:00:00', '19.99', '2026-06-15 00:00:00', 500 );
+		$by_origin = $this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-07-15 00:00:00', '19.99', '2026-06-15 00:00:00', 700 );
+
+		// The term equals the first contract's id: it matches by id.
+		$this->assertSame( array( $by_id ), $this->query_ids( array( 'search' => (string) $by_id ) ) );
+
+		// The term equals the second contract's origin order id: it matches by origin_order_id.
+		$this->assertSame( array( $by_origin ), $this->query_ids( array( 'search' => '700' ) ) );
+
+		// A numeric term matching nothing returns no rows.
+		$this->assertSame( array(), $this->query_ids( array( 'search' => '99999999' ) ) );
+	}
+
+	/**
+	 * @testdox query search resolves a non-numeric term to matching customers.
+	 */
+	public function test_query_search_matches_customers_for_a_text_term(): void {
+		$alice = self::factory()->user->create(
+			array(
+				'user_email'   => 'alice@example.test',
+				'display_name' => 'Alice Example',
+			)
+		);
+		$bob   = self::factory()->user->create(
+			array(
+				'user_email'   => 'bob@example.test',
+				'display_name' => 'Bob Example',
+			)
+		);
+		$this->assertIsInt( $alice );
+		$this->assertIsInt( $bob );
+
+		$alice_contract = $this->insert_list_contract( ContractStatus::ACTIVE, (int) $alice );
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $bob );
+
+		// The email resolves to Alice's user id, then to her contract.
+		$this->assertSame( array( $alice_contract ), $this->query_ids( array( 'search' => 'alice@example.test' ) ) );
+
+		// A text term matching no user returns no rows (empty customer set -> no rows).
+		$this->assertSame( array(), $this->query_ids( array( 'search' => 'nobody-by-this-name' ) ) );
+	}
+
+	/**
+	 * @testdox query search matches a customer by display name and by login, not only email.
+	 */
+	public function test_query_search_matches_display_name_and_login(): void {
+		$customer = self::factory()->user->create(
+			array(
+				'user_login'   => 'zelda_login',
+				'user_email'   => 'zelda@example.test',
+				'display_name' => 'Zelda Fitzgerald',
+			)
+		);
+		$this->assertIsInt( $customer );
+		$contract = $this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+
+		// The users-table subquery covers display_name and user_login, not just email.
+		$this->assertSame( array( $contract ), $this->query_ids( array( 'search' => 'Fitzgerald' ) ) );
+		$this->assertSame( array( $contract ), $this->query_ids( array( 'search' => 'zelda_login' ) ) );
+	}
+
+	/**
+	 * @testdox query/count customer search keeps every match, past the old 50-user lookup cap.
+	 */
+	public function test_query_search_is_not_capped_at_a_user_limit(): void {
+		// More than the old 50-user get_users() cap, all sharing an email substring, each with a contract.
+		$total = 55;
+		for ( $i = 0; $i < $total; $i++ ) {
+			$customer = self::factory()->user->create( array( 'user_email' => "capsearch{$i}@example.test" ) );
+			$this->assertIsInt( $customer );
+			$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		}
+
+		// The users-table subquery matches every customer whose email contains the term - no
+		// truncation - and count() agrees with the full set the page is a window onto.
+		$this->assertSame( $total, $this->sut->count( array( 'search' => 'capsearch' ) ) );
+		$this->assertCount(
+			$total,
+			$this->sut->query(
+				array(
+					'search' => 'capsearch',
+					'limit'  => 100,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox query composes status, search, and sort together.
+	 */
+	public function test_query_composes_status_search_and_sort(): void {
+		$customer = self::factory()->user->create(
+			array(
+				'user_email'   => 'composer@example.test',
+				'display_name' => 'Composer Example',
+			)
+		);
+		$other    = self::factory()->user->create( array( 'user_email' => 'other@example.test' ) );
+		$this->assertIsInt( $customer );
+		$this->assertIsInt( $other );
+
+		$active_low  = $this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer, '2026-07-15 00:00:00', '10.00' );
+		$active_high = $this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer, '2026-07-15 00:00:00', '20.00' );
+		// Same customer, different status - excluded by the status filter.
+		$this->insert_list_contract( ContractStatus::CANCELLED, (int) $customer, '2026-07-15 00:00:00', '30.00' );
+		// A different customer - excluded by the search.
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $other, '2026-07-15 00:00:00', '5.00' );
+
+		$this->assertSame(
+			array( $active_low, $active_high ),
+			$this->query_ids(
+				array(
+					'status'  => ContractStatus::ACTIVE,
+					'search'  => 'composer@example.test',
+					'orderby' => 'total',
+					'order'   => 'ASC',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox count_by_status returns every known status, filling absent ones with zero.
+	 */
+	public function test_count_by_status_returns_every_status_filling_zeros(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ON_HOLD );
+
+		$counts = $this->sut->count_by_status();
+
+		// Every known status is a key, in ContractStatus::all() order, with absent ones 0.
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( 2, $counts[ ContractStatus::ACTIVE ] );
+		$this->assertSame( 1, $counts[ ContractStatus::ON_HOLD ] );
+		$this->assertSame( 0, $counts[ ContractStatus::PENDING_CANCELLATION ] );
+		$this->assertSame( 0, $counts[ ContractStatus::CANCELLED ] );
+		$this->assertSame( 0, $counts[ ContractStatus::EXPIRED ] );
+	}
+
+	/**
+	 * @testdox count_by_status returns all-zero when there are no contracts.
+	 */
+	public function test_count_by_status_is_all_zero_when_empty(): void {
+		$counts = $this->sut->count_by_status();
+
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( array( 0, 0, 0, 0, 0 ), array_values( $counts ) );
+	}
+
+	/**
+	 * @testdox count honours the same status + search filter as query, ignoring paging/sort.
+	 */
+	public function test_count_matches_the_query_filter(): void {
+		$customer = self::factory()->user->create( array( 'user_email' => 'counted@example.test' ) );
+		$this->assertIsInt( $customer );
+
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ON_HOLD, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-07-15 00:00:00', '19.99', '2026-06-15 00:00:00', 4242 );
+
+		// No args: the grand total.
+		$this->assertSame( 4, $this->sut->count() );
+
+		// A status filter counts only that status.
+		$this->assertSame( 3, $this->sut->count( array( 'status' => ContractStatus::ACTIVE ) ) );
+		$this->assertSame( 1, $this->sut->count( array( 'status' => ContractStatus::ON_HOLD ) ) );
+
+		// A numeric search counts by id / origin order id.
+		$this->assertSame( 1, $this->sut->count( array( 'search' => '4242' ) ) );
+
+		// A text search counts the matching customer's rows; status composes with it.
+		$this->assertSame( 3, $this->sut->count( array( 'search' => 'counted@example.test' ) ) );
+		$this->assertSame(
+			2,
+			$this->sut->count(
+				array(
+					'search' => 'counted@example.test',
+					'status' => ContractStatus::ACTIVE,
+				)
+			)
+		);
+
+		// Paging and sort args do not change the count.
+		$this->assertSame(
+			4,
+			$this->sut->count(
+				array(
+					'limit'   => 1,
+					'offset'  => 2,
+					'orderby' => 'total',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox count agrees with the number of rows query returns for the same filter.
+	 */
+	public function test_count_agrees_with_query_result_size(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::CANCELLED );
+
+		$args = array( 'status' => ContractStatus::ACTIVE );
+		$this->assertSame( count( $this->sut->query( $args ) ), $this->sut->count( $args ) );
+	}
+
+	/**
+	 * @testdox count_items_by_contract maps every requested id, zero-filling ids with no items.
+	 */
+	public function test_count_items_by_contract_maps_every_requested_id(): void {
+		$with_items = $this->sut->insert( $this->make_contract() ); // Seeds one line item.
+		$no_items   = $this->insert_list_contract( ContractStatus::ACTIVE ); // Bare row, no items.
+		$absent     = 999999; // Never inserted.
+
+		$counts = $this->sut->count_items_by_contract( array( $with_items, $no_items, $absent ) );
+
+		$this->assertSame( 1, $counts[ $with_items ], 'A contract with items reports its line-item count.' );
+		$this->assertSame( 0, $counts[ $no_items ], 'A contract with no items is zero-filled, not absent.' );
+		$this->assertSame( 0, $counts[ $absent ], 'A requested id with no rows is present at zero.' );
+		$this->assertCount( 3, $counts, 'The map carries exactly the requested ids.' );
+
+		// De-duplicates its input and short-circuits an empty request.
+		$this->assertSame( array( $with_items => 1 ), $this->sut->count_items_by_contract( array( $with_items, $with_items ) ) );
+		$this->assertSame( array(), $this->sut->count_items_by_contract( array() ) );
+	}
+
+	/**
 	 * @testdox A manual/admin contract with a null origin order round-trips.
 	 */
 	public function test_contract_round_trips_a_null_origin_order(): void {
