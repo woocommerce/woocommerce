@@ -31,7 +31,7 @@ class WC_Queue {
 	 *
 	 * @var string
 	 */
-	protected static $default_cass = '\Automattic\WooCommerce\Queue\OptionsAwareActionQueue';
+	protected static $default_cass = 'Automattic\WooCommerce\Queue\OptionsAwareActionQueue';
 
 	/**
 	 * Single instance of WC_Queue_Interface

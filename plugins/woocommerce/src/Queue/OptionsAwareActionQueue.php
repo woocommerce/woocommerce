@@ -140,7 +140,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 
 		wc_doing_it_wrong(
 			__METHOD__,
-			'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.',
+			__( 'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.', 'woocommerce' ),
 			'11.3.0'
 		);
 
@@ -233,7 +233,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 */
 	private function can_schedule( string $function_name, string $method, $hook, $args, $group, array $options ): bool {
 		if ( ! function_exists( $function_name ) ) {
-			wc_doing_it_wrong( __CLASS__ . '::' . $method, 'Action Scheduler is not loaded, so actions cannot be scheduled. Call this after Action Scheduler has initialized.', '11.3.0' );
+			wc_doing_it_wrong( __CLASS__ . '::' . $method, __( 'Action Scheduler is not loaded, so actions cannot be scheduled. Call this after Action Scheduler has initialized.', 'woocommerce' ), '11.3.0' );
 			return false;
 		}
 

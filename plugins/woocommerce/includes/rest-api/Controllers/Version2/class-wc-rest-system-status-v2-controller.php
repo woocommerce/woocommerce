@@ -221,7 +221,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'readonly'    => true,
 						),
 						'queue_priority_support'    => array(
-							'description' => __( 'Does the queue support prioritised scheduled actions natively?', 'woocommerce' ),
+							'description' => __( 'Does the queue support prioritized scheduled actions natively?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,

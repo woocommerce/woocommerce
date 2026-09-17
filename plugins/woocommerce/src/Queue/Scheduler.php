@@ -31,9 +31,12 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  *
  * Resolve it through the container: `wc_get_container()->get( Scheduler::class )`.
  *
+ * The class is final: behaviour is customised through the queue, by attaching one through the
+ * `woocommerce_queue_class` filter or by implementing OptionsAwareQueueInterface, not by subclassing.
+ *
  * @since 11.3.0
  */
-class Scheduler {
+final class Scheduler {
 
 	/**
 	 * Priority used when none is requested. Matches Action Scheduler's own default.
@@ -41,6 +44,13 @@ class Scheduler {
 	 * @since 11.3.0
 	 */
 	public const DEFAULT_PRIORITY = OptionsAwareActionQueue::DEFAULT_PRIORITY;
+
+	/**
+	 * The options a queue can honour natively, and therefore the ones `supports()` and `strict` reason about.
+	 *
+	 * @var string[]
+	 */
+	private const CAPABILITY_OPTIONS = array( 'priority', 'unique' );
 
 	/**
 	 * The legacy proxy, through which the active queue is reached so tests can replace it.
@@ -64,7 +74,7 @@ class Scheduler {
 	 * @param LegacyProxy             $legacy_proxy The legacy proxy.
 	 * @param OptionsAwareActionQueue $default_queue The stock queue.
 	 */
-	final public function init( LegacyProxy $legacy_proxy, OptionsAwareActionQueue $default_queue ): void {
+	final public function init( LegacyProxy $legacy_proxy, OptionsAwareActionQueue $default_queue ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
 		$this->legacy_proxy  = $legacy_proxy;
 		$this->default_queue = $default_queue;
 	}
@@ -349,7 +359,7 @@ class Scheduler {
 
 		$queue = $options['queue'] ?? SchedulerQueue::ACTIVE;
 		if ( ! in_array( $queue, SchedulerQueue::get_all(), true ) ) {
-			wc_doing_it_wrong( __CLASS__ . '::' . $method, 'The queue option must be one of the SchedulerQueue values. Falling back to the active queue.', '11.3.0' );
+			wc_doing_it_wrong( __CLASS__ . '::' . $method, __( 'The queue option must be one of the SchedulerQueue values. Falling back to the active queue.', 'woocommerce' ), '11.3.0' );
 			$queue = SchedulerQueue::ACTIVE;
 		}
 
@@ -388,7 +398,14 @@ class Scheduler {
 		foreach ( $requested as $option ) {
 			if ( ! $this->is_supported_by( $queue, $option ) ) {
 				throw new \RuntimeException(
-					esc_html( sprintf( 'The %1$s scheduling option cannot take effect: %2$s.', $option, $this->describe_unsupported( $queue, $option ) ) )
+					esc_html(
+						sprintf(
+							/* translators: 1: scheduling option name, for example "unique", 2: the reason it cannot take effect */
+							__( 'The %1$s scheduling option cannot take effect: %2$s.', 'woocommerce' ),
+							$option,
+							$this->describe_unsupported( $queue, $option )
+						)
+					)
 				);
 			}
 		}
@@ -402,7 +419,7 @@ class Scheduler {
 	 * @return bool
 	 */
 	private function is_supported_by( \WC_Queue_Interface $queue, string $option ): bool {
-		if ( ! in_array( $option, array( 'priority', 'unique' ), true ) || ! $queue instanceof OptionsAwareQueueInterface ) {
+		if ( ! in_array( $option, self::CAPABILITY_OPTIONS, true ) || ! $queue instanceof OptionsAwareQueueInterface ) {
 			return false;
 		}
 
@@ -423,14 +440,16 @@ class Scheduler {
 	private function describe_unsupported( \WC_Queue_Interface $queue, string $option ): string {
 		if ( $queue instanceof OptionsAwareActionQueue ) {
 			return sprintf(
-				'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s',
-				$this->get_version() ?? 'unknown version',
+				/* translators: 1: loaded Action Scheduler version, 2: scheduling option name, 3: the Action Scheduler version that added it */
+				__( 'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s', 'woocommerce' ),
+				$this->get_version() ?? __( 'unknown version', 'woocommerce' ),
 				$option,
 				'unique' === $option ? '3.5.0' : '3.6.0'
 			);
 		}
 
-		return sprintf( 'the active queue (%s) does not implement OptionsAwareQueueInterface', get_class( $queue ) );
+		/* translators: %s: class name of the active queue */
+		return sprintf( __( 'the active queue (%s) does not implement OptionsAwareQueueInterface', 'woocommerce' ), get_class( $queue ) );
 	}
 
 	/**

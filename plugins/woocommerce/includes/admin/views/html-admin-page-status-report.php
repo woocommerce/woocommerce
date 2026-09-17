@@ -119,22 +119,22 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Background Scheduling"><?php esc_html_e( 'Background scheduling', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The queue WooCommerce schedules background work through, and whether it natively supports unique and prioritised actions. Those need Action Scheduler 3.5.0 and 3.6.0 respectively, and a queue that implements OptionsAwareQueueInterface. Without them WooCommerce falls back to a best-effort uniqueness check and ignores priorities.', 'woocommerce' ) ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The queue WooCommerce schedules background work through, and whether it natively supports unique and prioritized actions. Those need Action Scheduler 3.5.0 and 3.6.0 respectively, and a queue that implements OptionsAwareQueueInterface. Without them WooCommerce falls back to a best-effort uniqueness check and ignores priorities.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( empty( $environment['queue_class'] ) ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the background scheduling queue.', 'woocommerce' ) . '</mark>';
 				} elseif ( ! empty( $environment['queue_unique_support'] ) && ! empty( $environment['queue_priority_support'] ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $environment['queue_class'] ) . ' ' . esc_html__( 'supports unique and prioritised actions.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $environment['queue_class'] ) . ' ' . esc_html__( 'supports unique and prioritized actions.', 'woocommerce' ) . '</mark>';
 				} else {
 					$unsupported = array();
 					if ( empty( $environment['queue_unique_support'] ) ) {
 						$unsupported[] = __( 'unique actions', 'woocommerce' );
 					}
 					if ( empty( $environment['queue_priority_support'] ) ) {
-						$unsupported[] = __( 'prioritised actions', 'woocommerce' );
+						$unsupported[] = __( 'prioritized actions', 'woocommerce' );
 					}
-					/* translators: 1: queue class name, 2: unsupported features, for example "unique actions or prioritised actions" */
+					/* translators: 1: queue class name, 2: unsupported features, for example "unique actions or prioritized actions" */
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s does not support %2$s. Check the queue class and the Action Scheduler package version above.', 'woocommerce' ), esc_html( $environment['queue_class'] ), esc_html( implode( __( ' or ', 'woocommerce' ), $unsupported ) ) ) . '</mark>';
 				}
 				?>
