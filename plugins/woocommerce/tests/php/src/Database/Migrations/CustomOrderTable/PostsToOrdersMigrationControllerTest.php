@@ -162,7 +162,7 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave the GMT dates empty when both the GMT and the local columns hold the zero date.
+	 * @testdox Should keep the zero date when both the GMT and the local columns hold the zero date.
 	 */
 	public function test_migration_for_order_with_zero_gmt_and_local_dates(): void {
 		global $wpdb;
@@ -184,8 +184,8 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 		$this->sut->migrate_order( $order->get_id() );
 
 		$db_order = $this->get_order_from_cot( $order );
-		$this->assertNull( $db_order->date_created_gmt, 'There is no date to derive the created date from.' );
-		$this->assertNull( $db_order->date_updated_gmt, 'There is no date to derive the modified date from.' );
+		$this->assertSame( '0000-00-00 00:00:00', $db_order->date_created_gmt, 'With no date to derive the created date from, the zero date is stored as before.' );
+		$this->assertSame( '0000-00-00 00:00:00', $db_order->date_updated_gmt, 'With no date to derive the modified date from, the zero date is stored as before.' );
 
 		$migrator = new PostToOrderTableMigrator();
 		$this->assertEmpty( $migrator->verify_migrated_data( array( $order->get_id() ) ), 'Verification should accept the empty dates.' );

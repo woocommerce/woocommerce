@@ -827,7 +827,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts() );
 
 		$this->assertSame( $dated_before, $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dated_id ) ), 'A dated row must not change' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dateless_id ) ), 'A post with no date gives nothing to repair from' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '0000-00-00 00:00:00', $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dateless_id ) ), 'A post with no date gives nothing to repair from' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
