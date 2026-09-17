@@ -73,7 +73,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			}
 			public function search( $args = array(), $return_format = OBJECT ) {
 				$this->calls[] = array( 'search', func_get_args() );
-				return array( 'searched' );
+				return 'ids' === $return_format ? array( 101, 102, 103 ) : array( 'searched' );
 			}
 			// phpcs:enable
 		};
@@ -135,6 +135,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			public function search( $args = array(), $return_format = OBJECT ) {
 				$this->calls[] = array( 'search', func_get_args() );
 				return array();
+			}
+			public function count( $args = array() ) {
+				$this->calls[] = array( 'count', func_get_args() );
+				return 7;
 			}
 			// phpcs:enable
 		};
@@ -415,7 +419,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$results  = $this->sut->search( array( 'hook' => 'wc_scheduler_test_hook' ), 'ids' );
 
 		$this->assertSame( $next, $got_next );
-		$this->assertSame( array( 'searched' ), $results );
+		$this->assertSame( array( 101, 102, 103 ), $results, 'search() returns whatever the queue returns, here the IDs the double answers for the ids format' );
 		$this->assertSame(
 			array(
 				array( 'cancel', array( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test' ) ),
@@ -736,5 +740,22 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			$this->assertNull( $queue->calls[0][1][1], 'cancel() should forward null args unchanged' );
 			$this->assertNull( $queue->calls[1][1][1], 'cancel_all() should forward null args unchanged' );
 		}
+	}
+
+	/**
+	 * @testdox Should count through the queue's own count() where it has one, and through an ID search otherwise.
+	 */
+	public function test_count_uses_the_queue_count_or_falls_back_to_an_id_search(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 7, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
+		$this->assertSame( array( 'count', array( array( 'hook' => 'wc_scheduler_test_count' ) ) ), $queue->calls[0] );
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->assertSame( 3, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
+		$this->assertSame( array( 'search', array( array( 'hook' => 'wc_scheduler_test_count' ), 'ids' ) ), $plain->calls[0], 'A plain queue is searched for IDs only' );
 	}
 }

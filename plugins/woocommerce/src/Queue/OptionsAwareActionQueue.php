@@ -150,6 +150,41 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	}
 
 	/**
+	 * Count matching actions with a store-level count query, without hydrating them.
+	 *
+	 * Date criteria are converted the way `as_get_scheduled_actions()` converts them. A copy of
+	 * Action Scheduler too old to count in the store ignores the query type and returns IDs, which
+	 * are then counted. Reports 0 with a doing-it-wrong notice when Action Scheduler is not ready.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args Search criteria, as accepted by WC_Queue_Interface::search().
+	 * @return int
+	 */
+	public function count( $args = array() ): int {
+		if ( ! $this->is_ready() ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				__( 'Action Scheduler is not ready, so scheduled actions cannot be counted. Call this after Action Scheduler has initialized.', 'woocommerce' ),
+				'11.3.0'
+			);
+
+			return 0;
+		}
+
+		$args = is_array( $args ) ? $args : array();
+		foreach ( array( 'date', 'modified' ) as $key ) {
+			if ( isset( $args[ $key ] ) && function_exists( 'as_get_datetime_object' ) ) {
+				$args[ $key ] = as_get_datetime_object( $args[ $key ] );
+			}
+		}
+
+		$result = \ActionScheduler::store()->query_actions( $args, 'count' );
+
+		return is_array( $result ) ? count( $result ) : (int) $result;
+	}
+
+	/**
 	 * Whether Action Scheduler can accept calls yet.
 	 *
 	 * The copy that won the load race registers its functions at `plugins_loaded` priority 0 and

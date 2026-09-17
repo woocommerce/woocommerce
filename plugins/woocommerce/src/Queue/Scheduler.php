@@ -293,6 +293,36 @@ final class Scheduler {
 	}
 
 	/**
+	 * Count the actions matching the given criteria.
+	 *
+	 * An options-aware queue counts in its backend without hydrating actions. A plain queue has no
+	 * count operation, so the count falls back to the size of a `search()` for IDs, which still
+	 * avoids loading each action.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args Search criteria, as accepted by WC_Queue_Interface::search().
+	 * @param array $options `queue` (a SchedulerQueue value) and `strict` apply here.
+	 * @return int The number of matching actions, or 0 when the queue is not ready.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
+	 */
+	public function count( array $args = array(), array $options = array() ): int {
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
+			return 0;
+		}
+
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->count( $args );
+		}
+
+		$ids = $queue->search( $args, 'ids' );
+
+		return is_array( $ids ) ? count( $ids ) : 0;
+	}
+
+	/**
 	 * Check whether a matching action is currently scheduled.
 	 *
 	 * On an options-aware queue this covers pending and in-progress actions. On a plain queue it

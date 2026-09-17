@@ -276,4 +276,27 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $duplicate, 'The emulation should skip a unique action that matches a pending one' );
 		$this->assertGreaterThan( 0, $other, 'The emulation should let a unique action with different args through' );
 	}
+
+	/**
+	 * @testdox Should count matching actions in the store without hydrating them.
+	 */
+	public function test_count_matches_the_store(): void {
+		$timestamp = time() + HOUR_IN_SECONDS;
+		$this->sut->schedule_single( $timestamp, 'wc_oaq_test_count', array( 'n' => 1 ), 'wc-oaq-count' );
+		$this->sut->schedule_single( $timestamp, 'wc_oaq_test_count', array( 'n' => 2 ), 'wc-oaq-count' );
+		$this->sut->schedule_single( $timestamp, 'wc_oaq_test_count_other', array(), 'wc-oaq-count' );
+
+		$this->assertSame( 3, $this->sut->count( array( 'group' => 'wc-oaq-count' ) ) );
+		$this->assertSame(
+			2,
+			$this->sut->count(
+				array(
+					'hook'  => 'wc_oaq_test_count',
+					'group' => 'wc-oaq-count',
+				)
+			)
+		);
+		$this->assertSame( 0, $this->sut->count( array( 'hook' => 'wc_oaq_test_count_missing' ) ) );
+		$this->assertSame( count( $this->sut->search( array( 'group' => 'wc-oaq-count' ), 'ids' ) ), $this->sut->count( array( 'group' => 'wc-oaq-count' ) ), 'count() agrees with an ID search' );
+	}
 }

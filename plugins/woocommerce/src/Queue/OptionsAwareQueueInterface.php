@@ -134,4 +134,17 @@ interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 	 * @return bool
 	 */
 	public function is_ready();
+
+	/**
+	 * Count the actions matching the given criteria.
+	 *
+	 * Takes the same criteria as `search()`. Count without hydrating actions where the backend
+	 * can, since callers use this on large stores precisely to avoid loading every match.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args Search criteria, as accepted by WC_Queue_Interface::search().
+	 * @return int The number of matching actions.
+	 */
+	public function count( $args = array() );
 }
