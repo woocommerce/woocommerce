@@ -4119,7 +4119,12 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 	$forget_and_import( $repaired_ids );
 
 	if ( count( $rows ) === $batch_size ) {
-		update_option( $last_id_option, (int) end( $rows )->id, false );
+		// Without a saved cursor the next run would pick the same rows again, and rows whose post has no date never leave the selection.
+		if ( ! update_option( $last_id_option, (int) end( $rows )->id, false ) ) {
+			wc_get_logger()->error( 'Stopped repairing HPOS order dates: the progress cursor could not be saved.', array( 'source' => 'wc-updater' ) );
+			delete_option( $last_id_option );
+			return false;
+		}
 		return true;
 	}
 
