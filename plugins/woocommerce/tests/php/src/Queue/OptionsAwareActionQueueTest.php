@@ -251,6 +251,13 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should be ready on the bundled Action Scheduler once it is initialised.
+	 */
+	public function test_is_ready_on_bundled_action_scheduler(): void {
+		$this->assertTrue( $this->sut->is_ready() );
+	}
+
+	/**
 	 * Below Action Scheduler 3.5.0 the unique argument does not exist, so the queue has to check for a
 	 * pending match itself before scheduling.
 	 *

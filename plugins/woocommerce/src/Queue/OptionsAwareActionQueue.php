@@ -60,7 +60,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() ) {
 		$options = $this->coerce_options( $options );
-		if ( ! $this->can_schedule( 'as_schedule_single_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
+		if ( ! $this->can_schedule( __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
@@ -83,7 +83,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $options = array() ) {
 		$options = $this->coerce_options( $options );
-		if ( ! $this->can_schedule( 'as_schedule_recurring_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
+		if ( ! $this->can_schedule( __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
@@ -107,7 +107,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $options = array() ) {
 		$options = $this->coerce_options( $options );
-		if ( ! $this->can_schedule( 'as_schedule_cron_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
+		if ( ! $this->can_schedule( __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
@@ -130,23 +130,50 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 * @return bool True if a matching action is pending or in progress.
 	 */
 	public function has_scheduled_action( $hook, $args = null, $group = '' ) {
-		foreach ( array( 'as_has_scheduled_action', 'as_next_scheduled_action' ) as $function ) {
-			// PHPStan sees the Action Scheduler copy bundled with WooCommerce and concludes both functions
-			// always exist. The runtime case this guard exists for is precisely the one it cannot see.
-			// @phpstan-ignore-next-line function.alreadyNarrowedType -- see comment above.
-			if ( function_exists( $function ) ) {
-				// `as_next_scheduled_action` returns the timestamp of the next pending action, hence the cast.
-				return (bool) $function( $hook, $args, $group );
-			}
+		if ( ! $this->is_ready() ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				__( 'Action Scheduler is not ready, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.', 'woocommerce' ),
+				'11.3.0'
+			);
+
+			return false;
 		}
 
-		wc_doing_it_wrong(
-			__METHOD__,
-			__( 'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.', 'woocommerce' ),
-			'11.3.0'
-		);
+		// `as_has_scheduled_action` only exists since Action Scheduler 3.3.0; an older copy may have won the load race.
+		if ( function_exists( 'as_has_scheduled_action' ) ) {
+			return (bool) as_has_scheduled_action( $hook, $args, $group );
+		}
 
-		return false;
+		// `as_next_scheduled_action` returns the timestamp of the next pending action, hence the cast.
+		return (bool) as_next_scheduled_action( $hook, $args, $group );
+	}
+
+	/**
+	 * Whether Action Scheduler can accept calls yet.
+	 *
+	 * The copy that won the load race registers its functions at `plugins_loaded` priority 0 and
+	 * initialises its data store at `init`. Calls in between fail quietly inside Action Scheduler.
+	 * Copies older than 3.1.6 cannot report initialisation and are assumed ready, which is the
+	 * assumption every direct Action Scheduler call in core makes on such a copy.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public function is_ready(): bool {
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			return false;
+		}
+
+		// PHPStan sees the bundled Action Scheduler, where the method exists. An older copy that won
+		// the load race may predate it (added in 3.1.6), which is the case this guard is for.
+		// @phpstan-ignore-next-line function.alreadyNarrowedType -- see comment above.
+		if ( method_exists( \ActionScheduler::class, 'is_initialized' ) ) {
+			return (bool) \ActionScheduler::is_initialized();
+		}
+
+		return true;
 	}
 
 	/**
@@ -227,11 +254,10 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	/**
 	 * Decide whether a scheduling call can go ahead.
 	 *
-	 * Returns false, with a doing-it-wrong notice, when the Action Scheduler function is missing.
-	 * Also returns false when a unique action is requested on an Action Scheduler copy that predates
-	 * the `$unique` argument and a matching action is already pending, emulating uniqueness.
+	 * Returns false, with a doing-it-wrong notice, when Action Scheduler is not ready. Also returns
+	 * false when a unique action is requested on an Action Scheduler copy that predates the
+	 * `$unique` argument and a matching action is already pending, emulating uniqueness.
 	 *
-	 * @param string $function_name The Action Scheduler function the caller is about to use.
 	 * @param string $method The public method being guarded, named in the notice.
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
@@ -239,9 +265,9 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	 * @param array  $options Scheduling options.
 	 * @return bool
 	 */
-	private function can_schedule( string $function_name, string $method, $hook, $args, $group, array $options ): bool {
-		if ( ! function_exists( $function_name ) ) {
-			wc_doing_it_wrong( __CLASS__ . '::' . $method, __( 'Action Scheduler is not loaded, so actions cannot be scheduled. Call this after Action Scheduler has initialized.', 'woocommerce' ), '11.3.0' );
+	private function can_schedule( string $method, $hook, $args, $group, array $options ): bool {
+		if ( ! $this->is_ready() ) {
+			wc_doing_it_wrong( __CLASS__ . '::' . $method, __( 'Action Scheduler is not ready, so actions cannot be scheduled. Call this after Action Scheduler has initialized.', 'woocommerce' ), '11.3.0' );
 			return false;
 		}
 

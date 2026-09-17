@@ -16,9 +16,14 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  *
  * Every call goes through the active queue, `WC()->queue()`, so queues attached through the
  * `woocommerce_queue_class` filter keep intercepting. Scheduling options such as `priority` and
- * `unique` reach queues that implement OptionsAwareQueueInterface natively; on a plain
- * WC_Queue_Interface the priority is dropped and uniqueness is emulated with `get_next()`, which
- * cannot see in-progress actions and is not atomic.
+ * `unique` reach queues that implement OptionsAwareQueueInterface natively, as the caller gave
+ * them: each queue validates and defaults them itself, the stock queue clamping the priority to
+ * 0-255 with a default of 10. On a plain WC_Queue_Interface the priority is dropped and
+ * uniqueness is emulated with `get_next()`, which cannot see in-progress actions and is not atomic.
+ *
+ * Every operation first checks `is_ready()`. When the queue is not ready, a non-strict call raises
+ * a doing-it-wrong notice and returns a neutral value without touching the queue; a strict call
+ * throws.
  *
  * The `strict` option turns that best effort into a hard requirement: when true, a call whose
  * requested options cannot take effect natively throws instead of scheduling. `supports()` answers
@@ -38,13 +43,6 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * @since 11.3.0
  */
 final class Scheduler {
-
-	/**
-	 * Priority used when none is requested. Matches Action Scheduler's own default.
-	 *
-	 * @since 11.3.0
-	 */
-	public const DEFAULT_PRIORITY = OptionsAwareActionQueue::DEFAULT_PRIORITY;
 
 	/**
 	 * The legacy proxy, through which the active queue is reached so tests can replace it.
@@ -81,9 +79,9 @@ final class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (lower runs first; the queue applies its own range and default, 10 on the stock queue), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
-	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
 	 */
 	public function add( string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		return $this->schedule_single( time(), $hook, $args, $group, $options );
@@ -98,13 +96,16 @@ final class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (lower runs first; the queue applies its own range and default, 10 on the stock queue), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
-	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
 	 */
 	public function schedule_single( int $timestamp, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
 		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return 0;
+		}
 		$this->assert_options_supported( $queue, $options );
 
 		if ( $queue instanceof OptionsAwareQueueInterface ) {
@@ -128,13 +129,16 @@ final class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (lower runs first; the queue applies its own range and default, 10 on the stock queue), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
-	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
 	 */
 	public function schedule_recurring( int $timestamp, int $interval_in_seconds, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
 		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return 0;
+		}
 		$this->assert_options_supported( $queue, $options );
 
 		if ( $queue instanceof OptionsAwareQueueInterface ) {
@@ -159,13 +163,16 @@ final class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (lower runs first; the queue applies its own range and default, 10 on the stock queue), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
-	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
 	 */
 	public function schedule_cron( int $timestamp, string $cron_schedule, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
 		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return 0;
+		}
 		$this->assert_options_supported( $queue, $options );
 
 		if ( $queue instanceof OptionsAwareQueueInterface ) {
@@ -187,11 +194,18 @@ final class Scheduler {
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
 	 * @param string $group The group the job is assigned to.
-	 * @param array  $options Only `queue` (a SchedulerQueue value) applies here.
+	 * @param array  $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return void
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
 	public function cancel( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
-		$this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->cancel( $hook, $args, $group );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return;
+		}
+
+		$queue->cancel( $hook, $args, $group );
 	}
 
 	/**
@@ -202,11 +216,18 @@ final class Scheduler {
 	 * @param string $hook The hook that the job will trigger.
 	 * @param array  $args Args that would have been passed to the job.
 	 * @param string $group The group the job is assigned to.
-	 * @param array  $options Only `queue` (a SchedulerQueue value) applies here.
+	 * @param array  $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return void
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
 	public function cancel_all( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
-		$this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->cancel_all( $hook, $args, $group );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return;
+		}
+
+		$queue->cancel_all( $hook, $args, $group );
 	}
 
 	/**
@@ -217,11 +238,18 @@ final class Scheduler {
 	 * @param string     $hook The hook that the job will trigger.
 	 * @param array|null $args Args that would have been passed to the job. Null matches any args.
 	 * @param string     $group The group the job is assigned to.
-	 * @param array      $options Only `queue` (a SchedulerQueue value) applies here.
+	 * @param array      $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return \WC_DateTime|null The next occurrence, or null when nothing is pending.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
 	public function get_next( string $hook, ?array $args = null, string $group = '', array $options = array() ): ?\WC_DateTime {
-		$next = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->get_next( $hook, $args, $group );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return null;
+		}
+
+		$next = $queue->get_next( $hook, $args, $group );
 
 		return $next instanceof \WC_DateTime ? $next : null;
 	}
@@ -233,11 +261,18 @@ final class Scheduler {
 	 *
 	 * @param array  $args Search criteria, as accepted by WC_Queue_Interface::search().
 	 * @param string $return_format OBJECT, ARRAY_A, or 'ids'.
-	 * @param array  $options Only `queue` (a SchedulerQueue value) applies here.
+	 * @param array  $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return array
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
 	public function search( array $args = array(), string $return_format = OBJECT, array $options = array() ): array {
-		$results = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->search( $args, $return_format );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return array();
+		}
+
+		$results = $queue->search( $args, $return_format );
 
 		return is_array( $results ) ? $results : array();
 	}
@@ -253,11 +288,16 @@ final class Scheduler {
 	 * @param string     $hook The hook of the action.
 	 * @param array|null $args Args of the action. Null matches any args.
 	 * @param string     $group The group the action is assigned to.
-	 * @param array      $options Only `queue` (a SchedulerQueue value) applies here.
+	 * @param array      $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return bool
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
 	public function has_scheduled_action( string $hook, ?array $args = null, string $group = '', array $options = array() ): bool {
-		$queue = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) );
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->select_queue( $options );
+		if ( ! $this->ensure_ready( $queue, $options, __FUNCTION__ ) ) {
+			return false;
+		}
 
 		if ( $queue instanceof OptionsAwareQueueInterface ) {
 			return (bool) $queue->has_scheduled_action( $hook, $args, $group );
@@ -306,71 +346,109 @@ final class Scheduler {
 	}
 
 	/**
-	 * Whether scheduling calls can be made yet.
+	 * Whether calls can be made yet on the path a call would take.
 	 *
-	 * The queue class is chosen at `plugins_loaded`. When the active queue is the stock one or extends
-	 * WC_Action_Queue, and so delegates to Action Scheduler, Action Scheduler must also have loaded its
-	 * functions and, on copies that report it, initialised its data store, which happens at `init`.
+	 * False before `plugins_loaded`, when the queue class has not been chosen. After that an
+	 * options-aware queue answers for itself. A plain queue that extends WC_Action_Queue delegates
+	 * to Action Scheduler, so it is judged by the stock queue's answer, which covers Action
+	 * Scheduler having loaded its functions and initialised its data store at `init`. Any other
+	 * plain queue is ready.
 	 *
 	 * @since 11.3.0
 	 *
+	 * @param array $options Only `queue` (a SchedulerQueue value) applies here, to pick the path.
 	 * @return bool
 	 */
-	public function is_ready(): bool {
+	public function is_ready( array $options = array() ): bool {
 		if ( ! did_action( 'plugins_loaded' ) ) {
 			return false;
 		}
 
-		if ( ! $this->get_active_queue() instanceof \WC_Action_Queue ) {
-			return true;
+		return $this->is_queue_ready( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ) );
+	}
+
+	/**
+	 * Whether a queue can accept calls, see is_ready() for the rules.
+	 *
+	 * @param \WC_Queue_Interface $queue The queue a call would go through.
+	 * @return bool
+	 */
+	private function is_queue_ready( \WC_Queue_Interface $queue ): bool {
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (bool) $queue->is_ready();
 		}
 
-		if ( ! function_exists( 'as_schedule_single_action' ) ) {
-			return false;
-		}
-
-		// PHPStan sees the bundled Action Scheduler, where the method exists. An older copy that won
-		// the load race may predate it (added in 3.1.6), which is the case this guard is for.
-		// @phpstan-ignore-next-line function.alreadyNarrowedType -- see comment above.
-		if ( method_exists( \ActionScheduler::class, 'is_initialized' ) ) {
-			return (bool) \ActionScheduler::is_initialized();
+		if ( $queue instanceof \WC_Action_Queue ) {
+			return $this->default_queue->is_ready();
 		}
 
 		return true;
 	}
 
 	/**
-	 * Bring the options into a known shape: `priority`, `unique`, `strict` and `queue`, nothing else.
+	 * Stop a call on a queue that is not ready.
 	 *
-	 * The priority goes through the same normaliser the stock queue uses, so both public entry points
-	 * coerce it identically.
+	 * Throws in strict mode. Otherwise raises a doing-it-wrong notice naming the public method and
+	 * returns false so the caller can return its neutral value without touching the queue.
+	 *
+	 * @param \WC_Queue_Interface $queue The selected queue.
+	 * @param array               $options Normalised options.
+	 * @param string              $method The public method being guarded.
+	 * @return bool True when the call can go ahead.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
+	 */
+	private function ensure_ready( \WC_Queue_Interface $queue, array $options, string $method ): bool {
+		if ( did_action( 'plugins_loaded' ) && $this->is_queue_ready( $queue ) ) {
+			return true;
+		}
+
+		$message = __( 'The queue is not ready to accept calls yet. Check Scheduler::is_ready() and call this after init.', 'woocommerce' );
+
+		if ( $options['strict'] ) {
+			throw new \RuntimeException( esc_html( $message ) );
+		}
+
+		wc_doing_it_wrong( __CLASS__ . '::' . $method, $message, '11.3.0' );
+
+		return false;
+	}
+
+	/**
+	 * Bring the options into a known shape: `unique`, `strict` and `queue` always, `priority` only
+	 * when the caller gave one, and nothing else.
+	 *
+	 * The priority is kept as given: the queue that receives it applies its own validation and
+	 * default, so the scheduler never has to know what a backend considers valid.
 	 *
 	 * @param array  $options Options as given by the caller.
 	 * @param string $method  Public method the options were passed to, named in the notice for an invalid queue.
 	 * @return array
 	 */
 	private function normalize_options( array $options, string $method ): array {
-		$priority = OptionsAwareActionQueue::normalize_priority( $options[ QueueCapability::PRIORITY ] ?? self::DEFAULT_PRIORITY );
-
 		$queue = $options['queue'] ?? SchedulerQueue::ACTIVE;
 		if ( ! in_array( $queue, SchedulerQueue::get_all(), true ) ) {
 			wc_doing_it_wrong( __CLASS__ . '::' . $method, __( 'The queue option must be one of the SchedulerQueue values. Falling back to the active queue.', 'woocommerce' ), '11.3.0' );
 			$queue = SchedulerQueue::ACTIVE;
 		}
 
-		return array(
-			QueueCapability::PRIORITY => $priority,
-			QueueCapability::UNIQUE   => ! empty( $options[ QueueCapability::UNIQUE ] ),
-			'strict'                  => ! empty( $options['strict'] ),
-			'queue'                   => $queue,
+		$normalized = array(
+			QueueCapability::UNIQUE => ! empty( $options[ QueueCapability::UNIQUE ] ),
+			'strict'                => ! empty( $options['strict'] ),
+			'queue'                 => $queue,
 		);
+
+		if ( array_key_exists( QueueCapability::PRIORITY, $options ) ) {
+			$normalized[ QueueCapability::PRIORITY ] = $options[ QueueCapability::PRIORITY ];
+		}
+
+		return $normalized;
 	}
 
 	/**
 	 * Throw when a strict call asks for an option the selected queue cannot honour natively.
 	 *
-	 * Only options the caller actually asked for count: `unique` when true, `priority` when it
-	 * differs from the default.
+	 * Only options the caller actually asked for count: `unique` when true, `priority` whenever the
+	 * caller passed one, whatever its value.
 	 *
 	 * @param \WC_Queue_Interface $queue The selected queue.
 	 * @param array               $options Normalised options.
@@ -386,7 +464,7 @@ final class Scheduler {
 		if ( $options[ QueueCapability::UNIQUE ] ) {
 			$requested[] = QueueCapability::UNIQUE;
 		}
-		if ( self::DEFAULT_PRIORITY !== $options[ QueueCapability::PRIORITY ] ) {
+		if ( array_key_exists( QueueCapability::PRIORITY, $options ) ) {
 			$requested[] = QueueCapability::PRIORITY;
 		}
 
@@ -446,16 +524,23 @@ final class Scheduler {
 	}
 
 	/**
-	 * The options a queue receives. The `strict` and `queue` keys are the scheduler's own and never leave it.
+	 * The options a queue receives: `priority` only when the caller gave one, and `unique`.
+	 *
+	 * The `strict` and `queue` keys are the scheduler's own and never leave it.
 	 *
 	 * @param array $options Normalised options.
 	 * @return array
 	 */
 	private function extract_queue_options( array $options ): array {
-		return array(
-			QueueCapability::PRIORITY => $options[ QueueCapability::PRIORITY ],
-			QueueCapability::UNIQUE   => $options[ QueueCapability::UNIQUE ],
-		);
+		$queue_options = array();
+
+		if ( array_key_exists( QueueCapability::PRIORITY, $options ) ) {
+			$queue_options[ QueueCapability::PRIORITY ] = $options[ QueueCapability::PRIORITY ];
+		}
+
+		$queue_options[ QueueCapability::UNIQUE ] = $options[ QueueCapability::UNIQUE ];
+
+		return $queue_options;
 	}
 
 	/**

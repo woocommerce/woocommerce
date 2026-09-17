@@ -20,13 +20,16 @@ namespace Automattic\WooCommerce\Queue;
  *
  * Recognised option keys:
  *
- * - `priority` (int): lower values run first. Action Scheduler accepts 0-255, default 10.
+ * - `priority`: lower values run first. The queue applies its own range and default; the stock
+ *   queue clamps to the 0-255 Action Scheduler accepts and defaults to 10.
  * - `unique` (bool): when true, skip scheduling and return 0 if an action with the same hook,
  *   args and group is already pending or in progress. Default false.
  *
  * The `$options` parameters are deliberately untyped, like every parameter on WC_Queue_Interface.
- * Implementations must coerce a non-array to an empty array and ignore keys they do not recognise,
- * so that new options can be added without breaking existing queues.
+ * Implementations own the values they receive: coerce a non-array to an empty array, validate and
+ * default each recognised key, and ignore keys they do not recognise, so that new options can be
+ * added without breaking existing queues. The scheduler forwards option values as the caller gave
+ * them.
  *
  * @since 11.3.0
  */
@@ -118,4 +121,17 @@ interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 	 * @return bool True if the capability takes effect natively on this queue.
 	 */
 	public function supports( $capability );
+
+	/**
+	 * Whether this queue can accept calls yet.
+	 *
+	 * Return false until the backend is usable, for example while its data store is not yet
+	 * initialised. The scheduler checks this before every operation and, when false, raises a
+	 * notice and returns a neutral value instead of calling the queue, or throws in strict mode.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public function is_ready();
 }

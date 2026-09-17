@@ -83,18 +83,24 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * Build an options-aware queue double that records every call, including the options it receives.
 	 *
 	 * @param string[] $unsupported Options the double reports as unsupported.
+	 * @param bool     $ready       What is_ready() reports.
 	 * @return OptionsAwareQueueInterface
 	 */
-	private function options_aware_queue( array $unsupported = array() ): OptionsAwareQueueInterface {
-		return new class( $unsupported ) implements OptionsAwareQueueInterface {
+	private function options_aware_queue( array $unsupported = array(), bool $ready = true ): OptionsAwareQueueInterface {
+		return new class( $unsupported, $ready ) implements OptionsAwareQueueInterface {
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
 			public $calls = array();
 			private $unsupported;
-			public function __construct( array $unsupported ) {
+			private $ready;
+			public function __construct( array $unsupported, bool $ready ) {
 				$this->unsupported = $unsupported;
+				$this->ready       = $ready;
 			}
 			public function supports( $option ) {
 				return in_array( $option, array( 'priority', 'unique' ), true ) && ! in_array( $option, $this->unsupported, true );
+			}
+			public function is_ready() {
+				return $this->ready;
 			}
 			public function add( $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'add', func_get_args() );
@@ -144,6 +150,20 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			protected function get_action_scheduler_version(): ?string {
 				return '3.4.0';
+			}
+		};
+	}
+
+	/**
+	 * Build a stock queue that reports Action Scheduler as not ready.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function not_ready_stock_queue(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function is_ready(): bool {
+				return false;
 			}
 		};
 	}
@@ -314,33 +334,27 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Overflowing values must be clamped before the int cast: cast first, a float above PHP_INT_MAX
-	 * wraps to PHP_INT_MIN and lands at 0, the highest priority, instead of 255.
+	 * The queue owns validation and defaults, so the scheduler must not touch the value.
 	 *
-	 * @testdox Should clamp the priority to 0-255 and fall back to 10 for non-numeric or non-finite values.
-	 * @testWith [-5, 0]
-	 *           [300, 255]
-	 *           [9223372036854775808, 255]
-	 *           ["1e309", 10]
-	 *           ["7", 7]
-	 *           [3.9, 3]
-	 *           [null, 10]
-	 *           ["high", 10]
+	 * @testdox Should forward the priority to an options-aware queue exactly as the caller gave it.
+	 * @testWith [300]
+	 *           ["high"]
+	 *           [null]
+	 *           [3.9]
 	 *
 	 * @param mixed $requested The priority given by the caller.
-	 * @param int   $expected  The priority the queue should receive.
 	 */
-	public function test_normalizes_priority( $requested, int $expected ): void {
+	public function test_forwards_priority_as_given( $requested ): void {
 		$queue = $this->options_aware_queue();
 		$this->use_queue( $queue );
 
 		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'priority' => $requested ) );
 
-		$this->assertSame( $expected, $queue->calls[0][1][4]['priority'] );
+		$this->assertSame( $requested, $queue->calls[0][1][4]['priority'] );
 	}
 
 	/**
-	 * @testdox Should default to priority 10, non-unique, and drop unknown option keys.
+	 * @testdox Should forward only unique when no priority is given, and drop unknown option keys.
 	 */
 	public function test_default_options(): void {
 		$queue = $this->options_aware_queue();
@@ -348,13 +362,16 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'mystery' => true ) );
 
-		$this->assertSame(
-			array(
-				'priority' => 10,
-				'unique'   => false,
-			),
-			$queue->calls[0][1][4]
-		);
+		$this->assertSame( array( 'unique' => false ), $queue->calls[0][1][4], 'No priority key means the queue applies its own default' );
+	}
+
+	/**
+	 * @testdox Should let the stock queue clamp a priority that reaches it through the scheduler.
+	 */
+	public function test_stock_queue_clamps_priority_end_to_end(): void {
+		$action_id = $this->sut->schedule_single( time() + HOUR_IN_SECONDS, 'wc_scheduler_test_clamp', array(), 'wc-scheduler-test', array( 'priority' => 300 ) );
+
+		$this->assertSame( 255, $this->get_stored_priority( $action_id ) );
 	}
 
 	/**
@@ -505,16 +522,15 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should schedule in strict mode on a plain queue when only default options are requested.
+	 * @testdox Should schedule in strict mode on a plain queue when no capability is requested.
 	 */
 	public function test_strict_with_default_options_on_a_plain_queue_schedules(): void {
 		$queue = $this->plain_queue();
 		$this->use_queue( $queue );
 
 		$options = array(
-			'strict'   => true,
-			'priority' => 10,
-			'unique'   => false,
+			'strict' => true,
+			'unique' => false,
 		);
 
 		$action_id = $this->sut->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
@@ -580,6 +596,89 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->use_queue( new class() extends \WC_Action_Queue {} );
 		$this->assertTrue( $this->sut->is_ready(), 'A WC_Action_Queue subclass is checked against Action Scheduler, which is initialised here' );
+		$this->assertTrue( $this->sut->is_ready( array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The default queue can be asked directly' );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when the priority key is present on a plain queue, even at the default value.
+	 */
+	public function test_strict_priority_key_on_a_plain_queue_throws_even_at_default(): void {
+		$this->use_queue( $this->plain_queue() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'The priority scheduling option cannot take effect' );
+
+		$options = array(
+			'priority' => 10,
+			'strict'   => true,
+		);
+
+		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should return neutral values with a notice, and touch nothing, when the stock queue is not ready.
+	 */
+	public function test_not_ready_stock_queue_returns_neutral_values_with_a_notice(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+
+		$this->assertFalse( $scheduler->is_ready() );
+		$this->assertFalse( $scheduler->is_ready( array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+
+		foreach ( array( 'schedule_single', 'schedule_recurring', 'schedule_cron', 'cancel', 'cancel_all', 'get_next', 'search', 'has_scheduled_action' ) as $method ) {
+			$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::' . $method );
+		}
+
+		$this->assertSame( 0, $scheduler->schedule_single( 123, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( 0, $scheduler->schedule_recurring( 123, 60, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( 0, $scheduler->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook' ) );
+		$scheduler->cancel( 'wc_scheduler_test_hook' );
+		$scheduler->cancel_all( 'wc_scheduler_test_hook' );
+		$this->assertNull( $scheduler->get_next( 'wc_scheduler_test_hook' ) );
+		$this->assertSame( array(), $scheduler->search( array( 'hook' => 'wc_scheduler_test_hook' ) ) );
+		$this->assertFalse( $scheduler->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when the queue is not ready.
+	 */
+	public function test_not_ready_in_strict_mode_throws(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'not ready to accept calls yet' );
+
+		$scheduler->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'strict' => true ) );
+	}
+
+	/**
+	 * @testdox Should honour an options-aware queue that reports itself not ready.
+	 */
+	public function test_options_aware_queue_reporting_not_ready_is_honoured(): void {
+		$queue = $this->options_aware_queue( array(), false );
+		$this->use_queue( $queue );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::schedule_single' );
+
+		$this->assertFalse( $this->sut->is_ready() );
+		$this->assertSame( 0, $this->sut->schedule_single( 123, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( array(), $queue->calls, 'A queue that is not ready must not be called' );
+	}
+
+	/**
+	 * @testdox Should judge a plain WC_Action_Queue subclass by the stock queue's readiness.
+	 */
+	public function test_plain_action_queue_subclass_follows_stock_readiness(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->not_ready_stock_queue() );
+		$this->use_queue( new class() extends \WC_Action_Queue {} );
+
+		$this->assertFalse( $scheduler->is_ready(), 'A WC_Action_Queue subclass delegates to Action Scheduler, so it is as ready as the stock queue' );
+
+		$this->use_queue( $this->plain_queue() );
+		$this->assertTrue( $scheduler->is_ready(), 'A queue that does not extend WC_Action_Queue only needs plugins_loaded' );
 	}
 
 	/**
