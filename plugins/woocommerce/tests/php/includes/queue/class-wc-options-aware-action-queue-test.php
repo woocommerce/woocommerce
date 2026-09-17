@@ -70,26 +70,49 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass the requested priority to Action Scheduler, which clamps it to the 0-255 range it accepts.
+	 * Overflowing values must be clamped before the int cast: cast first, a float above PHP_INT_MAX
+	 * wraps to PHP_INT_MIN and lands at 0, the highest priority, instead of 255. Non-numeric values
+	 * must fall back to 10 rather than cast to 0.
+	 *
+	 * @testdox Should store the requested priority clamped to 0-255, falling back to 10 for non-numeric or non-finite values.
 	 * @testWith [1, 1]
 	 *           [10, 10]
 	 *           [200, 200]
 	 *           [-5, 0]
 	 *           [300, 255]
+	 *           [9223372036854775808, 255]
+	 *           ["1e309", 10]
+	 *           ["7", 7]
+	 *           [3.9, 3]
+	 *           [null, 10]
+	 *           ["high", 10]
 	 *
-	 * @param int $requested_priority The priority passed to the queue.
-	 * @param int $expected_priority  The priority Action Scheduler is expected to store.
+	 * @param mixed $requested_priority The priority passed to the queue.
+	 * @param int   $expected_priority  The priority Action Scheduler is expected to store.
 	 */
-	public function test_schedule_single_stores_priority( int $requested_priority, int $expected_priority ): void {
+	public function test_schedule_single_stores_priority( $requested_priority, int $expected_priority ): void {
 		$action_id = $this->sut->schedule_single(
 			time() + HOUR_IN_SECONDS,
 			'wc_oaq_test_single',
-			array( 'priority' => $requested_priority ),
+			array( 'priority' => is_scalar( $requested_priority ) ? $requested_priority : 'none' ),
 			'wc-oaq-test',
 			array( 'priority' => $requested_priority )
 		);
 
 		$this->assertSame( $expected_priority, $this->get_stored_priority( $action_id ) );
+	}
+
+	/**
+	 * The base interface has no options parameter, so a stray extra argument was silently discarded
+	 * before this class became the default queue. It must not become a type error now.
+	 *
+	 * @testdox Should ignore a non-array extra argument and schedule at the default priority.
+	 */
+	public function test_ignores_a_non_array_options_argument(): void {
+		$action_id = $this->sut->schedule_single( time() + HOUR_IN_SECONDS, 'wc_oaq_test_stray', array(), 'wc-oaq-test', true );
+
+		$this->assertGreaterThan( 0, $action_id );
+		$this->assertSame( 10, $this->get_stored_priority( $action_id ) );
 	}
 
 	/**

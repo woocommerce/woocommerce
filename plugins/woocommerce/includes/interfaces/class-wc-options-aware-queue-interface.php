@@ -48,7 +48,7 @@ interface WC_Options_Aware_Queue_Interface extends WC_Queue_Interface {
 	 * @param array  $options Scheduling options. See the interface description for the recognised keys.
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
-	public function add( $hook, $args = array(), $group = '', array $options = array() );
+	public function add( $hook, $args = array(), $group = '', $options = array() );
 
 	/**
 	 * Schedule an action to run once at some time in the future.
@@ -62,7 +62,7 @@ interface WC_Options_Aware_Queue_Interface extends WC_Queue_Interface {
 	 * @param array  $options Scheduling options. See the interface description for the recognised keys.
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
-	public function schedule_single( $timestamp, $hook, $args = array(), $group = '', array $options = array() );
+	public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() );
 
 	/**
 	 * Schedule a recurring action.
@@ -77,7 +77,7 @@ interface WC_Options_Aware_Queue_Interface extends WC_Queue_Interface {
 	 * @param array  $options Scheduling options. See the interface description for the recognised keys.
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
-	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', array $options = array() );
+	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $options = array() );
 
 	/**
 	 * Schedule an action that recurs on a cron-like schedule.
@@ -93,7 +93,7 @@ interface WC_Options_Aware_Queue_Interface extends WC_Queue_Interface {
 	 * @param array  $options Scheduling options. See the interface description for the recognised keys.
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
-	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', array $options = array() );
+	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $options = array() );
 
 	/**
 	 * Check whether a matching action is currently scheduled.

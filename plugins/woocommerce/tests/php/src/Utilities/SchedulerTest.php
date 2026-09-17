@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
+use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Utilities\Scheduler;
 use WC_Unit_Test_Case;
 
@@ -29,10 +30,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a plain queue double that records every call and answers get_next() with a fixed value.
 	 *
-	 * @param \WC_DateTime|null $next What get_next() returns.
+	 * @param mixed $next What get_next() returns. The base interface has no return type, so this may be false.
 	 * @return \WC_Queue_Interface
 	 */
-	private function plain_queue( ?\WC_DateTime $next = null ): \WC_Queue_Interface {
+	private function plain_queue( $next = null ): \WC_Queue_Interface {
 		return new class( $next ) implements \WC_Queue_Interface {
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
 			public $calls = array();
@@ -83,19 +84,19 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		return new class() implements \WC_Options_Aware_Queue_Interface {
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
 			public $calls = array();
-			public function add( $hook, $args = array(), $group = '', array $options = array() ) {
+			public function add( $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'add', func_get_args() );
 				return 21;
 			}
-			public function schedule_single( $timestamp, $hook, $args = array(), $group = '', array $options = array() ) {
+			public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'schedule_single', func_get_args() );
 				return 22;
 			}
-			public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', array $options = array() ) {
+			public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'schedule_recurring', func_get_args() );
 				return 23;
 			}
-			public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', array $options = array() ) {
+			public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'schedule_cron', func_get_args() );
 				return 24;
 			}
@@ -155,7 +156,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			array(
 				'priority' => 3,
 				'unique'   => true,
-				'queue'    => Scheduler::QUEUE_ACTIVE,
+				'queue'    => SchedulerQueue::ACTIVE,
 			)
 		);
 
@@ -223,6 +224,21 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A custom queue may answer false from get_next() when nothing is scheduled, as wp_next_scheduled() does.
+	 *
+	 * @testdox Should treat only a WC_DateTime from get_next() as a scheduled action on a plain queue.
+	 */
+	public function test_only_a_datetime_from_get_next_counts_as_scheduled(): void {
+		$queue = $this->plain_queue( false );
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'unique' => true ) );
+
+		$this->assertSame( 12, $action_id, 'A false from get_next() must not block a unique action' );
+		$this->assertFalse( $this->sut->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+	}
+
+	/**
 	 * @testdox Should not consult get_next() on a plain queue when unique is not requested.
 	 */
 	public function test_does_not_check_get_next_when_not_unique(): void {
@@ -248,7 +264,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			'wc-scheduler-test',
 			array(
 				'priority' => 4,
-				'queue'    => Scheduler::QUEUE_DEFAULT,
+				'queue'    => SchedulerQueue::DEFAULT,
 			)
 		);
 
@@ -307,7 +323,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function test_unknown_queue_option_falls_back_to_active(): void {
 		$queue = $this->options_aware_queue();
 		$this->use_queue( $queue );
-		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Utilities\Scheduler::normalize_options' );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Utilities\Scheduler::schedule_single' );
 
 		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'queue' => 'elsewhere' ) );
 
@@ -382,7 +398,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->use_queue( $this->plain_queue() );
 		$this->assertFalse( $this->sut->supports( 'priority' ), 'A plain queue drops the priority' );
 		$this->assertTrue( $this->sut->supports( 'unique' ), 'Uniqueness is emulated on a plain queue' );
-		$this->assertTrue( $this->sut->supports( 'priority', array( 'queue' => Scheduler::QUEUE_DEFAULT ) ), 'The default queue supports priority even when a plain queue is active' );
+		$this->assertTrue( $this->sut->supports( 'priority', array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The default queue supports priority even when a plain queue is active' );
 	}
 
 	/**
@@ -396,9 +412,15 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should be ready in the test environment.
+	 * @testdox Should be ready in the test environment, whichever kind of queue is active.
 	 */
 	public function test_is_ready(): void {
-		$this->assertTrue( $this->sut->is_ready() );
+		$this->assertTrue( $this->sut->is_ready(), 'Stock queue: Action Scheduler is initialised in the test environment' );
+
+		$this->use_queue( $this->plain_queue() );
+		$this->assertTrue( $this->sut->is_ready(), 'A queue that does not extend WC_Action_Queue only needs plugins_loaded' );
+
+		$this->use_queue( new class() extends \WC_Action_Queue {} );
+		$this->assertTrue( $this->sut->is_ready(), 'A WC_Action_Queue subclass is checked against Action Scheduler, which is initialised here' );
 	}
 }
