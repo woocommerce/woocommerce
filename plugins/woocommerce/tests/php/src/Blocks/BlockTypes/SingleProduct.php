@@ -92,7 +92,7 @@ class SingleProduct extends \WP_UnitTestCase {
 
 <!-- wp:woocommerce/product-gallery-large-image -->
 <div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks">
-<!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
+<!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false} /-->
 
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 
@@ -107,11 +107,11 @@ class SingleProduct extends \WP_UnitTestCase {
 <div class="wp-block-column">
 <!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
 
-<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductBlock":true} /-->
+<!-- wp:woocommerce/product-rating /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductBlock":true} /-->
+<!-- wp:woocommerce/product-price /-->
 
-<!-- wp:woocommerce/product-summary {"isDescendentOfSingleProductBlock":true} /-->
+<!-- wp:woocommerce/product-summary /-->
 
 <!-- wp:woocommerce/product-meta -->
 <div class="wp-block-woocommerce-product-meta"></div>
