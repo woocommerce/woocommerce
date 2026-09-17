@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicated order meta in HPOS tables when the CLI sync and the background sync migrate the same orders at the same time.
