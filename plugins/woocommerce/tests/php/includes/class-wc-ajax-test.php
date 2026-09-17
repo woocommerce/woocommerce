@@ -3019,7 +3019,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @param float  $expected_total  Expected order grand total.
 	 */
 	public function test_add_order_fee_percentage_uses_net_total( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
-		$order = $this->create_order_for_percentage_fee_tests();
+		$order = $this->create_order_with_20_percent_tax();
 
 		$this->_setRole( 'administrator' );
 		$_POST['security'] = wp_create_nonce( 'order-item' );
@@ -3041,10 +3041,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Percentage fee base includes shipping under option A (net items + shipping, ex tax).
+	 * @testdox Percentage order fees include net shipping in their base.
 	 */
 	public function test_add_order_fee_percentage_includes_shipping_in_net_base(): void {
-		$order = $this->create_order_for_percentage_fee_tests();
+		$order = $this->create_order_with_20_percent_tax();
 
 		$shipping = new WC_Order_Item_Shipping();
 		$shipping->set_method_title( 'Flat rate' );
@@ -3073,10 +3073,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Fixed-amount order fees added via AJAX are unchanged.
+	 * @testdox Fixed-amount order fees added via AJAX are stored as posted and taxed.
 	 */
-	public function test_add_order_fee_fixed_amount_unchanged(): void {
-		$order = $this->create_order_for_percentage_fee_tests();
+	public function test_add_order_fee_fixed_amount_is_stored_as_posted(): void {
+		$order = $this->create_order_with_20_percent_tax();
 
 		$this->_setRole( 'administrator' );
 		$_POST['security'] = wp_create_nonce( 'order-item' );
@@ -3098,11 +3098,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Create a $100 order with a 20% tax line for percentage fee AJAX tests.
+	 * Create a $100 order with a 20% tax line for order fee AJAX tests.
 	 *
 	 * @return WC_Order
 	 */
-	private function create_order_for_percentage_fee_tests(): WC_Order {
+	private function create_order_with_20_percent_tax(): WC_Order {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
