@@ -40,7 +40,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @return bool
 	 */
 	public static function is_importing() {
-		$pending_jobs = self::queue()->search(
+		$pending_jobs = self::scheduler()->search(
 			array(
 				'status'   => 'pending',
 				'per_page' => 1,
@@ -50,7 +50,7 @@ abstract class ImportScheduler implements ImportInterface {
 			)
 		);
 		if ( empty( $pending_jobs ) ) {
-			$in_progress = self::queue()->search(
+			$in_progress = self::scheduler()->search(
 				array(
 					'status'   => 'in-progress',
 					'per_page' => 1,

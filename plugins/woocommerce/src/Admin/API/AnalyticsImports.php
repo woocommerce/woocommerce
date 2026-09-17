@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use WP_Error;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -167,7 +168,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				array( 'status' => 500 )
 			);
 		}
-		WC()->queue()->cancel_all( $action_hook, array(), (string) OrdersScheduler::$group );
+		$this->get_scheduler()->cancel_all( $action_hook, array(), (string) OrdersScheduler::$group );
 		OrdersScheduler::schedule_recurring_batch_processor();
 
 		return rest_ensure_response(
@@ -351,7 +352,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		if ( ! is_string( $action_hook ) ) {
 			return null;
 		}
-		$next_time = WC()->queue()->get_next( $action_hook, array(), (string) OrdersScheduler::$group );
+		$next_time = $this->get_scheduler()->get_next( $action_hook, array(), (string) OrdersScheduler::$group );
 
 		if ( ! $next_time ) {
 			return null;
@@ -456,7 +457,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		}
 
 		// Check for actions with 'in-progress' status.
-		$in_progress_actions = WC()->queue()->search(
+		$in_progress_actions = $this->get_scheduler()->search(
 			array(
 				'hook'     => $hook,
 				'status'   => 'in-progress',
@@ -470,7 +471,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		}
 
 		// Check if the next scheduled import is due within 1 minute.
-		$next_scheduled = WC()->queue()->get_next( $hook, array(), (string) OrdersScheduler::$group );
+		$next_scheduled = $this->get_scheduler()->get_next( $hook, array(), (string) OrdersScheduler::$group );
 		if ( $next_scheduled ) {
 			$time_until_next = $next_scheduled->getTimestamp() - time();
 			// Consider it "due" if it's scheduled to run within the next 60 seconds.
@@ -480,5 +481,14 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the scheduler.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 }

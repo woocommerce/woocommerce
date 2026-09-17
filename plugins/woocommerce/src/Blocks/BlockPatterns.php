@@ -6,7 +6,8 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -214,7 +215,7 @@ class BlockPatterns {
 			// By only logging when patterns are empty and no fetch is scheduled,
 			// we ensure that warnings are only generated in genuinely problematic situations,
 			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! get_transient( $transient_key ) && ! ActionSchedulerUtil::has_scheduled_action( 'fetch_patterns' ) ) {
+			if ( ! get_transient( $transient_key ) && ! wc_get_container()->get( Scheduler::class )->has_scheduled_action( 'fetch_patterns', null, '', array( 'queue' => SchedulerQueue::DEFAULT ) ) ) {
 				wc_get_logger()->warning(
 					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
 				);
