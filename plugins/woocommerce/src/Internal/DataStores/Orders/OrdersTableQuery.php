@@ -682,6 +682,8 @@ class OrdersTableQuery {
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
+		$status_was_provided = ! empty( $this->args['status'] );
+
 		if ( empty( $this->args['status'] ) ) {
 			$this->args['status'] = array();
 		}
@@ -690,7 +692,15 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+		// Drop non-string entries — they can't match a registered status and would
+		// cause a TypeError in the string concatenation below.
+		$this->args['status'] = array_filter( $this->args['status'], 'is_string' );
+
+		if ( $status_was_provided && empty( $this->args['status'] ) ) {
+			// All status values were non-string; use a non-matching sentinel so the query
+			// returns nothing instead of being treated as "any" and returning every order.
+			$this->args['status'] = array( '__wc_invalid_status__' );
+		} elseif ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
 			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
 			// excluding statuses marked as exclude_from_search (e.g. checkout-draft) to match WP_Query behavior.
 			$exclude              = get_post_stati( array( 'exclude_from_search' => true ) );

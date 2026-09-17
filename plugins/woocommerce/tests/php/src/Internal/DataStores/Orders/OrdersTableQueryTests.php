@@ -864,6 +864,48 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders ignores non-string values in the status array instead of throwing a TypeError.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_ignores_non_string_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Non-string status values should be ignored while valid statuses are still applied.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders when every status value is non-string.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_non_string( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A status array with only non-string values should not be treated as "any" and return every order.' );
+	}
+
+	/**
 	 * @testdox CPT order queries support the "$status" special status.
 	 *
 	 * @dataProvider cpt_special_status_provider

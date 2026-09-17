@@ -946,9 +946,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// and WP_Query's own sanitization strips the uppercase letters and drops the status
 		// clause, returning every order.
 		if ( ! empty( $query_vars['post_status'] ) ) {
-			$statuses = is_array( $query_vars['post_status'] )
-				? $query_vars['post_status']
-				: explode( ',', $query_vars['post_status'] );
+			$statuses = is_string( $query_vars['post_status'] )
+				? explode( ',', $query_vars['post_status'] )
+				: (array) $query_vars['post_status'];
+
+			// Drop non-string entries — they can't match a registered status and would
+			// cause a TypeError in strtolower(). On trunk the concat only emitted a warning,
+			// so silently removing them preserves the no-fatal behavior.
+			$statuses = array_filter( $statuses, 'is_string' );
+
+			// If all entries were non-string, keep a sentinel so the guard below rejects
+			// the query instead of returning every order.
+			if ( empty( $statuses ) ) {
+				$statuses = array( '' );
+			}
 
 			foreach ( $statuses as &$status ) {
 				$status = strtolower( $status );
