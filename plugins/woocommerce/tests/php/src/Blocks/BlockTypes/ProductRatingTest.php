@@ -198,6 +198,8 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 	public function test_single_product_block_review_link_ignores_matching_global_product( string $inner_block_name, bool $global_product_matches, bool $on_product_page ): void {
 		$had_global_product      = array_key_exists( 'product', $GLOBALS );
 		$previous_global_product = $GLOBALS['product'] ?? null;
+		$products_store_state    = $this->snapshot_products_store_static_state();
+		$interactivity_state     = $this->snapshot_interactivity_state();
 
 		try {
 			$product        = $this->create_rated_product();
@@ -246,10 +248,18 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 				);
 			}
 		} finally {
-			if ( $had_global_product ) {
-				$GLOBALS['product'] = $previous_global_product;
-			} else {
-				unset( $GLOBALS['product'] );
+			try {
+				if ( $had_global_product ) {
+					$GLOBALS['product'] = $previous_global_product;
+				} else {
+					unset( $GLOBALS['product'] );
+				}
+			} finally {
+				try {
+					$this->restore_products_store_static_state( $products_store_state );
+				} finally {
+					$this->restore_interactivity_state( $interactivity_state );
+				}
 			}
 		}
 	}
