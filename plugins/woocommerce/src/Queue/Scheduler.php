@@ -35,6 +35,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * guards for the case where an older Action Scheduler copy bundled by another plugin won the
  * load race.
  *
+ * `when_ready()` runs a callback once the queue can accept calls, and `ensure_recurring()` and
+ * `ensure_cron()` keep a recurring action scheduled by re-asserting it, as a unique action,
+ * whenever Action Scheduler asks for recurring actions to be ensured. Like `add_action()`, those
+ * registrations are per request and have to be made on every request.
+ *
  * Resolve it through the container: `wc_get_container()->get( Scheduler::class )`.
  *
  * The class is final: behaviour is customised through the queue, by attaching one through the
@@ -57,6 +62,20 @@ final class Scheduler {
 	 * @var OptionsAwareActionQueue
 	 */
 	private $default_queue;
+
+	/**
+	 * Recurring actions registered through ensure_recurring() and ensure_cron() in this request.
+	 *
+	 * @var array[]
+	 */
+	private $recurring_registrations = array();
+
+	/**
+	 * The callback attached to Action Scheduler's ensure hook, once a registration exists.
+	 *
+	 * @var \Closure|null
+	 */
+	private $recurring_registry_handler;
 
 	/**
 	 * Initialize the class dependencies.
@@ -199,6 +218,69 @@ final class Scheduler {
 		}
 
 		return (int) $queue->schedule_cron( $timestamp, $cron_schedule, $hook, $args, $group );
+	}
+
+	/**
+	 * Keep a recurring action scheduled.
+	 *
+	 * The registration is re-asserted, as a unique action so a pending or in-progress instance
+	 * blocks a duplicate, whenever Action Scheduler fires `action_scheduler_ensure_recurring_actions`.
+	 * Action Scheduler fires it from a daily recurring action of its own on every store, whatever
+	 * queue WooCommerce is configured with. If it has already fired in this request the action is
+	 * scheduled at once. Registrations are per request, like `add_action()`, and have to be made
+	 * on every request early enough to be in place when the queue runs.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int    $timestamp When the first instance of the job will run.
+	 * @param int    $interval_in_seconds How long to wait between runs.
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param array  $options Scheduling options as for schedule_recurring(); `unique` is always true.
+	 * @throws \RuntimeException When `strict` is set and the action cannot be scheduled as requested.
+	 */
+	public function ensure_recurring( int $timestamp, int $interval_in_seconds, string $hook, array $args = array(), string $group = '', array $options = array() ): void {
+		$this->register_recurring(
+			array(
+				'type'      => 'recurring',
+				'timestamp' => $timestamp,
+				'schedule'  => $interval_in_seconds,
+				'hook'      => $hook,
+				'args'      => $args,
+				'group'     => $group,
+				'options'   => $options,
+			)
+		);
+	}
+
+	/**
+	 * Keep an action that recurs on a cron-like schedule scheduled.
+	 *
+	 * Works like ensure_recurring(), see there for when the registration takes effect.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int    $timestamp The schedule will start on or after this time.
+	 * @param string $cron_schedule A cron-like schedule string.
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param array  $options Scheduling options as for schedule_cron(); `unique` is always true.
+	 * @throws \RuntimeException When `strict` is set and the action cannot be scheduled as requested.
+	 */
+	public function ensure_cron( int $timestamp, string $cron_schedule, string $hook, array $args = array(), string $group = '', array $options = array() ): void {
+		$this->register_recurring(
+			array(
+				'type'      => 'cron',
+				'timestamp' => $timestamp,
+				'schedule'  => $cron_schedule,
+				'hook'      => $hook,
+				'args'      => $args,
+				'group'     => $group,
+				'options'   => $options,
+			)
+		);
 	}
 
 	/**
@@ -413,6 +495,45 @@ final class Scheduler {
 	}
 
 	/**
+	 * Run a callback as soon as the queue is ready, now if it already is.
+	 *
+	 * Otherwise the callback waits for the next event after which the queue may be ready:
+	 * `plugins_loaded` before it has fired; on an Action Scheduler-backed path `action_scheduler_init`,
+	 * which fires right after the data store initialises (copies older than 3.6.0 lack it and get
+	 * `init`); then `init` and `wp_loaded`. Readiness is re-checked when the event fires, moving on
+	 * to the next event if needed. Once no event is left to wait for, a notice is raised and the
+	 * callback is dropped rather than attached to an event that will never fire.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param callable $callback Called with no arguments once the queue is ready.
+	 * @param array    $options Only `queue` (a SchedulerQueue value) applies here, to pick the path.
+	 */
+	public function when_ready( callable $callback, array $options = array() ): void {
+		if ( $this->is_ready( $options ) ) {
+			$callback();
+			return;
+		}
+
+		$hook = $this->next_readiness_hook( $options );
+		if ( null === $hook ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				__( 'The queue is not ready and no event is left in this request to wait for, so the callback was dropped. Check Scheduler::is_ready() first.', 'woocommerce' ),
+				'11.3.0'
+			);
+			return;
+		}
+
+		add_action(
+			$hook,
+			function () use ( $callback, $options ) {
+				$this->when_ready( $callback, $options );
+			}
+		);
+	}
+
+	/**
 	 * Whether a queue can accept calls, see is_ready() for the rules.
 	 *
 	 * @param \WC_Queue_Interface $queue The queue a call would go through.
@@ -611,6 +732,80 @@ final class Scheduler {
 	 */
 	private function has_pending_match( \WC_Queue_Interface $queue, array $options, string $hook, array $args, string $group ): bool {
 		return $options[ QueueCapability::UNIQUE ] && $queue->get_next( $hook, $args, $group ) instanceof \WC_DateTime;
+	}
+
+	/**
+	 * The next event after which the queue may be ready, or null when none is left in this request.
+	 *
+	 * Before `plugins_loaded` the queue is not selected at all, since that would pin the singleton
+	 * before `woocommerce_queue_class` callbacks are attached.
+	 *
+	 * @param array $options Options as given to when_ready().
+	 * @return string|null
+	 */
+	private function next_readiness_hook( array $options ): ?string {
+		if ( ! did_action( 'plugins_loaded' ) ) {
+			return 'plugins_loaded';
+		}
+
+		$candidates = array();
+		$queue      = $this->select_queue( $this->normalize_options( $options, 'when_ready' ) );
+		if ( $queue instanceof \WC_Action_Queue && version_compare( $this->get_action_scheduler_version() ?? '0', '3.6.0', '>=' ) ) {
+			$candidates[] = 'action_scheduler_init';
+		}
+		$candidates[] = 'init';
+		$candidates[] = 'wp_loaded';
+
+		foreach ( $candidates as $hook ) {
+			if ( ! did_action( $hook ) ) {
+				return $hook;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Record a recurring registration, or schedule it now if Action Scheduler already asked for
+	 * recurring actions in this request.
+	 *
+	 * @param array $registration The registration as built by ensure_recurring() or ensure_cron().
+	 */
+	private function register_recurring( array $registration ): void {
+		if ( did_action( 'action_scheduler_ensure_recurring_actions' ) ) {
+			$this->schedule_registration( $registration );
+			return;
+		}
+
+		$this->recurring_registrations[] = $registration;
+
+		if ( null === $this->recurring_registry_handler ) {
+			$this->recurring_registry_handler = function () {
+				foreach ( $this->recurring_registrations as $registration ) {
+					$this->schedule_registration( $registration );
+				}
+			};
+		}
+
+		if ( false === has_action( 'action_scheduler_ensure_recurring_actions', $this->recurring_registry_handler ) ) {
+			add_action( 'action_scheduler_ensure_recurring_actions', $this->recurring_registry_handler );
+		}
+	}
+
+	/**
+	 * Schedule a recurring registration as a unique action.
+	 *
+	 * @param array $registration The registration as built by ensure_recurring() or ensure_cron().
+	 */
+	private function schedule_registration( array $registration ): void {
+		$options = array_merge( $registration['options'], array( QueueCapability::UNIQUE => true ) );
+
+		if ( 'cron' === $registration['type'] ) {
+			$this->schedule_cron( $registration['timestamp'], $registration['schedule'], $registration['hook'], $registration['args'], $registration['group'], $options );
+			return;
+		}
+
+		$this->schedule_recurring( $registration['timestamp'], $registration['schedule'], $registration['hook'], $registration['args'], $registration['group'], $options );
 	}
 
 	/**

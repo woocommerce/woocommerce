@@ -165,11 +165,48 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	private function not_ready_stock_queue(): OptionsAwareActionQueue {
 		return new class() extends OptionsAwareActionQueue {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+			public $ready = false;
 			public function is_ready(): bool {
-				return false;
+				return $this->ready;
 			}
+			// phpcs:enable
 		};
+	}
+
+	/**
+	 * Run a callback with the given hooks marked as not yet fired, restoring the counters afterwards.
+	 *
+	 * @param string[] $hooks    Hook names to un-fire.
+	 * @param callable $callback What to run.
+	 */
+	private function with_unfired_hooks( array $hooks, callable $callback ): void {
+		$saved = array();
+		foreach ( $hooks as $hook ) {
+			$saved[ $hook ] = $GLOBALS['wp_actions'][ $hook ] ?? null;
+			unset( $GLOBALS['wp_actions'][ $hook ] );
+		}
+		try {
+			$callback();
+		} finally {
+			foreach ( $saved as $hook => $count ) {
+				if ( null === $count ) {
+					unset( $GLOBALS['wp_actions'][ $hook ] );
+				} else {
+					$GLOBALS['wp_actions'][ $hook ] = $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter this helper changed.
+				}
+			}
+		}
+	}
+
+	/**
+	 * Count the callbacks attached to a hook at the default priority.
+	 *
+	 * @param string $hook Hook name.
+	 * @return int
+	 */
+	private function count_callbacks( string $hook ): int {
+		return isset( $GLOBALS['wp_filter'][ $hook ] ) ? count( $GLOBALS['wp_filter'][ $hook ]->callbacks[10] ?? array() ) : 0;
 	}
 
 	/**
@@ -757,5 +794,164 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 3, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
 		$this->assertSame( array( 'search', array( array( 'hook' => 'wc_scheduler_test_count' ), 'ids' ) ), $plain->calls[0], 'A plain queue is searched for IDs only' );
+	}
+
+	/**
+	 * @testdox Should run a when_ready() callback at once when the queue is ready.
+	 */
+	public function test_when_ready_runs_immediately_when_ready(): void {
+		$this->use_queue( $this->plain_queue() );
+		$ran = 0;
+
+		$this->sut->when_ready(
+			function () use ( &$ran ) {
+				++$ran;
+			}
+		);
+
+		$this->assertSame( 1, $ran );
+	}
+
+	/**
+	 * @testdox Should defer a when_ready() callback to action_scheduler_init and run it once the queue is ready.
+	 */
+	public function test_when_ready_waits_for_action_scheduler_init(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+		$ran = 0;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_init' ),
+			function () use ( $scheduler, $stock, &$ran ) {
+				$before = $this->count_callbacks( 'action_scheduler_init' );
+
+				$scheduler->when_ready(
+					function () use ( &$ran ) {
+						++$ran;
+					}
+				);
+
+				$this->assertSame( $before + 1, $this->count_callbacks( 'action_scheduler_init' ), 'The callback waits for action_scheduler_init' );
+				$this->assertSame( 0, $ran, 'Nothing runs before the queue is ready' );
+
+				$stock->ready = true;
+				do_action( 'action_scheduler_init' );
+
+				$this->assertSame( 1, $ran, 'The callback runs once the queue is ready and the event fires' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should drop a when_ready() callback with a notice when no readiness event is left in the request.
+	 */
+	public function test_when_ready_drops_the_callback_with_a_notice_when_no_event_is_left(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+		$this->setExpectedIncorrectUsage( 'Automattic\\WooCommerce\\Queue\\Scheduler::when_ready' );
+		$before = $this->count_callbacks( 'action_scheduler_init' );
+		$ran    = 0;
+
+		$scheduler->when_ready(
+			function () use ( &$ran ) {
+				++$ran;
+			}
+		);
+
+		$this->assertSame( 0, $ran );
+		$this->assertSame( $before, $this->count_callbacks( 'action_scheduler_init' ), 'A fired event is not hooked' );
+	}
+
+	/**
+	 * @testdox Should re-assert ensure_recurring() and ensure_cron() registrations, as unique actions, when Action Scheduler asks.
+	 */
+	public function test_ensure_recurring_schedules_registrations_on_the_ensure_hook(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $queue, $timestamp ) {
+				$this->sut->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_ensure', array( 'a' => 1 ), 'wc-scheduler-test', array( 'priority' => 5 ) );
+				$this->sut->ensure_cron( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test' );
+
+				$this->assertSame( array(), $queue->calls, 'Registering schedules nothing until Action Scheduler asks' );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+
+				$this->assertSame(
+					array(
+						array(
+							'schedule_recurring',
+							array(
+								$timestamp,
+								DAY_IN_SECONDS,
+								'wc_scheduler_test_ensure',
+								array( 'a' => 1 ),
+								'wc-scheduler-test',
+								array(
+									'priority' => 5,
+									'unique'   => true,
+								),
+							),
+						),
+						array( 'schedule_cron', array( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test', array( 'unique' => true ) ) ),
+					),
+					$queue->calls
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should schedule an ensure_recurring() registration at once when the ensure hook already fired.
+	 */
+	public function test_ensure_recurring_schedules_immediately_after_the_hook_fired(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+		$saved = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
+		$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook having fired; restored below.
+
+		try {
+			$this->sut->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_late', array(), 'wc-scheduler-test' );
+		} finally {
+			if ( null === $saved ) {
+				unset( $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] );
+			} else {
+				$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter.
+			}
+		}
+
+		$this->assertCount( 1, $queue->calls );
+		$this->assertSame( 'schedule_recurring', $queue->calls[0][0] );
+		$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][5] );
+	}
+
+	/**
+	 * @testdox Should keep exactly one pending instance of an ensured recurring action on the stock queue.
+	 */
+	public function test_ensure_recurring_keeps_one_pending_instance_on_the_stock_queue(): void {
+		$criteria = array(
+			'hook'   => 'wc_scheduler_test_ensure_stock',
+			'group'  => 'wc-scheduler-test',
+			'status' => \ActionScheduler_Store::STATUS_PENDING,
+		);
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $criteria ) {
+				$this->sut->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_stock', array(), 'wc-scheduler-test' );
+				$this->assertSame( 0, $this->sut->count( $criteria ) );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+				$this->assertSame( 1, $this->sut->count( $criteria ) );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+				$this->assertSame( 1, $this->sut->count( $criteria ), 'A second pass does not add a duplicate' );
+			}
+		);
 	}
 }
