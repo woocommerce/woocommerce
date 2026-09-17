@@ -547,17 +547,15 @@ class WC_Checkout {
 	/**
 	 * Checks whether an order has moved past payment, so a checkout submit for it is a repeat.
 	 *
-	 * An order reaches a gateway awaiting payment or as a draft, so any other status means
-	 * something moved it on. This is about the status, not the money: an order parked on-hold
-	 * for review counts, because building a second order for it would be wrong. Not
-	 * needs_payment(): that folds in the order total, and a free order that failed would then
-	 * look paid.
+	 * An order reaches a gateway awaiting payment, so any other status means something moved
+	 * it on, on-hold included. The order total plays no part, which is why this is not
+	 * needs_payment(): that would call a free order that failed paid.
 	 *
 	 * @since 11.3.0
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
-	protected function order_moved_past_payment( $order ) {
+	private function order_moved_past_payment( WC_Order $order ): bool {
 		/**
 		 * This filter is documented in woocommerce/includes/class-wc-order.php
 		 *
@@ -1284,7 +1282,7 @@ class WC_Checkout {
 	 * @since 11.3.0
 	 * @param WC_Order $order The order the session was awaiting payment for.
 	 */
-	protected function send_order_already_placed_response( $order ): void {
+	protected function send_order_already_placed_response( WC_Order $order ): void {
 		$order->add_order_note( __( 'The checkout form was submitted again for this order after the payment step. No second order was created; the customer was sent to the order received page.', 'woocommerce' ) );
 
 		wc_log_order_step(
