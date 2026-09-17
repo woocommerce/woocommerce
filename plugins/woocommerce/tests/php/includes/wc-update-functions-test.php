@@ -725,6 +725,57 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Insert a full batch of HPOS rows with no created date whose posts have no date either, so the repair has to advance its cursor.
+	 *
+	 * @return int The id of the last row in the batch.
+	 */
+	private function insert_full_batch_of_unrepairable_orders(): int {
+		global $wpdb;
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$first_id     = (int) $wpdb->get_var( "SELECT GREATEST( COALESCE( ( SELECT MAX( ID ) FROM {$wpdb->posts} ), 0 ), COALESCE( ( SELECT MAX( id ) FROM {$orders_table} ), 0 ) )" ) + 1; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$posts        = array();
+		$orders       = array();
+		for ( $id = $first_id; $id < $first_id + 500; $id++ ) {
+			$posts[]  = "( {$id}, 'shop_order', 'wc-completed', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '', '', '', '', '', '' )";
+			$orders[] = "( {$id}, 'shop_order', 'wc-completed', NULL, '2026-01-01 00:00:00' )";
+		}
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Generated integers and literals only.
+		$wpdb->query( "INSERT INTO {$wpdb->posts} ( ID, post_type, post_status, post_date, post_date_gmt, post_modified, post_modified_gmt, post_content, post_title, post_excerpt, to_ping, pinged, post_content_filtered ) VALUES " . implode( ',', $posts ) );
+		$wpdb->query( "INSERT INTO {$orders_table} ( id, type, status, date_created_gmt, date_updated_gmt ) VALUES " . implode( ',', $orders ) );
+		// phpcs:enable
+
+		return $first_id + 499;
+	}
+
+	/**
+	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should keep going when another run has already saved the same or a later cursor.
+	 *
+	 * @testWith [0]
+	 *           [1000]
+	 *
+	 * @param int $ahead How far past this batch the other run has already moved the cursor.
+	 */
+	public function test_wc_update_1130_accepts_a_cursor_saved_by_a_concurrent_run( int $ahead ): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$last_id      = $this->insert_full_batch_of_unrepairable_orders();
+		$option       = 'woocommerce_update_1130_last_repaired_order_id';
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		// The other run saves its cursor right after this one has read its batch.
+		$concurrent_save = function ( $query ) use ( $option, $last_id, $ahead, $orders_table ) {
+			if ( false !== strpos( $query, "FROM {$orders_table} o" ) ) {
+				update_option( $option, $last_id + $ahead, false );
+			}
+			return $query;
+		};
+		add_filter( 'query', $concurrent_save );
+
+		$this->assertTrue( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A cursor saved by another run is progress, not a failure' );
+		$this->assertSame( $last_id + $ahead, (int) get_option( $option ), 'The cursor must never move backwards' );
+	}
+
+	/**
 	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should leave rows alone when they have dates or their post has none.
 	 */
 	public function test_wc_update_1130_leaves_dated_rows_and_dateless_posts_alone(): void {
