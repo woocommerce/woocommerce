@@ -454,6 +454,44 @@ class WC_REST_Product_Categories_Controller_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox hide_empty pagination respects an explicit hierarchical override from the query filter.
+	 */
+	public function test_hide_empty_pagination_respects_hierarchical_override() {
+		$fixture   = $this->create_empty_parent_with_nonempty_child( '67934 Override ' . uniqid() );
+		$parent_id = (int) $fixture['parent']['term_id'];
+		$child_id  = (int) $fixture['child']['term_id'];
+
+		$force_non_hierarchical = static function ( array $args ): array {
+			$args['hierarchical'] = false;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_rest_product_cat_query', $force_non_hierarchical );
+		$response = $this->make_categories_request(
+			'',
+			array(
+				'hide_empty' => true,
+				'include'    => array( $parent_id, $child_id ),
+				'per_page'   => 100,
+				'page'       => 1,
+			)
+		);
+		remove_filter( 'woocommerce_rest_product_cat_query', $force_non_hierarchical );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $data, 'An explicit hierarchical=false override must fall back to count-based filtering.' );
+		$this->assertNull( $this->find_category_in_response( $data, $parent_id ), 'Empty parent must drop out once hierarchical handling is explicitly disabled.' );
+		$this->assertNotNull( $this->find_category_in_response( $data, $child_id ) );
+		$this->assertSame( 1, (int) $response->get_headers()['X-WP-Total'] );
+
+		WC_Helper_Product::delete_product( $fixture['product']->get_id() );
+		wp_delete_term( $child_id, 'product_cat' );
+		wp_delete_term( $parent_id, 'product_cat' );
+	}
+
+	/**
 	 * Create an empty parent category whose child has a product assigned.
 	 *
 	 * @param string $prefix Unique name prefix.

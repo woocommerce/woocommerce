@@ -628,6 +628,17 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * undercounts. Pagination headers and the out-of-bounds guard then hide
 	 * those terms from later pages.
 	 *
+	 * For hierarchical taxonomies, `number`/`offset` are removed before the
+	 * `get_terms()` call so the full population can be counted, then re-applied
+	 * with `array_slice()` below. `WP_Term_Query::get_terms()` uses the same
+	 * approach internally: it never applies a SQL `LIMIT`/`OFFSET` for a
+	 * hierarchical query either, and slices the full result set in PHP once the
+	 * term tree is built. Any `number`/`offset` set on `$prepared_args` by the
+	 * `woocommerce_rest_{$taxonomy}_query` filter are still honored in the
+	 * response; only the raw `get_terms()` call receives the unbounded query.
+	 * A filter can still force the non-hierarchical, SQL-paginated path for a
+	 * hierarchical taxonomy by explicitly setting `hierarchical` to `false`.
+	 *
 	 * @param string $taxonomy      Taxonomy name.
 	 * @param array  $prepared_args Arguments for `get_terms()`, including number and offset.
 	 * @return array List of term objects for the current page. Total count in `$this->total_terms`.
@@ -635,7 +646,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	protected function get_terms_for_response( $taxonomy, $prepared_args ) {
 		$number          = isset( $prepared_args['number'] ) ? (int) $prepared_args['number'] : 0;
 		$offset          = isset( $prepared_args['offset'] ) ? (int) $prepared_args['offset'] : 0;
-		$is_hierarchical = is_taxonomy_hierarchical( $taxonomy );
+		$is_hierarchical = isset( $prepared_args['hierarchical'] )
+			? (bool) $prepared_args['hierarchical']
+			: is_taxonomy_hierarchical( $taxonomy );
 		$query_args      = $prepared_args;
 
 		if ( $is_hierarchical ) {
