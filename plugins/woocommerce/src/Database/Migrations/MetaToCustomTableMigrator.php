@@ -102,6 +102,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 *  '$meta_key_1' => array(  // $meta_key_1 is the name of meta_key in source meta table.
 	 *          'type' => 'type of value, could be string/int/date/float',
 	 *          'destination' => 'name of the column in column name where this data should be inserted in.',
+	 *          'fallback_meta_key' => 'optional, for the date_epoch type only: meta key holding the same date as a MySQL datetime in the site timezone, used when $meta_key_1 has no value.',
 	 *  ),
 	 *  '$meta_key_2' => array(
 	 *          ......
@@ -484,7 +485,7 @@ WHERE $where_clause;
 		global $wpdb;
 
 		$meta_table                = $this->schema_config['source']['meta']['table_name'];
-		$meta_keys                 = array_keys( $this->meta_column_mapping );
+		$meta_keys                 = array_merge( array_keys( $this->meta_column_mapping ), array_keys( $this->get_fallback_meta_keys() ) );
 		$meta_key_column           = $this->schema_config['source']['meta']['meta_key_column'];
 		$meta_value_column         = $this->schema_config['source']['meta']['meta_value_column'];
 		$meta_table_relational_key = $this->schema_config['source']['meta']['entity_id_column'];
@@ -568,7 +569,7 @@ WHERE
 	 * @param array $meta_data Original source data.
 	 */
 	private function process_and_sanitize_meta_data( array &$sanitized_entity_data, array &$error_records, array $meta_data ): void {
-		foreach ( $meta_data as $datum ) {
+		foreach ( $this->resolve_fallback_meta_keys( $meta_data ) as $datum ) {
 			$column_schema = $this->meta_column_mapping[ $datum->meta_key ];
 			if ( isset( $sanitized_entity_data[ $datum->entity_id ][ $column_schema['destination'] ] ) ) {
 				// We pick only the first meta if there are duplicates for a flat column, to be consistent with WP core behavior in handing duplicate meta which are marked as unique.
@@ -581,6 +582,70 @@ WHERE
 				$sanitized_entity_data[ $datum->entity_id ][ $column_schema['destination'] ] = $value;
 			}
 		}
+	}
+
+	/**
+	 * Get the meta keys that are only read when the key they back up has no value.
+	 *
+	 * @return array<string, string> Main meta key, indexed by its fallback meta key.
+	 */
+	private function get_fallback_meta_keys(): array {
+		$fallback_meta_keys = array();
+		foreach ( $this->meta_column_mapping as $meta_key => $schema ) {
+			if ( isset( $schema['fallback_meta_key'] ) ) {
+				$fallback_meta_keys[ $schema['fallback_meta_key'] ] = $meta_key;
+			}
+		}
+		return $fallback_meta_keys;
+	}
+
+	/**
+	 * Rewrite fallback meta rows as rows of the key they back up, and move them after all other rows.
+	 *
+	 * Callers keep the first usable value per column, so the fallback only counts when the main key has none.
+	 *
+	 * @param array $meta_data Meta rows (objects or arrays) with `meta_key` and `meta_value`.
+	 * @return array Meta rows where every key is a main key.
+	 */
+	private function resolve_fallback_meta_keys( array $meta_data ): array {
+		$fallback_meta_keys = $this->get_fallback_meta_keys();
+		if ( empty( $fallback_meta_keys ) ) {
+			return $meta_data;
+		}
+
+		$main_rows     = array();
+		$fallback_rows = array();
+		foreach ( $meta_data as $datum ) {
+			$row = (array) $datum;
+			if ( ! isset( $fallback_meta_keys[ $row['meta_key'] ] ) ) {
+				$main_rows[] = $datum;
+				continue;
+			}
+			// phpcs:disable WordPress.DB.SlowDBQuery -- These are rows already read from the database, not query arguments.
+			$row['meta_key']   = $fallback_meta_keys[ $row['meta_key'] ];
+			$row['meta_value'] = $this->local_date_to_epoch( $row['meta_value'] );
+			// phpcs:enable WordPress.DB.SlowDBQuery
+			$fallback_rows[] = is_object( $datum ) ? (object) $row : $row;
+		}
+
+		return array_merge( $main_rows, $fallback_rows );
+	}
+
+	/**
+	 * Convert a MySQL datetime in the site timezone to a Unix timestamp, the way the posts data store reads it.
+	 *
+	 * @param mixed $value Datetime string in the site timezone, or a timestamp.
+	 * @return string Unix timestamp, or an empty string when there is no usable date.
+	 */
+	private function local_date_to_epoch( $value ): string {
+		if ( is_numeric( $value ) ) {
+			return (string) (int) $value;
+		}
+		if ( ! is_string( $value ) || '' === $value || '0000-00-00 00:00:00' === $value ) {
+			return '';
+		}
+		$datetime = date_create( $value, wp_timezone() );
+		return false === $datetime ? '' : (string) $datetime->getTimestamp();
 	}
 
 	/**
@@ -715,7 +780,7 @@ WHERE $where_clause
 		$meta_key_column       = $this->schema_config['source']['meta']['meta_key_column'];
 		$meta_value_column     = $this->schema_config['source']['meta']['meta_value_column'];
 		$meta_id_column        = $this->schema_config['source']['meta']['meta_id_column'];
-		$meta_columns          = array_keys( $this->meta_column_mapping );
+		$meta_columns          = array_merge( array_keys( $this->meta_column_mapping ), array_keys( $this->get_fallback_meta_keys() ) );
 
 		$meta_columns_placeholder = implode( ', ', array_fill( 0, count( $meta_columns ), '%s' ) );
 		$source_ids_placeholder   = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
@@ -734,13 +799,16 @@ WHERE $where_clause
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$meta_data            = $wpdb->get_results( $query, ARRAY_A );
 		$source_metadata_rows = array();
-		foreach ( $meta_data as $meta_datum ) {
+		foreach ( $this->resolve_fallback_meta_keys( $meta_data ) as $meta_datum ) {
 			if ( ! isset( $source_metadata_rows[ $meta_datum['entity_id'] ] ) ) {
 				$source_metadata_rows[ $meta_datum['entity_id'] ] = array();
 			}
 			$destination_column = $this->meta_column_mapping[ $meta_datum['meta_key'] ]['destination'];
 			$alias              = "meta_source_{$destination_column}";
-			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) ) {
+			// The migration stores an empty date as null and lets the next row fill the column, so do the same here.
+			$is_empty_date = '' === ( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null )
+				&& in_array( $this->meta_column_mapping[ $meta_datum['meta_key'] ]['type'], array( 'date', 'date_epoch' ), true );
+			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) && ! $is_empty_date ) {
 				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
 				continue;
 			}

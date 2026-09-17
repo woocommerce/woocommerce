@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -4170,4 +4171,111 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 	delete_option( $last_id_option );
 
 	return false;
+}
+
+/**
+ * Restore the paid and completed dates of HPOS orders that were migrated from posts carrying only the
+ * pre-3.0 '_paid_date' / '_completed_date' meta keys, which the migration used to skip.
+ *
+ * Only empty dates are filled. Runs in batches of 250 orders.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True to run again, false when done.
+ */
+function wc_update_1130_restore_hpos_legacy_paid_and_completed_dates() {
+	global $wpdb;
+
+	$last_id_option = 'woocommerce_update_1130_last_legacy_date_order_id';
+	$data_sync      = wc_get_container()->get( DataSynchronizer::class );
+
+	if ( ! $data_sync->check_orders_table_exists() ) {
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	$op_table   = OrdersTableDataStore::get_operational_data_table_name();
+	$meta_table = OrdersTableDataStore::get_meta_table_name();
+	$columns    = array(
+		'_paid_date'      => 'date_paid_gmt',
+		'_completed_date' => 'date_completed_gmt',
+	);
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names cannot be prepared.
+	$order_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT DISTINCT op.order_id FROM {$op_table} AS op
+			INNER JOIN {$meta_table} AS meta ON meta.order_id = op.order_id
+			WHERE op.order_id > %d
+			AND meta.meta_value NOT IN ( '', '0000-00-00 00:00:00' )
+			AND (
+				( meta.meta_key = '_paid_date' AND op.date_paid_gmt IS NULL )
+				OR ( meta.meta_key = '_completed_date' AND op.date_completed_gmt IS NULL )
+			)
+			ORDER BY op.order_id ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+
+	if ( '' !== $wpdb->last_error || empty( $order_ids ) ) {
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	$order_ids       = array_map( 'intval', $order_ids );
+	$id_placeholders = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
+	$meta_rows       = $wpdb->get_results(
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders are generated per ID.
+		$wpdb->prepare( "SELECT order_id, meta_key, meta_value FROM {$meta_table} WHERE order_id IN ( {$id_placeholders} ) AND meta_key IN ( '_paid_date', '_completed_date' ) ORDER BY id ASC", $order_ids )
+	);
+
+	$repaired_ids = array();
+	$seen         = array();
+	foreach ( $meta_rows as $row ) {
+		// Like the posts data store, only the first value of a key counts.
+		if ( isset( $seen[ $row->order_id ][ $row->meta_key ] ) ) {
+			continue;
+		}
+		$seen[ $row->order_id ][ $row->meta_key ] = true;
+
+		// The old keys hold a MySQL datetime in the site timezone.
+		if ( '' === $row->meta_value || '0000-00-00 00:00:00' === $row->meta_value ) {
+			continue;
+		}
+		$datetime = is_numeric( $row->meta_value ) ? date_create( '@' . (int) $row->meta_value ) : date_create( $row->meta_value, wp_timezone() );
+		if ( ! $datetime ) {
+			continue;
+		}
+
+		$column  = $columns[ $row->meta_key ];
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$op_table} SET {$column} = %s WHERE order_id = %d AND {$column} IS NULL",
+				$datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ),
+				$row->order_id
+			)
+		);
+		if ( $updated ) {
+			$repaired_ids[ (int) $row->order_id ] = true;
+		}
+	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	$repaired_ids = array_keys( $repaired_ids );
+	if ( $repaired_ids ) {
+		wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( $repaired_ids );
+
+		// Analytics keeps its own copy of these dates. Nothing handles the import action when Analytics is off.
+		$import_hook = OrdersScheduler::get_action( 'import' );
+		if ( $import_hook && has_action( $import_hook ) ) {
+			foreach ( $repaired_ids as $repaired_id ) {
+				OrdersScheduler::schedule_action( 'import', array( $repaired_id ) );
+			}
+		}
+	}
+
+	update_option( $last_id_option, end( $order_ids ), false );
+
+	return true;
 }

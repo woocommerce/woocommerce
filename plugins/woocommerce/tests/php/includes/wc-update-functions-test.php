@@ -1024,4 +1024,48 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
 	}
+
+	/**
+	 * @testdox The 11.3.0 update fills empty HPOS paid and completed dates from the pre-3.0 meta keys and leaves set dates alone.
+	 */
+	public function test_wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(): void {
+		global $wpdb;
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$op_table   = $wpdb->prefix . 'wc_order_operational_data';
+		$meta_table = $wpdb->prefix . 'wc_orders_meta';
+		$rows       = array(
+			101 => array( null, '2016-05-10 12:00:00' ),
+			102 => array( '2020-01-02 03:04:05', '2016-05-10 12:00:00' ),
+			103 => array( null, '' ),
+		);
+		foreach ( $rows as $order_id => list( $date_paid_gmt, $legacy_paid_date ) ) {
+			$wpdb->insert(
+				$op_table,
+				array(
+					'order_id'      => $order_id,
+					'date_paid_gmt' => $date_paid_gmt,
+				)
+			);
+			$wpdb->insert(
+				$meta_table,
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => $legacy_paid_date, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				)
+			);
+		}
+
+		$this->assertTrue( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A batch with orders to repair should request another run' );
+		$this->assertFalse( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A run with nothing left to repair should complete' );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_legacy_date_order_id' ), 'The cursor should be cleared on completion' );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$dates = $wpdb->get_results( "SELECT order_id, date_paid_gmt FROM {$op_table} WHERE order_id IN ( 101, 102, 103 )", OBJECT_K );
+		$this->assertSame( '2016-05-10 10:00:00', $dates[101]->date_paid_gmt, 'An empty paid date should be filled from _paid_date, in GMT' );
+		$this->assertSame( '2020-01-02 03:04:05', $dates[102]->date_paid_gmt, 'An existing paid date should not be overwritten' );
+		$this->assertNull( $dates[103]->date_paid_gmt, 'An empty legacy value should leave the paid date empty' );
+	}
 }

@@ -362,6 +362,7 @@ class WC_Install {
 		),
 		'11.3.0'   => array(
 			'wc_update_1130_repair_hpos_order_dates_from_posts',
+			'wc_update_1130_restore_hpos_legacy_paid_and_completed_dates',
 		),
 	);
 
