@@ -3,6 +3,7 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import { select } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 import { validationStore } from '@woocommerce/block-data';
 import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
@@ -24,9 +25,6 @@ jest.mock( '@woocommerce/block-data/cart/resolvers', () => {
 	};
 } );
 
-// The stubbed batch responses below are not complete Store API responses, so
-// applyCoupon rejects after the request has been captured. Where only the
-// request is under test, the rejection is ignored.
 type CapturedRequest = {
 	url: string;
 	method: string;
@@ -39,6 +37,12 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	beforeEach( () => {
 		// Reset any request handlers that were added in individual tests
 		server.resetHandlers();
+		// The middleware that adds these to apiFetch is not loaded under Jest,
+		// and processHeadersOnFetch logs console.error when they are missing.
+		// @ts-expect-error setNonce exists but is not typed
+		apiFetch.setNonce = jest.fn();
+		// @ts-expect-error setCartHash exists but is not typed
+		apiFetch.setCartHash = jest.fn();
 	} );
 
 	describe( 'applyCoupon API calls', () => {
@@ -82,6 +86,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 										shipping_address: {},
 										billing_address: {},
 									},
+									headers: {},
 								},
 							],
 						} );
@@ -95,9 +100,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			// Apply a coupon
 			await act( async () => {
-				await result.current
-					.applyCoupon( 'TEST5' )
-					.catch( () => undefined );
+				await result.current.applyCoupon( 'TEST5' );
 			} );
 
 			// Verify the request was made
@@ -142,7 +145,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						capturedRequests.push( requestData );
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -155,9 +160,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			// Apply each coupon and verify API calls
 			for ( let i = 0; i < testCoupons.length; i++ ) {
 				await act( async () => {
-					await result.current
-						.applyCoupon( testCoupons[ i ] )
-						.catch( () => undefined );
+					await result.current.applyCoupon( testCoupons[ i ] );
 				} );
 
 				// Verify the API call for this coupon
@@ -274,7 +277,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -285,9 +290,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current
-					.applyCoupon( 'CACHE_TEST' )
-					.catch( () => undefined );
+				await result.current.applyCoupon( 'CACHE_TEST' );
 			} );
 
 			// Verify proper headers are sent
@@ -320,7 +323,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -331,9 +336,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current
-					.applyCoupon( 'BATCH_TEST' )
-					.catch( () => undefined );
+				await result.current.applyCoupon( 'BATCH_TEST' );
 			} );
 
 			// Parse and verify the batch request structure
@@ -373,7 +376,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -420,7 +425,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -432,9 +439,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current
-					.applyCoupon( 'CHECKOUT_CONTEXT' )
-					.catch( () => undefined );
+				await result.current.applyCoupon( 'CHECKOUT_CONTEXT' );
 			} );
 
 			// Verify API call is made regardless of context
@@ -463,7 +468,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						capturedRequests.push( requestData );
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -480,15 +487,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await checkoutResult.current
-					.applyCoupon( 'CHECKOUT_COUPON' )
-					.catch( () => undefined );
+				await checkoutResult.current.applyCoupon( 'CHECKOUT_COUPON' );
 			} );
 
 			await act( async () => {
-				await cartResult.current
-					.applyCoupon( 'CART_COUPON' )
-					.catch( () => undefined );
+				await cartResult.current.applyCoupon( 'CART_COUPON' );
 			} );
 
 			// Both should make the same API calls
@@ -527,7 +530,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -539,9 +544,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			const specialCoupon = 'COUPON-WITH_SPECIAL@CHARS';
 			await act( async () => {
-				await result.current
-					.applyCoupon( specialCoupon )
-					.catch( () => undefined );
+				await result.current.applyCoupon( specialCoupon );
 			} );
 
 			expect( capturedRequest ).not.toBeNull();
@@ -568,7 +571,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -579,7 +584,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			);
 
 			await act( async () => {
-				await result.current.applyCoupon( '' ).catch( () => undefined );
+				await result.current.applyCoupon( '' );
 			} );
 
 			expect( capturedRequest ).not.toBeNull();
