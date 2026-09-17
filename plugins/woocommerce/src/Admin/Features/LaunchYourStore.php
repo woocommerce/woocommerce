@@ -93,7 +93,7 @@ class LaunchYourStore {
 
 
 	/**
-	 * Preload settings for Site Visibility.
+	 * Preload settings for Store visibility.
 	 *
 	 * @param array $settings settings array.
 	 *
@@ -217,7 +217,7 @@ class LaunchYourStore {
 			'woocommerce_launch_your_store_tour_hidden',
 			array(
 				'type'         => 'string',
-				'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+				'description'  => 'Indicate whether the user has dismissed the store visibility tour on the home screen.',
 				'single'       => true,
 				'show_in_rest' => true,
 			)

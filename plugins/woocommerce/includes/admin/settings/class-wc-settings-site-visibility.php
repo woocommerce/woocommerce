@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce site visibility settings
+ * WooCommerce store visibility settings
  *
  * @package  WooCommerce\Admin
  */
@@ -24,7 +24,7 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'site-visibility';
-		$this->label = __( 'Site visibility', 'woocommerce' );
+		$this->label = __( 'Store visibility', 'woocommerce' );
 
 		parent::__construct();
 	}

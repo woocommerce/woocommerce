@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
 /**
- * Adds hooks to add a badge to the WordPress admin bar showing site visibility.
+ * Adds hooks to add a badge to the WordPress admin bar showing store visibility.
  */
 class ComingSoonAdminBarBadge {
 
 	/**
-	 * Check if the site visibility badge is enabled.
+	 * Check if the store visibility badge is enabled.
 	 *
 	 * @return bool
 	 */
@@ -44,7 +44,7 @@ class ComingSoonAdminBarBadge {
 	}
 
 	/**
-	 * Add site visibility cache badge to WP admin bar.
+	 * Add store visibility cache badge to WP admin bar.
 	 *
 	 * @internal
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
@@ -82,7 +82,7 @@ class ComingSoonAdminBarBadge {
 	}
 
 	/**
-	 * Output CSS for site visibility badge.
+	 * Output CSS for store visibility badge.
 	 *
 	 * @internal
 	 */

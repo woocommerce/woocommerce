@@ -394,9 +394,9 @@ class FeaturesController {
 				'is_experimental'              => false,
 			),
 			'site_visibility_badge'                => array(
-				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
+				'name'                         => __( 'Store visibility badge', 'woocommerce' ),
 				'description'                  => __(
-					'Enable the site visibility badge in the WordPress admin bar',
+					'Enable the store visibility badge in the WordPress admin bar',
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,

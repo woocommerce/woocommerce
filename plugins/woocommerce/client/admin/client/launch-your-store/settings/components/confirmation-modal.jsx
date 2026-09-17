@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 import './confirmation-modal.scss';
 
 /**
- * Confirmation modal for the site visibility settings.
+ * Confirmation modal for the store visibility settings.
  *
  * @return {React.ReactNode} The confirmation modal component.
  */

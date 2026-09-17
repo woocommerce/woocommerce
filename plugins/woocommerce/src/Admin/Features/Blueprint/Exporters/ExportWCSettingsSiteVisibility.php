@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 /**
  * Class ExportWCSettingsSiteVisibility
  *
- * This class exports WooCommerce settings on the Site Visibility page.
+ * This class exports WooCommerce settings on the Store visibility page.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
@@ -20,7 +20,7 @@ class ExportWCSettingsSiteVisibility implements StepExporter, HasAlias {
 	use UseWPFunctions;
 
 	/**
-	 * Export Site Visibility settings.
+	 * Export Store visibility settings.
 	 *
 	 * @return SetSiteOptions
 	 */
@@ -48,7 +48,7 @@ class ExportWCSettingsSiteVisibility implements StepExporter, HasAlias {
 	 * @return string
 	 */
 	public function get_label() {
-		return __( 'Site Visibility', 'woocommerce' );
+		return __( 'Store visibility', 'woocommerce' );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class ExportWCSettingsSiteVisibility implements StepExporter, HasAlias {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'Includes all settings in WooCommerce | Settings | Visibility.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Store visibility.', 'woocommerce' );
 	}
 
 	/**

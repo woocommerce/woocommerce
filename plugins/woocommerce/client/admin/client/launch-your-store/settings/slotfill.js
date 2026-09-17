@@ -154,7 +154,7 @@ const SiteVisibility = () => {
 				value={ siteVisibilityBadge }
 				name="woocommerce_feature_site_visibility_badge_enabled"
 			/>
-			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
+			<h2>{ __( 'Store visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
 				{ createInterpolateElement(
 					__(
@@ -323,12 +323,12 @@ const SiteVisibility = () => {
 						label={
 							<>
 								{ __(
-									'Display site visibility badge in admin bar',
+									'Display store visibility badge in admin bar',
 									'woocommerce'
 								) }
 								<p>
 									{ __(
-										'Show the site visibility status badge in the WordPress admin bar.',
+										'Show the store visibility status badge in the WordPress admin bar.',
 										'woocommerce'
 									) }
 								</p>

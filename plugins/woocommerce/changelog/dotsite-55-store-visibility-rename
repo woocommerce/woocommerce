@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Rename the "Site visibility" settings tab to "Store visibility" to distinguish WooCommerce's coming soon controls from the host's own site-level visibility settings.
