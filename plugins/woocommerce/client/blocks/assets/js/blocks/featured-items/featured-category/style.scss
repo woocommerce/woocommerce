@@ -7,3 +7,10 @@
 .wc-block-featured-category {
 	@include wc-block-featured-item();
 }
+
+.wc-block-featured-category__natural-image {
+	> .wp-block-cover__image-background {
+		object-fit: none;
+		background-size: auto;
+	}
+}
