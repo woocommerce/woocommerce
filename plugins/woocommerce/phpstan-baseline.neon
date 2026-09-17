@@ -18764,24 +18764,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Cannot call method get_billing_email\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Cannot call method get_billing_first_name\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Cannot call method get_billing_last_name\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Method WC_Email\:\:admin_actions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

@@ -687,7 +687,7 @@ class WC_Email extends WC_Settings_API {
 
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object ) {
+			if ( $this->object instanceof WC_Order ) {
 				$reply_to_name  = str_replace( ',', '', sanitize_text_field( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() ) );
 				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
 

@@ -153,10 +153,8 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_admin_order_email_invalid_billing_email_produces_no_reply_to(): void {
 		// WC_Order::set_billing_email() throws on an invalid address, so the
-		// order getters are stubbed out instead of going through a real order.
-		$order = $this->getMockBuilder( 'stdClass' )
-			->addMethods( array( 'get_billing_first_name', 'get_billing_last_name', 'get_billing_email' ) )
-			->getMock();
+		// order getters are stubbed on a mock instead of going through a real order.
+		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_billing_first_name' )->willReturn( 'Foo' );
 		$order->method( 'get_billing_last_name' )->willReturn( 'Bar' );
 		$order->method( 'get_billing_email' )->willReturn( 'not-an-email' );
@@ -175,9 +173,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	 * @param string $name Billing first name made up only of whitespace/line breaks.
 	 */
 	public function test_admin_order_email_blank_billing_name_produces_no_reply_to( string $name ): void {
-		$order = $this->getMockBuilder( 'stdClass' )
-			->addMethods( array( 'get_billing_first_name', 'get_billing_last_name', 'get_billing_email' ) )
-			->getMock();
+		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_billing_first_name' )->willReturn( $name );
 		$order->method( 'get_billing_last_name' )->willReturn( '' );
 		$order->method( 'get_billing_email' )->willReturn( 'guest@example.com' );
@@ -192,9 +188,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	 * @testdox A billing name of "0" is not treated as empty.
 	 */
 	public function test_admin_order_email_billing_name_of_zero_is_kept(): void {
-		$order = $this->getMockBuilder( 'stdClass' )
-			->addMethods( array( 'get_billing_first_name', 'get_billing_last_name', 'get_billing_email' ) )
-			->getMock();
+		$order = $this->createMock( WC_Order::class );
 		$order->method( 'get_billing_first_name' )->willReturn( '0' );
 		$order->method( 'get_billing_last_name' )->willReturn( '' );
 		$order->method( 'get_billing_email' )->willReturn( 'guest@example.com' );
@@ -203,6 +197,23 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email->object = $order;
 
 		$this->assertSame( "Reply-to: 0 <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+	}
+
+	/**
+	 * @testdox No Reply-to line is added when the object is not a WC_Order.
+	 */
+	public function test_admin_order_email_non_order_object_produces_no_reply_to(): void {
+		$order = $this->getMockBuilder( 'stdClass' )
+			->addMethods( array( 'get_billing_first_name', 'get_billing_last_name', 'get_billing_email' ) )
+			->getMock();
+		$order->method( 'get_billing_first_name' )->willReturn( 'Foo' );
+		$order->method( 'get_billing_last_name' )->willReturn( 'Bar' );
+		$order->method( 'get_billing_email' )->willReturn( 'guest@example.com' );
+
+		$email         = new WC_Email_New_Order();
+		$email->object = $order;
+
+		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
 	}
 
 	/**
