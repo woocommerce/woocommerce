@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Use Cover layout and image controls in the Featured Category editor, preserving existing blocks through migration.
