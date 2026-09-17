@@ -54,7 +54,7 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 
 			$markup = do_blocks(
 				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
-				'<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductBlock":true} /-->' .
+				'<!-- wp:woocommerce/product-rating /-->' .
 				'<!-- /wp:woocommerce/single-product -->'
 			);
 
