@@ -76,6 +76,11 @@
 		height: em($grid-unit-30);
 	}
 
+	:where(.wc-block-customer-account__visual > svg):has(+ .wc-block-customer-account__avatar),
+	.wc-block-customer-account__account-icon:has(+ .wc-block-customer-account__avatar) {
+		opacity: 0;
+	}
+
 	:where(.wc-block-customer-account__avatar) {
 		// SVG icons have some transparent spacing around the actual icon.
 		// So we add some spacing around the avatar to simulate a similar size.
