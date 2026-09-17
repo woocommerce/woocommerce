@@ -75,6 +75,14 @@ run `pnpm playwright test --help`
 The e2e test environment configuration can be found in the `.wp-env.e2e.json` file in the `plugins/woocommerce`
 folder (the `.wp-env.json` file configures the separate dev environment, and `.wp-env.test.json` the lean PHP-unit environment).
 
+### PHP coverage in CI
+
+See the [PHP version guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/testing/php-version-coverage.md) for how to choose PHP versions and where they are covered by E2E and PHP unit tests.
+
+The policy lives in `config.ci.tests` in `plugins/woocommerce/package.json`, using each job's `events` and `testEnv.config.phpVersion`. PHP 7.4 and 8.5 have separate nightly entries and report names; the existing report names represent PHP 8.3. When updating the policy, keep the routine version aligned with store usage and update the latest nightly version as WooCommerce adopts a newer PHP release.
+
+Custom on-demand triggers run their selected jobs with the configured PHP version; `core-e2e-php-8.5` remains available for PHP 8.5. Tests against existing hosted sites also keep the host's PHP version. Local E2E environments continue to use `.wp-env.e2e.json`; set `WP_ENV_PHP_VERSION=8.3` when starting the environment to reproduce routine CI coverage.
+
 For more information on how to configure the test environment for `wp-env`, please check out
 the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
 
