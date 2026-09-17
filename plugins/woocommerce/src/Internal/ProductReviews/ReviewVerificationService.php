@@ -25,13 +25,6 @@ final class ReviewVerificationService implements RegisterHooksInterface {
 	public const PRODUCT_REVIEWS_GROUP = 'woocommerce-reviews';
 
 	/**
-	 * Comment types WooCommerce recognizes as product reviews.
-	 *
-	 * @var string[]
-	 */
-	private const REVIEW_COMMENT_TYPES = array( 'review', 'comment', '' );
-
-	/**
 	 * Register hooks.
 	 *
 	 * @return void
@@ -123,7 +116,7 @@ final class ReviewVerificationService implements RegisterHooksInterface {
 		$comment_ids = get_comments(
 			array(
 				'fields'     => 'ids',
-				'type__in'   => self::REVIEW_COMMENT_TYPES,
+				'type__in'   => array( 'review', 'comment', '' ),
 				'status'     => array( 'approve', 'hold' ),
 				'number'     => $batches_number * $batch_size,
 				'orderby'    => 'comment_ID',
