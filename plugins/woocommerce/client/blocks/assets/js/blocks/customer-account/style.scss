@@ -61,10 +61,6 @@
 		text-decoration: underline;
 	}
 
-	:where(.wc-block-customer-account__visual) {
-		position: relative;
-	}
-
 	:where(.wc-block-customer-account__visual + .label) {
 		padding-left: em($gap-smallest);
 	}
