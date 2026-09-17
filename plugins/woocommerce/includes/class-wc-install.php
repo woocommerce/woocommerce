@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
+use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
@@ -358,6 +359,7 @@ class WC_Install {
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
 			'wc_update_11202_reset_refund_returning_customer_markers',
+			'wc_update_11203_normalize_stock_notification_emails',
 		),
 	);
 
@@ -1276,7 +1278,21 @@ class WC_Install {
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
-		if ( self::is_new_install() ) {
+		$is_new_install = self::is_new_install();
+
+		// New stores keep the cart through logout; existing stores stay on the behavior they have always
+		// had, and their merchants opt in. This runs here rather than as an update callback so the value
+		// is in place before anything can read it: update callbacks are queued through Action Scheduler,
+		// which would leave a window where the setting is visible but not yet corrected. add_option() is
+		// a no-op once a value exists, so a merchant's own choice is never overwritten.
+		add_option(
+			'woocommerce_cart_behavior_on_logout',
+			$is_new_install ? CartBehaviorOnLogout::PRESERVE : CartBehaviorOnLogout::CLEAR,
+			'',
+			false
+		);
+
+		if ( $is_new_install ) {
 			// Define initial tax classes.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
@@ -1339,7 +1355,7 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
-		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 	}
 
 	/**
@@ -3166,21 +3182,18 @@ EOT;
 <!-- /wp:woocommerce/cart-line-items-block -->
 
 <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
-<div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
-<h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
-
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail"} -->
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
 <!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 

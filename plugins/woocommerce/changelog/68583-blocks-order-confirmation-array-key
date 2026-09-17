@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat an array-valued key on the Blocks order confirmation page as absent so it falls through to the invalid-order handling instead of fataling in hash_equals().
