@@ -354,6 +354,61 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox A taxonomy params callback that returns a non-array value falls back to the unfiltered map.
+	 *
+	 * @testWith ["null"]
+	 *           ["string"]
+	 *           ["false"]
+	 *
+	 * @param string $return_type Which non-array value the callback returns.
+	 */
+	public function test_taxonomy_params_filter_falls_back_when_callback_returns_a_non_array( string $return_type ): void {
+		$return_values = array(
+			'null'   => null,
+			'string' => 'brands',
+			'false'  => false,
+		);
+
+		$this->taxonomy_params_filter = static function () use ( $return_values, $return_type ) {
+			return $return_values[ $return_type ];
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+
+		$this->assertSame( 'categories', $taxonomy_params['product_cat'] ?? null, "A callback returning {$return_type} should leave the default map in place." );
+		$this->assertSame( 'brands', $taxonomy_params['product_brand'] ?? null, "A callback returning {$return_type} should leave the default map in place." );
+		$this->assertContains( 'categories', $this->sut->get_param_keys(), 'get_param_keys() should still resolve after a callback returns a non-array.' );
+	}
+
+	/**
+	 * @testdox Taxonomy param entries that are not name => string pairs are discarded.
+	 */
+	public function test_taxonomy_params_filter_discards_unusable_entries(): void {
+		$this->taxonomy_params_filter = static function ( array $taxonomy_params ): array {
+			$taxonomy_params['product_cat']   = array( 'categories', 'cats' );
+			$taxonomy_params['product_tag']   = 42;
+			$taxonomy_params['product_brand'] = '';
+			$taxonomy_params[]                = 'orphan';
+
+			return $taxonomy_params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$param_keys      = $this->sut->get_param_keys();
+
+		$this->assertArrayNotHasKey( 'product_cat', $taxonomy_params, 'An array param value should be discarded.' );
+		$this->assertArrayNotHasKey( 'product_tag', $taxonomy_params, 'A non-string param value should be discarded.' );
+		$this->assertArrayNotHasKey( 'product_brand', $taxonomy_params, 'An empty param value should be discarded.' );
+		$this->assertArrayNotHasKey( 0, $taxonomy_params, 'A numerically keyed entry should be discarded.' );
+
+		foreach ( $param_keys as $param_key ) {
+			$this->assertIsString( $param_key, 'get_param_keys() must only expose strings, since they become public query vars.' );
+		}
+	}
+
+	/**
 	 * Helper method to clear params cache for testing.
 	 */
 	private function clear_params_cache() {

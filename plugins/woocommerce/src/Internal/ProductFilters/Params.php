@@ -67,8 +67,19 @@ class Params implements FilterUrlParam {
 			$this->init_params();
 		}
 
-		$params = self::$params;
+		$params             = self::$params;
+		$params['taxonomy'] = $this->filter_taxonomy_params( $params['taxonomy'] ?? array() );
 
+		return $params;
+	}
+
+	/**
+	 * Pass the taxonomy param map through its filter, discarding unusable values.
+	 *
+	 * @param array $taxonomy_params Map of taxonomy name to URL query parameter name.
+	 * @return array
+	 */
+	private function filter_taxonomy_params( array $taxonomy_params ): array {
 		/**
 		 * Filters the URL query parameter that product filters claim for each product taxonomy.
 		 *
@@ -80,13 +91,37 @@ class Params implements FilterUrlParam {
 		 * returns an empty string for a taxonomy that is missing from this map, so releasing a
 		 * parameter also hides the core filter block for that taxonomy.
 		 *
+		 * Register the callback before `parse_request` runs, on `plugins_loaded` or `init`. The
+		 * param names are registered as public query vars through the one-shot `query_vars`
+		 * filter, which WordPress fires once per request in `WP::parse_request()`; a callback
+		 * added after that renames the param here but never registers it, so `get_query_var()`
+		 * returns an empty string and filtering stops working. For the same reason the map must
+		 * be stable for the whole request: do not vary it by the current query or request URI.
+		 *
+		 * A return value that is not an array is discarded in favour of the unfiltered map, as
+		 * are entries whose taxonomy name or param name is not a non-empty string.
+		 *
+		 * @hook woocommerce_product_filter_taxonomy_params
 		 * @since 11.3.0
 		 *
 		 * @param array $taxonomy_params Map of taxonomy name to URL query parameter name.
+		 * @return array Map of taxonomy name to URL query parameter name.
 		 */
-		$params['taxonomy'] = apply_filters( 'woocommerce_product_filter_taxonomy_params', $params['taxonomy'] ?? array() );
+		$filtered = apply_filters( 'woocommerce_product_filter_taxonomy_params', $taxonomy_params );
 
-		return $params;
+		if ( ! is_array( $filtered ) ) {
+			return $taxonomy_params;
+		}
+
+		$valid = array();
+
+		foreach ( $filtered as $taxonomy => $param ) {
+			if ( is_string( $taxonomy ) && '' !== $taxonomy && is_string( $param ) && '' !== $param ) {
+				$valid[ $taxonomy ] = $param;
+			}
+		}
+
+		return $valid;
 	}
 
 	/**
