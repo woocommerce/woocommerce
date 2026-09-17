@@ -31,7 +31,7 @@ class WC_Queue {
 	 *
 	 * @var string
 	 */
-	protected static $default_cass = 'WC_Priority_Action_Queue';
+	protected static $default_cass = 'WC_Options_Aware_Action_Queue';
 
 	/**
 	 * Single instance of WC_Queue_Interface
