@@ -36,6 +36,24 @@ class DataUtils {
 	);
 
 	/**
+	 * Default log source, used outside the entry-point pipelines.
+	 */
+	private const DEFAULT_LOG_SOURCE = 'wc-v4-refunds';
+
+	/**
+	 * Log source for warnings emitted while an entry-point pipeline runs.
+	 *
+	 * Set from the caller's $log_source by compute_refund_preview_or_error() and
+	 * prepare_refund_creation_or_error(), restored to the default afterwards.
+	 * Carried as state rather than a parameter because the intermediate methods
+	 * are public and overridable, so their signatures must not change (see
+	 * DataUtilsTest::test_original_public_method_signatures_remain_overridable()).
+	 *
+	 * @var string
+	 */
+	private $log_source = self::DEFAULT_LOG_SOURCE;
+
+	/**
 	 * Convert line items (schema format) to internal format. This keys arrays by item ID and has some different naming
 	 * conventions.
 	 *
@@ -590,7 +608,7 @@ class DataUtils {
 					(int) $item->get_order_id(),
 					$reason
 				),
-				array( 'source' => 'wc-v4-refunds' )
+				array( 'source' => $this->log_source )
 			);
 			return array(
 				'subtotal'  => $amount,
@@ -668,7 +686,7 @@ class DataUtils {
 			if ( 0 === $original_qty ) {
 				wc_get_logger()->warning(
 					sprintf( 'Refund preview: product item %d has zero original quantity on order %d.', $item->get_id(), $item->get_order_id() ),
-					array( 'source' => 'wc-v4-refunds' )
+					array( 'source' => $this->log_source )
 				);
 				return 0.0;
 			}
@@ -1255,75 +1273,80 @@ class DataUtils {
 	 * @since 11.1.0
 	 */
 	public function compute_refund_preview_or_error( WC_Order $order, array $line_items, string $log_source ) {
-		// Round caller-supplied refund_total values once, up front, so validation and
-		// the computed preview use the same precision the create flow stores. Reused
-		// for both validate and build below.
-		$line_items = $this->normalize_refund_totals( $line_items );
-
-		$validation_error = $this->validate_preview_line_items( $line_items, $order );
-
-		if ( is_wp_error( $validation_error ) ) {
-			return $validation_error;
-		}
-
+		$this->log_source = $log_source;
 		try {
-			$preview = $this->build_refund_preview( $order, $line_items );
-		} catch ( \InvalidArgumentException $e ) {
-			// validate_preview_line_items above should have caught any bad input.
-			// If build_refund_preview still throws InvalidArgumentException, treat
-			// it as a server-side invariant violation, log for observability, and
-			// return a generic message (do not leak internal IDs to clients).
-			wc_get_logger()->error(
-				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
-				array( 'source' => $log_source )
-			);
-			return new WP_Error(
-				'invalid_preview_request',
-				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
-				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
-			);
-		} catch ( \Throwable $e ) {
-			wc_get_logger()->error(
-				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
-				array( 'source' => $log_source )
-			);
-			return new WP_Error(
-				'unexpected_preview_error',
-				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
-				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
-			);
-		}
+			// Round caller-supplied refund_total values once, up front, so validation and
+			// the computed preview use the same precision the create flow stores. Reused
+			// for both validate and build below.
+			$line_items = $this->normalize_refund_totals( $line_items );
 
-		// Reject a non-positive aggregate total up front. A refund of only a negative
-		// discount line, or a product plus discount that nets to zero, would otherwise
-		// preview successfully and then fail at create time.
-		if ( (float) $preview['total'] <= 0 ) {
-			return new WP_Error(
-				'invalid_refund_amount',
-				__( 'Refund total must be greater than zero.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
-		}
+			$validation_error = $this->validate_preview_line_items( $line_items, $order );
 
-		// Final guard: even when per-line validation passes, the aggregate
-		// preview total can still exceed the order's remaining refundable
-		// amount (e.g. an amount-only partial refund applied previously).
-		// `total` is already tax-inclusive; compare directly against max_refundable.
-		$preview_total_with_tax = abs( (float) $preview['total'] );
-		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
-			return new WP_Error(
-				'preview_exceeds_max_refundable',
-				sprintf(
-					/* translators: 1: requested preview total including tax, 2: remaining refundable */
-					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
-					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
-					$preview['max_refundable']
-				),
-				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-			);
-		}
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
 
-		return $preview;
+			try {
+				$preview = $this->build_refund_preview( $order, $line_items );
+			} catch ( \InvalidArgumentException $e ) {
+				// validate_preview_line_items above should have caught any bad input.
+				// If build_refund_preview still throws InvalidArgumentException, treat
+				// it as a server-side invariant violation, log for observability, and
+				// return a generic message (do not leak internal IDs to clients).
+				wc_get_logger()->error(
+					sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
+					array( 'source' => $log_source )
+				);
+				return new WP_Error(
+					'invalid_preview_request',
+					__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+				);
+			} catch ( \Throwable $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
+					array( 'source' => $log_source )
+				);
+				return new WP_Error(
+					'unexpected_preview_error',
+					__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+				);
+			}
+
+			// Reject a non-positive aggregate total up front. A refund of only a negative
+			// discount line, or a product plus discount that nets to zero, would otherwise
+			// preview successfully and then fail at create time.
+			if ( (float) $preview['total'] <= 0 ) {
+				return new WP_Error(
+					'invalid_refund_amount',
+					__( 'Refund total must be greater than zero.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
+			// Final guard: even when per-line validation passes, the aggregate
+			// preview total can still exceed the order's remaining refundable
+			// amount (e.g. an amount-only partial refund applied previously).
+			// `total` is already tax-inclusive; compare directly against max_refundable.
+			$preview_total_with_tax = abs( (float) $preview['total'] );
+			if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
+				return new WP_Error(
+					'preview_exceeds_max_refundable',
+					sprintf(
+						/* translators: 1: requested preview total including tax, 2: remaining refundable */
+						__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
+						$preview['max_refundable']
+					),
+					array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+				);
+			}
+
+			return $preview;
+		} finally {
+			$this->log_source = self::DEFAULT_LOG_SOURCE;
+		}
 	}
 
 	/**
@@ -1357,93 +1380,98 @@ class DataUtils {
 	 * @since 11.1.0
 	 */
 	public function prepare_refund_creation_or_error( WC_Order $order, array $line_items, bool $has_amount_override, $amount_override, string $log_source ) {
-		// Fill in refund_total for any line items that omit it. The simplified
-		// request form sends only {line_item_id, quantity}; the backend derives
-		// the tax-inclusive total from the order's unit price × quantity. Scoped
-		// try: compute_line_item_refund_total throws InvalidArgumentException on
-		// quantity < 1, but fill_missing_refund_totals pre-checks that condition,
-		// so this branch is defensive against a future invariant break only.
+		$this->log_source = $log_source;
 		try {
-			$line_items = $this->fill_missing_refund_totals( $line_items, $order );
-		} catch ( \InvalidArgumentException $e ) {
-			wc_get_logger()->error(
-				sprintf( 'Refund creation invariant violation on order %d (%s): %s', $order->get_id(), get_class( $e ), $e->getMessage() ),
-				array( 'source' => $log_source )
+			// Fill in refund_total for any line items that omit it. The simplified
+			// request form sends only {line_item_id, quantity}; the backend derives
+			// the tax-inclusive total from the order's unit price × quantity. Scoped
+			// try: compute_line_item_refund_total throws InvalidArgumentException on
+			// quantity < 1, but fill_missing_refund_totals pre-checks that condition,
+			// so this branch is defensive against a future invariant break only.
+			try {
+				$line_items = $this->fill_missing_refund_totals( $line_items, $order );
+			} catch ( \InvalidArgumentException $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Refund creation invariant violation on order %d (%s): %s', $order->get_id(), get_class( $e ), $e->getMessage() ),
+					array( 'source' => $log_source )
+				);
+				return new WP_Error(
+					'invalid_refund_request',
+					__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+				);
+			}
+
+			// The WP_Error already carries its HTTP status (400/422) in the error
+			// data, so create and preview return the same code for the same invalid
+			// input.
+			$validation_error = $this->validate_line_items( $line_items, $order );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
+
+			// Convert line items to internal format. refund_total is tax-inclusive when no
+			// explicit refund_tax is supplied (auto-computed values, or client values) — the
+			// converter splits the tax portion out via the line's stored total/tax ratio
+			// (split_inclusive_by_stored_ratio(), the same method the preview uses). When
+			// the client supplies an explicit refund_tax breakdown, refund_total is the
+			// tax-exclusive subtotal and the tax is added on top (core Woo semantics).
+			// Either way calculate_refund_amount sums refund_total + refund_tax to the
+			// gross line amount, so mixing the two forms across line items is well-defined.
+			$internal_line_items = $this->convert_line_items_to_internal_format( $line_items, $order );
+			$calculated_total    = ! empty( $line_items ) ? $this->calculate_refund_amount( $line_items ) : 0;
+
+			$amount = $has_amount_override ? $amount_override : $calculated_total;
+
+			if ( (float) $amount <= 0 ) {
+				return new WP_Error(
+					'invalid_refund_amount',
+					__( 'Refund total must be greater than zero.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
+			// Prevent under-refunding: the amount cannot be less than the calculated line
+			// items total. Over-refunding is allowed for goodwill/compensation scenarios.
+			if ( $has_amount_override && $calculated_total > 0 && NumberUtil::round( (float) $amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
+				return new WP_Error(
+					'invalid_refund_amount',
+					sprintf(
+						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
+						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $amount, wc_get_price_decimals() ),
+						wc_format_decimal( $calculated_total, wc_get_price_decimals() )
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+
+			// Over-refunding line items is allowed (goodwill), but the amount can never
+			// exceed the order's remaining refundable amount. Reject up-front with a clear
+			// 422 rather than relying on wc_create_refund's generic failure, mirroring the
+			// preview pipeline's preview_exceeds_max_refundable guard.
+			$remaining_refundable = (float) $order->get_remaining_refund_amount();
+			if ( NumberUtil::round( (float) $amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
+				return new WP_Error(
+					'refund_exceeds_remaining',
+					sprintf(
+						/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
+						__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $amount, wc_get_price_decimals() ),
+						wc_format_decimal( $remaining_refundable, wc_get_price_decimals() )
+					),
+					array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+				);
+			}
+
+			return array(
+				'line_items'        => $internal_line_items,
+				'schema_line_items' => $line_items,
+				'amount'            => $amount,
 			);
-			return new WP_Error(
-				'invalid_refund_request',
-				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
-				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
-			);
+		} finally {
+			$this->log_source = self::DEFAULT_LOG_SOURCE;
 		}
-
-		// The WP_Error already carries its HTTP status (400/422) in the error
-		// data, so create and preview return the same code for the same invalid
-		// input.
-		$validation_error = $this->validate_line_items( $line_items, $order );
-		if ( is_wp_error( $validation_error ) ) {
-			return $validation_error;
-		}
-
-		// Convert line items to internal format. refund_total is tax-inclusive when no
-		// explicit refund_tax is supplied (auto-computed values, or client values) — the
-		// converter splits the tax portion out via the line's stored total/tax ratio
-		// (split_inclusive_by_stored_ratio(), the same method the preview uses). When
-		// the client supplies an explicit refund_tax breakdown, refund_total is the
-		// tax-exclusive subtotal and the tax is added on top (core Woo semantics).
-		// Either way calculate_refund_amount sums refund_total + refund_tax to the
-		// gross line amount, so mixing the two forms across line items is well-defined.
-		$internal_line_items = $this->convert_line_items_to_internal_format( $line_items, $order );
-		$calculated_total    = ! empty( $line_items ) ? $this->calculate_refund_amount( $line_items ) : 0;
-
-		$amount = $has_amount_override ? $amount_override : $calculated_total;
-
-		if ( (float) $amount <= 0 ) {
-			return new WP_Error(
-				'invalid_refund_amount',
-				__( 'Refund total must be greater than zero.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
-		}
-
-		// Prevent under-refunding: the amount cannot be less than the calculated line
-		// items total. Over-refunding is allowed for goodwill/compensation scenarios.
-		if ( $has_amount_override && $calculated_total > 0 && NumberUtil::round( (float) $amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
-			return new WP_Error(
-				'invalid_refund_amount',
-				sprintf(
-					/* translators: %1$s: refund amount, %2$s: calculated total from line items */
-					__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
-					wc_format_decimal( $amount, wc_get_price_decimals() ),
-					wc_format_decimal( $calculated_total, wc_get_price_decimals() )
-				),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
-		}
-
-		// Over-refunding line items is allowed (goodwill), but the amount can never
-		// exceed the order's remaining refundable amount. Reject up-front with a clear
-		// 422 rather than relying on wc_create_refund's generic failure, mirroring the
-		// preview pipeline's preview_exceeds_max_refundable guard.
-		$remaining_refundable = (float) $order->get_remaining_refund_amount();
-		if ( NumberUtil::round( (float) $amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
-			return new WP_Error(
-				'refund_exceeds_remaining',
-				sprintf(
-					/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
-					__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
-					wc_format_decimal( $amount, wc_get_price_decimals() ),
-					wc_format_decimal( $remaining_refundable, wc_get_price_decimals() )
-				),
-				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-			);
-		}
-
-		return array(
-			'line_items'        => $internal_line_items,
-			'schema_line_items' => $line_items,
-			'amount'            => $amount,
-		);
 	}
 
 	/**
