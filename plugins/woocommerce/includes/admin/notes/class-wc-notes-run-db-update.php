@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * WC_Notes_Run_Db_Update.
@@ -49,7 +50,7 @@ class WC_Notes_Run_Db_Update {
 			}
 		} else {
 			// If a db update is needed...
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
+			$next_scheduled_date = wc_get_container()->get( Scheduler::class )->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date ) {
 				// ... and scheduled, update the note to "in progress".
@@ -339,7 +340,7 @@ class WC_Notes_Run_Db_Update {
 
 			$note = new Note( $note_id );
 
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
+			$next_scheduled_date = wc_get_container()->get( Scheduler::class )->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				// Db needs update && db update is scheduled -> update note to In progress.

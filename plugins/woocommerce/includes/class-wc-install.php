@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -593,7 +594,7 @@ class WC_Install {
 	 */
 	protected static function run_update_callback_end( $callback, $result ) {
 		if ( $result ) {
-			WC()->queue()->add(
+			wc_get_container()->get( Scheduler::class )->add(
 				'woocommerce_run_update_callback',
 				array(
 					'update_callback' => $callback,
@@ -1030,7 +1031,7 @@ class WC_Install {
 			}
 
 			foreach ( $update_callbacks as $update_callback ) {
-				WC()->queue()->schedule_single(
+				wc_get_container()->get( Scheduler::class )->schedule_single(
 					$scheduled_time + $loop,
 					'woocommerce_run_update_callback',
 					array(
@@ -1053,8 +1054,8 @@ class WC_Install {
 
 		$success = true;
 		if ( version_compare( $current_db_version, $wc_db_version, '<' ) &&
-			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
-			$success = WC()->queue()->schedule_single(
+			! wc_get_container()->get( Scheduler::class )->get_next( 'woocommerce_update_db_to_current_version' ) ) {
+			$success = wc_get_container()->get( Scheduler::class )->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(

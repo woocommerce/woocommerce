@@ -50,6 +50,8 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Update file paths for 2.0
@@ -3299,7 +3301,7 @@ function wc_update_1030_add_comments_date_type_index() {
  */
 function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
 	delete_option( 'last_fetch_patterns_request' );
-	as_unschedule_all_actions( 'fetch_patterns' );
+	wc_get_container()->get( Scheduler::class )->cancel_all( 'fetch_patterns', array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 }
 
 /**
@@ -3666,9 +3668,7 @@ function wc_update_1120_remove_abandoned_cart_recovery() {
 	// Cancel queued automated sends. Nothing listens to the hook any more, so a
 	// due action would run as an inert no-op, but leaving it queued keeps dead
 	// rows in the Action Scheduler store until then.
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
-	}
+	wc_get_container()->get( Scheduler::class )->cancel_all( 'woocommerce_send_abandoned_cart_recovery_notification', array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 	delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
 	delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );

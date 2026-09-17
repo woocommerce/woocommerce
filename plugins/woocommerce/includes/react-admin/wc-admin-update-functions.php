@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Update order stats `status` index length.
@@ -57,8 +59,11 @@ function wc_admin_update_0230_rename_gross_total() {
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' ); // @phpstan-ignore-line argument.type We want to use null. With null we clean any action with the given hook. Passing array would only clean actions with the given args.
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' ); // @phpstan-ignore-line argument.type
+	// Null args cancel the action whatever args it was scheduled with.
+	$scheduler = wc_get_container()->get( Scheduler::class );
+	$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+	$scheduler->cancel( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data', $options );
+	$scheduler->cancel( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes', $options );
 }
 
 /**

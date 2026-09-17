@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -419,7 +420,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( WC_Install::needs_db_update() ) {
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
+			$next_scheduled_date = wc_get_container()->get( Scheduler::class )->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) {

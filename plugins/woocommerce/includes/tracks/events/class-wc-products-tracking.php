@@ -7,6 +7,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -390,11 +392,12 @@ class WC_Products_Tracking {
 	 */
 	public function track_product_published_maybe_defer( string $event_name, array $event_properties, bool $defer = false ): void {
 		if ( $defer ) {
-			as_schedule_single_action(
+			wc_get_container()->get( Scheduler::class )->schedule_single(
 				time(),
 				self::TRACK_PRODUCT_PUBLISHED_CALLBACK,
 				array( $event_name, $event_properties ),
-				'woocommerce-tracks'
+				'woocommerce-tracks',
+				array( 'queue' => SchedulerQueue::DEFAULT )
 			);
 		} else {
 			WC_Tracks::record_event( $event_name, $event_properties );

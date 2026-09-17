@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1242,12 +1244,10 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
+	$scheduler = wc_get_container()->get( Scheduler::class );
+
 	// Clear existing scheduled events.
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-	} else {
-		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-	}
+	$scheduler->cancel_all( 'woocommerce_cancel_unpaid_orders', array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 	if ( '' !== $value ) {
 		/**
@@ -1259,11 +1259,16 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
 
-		if ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
-		} else {
-			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-		}
+		$scheduler->schedule_single(
+			time() + ( absint( $cancel_unpaid_interval ) * 60 ),
+			'woocommerce_cancel_unpaid_orders',
+			array(),
+			'woocommerce',
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
+		);
 	}
 
 	return $value;

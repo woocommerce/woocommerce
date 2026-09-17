@@ -201,10 +201,11 @@ class WC_Marketplace_Suggestions {
 
 		// If the options have never been updated, or were updated over a week ago, queue update.
 		if ( empty( $data['updated'] ) || ( time() - WEEK_IN_SECONDS ) > $data['updated'] ) {
-			$next = WC()->queue()->get_next( 'woocommerce_update_marketplace_suggestions' );
+			$scheduler = wc_get_container()->get( \Automattic\WooCommerce\Queue\Scheduler::class );
+			$next      = $scheduler->get_next( 'woocommerce_update_marketplace_suggestions' );
 			if ( ! $next ) {
-				WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
-				WC()->queue()->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
+				$scheduler->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+				$scheduler->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
 			}
 		}
 
