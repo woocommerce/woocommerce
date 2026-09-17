@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Shipping\FlatRate;
 
+use WC_Product;
+
 /**
  * The [weight] placeholder used in flat rate shipping cost formulas.
  *
@@ -17,9 +19,9 @@ class WeightPlaceholder {
 	/**
 	 * Matches [weight] along with its optional attributes, e.g. [weight min="1" max="20"].
 	 *
-	 * Attribute values containing "]" are not supported, which is immaterial for the numeric min and max.
+	 * The word boundary excludes names such as [weightless]. Attributes stop at the first closing bracket.
 	 */
-	private const PLACEHOLDER_PATTERN = '/\[weight\b([^]]*)]/';
+	private const PLACEHOLDER_PATTERN = '/\[weight\b(?<attributes>[^]]*)]/';
 
 	/**
 	 * Get the total weight of the shippable items in a package, in the store's weight unit.
@@ -30,7 +32,9 @@ class WeightPlaceholder {
 	 * @since 11.2.0
 	 */
 	public function get_for_package( array $package ): float {
-		return $this->get_for_items( $package['contents'] ?? array() );
+		$items = $package['contents'] ?? array();
+
+		return is_array( $items ) ? $this->get_for_items( $items ) : 0.0;
 	}
 
 	/**
@@ -48,8 +52,15 @@ class WeightPlaceholder {
 		$total_weight = 0.0;
 
 		foreach ( $items as $values ) {
-			if ( $values['quantity'] > 0 && $values['data']->needs_shipping() && $values['data']->has_weight() ) {
-				$total_weight += $this->normalize( $values['data']->get_weight() ) * $values['quantity'];
+			if ( ! is_array( $values ) ) {
+				continue;
+			}
+
+			$product  = $values['data'] ?? null;
+			$quantity = $values['quantity'] ?? 0;
+
+			if ( $product instanceof WC_Product && is_numeric( $quantity ) && $quantity > 0 && $product->needs_shipping() && $product->has_weight() ) {
+				$total_weight += $this->normalize( $product->get_weight() ) * $quantity;
 			}
 		}
 
@@ -63,26 +74,33 @@ class WeightPlaceholder {
 	 *
 	 * @param string $sum Cost formula.
 	 * @return void
-	 * @throws \InvalidArgumentException If a weight limit is not numeric.
+	 * @throws \InvalidArgumentException If a weight limit or range is invalid.
 	 */
 	public function validate( string $sum ): void {
 		preg_match_all( self::PLACEHOLDER_PATTERN, $sum, $matches, PREG_SET_ORDER );
 
 		foreach ( $matches as $match ) {
-			$atts = (array) shortcode_parse_atts( $match[1] );
+			$atts = (array) shortcode_parse_atts( $match['attributes'] );
 
 			foreach ( array( 'min', 'max' ) as $attribute ) {
 				$limit = $atts[ $attribute ] ?? '';
 
-				if ( '' !== $limit && ! is_numeric( $limit ) ) {
+				if ( '' !== $limit && ( ! is_numeric( $limit ) || (float) $limit < 0 ) ) {
 					throw new \InvalidArgumentException(
 						sprintf(
 							/* translators: %s: weight placeholder attribute, either min or max. */
-							esc_html__( 'The [weight] %s value must be a number with a dot decimal separator and no thousands separators, e.g. 1000.5.', 'woocommerce' ),
+							esc_html__( 'The [weight] %s value must be a non-negative number with a dot decimal separator and no thousands separators, e.g. 1000.5.', 'woocommerce' ),
 							esc_html( $attribute )
 						)
 					);
 				}
+			}
+
+			$min = $atts['min'] ?? '';
+			$max = $atts['max'] ?? '';
+
+			if ( '' !== $min && '' !== $max && (float) $min > (float) $max ) {
+				throw new \InvalidArgumentException( esc_html__( 'The [weight] min value cannot be greater than the max value.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -105,7 +123,7 @@ class WeightPlaceholder {
 		return preg_replace_callback(
 			self::PLACEHOLDER_PATTERN,
 			function ( $matches ) use ( $weight ) {
-				return $this->clamp( $weight, shortcode_parse_atts( $matches[1] ) );
+				return $this->clamp( $weight, shortcode_parse_atts( $matches['attributes'] ) );
 			},
 			$sum
 		) ?? $sum;

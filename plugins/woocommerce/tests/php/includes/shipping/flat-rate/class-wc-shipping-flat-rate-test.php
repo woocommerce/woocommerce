@@ -210,6 +210,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			'shortcode weight expression'   => array( '2.50 * [weight] + 1', '.', ',' ),
 			'shortcode weight with min'     => array( '[weight min="1"]', '.', ',' ),
 			'shortcode weight min and max'  => array( '2 * [weight min="1" max="20"]', '.', ',' ),
+			'weight min zero'               => array( '2 * [weight min="0"]', '.', ',' ),
+			'weight max zero'               => array( '2 * [weight max="0"]', '.', ',' ),
+			'weight equal limits'           => array( '2 * [weight min="1" max="1"]', '.', ',' ),
+			'weight empty limits'           => array( '2 * [weight min="" max=""]', '.', ',' ),
 
 			// Safe because the minimum keeps the divisor away from zero.
 			'weight division with min'      => array( '10 / [weight min="1"]', '.', ',' ),
@@ -399,6 +403,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	 *           ["10 * [weight max=\"1 000.50\"]"]
 	 *           ["10 * [weight min=\"abc\"]"]
 	 *           ["10 * [weight max=\"abc\"]"]
+	 *           ["10 * [weight min=\"-1\"]"]
+	 *           ["10 * [weight max=\"-1\"]"]
+	 *           ["10 * [weight min=\"20\" max=\"10\"]"]
+	 *           ["10 * [weight min=\"0.5\" max=\"0\"]"]
 	 *
 	 * @param string $sum Cost formula with an invalid weight limit.
 	 */

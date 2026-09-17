@@ -103,6 +103,43 @@ class WeightPlaceholderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Non-array package contents do not cause a type error.
+	 *
+	 * @testWith [null]
+	 *           ["invalid"]
+	 *           [false]
+	 *           [12]
+	 *
+	 * @param mixed $contents Invalid package contents.
+	 */
+	public function test_get_for_package_ignores_invalid_contents( $contents ): void {
+		$this->assertSame( 0.0, $this->sut->get_for_package( array( 'contents' => $contents ) ), 'Invalid contents must not contribute weight.' );
+	}
+
+	/**
+	 * @testdox Malformed items do not prevent valid items from contributing weight.
+	 */
+	public function test_get_for_items_ignores_malformed_items(): void {
+		$items   = $this->single_item( '2.5', 2 );
+		$product = $items['item']['data'];
+
+		$items['missing_quantity'] = array( 'data' => $product );
+		$items['invalid_quantity'] = array(
+			'data'     => $product,
+			'quantity' => 'invalid',
+		);
+		$items['missing_product']  = array( 'quantity' => 2 );
+		$items['invalid_product']  = array(
+			'data'     => false,
+			'quantity' => 2,
+		);
+		$items['invalid_item']     = 'invalid';
+		$items['object_item']      = new \stdClass();
+
+		$this->assertSame( 5.0, $this->sut->get_for_items( $items ), 'Only valid items should contribute to the weight.' );
+	}
+
+	/**
 	 * @testdox A negative product weight is clamped to zero.
 	 */
 	public function test_get_for_items_clamps_negative_product_weight(): void {
@@ -161,6 +198,9 @@ class WeightPlaceholderTest extends WC_Unit_Test_Case {
 			'bare placeholder'                => array( '[weight]', 3, '3' ),
 			'placeholder in an expression'    => array( '2 * [weight]', 1.5, '2 * 1.5' ),
 			'repeated placeholder'            => array( '[weight] + [weight]', 2, '2 + 2' ),
+			'independent placeholder limits'  => array( '[weight min="5"] + [weight max="2"]', 3, '5 + 2' ),
+			'longer placeholder name'         => array( '[weightless min="1"]', 3, '[weightless min="1"]' ),
+			'unterminated placeholder'        => array( '[weight min="1"', 3, '[weight min="1"' ),
 			'no placeholder is untouched'     => array( '10 * [qty]', 5, '10 * [qty]' ),
 			'numeric string weight'           => array( '[weight]', '2.5', '2.5' ),
 

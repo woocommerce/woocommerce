@@ -63,12 +63,22 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			'[weight min="0.5"]',
 			'10 * [weight max="1000.5"]',
 			'[weight min="0.5" max="1.5"] + 2,5',
+			'[weight min="0.5"] + [weight max="1.5"]',
 		] )( 'allows dot-decimal weight limits in %s for server validation', ( value ) => {
 			expect( isValidFormattedNumber( value, config ) ).toBe( true );
 		} );
 
 		test( 'still validates the decimal separator outside weight limits', () => {
 			expect( isValidFormattedNumber( '[weight min="0.5"] * 2.5', config ) ).toBe( false );
+		} );
+
+		test.each( [
+			'[weightless min="0.5"]',
+			'[weight min="0.5"',
+			'[weight min="0.5"] + [weightless min="1.5"]',
+			'[weight min="0.5"] + [weight max="1.5"',
+		] )( 'does not bypass number validation in %s', ( value ) => {
+			expect( isValidFormattedNumber( value, config ) ).toBe( false );
 		} );
 	} );
 

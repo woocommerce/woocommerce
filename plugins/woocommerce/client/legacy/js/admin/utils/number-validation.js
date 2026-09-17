@@ -29,7 +29,8 @@ function isValidFormattedNumber( value, config ) {
         return false;
     }
 
-	// Weight limits use dot decimals and are validated by the server when saving.
+	// The word boundary excludes [weightless]; attributes stop at the first closing bracket.
+	// Only complete tokens bypass locale checks; the server validates their dot-decimal limits on save.
 	value = value.replace( /\[weight\b[^\]]*\]/g, '[weight]' );
 
 	var decimalSeparator = config.decimalSeparator || '.';
