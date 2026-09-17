@@ -360,6 +360,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 				10,
 				2
 			);
+			add_action( 'woocommerce_delete_order_refund', array( $webhook, 'process' ) );
 			$webhook->enqueue();
 
 			$refund->delete( true );

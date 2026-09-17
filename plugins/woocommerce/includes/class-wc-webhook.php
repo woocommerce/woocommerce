@@ -99,6 +99,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( is_array( $hooks ) && ! empty( $url ) ) {
 			foreach ( $hooks as $hook ) {
 				if ( 'order.updated' === $this->get_topic() && 'woocommerce_delete_order_refund' === $hook ) {
+					remove_action( $hook, array( $this, 'process' ), 10 );
 					add_action( $hook, array( $this, 'process_refund_deleted' ), 10, 2 );
 				} else {
 					add_action( $hook, array( $this, 'process' ) );
