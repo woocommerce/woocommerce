@@ -232,6 +232,35 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() returns every node when no types are requested.
+	 *
+	 * @testWith [null]
+	 *           [false]
+	 *           [""]
+	 *           [0]
+	 *
+	 * @param mixed $requested_types Falsy value standing in for "no type filtering".
+	 */
+	public function test_get_structured_data_returns_array_type_when_no_types_requested( $requested_types ): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Car', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => array( 'Car', 'Product' ),
+				'name'     => 'Multi-type product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'A falsy $types means "return everything", the same as it does for scalar @type nodes.'
+		);
+	}
+
+	/**
 	 * @testdox Order structured data looks up the product image with an integer attachment ID.
 	 */
 	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
