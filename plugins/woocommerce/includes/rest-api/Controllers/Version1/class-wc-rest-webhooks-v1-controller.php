@@ -747,7 +747,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset']  = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description'       => __( 'Offset the result set by a specific number of items. Takes precedence over the page parameter.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
