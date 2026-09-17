@@ -119,14 +119,15 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_for_store_api_cart_and_checkout_requests( string $route ): void {
 		$this->add_product_to_cart( true );
 		$request = new \WP_REST_Request( 'GET', $route );
-		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $request );
+		$server  = new \WP_REST_Server();
+		$this->sut->handle_rest_pre_dispatch( null, $server, $request );
 
 		try {
 			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
 
 			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A Store API cart request should use the billing address.' );
 		} finally {
-			$this->sut->handle_rest_post_dispatch( null );
+			$this->sut->handle_rest_post_dispatch( null, $server, $request );
 		}
 	}
 
@@ -164,14 +165,15 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$this->add_product_to_cart( true );
 		$this->set_checkout_context();
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $request );
+		$server  = new \WP_REST_Server();
+		$this->sut->handle_rest_pre_dispatch( null, $server, $request );
 
 		try {
 			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
 
 			$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'Other Store API requests should not use the billing address.' );
 		} finally {
-			$this->sut->handle_rest_post_dispatch( null );
+			$this->sut->handle_rest_post_dispatch( null, $server, $request );
 		}
 	}
 
@@ -183,19 +185,20 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$cart_request    = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
 		$product_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+		$server         = new \WP_REST_Server();
 
-		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $cart_request );
-		$this->sut->handle_rest_pre_dispatch( null, new \WP_REST_Server(), $product_request );
+		$this->sut->handle_rest_pre_dispatch( null, $server, $cart_request );
+		$this->sut->handle_rest_pre_dispatch( null, $server, $product_request );
 
 		try {
 			$result_during_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
-			$this->sut->handle_rest_post_dispatch( null );
+			$this->sut->handle_rest_post_dispatch( null, $server, $product_request );
 			$result_after_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
 
 			$this->assertSame( $taxable_address, $result_during_nested_request, 'Nested non-cart Store API requests should not use the billing address.' );
 			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result_after_nested_request, 'The cart request context should be restored after a nested request.' );
 		} finally {
-			$this->sut->handle_rest_post_dispatch( null );
+			$this->sut->handle_rest_post_dispatch( null, $server, $cart_request );
 		}
 	}
 
@@ -326,5 +329,79 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	private function set_checkout_context(): void {
 		add_filter( 'woocommerce_is_checkout', '__return_true' );
+	}
+
+	/**
+	 * @testdox Preserves the REST context during nested rest_do_request() calls through WP_REST_Server::dispatch().
+	 */
+	public function test_preserves_rest_context_during_nested_rest_do_request_calls(): void {
+		$this->add_product_to_cart( true );
+
+		// Create a test endpoint that makes nested REST requests.
+		add_action(
+			'rest_api_init',
+			function () {
+				register_rest_route(
+					'wc/v3/test-nested-dispatch',
+					'/test',
+					array(
+						'methods'             => 'GET',
+						'callback'            => function ( \WP_REST_Request $request ) {
+							// Make a nested request to a cart endpoint (which should set cart context).
+							$cart_request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+							$cart_response = rest_do_request( $cart_request );
+
+							// After the nested cart request completes, make another nested request to products (non-cart).
+							$products_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+							$products_response = rest_do_request( $products_request );
+
+							// After all nested requests, the outer context should still be valid.
+							return new \WP_REST_Response( array(
+								'cart_status'    => $cart_response->get_status(),
+								'products_status' => $products_response->get_status(),
+							) );
+						},
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+		);
+
+		try {
+			rest_api_init();
+
+			// Make the outer request which will trigger nested requests.
+			$outer_request = new \WP_REST_Request( 'GET', '/wc/v3/test-nested-dispatch/test' );
+			$response      = rest_do_request( $outer_request );
+
+			// Verify the nested requests succeeded.
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertSame( 200, $data['cart_status'] );
+			$this->assertSame( 200, $data['products_status'] );
+
+			// The key verification: after all nested requests complete,
+			// the dispatch stack should be empty, meaning all contexts were properly cleaned up.
+			// We verify this by checking that a non-cart request returns the shipping address,
+			// not the billing address (which would indicate cart context is still active).
+			$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+			$result         = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
+			
+			// The result should NOT be the billing address, because:
+			// 1. We're not in a REST cart/checkout context (all requests completed and cleaned up)
+			// 2. We're not in is_cart() or is_checkout() context
+			// So it should return the original taxable_address.
+			$this->assertNotSame(
+				array( 'GB', 'LND', 'SW1A 1AA', 'London' ),
+				$result,
+				'Cart context should not be active after all nested requests complete; the billing address should not be used.'
+			);
+		} finally {
+			// Ensure cleanup.
+			remove_all_actions( 'rest_api_init' );
+			// Unregister our test route - just reset the rest server.
+			global $wp_rest_server;
+			$wp_rest_server = null;
+		}
 	}
 }

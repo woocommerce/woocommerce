@@ -14,11 +14,18 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 class NonShippingCartTaxLocation {
 
 	/**
-	 * Stack of Store API cart and checkout request contexts.
+	 * Stack of dispatch IDs for Store API cart and checkout requests.
 	 *
-	 * @var bool[]
+	 * @var int[]
 	 */
-	private $store_api_cart_or_checkout_request_contexts = array();
+	private $dispatch_stack = array();
+
+	/**
+	 * Map of dispatch IDs to their cart/checkout context.
+	 *
+	 * @var array<int, bool>
+	 */
+	private $dispatch_contexts = array();
 
 	/**
 	 * Register hooks.
@@ -27,10 +34,11 @@ class NonShippingCartTaxLocation {
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->store_api_cart_or_checkout_request_contexts = array();
+		$this->dispatch_stack    = array();
+		$this->dispatch_contexts = array();
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
-		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ) );
+		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ), 10, 3 );
 	}
 
 	/**
@@ -46,7 +54,11 @@ class NonShippingCartTaxLocation {
 	 * @return mixed The response to dispatch.
 	 */
 	public function handle_rest_pre_dispatch( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
-		$this->store_api_cart_or_checkout_request_contexts[] = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
+		$dispatch_id         = spl_object_id( $request );
+		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
+
+		$this->dispatch_contexts[ $dispatch_id ] = $is_cart_or_checkout;
+		$this->dispatch_stack[]                  = $dispatch_id;
 
 		return $result;
 	}
@@ -57,11 +69,27 @@ class NonShippingCartTaxLocation {
 	 * @since 11.2.0
 	 * @internal
 	 *
-	 * @param mixed $response Response generated for the request.
+	 * @param mixed            $response Response generated for the request.
+	 * @param \WP_REST_Server  $server  Server instance.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return mixed The dispatched response.
 	 */
-	public function handle_rest_post_dispatch( $response ) {
-		array_pop( $this->store_api_cart_or_checkout_request_contexts );
+	public function handle_rest_post_dispatch( $response, \WP_REST_Server $server, \WP_REST_Request $request ) {
+		$dispatch_id = spl_object_id( $request );
+
+		// Remove the context for this specific dispatch.
+		if ( isset( $this->dispatch_contexts[ $dispatch_id ] ) ) {
+			unset( $this->dispatch_contexts[ $dispatch_id ] );
+		}
+
+		// Remove the dispatch ID from the stack, preserving the order of outer contexts.
+		$stack_key = array_search( $dispatch_id, $this->dispatch_stack, true );
+		if ( false !== $stack_key ) {
+			// array_search returns int|string|false, but array_splice expects int offset.
+			// Since we're using sequential integer keys (from array_push), this should be an int.
+			array_splice( $this->dispatch_stack, (int) $stack_key, 1 );
+		}
 
 		return $response;
 	}
@@ -85,8 +113,9 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		if ( ! empty( $this->store_api_cart_or_checkout_request_contexts ) ) {
-			if ( ! end( $this->store_api_cart_or_checkout_request_contexts ) ) {
+		if ( ! empty( $this->dispatch_stack ) ) {
+			$current_dispatch_id = end( $this->dispatch_stack );
+			if ( empty( $this->dispatch_contexts[ $current_dispatch_id ] ) ) {
 				return $taxable_address;
 			}
 		} elseif ( ! is_cart() && ! is_checkout() ) {
