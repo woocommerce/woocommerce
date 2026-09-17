@@ -27,20 +27,6 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore options changed by the tests.
-	 */
-	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_email_improvements_enabled' );
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
-		delete_option( 'woocommerce_email_from_address' );
-		delete_option( 'woocommerce_email_from_name' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Split header text into individual lines, so newline variants used to
 	 * smuggle extra headers are all normalized the same way.
 	 *
