@@ -114,7 +114,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Compatibility signature: process_refund_deleted($refund_id, $order_id = 0).
 	 * The optional second argument preserves existing one-argument action calls.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @param int $refund_id Deleted refund ID.
 	 * @param int $order_id  Parent order ID. Optional to maintain backward compatibility.
 	 */
