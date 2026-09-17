@@ -1309,6 +1309,141 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_payment_gateway_details does not override the title and description of gateways
+	 * registered by an extension that registers multiple gateways (e.g. one per payment method).
+	 */
+	public function test_get_payment_gateway_details_does_not_override_titles_for_multi_gateway_extensions() {
+		// Arrange.
+		$plugin_slug = 'acme-payments';
+		$plugin_file = 'acme-payments/acme-payments.php';
+		$this->mock_payment_gateways(
+			array(
+				'acme_card' => array(
+					'enabled'            => true,
+					'title'              => 'Card',
+					'method_title'       => 'Acme - Card',
+					'description'        => 'Pay with your card.',
+					'method_description' => 'Card payments powered by Acme',
+					'plugin_slug'        => $plugin_slug,
+					'plugin_file'        => $plugin_file,
+				),
+				'acme_bank' => array(
+					'enabled'            => true,
+					'title'              => 'Bank transfer',
+					'method_title'       => 'Acme - Bank transfer',
+					'description'        => 'Pay by bank transfer.',
+					'method_description' => 'Bank transfer payments powered by Acme',
+					'plugin_slug'        => $plugin_slug,
+					'plugin_file'        => $plugin_file,
+				),
+			)
+		);
+
+		// Mock a suggestion that is NOT in the exclusion list.
+		$suggestion = array(
+			'id'          => 'acme',
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'Acme Payments (Should Not Override)',
+			'description' => 'Acme - Suggestion Description (Should Not Override)',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/acme-icon.png',
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateways        = $this->sut->get_payment_gateways( false );
+		$gateway_details = array();
+		foreach ( $gateways as $gateway ) {
+			$gateway_details[ $gateway->id ] = $this->sut->get_payment_gateway_details( $gateway, 0, 'US' );
+		}
+
+		// Assert that each gateway keeps its own title and description.
+		$this->assertSame( 'Acme - Card', $gateway_details['acme_card']['title'], 'Title should NOT be overridden for multi-gateway extensions' );
+		$this->assertSame( 'Card payments powered by Acme', $gateway_details['acme_card']['description'], 'Description should NOT be overridden for multi-gateway extensions' );
+		$this->assertSame( 'Acme - Bank transfer', $gateway_details['acme_bank']['title'], 'Title should NOT be overridden for multi-gateway extensions' );
+		$this->assertSame( 'Bank transfer payments powered by Acme', $gateway_details['acme_bank']['description'], 'Description should NOT be overridden for multi-gateway extensions' );
+
+		// But the icon and suggestion ID should still be filled in from the suggestion.
+		$this->assertSame( 'http://example.com/acme-icon.png', $gateway_details['acme_card']['icon'], 'Icon should be filled from suggestion' );
+		$this->assertSame( 'acme', $gateway_details['acme_card']['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details still overrides the title and description when an extension
+	 * registers a single non-shell gateway alongside shell gateways.
+	 */
+	public function test_get_payment_gateway_details_overrides_titles_for_single_gateway_extension_with_shells() {
+		// Arrange.
+		$plugin_slug = 'acme-payments';
+		$plugin_file = 'acme-payments/acme-payments.php';
+		$this->mock_payment_gateways(
+			array(
+				'acme'      => array(
+					'enabled'            => true,
+					'title'              => 'Acme',
+					'method_title'       => 'Acme Gateway Method Title',
+					'description'        => 'Acme gateway description',
+					'method_description' => '',
+					'plugin_slug'        => $plugin_slug,
+					'plugin_file'        => $plugin_file,
+				),
+				// A shell gateway (no WC admin title or description) from the same extension.
+				'acme_bank' => array(
+					'enabled'            => true,
+					'title'              => 'Bank transfer',
+					'method_title'       => '',
+					'description'        => 'Pay by bank transfer.',
+					'method_description' => '',
+					'plugin_slug'        => $plugin_slug,
+					'plugin_file'        => $plugin_file,
+				),
+			)
+		);
+
+		$suggestion = array(
+			'id'          => 'acme',
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'Acme - Suggestion Title',
+			'description' => 'Acme - Suggestion Description',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		$main_gateway = null;
+		foreach ( $this->sut->get_payment_gateways( false ) as $gateway ) {
+			if ( 'acme' === $gateway->id ) {
+				$main_gateway = $gateway;
+			}
+		}
+		$this->assertNotNull( $main_gateway );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $main_gateway, 0, 'US' );
+
+		// Assert that the suggestion details still take precedence for a single-gateway extension.
+		$this->assertSame( 'Acme - Suggestion Title', $gateway_details['title'], 'Title should be filled from suggestion' );
+		$this->assertSame( 'Acme - Suggestion Description', $gateway_details['description'], 'Description should be filled from suggestion' );
+	}
+
+	/**
 	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
 	 *
 	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
