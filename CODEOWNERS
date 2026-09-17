@@ -22,11 +22,17 @@
 /plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
 /plugins/woocommerce/includes/shortcodes/class-wc-shortcode-cart.php @woocommerce/rubik
 /plugins/woocommerce/includes/shortcodes/class-wc-shortcode-checkout.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/settings/class-wc-settings-checkout.php @woocommerce/rubik
+/plugins/woocommerce/includes/legacy/class-wc-legacy-cart.php @woocommerce/rubik
+/plugins/woocommerce/includes/widgets/class-wc-widget-cart.php @woocommerce/rubik
 /plugins/woocommerce/client/legacy/js/frontend/cart.js @woocommerce/rubik
 /plugins/woocommerce/client/legacy/js/frontend/cart-fragments.js @woocommerce/rubik
 /plugins/woocommerce/client/legacy/js/frontend/checkout.js @woocommerce/rubik
 /plugins/woocommerce/client/legacy/js/frontend/order-review.js @woocommerce/rubik
 /plugins/woocommerce/src/Internal/Checkout/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutLink.php @woocommerce/rubik
+/plugins/woocommerce/templates/cart/ @woocommerce/rubik
+/plugins/woocommerce/templates/checkout/ @woocommerce/rubik
 
 # Checkout Fields (Additional Checkout Fields API)
 /plugins/woocommerce/src/Blocks/Domain/Services/*CheckoutField*.php @woocommerce/rubik
@@ -78,6 +84,28 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
 /plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout @woocommerce/rubik
+
+# Cart Checkout Blocks (PHP block types, templates, utils)
+/plugins/woocommerce/src/Blocks/BlockTypes/Cart*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/Checkout*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/MiniCart*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/EmptyCartBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/FilledCartBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/ProceedToCheckoutBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CartTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CheckoutHeaderTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CheckoutTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/MiniCartTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Utils/CartCheckoutUtils.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Utils/MiniCartUtils.php @woocommerce/rubik
+/plugins/woocommerce/templates/parts/checkout-header.html @woocommerce/rubik
+/plugins/woocommerce/templates/parts/mini-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/page-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/page-checkout.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/blockified/page-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/blockified/page-checkout.html @woocommerce/rubik
 
 # Cart and checkout data stores
 /plugins/woocommerce/client/blocks/packages/public-api/block-data/cart @woocommerce/rubik
