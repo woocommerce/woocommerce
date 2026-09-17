@@ -840,14 +840,12 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Translate legacy `posts.<col>` and bare `<col>` references in an arbitrary SQL fragment.
 	 *
-	 * Both passes cover the full set of columns in {@see self::legacy_to_hpos_column_map()}:
-	 * legacy callers write these unqualified as often as they qualify them — e.g. WooCommerce
-	 * Subscriptions' "Subscription events by date" report passes a bare
-	 * `post_status NOT IN ( 'trash', 'auto-draft' )` where-predicate — and an untranslated bare
-	 * token references a column that does not exist on `wc_orders`.
+	 * Both passes cover every column in {@see self::legacy_to_hpos_column_map()}: legacy callers
+	 * often leave these unqualified (e.g. WooCommerce Subscriptions before 7.8.0 passed a bare
+	 * `post_status` where-key), and an untranslated bare token names a column `wc_orders` lacks.
 	 *
-	 * Matches are bounded by `\b` so tokens embedded in longer identifiers
-	 * (e.g. `product_ID`, `posts.post_date_gmt`) are left untouched.
+	 * Tokens inside longer identifiers (`product_ID`, `posts.post_date_gmt`), qualified by another
+	 * table alias (`p.post_type`, joined via a query filter), or quoted are left untouched.
 	 *
 	 * @param string $fragment Caller-supplied SQL fragment.
 	 *
@@ -863,9 +861,11 @@ class HposLegacyOrderReportQueryBuilder {
 			return $map[ $matches[1] ];
 		};
 
-		$fragment = (string) preg_replace_callback( '/\bposts\.(' . $alternation . ')\b/', $replace, $fragment );
+		// `\b` alone matches after `.` or a quote, which would rewrite `p.post_type`,
+		// a quoted alias like `post_status` or a string literal.
+		$fragment = (string) preg_replace_callback( '/(?<![\w.`\'"])posts\.(' . $alternation . ')\b/', $replace, $fragment );
 
-		return (string) preg_replace_callback( '/\b(' . $alternation . ')\b/', $replace, $fragment );
+		return (string) preg_replace_callback( '/(?<![\w.`\'"])(' . $alternation . ')\b/', $replace, $fragment );
 	}
 
 	/**

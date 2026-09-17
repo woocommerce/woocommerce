@@ -539,10 +539,9 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Legacy report consumers write `post_data` column names unqualified as often as they qualify
-	 * them. WooCommerce Subscriptions' "Subscription events by date" report passes exactly this
-	 * shape — a bare `post_status NOT IN ( 'trash', 'auto-draft' )` where-predicate — which used to
-	 * pass through untranslated and emit SQL against a column `wc_orders` does not have.
+	 * Legacy report consumers often leave `post_data` columns unqualified (e.g. WooCommerce
+	 * Subscriptions before 7.8.0 passed a bare `post_status` where-key), which used to reach
+	 * SQL untranslated against a column `wc_orders` does not have.
 	 *
 	 * @testdox Should translate bare post_status, post_parent and post_type where keys to HPOS columns.
 	 */
@@ -622,7 +621,7 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should translate only word-bounded ID and post_date tokens, leaving longer identifiers untouched.
+	 * @testdox Should translate only word-bounded legacy tokens, leaving longer identifiers and other table aliases untouched.
 	 */
 	public function test_translate_legacy_sql_fragment_respects_word_boundaries(): void {
 		OrderHelper::toggle_cot_feature_and_usage( true );
@@ -638,7 +637,14 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 						'name'     => 'id',
 					),
 				),
-				'group_by'     => 'posts.post_date_gmt, product_ID, ID, YEAR(posts.post_date)',
+				'where'        => array(
+					array(
+						'key'      => 'product_posts.post_status',
+						'operator' => '=',
+						'value'    => 'publish',
+					),
+				),
+				'group_by'     => "posts.post_date_gmt, product_ID, p.post_type, p.ID, `post_status`, FIELD(kind, 'post_type'), ID, YEAR(posts.post_date)",
 				'order_by'     => 'posts.ID DESC',
 				'filter_range' => false,
 				'order_types'  => array( 'shop_order' ),
@@ -652,6 +658,11 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 		// Tokens embedded in longer identifiers survive untranslated.
 		$this->assertStringContainsString( 'posts.post_date_gmt', $query['group_by'] );
 		$this->assertStringContainsString( 'product_ID', $query['group_by'] );
+		// Columns qualified by another table alias (e.g. one joined via a query filter) survive too.
+		$this->assertStringContainsString( ' p.post_type, p.ID,', $query['group_by'] );
+		$this->assertStringContainsString( "product_posts.post_status = 'publish'", $query['where'] );
+		// Quoted identifiers and string literals survive too.
+		$this->assertStringContainsString( " `post_status`, FIELD(kind, 'post_type'),", $query['group_by'] );
 		// Word-bounded tokens translate as before.
 		$this->assertStringContainsString( "YEAR({$local_date_expression})", $query['group_by'] );
 		$this->assertStringContainsString( ' orders.id,', $query['group_by'] );
