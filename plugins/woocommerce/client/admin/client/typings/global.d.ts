@@ -78,6 +78,9 @@ declare global {
 				woocommerce_payments_nox_profile?: {
 					business_country_code: string;
 				};
+				woocommerce_payments_checkout_block_compatibility?: {
+					incompatible_gateway_ids: string[];
+				};
 				wcpay_welcome_page_connect_nonce: string;
 				currentUserData: {
 					first_name: string;
