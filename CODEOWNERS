@@ -20,10 +20,56 @@
 /plugins/woocommerce/includes/class-wc-checkout*.php @woocommerce/rubik
 /plugins/woocommerce/includes/wc-cart-functions.php @woocommerce/rubik
 /plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
+/plugins/woocommerce/includes/shortcodes/class-wc-shortcode-cart.php @woocommerce/rubik
+/plugins/woocommerce/includes/shortcodes/class-wc-shortcode-checkout.php @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/cart.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/cart-fragments.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/checkout.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/order-review.js @woocommerce/rubik
+/plugins/woocommerce/src/Internal/Checkout/ @woocommerce/rubik
+
+# Checkout Fields (Additional Checkout Fields API)
+/plugins/woocommerce/src/Blocks/Domain/Services/*CheckoutField*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFieldsSchema/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFieldTypes/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/CheckoutFieldsBlock.php @woocommerce/rubik
 
 # Store API and internal REST routes
 /plugins/woocommerce/src/StoreApi/ @woocommerce/rubik
 /plugins/woocommerce/src/Internal/RestApi/ @woocommerce/rubik
+
+# Store API product catalog routes, schemas, and queries
+/plugins/woocommerce/src/StoreApi/Routes/V1/Product*.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Schemas/V1/Product*.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Utilities/ProductQuery.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Utilities/ProductQueryFilters.php @woocommerce/kirigami
+
+# Legacy REST API order controllers
+/plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-network-orders*.php @woocommerce/rubik
+
+# Core order objects, items, and data stores
+/plugins/woocommerce/includes/class-wc-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-item-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-step-logger-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/class-wc-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/abstract-wc-order-data-store-cpt.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/abstract-wc-order-item-type-data-store.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-product-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-type-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-refund-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-abstract-order-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/src/Internal/DataStores/Orders/ @woocommerce/rubik
+
+# Order withdrawal
+/plugins/woocommerce/src/Internal/OrderWithdrawal/ @woocommerce/rubik
+/plugins/woocommerce/templates/myaccount/form-order-withdrawal.php @woocommerce/rubik
+/plugins/woocommerce/templates/emails/*order-withdrawal-requested.php @woocommerce/rubik
+/plugins/woocommerce/templates/emails/plain/*order-withdrawal-requested.php @woocommerce/rubik
+/plugins/woocommerce/includes/emails/class-wc-email-*order-withdrawal-requested.php @woocommerce/rubik
 
 # Cart Checkout Blocks
 /plugins/woocommerce/client/blocks/assets/js/blocks/cart @woocommerce/rubik
