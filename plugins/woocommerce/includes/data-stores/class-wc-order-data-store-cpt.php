@@ -939,29 +939,31 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Add the 'wc-' prefix to status if needed.
+		// Add the 'wc-' prefix to status if needed. Statuses arrive as an array or a
+		// comma-separated string; normalize to an array so the case normalization and prefix
+		// check only need to run once. Status slugs are stored lowercase, so an uppercase
+		// value like 'WC-COMPLETED' must be lowercased first — otherwise it is not recognized,
+		// and WP_Query's own sanitization strips the uppercase letters and drops the status
+		// clause, returning every order.
 		if ( ! empty( $query_vars['post_status'] ) ) {
-			if ( is_array( $query_vars['post_status'] ) ) {
-				foreach ( $query_vars['post_status'] as &$status ) {
-					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
-				}
-			} else {
-				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
+			$statuses = is_array( $query_vars['post_status'] )
+				? $query_vars['post_status']
+				: explode( ',', $query_vars['post_status'] );
+
+			foreach ( $statuses as &$status ) {
+				$status = strtolower( $status );
+				$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 			}
+
+			$query_vars['post_status'] = $statuses;
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
 		// WP_Query omits the status clause when none of the requested statuses are registered, which would return all orders.
 		if ( ! empty( $query_vars['post_status'] ) ) {
-			// Normalize the requested statuses the way WP_Query does in parse_query()/get_posts() before comparing
-			// them against registered statuses, so a value differing only in case does not false-positive.
-			if ( is_array( $query_vars['post_status'] ) ) {
-				$requested_statuses = array_map( 'sanitize_key', array_unique( $query_vars['post_status'] ) );
-			} else {
-				$requested_statuses = array_map( 'sanitize_key', explode( ',', $query_vars['post_status'] ) );
-			}
-			$known_statuses = array_merge( array( 'any', 'all' ), get_post_stati() );
+			$requested_statuses = array_map( 'sanitize_key', array_unique( $query_vars['post_status'] ) );
+			$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
 
 			if ( ! array_intersect( $requested_statuses, $known_statuses ) ) {
 				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_invalid_order_status' );

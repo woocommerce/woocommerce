@@ -843,6 +843,27 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders returns only matching orders when a known status is supplied in uppercase.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_filters_by_uppercase_known_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'WC-COMPLETED',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'An uppercase known status should match its registered lowercase counterpart and return only the matching orders.' );
+	}
+
+	/**
 	 * @testdox CPT order queries support the "$status" special status.
 	 *
 	 * @dataProvider cpt_special_status_provider
@@ -903,6 +924,11 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$order->set_status( 'custom' );
 		$order->save();
 
+		// A non-matching order ensures the query is not silently returning every order.
+		$other = new \WC_Order();
+		$other->set_status( OrderStatus::PROCESSING );
+		$other->save();
+
 		$queried_order_ids = wc_get_orders(
 			array(
 				'status' => $status_query,
@@ -911,11 +937,12 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertContains( $order->get_id(), $queried_order_ids, 'A registered status differing only in case should match instead of being rejected as unknown.' );
+		$this->assertSame( array( $order->get_id() ), $queried_order_ids, 'A registered status differing only in case should match only the orders with that status.' );
 
 		remove_filter( 'wc_order_statuses', $register_custom_status );
 		unset( $wp_post_statuses['wc-custom'] );
 		$order->delete( true );
+		$other->delete( true );
 	}
 
 	/**
