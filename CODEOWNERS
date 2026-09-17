@@ -116,6 +116,14 @@
 /plugins/woocommerce/src/Internal/Admin/Orders/ @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-order-*.php @woocommerce/rubik
 /plugins/woocommerce/includes/admin/meta-boxes/views/html-order-*.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/customer-history.php @woocommerce/rubik
+
+# Customer order display templates
+/plugins/woocommerce/templates/order/order-details.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-details-customer.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-details-item.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-downloads.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-again.php @woocommerce/rubik
 
 # Shopper Lists (wishlist, saved for later)
 /plugins/woocommerce/src/Internal/ShopperLists/ @woocommerce/rubik
