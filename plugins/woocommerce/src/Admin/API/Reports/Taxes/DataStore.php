@@ -102,8 +102,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'tax_rate_id'    => "{$table_name}.tax_rate_id",
 			'name'           => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
 			'tax_rate'       => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
-			'country'        => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
-			'state'          => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
+			'country'        => self::get_country_sql_expression() . ' as country',
+			'state'          => self::get_state_sql_expression() . ' as state',
 			'priority'       => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
 			'total_tax'      => 'SUM(total_tax) as total_tax',
 			'order_tax'      => 'SUM(order_tax) as order_tax',
@@ -120,6 +120,168 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! static::has_taxable_amount_column() ) {
 			unset( $this->report_columns['taxable_amount'] );
 		}
+	}
+
+	/**
+	 * SQL expression the reports read a row's country from.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public static function get_country_sql_expression(): string {
+		global $wpdb;
+
+		return "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1)";
+	}
+
+	/**
+	 * SQL expression the reports read a row's state from.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public static function get_state_sql_expression(): string {
+		global $wpdb;
+
+		return "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1)";
+	}
+
+	/**
+	 * SQL condition matching the tax codes of a list of locations.
+	 *
+	 * A location is a country code (`GB`) or a country and state pair (`US:CA`), the form the
+	 * Customers report already takes. Matching runs against the same expressions the Country
+	 * and State columns are read with, so a filter always selects the rows the report shows
+	 * under those codes, including rates that have since been edited or deleted.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @param string $locations  Comma separated list of locations.
+	 * @param bool   $is_include True to match the locations, false to match everything else.
+	 * @return string SQL condition, or an empty string when the list holds no location.
+	 */
+	public static function get_location_condition( string $locations, bool $is_include ): string {
+		$country_expression = self::get_country_sql_expression();
+		$state_expression   = self::get_state_sql_expression();
+
+		$countries  = array();
+		$conditions = array();
+
+		foreach ( explode( ',', $locations ) as $location ) {
+			$parts   = explode( ':', trim( $location ), 2 );
+			$country = self::sanitize_location_code( $parts[0] );
+
+			if ( '' === $country ) {
+				continue;
+			}
+
+			$state = isset( $parts[1] ) ? self::sanitize_location_code( $parts[1] ) : '';
+
+			if ( '' === $state ) {
+				$countries[] = $country;
+			} else {
+				$conditions[] = "( {$country_expression} = '{$country}' AND {$state_expression} = '{$state}' )";
+			}
+		}
+
+		if ( $countries ) {
+			$conditions[] = "{$country_expression} IN ( '" . implode( "', '", $countries ) . "' )";
+		}
+
+		if ( ! $conditions ) {
+			return '';
+		}
+
+		$condition = '( ' . implode( ' OR ', $conditions ) . ' )';
+
+		return $is_include ? $condition : "NOT {$condition}";
+	}
+
+	/**
+	 * Normalize a country or state code to the uppercase form the tax codes are stored in.
+	 *
+	 * Codes are alphanumeric in `i18n/countries.php` and `i18n/states.php`, so anything else is
+	 * dropped rather than escaped: the value goes into SQL directly.
+	 *
+	 * @param string $code Country or state code.
+	 * @return string
+	 */
+	private static function sanitize_location_code( string $code ): string {
+		return (string) preg_replace( '/[^A-Z0-9]/', '', strtoupper( trim( $code ) ) );
+	}
+
+	/**
+	 * SQL condition for the location filter of a report query.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @param array $query_args Query arguments supplied by the user.
+	 * @return string SQL condition, or an empty string when the query carries no location filter.
+	 */
+	public static function get_location_filter_condition( array $query_args ): string {
+		$conditions = array();
+
+		foreach ( array(
+			'location_includes' => true,
+			'location_excludes' => false,
+		) as $param => $is_include ) {
+			if ( empty( $query_args[ $param ] ) ) {
+				continue;
+			}
+
+			$locations = $query_args[ $param ];
+			$locations = is_array( $locations ) ? implode( ',', $locations ) : (string) $locations;
+			$condition = self::get_location_condition( $locations, $is_include );
+
+			if ( '' !== $condition ) {
+				$conditions[] = $condition;
+			}
+		}
+
+		return $conditions ? implode( ' AND ', $conditions ) : '';
+	}
+
+	/**
+	 * The location filter of a report query, as a condition on the lookup table alone.
+	 *
+	 * The tax code a row's country and state are read from lives on the tax order item, which
+	 * the stats queries do not join. They sum their rows, so joining the tax order items there
+	 * would repeat a row for every line of the order sharing its rate; an EXISTS check reads
+	 * the same names without bringing rows back.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @param array $query_args Query arguments supplied by the user.
+	 * @return string SQL condition, or an empty string when the query carries no location filter.
+	 */
+	public static function get_location_filter_subquery( array $query_args ): string {
+		global $wpdb;
+
+		$condition = self::get_location_filter_condition( $query_args );
+
+		if ( '' === $condition ) {
+			return '';
+		}
+
+		$table_name = self::get_db_table_name();
+		$items      = $wpdb->prefix . 'woocommerce_order_items';
+		$item_meta  = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$tax_type   = OrderItemType::TAX;
+
+		return "EXISTS ( SELECT 1 FROM {$items}
+			JOIN {$item_meta} location_rate_id ON location_rate_id.order_item_id = {$items}.order_item_id AND location_rate_id.meta_key = 'rate_id'
+			WHERE {$items}.order_id = {$table_name}.order_id
+			AND {$items}.order_item_type = '{$tax_type}'
+			AND location_rate_id.meta_value = {$table_name}.tax_rate_id
+			AND ( {$table_name}.order_item_id = {$items}.order_item_id OR {$table_name}.order_item_id = 0 )
+			AND {$condition} )";
 	}
 
 	/**
@@ -242,6 +404,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
 		}
 
+		// The tax order items are already joined here, so the location matches read their names
+		// directly rather than through the EXISTS check the stats queries need.
+		$location_filter = self::get_location_filter_condition( $query_args );
+
+		if ( '' !== $location_filter ) {
+			$this->subquery->add_sql_clause( 'where', "AND {$location_filter}" );
+		}
+
 		if ( $order_status_filter ) {
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
@@ -256,9 +426,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
-		$defaults            = parent::get_default_query_vars();
-		$defaults['orderby'] = 'tax_rate_id';
-		$defaults['taxes']   = array();
+		$defaults                      = parent::get_default_query_vars();
+		$defaults['orderby']           = 'tax_rate_id';
+		$defaults['taxes']             = array();
+		$defaults['location_includes'] = '';
+		$defaults['location_excludes'] = '';
 
 		return $defaults;
 	}

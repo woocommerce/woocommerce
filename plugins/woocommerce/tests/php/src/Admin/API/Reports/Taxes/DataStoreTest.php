@@ -1588,4 +1588,222 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'NOT EXISTS', DataStore::get_legacy_row_condition(), 'The check should be back once the re-key has landed.' );
 	}
+
+	/**
+	 * Tax lines of three jurisdictions, none of them backed by a row in the tax rates table,
+	 * which is the shape a rate that has since been edited or deleted leaves behind.
+	 *
+	 * @return array
+	 */
+	private function tax_lines_in_three_locations(): array {
+		return array(
+			array(
+				'code'         => 'US-CA-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 201,
+				'rate_percent' => 7.25,
+				'tax_total'    => 7.25,
+			),
+			array(
+				'code'         => 'US-NY-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 202,
+				'rate_percent' => 4.0,
+				'tax_total'    => 4.0,
+			),
+			array(
+				'code'         => 'DE-VAT-1',
+				'label'        => 'VAT',
+				'rate_id'      => 203,
+				'rate_percent' => 19.0,
+				'tax_total'    => 19.0,
+			),
+		);
+	}
+
+	/**
+	 * Run the Taxes table report over February 2023 with a location filter.
+	 *
+	 * @param array $location_args Location filter arguments.
+	 * @return array Report rows.
+	 */
+	private function taxes_report_rows_for_location( array $location_args ): array {
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + $location_args );
+
+		return $data->data;
+	}
+
+	/**
+	 * @testdox Taxes report keeps only the rows of the filtered country.
+	 */
+	public function test_taxes_report_filters_rows_by_country(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'DE' ) );
+
+		$this->assertCount( 1, $rows, 'Only the German tax code should be reported.' );
+		$this->assertSame( 'DE', $rows[0]['country'], 'The reported row should be the one the filter names.' );
+		$this->assertSame( 19.0, $rows[0]['total_tax'], 'The row should carry its own tax amount.' );
+	}
+
+	/**
+	 * @testdox Taxes report keeps only the rows of the filtered state.
+	 */
+	public function test_taxes_report_filters_rows_by_country_and_state(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA' ) );
+
+		$this->assertCount( 1, $rows, 'Only the Californian tax code should be reported.' );
+		$this->assertSame( 'CA', $rows[0]['state'], 'The reported row should be the one the filter names.' );
+		$this->assertSame( 7.25, $rows[0]['total_tax'], 'The row should carry its own tax amount.' );
+	}
+
+	/**
+	 * @testdox Taxes report reads a filter holding several locations as any of them.
+	 */
+	public function test_taxes_report_filters_rows_by_several_locations(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA,DE' ) );
+
+		$this->assertCount( 2, $rows, 'Both named locations should be reported.' );
+		$this->assertSame( 26.25, array_sum( array_column( $rows, 'total_tax' ) ), 'The rows should add up to the tax of the named locations.' );
+	}
+
+	/**
+	 * @testdox Taxes report drops the rows of an excluded location.
+	 */
+	public function test_taxes_report_excludes_rows_by_location(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => 'US' ) );
+
+		$this->assertCount( 1, $rows, 'Only the tax codes outside the excluded country should be reported.' );
+		$this->assertSame( 'DE', $rows[0]['country'], 'The excluded country should leave the report.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports every location when the filter holds no location to read.
+	 */
+	public function test_taxes_report_ignores_a_filter_holding_no_location(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => " ', -" ) );
+
+		$this->assertCount( 3, $rows, 'A filter that names no location should read as no filter, as it does on the Customers report.' );
+	}
+
+	/**
+	 * @testdox Taxes stats totals count only the tax lines of the filtered location.
+	 */
+	public function test_taxes_stats_totals_honour_the_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_includes' => 'US:CA',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 7.25, $data->totals->total_tax, 'The summary should add up the filtered location alone, so it reconciles with the table.' );
+		$this->assertSame( 1, $data->totals->tax_codes, 'Only the tax code of the filtered location should be counted.' );
+		$this->assertSame( 1, $data->totals->orders_count, 'The order should be counted once.' );
+	}
+
+	/**
+	 * @testdox Taxes stats totals drop the tax lines of an excluded location.
+	 */
+	public function test_taxes_stats_totals_honour_an_excluded_location(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_excludes' => 'US',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 19.0, $data->totals->total_tax, 'The summary should leave out the excluded country.' );
+		$this->assertSame( 1, $data->totals->tax_codes, 'Only the tax code outside the excluded country should be counted.' );
+	}
+
+	/**
+	 * @testdox Taxes stats count a tax line once when the order holds several lines on one rate.
+	 */
+	public function test_taxes_stats_do_not_repeat_a_line_under_a_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Every line carries rate id 0, so a join to the tax order items would match each lookup
+		// row against all four of them.
+		$this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_includes' => 'US:CA',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 9.75, $data->totals->total_tax, 'The summary should match the tax the order carries, not a multiple of it.' );
+	}
+
+	/**
+	 * @testdox The country and state report columns keep the released SQL the report columns filter carries.
+	 */
+	public function test_report_columns_keep_their_released_sql(): void {
+		global $wpdb;
+
+		$columns = array();
+
+		add_filter(
+			'woocommerce_admin_report_columns',
+			function ( $report_columns, $context ) use ( &$columns ) {
+				if ( 'taxes' === $context ) {
+					$columns = $report_columns;
+				}
+
+				return $report_columns;
+			},
+			10,
+			2
+		);
+
+		new DataStore();
+
+		$this->assertSame(
+			"SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
+			$columns['country'],
+			'Extension callbacks inspect these strings, so the country column has to read as it was released.'
+		);
+		$this->assertSame(
+			"SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
+			$columns['state'],
+			'Extension callbacks inspect these strings, so the state column has to read as it was released.'
+		);
+	}
 }

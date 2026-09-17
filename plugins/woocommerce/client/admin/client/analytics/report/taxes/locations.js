@@ -1,0 +1,144 @@
+/**
+ * External dependencies
+ */
+import { __, sprintf } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
+import { resolveSelect } from '@wordpress/data';
+import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { Flag } from '@woocommerce/components';
+
+/**
+ * The locations a tax code can belong to: every country, plus every state of that country.
+ *
+ * Keys are the form the `location_includes` and `location_excludes` report parameters read,
+ * a country code (`GB`) or a country and state pair (`US:CA`).
+ *
+ * @return {Promise<Array<{key: string, label: string, country: string, keywords: string[]}>>} Locations.
+ */
+async function getLocations() {
+	const countries =
+		await resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
+
+	return ( countries || [] ).reduce( ( locations, country ) => {
+		const countryName = decodeEntities( country.name );
+
+		locations.push( {
+			key: country.code,
+			label: countryName,
+			country: country.code,
+			keywords: [ country.code, countryName ],
+		} );
+
+		( country.states || [] ).forEach( ( state ) => {
+			const stateName = decodeEntities( state.name );
+			const key = `${ country.code }:${ state.code }`;
+
+			locations.push( {
+				key,
+				label: sprintf(
+					/* translators: 1: state name, 2: country name. Example: California, United States (US) */
+					__( '%1$s, %2$s', 'woocommerce' ),
+					stateName,
+					countryName
+				),
+				country: country.code,
+				keywords: [ key, stateName ],
+			} );
+		} );
+
+		return locations;
+	}, [] );
+}
+
+/**
+ * Wrap the part of a label the search matched, so the dropdown highlights it.
+ *
+ * @param {string} label Location label.
+ * @param {string} query Search query.
+ * @return {Object} Label split around the match.
+ */
+function highlightMatch( label, query ) {
+	const start = query
+		? label.toLowerCase().indexOf( query.toLowerCase() )
+		: -1;
+
+	if ( start === -1 ) {
+		return { before: label, match: '', after: '' };
+	}
+
+	return {
+		before: label.substring( 0, start ),
+		match: label.substring( start, start + query.length ),
+		after: label.substring( start + query.length ),
+	};
+}
+
+/**
+ * Autocompleter matching countries and their states.
+ */
+export const locationsAutocompleter = {
+	name: 'locations',
+	// Every result carries a flag beside a name, so it takes the country result styles.
+	className: 'woocommerce-search__country-result',
+	isDebounced: true,
+	options: getLocations,
+	getOptionIdentifier( location ) {
+		return location.key;
+	},
+	getOptionKeywords( location ) {
+		return location.keywords;
+	},
+	getSearchExpression( query ) {
+		return '^' + query;
+	},
+	getOptionLabel( location, query ) {
+		const { before, match, after } = highlightMatch(
+			location.label,
+			query
+		);
+
+		return (
+			<>
+				<Flag
+					key="thumbnail"
+					className="woocommerce-search__result-thumbnail"
+					code={ location.country }
+					size={ 18 }
+					hideFromScreenReader
+				/>
+				<span
+					key="name"
+					className="woocommerce-search__result-name"
+					aria-label={ location.label }
+				>
+					{ before }
+					<strong className="components-form-token-field__suggestion-match">
+						{ match }
+					</strong>
+					{ after }
+				</span>
+			</>
+		);
+	},
+	getOptionCompletion( location ) {
+		return {
+			key: location.key,
+			label: location.label,
+		};
+	},
+};
+
+/**
+ * Labels of the locations a filter value holds, for the tags of a filter restored from the URL.
+ *
+ * @param {string} value Comma separated list of location keys.
+ * @return {Promise<Array<{key: string, label: string}>>} Labels.
+ */
+export async function getLocationLabels( value ) {
+	const keys = value.split( ',' ).filter( Boolean );
+	const locations = await getLocations();
+
+	return locations
+		.filter( ( location ) => keys.includes( location.key ) )
+		.map( ( { key, label } ) => ( { key, label } ) );
+}
