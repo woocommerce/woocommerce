@@ -10,6 +10,8 @@ use WC_Gateway_BACS;
  * @since 3.0.0
  */
 final class BankTransfer extends AbstractPaymentMethodType {
+	use ShippingRestrictionsSettingsTrait;
+
 	/**
 	 * Payment method name/id/slug (matches id in WC_Gateway_BACS in core).
 	 *
@@ -69,9 +71,11 @@ final class BankTransfer extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return [
-			'title'       => $this->get_setting( 'title' ),
-			'description' => $this->get_setting( 'description' ),
-			'supports'    => $this->get_supported_features(),
+			'title'                    => $this->get_setting( 'title' ),
+			'description'              => $this->get_setting( 'description' ),
+			'enableForVirtual'         => $this->get_enable_for_virtual(),
+			'enableForShippingMethods' => $this->get_enable_for_methods(),
+			'supports'                 => $this->get_supported_features(),
 		];
 	}
 }

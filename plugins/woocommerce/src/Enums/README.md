@@ -6,6 +6,7 @@ The enum classes make it easier to reference string values and avoid typos. They
 
 ## Available Enumerators
 
+- [CartBehaviorOnLogout](./CartBehaviorOnLogout.php) - Enumerates the possible values of the `woocommerce_cart_behavior_on_logout` option.
 - [CatalogSortOrder](./CatalogSortOrder.php) - Enumerates the possible values of the `woocommerce_default_catalog_orderby` option.
 - [CatalogVisibility](./CatalogVisibility.php) - Enumerates the possible catalog visibility options for a product.
 - [CurrencyPosition](./CurrencyPosition.php) - Enumerates the possible values of the `woocommerce_currency_pos` option.
