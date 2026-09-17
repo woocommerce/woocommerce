@@ -19,6 +19,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await blockLocator.getByText( 'Music' ).click();
 		await blockLocator.getByText( 'Done' ).click();
+		await expect( blockLocator.getByText( 'Shop now' ) ).toBeVisible();
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
 			blockData.slug
@@ -30,8 +31,12 @@ test.describe( `${ blockData.slug } Block`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'image can be edited', async ( { editor, admin, requestUtils } ) => {
-		let editedMediaId: number | undefined;
+	test( 'image can be edited through Cover and persists after saving', async ( {
+		editor,
+		admin,
+		requestUtils,
+		frontendUtils,
+	} ) => {
 		let productId: string | undefined;
 		let categoryId: string | undefined;
 		let originalCategoryIds: string[] | undefined;
@@ -97,32 +102,58 @@ test.describe( `${ blockData.slug } Block`, () => {
 			const blockLocator = await editor.getBlockByName( blockData.slug );
 			await blockLocator.getByText( 'Test Category' ).click();
 			await blockLocator.getByText( 'Done' ).click();
-			await editor.clickBlockToolbarButton( 'Edit category image' );
-			await editor.clickBlockToolbarButton( 'Rotate' );
-			const editImageResponse = editor.page.waitForResponse(
-				( response ) =>
-					response.request().method() === 'POST' &&
-					new URL( response.url() ).pathname ===
-						`/wp-json/wp/v2/media/${ media.id }/edit`
+			const cover = await editor.getBlockByName( 'core/cover' );
+			const image = cover.locator(
+				'img.wp-block-cover__image-background'
 			);
+			await expect( image ).toBeVisible();
+			const originalSrc = await image.getAttribute( 'src' );
+			await editor.selectBlocks( cover );
+			await editor.clickBlockToolbarButton( 'Replace' );
 			await editor.page
-				.getByRole( 'button', { name: 'Apply', exact: true } )
+				.getByRole( 'menuitem', { name: 'Open Media Library' } )
 				.click();
-			const editResponse = await editImageResponse;
-			expect( editResponse.status() ).toBe( 201 );
-			const editedMedia = await editResponse.json();
-			if (
-				typeof editedMedia.id !== 'number' ||
-				! Number.isInteger( editedMedia.id )
-			) {
-				throw new Error( 'The image edit did not return a media ID.' );
-			}
-			editedMediaId = editedMedia.id;
+			const mediaDialog = editor.page.getByRole( 'dialog' );
+			await mediaDialog
+				.getByRole( 'tab', { name: 'Media Library' } )
+				.click();
+			await mediaDialog
+				.getByRole( 'link', { name: 'Edit Image', exact: true } )
+				.click();
+			// Wait for the image editor's initial focus, which otherwise closes the rotation menu.
 			await expect(
-				editor.canvas.locator(
-					'img[alt="Test Category"][src*="-edited"]'
-				)
-			).toBeVisible();
+				mediaDialog.getByRole( 'button', { name: /^Crop/ } )
+			).toBeFocused();
+			await mediaDialog
+				.getByRole( 'button', { name: /Image Rotation/ } )
+				.click();
+			await mediaDialog
+				.getByRole( 'button', { name: /Rotate 90° left/ } )
+				.click();
+			await mediaDialog
+				.getByRole( 'button', { name: 'Save Edits', exact: true } )
+				.click();
+			await mediaDialog
+				.getByRole( 'button', { name: 'Select', exact: true } )
+				.click();
+			await expect( image ).toHaveAttribute( 'src', /-e\d+/ );
+			await expect( image ).not.toHaveAttribute( 'src', originalSrc! );
+			const editedSrc = await image.getAttribute( 'src' );
+
+			const postId = await editor.publishPost();
+			await editor.page.goto( `/?p=${ postId }` );
+			const frontendBlock = await frontendUtils.getBlockByName(
+				blockData.slug
+			);
+			const frontendImage = frontendBlock.locator(
+				'img.wp-block-cover__image-background'
+			);
+			await expect( frontendImage ).toBeVisible();
+			await expect( frontendImage ).toHaveAttribute( 'src', editedSrc! );
+
+			await admin.editPost( postId );
+			await expect( image ).toBeVisible();
+			await expect( image ).toHaveAttribute( 'src', editedSrc! );
 		} finally {
 			try {
 				if ( productId && originalCategoryIds ) {
@@ -141,13 +172,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 						);
 					}
 				} finally {
-					try {
-						if ( editedMediaId !== undefined ) {
-							await requestUtils.deleteMedia( editedMediaId );
-						}
-					} finally {
-						await requestUtils.deleteMedia( media.id );
-					}
+					// The Media Library editor changes the uploaded attachment in place.
+					await requestUtils.deleteMedia( media.id );
 				}
 			}
 		}
