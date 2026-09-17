@@ -1192,6 +1192,8 @@ WHERE
 	/**
 	 * Get unpaid orders last updated before the specified GMT date.
 	 *
+	 * An order with no updated date is judged by its created date instead, and only one with neither is treated as stale.
+	 *
 	 * @param int $gmt_timestamp GMT timestamp.
 	 *
 	 * @return array Array of order IDs.
@@ -1208,8 +1210,15 @@ WHERE
 				"SELECT id FROM {$orders_table} WHERE
 				{$orders_table}.type IN {$order_types_sql}
 				AND {$orders_table}.status = %s
-				AND ( {$orders_table}.date_updated_gmt < %s OR {$orders_table}.date_updated_gmt IS NULL )",
+				AND (
+					{$orders_table}.date_updated_gmt < %s
+					OR (
+						{$orders_table}.date_updated_gmt IS NULL
+						AND ( {$orders_table}.date_created_gmt < %s OR {$orders_table}.date_created_gmt IS NULL )
+					)
+				)",
 				OrderInternalStatus::PENDING,
+				gmdate( 'Y-m-d H:i:s', absint( $gmt_timestamp ) ),
 				gmdate( 'Y-m-d H:i:s', absint( $gmt_timestamp ) )
 			)
 		);

@@ -1503,18 +1503,34 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testDox Unpaid pending orders with no updated date should still be returned for cancellation.
+	 * @testDox Unpaid pending orders with no updated date should be judged by their created date, and cancelled when they have neither.
+	 *
+	 * @testWith ["-2 days", true]
+	 *           ["now", false]
+	 *           [null, true]
+	 *
+	 * @param string|null $created  Relative created date to store, or null for none.
+	 * @param bool        $expected Whether the order should be returned as unpaid.
 	 */
-	public function test_get_unpaid_orders_includes_orders_without_updated_date(): void {
+	public function test_get_unpaid_orders_falls_back_to_created_date( ?string $created, bool $expected ): void {
 		global $wpdb;
 		$order = new \WC_Order();
 		$this->switch_data_store( $order, $this->sut );
 		$order->set_status( OrderInternalStatus::PENDING );
 		$order->save();
-		$wpdb->update( $this->sut::get_orders_table_name(), array( 'date_updated_gmt' => null ), array( 'id' => $order->get_id() ) );
+		$wpdb->update(
+			$this->sut::get_orders_table_name(),
+			array(
+				'date_updated_gmt' => null,
+				'date_created_gmt' => is_null( $created ) ? null : gmdate( 'Y-m-d H:i:s', strtotime( $created ) ),
+			),
+			array( 'id' => $order->get_id() )
+		);
 
 		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Testing a legacy code that does expect the offset timestamp.
-		$this->assertContainsEquals( $order->get_id(), $this->sut->get_unpaid_orders( current_time( 'timestamp', 0 ) ) );
+		$unpaid = array_map( 'intval', $this->sut->get_unpaid_orders( current_time( 'timestamp', 0 ) - HOUR_IN_SECONDS ) );
+
+		$this->assertSame( $expected, in_array( $order->get_id(), $unpaid, true ) );
 	}
 
 	/**
