@@ -923,8 +923,12 @@ jQuery( function ( $ ) {
 	$( '#product_attributes' ).on(
 		'click',
 		'.product_attributes .remove_row',
-		function () {
-			var $parent = $( this ).parent().parent();
+		function ( event ) {
+			// Keep the click from toggling the metabox / starting a sort.
+			event.preventDefault();
+			event.stopPropagation();
+
+			var $parent = $( this ).closest( '.woocommerce_attribute' );
 			var isUsedForVariations = $parent
 				.find( 'input[name^="attribute_variation"]' )
 				.is( ':visible:checked' );
@@ -969,11 +973,15 @@ jQuery( function ( $ ) {
 	);
 
 	// Attribute ordering.
+	// Use the dedicated .sort grip (same as variations). Using the whole h3 as the
+	// handle made Remove clicks start a sortable drag; on tall lists that auto-scrolls
+	// the page and swallows the remove click (#50041).
 	$( '.product_attributes' ).sortable( {
 		items: '.woocommerce_attribute',
 		cursor: 'move',
 		axis: 'y',
-		handle: 'h3',
+		handle: '.sort',
+		cancel: 'input, textarea, button, select, option, a',
 		scrollSensitivity: 40,
 		forcePlaceholderSize: true,
 		helper: 'clone',

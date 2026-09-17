@@ -101,7 +101,14 @@ jQuery( function ( $ ) {
 		keepAlive: true,
 	} );
 
-	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
+	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function ( event ) {
+		// Ignore interactive controls inside the heading (Remove, inputs, drag handle).
+		if (
+			$( event.target ).closest( 'a, button, :input, option, .sort' ).length
+		) {
+			return;
+		}
+
 		var metabox = $( this ).parent( '.wc-metabox' );
 
 		if ( metabox.hasClass( 'closed' ) ) {
@@ -155,8 +162,11 @@ jQuery( function ( $ ) {
 	// Meta-Boxes - Open/close
 	$( '.wc-metaboxes-wrapper' )
 		.on( 'click', '.wc-metabox h3', function ( event ) {
-			// If the user clicks on some form input inside the h3, like a select list (for variations), the box should not be toggled
-			if ( $( event.target ).filter( ':input, option, .sort' ).length ) {
+			// Ignore interactive controls inside the heading (Remove, inputs, drag handle).
+			if (
+				$( event.target ).closest( 'a, button, :input, option, .sort' )
+					.length
+			) {
 				return;
 			}
 

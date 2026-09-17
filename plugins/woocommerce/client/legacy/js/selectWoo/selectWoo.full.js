@@ -1692,6 +1692,11 @@ S2.define('select2/selection/multiple',[
           return;
         }
 
+        // Prevent the selection container click handler from toggling the
+        // dropdown open. Opening focuses the search field at the bottom of a
+        // long choice list and scrolls the page (#50041).
+        evt.stopPropagation();
+
         var $remove = $(this);
         var $selection = $remove.parent();
 
