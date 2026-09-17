@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Route core's Action Scheduler and queue call sites through Automattic\WooCommerce\Queue\Scheduler, with no behaviour change.

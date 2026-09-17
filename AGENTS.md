@@ -82,6 +82,12 @@ plugins/woocommerce/
 
 - Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
 
+**Background scheduling:**
+
+- Schedule background work through `Automattic\WooCommerce\Queue\Scheduler`, injected via `init()` in `src` classes or resolved with `wc_get_container()->get( Scheduler::class )` elsewhere. Do not add direct `as_*()` calls outside `src/Queue`.
+- Options travel in an array: `priority`, `unique`, `strict` (throw instead of degrading when an option cannot take effect natively) and `queue`. Pass `'queue' => SchedulerQueue::DEFAULT` only when the caller depends on Action Scheduler specifically, since it bypasses a custom queue attached through `woocommerce_queue_class`.
+- Use `when_ready()` for work that may run before the queue can accept calls, and `ensure_recurring()` / `ensure_cron()` for recurring work that must stay registered, instead of hand-written `function_exists()`, version or has-scheduled-action guards.
+
 ## Development Workflow
 
 1. Make code changes
