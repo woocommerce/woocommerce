@@ -299,4 +299,17 @@ class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $this->sut->count( array( 'hook' => 'wc_oaq_test_count_missing' ) ) );
 		$this->assertSame( count( $this->sut->search( array( 'group' => 'wc-oaq-count' ), 'ids' ) ), $this->sut->count( array( 'group' => 'wc-oaq-count' ) ), 'count() agrees with an ID search' );
 	}
+
+	/**
+	 * @testdox Should store an async action with no scheduled time and the requested priority.
+	 */
+	public function test_enqueue_async_stores_an_async_action(): void {
+		$action_id = $this->sut->enqueue_async( 'wc_oaq_test_async', array( 'n' => 1 ), 'wc-oaq-test', array( 'priority' => 3 ) );
+
+		$action = \ActionScheduler::store()->fetch_action( (string) $action_id );
+		$this->assertInstanceOf( \ActionScheduler_NullSchedule::class, $action->get_schedule(), 'An async action has no schedule' );
+		$this->assertSame( 3, $action->get_priority() );
+
+		$this->assertSame( 0, $this->sut->enqueue_async( 'wc_oaq_test_async', array( 'n' => 1 ), 'wc-oaq-test', array( 'unique' => true ) ), 'A unique async action is blocked by the pending one' );
+	}
 }

@@ -122,6 +122,40 @@ final class Scheduler {
 	}
 
 	/**
+	 * Enqueue an action to run as soon as possible, without a scheduled time.
+	 *
+	 * On the stock queue this is an Action Scheduler async action, claimed ahead of overdue timestamped
+	 * work of the same priority. A plain queue has no async concept, so it receives `add()`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param array  $options Scheduling options: `priority` (lower runs first; the queue applies its own range and default, 10 on the stock queue), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @return int The action ID, or 0 when the action was not scheduled.
+	 * @throws \RuntimeException When `strict` is set and the queue is not ready or a requested option cannot take effect natively.
+	 */
+	public function enqueue_async( string $hook, array $args = array(), string $group = '', array $options = array() ): int {
+		$options = $this->normalize_options( $options, __FUNCTION__ );
+		$queue   = $this->ready_queue( $options, __FUNCTION__ );
+		if ( null === $queue ) {
+			return 0;
+		}
+		$this->assert_options_supported( $queue, $options );
+
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->enqueue_async( $hook, $args, $group, $this->extract_queue_options( $options ) );
+		}
+
+		if ( $this->has_pending_match( $queue, $options, $hook, $args, $group ) ) {
+			return 0;
+		}
+
+		return (int) $queue->add( $hook, $args, $group );
+	}
+
+	/**
 	 * Schedule an action to run once at some time in the future.
 	 *
 	 * @since 11.3.0

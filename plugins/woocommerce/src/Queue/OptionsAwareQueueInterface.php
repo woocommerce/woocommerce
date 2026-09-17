@@ -49,6 +49,23 @@ interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 	public function add( $hook, $args = array(), $group = '', $options = array() );
 
 	/**
+	 * Enqueue an action to run as soon as possible, without a scheduled time.
+	 *
+	 * Where the backend distinguishes async actions from timestamped ones, as Action Scheduler does,
+	 * an async action is claimed ahead of overdue timestamped work of the same priority. A backend
+	 * without that distinction may treat this exactly like `add()`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param array  $options Scheduling options. See the interface description for the recognised keys.
+	 * @return int The action ID, or 0 when the action was not scheduled.
+	 */
+	public function enqueue_async( $hook, $args = array(), $group = '', $options = array() );
+
+	/**
 	 * Schedule an action to run once at some time in the future.
 	 *
 	 * @since 11.3.0

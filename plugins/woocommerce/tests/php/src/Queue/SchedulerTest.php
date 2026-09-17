@@ -106,6 +106,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 				$this->calls[] = array( 'add', func_get_args() );
 				return 21;
 			}
+			public function enqueue_async( $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'enqueue_async', func_get_args() );
+				return 27;
+			}
 			public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() ) {
 				$this->calls[] = array( 'schedule_single', func_get_args() );
 				return 22;
@@ -969,5 +973,29 @@ class SchedulerTest extends WC_Unit_Test_Case {
 				$this->assertSame( 1, $scheduler->count( $criteria ), 'A second pass does not add a duplicate' );
 			}
 		);
+	}
+
+	/**
+	 * @testdox Should enqueue async through the queue's enqueue_async() where it has one, and through add() otherwise.
+	 */
+	public function test_enqueue_async_uses_the_queue_primitive_or_falls_back_to_add(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 27, $this->sut->enqueue_async( 'wc_scheduler_test_async', array( 'k' => 1 ), 'wc-scheduler-test', array( 'priority' => 1 ) ) );
+		$this->assertSame( 'enqueue_async', $queue->calls[0][0] );
+		$this->assertSame(
+			array(
+				'priority' => 1,
+				'unique'   => false,
+			),
+			$queue->calls[0][1][3]
+		);
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->assertSame( 11, $this->sut->enqueue_async( 'wc_scheduler_test_async', array(), 'wc-scheduler-test' ) );
+		$this->assertSame( 'add', $plain->calls[0][0], 'A plain queue has no async primitive and receives add()' );
 	}
 }

@@ -47,6 +47,32 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	}
 
 	/**
+	 * Enqueue an async action, which Action Scheduler claims ahead of overdue timestamped work.
+	 *
+	 * Falls back to a single action at the current time on a copy too old to know async actions.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $hook The hook to trigger.
+	 * @param array  $args Arguments to pass when the hook triggers.
+	 * @param string $group The group to assign this job to.
+	 * @param array  $options Scheduling options: `priority` and `unique`.
+	 * @return int The action ID, or 0 when the action was not scheduled.
+	 */
+	public function enqueue_async( $hook, $args = array(), $group = '', $options = array() ) {
+		$options = $this->coerce_options( $options );
+		if ( ! function_exists( 'as_enqueue_async_action' ) ) {
+			return $this->schedule_single( time(), $hook, $args, $group, $options );
+		}
+		if ( ! $this->can_schedule( __FUNCTION__, $hook, $args, $group, $options ) ) {
+			return 0;
+		}
+
+		// Action Scheduler older than 3.6.0 discards the surplus priority argument, so it is passed unconditionally.
+		return as_enqueue_async_action( $hook, $args, $group, $this->is_unique_requested( $options ), $this->get_priority( $options ) );
+	}
+
+	/**
 	 * Schedule an action to run once at some time in the future.
 	 *
 	 * @since 11.3.0
