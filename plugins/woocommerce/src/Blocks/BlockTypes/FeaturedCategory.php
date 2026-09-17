@@ -31,17 +31,6 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
-	 * Register the term context used by this block.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy', 'taxonomy' ];
-	}
-
-	/**
 	 * Render the selected category or the product category inherited from context.
 	 *
 	 * @since 11.2.0

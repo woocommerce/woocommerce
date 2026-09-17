@@ -61,15 +61,6 @@ class CategoryDescription extends AbstractBlock {
 	}
 
 	/**
-	 * Register the context used by this block.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy', 'taxonomy' ];
-	}
-
-	/**
 	 * Disable the frontend script for this block.
 	 *
 	 * @param string|null $key Data to get, or default to everything.
