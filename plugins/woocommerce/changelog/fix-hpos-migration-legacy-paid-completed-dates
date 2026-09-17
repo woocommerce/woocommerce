@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix HPOS migration dropping the paid and completed dates of orders that only carry the pre-3.0 `_paid_date` and `_completed_date` meta keys, and restore those dates on stores that already migrated.
