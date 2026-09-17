@@ -3044,8 +3044,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Percentage fee base includes shipping under option A (net items + shipping, ex tax).
 	 */
 	public function test_add_order_fee_percentage_includes_shipping_in_net_base(): void {
-		WC_Helper_Shipping::create_simple_flat_rate();
-
 		$order = $this->create_order_for_percentage_fee_tests();
 
 		$shipping = new WC_Order_Item_Shipping();
@@ -3072,7 +3070,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertEquals( 11.0, (float) $fees[0]->get_total(), 'Percentage fee should use the net total including shipping.' );
 
 		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
-		WC_Helper_Shipping::delete_simple_flat_rate();
 	}
 
 	/**
