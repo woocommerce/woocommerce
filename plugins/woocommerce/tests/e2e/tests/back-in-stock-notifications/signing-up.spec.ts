@@ -6,14 +6,11 @@ import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
 	BIS_FEATURE_OPTION,
-	bisConsentCheckbox,
 	bisEmailSubject,
 	bisFormLocator,
 	bisNotice,
 	bisTargetProductInput,
 	expectEmailAsAdmin,
-	expectNoSignupAsAdmin,
-	findCustomerByEmail,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
@@ -22,6 +19,13 @@ import {
 } from '../../utils/back-in-stock-notifications';
 import { clearFilters, setFilterValue } from '../../utils/filters';
 import { setOption } from '../../utils/options';
+
+/**
+ * Drop a trailing slash so URL paths compare regardless of permalink trailing.
+ *
+ * @param path URL path to normalize.
+ */
+const trimSlash = ( path: string ) => path.replace( /\/$/, '' );
 
 test.describe(
 	'Back in Stock Notifications — signing up',
@@ -45,7 +49,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -85,7 +88,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -203,7 +205,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -222,9 +223,11 @@ test.describe(
 					page.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
 
-				// The consent checkbox only belongs to the account-creation
-				// setup, which is off here.
-				await expect( bisConsentCheckbox( page ) ).toHaveCount( 0 );
+				// Guest signups never register an account, so no consent
+				// checkbox is rendered.
+				await expect(
+					page.locator( 'input[name="wc_bis_opt_in"]' )
+				).toHaveCount( 0 );
 			} );
 
 			test( 'submitting the form surfaces a success notice', async ( {
@@ -284,7 +287,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: true,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -312,119 +314,12 @@ test.describe(
 			} );
 		} );
 
-		test.describe( 'Guest — create account on signup', () => {
-			test.describe( 'Single opt-in', () => {
-				test.beforeAll( async ( { baseURL } ) => {
-					await setBISOptions( request, baseURL!, {
-						allowSignups: true,
-						doubleOptIn: false,
-						requireAccount: false,
-						createAccountOnSignup: true,
-					} );
-				} );
-
-				test( 'the consent checkbox renders and the signup is refused until it is ticked', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-
-					const consent = bisConsentCheckbox( page );
-					await expect( consent ).toBeVisible();
-					await expect( consent ).not.toBeChecked();
-
-					await signUpOnProductPage( page, { email } );
-
-					await expect(
-						page.getByText( bisNotice.errors.missingConsent )
-					).toBeVisible();
-
-					// The refusal has to happen before anything is written:
-					// no account for the address, and no signup either.
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeUndefined();
-					await expectNoSignupAsAdmin( browser, product.id, email );
-				} );
-
-				test( 'ticking consent signs up, registers an account and sends the welcome email', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-					await signUpOnProductPage( page, { email, consent: true } );
-
-					await expect(
-						page.getByText(
-							bisNotice.accountCreated( product.name )
-						)
-					).toBeVisible();
-
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeDefined();
-
-					// The "check your e-mail for details" in the notice is
-					// WooCommerce's own new-account email, sent with the
-					// generated password.
-					await expectEmailAsAdmin(
-						browser,
-						email,
-						/account has been created!/
-					);
-				} );
-			} );
-
-			test.describe( 'Double opt-in', () => {
-				test.beforeAll( async ( { baseURL } ) => {
-					await setBISOptions( request, baseURL!, {
-						allowSignups: true,
-						doubleOptIn: true,
-						requireAccount: false,
-						createAccountOnSignup: true,
-					} );
-				} );
-
-				test( 'ticking consent registers an account and still asks for email verification', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-					await signUpOnProductPage( page, { email, consent: true } );
-
-					await expect(
-						page.getByText( bisNotice.accountCreatedDoubleOptIn )
-					).toBeVisible();
-
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeDefined();
-
-					await expectEmailAsAdmin(
-						browser,
-						email,
-						bisEmailSubject.verify( product.name )
-					);
-				} );
-			} );
-		} );
-
 		test.describe( 'Guest — requires account', () => {
 			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: true,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -453,22 +348,29 @@ test.describe(
 			test( 'logging in from the prompt lets the customer sign up', async ( {
 				page,
 				product,
+				baseURL,
 			} ) => {
 				await page.goto( product.permalink );
 
-				await page.getByRole( 'link', { name: 'log in' } ).click();
+				const accountPath = trimSlash(
+					new URL( 'my-account/', baseURL ).pathname
+				);
+				const loginLink = page.getByRole( 'link', { name: 'log in' } );
 
-				// The prompt's link points at a non-existent endpoint, so
-				// WordPress guesses the 404 back to the account page. Assert
-				// the landing, or a lost guess would only show up as a
-				// timeout on the login form below.
-				await expect( page ).toHaveURL( ( url ) => {
-					const path = url.pathname.endsWith( '/' )
-						? url.pathname.slice( 0, -1 )
-						: url.pathname;
+				// The link has to point at the account page itself. A nested
+				// endpoint such as /my-account/my-account/ still lands there
+				// via WordPress' 404 URL guessing, so only the href tells a
+				// working link apart from a broken one.
+				const href = await loginLink.getAttribute( 'href' );
+				expect( trimSlash( new URL( href!, baseURL ).pathname ) ).toBe(
+					accountPath
+				);
 
-					return path.endsWith( '/my-account' );
-				} );
+				await loginLink.click();
+
+				await expect( page ).toHaveURL(
+					( url ) => trimSlash( url.pathname ) === accountPath
+				);
 
 				await page.locator( '#username' ).fill( customer.username );
 				await page.locator( '#password' ).fill( customer.password );
