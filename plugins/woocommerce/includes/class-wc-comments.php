@@ -9,7 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
-use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationService;
+use Automattic\WooCommerce\Internal\ProductReviews\ReviewVerificationService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -81,10 +81,7 @@ class WC_Comments {
 		// Add Product Reviews filter for `review` comment type.
 		add_filter( 'admin_comment_types_dropdown', array( __CLASS__, 'add_review_comment_filter' ) );
 
-		// Review of verified purchase.
-		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
-
-		// Backfill "verified owner" status for a product's reviews off-hours, in one query.
+		// Populate verified owner flag for product reviews.
 		wc_get_container()->get( ReviewVerificationService::class )->register();
 
 		// Set comment type.
@@ -511,20 +508,13 @@ class WC_Comments {
 
 	/**
 	 * Determine if a review is from a verified owner at submission.
+	 * Permanent facade for backward compatibility — do not deprecate.
 	 *
 	 * @param int $comment_id Comment ID.
 	 * @return bool
 	 */
 	public static function add_comment_purchase_verification( $comment_id ) {
-		$comment  = get_comment( $comment_id );
-		$verified = false;
-		if ( 'product' === get_post_type( $comment->comment_post_ID ) ) {
-			// When possible, narrow down wc_customer_bought_product inputs for better performance.
-			$email    = $comment->user_id ? '' : $comment->comment_author_email;
-			$verified = wc_customer_bought_product( $email, $comment->user_id, $comment->comment_post_ID );
-			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
-		}
-		return $verified;
+		return wc_get_container()->get( ReviewVerificationService::class )->add_comment_purchase_verification( $comment_id );
 	}
 
 	/**
