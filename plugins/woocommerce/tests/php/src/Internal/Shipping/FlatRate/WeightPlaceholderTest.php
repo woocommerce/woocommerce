@@ -114,6 +114,29 @@ class WeightPlaceholderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Negative product weights do not reduce the weight of other items.
+	 *
+	 * @testWith ["-1"]
+	 *           ["-5"]
+	 *
+	 * @param string $negative_weight Weight of the product that must contribute nothing.
+	 */
+	public function test_get_for_items_does_not_subtract_negative_product_weights( string $negative_weight ): void {
+		$items = array(
+			array(
+				'data'     => WC_Helper_Product::create_simple_product( false, array( 'weight' => '2.5' ) ),
+				'quantity' => 2,
+			),
+			array(
+				'data'     => WC_Helper_Product::create_simple_product( false, array( 'weight' => $negative_weight ) ),
+				'quantity' => 2,
+			),
+		);
+
+		$this->assertSame( 5.0, $this->sut->get_for_items( $items ), 'Negative product weights must not cancel out positive weights.' );
+	}
+
+	/**
 	 * @testdox The [weight] placeholder is replaced with the weight.
 	 *
 	 * @dataProvider provider_placeholder_replacement

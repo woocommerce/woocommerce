@@ -27,7 +27,7 @@ class WeightPlaceholder {
 	 * @param array $package Package of items from the cart.
 	 * @return float
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_for_package( array $package ): float {
 		return $this->get_for_items( $package['contents'] ?? array() );
@@ -42,19 +42,18 @@ class WeightPlaceholder {
 	 * @param array $items Cart items, in the shape of a package's `contents`.
 	 * @return float
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_for_items( array $items ): float {
 		$total_weight = 0.0;
 
 		foreach ( $items as $values ) {
 			if ( $values['quantity'] > 0 && $values['data']->needs_shipping() && $values['data']->has_weight() ) {
-				$total_weight += (float) $values['data']->get_weight() * $values['quantity'];
+				$total_weight += $this->normalize( $values['data']->get_weight() ) * $values['quantity'];
 			}
 		}
 
-		// get_weight() reads a filterable property, so the total can still be negative.
-		return $this->normalize( $total_weight );
+		return $total_weight;
 	}
 
 	/**
@@ -98,7 +97,7 @@ class WeightPlaceholder {
 	 * @param mixed  $weight Package weight. Anything non-numeric counts as zero.
 	 * @return string
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function expand( string $sum, $weight ): string {
 		$weight = $this->normalize( $weight );
