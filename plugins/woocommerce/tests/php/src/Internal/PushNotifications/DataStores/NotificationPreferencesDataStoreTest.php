@@ -164,4 +164,27 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertSame( $envelope, $stored );
 	}
+
+	/**
+	 * @testdox Should remove a stored envelope and report that it did so.
+	 */
+	public function test_delete_removes_a_stored_envelope(): void {
+		$this->sut->write(
+			$this->user_id,
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array( 'store_order' => array( 'enabled' => false ) ),
+			)
+		);
+
+		$this->assertTrue( $this->sut->delete( $this->user_id ) );
+		$this->assertNull( $this->sut->read( $this->user_id ) );
+	}
+
+	/**
+	 * @testdox Should report false when the user has no stored envelope to remove.
+	 */
+	public function test_delete_returns_false_when_nothing_is_stored(): void {
+		$this->assertFalse( $this->sut->delete( $this->user_id ) );
+	}
 }

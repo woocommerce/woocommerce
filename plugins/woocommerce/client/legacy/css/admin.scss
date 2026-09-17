@@ -1360,6 +1360,11 @@ table.wc_status_table--tools {
 	th {
 		padding: 2em;
 	}
+
+	// Keep a row linked to with #tool_{id} clear of the fixed admin bar.
+	tr {
+		scroll-margin-block-start: 50px;
+	}
 }
 
 .taxonomy-product_cat {
