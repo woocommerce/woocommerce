@@ -105,16 +105,17 @@ interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 	public function has_scheduled_action( $hook, $args = null, $group = '' );
 
 	/**
-	 * Whether this queue honours a scheduling option natively.
+	 * Whether this queue has a capability natively.
 	 *
-	 * Answers per option, `unique` and `priority` today, and must return false for an option it
-	 * does not know. The scheduler relies on it for `supports()`, for `strict` calls and for the
-	 * system status report, so it should reflect the backend actually in use.
+	 * The capabilities are the Automattic\WooCommerce\Enums\QueueCapability values, each of which is
+	 * also the scheduling option that requests it. Answer per capability, reflecting the backend
+	 * actually in use, and return false for one you do not know. The scheduler relies on this for
+	 * `supports()`, for `strict` calls and for the system status report.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $option The option name.
-	 * @return bool True if the option takes effect natively on this queue.
+	 * @param string $capability A QueueCapability value.
+	 * @return bool True if the capability takes effect natively on this queue.
 	 */
-	public function supports( $option );
+	public function supports( $capability );
 }

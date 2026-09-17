@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Queue;
 
+use Automattic\WooCommerce\Enums\QueueCapability;
+
 /**
  * The default WC()->queue() implementation.
  *
@@ -168,22 +170,22 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 	}
 
 	/**
-	 * Whether the loaded Action Scheduler honours a scheduling option.
+	 * Whether the loaded Action Scheduler has a capability.
 	 *
 	 * `unique` needs Action Scheduler 3.5.0 and `priority` needs 3.6.0. The scheduling methods pass
 	 * both arguments regardless, since older copies ignore what they do not declare, so this exists
-	 * for callers deciding whether an option will take effect.
+	 * for callers deciding whether a requested option will take effect.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $option The option name.
+	 * @param string $capability A QueueCapability value.
 	 * @return bool
 	 */
-	public function supports( $option ): bool {
-		switch ( $option ) {
-			case 'unique':
+	public function supports( $capability ): bool {
+		switch ( $capability ) {
+			case QueueCapability::UNIQUE:
 				return $this->action_scheduler_is_at_least( '3.5.0' );
-			case 'priority':
+			case QueueCapability::PRIORITY:
 				return $this->action_scheduler_is_at_least( '3.6.0' );
 			default:
 				return false;
@@ -243,7 +245,7 @@ class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQu
 			return false;
 		}
 
-		if ( $this->is_unique_requested( $options ) && ! $this->supports( 'unique' ) && as_next_scheduled_action( $hook, $args, $group ) ) {
+		if ( $this->is_unique_requested( $options ) && ! $this->supports( QueueCapability::UNIQUE ) && as_next_scheduled_action( $hook, $args, $group ) ) {
 			return false;
 		}
 

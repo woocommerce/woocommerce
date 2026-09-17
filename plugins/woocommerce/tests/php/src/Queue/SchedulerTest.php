@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Queue;
 
+use Automattic\WooCommerce\Enums\QueueCapability;
 use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
@@ -374,6 +375,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_scheduler_queue_enum_lists_every_value(): void {
 		$this->assertSame( array( SchedulerQueue::ACTIVE, SchedulerQueue::DEFAULT ), SchedulerQueue::get_all() );
+	}
+
+	/**
+	 * @testdox Should list every capability in QueueCapability::get_all().
+	 */
+	public function test_queue_capability_enum_lists_every_value(): void {
+		$this->assertSame( array( QueueCapability::PRIORITY, QueueCapability::UNIQUE ), QueueCapability::get_all() );
 	}
 
 	/**

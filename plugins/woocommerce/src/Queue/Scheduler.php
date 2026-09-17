@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Queue;
 
+use Automattic\WooCommerce\Enums\QueueCapability;
 use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -44,13 +45,6 @@ final class Scheduler {
 	 * @since 11.3.0
 	 */
 	public const DEFAULT_PRIORITY = OptionsAwareActionQueue::DEFAULT_PRIORITY;
-
-	/**
-	 * The options a queue can honour natively, and therefore the ones `supports()` and `strict` reason about.
-	 *
-	 * @var string[]
-	 */
-	private const CAPABILITY_OPTIONS = array( 'priority', 'unique' );
 
 	/**
 	 * The legacy proxy, through which the active queue is reached so tests can replace it.
@@ -273,22 +267,23 @@ final class Scheduler {
 	}
 
 	/**
-	 * Whether a scheduling option is supported natively on the path a call would take.
+	 * Whether a capability takes effect natively on the path a call would take.
 	 *
-	 * Both options need an options-aware queue. On the stock queue, `unique` also needs Action
-	 * Scheduler 3.5.0 or newer and `priority` 3.6.0 or newer. Where this returns false a non-strict
-	 * call still does its best: uniqueness is emulated with a pending-action check that cannot see
-	 * in-progress actions and is not atomic, and the priority is dropped. A strict call throws
-	 * instead. Unknown options are never supported.
+	 * Capabilities are the QueueCapability values, and each is also the scheduling option that
+	 * requests it. Every capability needs an options-aware queue; the stock queue additionally
+	 * needs Action Scheduler 3.5.0 for `unique` and 3.6.0 for `priority`. Where this returns false
+	 * a non-strict call still does its best: uniqueness is emulated with a pending-action check
+	 * that cannot see in-progress actions and is not atomic, and the priority is dropped. A strict
+	 * call throws instead. Unknown capabilities are never supported.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $option The option name: `priority` or `unique`.
+	 * @param string $capability A QueueCapability value.
 	 * @param array  $options Only `queue` (a SchedulerQueue value) applies here, to pick the path.
 	 * @return bool
 	 */
-	public function supports( string $option, array $options = array() ): bool {
-		return $this->is_supported_by( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ), $option );
+	public function supports( string $capability, array $options = array() ): bool {
+		return $this->is_supported_by( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ), $capability );
 	}
 
 	/**
@@ -389,21 +384,21 @@ final class Scheduler {
 
 		$requested = array();
 		if ( $options['unique'] ) {
-			$requested[] = 'unique';
+			$requested[] = QueueCapability::UNIQUE;
 		}
 		if ( self::DEFAULT_PRIORITY !== $options['priority'] ) {
-			$requested[] = 'priority';
+			$requested[] = QueueCapability::PRIORITY;
 		}
 
-		foreach ( $requested as $option ) {
-			if ( ! $this->is_supported_by( $queue, $option ) ) {
+		foreach ( $requested as $capability ) {
+			if ( ! $this->is_supported_by( $queue, $capability ) ) {
 				throw new \RuntimeException(
 					esc_html(
 						sprintf(
 							/* translators: 1: scheduling option name, for example "unique", 2: the reason it cannot take effect */
 							__( 'The %1$s scheduling option cannot take effect: %2$s.', 'woocommerce' ),
-							$option,
-							$this->describe_unsupported( $queue, $option )
+							$capability,
+							$this->describe_unsupported( $queue, $capability )
 						)
 					)
 				);
@@ -412,35 +407,37 @@ final class Scheduler {
 	}
 
 	/**
-	 * Whether a queue honours a scheduling option natively.
+	 * Whether a queue has a capability natively.
+	 *
+	 * Unknown capabilities are never supported, whatever the queue says.
 	 *
 	 * @param \WC_Queue_Interface $queue The queue a call would go through.
-	 * @param string              $option The option name: `priority` or `unique`.
+	 * @param string              $capability A QueueCapability value.
 	 * @return bool
 	 */
-	private function is_supported_by( \WC_Queue_Interface $queue, string $option ): bool {
-		if ( ! in_array( $option, self::CAPABILITY_OPTIONS, true ) || ! $queue instanceof OptionsAwareQueueInterface ) {
+	private function is_supported_by( \WC_Queue_Interface $queue, string $capability ): bool {
+		if ( ! in_array( $capability, QueueCapability::get_all(), true ) || ! $queue instanceof OptionsAwareQueueInterface ) {
 			return false;
 		}
 
-		return (bool) $queue->supports( $option );
+		return (bool) $queue->supports( $capability );
 	}
 
 	/**
 	 * Explain why a queue does not honour an option, for the strict-mode exception message.
 	 *
 	 * @param \WC_Queue_Interface $queue The queue a call would go through.
-	 * @param string              $option The option name: `priority` or `unique`.
+	 * @param string              $capability A QueueCapability value.
 	 * @return string
 	 */
-	private function describe_unsupported( \WC_Queue_Interface $queue, string $option ): string {
+	private function describe_unsupported( \WC_Queue_Interface $queue, string $capability ): string {
 		if ( $queue instanceof OptionsAwareActionQueue ) {
 			return sprintf(
 				/* translators: 1: loaded Action Scheduler version, 2: scheduling option name, 3: the Action Scheduler version that added it */
 				__( 'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s', 'woocommerce' ),
 				$this->get_version() ?? __( 'unknown version', 'woocommerce' ),
-				$option,
-				'unique' === $option ? '3.5.0' : '3.6.0'
+				$capability,
+				QueueCapability::UNIQUE === $capability ? '3.5.0' : '3.6.0'
 			);
 		}
 
