@@ -53,6 +53,25 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 		} );
 	} );
 
+	describe( 'Weight placeholder limits', () => {
+		const config = {
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+		};
+
+		test.each( [
+			'[weight min="0.5"]',
+			'10 * [weight max="1000.5"]',
+			'[weight min="0.5" max="1.5"] + 2,5',
+		] )( 'allows dot-decimal weight limits in %s for server validation', ( value ) => {
+			expect( isValidFormattedNumber( value, config ) ).toBe( true );
+		} );
+
+		test( 'still validates the decimal separator outside weight limits', () => {
+			expect( isValidFormattedNumber( '[weight min="0.5"] * 2.5', config ) ).toBe( false );
+		} );
+	} );
+
 	describe( 'Formula validation - US format', () => {
 		const config = {
 			decimalSeparator: '.',

@@ -58,6 +58,37 @@ class WeightPlaceholder {
 	}
 
 	/**
+	 * Validate weight limits before saving a cost formula.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $sum Cost formula.
+	 * @return void
+	 * @throws \InvalidArgumentException If a weight limit is not numeric.
+	 */
+	public function validate( string $sum ): void {
+		preg_match_all( self::PLACEHOLDER_PATTERN, $sum, $matches, PREG_SET_ORDER );
+
+		foreach ( $matches as $match ) {
+			$atts = (array) shortcode_parse_atts( $match[1] );
+
+			foreach ( array( 'min', 'max' ) as $attribute ) {
+				$limit = $atts[ $attribute ] ?? '';
+
+				if ( '' !== $limit && ! is_numeric( $limit ) ) {
+					throw new \InvalidArgumentException(
+						sprintf(
+							/* translators: %s: weight placeholder attribute, either min or max. */
+							esc_html__( 'The [weight] %s value must be a number with a dot decimal separator and no thousands separators, e.g. 1000.5.', 'woocommerce' ),
+							esc_html( $attribute )
+						)
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Replace every [weight] placeholder in a cost formula with the given weight.
 	 *
 	 * Parsed directly rather than registered as a shortcode, so that no global shortcode is added for the

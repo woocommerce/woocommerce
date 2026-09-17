@@ -365,6 +365,49 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Weight limits accept dot decimals even when the store uses a comma decimal separator.
+	 *
+	 * @testWith ["10 * [weight min=\"0.5\"]", 0.0, 5.0]
+	 *           ["10 * [weight max=\"1.5\"]", 3.0, 15.0]
+	 *
+	 * @param string $sum      Cost formula with a decimal weight limit.
+	 * @param float  $weight   Package weight in the store's unit.
+	 * @param float  $expected Expected shipping cost.
+	 */
+	public function test_evaluate_cost_weight_with_decimal_bounds( string $sum, float $weight, float $expected ): void {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			$this->sut->sanitize_cost( $sum ),
+			array(
+				'qty'    => 1,
+				'cost'   => 1,
+				'weight' => $weight,
+			)
+		);
+
+		$this->assertFloatEquals( $expected, (float) $val, null, "Expected '{$sum}' to honor its decimal weight limit." );
+	}
+
+	/**
+	 * @testdox Invalid weight limits produce a validation error when saving the cost.
+	 *
+	 * @testWith ["10 * [weight min=\"0,5\"]"]
+	 *           ["10 * [weight max=\"1,5\"]"]
+	 *           ["10 * [weight min=\"100,000.50\"]"]
+	 *           ["10 * [weight max=\"100,00.5\"]"]
+	 *           ["10 * [weight min=\"1.000,50\"]"]
+	 *           ["10 * [weight max=\"1 000.50\"]"]
+	 *           ["10 * [weight min=\"abc\"]"]
+	 *           ["10 * [weight max=\"abc\"]"]
+	 *
+	 * @param string $sum Cost formula with an invalid weight limit.
+	 */
+	public function test_sanitize_cost_rejects_invalid_weight_limits( string $sum ): void {
+		$this->expectException( InvalidArgumentException::class );
+		$this->sut->sanitize_cost( $sum );
+	}
+
+	/**
 	 * @testdox The [fee] shortcode stays based on cost when a weight is supplied.
 	 */
 	public function test_evaluate_cost_weight_does_not_change_fee_base(): void {

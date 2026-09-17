@@ -29,6 +29,9 @@ function isValidFormattedNumber( value, config ) {
         return false;
     }
 
+	// Weight limits use dot decimals and are validated by the server when saving.
+	value = value.replace( /\[weight\b[^\]]*\]/g, '[weight]' );
+
 	var decimalSeparator = config.decimalSeparator || '.';
 	var thousandSeparator = config.thousandSeparator || ',';
 
