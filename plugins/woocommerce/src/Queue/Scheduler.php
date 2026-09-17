@@ -295,7 +295,7 @@ final class Scheduler {
 	 *
 	 * @return string|null
 	 */
-	public function get_version(): ?string {
+	public function get_action_scheduler_version(): ?string {
 		if ( ! did_action( 'plugins_loaded' ) || ! class_exists( \ActionScheduler_Versions::class ) ) {
 			return null;
 		}
@@ -435,7 +435,7 @@ final class Scheduler {
 			return sprintf(
 				/* translators: 1: loaded Action Scheduler version, 2: scheduling option name, 3: the Action Scheduler version that added it */
 				__( 'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s', 'woocommerce' ),
-				$this->get_version() ?? __( 'unknown version', 'woocommerce' ),
+				$this->get_action_scheduler_version() ?? __( 'unknown version', 'woocommerce' ),
 				$capability,
 				QueueCapability::UNIQUE === $capability ? '3.5.0' : '3.6.0'
 			);

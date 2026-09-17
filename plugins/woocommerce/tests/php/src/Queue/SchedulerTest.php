@@ -562,8 +562,8 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should report the loaded Action Scheduler version.
 	 */
-	public function test_get_version(): void {
-		$version = $this->sut->get_version();
+	public function test_get_action_scheduler_version(): void {
+		$version = $this->sut->get_action_scheduler_version();
 
 		$this->assertIsString( $version );
 		$this->assertMatchesRegularExpression( '/^\d+\.\d+/', $version );
