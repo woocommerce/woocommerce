@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Customer Account block: prevent icon overlap with custom avatars with transparency
