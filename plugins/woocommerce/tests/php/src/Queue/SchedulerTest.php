@@ -721,4 +721,20 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->sut->add( 'wc_scheduler_test_add', array(), 'wc-scheduler-test' );
 		$this->assertSame( 'add', $plain->calls[0][0] );
 	}
+
+	/**
+	 * @testdox Should pass null args through cancel() and cancel_all() so a queue can match any args.
+	 */
+	public function test_cancel_passes_null_args_through(): void {
+		foreach ( array( $this->plain_queue(), $this->options_aware_queue() ) as $queue ) {
+			$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+			$this->sut->cancel( 'wc_scheduler_test_cancel', null, 'wc-scheduler-test' );
+			$this->sut->cancel_all( 'wc_scheduler_test_cancel', null, 'wc-scheduler-test' );
+
+			$this->assertSame( array( 'cancel', 'cancel_all' ), array_column( $queue->calls, 0 ) );
+			$this->assertNull( $queue->calls[0][1][1], 'cancel() should forward null args unchanged' );
+			$this->assertNull( $queue->calls[1][1][1], 'cancel_all() should forward null args unchanged' );
+		}
+	}
 }

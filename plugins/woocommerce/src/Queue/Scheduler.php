@@ -206,14 +206,14 @@ final class Scheduler {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $hook The hook that the job will trigger.
-	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group The group the job is assigned to.
-	 * @param array  $options `queue` (a SchedulerQueue value) and `strict` apply here.
+	 * @param string     $hook    The hook that the job will trigger.
+	 * @param array|null $args    Args that would have been passed to the job. Null matches any args.
+	 * @param string     $group   The group the job is assigned to.
+	 * @param array      $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return void
 	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
-	public function cancel( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
+	public function cancel( string $hook, ?array $args = array(), string $group = '', array $options = array() ): void {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
 		$queue   = $this->ready_queue( $options, __FUNCTION__ );
 		if ( null === $queue ) {
@@ -228,14 +228,14 @@ final class Scheduler {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $hook The hook that the job will trigger.
-	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group The group the job is assigned to.
-	 * @param array  $options `queue` (a SchedulerQueue value) and `strict` apply here.
+	 * @param string     $hook    The hook that the job will trigger.
+	 * @param array|null $args    Args that would have been passed to the job. Null matches any args.
+	 * @param string     $group   The group the job is assigned to.
+	 * @param array      $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return void
 	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
 	 */
-	public function cancel_all( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
+	public function cancel_all( string $hook, ?array $args = array(), string $group = '', array $options = array() ): void {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
 		$queue   = $this->ready_queue( $options, __FUNCTION__ );
 		if ( null === $queue ) {
@@ -250,9 +250,9 @@ final class Scheduler {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string     $hook The hook that the job will trigger.
-	 * @param array|null $args Args that would have been passed to the job. Null matches any args.
-	 * @param string     $group The group the job is assigned to.
+	 * @param string     $hook    The hook that the job will trigger.
+	 * @param array|null $args    Args that would have been passed to the job. Null matches any args.
+	 * @param string     $group   The group the job is assigned to.
 	 * @param array      $options `queue` (a SchedulerQueue value) and `strict` apply here.
 	 * @return \WC_DateTime|null The next occurrence, or null when nothing is pending.
 	 * @throws \RuntimeException When `strict` is set and the queue is not ready.
