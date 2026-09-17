@@ -40,12 +40,15 @@ class CategoryTermContextTest extends WC_Unit_Test_Case {
 	 *           [true, "taxonomy", true]
 	 *           [false, "taxonomy", false]
 	 *           [true, "taxonomy", false]
+	 *           [false, "taxonomy", true, true]
+	 *           [true, "taxonomy", false, true]
 	 *
 	 * @param bool   $selected Whether the category is selected explicitly.
 	 * @param string $taxonomy_key Context key supplying the taxonomy.
 	 * @param bool   $bound Whether the button uses the term-data binding.
+	 * @param bool   $cover Whether the content is wrapped in the migrated Cover layout.
 	 */
-	public function test_featured_category_context( bool $selected, string $taxonomy_key, bool $bound ): void {
+	public function test_featured_category_context( bool $selected, string $taxonomy_key, bool $bound, bool $cover = false ): void {
 		if ( $bound && ! get_block_bindings_source( 'core/term-data' ) ) {
 			$this->markTestSkipped( 'Core term-data bindings are not available.' );
 		}
@@ -68,6 +71,12 @@ class CategoryTermContextTest extends WC_Unit_Test_Case {
 		$parsed      = parse_blocks( $markup )[0];
 
 		$parsed['attrs']['categoryId'] = $selected ? $selected_id : 0;
+		if ( $cover ) {
+			$parsed['attrs']['layout'] = 'cover';
+			$cover_block               = parse_blocks( '<!-- wp:cover --><div class="wp-block-cover"><div class="wp-block-cover__inner-container">' . serialize_blocks( $parsed['innerBlocks'] ) . '</div></div><!-- /wp:cover -->' )[0];
+			$parsed['innerBlocks']     = array( $cover_block );
+			$parsed['innerContent']    = array( null );
+		}
 
 		foreach ( $term_ids as $term_id ) {
 			$sut           = new \WP_Block(
