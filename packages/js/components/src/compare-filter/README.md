@@ -1,5 +1,4 @@
-CompareFilter
-===
+# CompareFilter
 
 Displays a card + search used to filter results as a comparison between objects.
 

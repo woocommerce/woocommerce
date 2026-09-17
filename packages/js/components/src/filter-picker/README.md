@@ -1,5 +1,4 @@
-Filter Picker
-===
+# Filter Picker
 
 Modify a url query parameter via a dropdown selection of configurable options. This component manipulates the `filter` query parameter.
 
