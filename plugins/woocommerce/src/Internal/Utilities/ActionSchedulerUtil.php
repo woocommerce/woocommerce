@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+
 /**
  * A class of utilities for dealing with Action Scheduler across the versions of it that may be loaded.
  */
@@ -22,7 +24,7 @@ class ActionSchedulerUtil {
 	 * {@see self::can_check_scheduled_actions()} first.
 	 *
 	 * Delegates to the stock queue, which owns this logic; new code should use
-	 * Automattic\WooCommerce\Utilities\Scheduler::has_scheduled_action() instead.
+	 * Automattic\WooCommerce\Queue\Scheduler::has_scheduled_action() instead.
 	 *
 	 * @since 11.2.0
 	 *
@@ -33,7 +35,7 @@ class ActionSchedulerUtil {
 	 * @return bool True if a matching action is scheduled, false otherwise.
 	 */
 	public static function has_scheduled_action( string $hook, ?array $args = null, string $group = '' ): bool {
-		return ( new \WC_Options_Aware_Action_Queue() )->has_scheduled_action( $hook, $args, $group );
+		return ( new OptionsAwareActionQueue() )->has_scheduled_action( $hook, $args, $group );
 	}
 
 	/**

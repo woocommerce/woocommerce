@@ -1,10 +1,13 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Utilities;
+namespace Automattic\WooCommerce\Tests\Queue;
 
 use Automattic\WooCommerce\Enums\SchedulerQueue;
-use Automattic\WooCommerce\Utilities\Scheduler;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+use Automattic\WooCommerce\Queue\OptionsAwareQueueInterface;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WC_Unit_Test_Case;
 
 /**
@@ -78,10 +81,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	/**
 	 * Build an options-aware queue double that records every call, including the options it receives.
 	 *
-	 * @return \WC_Options_Aware_Queue_Interface
+	 * @return OptionsAwareQueueInterface
 	 */
-	private function options_aware_queue(): \WC_Options_Aware_Queue_Interface {
-		return new class() implements \WC_Options_Aware_Queue_Interface {
+	private function options_aware_queue(): OptionsAwareQueueInterface {
+		return new class() implements OptionsAwareQueueInterface {
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
 			public $calls = array();
 			public function add( $hook, $args = array(), $group = '', $options = array() ) {
@@ -123,12 +126,39 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a stock queue that believes an Action Scheduler copy predating both options is loaded.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function stock_queue_on_old_action_scheduler(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			protected function get_action_scheduler_version(): ?string {
+				return '3.4.0';
+			}
+		};
+	}
+
+	/**
 	 * Make the given queue the active one.
 	 *
 	 * @param \WC_Queue_Interface $queue The queue double.
 	 */
 	private function use_queue( \WC_Queue_Interface $queue ): void {
 		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+	}
+
+	/**
+	 * Build a scheduler whose stock queue is the given one, for the paths that bypass the active queue.
+	 *
+	 * @param OptionsAwareActionQueue $default_queue The stock queue to inject.
+	 * @return Scheduler
+	 */
+	private function scheduler_with_default_queue( OptionsAwareActionQueue $default_queue ): Scheduler {
+		$scheduler = new Scheduler();
+		$scheduler->init( wc_get_container()->get( LegacyProxy::class ), $default_queue );
+
+		return $scheduler;
 	}
 
 	/**
@@ -142,7 +172,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass priority and unique to an options-aware queue and never the queue key.
+	 * @testdox Should pass priority and unique to an options-aware queue and never the scheduler's own keys.
 	 */
 	public function test_passes_options_to_an_options_aware_queue(): void {
 		$queue = $this->options_aware_queue();
@@ -156,6 +186,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			array(
 				'priority' => 3,
 				'unique'   => true,
+				'strict'   => true,
 				'queue'    => SchedulerQueue::ACTIVE,
 			)
 		);
@@ -323,11 +354,18 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function test_unknown_queue_option_falls_back_to_active(): void {
 		$queue = $this->options_aware_queue();
 		$this->use_queue( $queue );
-		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Utilities\Scheduler::schedule_single' );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::schedule_single' );
 
 		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'queue' => 'elsewhere' ) );
 
 		$this->assertSame( 22, $action_id, 'The call should reach the active queue' );
+	}
+
+	/**
+	 * @testdox Should list every queue option value in SchedulerQueue::get_all().
+	 */
+	public function test_scheduler_queue_enum_lists_every_value(): void {
+		$this->assertSame( array( SchedulerQueue::ACTIVE, SchedulerQueue::DEFAULT ), SchedulerQueue::get_all() );
 	}
 
 	/**
@@ -384,7 +422,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report which options take effect on the active path.
+	 * @testdox Should report native support only: both options on the stock and options-aware queues, neither on a plain queue.
 	 */
 	public function test_supports(): void {
 		$this->assertTrue( $this->sut->supports( 'priority' ), 'The stock queue on the bundled Action Scheduler supports priority' );
@@ -397,8 +435,112 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$this->use_queue( $this->plain_queue() );
 		$this->assertFalse( $this->sut->supports( 'priority' ), 'A plain queue drops the priority' );
-		$this->assertTrue( $this->sut->supports( 'unique' ), 'Uniqueness is emulated on a plain queue' );
+		$this->assertFalse( $this->sut->supports( 'unique' ), 'A plain queue only gets emulated uniqueness, which is not native support' );
 		$this->assertTrue( $this->sut->supports( 'priority', array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The default queue supports priority even when a plain queue is active' );
+	}
+
+	/**
+	 * @testdox Should report no native support on a stock queue whose Action Scheduler predates both options.
+	 */
+	public function test_supports_follows_the_action_scheduler_version(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_on_old_action_scheduler() );
+
+		$this->assertFalse( $scheduler->supports( 'unique', array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+		$this->assertFalse( $scheduler->supports( 'priority', array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when unique is requested on a plain queue.
+	 */
+	public function test_strict_unique_on_a_plain_queue_throws(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'The unique scheduling option cannot take effect' );
+
+		try {
+			$options = array(
+				'unique' => true,
+				'strict' => true,
+			);
+
+			$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+		} finally {
+			$this->assertSame( array(), $queue->calls, 'Nothing should reach the queue when strict mode throws' );
+		}
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when a non-default priority is requested on a plain queue.
+	 */
+	public function test_strict_priority_on_a_plain_queue_throws(): void {
+		$this->use_queue( $this->plain_queue() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'does not implement OptionsAwareQueueInterface' );
+
+		$options = array(
+			'priority' => 1,
+			'strict'   => true,
+		);
+
+		$this->sut->schedule_recurring( 123, 60, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should schedule in strict mode on a plain queue when only default options are requested.
+	 */
+	public function test_strict_with_default_options_on_a_plain_queue_schedules(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$options = array(
+			'strict'   => true,
+			'priority' => 10,
+			'unique'   => false,
+		);
+
+		$action_id = $this->sut->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+
+		$this->assertSame( 14, $action_id );
+		$this->assertSame( array( 'schedule_cron' ), array_column( $queue->calls, 0 ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode on a stock queue whose Action Scheduler predates unique actions.
+	 */
+	public function test_strict_unique_on_old_action_scheduler_throws(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_on_old_action_scheduler() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'predates unique support, which needs 3.5.0' );
+
+		$options = array(
+			'unique' => true,
+			'strict' => true,
+			'queue'  => SchedulerQueue::DEFAULT,
+		);
+
+		$scheduler->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should keep best-effort behaviour when strict is not set, even where support is missing.
+	 */
+	public function test_non_strict_falls_back_where_support_is_missing(): void {
+		$queue = $this->plain_queue( null );
+		$this->use_queue( $queue );
+
+		$options = array(
+			'unique'   => true,
+			'priority' => 1,
+		);
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+
+		$this->assertSame( 12, $action_id );
+		$this->assertSame( array( 'get_next', 'schedule_single' ), array_column( $queue->calls, 0 ), 'Uniqueness is emulated and the priority dropped' );
 	}
 
 	/**

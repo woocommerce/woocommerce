@@ -1,21 +1,21 @@
 <?php
-/**
- * Tests for WC_Options_Aware_Action_Queue.
- *
- * @package WooCommerce\Tests\Queue
- */
-
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Queue;
+
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+use Automattic\WooCommerce\Queue\OptionsAwareQueueInterface;
+use WC_Unit_Test_Case;
+
 /**
- * Tests for the WC_Options_Aware_Action_Queue class.
+ * Tests for the OptionsAwareActionQueue class.
  */
-class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
+class OptionsAwareActionQueueTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var WC_Options_Aware_Action_Queue
+	 * @var OptionsAwareActionQueue
 	 */
 	private $sut;
 
@@ -24,7 +24,7 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new WC_Options_Aware_Action_Queue();
+		$this->sut = new OptionsAwareActionQueue();
 	}
 
 	/**
@@ -34,16 +34,16 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 	 * @return int
 	 */
 	private function get_stored_priority( int $action_id ): int {
-		return ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority();
+		return \ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority();
 	}
 
 	/**
 	 * Build a queue that believes an Action Scheduler copy predating the unique argument is loaded.
 	 *
-	 * @return WC_Options_Aware_Action_Queue
+	 * @return OptionsAwareActionQueue
 	 */
-	private function queue_on_old_action_scheduler(): WC_Options_Aware_Action_Queue {
-		return new class() extends WC_Options_Aware_Action_Queue {
+	private function queue_on_old_action_scheduler(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			protected function get_action_scheduler_version(): ?string {
 				return '3.4.0';
@@ -55,8 +55,16 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 	 * @testdox Should be usable as both a plain queue and an options-aware queue.
 	 */
 	public function test_implements_both_queue_interfaces(): void {
-		$this->assertInstanceOf( WC_Queue_Interface::class, $this->sut );
-		$this->assertInstanceOf( WC_Options_Aware_Queue_Interface::class, $this->sut );
+		$this->assertInstanceOf( \WC_Queue_Interface::class, $this->sut );
+		$this->assertInstanceOf( \WC_Action_Queue::class, $this->sut );
+		$this->assertInstanceOf( OptionsAwareQueueInterface::class, $this->sut );
+	}
+
+	/**
+	 * @testdox Should be the queue WC()->queue() returns by default.
+	 */
+	public function test_is_the_default_queue(): void {
+		$this->assertInstanceOf( OptionsAwareActionQueue::class, WC()->queue() );
 	}
 
 	/**
@@ -66,7 +74,7 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 	 * @testdox Should not make plain WC_Action_Queue subclasses options-aware.
 	 */
 	public function test_plain_action_queue_is_not_options_aware(): void {
-		$this->assertNotInstanceOf( WC_Options_Aware_Queue_Interface::class, new WC_Action_Queue() );
+		$this->assertNotInstanceOf( OptionsAwareQueueInterface::class, new \WC_Action_Queue() );
 	}
 
 	/**
@@ -132,7 +140,7 @@ class WC_Options_Aware_Action_Queue_Test extends WC_Unit_Test_Case {
 
 		$action_id = $this->sut->add( 'wc_oaq_test_add', array(), 'wc-oaq-test', array( 'priority' => 3 ) );
 
-		$action = ActionScheduler::store()->fetch_action( (string) $action_id );
+		$action = \ActionScheduler::store()->fetch_action( (string) $action_id );
 		$this->assertSame( 3, $action->get_priority() );
 		$this->assertGreaterThanOrEqual( $before, $action->get_schedule()->get_date()->getTimestamp(), 'add() should schedule for now, not the future' );
 	}

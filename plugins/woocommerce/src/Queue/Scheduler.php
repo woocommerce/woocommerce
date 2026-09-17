@@ -5,7 +5,7 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Utilities;
+namespace Automattic\WooCommerce\Queue;
 
 use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -15,9 +15,13 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  *
  * Every call goes through the active queue, `WC()->queue()`, so queues attached through the
  * `woocommerce_queue_class` filter keep intercepting. Scheduling options such as `priority` and
- * `unique` reach queues that implement WC_Options_Aware_Queue_Interface natively; on a plain
+ * `unique` reach queues that implement OptionsAwareQueueInterface natively; on a plain
  * WC_Queue_Interface the priority is dropped and uniqueness is emulated with `get_next()`, which
- * cannot see in-progress actions.
+ * cannot see in-progress actions and is not atomic.
+ *
+ * The `strict` option turns that best effort into a hard requirement: when true, a call whose
+ * requested options cannot take effect natively throws instead of scheduling. `supports()` answers
+ * the same question in advance.
  *
  * The `queue` option, one of the SchedulerQueue values, selects the stock queue instead of the
  * active one. That ignores a custom queue attached through `woocommerce_queue_class`, so it is
@@ -36,24 +40,33 @@ class Scheduler {
 	 *
 	 * @since 11.3.0
 	 */
-	public const DEFAULT_PRIORITY = \WC_Options_Aware_Action_Queue::DEFAULT_PRIORITY;
+	public const DEFAULT_PRIORITY = OptionsAwareActionQueue::DEFAULT_PRIORITY;
 
 	/**
-	 * The legacy proxy, through which the legacy queue classes are reached so tests can replace them.
+	 * The legacy proxy, through which the active queue is reached so tests can replace it.
 	 *
 	 * @var LegacyProxy
 	 */
 	private $legacy_proxy;
 
 	/**
+	 * The stock queue, used when a call selects it regardless of `woocommerce_queue_class`.
+	 *
+	 * @var OptionsAwareActionQueue
+	 */
+	private $default_queue;
+
+	/**
 	 * Initialize the class dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param LegacyProxy $legacy_proxy The legacy proxy.
+	 * @param LegacyProxy             $legacy_proxy The legacy proxy.
+	 * @param OptionsAwareActionQueue $default_queue The stock queue.
 	 */
-	final public function init( LegacyProxy $legacy_proxy ): void {
-		$this->legacy_proxy = $legacy_proxy;
+	final public function init( LegacyProxy $legacy_proxy, OptionsAwareActionQueue $default_queue ): void {
+		$this->legacy_proxy  = $legacy_proxy;
+		$this->default_queue = $default_queue;
 	}
 
 	/**
@@ -64,8 +77,9 @@ class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
+	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
 	 */
 	public function add( string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		return $this->schedule_single( time(), $hook, $args, $group, $options );
@@ -80,18 +94,20 @@ class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
+	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
 	 */
 	public function schedule_single( int $timestamp, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->queue_for( $options );
+		$queue   = $this->select_queue( $options );
+		$this->assert_options_supported( $queue, $options );
 
-		if ( $queue instanceof \WC_Options_Aware_Queue_Interface ) {
-			return (int) $queue->schedule_single( $timestamp, $hook, $args, $group, $this->queue_options( $options ) );
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->schedule_single( $timestamp, $hook, $args, $group, $this->extract_queue_options( $options ) );
 		}
 
-		if ( $this->emulated_unique_match( $queue, $options, $hook, $args, $group ) ) {
+		if ( $this->has_pending_match( $queue, $options, $hook, $args, $group ) ) {
 			return 0;
 		}
 
@@ -108,18 +124,20 @@ class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
+	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
 	 */
 	public function schedule_recurring( int $timestamp, int $interval_in_seconds, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->queue_for( $options );
+		$queue   = $this->select_queue( $options );
+		$this->assert_options_supported( $queue, $options );
 
-		if ( $queue instanceof \WC_Options_Aware_Queue_Interface ) {
-			return (int) $queue->schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args, $group, $this->queue_options( $options ) );
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args, $group, $this->extract_queue_options( $options ) );
 		}
 
-		if ( $this->emulated_unique_match( $queue, $options, $hook, $args, $group ) ) {
+		if ( $this->has_pending_match( $queue, $options, $hook, $args, $group ) ) {
 			return 0;
 		}
 
@@ -137,18 +155,20 @@ class Scheduler {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `queue` (a SchedulerQueue value).
+	 * @param array  $options Scheduling options: `priority` (int, 0-255, default 10), `unique` (bool, default false), `strict` (bool, default false), `queue` (a SchedulerQueue value).
 	 * @return int The action ID, or 0 when the action was not scheduled.
+	 * @throws \RuntimeException When `strict` is set and a requested option cannot take effect natively.
 	 */
 	public function schedule_cron( int $timestamp, string $cron_schedule, string $hook, array $args = array(), string $group = '', array $options = array() ): int {
 		$options = $this->normalize_options( $options, __FUNCTION__ );
-		$queue   = $this->queue_for( $options );
+		$queue   = $this->select_queue( $options );
+		$this->assert_options_supported( $queue, $options );
 
-		if ( $queue instanceof \WC_Options_Aware_Queue_Interface ) {
-			return (int) $queue->schedule_cron( $timestamp, $cron_schedule, $hook, $args, $group, $this->queue_options( $options ) );
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
+			return (int) $queue->schedule_cron( $timestamp, $cron_schedule, $hook, $args, $group, $this->extract_queue_options( $options ) );
 		}
 
-		if ( $this->emulated_unique_match( $queue, $options, $hook, $args, $group ) ) {
+		if ( $this->has_pending_match( $queue, $options, $hook, $args, $group ) ) {
 			return 0;
 		}
 
@@ -167,7 +187,7 @@ class Scheduler {
 	 * @return void
 	 */
 	public function cancel( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
-		$this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) )->cancel( $hook, $args, $group );
+		$this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->cancel( $hook, $args, $group );
 	}
 
 	/**
@@ -182,7 +202,7 @@ class Scheduler {
 	 * @return void
 	 */
 	public function cancel_all( string $hook, array $args = array(), string $group = '', array $options = array() ): void {
-		$this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) )->cancel_all( $hook, $args, $group );
+		$this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->cancel_all( $hook, $args, $group );
 	}
 
 	/**
@@ -197,7 +217,7 @@ class Scheduler {
 	 * @return \WC_DateTime|null The next occurrence, or null when nothing is pending.
 	 */
 	public function get_next( string $hook, ?array $args = null, string $group = '', array $options = array() ): ?\WC_DateTime {
-		$next = $this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) )->get_next( $hook, $args, $group );
+		$next = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->get_next( $hook, $args, $group );
 
 		return $next instanceof \WC_DateTime ? $next : null;
 	}
@@ -213,7 +233,7 @@ class Scheduler {
 	 * @return array
 	 */
 	public function search( array $args = array(), string $return_format = OBJECT, array $options = array() ): array {
-		$results = $this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) )->search( $args, $return_format );
+		$results = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) )->search( $args, $return_format );
 
 		return is_array( $results ) ? $results : array();
 	}
@@ -233,9 +253,9 @@ class Scheduler {
 	 * @return bool
 	 */
 	public function has_scheduled_action( string $hook, ?array $args = null, string $group = '', array $options = array() ): bool {
-		$queue = $this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) );
+		$queue = $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) );
 
-		if ( $queue instanceof \WC_Options_Aware_Queue_Interface ) {
+		if ( $queue instanceof OptionsAwareQueueInterface ) {
 			return (bool) $queue->has_scheduled_action( $hook, $args, $group );
 		}
 
@@ -243,12 +263,13 @@ class Scheduler {
 	}
 
 	/**
-	 * Whether a scheduling option will take effect on the path a call would take.
+	 * Whether a scheduling option is supported natively on the path a call would take.
 	 *
-	 * `priority` needs an options-aware queue, and on the stock queue an Action Scheduler of 3.6.0 or
-	 * newer. `unique` always takes effect, natively or emulated. The emulation, used on plain queues
-	 * and on Action Scheduler older than 3.5.0, cannot see in-progress actions and is not atomic, so
-	 * a duplicate can slip through while the first instance runs. Unknown options never take effect.
+	 * Both options need an options-aware queue. On the stock queue, `unique` also needs Action
+	 * Scheduler 3.5.0 or newer and `priority` 3.6.0 or newer. Where this returns false a non-strict
+	 * call still does its best: uniqueness is emulated with a pending-action check that cannot see
+	 * in-progress actions and is not atomic, and the priority is dropped. A strict call throws
+	 * instead. Unknown options are never supported.
 	 *
 	 * @since 11.3.0
 	 *
@@ -257,19 +278,7 @@ class Scheduler {
 	 * @return bool
 	 */
 	public function supports( string $option, array $options = array() ): bool {
-		$queue = $this->queue_for( $this->normalize_options( $options, __FUNCTION__ ) );
-
-		switch ( $option ) {
-			case 'unique':
-				return true;
-			case 'priority':
-				if ( $queue instanceof \WC_Options_Aware_Action_Queue ) {
-					return $queue->supports_priority();
-				}
-				return $queue instanceof \WC_Options_Aware_Queue_Interface;
-			default:
-				return false;
-		}
+		return $this->is_supported_by( $this->select_queue( $this->normalize_options( $options, __FUNCTION__ ) ), $option );
 	}
 
 	/**
@@ -307,7 +316,7 @@ class Scheduler {
 			return false;
 		}
 
-		if ( ! $this->active_queue() instanceof \WC_Action_Queue ) {
+		if ( ! $this->get_active_queue() instanceof \WC_Action_Queue ) {
 			return true;
 		}
 
@@ -326,7 +335,7 @@ class Scheduler {
 	}
 
 	/**
-	 * Bring the options into a known shape: `priority`, `unique` and `queue`, nothing else.
+	 * Bring the options into a known shape: `priority`, `unique`, `strict` and `queue`, nothing else.
 	 *
 	 * The priority goes through the same normaliser the stock queue uses, so both public entry points
 	 * coerce it identically.
@@ -336,10 +345,10 @@ class Scheduler {
 	 * @return array
 	 */
 	private function normalize_options( array $options, string $method ): array {
-		$priority = \WC_Options_Aware_Action_Queue::normalize_priority( $options['priority'] ?? self::DEFAULT_PRIORITY );
+		$priority = OptionsAwareActionQueue::normalize_priority( $options['priority'] ?? self::DEFAULT_PRIORITY );
 
 		$queue = $options['queue'] ?? SchedulerQueue::ACTIVE;
-		if ( ! in_array( $queue, array( SchedulerQueue::ACTIVE, SchedulerQueue::DEFAULT ), true ) ) {
+		if ( ! in_array( $queue, SchedulerQueue::get_all(), true ) ) {
 			wc_doing_it_wrong( __CLASS__ . '::' . $method, 'The queue option must be one of the SchedulerQueue values. Falling back to the active queue.', '11.3.0' );
 			$queue = SchedulerQueue::ACTIVE;
 		}
@@ -347,17 +356,90 @@ class Scheduler {
 		return array(
 			'priority' => $priority,
 			'unique'   => ! empty( $options['unique'] ),
+			'strict'   => ! empty( $options['strict'] ),
 			'queue'    => $queue,
 		);
 	}
 
 	/**
-	 * The options a queue receives. The `queue` key is the scheduler's own and never leaves it.
+	 * Throw when a strict call asks for an option the selected queue cannot honour natively.
+	 *
+	 * Only options the caller actually asked for count: `unique` when true, `priority` when it
+	 * differs from the default.
+	 *
+	 * @param \WC_Queue_Interface $queue The selected queue.
+	 * @param array               $options Normalised options.
+	 * @return void
+	 * @throws \RuntimeException When `strict` is set and a requested option is unsupported.
+	 */
+	private function assert_options_supported( \WC_Queue_Interface $queue, array $options ): void {
+		if ( ! $options['strict'] ) {
+			return;
+		}
+
+		$requested = array();
+		if ( $options['unique'] ) {
+			$requested[] = 'unique';
+		}
+		if ( self::DEFAULT_PRIORITY !== $options['priority'] ) {
+			$requested[] = 'priority';
+		}
+
+		foreach ( $requested as $option ) {
+			if ( ! $this->is_supported_by( $queue, $option ) ) {
+				throw new \RuntimeException(
+					esc_html( sprintf( 'The %1$s scheduling option cannot take effect: %2$s.', $option, $this->describe_unsupported( $queue, $option ) ) )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Whether a queue honours a scheduling option natively.
+	 *
+	 * @param \WC_Queue_Interface $queue The queue a call would go through.
+	 * @param string              $option The option name: `priority` or `unique`.
+	 * @return bool
+	 */
+	private function is_supported_by( \WC_Queue_Interface $queue, string $option ): bool {
+		if ( ! in_array( $option, array( 'priority', 'unique' ), true ) || ! $queue instanceof OptionsAwareQueueInterface ) {
+			return false;
+		}
+
+		if ( ! $queue instanceof OptionsAwareActionQueue ) {
+			return true;
+		}
+
+		return 'unique' === $option ? $queue->supports_unique_actions() : $queue->supports_priority();
+	}
+
+	/**
+	 * Explain why a queue does not honour an option, for the strict-mode exception message.
+	 *
+	 * @param \WC_Queue_Interface $queue The queue a call would go through.
+	 * @param string              $option The option name: `priority` or `unique`.
+	 * @return string
+	 */
+	private function describe_unsupported( \WC_Queue_Interface $queue, string $option ): string {
+		if ( $queue instanceof OptionsAwareActionQueue ) {
+			return sprintf(
+				'the loaded Action Scheduler (%1$s) predates %2$s support, which needs %3$s',
+				$this->get_version() ?? 'unknown version',
+				$option,
+				'unique' === $option ? '3.5.0' : '3.6.0'
+			);
+		}
+
+		return sprintf( 'the active queue (%s) does not implement OptionsAwareQueueInterface', get_class( $queue ) );
+	}
+
+	/**
+	 * The options a queue receives. The `strict` and `queue` keys are the scheduler's own and never leave it.
 	 *
 	 * @param array $options Normalised options.
 	 * @return array
 	 */
-	private function queue_options( array $options ): array {
+	private function extract_queue_options( array $options ): array {
 		return array(
 			'priority' => $options['priority'],
 			'unique'   => $options['unique'],
@@ -377,35 +459,35 @@ class Scheduler {
 	 * @param string              $group The group to assign this job to.
 	 * @return bool
 	 */
-	private function emulated_unique_match( \WC_Queue_Interface $queue, array $options, string $hook, array $args, string $group ): bool {
+	private function has_pending_match( \WC_Queue_Interface $queue, array $options, string $hook, array $args, string $group ): bool {
 		return $options['unique'] && $queue->get_next( $hook, $args, $group ) instanceof \WC_DateTime;
 	}
 
 	/**
-	 * The queue a call should go through.
+	 * Pick the queue a call should go through.
 	 *
 	 * @param array $options Normalised options.
 	 * @return \WC_Queue_Interface
 	 */
-	private function queue_for( array $options ): \WC_Queue_Interface {
-		return SchedulerQueue::DEFAULT === $options['queue'] ? $this->default_queue() : $this->active_queue();
+	private function select_queue( array $options ): \WC_Queue_Interface {
+		return SchedulerQueue::DEFAULT === $options['queue'] ? $this->get_default_queue() : $this->get_active_queue();
 	}
 
 	/**
-	 * The queue WooCommerce is configured with, honouring `woocommerce_queue_class`.
+	 * Get the queue WooCommerce is configured with, honouring `woocommerce_queue_class`.
 	 *
 	 * @return \WC_Queue_Interface
 	 */
-	private function active_queue(): \WC_Queue_Interface {
+	private function get_active_queue(): \WC_Queue_Interface {
 		return $this->legacy_proxy->get_instance_of( \WC_Queue_Interface::class );
 	}
 
 	/**
-	 * The stock queue, regardless of `woocommerce_queue_class`.
+	 * Get the stock queue, regardless of `woocommerce_queue_class`.
 	 *
-	 * @return \WC_Options_Aware_Action_Queue
+	 * @return OptionsAwareActionQueue
 	 */
-	private function default_queue(): \WC_Options_Aware_Action_Queue {
-		return $this->legacy_proxy->get_instance_of( \WC_Options_Aware_Action_Queue::class );
+	private function get_default_queue(): OptionsAwareActionQueue {
+		return $this->default_queue;
 	}
 }

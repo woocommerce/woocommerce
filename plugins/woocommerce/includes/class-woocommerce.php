@@ -750,7 +750,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-options-aware-queue-interface.php';
 
 		/**
 		 * Core traits.
@@ -815,7 +814,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-options-aware-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';

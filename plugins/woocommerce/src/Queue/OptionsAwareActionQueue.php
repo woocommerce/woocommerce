@@ -1,32 +1,25 @@
 <?php
 /**
- * Options Aware Action Queue
- *
- * @version 11.3.0
- * @package WooCommerce\Classes
+ * OptionsAwareActionQueue class file.
  */
 
 declare( strict_types = 1 );
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+namespace Automattic\WooCommerce\Queue;
 
 /**
- * WC Options Aware Action Queue
+ * The default WC()->queue() implementation.
  *
- * The default WC()->queue() implementation. Extends WC_Action_Queue so that it accepts the
- * scheduling options described by WC_Options_Aware_Queue_Interface and passes them to
- * Action Scheduler, guarding the cases where an older Action Scheduler copy bundled by another
- * plugin won the load race.
+ * Extends WC_Action_Queue so that it accepts the scheduling options described by
+ * OptionsAwareQueueInterface and passes them to Action Scheduler, guarding the cases where an
+ * older Action Scheduler copy bundled by another plugin won the load race.
  *
  * Third-party queues that extend WC_Action_Queue do not implement the options-aware interface,
- * so callers going through Automattic\WooCommerce\Utilities\Scheduler fall back to the plain
- * methods those queues override.
+ * so callers going through Scheduler fall back to the plain methods those queues override.
  *
  * @since 11.3.0
  */
-class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Options_Aware_Queue_Interface {
+class OptionsAwareActionQueue extends \WC_Action_Queue implements OptionsAwareQueueInterface {
 
 	/**
 	 * Priority used when none is requested. Matches Action Scheduler's own default.
@@ -48,7 +41,7 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
 	public function add( $hook, $args = array(), $group = '', $options = array() ) {
-		return $this->schedule_single( time(), $hook, $args, $group, $this->options( $options ) );
+		return $this->schedule_single( time(), $hook, $args, $group, $this->coerce_options( $options ) );
 	}
 
 	/**
@@ -64,13 +57,13 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() ) {
-		$options = $this->options( $options );
+		$options = $this->coerce_options( $options );
 		if ( ! $this->can_schedule( 'as_schedule_single_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
 		// Action Scheduler older than 3.6.0 discards the surplus priority argument, so it is passed unconditionally.
-		return as_schedule_single_action( $timestamp, $hook, $args, $group, $this->unique( $options ), $this->priority( $options ) );
+		return as_schedule_single_action( $timestamp, $hook, $args, $group, $this->is_unique_requested( $options ), $this->get_priority( $options ) );
 	}
 
 	/**
@@ -87,13 +80,13 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $options = array() ) {
-		$options = $this->options( $options );
+		$options = $this->coerce_options( $options );
 		if ( ! $this->can_schedule( 'as_schedule_recurring_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
 		// Action Scheduler older than 3.6.0 discards the surplus priority argument, so it is passed unconditionally.
-		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, $this->unique( $options ), $this->priority( $options ) );
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, $this->is_unique_requested( $options ), $this->get_priority( $options ) );
 	}
 
 	/**
@@ -111,13 +104,13 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @return int The action ID, or 0 when the action was not scheduled.
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $options = array() ) {
-		$options = $this->options( $options );
+		$options = $this->coerce_options( $options );
 		if ( ! $this->can_schedule( 'as_schedule_cron_action', __FUNCTION__, $hook, $args, $group, $options ) ) {
 			return 0;
 		}
 
 		// Action Scheduler older than 3.6.0 discards the surplus priority argument, so it is passed unconditionally.
-		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, $this->unique( $options ), $this->priority( $options ) );
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, $this->is_unique_requested( $options ), $this->get_priority( $options ) );
 	}
 
 	/**
@@ -165,11 +158,11 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @return string|null
 	 */
 	protected function get_action_scheduler_version(): ?string {
-		if ( ! did_action( 'plugins_loaded' ) || ! class_exists( 'ActionScheduler_Versions' ) ) {
+		if ( ! did_action( 'plugins_loaded' ) || ! class_exists( \ActionScheduler_Versions::class ) ) {
 			return null;
 		}
 
-		$version = ActionScheduler_Versions::instance()->latest_version();
+		$version = \ActionScheduler_Versions::instance()->latest_version();
 
 		return is_string( $version ) && '' !== $version ? $version : null;
 	}
@@ -204,6 +197,26 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	}
 
 	/**
+	 * Bring a priority value into the 0-255 range Action Scheduler accepts.
+	 *
+	 * Clamps before narrowing to an integer, since a float above the integer range would otherwise
+	 * wrap to a negative number and land at the highest priority. Non-numeric and non-finite values
+	 * fall back to the default.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value The requested priority.
+	 * @return int
+	 */
+	public static function normalize_priority( $value ): int {
+		if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) ) {
+			return self::DEFAULT_PRIORITY;
+		}
+
+		return (int) max( 0, min( 255, (float) $value ) );
+	}
+
+	/**
 	 * Decide whether a scheduling call can go ahead.
 	 *
 	 * Returns false, with a doing-it-wrong notice, when the Action Scheduler function is missing.
@@ -224,7 +237,7 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 			return false;
 		}
 
-		if ( $this->unique( $options ) && ! $this->supports_unique_actions() && as_next_scheduled_action( $hook, $args, $group ) ) {
+		if ( $this->is_unique_requested( $options ) && ! $this->supports_unique_actions() && as_next_scheduled_action( $hook, $args, $group ) ) {
 			return false;
 		}
 
@@ -237,17 +250,17 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @param array $options Scheduling options.
 	 * @return bool
 	 */
-	private function unique( array $options ): bool {
+	private function is_unique_requested( array $options ): bool {
 		return ! empty( $options['unique'] );
 	}
 
 	/**
-	 * Read the `priority` option, defaulting to 10.
+	 * Read the `priority` option, normalised, defaulting to 10.
 	 *
 	 * @param array $options Scheduling options.
 	 * @return int
 	 */
-	private function priority( array $options ): int {
+	private function get_priority( array $options ): int {
 		return self::normalize_priority( $options['priority'] ?? self::DEFAULT_PRIORITY );
 	}
 
@@ -260,27 +273,7 @@ class WC_Options_Aware_Action_Queue extends WC_Action_Queue implements WC_Option
 	 * @param mixed $options Whatever the caller passed.
 	 * @return array
 	 */
-	private function options( $options ): array {
+	private function coerce_options( $options ): array {
 		return is_array( $options ) ? $options : array();
-	}
-
-	/**
-	 * Bring a priority value into the 0-255 range Action Scheduler accepts.
-	 *
-	 * Clamps before narrowing to an integer, since a float above the integer range would otherwise
-	 * wrap to a negative number and land at the highest priority. Non-numeric and non-finite values
-	 * fall back to the default.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param mixed $value The requested priority.
-	 * @return int
-	 */
-	public static function normalize_priority( $value ): int {
-		if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) ) {
-			return self::DEFAULT_PRIORITY;
-		}
-
-		return (int) max( 0, min( 255, (float) $value ) );
 	}
 }

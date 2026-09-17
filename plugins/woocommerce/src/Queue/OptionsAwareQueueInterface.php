@@ -1,28 +1,22 @@
 <?php
 /**
- * Options Aware Queue Interface
- *
- * @version 11.3.0
- * @package WooCommerce\Interface
+ * OptionsAwareQueueInterface interface file.
  */
 
 declare( strict_types = 1 );
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+namespace Automattic\WooCommerce\Queue;
 
 /**
- * WC Options Aware Queue Interface
+ * Contract for queues that accept per-action scheduling options.
  *
- * Contract for queues that accept per-action scheduling options. A queue opts in by
- * implementing this interface in addition to WC_Queue_Interface. Existing WC_Queue_Interface
- * implementations, including third-party queues attached through the `woocommerce_queue_class`
- * filter, remain valid and are unaffected.
+ * A queue opts in by implementing this interface in addition to WC_Queue_Interface. Existing
+ * WC_Queue_Interface implementations, including third-party queues attached through the
+ * `woocommerce_queue_class` filter, remain valid and are unaffected.
  *
- * Callers should not use this interface directly. They go through
- * Automattic\WooCommerce\Utilities\Scheduler, which passes the options to queues that implement
- * this interface and falls back to the plain WC_Queue_Interface methods otherwise.
+ * Callers should not use this interface directly. They go through Scheduler, which passes the
+ * options to queues that implement this interface and falls back to the plain WC_Queue_Interface
+ * methods otherwise.
  *
  * Recognised option keys:
  *
@@ -30,12 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - `unique` (bool): when true, skip scheduling and return 0 if an action with the same hook,
  *   args and group is already pending or in progress. Default false.
  *
- * Implementations must ignore keys they do not recognise, so that new options can be added
- * without breaking existing queues.
+ * The `$options` parameters are deliberately untyped, like every parameter on WC_Queue_Interface.
+ * Implementations must coerce a non-array to an empty array and ignore keys they do not recognise,
+ * so that new options can be added without breaking existing queues.
  *
  * @since 11.3.0
  */
-interface WC_Options_Aware_Queue_Interface extends WC_Queue_Interface {
+interface OptionsAwareQueueInterface extends \WC_Queue_Interface {
 
 	/**
 	 * Enqueue an action to run one time, as soon as possible.
