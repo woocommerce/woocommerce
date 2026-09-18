@@ -17,6 +17,10 @@ const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
 
+// The Blocks E2E store seeds sixteen products, and the shop page lists them all
+// on one page.
+const UNFILTERED_PRODUCT_COUNT = 16;
+
 const blockifiedTemplateOption =
 	'wc_blocks_use_blockified_product_grid_block_as_template';
 
@@ -124,7 +128,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 
 		await expect( productTitles.first() ).toBeVisible();
-		expect( await productTitles.allTextContents() ).not.toHaveLength( 0 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 		for ( const name of [ 'Small', 'Medium', 'Large' ] ) {
 			await expect(
 				page.getByRole( 'checkbox', { name } )
@@ -155,10 +159,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
-		const automaticBaseline = ( await productTitles.allTextContents() ).map(
-			( title ) => title.trim()
-		);
-		expect( automaticBaseline ).not.toHaveLength( 0 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 		await expect(
 			page.getByRole( 'checkbox', { name: 'Small' } )
 		).toBeVisible();

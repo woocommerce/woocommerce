@@ -18,12 +18,16 @@ const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'rating_filter=2',
 };
 
+// The Blocks E2E store seeds sixteen products, and the shop page lists them all
+// on one page.
+const UNFILTERED_PRODUCT_COUNT = 16;
+
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
+	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
 		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_filters-with-product-collection'
 		);
-		await use( compiler );
+		await provideTemplateCompiler( compiler );
 	},
 } );
 
@@ -59,20 +63,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await page
-			.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
-			.click();
-
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
-
 		const legacyTemplate = await frontendUtils.getBlockByName(
 			'woocommerce/legacy-template'
 		);
 		const products = legacyTemplate
 			.getByRole( 'list' )
 			.locator( '.product' );
+		const ratingCheckbox = page.getByRole( 'checkbox', {
+			name: 'Rated 2 out of 5',
+		} );
+
+		await expect( products ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
+		await expect( ratingCheckbox ).toBeVisible();
+
+		await ratingCheckbox.click();
+
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+		);
 
 		await expect( products ).toHaveCount( 1 );
 		await expect(
@@ -96,14 +104,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
-		const automaticBaseline = ( await productTitles.allTextContents() ).map(
-			( title ) => title.trim()
-		);
-		// Greater than one, not merely non-empty: an unfiltered /shop must show more
-		// than the single product the filter is about to leave behind. Asserting only
-		// that it is non-empty passes on a shop page that arrived already filtered,
-		// and then the post-filter assertion passes too, for the wrong reason.
-		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
