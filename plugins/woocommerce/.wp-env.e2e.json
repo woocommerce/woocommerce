@@ -42,7 +42,6 @@
 		"wp-content/themes/storefront-child__classic-notices-template": "./tests/e2e/themes/blocks/storefront-child__classic-notices-template",
 		"wp-content/themes/storefront-child__with-block-template-part": "./tests/e2e/themes/blocks/storefront-child__with-block-template-part",
 		"wp-content/themes/storefront-child__with-block-template-part-support": "./tests/e2e/themes/blocks/storefront-child__with-block-template-part-support",
-		"wp-content/themes/twentytwentyfour-child__block-notices-filter": "./tests/e2e/themes/blocks/twentytwentyfour-child__block-notices-filter",
 		"wp-content/themes/twentytwentyfour-child__block-notices-template": "./tests/e2e/themes/blocks/twentytwentyfour-child__block-notices-template",
 		"wp-content/themes/twentytwentyfour-child__classic-notices-template": "./tests/e2e/themes/blocks/twentytwentyfour-child__classic-notices-template",
 		"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip",

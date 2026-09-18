@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cover Store API cart item prices set on woocommerce_before_calculate_totals, the hide-shipping-until-address filter in both directions, and the classic notices wrapper at the PHPUnit layer
