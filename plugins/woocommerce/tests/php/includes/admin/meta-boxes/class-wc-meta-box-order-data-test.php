@@ -668,11 +668,14 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'guest.buyer@example.com', $saved_order->get_billing_email( 'edit' ) );
 		$this->assertSame( '555-0100', $saved_order->get_billing_phone( 'edit' ) );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$this->assertNotEmpty( $notes, 'The status transition should create an order note.' );
-		$this->assertSame(
+		// The transactional email for the new status adds a note of its own, so the
+		// status-change note is not reliably the newest one.
+		$note_contents = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+
+		$this->assertContains(
 			"Order status changed from Processing to {$status_label}.",
-			$notes[0]->content
+			$note_contents,
+			'The status transition should be recorded as an order note.'
 		);
 	}
 

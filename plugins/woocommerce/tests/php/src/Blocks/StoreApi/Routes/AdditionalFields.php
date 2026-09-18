@@ -132,7 +132,38 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		remove_all_actions( 'doing_it_wrong_run' );
 		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->unregister_fields();
+		$this->clear_customer_additional_field_values();
 		parent::tearDown();
+	}
+
+	/**
+	 * Drop the additional field values the checkout route saved on the customer.
+	 *
+	 * `WC()->customer` is built once for the whole process, so the values one test saves stay
+	 * readable by the next one and decide what a conditional rule sees. Clearing them in memory
+	 * is enough: the customer is read back from the session, which this teardown destroys.
+	 */
+	private function clear_customer_additional_field_values() {
+		$customer = WC()->customer;
+
+		if ( ! $customer ) {
+			return;
+		}
+
+		$prefixes = array(
+			CheckoutFields::BILLING_FIELDS_PREFIX,
+			CheckoutFields::SHIPPING_FIELDS_PREFIX,
+			CheckoutFields::OTHER_FIELDS_PREFIX,
+		);
+
+		foreach ( $customer->get_meta_data() as $meta ) {
+			foreach ( $prefixes as $prefix ) {
+				if ( 0 === strpos( (string) $meta->key, $prefix ) ) {
+					$customer->delete_meta_data( $meta->key );
+					break;
+				}
+			}
+		}
 	}
 
 	/**

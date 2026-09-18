@@ -316,11 +316,12 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews = wc_get_container()->get( Reviews::class );
+		$reviews    = wc_get_container()->get( Reviews::class );
 		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
 		$property->setAccessible( true );
+		$previous_list_table = $property->getValue( $reviews );
 		$property->setValue( $reviews, $list_table );
 
 		add_filter(
@@ -332,9 +333,15 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		ob_start();
 
-		$reviews->render_reviews_list_table();
+		try {
+			$reviews->render_reviews_list_table();
+		} finally {
+			$output = ob_get_clean();
 
-		$output = ob_get_clean();
+			// The container hands out one shared Reviews instance, and tear_down() does not reset it.
+			$property->setValue( $reviews, $previous_list_table );
+			remove_all_filters( 'woocommerce_product_reviews_list_table' );
+		}
 
 		$this->assertStringContainsString( '<form id="reviews-filter" method="get">', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="page" value="' . Reviews::MENU_SLUG . '" />', $output );
@@ -342,8 +349,6 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<input type="hidden" name="pagegen_timestamp" value="', $output );
 		$this->assertStringContainsString( 'id="trash-undo-holder"', $output, 'Core comment list script copies the trash Undo notice from this holder.' );
 		$this->assertStringEndsWith( 'custom additional content', $output );
-
-		remove_all_filters( 'woocommerce_product_reviews_list_table' );
 	}
 
 	/**

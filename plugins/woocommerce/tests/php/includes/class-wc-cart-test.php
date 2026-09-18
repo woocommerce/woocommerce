@@ -975,33 +975,44 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$default_shipping_cost_requires_address = get_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 
-		WC()->cart->empty_cart();
-		$this->assertFalse( WC()->cart->show_shipping() );
+		// The customer object survives the test, so remember the address this test found.
+		$previous_shipping_country  = WC()->cart->get_customer()->get_shipping_country();
+		$previous_shipping_state    = WC()->cart->get_customer()->get_shipping_state();
+		$previous_shipping_city     = WC()->cart->get_customer()->get_shipping_city();
+		$previous_shipping_postcode = WC()->cart->get_customer()->get_shipping_postcode();
 
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$product = null;
 
-		// Country that does not require state.
-		WC()->cart->get_customer()->set_shipping_country( 'LB' );
-		WC()->cart->get_customer()->set_shipping_state( '' );
-		WC()->cart->get_customer()->set_shipping_city( 'Test' );
-		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
-		$this->assertTrue( WC()->cart->show_shipping() );
+		try {
+			WC()->cart->empty_cart();
+			$this->assertFalse( WC()->cart->show_shipping() );
 
-		// Country that does not require postcode.
-		WC()->cart->get_customer()->set_shipping_country( 'NG' );
-		WC()->cart->get_customer()->set_shipping_state( 'AB' );
-		WC()->cart->get_customer()->set_shipping_city( 'Test' );
-		WC()->cart->get_customer()->set_shipping_postcode( '' );
-		$this->assertTrue( WC()->cart->show_shipping() );
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Reset.
-		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
-		$product->delete( true );
-		WC()->cart->get_customer()->set_shipping_country( 'GB' );
-		WC()->cart->get_customer()->set_shipping_state( '' );
-		WC()->cart->get_customer()->set_shipping_city( 'Test' );
-		WC()->cart->get_customer()->set_shipping_postcode( '' );
+			// Country that does not require state.
+			WC()->cart->get_customer()->set_shipping_country( 'LB' );
+			WC()->cart->get_customer()->set_shipping_state( '' );
+			WC()->cart->get_customer()->set_shipping_city( 'Test' );
+			WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+			$this->assertTrue( WC()->cart->show_shipping() );
+
+			// Country that does not require postcode.
+			WC()->cart->get_customer()->set_shipping_country( 'NG' );
+			WC()->cart->get_customer()->set_shipping_state( 'AB' );
+			WC()->cart->get_customer()->set_shipping_city( 'Test' );
+			WC()->cart->get_customer()->set_shipping_postcode( '' );
+			$this->assertTrue( WC()->cart->show_shipping() );
+		} finally {
+			update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
+			if ( $product ) {
+				$product->delete( true );
+			}
+			WC()->cart->get_customer()->set_shipping_country( $previous_shipping_country );
+			WC()->cart->get_customer()->set_shipping_state( $previous_shipping_state );
+			WC()->cart->get_customer()->set_shipping_city( $previous_shipping_city );
+			WC()->cart->get_customer()->set_shipping_postcode( $previous_shipping_postcode );
+		}
 	}
 
 	/**
@@ -1053,55 +1064,71 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Create a product to add to cart.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->save();
+		// Rates are only ever found for a customer with a country, and the customer object
+		// carries whatever address the test before this one left on it.
+		$previous_shipping_country = WC()->customer->get_shipping_country();
+		$previous_billing_country  = WC()->customer->get_billing_country();
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->customer->set_billing_country( 'GB' );
 
-		// Create a coupon with uppercase code.
-		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
-		$coupon->set_discount_type( 'fixed_cart' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
+		$product = null;
+		$coupon  = null;
 
-		// Add product to cart.
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->calculate_totals();
+		try {
+			// Create a product to add to cart.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->save();
 
-		// Apply the coupon using lowercase code.
-		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
-		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+			// Create a coupon with uppercase code.
+			$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+			$coupon->set_discount_type( 'fixed_cart' );
+			$coupon->set_amount( 10 );
+			$coupon->save();
 
-		// Verify the coupon is in applied coupons (should be stored in original case).
-		$applied_coupons = WC()->cart->get_applied_coupons();
-		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
+			// Add product to cart.
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->cart->calculate_totals();
 
-		// Test get_coupon_discount_amount with lowercase code.
-		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
-		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+			// Apply the coupon using lowercase code.
+			$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+			$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
 
-		// Test get_coupon_discount_amount with uppercase code.
-		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
-		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+			// Verify the coupon is in applied coupons (should be stored in original case).
+			$applied_coupons = WC()->cart->get_applied_coupons();
+			$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
 
-		// Test get_coupon_discount_tax_amount with lowercase code.
-		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
-		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+			// Test get_coupon_discount_amount with lowercase code.
+			$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+			$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
 
-		// Test get_coupon_discount_tax_amount with uppercase code.
-		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
-		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+			// Test get_coupon_discount_amount with uppercase code.
+			$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+			$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
 
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$product->delete( true );
-		$coupon->delete( true );
+			// Test get_coupon_discount_tax_amount with lowercase code.
+			$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+			$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
 
-		// Restore global state.
-		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
-		if ( $tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $tax_rate_id );
+			// Test get_coupon_discount_tax_amount with uppercase code.
+			$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+			$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+		} finally {
+			WC()->cart->empty_cart();
+			WC()->cart->remove_coupons();
+			if ( $product ) {
+				$product->delete( true );
+			}
+			if ( $coupon ) {
+				$coupon->delete( true );
+			}
+
+			update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
+			WC()->customer->set_shipping_country( $previous_shipping_country );
+			WC()->customer->set_billing_country( $previous_billing_country );
+			if ( $tax_rate_id ) {
+				WC_Tax::_delete_tax_rate( $tax_rate_id );
+			}
 		}
 	}
 
