@@ -23,6 +23,49 @@ use WC_Unit_Test_Case;
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Presence and value of the comment view globals before the test.
+	 *
+	 * @var array<string, array{present: bool, value: mixed}>
+	 */
+	private $original_comment_globals = array();
+
+	/**
+	 * Start every test from an unset comment view.
+	 *
+	 * The list table reads the current view from `$comment_status` and `$comment_type`, and WordPress
+	 * teardown does not reset either one, so a test that leaves one set decides what the next test sees.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		foreach ( array( 'comment_status', 'comment_type' ) as $global_name ) {
+			$this->original_comment_globals[ $global_name ] = array(
+				'present' => array_key_exists( $global_name, $GLOBALS ),
+				'value'   => $GLOBALS[ $global_name ] ?? null,
+			);
+
+			unset( $GLOBALS[ $global_name ] );
+		}
+	}
+
+	/**
+	 * Restore the comment view globals.
+	 */
+	public function tearDown(): void {
+		try {
+			foreach ( $this->original_comment_globals as $global_name => $global ) {
+				if ( $global['present'] ) {
+					$GLOBALS[ $global_name ] = $global['value']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test comment view global.
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * Returns a new instance of the {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
@@ -1907,8 +1950,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_views(): void {
-		global $comment_status;
+		global $comment_status, $comment_type;
 		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$comment_type   = 'other'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
 		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
