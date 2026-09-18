@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Use the billing address as the default shipping address in the cart, Cart block and Checkout block when the "Shipping destination" setting defaults to the billing address, and stop defaulting the billing state to the store base state when the billing country is already set.

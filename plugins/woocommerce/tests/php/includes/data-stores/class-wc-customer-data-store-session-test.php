@@ -11,6 +11,8 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		WC()->session->set( 'customer', null );
+		// Most tests here cover how a saved shipping address is loaded, so keep it as the default destination.
+		update_option( 'woocommerce_ship_to_destination', 'shipping' );
 	}
 
 	/**
@@ -172,6 +174,138 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		$reloaded_customer = new WC_Customer( $customer_id, true );
 
 		$this->assertSame( 'session-empty-email@example.com', $reloaded_customer->get_billing_email(), 'An emptied billing email should be replaced with the account email for logged in users' );
+	}
+
+	/**
+	 * @testdox Should default the shipping address to the billing address when the store ships to the billing address by default.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/29744
+	 * @testWith [ "billing" ]
+	 *           [ "billing_only" ]
+	 *
+	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
+	 */
+	public function test_shipping_address_defaults_to_billing_address_when_store_ships_to_billing( string $ship_to_destination ): void {
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_' . $ship_to_destination );
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Stationsplein 23', $customer->get_shipping_address_1(), 'The shipping street should be taken from the billing address' );
+		$this->assertSame( 'Amsterdam', $customer->get_shipping_city(), 'The shipping city should be taken from the billing address' );
+		$this->assertSame( '1010 AA', $customer->get_shipping_postcode(), 'The shipping postcode should be taken from the billing address' );
+		$this->assertSame( 'NL', $customer->get_shipping_country(), 'The shipping country should be taken from the billing address' );
+		$this->assertSame( '', $customer->get_shipping_state(), 'The shipping state should be taken from the billing address, not the store base state' );
+		$this->assertSame( '020-123456789', $customer->get_shipping_phone(), 'The shipping phone should be taken from the billing address' );
+		$this->assertSame( 'Stationsplein 23', ( new WC_Customer( $customer_id ) )->get_billing_address_1(), 'The persisted billing address should be unchanged' );
+		$this->assertSame( 'Brandarisstraat 2', ( new WC_Customer( $customer_id ) )->get_shipping_address_1(), 'The persisted shipping address should be unchanged' );
+	}
+
+	/**
+	 * @testdox Should keep the saved shipping address when the store ships to the shipping address by default.
+	 */
+	public function test_saved_shipping_address_is_kept_when_store_ships_to_shipping_address(): void {
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_shipping' );
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Brandarisstraat 2', $customer->get_shipping_address_1(), 'The saved shipping address should be used' );
+		$this->assertSame( 'West-Terschelling', $customer->get_shipping_city(), 'The saved shipping city should be used' );
+	}
+
+	/**
+	 * @testdox Should not overwrite a shipping address set during the session with the billing address.
+	 */
+	public function test_shipping_address_from_session_is_not_overwritten_by_billing_address(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_session' );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_shipping_address_1( 'Keizersgracht 100' );
+		$session_customer->set_shipping_city( 'Rotterdam' );
+		$session_customer->save();
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Keizersgracht 100', $reloaded_customer->get_shipping_address_1(), 'A shipping address set during the session should be kept' );
+		$this->assertSame( 'Rotterdam', $reloaded_customer->get_shipping_city(), 'A shipping city set during the session should be kept' );
+	}
+
+	/**
+	 * @testdox Should not default the shipping address to an empty billing address.
+	 */
+	public function test_saved_shipping_address_is_kept_when_billing_address_is_empty(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'session-empty-billing-address@example.com' );
+		$customer->set_shipping_address_1( 'Brandarisstraat 2' );
+		$customer->set_shipping_city( 'West-Terschelling' );
+		$customer->set_shipping_country( 'NL' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer->get_id(), true );
+
+		$this->assertSame( 'Brandarisstraat 2', $session_customer->get_shipping_address_1(), 'The saved shipping address should be kept when there is no billing address to default to' );
+		$this->assertSame( 'NL', $session_customer->get_shipping_country(), 'The saved shipping country should be kept when there is no billing address to default to' );
+	}
+
+	/**
+	 * @testdox Should not default the billing state to the store base state when the billing country is already set.
+	 */
+	public function test_billing_state_is_not_defaulted_when_billing_country_is_set(): void {
+		$customer = new WC_Customer();
+		$customer->set_email( 'session-billing-country-only@example.com' );
+		$customer->set_billing_country( 'NL' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer->get_id(), true );
+
+		$this->assertSame( 'NL', $session_customer->get_billing_country(), 'The saved billing country should be kept' );
+		$this->assertSame( '', $session_customer->get_billing_state(), 'A saved billing country without a state should not pick up the store base state' );
+	}
+
+	/**
+	 * @testdox Should default the billing state together with the billing country when neither is set.
+	 */
+	public function test_billing_state_is_defaulted_together_with_billing_country(): void {
+		$customer         = new WC_Customer();
+		$default_location = wc_get_customer_default_location();
+
+		( new WC_Customer_Data_Store_Session() )->read( $customer );
+
+		$this->assertSame( $default_location['country'], $customer->get_billing_country(), 'An empty billing country should be replaced with the default location country' );
+		$this->assertSame( $default_location['state'], $customer->get_billing_state(), 'An empty billing state should be replaced with the default location state along with the country' );
+	}
+
+	/**
+	 * Creates a persisted customer whose billing and shipping addresses differ.
+	 *
+	 * @param string $username Username for the customer.
+	 * @return int Customer ID.
+	 */
+	private function create_customer_with_different_addresses( string $username ): int {
+		$customer = new WC_Customer();
+		$customer->set_username( $username );
+		$customer->set_password( 'password' );
+		$customer->set_email( $username . '@example.com' );
+		$customer->set_billing_first_name( 'Issue' );
+		$customer->set_billing_last_name( 'Tester' );
+		$customer->set_billing_address_1( 'Stationsplein 23' );
+		$customer->set_billing_city( 'Amsterdam' );
+		$customer->set_billing_postcode( '1010 AA' );
+		$customer->set_billing_country( 'NL' );
+		$customer->set_billing_phone( '020-123456789' );
+		$customer->set_shipping_first_name( 'Issue' );
+		$customer->set_shipping_last_name( 'Tester' );
+		$customer->set_shipping_address_1( 'Brandarisstraat 2' );
+		$customer->set_shipping_city( 'West-Terschelling' );
+		$customer->set_shipping_postcode( '8881 AW' );
+		$customer->set_shipping_country( 'NL' );
+		$customer->set_shipping_phone( '088-123456789' );
+		$customer->save();
+
+		return $customer->get_id();
 	}
 
 	/**
