@@ -2267,4 +2267,171 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		return array( (string) $cart_item_key, WC()->cart->get_cart_item( (string) $cart_item_key ) );
 	}
+
+	/**
+	 * @testdox Should add only selected grouped children with their submitted quantities.
+	 */
+	public function test_add_to_cart_action_handles_grouped_product_quantities(): void {
+		$first_child = WC_Helper_Product::create_simple_product();
+		$first_child->set_name( 'First grouped child' );
+		$first_child->save();
+
+		$skipped_child = WC_Helper_Product::create_simple_product();
+		$skipped_child->set_name( 'Skipped grouped child' );
+		$skipped_child->save();
+
+		$single_child = WC_Helper_Product::create_simple_product();
+		$single_child->set_name( 'Sold individually grouped child' );
+		$single_child->set_sold_individually( true );
+		$single_child->save();
+
+		$grouped_product = new WC_Product_Grouped();
+		$grouped_product->set_name( 'Grouped request product' );
+		$grouped_product->set_children(
+			array(
+				$first_child->get_id(),
+				$skipped_child->get_id(),
+				$single_child->get_id(),
+			)
+		);
+		$grouped_product->save();
+
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+
+		try {
+			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+			WC()->cart->empty_cart();
+
+			$grouped_quantities = array(
+				$first_child->get_id()   => 2,
+				$skipped_child->get_id() => 0,
+				$single_child->get_id()  => 1,
+			);
+
+			$_REQUEST['add-to-cart'] = $grouped_product->get_id();
+			$_REQUEST['quantity']    = $grouped_quantities;
+			$_POST['quantity']       = $grouped_quantities;
+
+			WC_Form_Handler::add_to_cart_action( false );
+
+			$cart_quantities = array();
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$cart_quantities[ $cart_item['product_id'] ] = (int) $cart_item['quantity'];
+			}
+
+			$this->assertSame(
+				array(
+					$first_child->get_id()  => 2,
+					$single_child->get_id() => 1,
+				),
+				$cart_quantities,
+				'Only positive grouped child quantities should be added to the cart.'
+			);
+			$this->assertArrayNotHasKey( $skipped_child->get_id(), $cart_quantities, 'A zero-quantity grouped child should be skipped.' );
+			$this->assertArrayNotHasKey( $grouped_product->get_id(), $cart_quantities, 'The grouped parent should not become a cart line.' );
+		} finally {
+			unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
+			WC()->cart->empty_cart();
+			$grouped_product->delete( true );
+			$single_child->delete( true );
+			$skipped_child->delete( true );
+			$first_child->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Should remove grouped child cart items through consecutive form requests.
+	 */
+	public function test_update_cart_action_removes_grouped_child_items(): void {
+		// $_SERVER is the only request global the base class leaves alone; it resets
+		// the other three before every test.
+		$original_server = $GLOBALS['_SERVER'];
+
+		try {
+			// Do not remove this unset as redundant cleanup. It is what keeps the test
+			// alive: after removing an item, update_cart_action() calls wp_safe_redirect()
+			// followed by exit whenever wp_get_referer() is truthy
+			// (includes/class-wc-form-handler.php:818-821). exit inside PHPUnit kills the
+			// whole run, not just this test.
+			unset( $GLOBALS['_SERVER']['HTTP_REFERER'] );
+			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+			WC()->cart->empty_cart();
+			WC()->session->set( 'wc_notices', null );
+
+			$first_child = WC_Helper_Product::create_simple_product();
+			$first_child->set_regular_price( '10' );
+			$first_child->save();
+
+			$second_child = WC_Helper_Product::create_simple_product();
+			$second_child->set_regular_price( '20' );
+			$second_child->save();
+
+			$grouped_product = new WC_Product_Grouped();
+			$grouped_product->set_name( 'Grouped removal request product' );
+			$grouped_product->set_children(
+				array(
+					$first_child->get_id(),
+					$second_child->get_id(),
+				)
+			);
+			$grouped_product->save();
+
+			$grouped_quantities  = array(
+				$first_child->get_id()  => 1,
+				$second_child->get_id() => 1,
+			);
+			$GLOBALS['_REQUEST'] = array(
+				'add-to-cart' => $grouped_product->get_id(),
+				'quantity'    => $grouped_quantities,
+			);
+			$GLOBALS['_POST']    = array(
+				'quantity' => $grouped_quantities,
+			);
+
+			WC_Form_Handler::add_to_cart_action( false );
+
+			$cart_items                = WC()->cart->get_cart();
+			$cart_item_keys_by_product = array();
+			foreach ( $cart_items as $cart_item_key => $cart_item ) {
+				$cart_item_keys_by_product[ $cart_item['product_id'] ] = $cart_item_key;
+			}
+			$expected_child_ids = array( $first_child->get_id(), $second_child->get_id() );
+			$actual_child_ids   = array_map( 'intval', array_keys( $cart_item_keys_by_product ) );
+			sort( $expected_child_ids );
+			sort( $actual_child_ids );
+
+			$this->assertCount( 2, $cart_items, 'Both grouped children should be cart lines.' );
+			$this->assertSame(
+				$expected_child_ids,
+				$actual_child_ids,
+				'Only the grouped children should be cart lines.'
+			);
+			$this->assertArrayNotHasKey( $grouped_product->get_id(), $cart_item_keys_by_product, 'The grouped parent should not become a cart line.' );
+
+			$cart_item_keys = array_values( $cart_item_keys_by_product );
+			foreach ( $cart_item_keys as $index => $cart_item_key ) {
+				$GLOBALS['_GET']     = array(
+					'remove_item' => $cart_item_key,
+				);
+				$GLOBALS['_POST']    = array();
+				$GLOBALS['_REQUEST'] = array(
+					'_wpnonce'    => wp_create_nonce( 'woocommerce-cart' ),
+					'remove_item' => $cart_item_key,
+				);
+
+				WC_Form_Handler::update_cart_action();
+
+				$remaining_cart_items = WC()->cart->get_cart();
+				if ( 0 === $index ) {
+					$this->assertArrayNotHasKey( $cart_item_key, $remaining_cart_items, 'The first requested cart item should be removed.' );
+					$this->assertSame( array( $cart_item_keys[1] ), array_keys( $remaining_cart_items ), 'Only the other original cart item should remain.' );
+				} else {
+					$this->assertEmpty( $remaining_cart_items, 'The second removal request should empty the cart.' );
+				}
+			}
+		} finally {
+			$GLOBALS['_SERVER'] = $original_server;
+		}
+	}
 }

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.2.0",
+	"version": "11.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -177,6 +177,35 @@
 					]
 				},
 				{
+					"name": "PHP: 8.3 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:env",
+					"shardingArguments": [],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.test.json",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"phpVersion": "8.3",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"php-unit-php-8.3-wp-latest"
+					]
+				},
+				{
 					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
@@ -245,7 +274,7 @@
 					]
 				},
 				{
-					"name": "Core e2e tests - parallel",
+					"name": "Core e2e tests - parallel - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
@@ -268,11 +297,15 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"events": [
 						"pull_request",
 						"push",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e"
 					],
@@ -283,7 +316,32 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - serial",
+					"name": "Core e2e tests - parallel - PHP 7.4",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:core-parallel",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"nightly-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-php-7.4",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - serial - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
@@ -306,11 +364,15 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"events": [
 						"pull_request",
 						"push",
+						"nightly-checks",
 						"release-checks",
 						"core-e2e"
 					],
@@ -321,7 +383,32 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - Gutenberg stable",
+					"name": "Core e2e tests - serial - PHP 7.4",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:core-serial",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"nightly-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-php-7.4",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg stable - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:gb-stable",
@@ -339,7 +426,10 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -348,7 +438,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - Gutenberg nightly",
+					"name": "Core e2e tests - Gutenberg nightly - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:gb-nightly",
@@ -365,7 +455,10 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -374,7 +467,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - (HPOS:off)",
+					"name": "Core e2e tests - (HPOS:off) - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:hpos-off",
@@ -392,7 +485,10 @@
 						"core-e2e-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
@@ -467,7 +563,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP L-1 - serial",
+					"name": "Core e2e tests - WP L-1 - serial - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
@@ -484,7 +580,8 @@
 					"testEnv": {
 						"start": "env:e2e --debug",
 						"config": {
-							"wpVersion": "latest-1"
+							"wpVersion": "latest-1",
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
@@ -500,7 +597,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP L-1 - parallel",
+					"name": "Core e2e tests - WP L-1 - parallel - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
@@ -517,7 +614,8 @@
 					"testEnv": {
 						"start": "env:e2e --debug",
 						"config": {
-							"wpVersion": "latest-1"
+							"wpVersion": "latest-1",
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
@@ -533,7 +631,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP pre-release - serial",
+					"name": "Core e2e tests - WP pre-release - serial - PHP 8.3",
 					"optional": true,
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
@@ -551,7 +649,8 @@
 					"testEnv": {
 						"start": "env:e2e --debug",
 						"config": {
-							"wpVersion": "prerelease"
+							"wpVersion": "prerelease",
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
@@ -567,7 +666,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP pre-release - parallel",
+					"name": "Core e2e tests - WP pre-release - parallel - PHP 8.3",
 					"optional": true,
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
@@ -585,7 +684,8 @@
 					"testEnv": {
 						"start": "env:e2e --debug",
 						"config": {
-							"wpVersion": "prerelease"
+							"wpVersion": "prerelease",
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
@@ -854,7 +954,7 @@
 					}
 				},
 				{
-					"name": "Blocks e2e tests",
+					"name": "Blocks e2e tests - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
@@ -895,12 +995,13 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
-							"phpVersion": "7.4"
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e"
 					],
@@ -911,7 +1012,79 @@
 					}
 				},
 				{
-					"name": "Blocks e2e tests - unified editor assets",
+					"name": "Blocks e2e tests - PHP 7.4",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:blocks",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"nightly-checks"
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-report-php-7.4",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Blocks e2e tests - PHP 8.5",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:blocks",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "8.5"
+						}
+					},
+					"events": [
+						"nightly-checks"
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-report-php-8.5",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Blocks e2e tests - unified editor assets - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:unified-editor-assets",
@@ -950,7 +1123,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
-							"phpVersion": "7.4"
+							"phpVersion": "8.3"
 						}
 					},
 					"events": [
@@ -963,7 +1136,7 @@
 					}
 				},
 				{
-					"name": "Blocks e2e tests - WP pre-release",
+					"name": "Blocks e2e tests - WP pre-release - PHP 8.3",
 					"optional": true,
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
@@ -998,7 +1171,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
-							"phpVersion": "7.4",
+							"phpVersion": "8.3",
 							"wpVersion": "prerelease"
 						}
 					},
@@ -1015,7 +1188,7 @@
 					}
 				},
 				{
-					"name": "Blocks e2e tests - WP latest-1",
+					"name": "Blocks e2e tests - WP latest-1 - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
@@ -1049,7 +1222,7 @@
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
-							"phpVersion": "7.4",
+							"phpVersion": "8.3",
 							"wpVersion": "latest-1"
 						}
 					},
@@ -1096,7 +1269,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PayPal Standard",
+					"name": "Core e2e tests - PayPal Standard - PHP 8.3",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:paypal-standard",
@@ -1113,7 +1286,10 @@
 						"core-e2e"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "env:e2e --debug",
+						"config": {
+							"phpVersion": "8.3"
+						}
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-report",
