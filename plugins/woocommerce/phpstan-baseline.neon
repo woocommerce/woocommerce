@@ -5329,12 +5329,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order\.\)\: Unexpected token "@user", expected variable at offset 317 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(array Billing fields\.\)\: Unexpected token "Billing", expected variable at offset 146 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -14912,6 +14906,12 @@ parameters:
 			path: includes/class-wc-shipping.php
 
 		-
+			message: '#^Offset mixed might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/class-wc-shipping.php
+
+		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -16570,13 +16570,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -60097,18 +60097,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
