@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
 use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingAddress as ShippingAddressBlock;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
 
 /**
  * Test ShippingAddress block class.
@@ -71,8 +70,9 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	 */
 	public function test_shipping_address_topology( string $topology, $permission, bool $expected_visible ): void {
 		try {
-			// Inside the try: create_topology_order() registers PickupLocation partway
-			// through, so a throw after that point must still reach the finally below.
+			// Inside the try: create_topology_order() makes the Checkout block the store
+			// checkout partway through, which has core register Local Pickup, so a throw
+			// after that point must still reach the finally below.
 			$order = $this->create_topology_order( $topology );
 			update_option( 'woocommerce_calc_shipping', 'yes' );
 			$content = $this->render( $order, $permission );
@@ -189,15 +189,35 @@ final class ShippingAddress extends \WP_UnitTestCase {
 			// `needs_shipping_address()` hides the address for both, but it finds
 			// `pickup_location` only by asking the registered shipping methods which of them
 			// support `local-pickup`. Core registers that method when the Checkout block is
-			// the default checkout, which the test store is not, so register it the same way.
+			// the store checkout, so make it the store checkout and let core register it.
+			// Registering PickupLocation here would supply the very thing this asserts.
 			$pickup_methods = array(
 				'local-pickup'    => array( 'Local pickup', 'local_pickup' ),
 				'pickup-location' => array( 'Pickup Location', 'pickup_location' ),
 			);
 
 			if ( 'pickup-location' === $topology ) {
-				WC()->shipping()->get_shipping_methods();
-				WC()->shipping()->register_shipping_method( new PickupLocation() );
+				$checkout_page_id = self::factory()->post->create(
+					array(
+						'post_type'    => 'page',
+						'post_status'  => 'publish',
+						'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->',
+					)
+				);
+				update_option( 'woocommerce_checkout_page_id', $checkout_page_id );
+
+				// `ShippingController::register_local_pickup()` runs on
+				// `woocommerce_load_shipping_methods` and asks
+				// `is_checkout_block_default()` at that moment. The method list is already
+				// populated by now, so it has to be reloaded after the option changes.
+				WC()->shipping()->load_shipping_methods();
+
+				$shipping_methods = WC()->shipping()->get_shipping_methods();
+				$this->assertArrayHasKey(
+					'pickup_location',
+					$shipping_methods,
+					'Local Pickup should be registered by core once the Checkout block is the store checkout.'
+				);
 			}
 
 			list( $method_title, $method_id ) = $pickup_methods[ $topology ] ?? array( 'Free shipping', 'free_shipping' );

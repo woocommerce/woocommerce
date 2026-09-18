@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Restore test coverage for the pickup order confirmation shipping address and for a required checkbox field's error message

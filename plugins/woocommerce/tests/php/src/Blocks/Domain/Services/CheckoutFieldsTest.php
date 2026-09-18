@@ -132,6 +132,17 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 					'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
 				),
 			),
+			array(
+				// Required, with a string error_message: the only shape that reaches
+				// CheckboxFieldType's camelCase conversion. A non-required field or a
+				// non-string message is stripped by the guards above it.
+				'id'            => 'plugin-namespace/terms-accepted',
+				'label'         => 'I accept the terms',
+				'location'      => 'order',
+				'type'          => 'checkbox',
+				'required'      => true,
+				'error_message' => 'Please accept the terms before continuing.',
+			),
 		);
 		array_map( 'woocommerce_register_additional_checkout_field', $this->fields );
 	}
@@ -142,6 +153,20 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	private function unregister_fields() {
 		$fields = $this->controller->get_additional_fields();
 		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_keys( $fields ) );
+	}
+
+	/**
+	 * @testdox A required checkbox field exposes its error message to the client as errorMessage.
+	 */
+	public function test_required_checkbox_error_message_is_camel_cased_for_the_client() {
+		$field = $this->controller->get_additional_fields()['plugin-namespace/terms-accepted'];
+
+		// `CheckboxFieldType::process_type_options()` renames the registered
+		// `error_message` to `errorMessage`, the key the client reads. Without the
+		// rename every custom required checkbox falls back to the generic message.
+		$this->assertArrayHasKey( 'errorMessage', $field, 'A required checkbox should expose errorMessage to the client.' );
+		$this->assertSame( 'Please accept the terms before continuing.', $field['errorMessage'] );
+		$this->assertArrayNotHasKey( 'error_message', $field, 'The snake_case key should not reach the client.' );
 	}
 
 	/**

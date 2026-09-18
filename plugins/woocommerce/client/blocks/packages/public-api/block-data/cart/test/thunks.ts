@@ -10,9 +10,10 @@ import {
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
+	updateCustomerData,
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
-import { getIsCustomerDataDirty } from '../utils';
+import { getIsCustomerDataDirty, setIsCustomerDataDirty } from '../utils';
 import { store as checkoutStore } from '../../checkout';
 
 jest.mock( '../../shared-controls', () => ( {
@@ -47,6 +48,11 @@ jest.mock( '../utils', () => ( {
 const mockGetIsCustomerDataDirty =
 	getIsCustomerDataDirty as jest.MockedFunction<
 		typeof getIsCustomerDataDirty
+	>;
+
+const mockSetIsCustomerDataDirty =
+	setIsCustomerDataDirty as jest.MockedFunction<
+		typeof setIsCustomerDataDirty
 	>;
 
 const mockApiFetchWithHeaders = apiFetchWithHeaders as jest.MockedFunction<
@@ -394,6 +400,71 @@ describe( 'receiveCart', () => {
 		} as never )( { dispatch, select } as never );
 
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'updateCustomerData', () => {
+	// The dirty flag decides whether a later cart response may overwrite addresses
+	// the shopper is still editing.
+	//
+	// `setIsCustomerDataDirty` is debounced by 300ms and keeps only the last
+	// arguments, so only the final write reaches localStorage. These cases assert
+	// the last call for that reason, not merely that the value was passed.
+	//
+	// Two of the flag's four call sites are covered here. `reducers.ts` sets it
+	// while the shopper types and stays unobserved, and a save overlapping an edit
+	// inside the debounce window needs fake timers and the real implementation.
+	const mockResponse = {
+		items: [],
+		shipping_address: { address_1: '123 Ship St' },
+		billing_address: { address_1: '456 Bill Ave' },
+		totals: { total_price: '1000' },
+	};
+
+	const createMockDispatch = () => ( {
+		receiveCart: jest.fn(),
+		receiveCartContents: jest.fn(),
+		receiveError: jest.fn(),
+		updatingCustomerData: jest.fn(),
+		updatingAddressFieldsForShippingRates: jest.fn(),
+	} );
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+		mockApiFetchWithHeaders.mockResolvedValue( { response: mockResponse } );
+	} );
+
+	it( 'marks the customer data clean once the save completes', async () => {
+		const dispatch = createMockDispatch();
+
+		await updateCustomerData( {
+			billing_address: { address_1: '456 Bill Ave' },
+		} as never )( { dispatch } as never );
+
+		expect( mockSetIsCustomerDataDirty ).toHaveBeenCalledTimes( 1 );
+		expect( mockSetIsCustomerDataDirty ).toHaveBeenLastCalledWith( false );
+	} );
+
+	it( 'leaves the customer data dirty when the save fails', async () => {
+		const dispatch = createMockDispatch();
+		// `Once`, not a persistent implementation: `jest.clearAllMocks()` clears
+		// call history but leaves implementations in place, so a persistent
+		// rejection would reach whatever runs next.
+		const error = {
+			code: 'save_failed',
+			message: 'Save failed',
+			data: { status: 400, context: 'wc/cart' },
+		};
+		mockApiFetchWithHeaders.mockRejectedValueOnce( error );
+
+		await expect(
+			updateCustomerData( {
+				billing_address: { address_1: '456 Bill Ave' },
+			} as never )( { dispatch } as never )
+		).rejects.toBe( error );
+
+		expect( mockSetIsCustomerDataDirty ).toHaveBeenCalledTimes( 1 );
+		expect( mockSetIsCustomerDataDirty ).toHaveBeenLastCalledWith( true );
 	} );
 } );
 
