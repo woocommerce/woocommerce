@@ -1697,17 +1697,93 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Taxes report reports every location when the filter holds no location to read.
+	 * Tax lines whose codes hold a hyphen where the country, state, name and priority meet:
+	 * `DE-BW` is a state code in `i18n/states.php`, and a rate name can hold one too.
+	 *
+	 * @return array
 	 */
-	public function test_taxes_report_ignores_a_filter_holding_no_location(): void {
+	private function tax_lines_with_hyphenated_codes(): array {
+		return array(
+			array(
+				'code'         => 'DE-DE-BW-VAT-1',
+				'label'        => 'VAT',
+				'rate_id'      => 301,
+				'rate_percent' => 19.0,
+				'tax_total'    => 19.0,
+			),
+			array(
+				'code'         => 'US-CA-CITY-TAX-2',
+				'label'        => 'City Tax',
+				'rate_id'      => 302,
+				'rate_percent' => 1.25,
+				'tax_total'    => 1.25,
+			),
+			array(
+				'code'         => 'US-NY-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 303,
+				'rate_percent' => 4.0,
+				'tax_total'    => 4.0,
+			),
+		);
+	}
+
+	/**
+	 * @testdox Taxes report keeps the rows of a state whose code holds a hyphen.
+	 */
+	public function test_taxes_report_filters_rows_by_a_state_code_holding_a_hyphen(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_with_hyphenated_codes(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'DE:DE-BW' ) );
+
+		$this->assertCount( 1, $rows, 'A state code holding a hyphen should still select its rows.' );
+		$this->assertSame( 19.0, $rows[0]['total_tax'], 'The reported row should be the German one.' );
+	}
+
+	/**
+	 * @testdox Taxes report keeps the rows of a state whose rate name holds a hyphen.
+	 */
+	public function test_taxes_report_filters_rows_by_state_when_the_rate_name_holds_a_hyphen(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_with_hyphenated_codes(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA' ) );
+
+		$this->assertCount( 1, $rows, 'A rate name holding a hyphen should not hide its row from its own state, and New York should stay out.' );
+		$this->assertSame( 1.25, $rows[0]['total_tax'], 'The reported row should be the Californian city tax.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports nothing when an included location holds no code to read.
+	 */
+	public function test_taxes_report_reports_nothing_for_an_included_location_holding_no_code(): void {
 		update_option( 'woocommerce_date_type', 'date_paid' );
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
 
-		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => " ', -" ) );
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => '!!!' ) );
 
-		$this->assertCount( 3, $rows, 'A filter that names no location should read as no filter, as it does on the Customers report.' );
+		$this->assertCount( 0, $rows, 'An include filter should never widen the report, the way the Customers report narrows to nothing.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports every location when an excluded location holds no code to read.
+	 */
+	public function test_taxes_report_ignores_an_excluded_location_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => '!!!' ) );
+
+		$this->assertCount( 3, $rows, 'An exclude filter that names nothing should leave the report alone.' );
 	}
 
 	/**

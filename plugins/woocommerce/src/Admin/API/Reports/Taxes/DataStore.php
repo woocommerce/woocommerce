@@ -102,8 +102,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'tax_rate_id'    => "{$table_name}.tax_rate_id",
 			'name'           => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
 			'tax_rate'       => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
-			'country'        => self::get_country_sql_expression() . ' as country',
-			'state'          => self::get_state_sql_expression() . ' as state',
+			'country'        => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
+			'state'          => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
 			'priority'       => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
 			'total_tax'      => 'SUM(total_tax) as total_tax',
 			'order_tax'      => 'SUM(order_tax) as order_tax',
@@ -123,78 +123,51 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * SQL expression the reports read a row's country from.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @since 11.3.0
-	 *
-	 * @return string
-	 */
-	public static function get_country_sql_expression(): string {
-		global $wpdb;
-
-		return "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1)";
-	}
-
-	/**
-	 * SQL expression the reports read a row's state from.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @since 11.3.0
-	 *
-	 * @return string
-	 */
-	public static function get_state_sql_expression(): string {
-		global $wpdb;
-
-		return "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1)";
-	}
-
-	/**
 	 * SQL condition matching the tax codes of a list of locations.
 	 *
 	 * A location is a country code (`GB`) or a country and state pair (`US:CA`), the form the
-	 * Customers report already takes. Matching runs against the same expressions the Country
-	 * and State columns are read with, so a filter always selects the rows the report shows
-	 * under those codes, including rates that have since been edited or deleted.
+	 * Customers report already takes. A tax code starts with its country, then its state when the
+	 * rate has one (`US-CA-STATE TAX-1`), so a location matches as a prefix of the code. Matching
+	 * the prefix rather than splitting the code on `-` keeps the state codes that hold a hyphen
+	 * (`DE-BW`) and the rate names that hold one working.
+	 *
+	 * Codes are normalized the way `WC_Tax` normalizes them before writing a rate, so a filter
+	 * value always reads as the stored code does.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
 	 *
 	 * @param string $locations  Comma separated list of locations.
 	 * @param bool   $is_include True to match the locations, false to match everything else.
-	 * @return string SQL condition, or an empty string when the list holds no location.
+	 * @return string SQL condition. An include naming no readable location matches nothing; an
+	 *                exclude naming none is an empty string, so it filters nothing.
 	 */
 	public static function get_location_condition( string $locations, bool $is_include ): string {
-		$country_expression = self::get_country_sql_expression();
-		$state_expression   = self::get_state_sql_expression();
+		global $wpdb;
 
-		$countries  = array();
+		$column     = $wpdb->prefix . 'woocommerce_order_items.order_item_name';
 		$conditions = array();
 
 		foreach ( explode( ',', $locations ) as $location ) {
-			$parts   = explode( ':', trim( $location ), 2 );
-			$country = self::sanitize_location_code( $parts[0] );
+			$parts   = explode( ':', $location, 2 );
+			$country = self::normalize_location_code( $parts[0] );
 
 			if ( '' === $country ) {
 				continue;
 			}
 
-			$state = isset( $parts[1] ) ? self::sanitize_location_code( $parts[1] ) : '';
+			$state  = isset( $parts[1] ) ? self::normalize_location_code( $parts[1] ) : '';
+			$prefix = '' === $state ? "{$country}-" : "{$country}-{$state}-";
 
-			if ( '' === $state ) {
-				$countries[] = $country;
-			} else {
-				$conditions[] = "( {$country_expression} = '{$country}' AND {$state_expression} = '{$state}' )";
-			}
-		}
-
-		if ( $countries ) {
-			$conditions[] = "{$country_expression} IN ( '" . implode( "', '", $countries ) . "' )";
+			$conditions[] = $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Column name cannot be prepared.
+				"{$column} LIKE %s",
+				$wpdb->esc_like( $prefix ) . '%'
+			);
 		}
 
 		if ( ! $conditions ) {
-			return '';
+			return $is_include ? '1 = 0' : '';
 		}
 
 		$condition = '( ' . implode( ' OR ', $conditions ) . ' )';
@@ -203,16 +176,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Normalize a country or state code to the uppercase form the tax codes are stored in.
-	 *
-	 * Codes are alphanumeric in `i18n/countries.php` and `i18n/states.php`, so anything else is
-	 * dropped rather than escaped: the value goes into SQL directly.
+	 * Normalize a country or state code the way `WC_Tax` does before it writes a rate.
 	 *
 	 * @param string $code Country or state code.
 	 * @return string
 	 */
-	private static function sanitize_location_code( string $code ): string {
-		return (string) preg_replace( '/[^A-Z0-9]/', '', strtoupper( trim( $code ) ) );
+	private static function normalize_location_code( string $code ): string {
+		return strtoupper( sanitize_key( $code ) );
 	}
 
 	/**
