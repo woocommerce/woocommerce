@@ -197,6 +197,13 @@ describe( 'isPostcode', () => {
 		[ true, '2000', 'AU' ],
 		[ false, '2000#', 'AU' ],
 
+		// Albania and Afghanistan have no shared rule, so the postcode-validator
+		// package's own patterns decide.
+		[ true, '1001', 'AL' ],
+		[ false, '100', 'AL' ],
+		[ true, '1001', 'AF' ],
+		[ false, 'ABCD', 'AF' ],
+
 		// Unknown country codes — assumed valid since no regex applies.
 		[ true, '12345', 'XX' ],
 		[ true, 'anything', 'ZZ' ],

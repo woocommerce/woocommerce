@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Restore pickup-only and virtual-order Checkout block E2E journeys, and make the Checkout topology PHPUnit test register Local Pickup.
