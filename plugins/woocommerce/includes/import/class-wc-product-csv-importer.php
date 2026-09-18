@@ -707,6 +707,41 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the "date on sale to" field from a CSV.
+	 *
+	 * A bare calendar day becomes the end of that day (23:59:59), matching the product edit
+	 * screen. A value that already carries a time, or a relative expression such as "now",
+	 * is left as the caller wrote it.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 */
+	public function parse_date_on_sale_to_field( $value ) {
+		$parsed = $this->parse_datetime_field( $value );
+
+		if ( null === $parsed ) {
+			return null;
+		}
+
+		$date = date_parse( $parsed );
+
+		// date_parse() reports an hour for every timed format strtotime() understands, not
+		// just "10:00", and flags relative expressions separately.
+		if (
+			false === $date['year'] || false === $date['month'] || false === $date['day']
+			|| false !== $date['hour'] || isset( $date['relative'] )
+		) {
+			return $parsed;
+		}
+
+		// Built from the parsed day, not a timestamp round-trip, so no timezone can move it.
+		return sprintf( '%04d-%02d-%02d 23:59:59', $date['year'], $date['month'], $date['day'] );
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param string $value Field value.
@@ -859,7 +894,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'published'         => array( $this, 'parse_published_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_datetime_field' ),
-			'date_on_sale_to'   => array( $this, 'parse_datetime_field' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_on_sale_to_field' ),
 			'name'              => array( $this, 'parse_skip_field' ),
 			'short_description' => array( $this, 'parse_description_field' ),
 			'description'       => array( $this, 'parse_description_field' ),

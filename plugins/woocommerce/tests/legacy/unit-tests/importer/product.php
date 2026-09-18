@@ -663,7 +663,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'short_description'  => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'date_on_sale_from'  => '2023-07-08 05:10:15',
-				'date_on_sale_to'    => '2023/07/13',
+				'date_on_sale_to'    => '2023-07-13 23:59:59',
 				'tax_status'         => ProductTaxStatus::TAXABLE,
 				'tax_class'          => 'standard',
 				'stock_status'       => ProductStockStatus::IN_STOCK,
