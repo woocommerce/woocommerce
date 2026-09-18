@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrderDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
@@ -361,6 +362,46 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		self::schedule_action( 'import', array( $order_id ) );
 		return $order_id;
+	}
+
+	/**
+	 * Drop the cached objects of orders whose stored data was repaired outside the data store, and hand them to Analytics again.
+	 *
+	 * Nothing is queued when Analytics is off, since no callback would handle it.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @param int[] $order_ids IDs of the orders whose stored data changed.
+	 */
+	public static function forget_and_reimport_orders( array $order_ids ): void {
+		if ( ! $order_ids ) {
+			return;
+		}
+		wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( $order_ids );
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		// With Analytics disabled nothing handles the import action, and queueing it would only leave failed actions behind.
+		$import_hook    = self::get_action( 'import' );
+		$import_handled = is_string( $import_hook ) && has_action( $import_hook );
+		/**
+		 * Filters whether Analytics runs its imports inline instead of queueing them.
+		 *
+		 * @since 4.0.0
+		 * @param bool $disable Whether Action Scheduler is bypassed.
+		 */
+		$import_inline = ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false );
+		foreach ( $order_ids as $order_id ) {
+			$order_cache->remove( $order_id );
+			if ( ! $import_handled ) {
+				continue;
+			}
+			if ( $import_inline ) {
+				self::import( $order_id );
+				continue;
+			}
+			// Queued directly: OrdersScheduler::schedule_action() first searches every pending action for a duplicate, which gets
+			// slower with each order queued here. A duplicate import only rewrites the same stats row.
+			WC()->queue()->schedule_single( time() + 5, $import_hook, array( $order_id ), (string) self::$group );
+		}
 	}
 
 	/**

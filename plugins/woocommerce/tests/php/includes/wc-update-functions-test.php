@@ -1099,4 +1099,77 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '2016-05-10 12:00:00', $rows[110]->date_paid_gmt, 'A numeric legacy value is a timestamp' );
 		$this->assertSame( '2016-05-10 10:00:00', $rows[111]->date_paid_gmt, 'The first legacy row wins when there are several' );
 	}
+
+	/**
+	 * @testdox The legacy date restore processes a full batch, saves its cursor, and resumes from it on the next run.
+	 */
+	public function test_wc_update_1130_restore_legacy_dates_resumes_after_a_full_batch(): void {
+		global $wpdb;
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$option = 'woocommerce_update_1130_last_legacy_date_order_id';
+
+		$this->insert_legacy_paid_orders( 1001, 251 );
+
+		$this->assertTrue( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A full batch should request another run' );
+		$this->assertSame( 1250, (int) get_option( $option ), 'The cursor should point at the last order of the batch' );
+		$this->assertNull( $wpdb->get_var( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = 1251" ), 'The order after the batch should not be touched yet' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertFalse( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'The short last batch should complete the update' );
+		$this->assertFalse( get_option( $option ), 'The cursor should be cleared on completion' );
+		$this->assertSame( 251, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id BETWEEN 1001 AND 1251 AND date_paid_gmt = '2016-05-10 10:00:00'" ), 'Every order should be restored across the two runs' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * @testdox The legacy date restore stops without moving its cursor when a meta read fails.
+	 */
+	public function test_wc_update_1130_restore_legacy_dates_stops_on_failed_read(): void {
+		global $wpdb;
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$option = 'woocommerce_update_1130_last_legacy_date_order_id';
+
+		$this->insert_legacy_paid_orders( 1001, 3 );
+
+		$break_read = function ( $query ) use ( $wpdb ) {
+			return 0 === strpos( $query, "SELECT 'order' AS source" ) ? 'SELECT no_such_column FROM ' . $wpdb->prefix . 'wc_orders_meta' : $query;
+		};
+		add_filter( 'query', $break_read );
+		$suppressed = $wpdb->suppress_errors();
+		try {
+			$this->assertFalse( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A failed read should stop the update' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_read );
+		}
+
+		$this->assertFalse( get_option( $option ), 'The cursor should be cleared after a failed read' );
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id BETWEEN 1001 AND 1003 AND date_paid_gmt IS NOT NULL" ), 'No order should be written after the read fails' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Insert pre-3.0 HPOS orders with an empty paid date and a legacy _paid_date of 2016-05-10 12:00:00 Europe/Amsterdam.
+	 *
+	 * @param int $first_id First order ID.
+	 * @param int $count    How many orders.
+	 */
+	private function insert_legacy_paid_orders( int $first_id, int $count ): void {
+		global $wpdb;
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		for ( $order_id = $first_id; $order_id < $first_id + $count; $order_id++ ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'wc_order_operational_data',
+				array(
+					'order_id'            => $order_id,
+					'woocommerce_version' => '2.6.14',
+				)
+			);
+			$wpdb->insert(
+				$wpdb->prefix . 'wc_orders_meta',
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => '2016-05-10 12:00:00', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				)
+			);
+		}
+	}
 }
