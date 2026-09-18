@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use WP_Upgrader;
 
 /**

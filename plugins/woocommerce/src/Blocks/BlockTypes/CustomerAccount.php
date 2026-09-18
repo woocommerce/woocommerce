@@ -347,25 +347,23 @@ class CustomerAccount extends AbstractBlock {
 	}
 
 	/**
-	 * Render the user avatar and icon.
+	 * Render the user avatar or icon.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
-	 * @return string Avatar and icon markup.
+	 * @return string Avatar or icon markup.
 	 */
 	private function render_visual( $attributes ) {
 		if ( self::TEXT_ONLY === $attributes['displayStyle'] ) {
 			return '';
 		}
 
-		$icon    = $this->render_icon( $attributes );
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
-			// We use `blank` as the default so if the user has no avatar, the icon underneath is visible.
 			$avatar = get_avatar(
 				$user_id,
 				48,
-				'blank',
+				'',
 				'',
 				array(
 					'class' => 'wc-block-customer-account__avatar',
@@ -373,10 +371,16 @@ class CustomerAccount extends AbstractBlock {
 			);
 
 			if ( $avatar ) {
-				return '<div class="wc-block-customer-account__visual">' . $icon . wp_kses_post( $avatar ) . '</div>';
+				return '<div class="wc-block-customer-account__visual">' . wp_kses_post( $avatar ) . '</div>';
 			}
 		}
-		return '<div class="wc-block-customer-account__visual">' . $icon . '</div>';
+
+		$icon = $this->render_icon( $attributes );
+		if ( '' !== $icon ) {
+			return '<div class="wc-block-customer-account__visual">' . $icon . '</div>';
+		}
+
+		return '';
 	}
 
 	/**

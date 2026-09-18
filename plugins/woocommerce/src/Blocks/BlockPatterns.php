@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
