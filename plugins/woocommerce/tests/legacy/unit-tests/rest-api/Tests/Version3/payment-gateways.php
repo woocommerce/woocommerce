@@ -51,21 +51,20 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
+		// COD covers several distinct form field types, so use it to check how each one is surfaced.
 		$gateways_by_id = array_column( $gateways, null, 'id' );
-		$setting_types  = array(
-			WC_Gateway_COD::ID => array(
-				'title'              => 'safe_text',
-				'instructions'       => 'textarea',
-				'enable_for_methods' => 'multiselect',
-				'enable_for_virtual' => 'checkbox',
+		$this->assertArrayHasKey( WC_Gateway_COD::ID, $gateways_by_id );
+		$this->assertArraySubset(
+			array(
+				'settings' => array(
+					'title'              => array( 'type' => 'safe_text' ),
+					'instructions'       => array( 'type' => 'textarea' ),
+					'enable_for_methods' => array( 'type' => 'multiselect' ),
+					'enable_for_virtual' => array( 'type' => 'checkbox' ),
+				),
 			),
+			$gateways_by_id[ WC_Gateway_COD::ID ]
 		);
-		foreach ( $setting_types as $gateway_id => $expected_settings ) {
-			$this->assertArrayHasKey( $gateway_id, $gateways_by_id );
-			foreach ( $expected_settings as $setting_id => $setting_type ) {
-				$this->assertSame( $setting_type, $gateways_by_id[ $gateway_id ]['settings'][ $setting_id ]['type'] );
-			}
-		}
 
 		$matching_gateway_data = current(
 			array_filter(
@@ -289,30 +288,75 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating a gateway's enabled state persists so a rebuilt gateway registry reads it back.
+	 * @testdox A gateway update reaches storage, so a later request reads the new state.
 	 */
-	public function test_update_payment_gateway_enabled_state() {
+	public function test_update_payment_gateway_persists_to_storage() {
 		wp_set_current_user( $this->user );
 
-		$option_key = ( new WC_Gateway_Cheque() )->get_option_key();
-		update_option( $option_key, array( 'enabled' => 'no' ) );
-		WC()->payment_gateways->init();
-
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertFalse( $response->get_data()['enabled'] );
-
+		// No settings payload here, so the write has to happen for the top level fields on their own.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
-		$request->set_body_params( array( 'enabled' => true ) );
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data()['enabled'] );
-		$this->assertSame( 'yes', get_option( $option_key )['enabled'] );
+		$request->set_body_params(
+			array(
+				'enabled' => true,
+				'title'   => 'Pay by check',
+			)
+		);
+		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+
+		// Rebuild the registry so the read goes through gateway construction, as the next request would.
+		WC()->payment_gateways->init();
+
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
+		$this->assertTrue( $data['enabled'] );
+		$this->assertSame( 'Pay by check', $data['title'] );
+
+		// Settings values take a different route through update_item, so post one on its own too.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'instructions' => 'Post the check to our office.',
+				),
+			)
+		);
+		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
 
 		WC()->payment_gateways->init();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data()['enabled'] );
+
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
+		$this->assertSame( 'Post the check to our office.', $data['settings']['instructions']['value'] );
+		$this->assertTrue( $data['enabled'] );
+	}
+
+	/**
+	 * @testdox Gateway order persists and decides where a gateway sits in the collection.
+	 */
+	public function test_update_payment_gateway_order_persists_to_storage() {
+		wp_set_current_user( $this->user );
+
+		// BACS loads before cheque, so putting cheque first means the registry has to reorder them.
+		foreach ( array(
+			WC_Gateway_Cheque::ID => 0,
+			WC_Gateway_BACS::ID   => 1,
+		) as $gateway_id => $order ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/' . $gateway_id );
+			$request->set_body_params( array( 'order' => $order ) );
+			$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+		}
+
+		// Order lives in its own option, and the registry reads it to sort gateways.
+		WC()->payment_gateways->init();
+
+		$gateways = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) )->get_data();
+		$by_id    = array_column( $gateways, null, 'id' );
+		$this->assertSame( 0, $by_id[ WC_Gateway_Cheque::ID ]['order'] );
+		$this->assertSame( 1, $by_id[ WC_Gateway_BACS::ID ]['order'] );
+
+		$ids = array_column( $gateways, 'id' );
+		$this->assertLessThan(
+			array_search( WC_Gateway_BACS::ID, $ids, true ),
+			array_search( WC_Gateway_Cheque::ID, $ids, true )
+		);
 	}
 
 	/**
