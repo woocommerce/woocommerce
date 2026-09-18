@@ -151,3 +151,5 @@ export function parseNumber(
 
 	return Number.parseFloat( parsedValue ).toFixed( parsedPrecision );
 }
+
+// POC: a real source change, to trigger the JavaScript unit test matrix.
