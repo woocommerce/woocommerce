@@ -70,6 +70,59 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Extensions must opt in to restoring rates hidden by free shipping.
+	 *
+	 * @testWith [1, []]
+	 *           [2, []]
+	 *           [3, ["flat_rate:1"]]
+	 *
+	 * @param int      $accepted_args Number of filter arguments accepted by the extension.
+	 * @param string[] $expected_rates Rate IDs returned after removing free shipping.
+	 */
+	public function test_package_rates_filter_can_opt_in_to_unfiltered_rates( int $accepted_args, array $expected_rates ): void {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$flat_rate                            = new WC_Shipping_Flat_Rate( 1 );
+		$flat_rate->instance_settings['cost'] = '10';
+		$filter_calls                         = 0;
+
+		add_filter( 'woocommerce_shipping_methods', fn () => array( $flat_rate, new WC_Shipping_Free_Shipping( 1 ) ) );
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates, $package = null, $unfiltered_rates = null ) use ( &$filter_calls, $accepted_args ) {
+				++$filter_calls;
+				$this->assertSame( array( 'free_shipping:1' ), array_keys( $rates ), 'The first argument must still contain only visible rates.' );
+				if ( 2 <= $accepted_args ) {
+					$this->assertSame( $rates, $package['rates'], 'The package argument must remain unchanged.' );
+				}
+				if ( null !== $unfiltered_rates ) {
+					$this->assertSame( array( 'flat_rate:1', 'free_shipping:1' ), array_keys( $unfiltered_rates ), 'The third argument must include hidden rates.' );
+					$rates = $unfiltered_rates;
+				}
+				unset( $rates['free_shipping:1'] );
+				return $rates;
+			},
+			10,
+			$accepted_args
+		);
+
+		$result = $this->sut->calculate_shipping_for_package(
+			array(
+				'contents'      => array(),
+				'contents_cost' => 10,
+				'destination'   => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '00000',
+				),
+			)
+		);
+
+		$this->assertSame( $expected_rates, array_keys( $result['rates'] ), 'Paid rates should return only when the extension opts in.' );
+		$this->assertSame( 1, $filter_calls, 'The filter must run only once.' );
+	}
+
+	/**
 	 * @testdox package rates filter doesn't cause errors when accessing non-existent rates with arithmetic operations
 	 *
 	 * @dataProvider provide_test_package_rates_filter_error_handling
