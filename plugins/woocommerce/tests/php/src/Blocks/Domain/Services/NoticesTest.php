@@ -152,6 +152,32 @@ class NoticesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A classic theme prints a queued success notice as a woocommerce-message element inside the notices wrapper.
+	 */
+	public function test_classic_theme_prints_a_success_notice_inside_the_notices_wrapper(): void {
+		$wrapper_contents = $this->get_notices_wrapper_contents( $this->render_queued_success_notice( false ) );
+
+		$this->assertMatchesRegularExpression(
+			'#<div class="woocommerce-message"[^>]*>\s*Coupon code applied successfully\.\s*</div>#s',
+			$wrapper_contents,
+			'A classic theme should render the success notice from the classic template inside the wrapper.'
+		);
+	}
+
+	/**
+	 * @testdox A classic theme that opts in to block notices prints a queued success notice as a notice banner inside the notices wrapper.
+	 */
+	public function test_a_classic_theme_opting_in_prints_a_success_notice_as_a_banner_inside_the_notices_wrapper(): void {
+		$wrapper_contents = $this->get_notices_wrapper_contents( $this->render_queued_success_notice( true ) );
+
+		$this->assertMatchesRegularExpression(
+			'#<div class="wc-block-components-notice-banner is-success"[^>]*>.*Coupon code applied successfully\..*</div>#s',
+			$wrapper_contents,
+			'Opting in to block notices should render the success notice as a success banner inside the wrapper.'
+		);
+	}
+
+	/**
 	 * @testdox Notices leave unrelated templates untouched.
 	 */
 	public function test_unrelated_templates_pass_through_unchanged(): void {
@@ -374,6 +400,64 @@ class NoticesTest extends WC_Unit_Test_Case {
 			wp_style_is( 'wc-blocks-style', 'enqueued' ),
 			'The shared notice stylesheet should only be enqueued after wp_head when block notices are active.'
 		);
+	}
+
+	/**
+	 * Queue a success notice on a classic theme and capture what the front end prints for it.
+	 *
+	 * Rendering under an active block theme is not asserted in this class: activating one re-registers the packaged
+	 * block templates, and WordPress reports that as incorrect usage of WP_Block_Templates_Registry::register.
+	 *
+	 * @param bool $use_block_notices Whether the theme opts in to block notice templates.
+	 * @return string Printed notices markup.
+	 */
+	private function render_queued_success_notice( bool $use_block_notices ): string {
+		switch_theme( 'storefront' );
+		wc_clear_template_cache();
+
+		if ( $use_block_notices ) {
+			add_filter( 'woocommerce_use_block_notices_in_classic_theme', '__return_true' );
+		}
+
+		( new Notices( new Package( 'test', WC_ABSPATH ) ) )->init();
+
+		/**
+		 * Trigger the service's theme-setup gate after init() has registered its callbacks.
+		 *
+		 * @since 11.1.0
+		 */
+		do_action( 'after_setup_theme' );
+
+		wc_add_notice( 'Coupon code applied successfully.', 'success' );
+
+		ob_start();
+
+		try {
+			woocommerce_output_all_notices();
+		} finally {
+			$output = ob_get_clean();
+			wc_clear_notices();
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Extract the markup a rendered notices wrapper contains.
+	 *
+	 * @param string $output Printed notices markup.
+	 * @return string Markup inside the notices wrapper.
+	 */
+	private function get_notices_wrapper_contents( string $output ): string {
+		$matches = array();
+
+		$this->assertSame(
+			1,
+			preg_match( '#<div class="woocommerce-notices-wrapper">(.*)</div>#s', $output, $matches ),
+			'Queued notices should be printed inside the notices wrapper that themes and shoppers rely on.'
+		);
+
+		return $matches[1];
 	}
 
 	/**
