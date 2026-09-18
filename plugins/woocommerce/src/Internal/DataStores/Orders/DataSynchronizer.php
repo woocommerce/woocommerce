@@ -788,7 +788,7 @@ ORDER BY orders.id ASC
 					$data_store->backfill_post_record( $order );
 				}
 			} else {
-				$this->posts_to_cot_migrator->migrate_orders( $batch );
+				$this->posts_to_cot_migrator->migrate_orders_with_lock( $batch );
 			}
 		}
 

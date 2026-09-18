@@ -935,17 +935,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testdox The migration lock is released once the batch is done.
+	 * @testdox The migration lock is released once the batch is done, and a save-path migration never takes it.
 	 */
-	public function test_migration_lock_is_released_after_migration(): void {
+	public function test_migration_lock_is_released_after_batch(): void {
 		global $wpdb;
 		$order = OrderHelper::create_order();
+		$seen  = array();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function () use ( &$seen, $wpdb ) {
+					$seen[] = (string) $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" );
+					return new \WC_Logger();
+				},
+			)
+		);
 
-		$this->sut->migrate_order( $order->get_id() );
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
+		$this->assertNotEmpty( $seen[0], 'The lock row should exist while the batch runs' );
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" ), 'The lock row should be gone once the batch is done' );
 
-		$lock_rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" );
-		$this->assertSame( 0, $lock_rows, 'No lock row should be left behind after a migration' );
-		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated' );
+		$seen = array();
+		$this->sut->migrate_orders( array( $order->get_id() ) );
+		$this->assertSame( '', $seen[0], 'A single-order migration should not take the lock' );
 	}
 
 	/**
@@ -957,7 +968,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->insert_migration_lock( microtime( true ) - 60 );
 
 		$started = microtime( true );
-		$this->sut->migrate_order( $order->get_id() );
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
 
 		$this->assertLessThan( 1, microtime( true ) - $started, 'An expired lock should not make the migration wait' );
 		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated' );
@@ -965,7 +976,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testdox A migration waits while another process holds the lock, and runs once that lock expires.
+	 * @testdox A batch waits while another process holds the lock, and runs once that lock expires.
 	 */
 	public function test_migration_waits_for_a_held_lock(): void {
 		global $wpdb;
@@ -973,10 +984,34 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->insert_migration_lock( microtime( true ) + 1 );
 
 		$started = microtime( true );
-		$this->sut->migrate_order( $order->get_id() );
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
 
 		$this->assertGreaterThanOrEqual( 0.9, microtime( true ) - $started, 'The migration should wait for the held lock' );
 		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should be migrated once the lock is free' );
+	}
+
+	/**
+	 * @testdox A process whose lock was taken over mid-batch does not delete the new holder's lock.
+	 */
+	public function test_lost_migration_lock_is_not_released_by_the_previous_holder(): void {
+		global $wpdb;
+		$order = OrderHelper::create_order();
+		$other = number_format( microtime( true ) + 3600, 6, '.', '' );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				// Runs inside the locked section: another process takes the lock over while this batch is running.
+				'wc_get_logger' => function () use ( $wpdb, $other ) {
+					$wpdb->update( $wpdb->options, array( 'option_value' => $other ), array( 'option_name' => 'wc_posts_to_orders_migration_lock' ) );
+					return new \WC_Logger();
+				},
+			)
+		);
+
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
+
+		$this->assertSame( $other, $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" ), 'The new holder\'s lock should survive' );
+		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The batch should still finish' );
+		$wpdb->delete( $wpdb->options, array( 'option_name' => 'wc_posts_to_orders_migration_lock' ) );
 	}
 
 	/**

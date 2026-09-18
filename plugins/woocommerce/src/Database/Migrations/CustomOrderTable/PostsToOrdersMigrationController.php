@@ -49,8 +49,16 @@ class PostsToOrdersMigrationController {
 
 	/**
 	 * Seconds a held lock stays valid before another process may take it over. Also how long a process waits for it.
+	 * The holder pushes its release time forward between migration steps, so only a single step has to fit in it.
 	 */
 	private const MIGRATION_LOCK_TTL = 15.0;
+
+	/**
+	 * Release time of the lock this process holds, or null when it holds none.
+	 *
+	 * @var string|null
+	 */
+	private $migration_lock_expiry = null;
 
 	/**
 	 * PostsToOrdersMigrationController constructor.
@@ -87,22 +95,6 @@ class PostsToOrdersMigrationController {
 	 * @param array $order_post_ids List of post IDs of the orders to migrate.
 	 */
 	public function migrate_orders( array $order_post_ids ): void {
-		$lock = $this->acquire_migration_lock();
-		try {
-			$this->migrate_orders_core( $order_post_ids );
-		} finally {
-			if ( null !== $lock ) {
-				$this->release_migration_lock( $lock );
-			}
-		}
-	}
-
-	/**
-	 * Migrates a set of orders from the posts table to the custom orders tables.
-	 *
-	 * @param array $order_post_ids List of post IDs of the orders to migrate.
-	 */
-	private function migrate_orders_core( array $order_post_ids ): void {
 		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 
 		$data = array();
@@ -119,10 +111,13 @@ class PostsToOrdersMigrationController {
 			return;
 		}
 
+		$this->refresh_migration_lock();
 		$using_transactions = $this->maybe_start_transaction();
 
 		foreach ( $this->all_migrators as $name => $migrator ) {
-			$results   = $migrator->process_migration_data( $data[ $name ] );
+			$results = $migrator->process_migration_data( $data[ $name ] );
+			$this->refresh_migration_lock();
+
 			$errors    = array_unique( $results['errors'] );
 			$exception = $results['exception'];
 
@@ -140,18 +135,38 @@ class PostsToOrdersMigrationController {
 	}
 
 	/**
+	 * Migrates a batch of orders while holding a lock that keeps other batches waiting.
+	 *
+	 * Two batch processes (the CLI sync and the background sync) migrating the same orders at once each insert
+	 * the orders' meta, so the batch paths take this lock. Single-order syncs on save do not, so a save never
+	 * waits for a running batch.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $order_post_ids List of post IDs of the orders to migrate.
+	 */
+	public function migrate_orders_with_lock( array $order_post_ids ): void {
+		$this->acquire_migration_lock();
+		try {
+			$this->migrate_orders( $order_post_ids );
+		} finally {
+			$this->release_migration_lock();
+		}
+	}
+
+	/**
 	 * Take the migration lock, waiting for another process to release it or for it to expire.
 	 *
 	 * The lock is a row in the options table, as in BatchProcessingController: the unique option name makes the
 	 * INSERT fail while another process holds it, and a lock whose release time has passed can be taken over.
-	 *
-	 * @return string|null The lock's release time, needed to release it, or null if it could not be taken in time.
+	 * If the lock cannot be taken within the TTL the migration goes ahead without it, as it always did.
 	 */
-	private function acquire_migration_lock(): ?string {
+	private function acquire_migration_lock(): void {
 		global $wpdb;
 
-		$deadline = microtime( true ) + self::MIGRATION_LOCK_TTL;
-		$suppress = $wpdb->suppress_errors( true );
+		$this->migration_lock_expiry = null;
+		$deadline                    = microtime( true ) + self::MIGRATION_LOCK_TTL;
+		$suppress                    = $wpdb->suppress_errors( true );
 		try {
 			do {
 				$time   = microtime( true );
@@ -169,48 +184,95 @@ class PostsToOrdersMigrationController {
 					array( '%s', '%s', '%s' )
 				);
 
-				if ( ! $acquired ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$acquired = $wpdb->query(
-						$wpdb->prepare(
-							"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s",
-							$expiry,
-							self::MIGRATION_LOCK_OPTION,
-							$now
-						)
-					);
+				if ( $acquired ) {
+					$this->migration_lock_expiry = $expiry;
+					return;
 				}
 
-				if ( $acquired ) {
-					return $expiry;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$taken_over = $wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s",
+						$expiry,
+						self::MIGRATION_LOCK_OPTION,
+						$now
+					)
+				);
+				if ( $taken_over ) {
+					$this->migration_lock_expiry = $expiry;
+					$this->log_lock_warning( 'Took over an expired orders migration lock. The process holding it may have died mid-batch.' );
+					return;
 				}
 
 				usleep( 50000 );
 			} while ( microtime( true ) < $deadline );
 
-			return null;
+			$this->log_lock_warning( sprintf( 'Could not take the orders migration lock within %d seconds, migrating without it.', self::MIGRATION_LOCK_TTL ) );
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
 	}
 
 	/**
-	 * Release the migration lock, unless it expired and another process took it over.
-	 *
-	 * @param string $expiry The value returned by acquire_migration_lock().
+	 * Push the held lock's release time forward so a long batch does not lose it between steps.
 	 */
-	private function release_migration_lock( string $expiry ): void {
+	private function refresh_migration_lock(): void {
 		global $wpdb;
+
+		if ( null === $this->migration_lock_expiry ) {
+			return;
+		}
+
+		$expiry = number_format( microtime( true ) + self::MIGRATION_LOCK_TTL, 6, '.', '' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$refreshed = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+				$expiry,
+				self::MIGRATION_LOCK_OPTION,
+				$this->migration_lock_expiry
+			)
+		);
+
+		if ( $refreshed ) {
+			$this->migration_lock_expiry = $expiry;
+			return;
+		}
+
+		// Another process took the lock over, so it is theirs now: finish this batch without it.
+		$this->migration_lock_expiry = null;
+		$this->log_lock_warning( 'Lost the orders migration lock mid-batch, finishing the batch without it.' );
+	}
+
+	/**
+	 * Release the migration lock, unless it expired and another process took it over.
+	 */
+	private function release_migration_lock(): void {
+		global $wpdb;
+
+		if ( null === $this->migration_lock_expiry ) {
+			return;
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->delete(
 			$wpdb->options,
 			array(
 				'option_name'  => self::MIGRATION_LOCK_OPTION,
-				'option_value' => $expiry,
+				'option_value' => $this->migration_lock_expiry,
 			),
 			array( '%s', '%s' )
 		);
+		$this->migration_lock_expiry = null;
+	}
+
+	/**
+	 * Log a warning about the migration lock.
+	 *
+	 * @param string $message The message to log.
+	 */
+	private function log_lock_warning( string $message ): void {
+		WC()->call_function( 'wc_get_logger' )->warning( $message, array( 'source' => self::LOGS_SOURCE_NAME ) );
 	}
 
 	/**
