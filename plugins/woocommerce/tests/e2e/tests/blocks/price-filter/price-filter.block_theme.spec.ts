@@ -24,8 +24,15 @@ const blockData = {
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.webp`,
 };
 
+// The Blocks E2E store seeds sixteen products, and the shop page lists them all
+// on one page.
+const UNFILTERED_PRODUCT_COUNT = 16;
+
+// The All Products block paginates at nine products per page.
+const ALL_PRODUCTS_PAGE_SIZE = 9;
+
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
+	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
 		// Retry the template creation to handle socket hang up errors
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -67,7 +74,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 			throw lastError;
 		}
 
-		await use( compiler );
+		await provideTemplateCompiler( compiler );
 	},
 } );
 
@@ -198,13 +205,18 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		const productTitles = allProductsBlock.locator(
 			'.wc-block-grid__product-title'
 		);
+		const firstProductImage = allProductsBlock.locator( 'img' ).first();
 
 		await expect( productTitles.first() ).toBeVisible();
-		// See the note on the other baselines: more than one product, so the test
-		// cannot pass against a shop page that was already filtered.
-		expect(
-			( await productTitles.allTextContents() ).length
-		).toBeGreaterThan( 1 );
+		// The block paints a full page of empty placeholders before the Store API
+		// answers, so wait for a product image from the media library before
+		// counting. The placeholder the block shows until then comes from the
+		// plugin's own assets, not from uploads.
+		await expect( firstProductImage ).toHaveAttribute(
+			'src',
+			/\/wp-content\/uploads\//
+		);
+		await expect( productTitles ).toHaveCount( ALL_PRODUCTS_PAGE_SIZE );
 
 		// The price filter input is initially enabled, but it becomes disabled
 		// for the time it takes to fetch the data. To avoid setting the filter
@@ -231,8 +243,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 
-		const img = allProductsBlock.locator( 'img' ).first();
-		await expect( img ).not.toHaveAttribute(
+		await expect( firstProductImage ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
@@ -281,11 +292,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 
 		await expect( productTitles.first() ).toBeVisible();
-		// See the note on the other baselines: more than one product, so the test
-		// cannot pass against a shop page that was already filtered.
-		expect(
-			( await productTitles.allTextContents() ).length
-		).toBeGreaterThan( 1 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -318,14 +325,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
-		const automaticBaseline = ( await productTitles.allTextContents() ).map(
-			( title ) => title.trim()
-		);
-		// Greater than one, not merely non-empty: an unfiltered /shop must show more
-		// than the single product the filter is about to leave behind. Asserting only
-		// that it is non-empty passes on a shop page that arrived already filtered,
-		// and then the post-filter assertion passes too, for the wrong reason.
-		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',

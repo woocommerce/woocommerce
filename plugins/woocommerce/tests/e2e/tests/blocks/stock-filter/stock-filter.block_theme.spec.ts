@@ -16,12 +16,16 @@ export const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_stock_status=outofstock',
 };
 
+// The Blocks E2E store seeds sixteen products, and the shop page lists them all
+// on one page.
+const UNFILTERED_PRODUCT_COUNT = 16;
+
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
+	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
 		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_filters-with-product-collection'
 		);
-		await use( compiler );
+		await provideTemplateCompiler( compiler );
 	},
 } );
 
@@ -59,18 +63,28 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		const stockFilter = await frontendUtils.getBlockByName(
 			'woocommerce/filter-wrapper'
 		);
-		await stockFilter.getByText( 'Out of Stock' ).click();
-
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
-
 		const legacyTemplate = await frontendUtils.getBlockByName(
 			'woocommerce/legacy-template'
 		);
 		const products = legacyTemplate
 			.getByRole( 'list' )
 			.locator( '.product' );
+		const inStockCheckbox = stockFilter.getByRole( 'checkbox', {
+			name: 'In Stock',
+		} );
+		const outOfStockCheckbox = stockFilter.getByRole( 'checkbox', {
+			name: 'Out of Stock',
+		} );
+
+		await expect( products ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
+		await expect( inStockCheckbox ).toBeVisible();
+		await expect( outOfStockCheckbox ).toBeVisible();
+
+		await outOfStockCheckbox.click();
+
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+		);
 
 		await expect( products ).toHaveCount( 1 );
 		await expect(
@@ -94,14 +108,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
-		const automaticBaseline = ( await productTitles.allTextContents() ).map(
-			( title ) => title.trim()
-		);
-		// Greater than one, not merely non-empty: an unfiltered /shop must show more
-		// than the single product the filter is about to leave behind. Asserting only
-		// that it is non-empty passes on a shop page that arrived already filtered,
-		// and then the post-filter assertion passes too, for the wrong reason.
-		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
+		await expect( productTitles ).toHaveCount( UNFILTERED_PRODUCT_COUNT );
 
 		await page.getByText( 'Out of Stock' ).click();
 		await expect( page ).toHaveURL(
@@ -128,10 +135,10 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
-		const outOfStockFilter = page.getByRole( 'checkbox', {
+		const outOfStockCheckbox = page.getByRole( 'checkbox', {
 			name: 'Out of Stock',
 		} );
-		await expect( outOfStockFilter ).toBeVisible();
+		await expect( outOfStockCheckbox ).toBeVisible();
 		await page.clock.pauseAt(
 			( await page.evaluate( () => Date.now() ) ) + 1_000
 		);
@@ -145,10 +152,10 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
 		const deferredUrl = page.url();
 
-		await outOfStockFilter.click();
+		await outOfStockCheckbox.click();
 		await page.clock.runFor( 501 );
 		await flushMacrotask( page );
-		await expect( outOfStockFilter ).toBeChecked();
+		await expect( outOfStockCheckbox ).toBeChecked();
 		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
 		await expect( applyButton ).toBeVisible();
 		await expect( applyButton ).toBeEnabled();
