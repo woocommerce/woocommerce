@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForProducts;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PublishBeforeTimeRuleProcessor;
 
 /**
  * Remote Inbox Notifications engine.
@@ -123,6 +124,8 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * Go through the specs and run them.
 	 */
 	public static function run() {
+		self::retire_expired_alerts();
+
 		$specs = RemoteInboxNotificationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		if ( false === $specs || ! is_countable( $specs ) || count( $specs ) === 0 ) {
@@ -141,6 +144,92 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 		if ( count( $errors ) > 0 ) {
 			self::log_errors( $errors );
+		}
+	}
+
+	/**
+	 * Hide store alerts whose end date has passed.
+	 *
+	 * A note keeps the publish_before date from its spec, so it can stop showing on its own
+	 * once that date passes and the spec is no longer served to re-evaluate its rules.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function retire_expired_alerts() {
+		try {
+			$data_store = Notes::load_data_store();
+
+			// A filtered data store may not have this internal read. has_callable() would say yes
+			// for any store with a __call(), so ask the class itself.
+			if ( ! method_exists( $data_store->get_current_class_name(), 'lookup_notes' ) ) {
+				return;
+			}
+
+			// Read the rows rather than building a Note for each one, which queries per note.
+
+			// @phpstan-ignore method.notFound (proxied by WC_Data_Store::__call(), checked above)
+			$notes = $data_store->lookup_notes(
+				array(
+					// Only these two types render as a store alert.
+					'type'   => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
+					'status' => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+					'source' => array( 'woocommerce.com' ),
+				)
+			);
+
+			if ( ! is_array( $notes ) ) {
+				return;
+			}
+
+			// Read the date the same way a live spec would, so a note behaves the same either way.
+			$rule_processor = new PublishBeforeTimeRuleProcessor();
+
+			foreach ( $notes as $note_row ) {
+				$content_data = json_decode( (string) $note_row->content_data );
+
+				if ( ! isset( $content_data->publish_before ) ) {
+					continue;
+				}
+
+				$rule = (object) array( 'publish_before' => $content_data->publish_before );
+
+				// The date is stored in a free form column, so don't trust it to be readable.
+				if ( ! $rule_processor->validate( $rule ) || $rule_processor->process( $rule, new \stdClass() ) ) {
+					continue;
+				}
+
+				$note = Notes::get_note( $note_row->note_id );
+
+				if ( ! $note instanceof Note ) {
+					continue;
+				}
+
+				// The row was read at the top of the pass, so check again before writing. The type
+				// is re-checked too: woocommerce_note_types is filterable, and a query for types
+				// it no longer allows comes back with no type clause at all.
+				if ( Note::E_WC_ADMIN_NOTE_UNACTIONED !== $note->get_status()
+					|| ! in_array( $note->get_type(), array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ), true ) ) {
+					continue;
+				}
+
+				$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
+				$note->save();
+			}
+		} catch ( \Throwable $e ) {
+			// run() is hooked to activated_plugin, so a throw here would surface during any
+			// plugin activation. The file log handler writes the message and drops the context,
+			// so put what is worth reading into the message.
+			wc_get_logger()->error(
+				sprintf(
+					'Could not retire expired store alerts%s: %s: %s',
+					isset( $note_row->note_id ) ? ' at note ' . $note_row->note_id : '',
+					get_class( $e ),
+					$e->getMessage()
+				),
+				array( 'source' => 'remote-inbox-notifications' )
+			);
 		}
 	}
 

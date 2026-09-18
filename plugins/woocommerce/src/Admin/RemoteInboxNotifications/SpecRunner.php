@@ -62,10 +62,23 @@ class SpecRunner {
 			return;
 		}
 
+		// Keep the end date on the note so it can retire itself if the spec stops being served.
+		// The field is ours to write, so drop anything the feed put there. Anything that isn't
+		// a stdClass is left alone for set_content_data() to reject.
+		$content_data = isset( $spec->content_data ) ? $spec->content_data : (object) array();
+		if ( $content_data instanceof \stdClass ) {
+			unset( $content_data->publish_before );
+
+			$publish_before = self::get_publish_before( $spec );
+			if ( null !== $publish_before ) {
+				$content_data->publish_before = $publish_before;
+			}
+		}
+
 		// Set up the note.
 		$note->set_title( $locale->title );
 		$note->set_content( $locale->content );
-		$note->set_content_data( isset( $spec->content_data ) ? $spec->content_data : (object) array() );
+		$note->set_content_data( $content_data );
 		$note->set_status( $status );
 		$note->set_type( $spec->type );
 		$note->set_name( $spec->slug );
@@ -78,6 +91,30 @@ class SpecRunner {
 		$note->set_actions( self::get_actions( $spec ) );
 
 		$note->save();
+	}
+
+	/**
+	 * Get the date from the spec's top level publish_before_time rule, if it has one.
+	 *
+	 * A rule nested inside another rule doesn't describe the spec's own end date, so it is
+	 * ignored. A `not` around an end date means the opposite of one.
+	 *
+	 * @param object $spec The spec.
+	 *
+	 * @return string|null The date, or null if the spec has no publish_before_time rule.
+	 */
+	private static function get_publish_before( $spec ) {
+		if ( ! isset( $spec->rules ) || ! is_array( $spec->rules ) ) {
+			return null;
+		}
+
+		foreach ( $spec->rules as $rule ) {
+			if ( isset( $rule->type, $rule->publish_before ) && 'publish_before_time' === $rule->type ) {
+				return $rule->publish_before;
+			}
+		}
+
+		return null;
 	}
 
 	/**
