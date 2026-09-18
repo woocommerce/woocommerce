@@ -1,6 +1,7 @@
 ---
 post_title: Accessibility
 sidebar_label: Accessibility
+sidebar_position: 7
 ---
 
 # Accessibility

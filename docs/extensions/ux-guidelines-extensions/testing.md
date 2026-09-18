@@ -1,6 +1,7 @@
 ---
 post_title: Testing
 sidebar_label: Testing
+sidebar_position: 8
 ---
 
 # Testing
