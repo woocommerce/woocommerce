@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add unit tests for the order list table status view links, covering which statuses render a link and the count each carries.
