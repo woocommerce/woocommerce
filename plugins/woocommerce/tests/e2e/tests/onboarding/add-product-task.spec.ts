@@ -142,7 +142,7 @@ test.describe( 'Add Product Task', () => {
 		} );
 	} );
 
-	test( 'Products page redirects to add product task when no products exist', async ( {
+	test( 'Products page redirects to the add product task until a product exists', async ( {
 		page,
 		restApi,
 	} ) => {

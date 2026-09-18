@@ -460,7 +460,7 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 				'100',
 				'0',
 			),
-			'empty change-to restoration'        => array(
+			'empty change-to clearing'           => array(
 				'100',
 				'80',
 				array(

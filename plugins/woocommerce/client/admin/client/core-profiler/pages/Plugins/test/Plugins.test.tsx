@@ -104,7 +104,7 @@ describe( 'Plugins Component', () => {
 		expect( screen.getByText( 'MailPoet' ) ).toBeInTheDocument();
 	} );
 
-	it( 'selects each default inactive recommendation', () => {
+	it( 'checks every inactive recommendation by default and marks the installed one', () => {
 		render(
 			<Plugins
 				context={ mockContext }

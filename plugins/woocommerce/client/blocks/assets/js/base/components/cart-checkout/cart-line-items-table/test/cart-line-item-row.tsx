@@ -184,7 +184,7 @@ const renderRow = ( rawPriceOverrides?: RawPriceOverrides ) => {
 	);
 };
 
-describe( 'renders cart row price', () => {
+describe( 'CartLineItemRow — price display', () => {
 	it.each( [
 		{
 			name: 'sale price with its regular price',
@@ -206,7 +206,7 @@ describe( 'renders cart row price', () => {
 			regularPrice: undefined,
 		},
 		{
-			name: 'extension-filtered price above its regular price without sale markup',
+			name: 'price above its regular price without sale markup',
 			rawPrices: {
 				price: '50000000',
 				regular_price: '10000000',

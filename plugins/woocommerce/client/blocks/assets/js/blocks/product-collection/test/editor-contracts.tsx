@@ -366,7 +366,7 @@ const GenericArchivePreview = ( {
 	);
 };
 
-describe( 'generic archive previews', () => {
+describe( 'Product Collection generic archive previews', () => {
 	it.each( [
 		[ 'tag', 'product_tag' ],
 		[ 'category', 'product_cat' ],
@@ -396,7 +396,7 @@ describe( 'generic archive previews', () => {
 	} );
 } );
 
-describe( 'default catalog order control', () => {
+describe( 'Product Collection default catalog order control', () => {
 	it( 'writes the selected default order to the site entity', async () => {
 		const user = userEvent.setup();
 		const coreSelectors = select( coreStore );

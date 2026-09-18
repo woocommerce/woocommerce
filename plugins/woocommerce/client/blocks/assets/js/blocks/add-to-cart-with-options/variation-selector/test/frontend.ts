@@ -365,7 +365,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		{ current: 2, expected: 4 },
 		{ current: 10, expected: 8 },
 	] )(
-		'clamps variation quantity $current to $expected when the input is idle',
+		'clamps variation quantity $current to $expected within the variation bounds',
 		( { current, expected } ) => {
 			const input = document.createElement( 'input' );
 			input.type = 'number';

@@ -276,7 +276,7 @@ class StatusTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A missing order directs the shopper to email and account confirmation paths.
 	 */
-	public function test_missing_order_notice(): void {
+	public function test_missing_order_notice_offers_email_and_account_paths(): void {
 		$my_account_url = wc_get_page_permalink( 'myaccount' );
 		$content        = $this->render_confirmation_notice( null );
 

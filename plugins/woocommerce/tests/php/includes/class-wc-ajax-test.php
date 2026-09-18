@@ -1490,7 +1490,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Calculating line taxes persists the tax class, rate, and totals for each supported product type.
+	 * @testdox Calculating line taxes persists the tax class, rate, and totals for simple, variation, and external line items.
 	 */
 	public function test_calc_line_taxes_persists_multiple_tax_classes(): void {
 		$suffix            = strtolower( wp_generate_password( 8, false, false ) );
@@ -1907,7 +1907,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	/**
 	 * @testdox Registered Remove Order Coupon AJAX removes the coupon, recalculates totals, and records its internal note.
 	 */
-	public function test_remove_order_coupon(): void {
+	public function test_remove_order_coupon_restores_the_total_and_records_an_internal_note(): void {
 		$output_buffering_level    = ob_get_level();
 		$coupon_code               = 'remove-coupon-' . wp_rand( 1000, 9999 );
 		$product_name              = 'Coupon Removal Product';

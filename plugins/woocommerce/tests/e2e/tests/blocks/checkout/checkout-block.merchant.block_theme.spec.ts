@@ -94,7 +94,7 @@ test.describe( 'Merchant → Checkout', () => {
 		);
 	} );
 
-	test( 'Merchant must accept T&S before checkout', async ( {
+	test( 'Merchant can require the T&S checkbox before an order can be placed', async ( {
 		frontendUtils,
 		checkoutPageObject,
 		editor,

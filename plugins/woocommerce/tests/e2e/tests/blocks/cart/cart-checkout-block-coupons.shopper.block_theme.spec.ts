@@ -25,7 +25,7 @@ test.describe( 'Shopper → Coupon', () => {
 		);
 	} );
 
-	test( 'Logged in user can apply single-use coupon and place order', async ( {
+	test( 'Logged in user can apply and remove a single-use coupon, then place the order', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		page,
