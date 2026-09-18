@@ -47,7 +47,6 @@ class PaymentsExtensionSuggestions {
 	const KUSTOM_CHECKOUT   = 'kustom_checkout';
 	const HELCIM            = 'helcim';
 	const KOMOJU            = 'komoju';
-	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
 	const BILLIE            = 'billie';
@@ -67,6 +66,13 @@ class PaymentsExtensionSuggestions {
 	const MASTERCARD        = 'mastercard';
 	const EVERGREEN         = 'evergreen';
 	const MYPOS             = 'mypos';
+
+	/**
+	 * Helio Pay suggestion ID.
+	 *
+	 * @deprecated 11.3.0 Helio Pay is no longer a recommended partner and has no suggestion details.
+	 */
+	const HELIOPAY = 'heliopay';
 
 	/*
 	 * The extension types.
@@ -4100,38 +4106,6 @@ class PaymentsExtensionSuggestions {
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
-					),
-				),
-			),
-			self::HELIOPAY          => array(
-				'_type'       => self::TYPE_CRYPTO,
-				'title'       => esc_html__( 'Helio Pay', 'woocommerce' ),
-				'description' => esc_html__( 'Effortlessly accept cryptocurrency payments in your store.', 'woocommerce' ),
-				'icon'        => plugins_url( 'assets/images/onboarding/icons/heliopay.png', WC_PLUGIN_FILE ),
-				'plugin'      => array(
-					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'helio',
-				),
-				'links'       => array(
-					array(
-						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-						'url'   => 'https://www.hel.io/pricing',
-					),
-					array(
-						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/helio-pay/',
-					),
-					array(
-						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-						'url'   => 'https://info.docs.hel.io/terms-of-service',
-					),
-					array(
-						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/helio-pay/',
-					),
-					array(
-						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helio-pay',
 					),
 				),
 			),
