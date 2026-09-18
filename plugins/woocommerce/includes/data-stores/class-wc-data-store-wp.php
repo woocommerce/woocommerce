@@ -127,9 +127,10 @@ class WC_Data_Store_WP {
 	 * @since  3.0.0
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		delete_metadata_by_mid( $this->meta_type, $meta->id );
+		return delete_metadata_by_mid( $this->meta_type, $meta->id );
 	}
 
 	/**
