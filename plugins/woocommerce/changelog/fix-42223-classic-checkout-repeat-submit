@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the classic checkout from placing a second order when the form is submitted again after an error that happened once the order had already gone through.

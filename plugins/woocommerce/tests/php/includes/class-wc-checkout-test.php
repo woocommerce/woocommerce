@@ -5,12 +5,21 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Class WC_Checkout
  */
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * The least create_order() needs from a posted classic checkout form, paying by cash on delivery.
+	 */
+	private const COD_POSTED_DATA = array(
+		'payment_method' => WC_Gateway_COD::ID,
+		'billing_email'  => 'customer@example.com',
+	);
 
 	/**
 	 * @var object The system under test.
@@ -21,6 +30,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @var callable[] Callbacks registering extra checkout fields, all removed on tear down.
 	 */
 	private $extra_field_filters = array();
+
+	/**
+	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
+	 */
+	private $original_session;
+
+	/**
+	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
+	 */
+	private $original_customer;
 
 	/**
 	 * Runs before each test.
@@ -58,6 +77,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->extra_field_filters = array();
+
+		if ( $this->original_session ) {
+			WC()->session            = $this->original_session;
+			WC()->customer           = $this->original_customer;
+			$this->original_session  = null;
+			$this->original_customer = null;
+		}
 
 		parent::tearDown();
 	}
@@ -782,6 +808,248 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox create_order() decides a repeat submit by the session order's status: "$status" leads to "$expected".
+	 *
+	 * @testWith ["processing", "refuse"]
+	 *           ["completed", "refuse"]
+	 *           ["on-hold", "refuse"]
+	 *           ["pending", "resume"]
+	 *           ["failed", "resume"]
+	 *           ["cancelled", "new-order"]
+	 *           ["refunded", "new-order"]
+	 *
+	 * @param string $status   Status the session order is in when the form is submitted again.
+	 * @param string $expected What create_order() does with it: refuse, resume or new-order.
+	 */
+	public function test_create_order_decides_a_repeat_submit_by_the_session_order_status( string $status, string $expected ): void {
+		$first_order_id = $this->leave_session_order_in_status( $status );
+
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
+
+		switch ( $expected ) {
+			case 'refuse':
+				$this->assertWPError( $result, 'A repeat submit for an order that went through must not build a new order.' );
+				$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
+				$this->assertSame( $first_order_id, $result->get_error_data()['order_id'] );
+				$this->assertSame(
+					array( $first_order_id ),
+					wc_get_orders(
+						array(
+							'return' => 'ids',
+							'limit'  => -1,
+						)
+					),
+					'No second order should exist.'
+				);
+				break;
+			case 'resume':
+				$this->assertSame( $first_order_id, $result, 'The order awaiting payment should be resumed.' );
+				break;
+			case 'new-order':
+				$this->assertNotWPError( $result );
+				$this->assertNotSame( $first_order_id, $result, 'A new order should be built.' );
+				break;
+			default:
+				$this->fail( "Unknown expectation '{$expected}'." );
+		}
+	}
+
+	/**
+	 * @testdox create_order() does not treat a status the site declares payable as a repeat submit.
+	 */
+	public function test_create_order_does_not_treat_a_site_declared_payable_status_as_a_repeat_submit(): void {
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment',
+			function ( $statuses ) {
+				$statuses[] = OrderStatus::ON_HOLD;
+
+				return $statuses;
+			}
+		);
+		$this->leave_session_order_in_status( OrderStatus::ON_HOLD );
+
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
+
+		$this->assertNotWPError( $result, 'An on-hold order the site still lets the shopper pay for is not a repeat submit.' );
+	}
+
+	/**
+	 * Leave the session the way a gateway that died right after its status change does: the order it points at
+	 * has the cart's hash and the given status, and the cart was never emptied.
+	 *
+	 * @param string $status Status to put the order in.
+	 * @return int The order ID.
+	 */
+	private function leave_session_order_in_status( string $status ): int {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( self::COD_POSTED_DATA );
+		$this->assertNotWPError( $order_id );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		wc_get_order( $order_id )->update_status( $status );
+
+		return $order_id;
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit with the order-received redirect when the session order already went through the gateway.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_with_the_order_received_redirect(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_BACS::ID );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+		$this->post_checkout_form( WC_Gateway_BACS::ID );
+
+		// A plugin dies inside the status transition the gateway triggers, after the order moved on but before the cart was emptied.
+		$die_in_transition = function () {
+			throw new Error( 'Call to a member function push_order() on null' );
+		};
+		add_action( 'woocommerce_order_status_on-hold', $die_in_transition );
+		try {
+			$this->submit_checkout_over_ajax();
+			$this->fail( 'The first submit should have died inside the status transition.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Call to a member function push_order() on null', $e->getMessage() );
+		}
+		remove_action( 'woocommerce_order_status_on-hold', $die_in_transition );
+
+		$order_ids = wc_get_orders(
+			array(
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+		$this->assertCount( 1, $order_ids, 'The first submit should have created the order before dying.' );
+		$order = wc_get_order( $order_ids[0] );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ) );
+		$this->assertFalse( WC()->cart->is_empty(), 'The gateway never got to empty the cart.' );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame(
+			$order_ids,
+			wc_get_orders(
+				array(
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			),
+			'The retry must not build a second order.'
+		);
+		$latest_note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 1,
+			)
+		)[0] ?? null;
+		$this->assertStringContainsString( 'No second order was created', $latest_note->content ?? '', 'The merchant should see the repeat submit on the order.' );
+	}
+
+	/**
+	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
+	 *
+	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
+	 */
+	private function use_real_session(): void {
+		$this->original_session  = WC()->session;
+		$this->original_customer = WC()->customer;
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+		WC()->customer = new WC_Customer( 0, true );
+	}
+
+	/**
+	 * Make a registered gateway available at checkout without touching its stored settings.
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 */
+	private function make_gateway_available( string $gateway_id ): void {
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function ( $gateways ) use ( $gateway_id ) {
+				$gateways[ $gateway_id ] = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
+
+				return $gateways;
+			}
+		);
+	}
+
+	/**
+	 * Fill the request the way the classic checkout form posts it, for a guest buying a virtual product.
+	 *
+	 * Call it after use_real_session(): the nonce takes its logged-out user ID from the session, so one created
+	 * before the swap fails verification after it.
+	 *
+	 * @param string $payment_method Gateway ID.
+	 */
+	private function post_checkout_form( string $payment_method ): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+
+		$_POST    = array(
+			'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ),
+			'payment_method'                     => $payment_method,
+			'billing_first_name'                 => 'Ada',
+			'billing_last_name'                  => 'Lovelace',
+			'billing_address_1'                  => '1 Analytical Engine Way',
+			'billing_city'                       => 'Los Angeles',
+			'billing_state'                      => 'CA',
+			'billing_postcode'                   => '90210',
+			'billing_country'                    => 'US',
+			'billing_email'                      => 'customer@example.com',
+			'billing_phone'                      => '555-555-5555',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test fixture; the request carries the nonce created just above.
+	}
+
+	/**
+	 * Run process_checkout() as the checkout JS does, returning the JSON it answers with.
+	 *
+	 * Anything other than the wp_send_json() exit, such as an Error a hook raises, propagates to the caller.
+	 * The exit is an Error rather than an Exception because process_checkout() catches Exception itself.
+	 *
+	 * @return array Decoded JSON response.
+	 */
+	private function submit_checkout_over_ajax(): array {
+		$throw_instead_of_dying = function () {
+			return function () {
+				throw new Error( 'wp_die' );
+			};
+		};
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $throw_instead_of_dying );
+		$outer_buffer_level = ob_get_level();
+		ob_start();
+
+		try {
+			$this->sut->process_checkout();
+			$this->fail( 'process_checkout() should end the request with wp_send_json().' );
+		} catch ( Error $e ) {
+			if ( 'wp_die' !== $e->getMessage() ) {
+				throw $e;
+			}
+			$output = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $outer_buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', $throw_instead_of_dying );
+		}
+
+		$decoded = json_decode( $output, true );
+		$this->assertIsArray( $decoded, $output );
+
+		return $decoded;
 	}
 
 	/**
