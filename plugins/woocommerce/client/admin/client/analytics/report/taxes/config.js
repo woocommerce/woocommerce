@@ -88,7 +88,6 @@ const filterValues = [
 		value: 'compare-taxes',
 		chartMode: 'item-comparison',
 		settings: {
-			type: 'taxes',
 			param: 'taxes',
 			getLabels: getRequestByIdString(
 				NAMESPACE + '/taxes',
@@ -103,12 +102,15 @@ const filterValues = [
 					'Check at least two tax codes below to compare',
 					'woocommerce'
 				),
+				title: __( 'Compare Tax Codes', 'woocommerce' ),
+				update: __( 'Compare', 'woocommerce' ),
+			},
+			searchProps: {
+				type: 'taxes',
 				placeholder: __(
 					'Search for tax codes to compare',
 					'woocommerce'
 				),
-				title: __( 'Compare Tax Codes', 'woocommerce' ),
-				update: __( 'Compare', 'woocommerce' ),
 			},
 			onClick: addCesSurveyForAnalytics,
 		},

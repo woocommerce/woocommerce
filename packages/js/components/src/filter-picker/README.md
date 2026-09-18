@@ -1,5 +1,4 @@
-Filter Picker
-===
+# Filter Picker
 
 Modify a url query parameter via a dropdown selection of configurable options. This component manipulates the `filter` query parameter.
 
@@ -78,5 +77,36 @@ The `filters` prop is an array of filter objects. Each filter object should have
 - `component`: String - A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
 - `label`: String - The label for this filter. Optional only for custom component filters.
 - `path`: String - An array representing the "path" to this filter, if nested.
+- `settings`: Object - Settings for a filter with a `component`, or for a comparison filter. See the `settings` structure below.
 - `subFilters`: Array - An array of more filter objects that act as "children" to this item. This set of filters is shown if the parent filter is clicked.
 - `value`: String - The value for this filter, used to set the `filter` query param when clicked, if there are no `subFilters`.
+
+### `settings` structure
+
+A filter with `component: 'Search'` renders a `Search` component in the dropdown. Its `settings` object has the following format:
+
+- `param`: String - The url parameter the selected value is stored in.
+- `getLabels`: Function - Function used to fetch labels for the selected values, returns a Promise.
+- `labels.button`: String - Label shown in the dropdown button next to the selected value.
+- `searchProps`: Object - Props forwarded to the `Search` component, except `selected`, `onChange`, `inlineTags`, and `staticResults`. `searchProps.type` is required. See [Search](../search/README.md) for the full list.
+
+```jsx
+{
+	component: 'Search',
+	value: 'single_product',
+	path: [ 'select_product' ],
+	settings: {
+		param: 'products',
+		getLabels: getProductLabels,
+		labels: {
+			button: 'Single product',
+		},
+		searchProps: {
+			type: 'products',
+			placeholder: 'Type to search for a product',
+		},
+	},
+}
+```
+
+The `type`, `autocompleter`, and `labels.placeholder` settings are deprecated. Use `searchProps.type`, `searchProps.autocompleter`, and `searchProps.placeholder` instead. When a deprecated setting is set, it takes precedence over the matching `searchProps` value, so extensions that change it on core filters keep working.
