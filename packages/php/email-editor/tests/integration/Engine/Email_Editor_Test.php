@@ -121,7 +121,8 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItLeavesThePreviewLinkOfANonEmailPostUntouched(): void {
 		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
-		$link    = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
+		$this->assertIsInt( $post_id );
+		$link = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
 
 		$this->assertSame( $link, apply_filters( 'preview_post_link', $link, get_post( $post_id ) ) );
 	}
