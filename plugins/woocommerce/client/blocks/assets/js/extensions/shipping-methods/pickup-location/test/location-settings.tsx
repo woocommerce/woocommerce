@@ -311,6 +311,20 @@ describe( 'LocationSettings', () => {
 		expect( updateLocation ).toHaveBeenCalledWith( 'warehouse-0', null );
 	} );
 
+	it( 'shows the empty-state placeholder when no locations remain', () => {
+		mockUseSettingsContext.mockReturnValue(
+			getContext( { pickupLocations: [] } )
+		);
+		render( <LocationSettings /> );
+
+		expect(
+			screen.getByText(
+				'When you add a pickup location, it will appear here.'
+			)
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Warehouse' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'toggles a location using its existing ID', async () => {
 		const user = userEvent.setup();
 		const toggleLocation = jest.fn();

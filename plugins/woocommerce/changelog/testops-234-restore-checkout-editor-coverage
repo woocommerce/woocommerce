@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cover the checkout editor's terms link source, dark mode toggle, billing address controls, preview-data round trip and pickup location state names in Jest

@@ -20,10 +20,10 @@ const countryData: Record< string, CountryData > = {
 	},
 };
 
-// The country maps are computed when the module loads, so every case needs a
-// fresh module registry seeded with its own `countries` setting.
-const loadConstants = ( countries: unknown ): Constants => {
-	window.wcSettings = { ...window.wcSettings, countries, countryData };
+// The constants are computed when the module loads, so every case needs a fresh
+// module registry seeded with its own settings.
+const loadConstants = ( settings: Record< string, unknown > ): Constants => {
+	window.wcSettings = { ...window.wcSettings, ...settings };
 	let constants: Constants | null = null;
 	jest.isolateModules( () => {
 		constants = require( '../constants' );
@@ -43,8 +43,11 @@ describe( 'country constants', () => {
 
 	it( 'maps allowed countries to their names', () => {
 		const { ALLOWED_COUNTRIES, SHIPPING_COUNTRIES } = loadConstants( {
-			US: 'United States (US)',
-			GB: 'United Kingdom (UK)',
+			countries: {
+				US: 'United States (US)',
+				GB: 'United Kingdom (UK)',
+			},
+			countryData,
 		} );
 
 		expect( ALLOWED_COUNTRIES ).toEqual( { US: 'United States (US)' } );
@@ -58,8 +61,10 @@ describe( 'country constants', () => {
 	] )(
 		'does not throw when the countries setting is %s',
 		( _label, countries ) => {
-			const { ALLOWED_COUNTRIES, SHIPPING_COUNTRIES } =
-				loadConstants( countries );
+			const { ALLOWED_COUNTRIES, SHIPPING_COUNTRIES } = loadConstants( {
+				countries,
+				countryData,
+			} );
 
 			expect( ALLOWED_COUNTRIES ).toEqual( { US: '' } );
 			expect( SHIPPING_COUNTRIES ).toEqual( { US: '' } );
@@ -67,8 +72,48 @@ describe( 'country constants', () => {
 	);
 
 	it( 'falls back to an empty name when the entry is not a string', () => {
-		const { ALLOWED_COUNTRIES } = loadConstants( { US: 42 } );
+		const { ALLOWED_COUNTRIES } = loadConstants( {
+			countries: { US: 42 },
+			countryData,
+		} );
 
 		expect( ALLOWED_COUNTRIES ).toEqual( { US: '' } );
+	} );
+} );
+
+describe( 'store page constants', () => {
+	const originalSettings = window.wcSettings;
+
+	const storePages = {
+		terms: {
+			id: 7,
+			title: 'Terms and conditions',
+			permalink: 'https://example.com/terms-and-conditions/',
+		},
+		privacy: {
+			id: 8,
+			title: 'Privacy policy',
+			permalink: 'https://example.com/privacy-policy/',
+		},
+	};
+
+	afterEach( () => {
+		window.wcSettings = originalSettings;
+	} );
+
+	it( 'takes the terms link and name from the terms store page', () => {
+		const { TERMS_URL, TERMS_PAGE_NAME } = loadConstants( { storePages } );
+
+		expect( TERMS_URL ).toBe( 'https://example.com/terms-and-conditions/' );
+		expect( TERMS_PAGE_NAME ).toBe( 'Terms and conditions' );
+	} );
+
+	it( 'takes the privacy link and name from the privacy store page', () => {
+		const { PRIVACY_URL, PRIVACY_PAGE_NAME } = loadConstants( {
+			storePages,
+		} );
+
+		expect( PRIVACY_URL ).toBe( 'https://example.com/privacy-policy/' );
+		expect( PRIVACY_PAGE_NAME ).toBe( 'Privacy policy' );
 	} );
 } );
