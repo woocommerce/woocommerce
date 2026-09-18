@@ -70,6 +70,9 @@
 	}
 
 	:where(.wc-block-customer-account__visual > svg),
+	:where(
+			.wc-block-customer-account__visual:has(> .wc-block-customer-account__avatar:only-child)
+	),
 	.wc-block-customer-account__account-icon {
 		display: block;
 		width: em($grid-unit-30);
