@@ -360,6 +360,9 @@ class WC_Install {
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
 		),
+		'11.3.0'   => array(
+			'wc_update_1130_repair_hpos_order_dates_from_posts',
+		),
 	);
 
 	/**
@@ -3170,15 +3173,15 @@ EOT;
 <div class="wp-block-woocommerce-product-collection"><!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail"} -->
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
 <!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 
