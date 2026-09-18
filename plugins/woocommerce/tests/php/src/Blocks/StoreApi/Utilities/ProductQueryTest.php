@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
- * Unit tests for the ProductQuery::get_last_modified() caching behavior.
+ * Unit tests for ProductQuery.
  */
 class ProductQueryTest extends \WC_Unit_Test_Case {
 
@@ -213,5 +213,19 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $second_result );
 		$this->assertNotFalse( wp_cache_get( 'last_modified', 'wc_products' ) );
+	}
+
+	/**
+	 * @testdox prepare_objects_query ignores taxonomy descendant options that are not an array.
+	 */
+	public function test_prepare_objects_query_ignores_non_array_taxonomy_include_children(): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'category', '15' );
+		$request->set_param( 'taxonomy_include_children', (object) array( 'product_cat' => false ) );
+
+		$query_args       = $this->product_query->prepare_objects_query( $request );
+		$category_clauses = wp_list_filter( $query_args['tax_query'], array( 'taxonomy' => 'product_cat' ) );
+
+		$this->assertSame( array( true ), array_column( $category_clauses, 'include_children' ), 'Descendants should stay included when the options are not an array.' );
 	}
 }

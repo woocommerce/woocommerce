@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add optional per-taxonomy descendant control to Store API product queries.
