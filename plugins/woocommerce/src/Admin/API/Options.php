@@ -113,12 +113,7 @@ class Options extends \WC_REST_Data_Controller {
 
 		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '6.3' );
 
-		// Disallow option updates in non-production environments unless the option is whitelisted, prompting developers to create specific endpoints in case they miss the deprecation notice.
-		if ( 'production' !== wp_get_environment_type() ) {
-			return false;
-		}
-
-		return current_user_can( 'manage_options' );
+		return false;
 	}
 
 	/**
@@ -196,9 +191,11 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_ces_shown_for_actions',
 			'woocommerce_clear_ces_tracks_queue_for_page',
 			'woocommerce_admin_install_timestamp',
+			'woocommerce_admin_dismissed_mobile_app_modal',
 			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_show_marketplace_suggestions',
 			'wc_connect_options',
+			'wcshipping_options',
 			'woocommerce_admin_created_default_shipping_zones',
 			'woocommerce_admin_reviewed_default_shipping_zones',
 			'woocommerce_admin_reviewed_store_location_settings',
@@ -215,11 +212,8 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_orders_report_date_tour_shown',
 			'woocommerce_show_prepublish_checks_enabled',
 			'woocommerce_date_type',
-			'date_format',
-			'time_format',
 			'woocommerce_onboarding_profile',
 			'woocommerce_default_country',
-			'blogname',
 			'wcpay_welcome_page_incentives_dismissed',
 			'wcpay_welcome_page_viewed_timestamp',
 			'wcpay_welcome_page_exit_survey_more_info_needed_timestamp',
@@ -241,15 +235,7 @@ class Options extends \WC_REST_Data_Controller {
 			'wc_admin_helper_feature_values',
 		);
 
-		$theme_permissions = array(
-			'theme_mods_' . get_stylesheet() => current_user_can( 'edit_theme_options' ),
-			'stylesheet'                     => current_user_can( 'edit_theme_options' ),
-		);
-
-		return array_merge(
-			array_fill_keys( $theme_permissions, current_user_can( 'edit_theme_options' ) ),
-			array_fill_keys( $legacy_whitelisted_options, $is_woocommerce_admin )
-		);
+		return array_fill_keys( $legacy_whitelisted_options, $is_woocommerce_admin );
 	}
 
 	/**
