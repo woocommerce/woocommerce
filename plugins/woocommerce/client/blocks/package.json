@@ -21,6 +21,7 @@
 		"*.scss",
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
+		"./assets/js/plugins/**",
 		"./assets/js/middleware/**",
 		"./packages/public-api/types/**",
 		"./assets/js/blocks/checkout/inner-blocks/**/index.tsx",
