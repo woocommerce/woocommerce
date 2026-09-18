@@ -51,6 +51,7 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'hooks'        => array(
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
+				'woocommerce_delete_order_refund',
 			),
 			'delivery_url' => $delivery_url,
 		);

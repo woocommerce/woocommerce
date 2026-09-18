@@ -3,10 +3,32 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
 
 	/**
 	 * @testdox Check that post-action validation uses the affected post ID.
@@ -262,6 +284,136 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		sort( $expected_ids );
 		sort( $delivered_ids );
 		$this->assertSame( $expected_ids, $delivered_ids );
+	}
+
+	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook for its parent order.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook(): void {
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+
+		$delivered_ids = array();
+		$webhook       = $this->create_active_webhook( 'order.updated' );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertSame( array( $order->get_id() ), $delivered_ids, 'The webhook should be delivered for the parent order.' );
+	}
+
+	/**
+	 * @testdox Deleting a refund with HPOS builds an order.updated payload for the parent order.
+	 */
+	public function test_refund_deletion_with_hpos_builds_parent_order_payload(): void {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		try {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+
+			$order  = WC_Helper_Order::create_order();
+			$refund = wc_create_refund(
+				array(
+					'order_id'       => $order->get_id(),
+					'amount'         => 1,
+					'refund_payment' => false,
+				)
+			);
+
+			$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+			$refund_id = $refund->get_id();
+
+			$payloads = array();
+			$webhook  = $this->create_active_webhook( 'order.updated' );
+			$webhook->set_user_id( 1 );
+
+			remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+			add_action(
+				'woocommerce_webhook_process_delivery',
+				function ( $delivering_webhook, $arg ) use ( $webhook, &$payloads ) {
+					if ( $webhook === $delivering_webhook ) {
+						$payloads[] = $delivering_webhook->build_payload( $arg );
+					}
+				},
+				10,
+				2
+			);
+			add_action( 'woocommerce_delete_order_refund', array( $webhook, 'process' ) );
+			$webhook->enqueue();
+
+			$refund->delete( true );
+
+			$this->assertCount( 1, $payloads, 'The refund deletion should queue one webhook payload.' );
+			$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
+			$this->assertArrayHasKey( 'id', $payloads[0] );
+			$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+			$this->assertArrayHasKey( 'refunds', $payloads[0] );
+			$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox A refund deletion using the legacy hook signature does not deliver an order.updated webhook.
+	 */
+	public function test_refund_deletion_with_legacy_hook_signature_does_not_deliver_webhook(): void {
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+
+		$delivered_ids = array();
+		$webhook       = $this->create_active_webhook( 'order.updated' );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		do_action( 'woocommerce_delete_order_refund', $refund->get_id() );
+
+		$this->assertSame( array(), $delivered_ids, 'The webhook should not be delivered without a parent order ID.' );
 	}
 
 	/**
