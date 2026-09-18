@@ -856,7 +856,7 @@ class HposLegacyOrderReportQueryBuilder {
 		$alternation = implode( '|', array_keys( $map ) );
 
 		// Qualified `posts.<col>` references first, then the bare tokens legacy
-		// callers use unqualified. Callbacks avoid `$`/`\` replacement-string pitfalls.
+		// callers use unqualified. The callback avoids `$`/`\` replacement-string pitfalls.
 		$replace = static function ( $matches ) use ( $map ) {
 			return $map[ $matches[1] ];
 		};
