@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add search, pagination, and an empty state to the order edit Add tax modal.

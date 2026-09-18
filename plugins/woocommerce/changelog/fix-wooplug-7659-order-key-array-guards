@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat array-valued order keys as invalid on the order pay, cancel and PayPal return paths instead of raising a PHP error.

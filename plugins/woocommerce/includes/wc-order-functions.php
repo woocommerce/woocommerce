@@ -588,7 +588,9 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
-		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		// A refund can be created with nobody logged in (gateway webhook, REST, WP-CLI, cron). Record no
+		// user in that case; falling back to user 1 attributes the refund to whoever that happens to be.
+		$refund->set_refunded_by( get_current_user_id() );
 		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
@@ -606,9 +608,16 @@ function wc_create_refund( $args = array() ) {
 
 				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
-				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
 
-				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+				// Keep every numeric tax entry, including a 0% amount that a callback-less array_filter would drop as falsy. 0% is a valid rate, not "no tax". See #27118.
+				$refund_tax = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_map( 'floatval', array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'], 'is_numeric' ) ) : array();
+
+				// The admin refund form posts a 0 total and 0 tax amounts for every untouched row, so an
+				// all-zero refund_tax alone must not create a refund line item (a genuine 0% tax line
+				// still survives, because its item is refunded via qty or refund_total).
+				$refund_tax_sum = array_sum( array_map( 'abs', $refund_tax ) );
+
+				if ( empty( $qty ) && empty( $refund_total ) && empty( $refund_tax_sum ) ) {
 					continue;
 				}
 
@@ -907,7 +916,10 @@ function wc_order_fully_refunded( $order_id ) {
 	$order      = wc_get_order( $order_id );
 	$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
-	if ( ! $max_refund ) {
+	// Numeric comparison, not truthiness: when prior refunds sum a float epsilon
+	// above the order total, the difference formats to '-0' — a truthy string that
+	// is numerically zero — which would otherwise create a ghost 0.00 refund below.
+	if ( (float) $max_refund <= 0 ) {
 		return;
 	}
 
@@ -1243,7 +1255,7 @@ function wc_get_order_notes( $args ) {
 
 	// Set WooCommerce order type.
 	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; the customer flag exists only as commentmeta, so a meta join is the only way to filter on it.
 			array(
 				'key'     => 'is_customer_note',
 				'value'   => 1,
@@ -1251,7 +1263,7 @@ function wc_get_order_notes( $args ) {
 			),
 		);
 	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; internal notes are identified by the absence of the is_customer_note meta, so NOT EXISTS is the only way to filter on them.
 			array(
 				'key'     => 'is_customer_note',
 				'compare' => 'NOT EXISTS',

@@ -69,7 +69,7 @@ const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 				'woocommerce/product-summary',
 				restAttributes
 			);
-			replaceBlock( clientId, productSummaryBlock );
+			void replaceBlock( clientId, productSummaryBlock );
 		}
 	};
 

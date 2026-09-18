@@ -1,4 +1,13 @@
+@import "../../base/components/button/style";
 @import "../../base/components/drawer/style";
+@import "../../base/components/cart-checkout/cart-line-items-table/style";
+@import "../../base/components/cart-checkout/payment-method-icons/style";
+@import "../../base/components/cart-checkout/product-badge/style";
+@import "../../base/components/cart-checkout/product-details/style";
+@import "../../base/components/cart-checkout/product-metadata/style";
+@import "../../base/components/quantity-selector/style";
+@import "../../base/components/product-name/style";
+@import "../../base/components/product-price/style";
 @import "quantity-badge/style";
 
 .wc-block-mini-cart {
@@ -129,18 +138,12 @@
 }
 
 h2.wc-block-mini-cart__title {
-	display: flex;
-	align-items: baseline;
 	background: inherit;
 	padding-bottom: $gap * 2;
 	mask-image: linear-gradient(#000 calc(100% - #{$gap * 1.5}), transparent);
 	z-index: 1;
-	margin: $gap $gap $gap * -2;
-	@include font-size(larger);
-
-	span:first-child {
-		margin-right: $gap-smaller;
-	}
+	margin: $gap-smallest * -0.5 $gap $gap * -2;
+	font-size: 1.5rem;
 }
 
 .wc-block-mini-cart__items {
@@ -169,7 +172,7 @@ h2.wc-block-mini-cart__title {
 }
 
 .wc-block-mini-cart__footer {
-	border-top: 1px solid $universal-translucent-border-color;
+	border-top: 1px solid $universal-border-light;
 	padding: $gap-large $gap;
 
 	.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {

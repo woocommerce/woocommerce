@@ -4,10 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { SectionHeader, ScrollTo } from '@woocommerce/components';
-import { useSettings } from '@woocommerce/data';
+import { itemsStore, reportsStore, useSettings } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -19,7 +18,13 @@ import Setting from './setting';
 import HistoricalData from './historical-data';
 import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
-const Settings = ( { createNotice, query } ) => {
+const Settings = ( { query } ) => {
+	const { createNotice } = useDispatch( 'core/notices' );
+	const {
+		invalidateResolutionForStoreSelector: invalidateReportResolutions,
+	} = useDispatch( reportsStore );
+	const { invalidateResolutionForStoreSelector: invalidateItemResolutions } =
+		useDispatch( itemsStore );
 	const {
 		settingsError,
 		isRequesting,
@@ -57,6 +62,9 @@ const Settings = ( { createNotice, query } ) => {
 		}
 		if ( ! isRequesting && hasSaved.current ) {
 			if ( ! settingsError ) {
+				invalidateReportResolutions( 'getReportItems' );
+				invalidateReportResolutions( 'getReportStats' );
+				invalidateItemResolutions( 'getItems' );
 				createNotice(
 					'success',
 					__(
@@ -75,7 +83,13 @@ const Settings = ( { createNotice, query } ) => {
 			}
 			hasSaved.current = false;
 		}
-	}, [ isRequesting, settingsError, createNotice ] );
+	}, [
+		isRequesting,
+		settingsError,
+		createNotice,
+		invalidateReportResolutions,
+		invalidateItemResolutions,
+	] );
 
 	const resetDefaults = () => {
 		if (
@@ -224,12 +238,4 @@ const Settings = ( { createNotice, query } ) => {
 	);
 };
 
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			createNotice,
-		};
-	} )
-)( Settings );
+export default Settings;

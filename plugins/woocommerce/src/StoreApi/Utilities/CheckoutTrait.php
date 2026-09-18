@@ -7,7 +7,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-use Automattic\WooCommerce\Admin\Features\Features;
 use WC_Customer;
 
 /**
@@ -88,6 +87,13 @@ trait CheckoutTrait {
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
 
+		$session = WC()->session;
+		$session->set( 'order_awaiting_payment', $order->get_id() );
+		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
+		if ( is_callable( array( $session, 'save_data' ) ) ) {
+			$session->save_data();
+		}
+
 		try {
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
@@ -117,7 +123,7 @@ trait CheckoutTrait {
 			/**
 			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 			 *
-			 * @param bool The WP_DEBUG mode.
+			 * @param bool $return_previous_exceptions Whether to include the previous exception. Defaults to the WP_DEBUG value.
 			 */
 			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [
@@ -320,19 +326,12 @@ trait CheckoutTrait {
 	 * @param callable         $persist Callback invoked as `$persist( string $key, mixed $value )` for each field.
 	 */
 	private function resolve_and_persist_additional_fields( \WP_REST_Request $request, callable $persist ): void {
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$document_object = $this->get_document_object_from_rest_request( $request );
-			$document_object->set_context( 'order' );
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
-			);
-		} else {
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_fields_for_location( 'order' ),
-				$this->additional_fields_controller->get_fields_for_location( 'contact' )
-			);
-		}
+		$document_object = $this->get_document_object_from_rest_request( $request );
+		$document_object->set_context( 'order' );
+		$additional_fields = array_merge(
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
+		);
 
 		$field_values = isset( $request['additional_fields'] ) ? (array) $request['additional_fields'] : array();
 
@@ -354,27 +353,47 @@ trait CheckoutTrait {
 	 * Returns a document object from a REST request.
 	 *
 	 * @param \WP_REST_Request $request The REST request.
-	 * @return DocumentObject The document object or null if experimental blocks are not enabled.
+	 * @return DocumentObject The document object.
 	 */
 	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
+		// Keep the order local so validation errors do not release its stock or coupon holds.
+		$order        = $this->order ?? $this->get_draft_order();
+		$saved_fields = wc()->customer instanceof WC_Customer
+			? $this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
+			: [];
+		if ( $order instanceof \WC_Order ) {
+			$saved_fields = wp_parse_args(
+				$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
+				$saved_fields
+			);
+		}
+
+		$field_values      = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+		$additional_fields = [];
+		$registered_fields = array_merge(
+			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
+			$this->additional_fields_controller->get_fields_for_location( 'order' )
+		);
+
+		// Conditions need raw values and explicit empty values for missing fields.
+		foreach ( $registered_fields as $key => $field ) {
+			$additional_fields[ $key ] = 'checkbox' === $field['type']
+				? (bool) ( $field_values[ $key ] ?? false )
+				: ( $field_values[ $key ] ?? '' );
+		}
+
 		return new DocumentObject(
 			[
 				'customer' => [
 					'billing_address'   => $request['billing_address'],
 					'shipping_address'  => $request['shipping_address'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_contact_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'contact' ),
 				],
 				'checkout' => [
 					'payment_method'    => $request['payment_method'],
 					'create_account'    => $request['create_account'],
 					'customer_note'     => $request['customer_note'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_order_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'order' ),
 				],
 			]
 		);

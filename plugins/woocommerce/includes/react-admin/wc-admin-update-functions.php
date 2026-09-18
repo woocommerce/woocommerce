@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 
 /**
  * Update order stats `status` index length.
@@ -306,4 +308,21 @@ function wc_update_1050_add_idx_user_email() {
 	if ( is_null( $index_exists ) ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX idx_user_email (user_email(100))" );
 	}
+}
+
+/**
+ * Queue the rebuild of `wc_order_tax_lookup` rows recorded before the table held one row per tax
+ * order item.
+ *
+ * The rebuild runs through BatchProcessingController, which owns the batching, the retries and the
+ * "Rebuild analytics tax data" tool on WooCommerce > Status > Tools. Until it has been through an
+ * order, that order's rows keep reporting the way they did before the column existed, so nothing
+ * waits on this finishing.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_migrate_tax_lookup_order_items() {
+	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 }

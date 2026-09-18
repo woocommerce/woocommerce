@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Document what Enums get_all() returns compared with the filterable wc_get_*() helpers, including the differing return shapes and the wc- prefix on order statuses.

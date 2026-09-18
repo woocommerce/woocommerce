@@ -241,7 +241,17 @@ class Controller extends AbstractController {
 			return true;
 		}
 
-		$allowed_values = array_map( 'strval', array_keys( (array) $options ) );
+		// Options can be a simple map ( 'yes' => 'Label' ) or a structured array
+		// ( array( 'value' => 'yes', 'label' => 'Label' ) ) when plugins filter
+		// the settings. Extract the allowed values from either format.
+		$allowed_values = array();
+		foreach ( (array) $options as $key => $option ) {
+			if ( is_array( $option ) && isset( $option['value'] ) ) {
+				$allowed_values[] = (string) $option['value'];
+			} else {
+				$allowed_values[] = (string) $key;
+			}
+		}
 
 		// Normalize value to array for consistent validation.
 		$check_values = is_array( $value ) ? array_map( 'strval', $value ) : array( (string) $value );

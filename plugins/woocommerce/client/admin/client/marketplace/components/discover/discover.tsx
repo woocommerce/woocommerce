@@ -62,7 +62,7 @@ export default function Discover(): React.JSX.Element | null {
 	useEffect( () => {
 		setIsLoading( true );
 
-		fetchDiscoverPageData()
+		void fetchDiscoverPageData()
 			.then(
 				( response: Array< ProductGroup > | { success: boolean } ) => {
 					if ( ! Array.isArray( response ) ) {

@@ -740,7 +740,8 @@ abstract class WC_Data {
 		foreach ( $filtered_meta_data as $meta ) {
 			$this->meta_data[] = new WC_Meta_Data(
 				array(
-					'id'    => (int) $meta->meta_id,
+					// Virtual meta injected by data-store read filters can omit meta_id; default it to 0 rather than emitting an undefined-property warning.
+					'id'    => (int) ( $meta->meta_id ?? 0 ),
 					'key'   => $meta->meta_key,
 					'value' => maybe_unserialize( $meta->meta_value ),
 				)

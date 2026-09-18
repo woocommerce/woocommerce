@@ -67,7 +67,7 @@ function useProducts(
 						per_page: 100,
 				  },
 		};
-		getProducts( query ).then( ( results ) => {
+		void getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );

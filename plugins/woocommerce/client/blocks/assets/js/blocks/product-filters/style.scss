@@ -1,5 +1,5 @@
 :where(.wc-block-product-filters) {
-	--top-padding: var(--wp-admin--admin-bar--height);
+	--top-padding: var(--wp-admin--admin-bar--height, 0);
 	@include breakpoint("<782px") {
 		--top-padding: var(--adminbar-mobile-padding, 0);
 	}
@@ -35,8 +35,10 @@
 		inset: 0;
 		pointer-events: none;
 		top: var(--top-padding);
+		z-index: 9999;
 		background-color: transparent;
-		transition: background-color 500ms;
+		// Delay the 200ms backdrop fade so it finishes with the 500ms drawer transition.
+		transition: background-color 200ms 300ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
@@ -47,9 +49,12 @@
 
 	.wc-block-product-filters__overlay-dialog {
 		position: absolute;
-		inset: 0;
-		transform: translateY(100vh);
-		transition: none;
+		/*rtl:ignore*/
+		inset: 0 auto 0 0;
+		--wc-product-filters-closed-translate-x: -100%;
+		width: min(100%, 480px);
+		transform: translateX(var(--wc-product-filters-closed-translate-x));
+		transition: transform 500ms;
 		background-color: var(
 			--wc-product-filters-overlay-background-color,
 			var(--wc-product-filters-background-color, Canvas)
@@ -64,7 +69,7 @@
 	}
 
 	.wc-block-product-filters__overlay-header {
-		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40) 0;
+		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--30) 0;
 		display: flex;
 		flex-flow: row-reverse;
 	}
@@ -85,12 +90,12 @@
 	}
 
 	.wc-block-product-filters__overlay-content {
-		padding: 0 var(--wp--preset--spacing--40);
+		padding: 0 var(--wp--preset--spacing--30);
 		overflow-y: scroll;
 	}
 
 	.wc-block-product-filters__overlay-footer {
-		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--30);
 		box-shadow: 0 -4px 8px 0 #0000001a;
 	}
 
@@ -98,102 +103,38 @@
 		width: 100%;
 	}
 
+	&.is-overlay-right .wc-block-product-filters__overlay-dialog {
+		/*rtl:ignore*/
+		inset: 0 0 0 auto;
+		--wc-product-filters-closed-translate-x: 100%;
+	}
+
 	&.is-overlay-opened {
 		.wc-block-product-filters__overlay {
-			z-index: 9999;
 			pointer-events: auto;
 			background-color: rgba(95, 95, 95, 0.35);
+			transition-delay: 0s;
 		}
 
 		.wc-block-product-filters__overlay-dialog {
-			transform: translateY(0);
-			transition: transform 500ms;
+			transform: translateX(0);
+		}
+
+		.wc-block-product-filters__overlay-content .wp-block-group {
+			display: block;
+
+			> div {
+				margin: 20px 0;
+			}
 		}
 	}
 
 	&.is-filter-drawer-disabled {
 		display: flex;
 	}
-
-	@include breakpoint(">600px") {
-		&,
-		&.is-overlay-opened {
-			display: flex;
-
-			.wc-block-product-filters__overlay-header,
-			.wc-block-product-filters__overlay-footer,
-			.wc-block-product-filters__open-overlay {
-				display: none;
-			}
-
-			.wc-block-product-filters__overlay {
-				position: relative;
-				pointer-events: auto;
-				inset: 0;
-				background: inherit;
-				color: inherit;
-				transition: none;
-				flex-grow: 1;
-			}
-			.wc-block-product-filters__overlay-wrapper {
-				width: auto;
-				height: auto;
-				background: inherit;
-				color: inherit;
-			}
-
-			.wc-block-product-filters__overlay-dialog {
-				position: relative;
-				transform: none;
-				background: inherit;
-				color: inherit;
-			}
-
-			.wc-block-product-filters__overlay-content {
-				padding: 0;
-				overflow: visible;
-				flex-grow: 1;
-				background: inherit;
-				color: inherit;
-			}
-		}
-	}
-
-	@include breakpoint("<600px") {
-		.wc-block-product-filters__content,
-		.wc-block-product-filters__overlay-content {
-			.wp-block-group {
-				display: block;
-
-				> div {
-					margin: 20px 0;
-				}
-			}
-		}
-	}
 }
 
 // We don't want zero specificity for this style.
 .wc-block-product-filter--hidden {
 	display: none;
-}
-
-.wc-block-product-filter__show-more {
-	background: none;
-	border: none;
-	font-family: inherit;
-	margin-top: 0.5em;
-	color: inherit;
-	cursor: pointer;
-	text-decoration: underline;
-	padding: 0;
-
-	&:hover {
-		text-decoration: none;
-	}
-
-	&:focus {
-		outline: 1px dotted currentColor;
-		outline-offset: 2px;
-	}
 }

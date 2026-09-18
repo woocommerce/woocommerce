@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use WC_Product;
@@ -14,6 +15,11 @@ use WC_Product;
  * Class for integrating with the product page.
  */
 class ProductPageIntegration {
+
+	/**
+	 * Name of the Add to Cart + Options block.
+	 */
+	private const ADD_TO_CART_WITH_OPTIONS_BLOCK = 'woocommerce/add-to-cart-with-options';
 
 	/**
 	 * Runtime cache for preventing double rendering.
@@ -68,6 +74,13 @@ class ProductPageIntegration {
 			return;
 		}
 
+		// Add to Cart + Options buffers this hook inside its <form> and falls back to a
+		// legacy HTML form when the buffer contains form elements. Block-theme support
+		// will ship separately.
+		if ( $this->is_rendering_inside_add_to_cart_with_options() ) {
+			return;
+		}
+
 		global $product;
 		if ( ! is_product() || ! is_a( $product, 'WC_Product' ) ) {
 			return;
@@ -99,6 +112,19 @@ class ProductPageIntegration {
 		wp_enqueue_script( 'wc-back-in-stock-form' );
 
 		$this->render_form( $product );
+	}
+
+	/**
+	 * Whether the hook is firing from inside the Add to Cart + Options render callback.
+	 *
+	 * WP_Block::render() sets WP_Block_Supports::$block_to_render around the callback,
+	 * and the block fires its buffered template hooks before rendering inner blocks.
+	 *
+	 * @return bool
+	 */
+	private function is_rendering_inside_add_to_cart_with_options(): bool {
+		return isset( \WP_Block_Supports::$block_to_render['blockName'] )
+			&& self::ADD_TO_CART_WITH_OPTIONS_BLOCK === \WP_Block_Supports::$block_to_render['blockName'];
 	}
 
 	/**
@@ -152,7 +178,7 @@ class ProductPageIntegration {
 		}
 
 		$text = __( 'Please {login_link} to sign up for stock notifications.', 'woocommerce' );
-		$text = str_replace( '{login_link}', '<a href="' . wc_get_account_endpoint_url( 'my-account' ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{login_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( 'my-account' ) ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 
@@ -181,8 +207,14 @@ class ProductPageIntegration {
 			return;
 		}
 
+		// The endpoint can be switched off from Settings > Advanced, leaving nowhere to link to.
+		if ( '' === MyAccountEndpoint::get_endpoint_slug() ) {
+			wc_print_notice( __( 'You have already joined the waitlist!', 'woocommerce' ), 'notice' );
+			return;
+		}
+
 		$text = __( 'You have already joined the waitlist! Click {manage_account_link} to manage your notifications.', 'woocommerce' );
-		$text = str_replace( '{manage_account_link}', '<a href="' . wc_get_account_endpoint_url( 'stock-notifications' ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{manage_account_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ) ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 

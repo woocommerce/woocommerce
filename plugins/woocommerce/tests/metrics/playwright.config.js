@@ -12,7 +12,7 @@ process.env.STORAGE_STATE_PATH ??= path.join(
 	'storage-states/admin.json'
 );
 process.env.WP_BASE_URL ??=
-	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+	'http://localhost:' + ( process.env.WP_ENV_PORT || '8086' );
 
 const config = defineConfig( {
 	reporter: [ [ 'list' ], [ './config/performance-reporter.ts' ] ],
@@ -31,7 +31,7 @@ const config = defineConfig( {
 		new URL( './config/global-setup.ts', 'file:' + __filename ).href
 	),
 	use: {
-		baseURL: process.env.WP_BASE_URL || 'http://localhost:8086',
+		baseURL: process.env.WP_BASE_URL,
 		headless: true,
 		viewport: {
 			width: 960,

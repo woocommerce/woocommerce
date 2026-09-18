@@ -22,6 +22,8 @@ class TestValidateSchema extends \WP_UnitTestCase {
 	 * Setup schema.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
 		$this->validate = new ValidateSchema(
 			[
 				'properties' => [

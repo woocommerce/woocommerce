@@ -101,7 +101,7 @@ const Editor = ( {
 	}, [ attributes, productId, productPreview, setAttributes ] );
 
 	useEffect( () => {
-		if ( isInvalidProductId && ! isEditing ) {
+		if ( isInvalidProductId ) {
 			setIsEditing( true );
 		}
 	}, [ isInvalidProductId ] );

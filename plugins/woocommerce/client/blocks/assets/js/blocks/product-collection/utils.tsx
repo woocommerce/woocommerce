@@ -443,6 +443,7 @@ export const useSetPreviewState = ( {
 		setAttributes,
 		usesReferencePreviewMessage,
 		isUsingReferencePreviewMode,
+		__unstableMarkNextChangeAsNotPersistent,
 	] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
@@ -504,6 +505,7 @@ export const useSetPreviewState = ( {
 		setAttributes,
 		setPreviewState,
 		isUsingReferencePreviewMode,
+		__unstableMarkNextChangeAsNotPersistent,
 	] );
 };
 export const getDefaultQueryForSettingsSection = (
@@ -620,7 +622,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 			}
 		};
 
-		fetchProduct();
+		void fetchProduct();
 	}, [ productId ] );
 
 	return { product, isLoading };

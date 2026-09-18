@@ -5,13 +5,14 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use WC_Unit_Test_Case;
 
 /**
- * Unit tests for the PatternRegistry class.
+ * Unit tests for the BlockTypesController class.
  */
-class BlockTypesController extends \WP_UnitTestCase {
+class BlockTypesController extends WC_Unit_Test_Case {
 
 	/**
 	 * Holds the BlockTypesController under test.
@@ -21,11 +22,14 @@ class BlockTypesController extends \WP_UnitTestCase {
 	private $block_types_controller;
 
 	/**
-	 * Block types registered during a test.
-	 *
-	 * @var string[]
+	 * Block registered through the real registration path, so register_block_type_args fires on it.
 	 */
-	private $registered_test_block_types = array();
+	private const PROBE_BLOCK = 'woocommerce/classic-theme-fallback-probe';
+
+	/**
+	 * Style handle the probe block declares, registered without a source.
+	 */
+	private const PROBE_STYLE = 'wc-classic-theme-fallback-probe';
 
 	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
@@ -33,8 +37,9 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 * @return void
 	 * @throws \Exception If there is no dependency for the given identifier in the container the setup will fail.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
+
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
@@ -42,29 +47,145 @@ class BlockTypesController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tear down test fixtures.
+	 * Removes the probe block and style; the base class does not reset the block registry or the style queue.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->registered_test_block_types as $block_type ) {
-			if ( \WP_Block_Type_Registry::get_instance()->is_registered( $block_type ) ) {
-				unregister_block_type( $block_type );
+		try {
+			if ( \WP_Block_Type_Registry::get_instance()->is_registered( self::PROBE_BLOCK ) ) {
+				unregister_block_type( self::PROBE_BLOCK );
 			}
+			wp_dequeue_style( self::PROBE_STYLE );
+			wp_deregister_style( self::PROBE_STYLE );
+		} finally {
+			parent::tearDown();
 		}
-
-		$this->registered_test_block_types = array();
-
-		remove_filter( 'allowed_block_types_all', array( $this->block_types_controller, 'filter_allowed_block_types' ), 10 );
-
-		parent::tearDown();
 	}
 
 	/**
-	 * Register 3 blocks, one will be allowed by full name, one by namespace,and one because it has a parent with a
-	 * woocommerce namespace.
-	 *
-	 * @return void
+	 * @testdox Should defer a block's style until the block renders on a classic theme.
 	 */
-	public function test_block_should_have_data_attributes() {
+	public function test_classic_theme_defers_block_style_until_render(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Since WordPress 7.0, wp_load_classic_theme_block_styles_on_demand() opts classic themes into
+		// on-demand block assets at wp_default_styles priority 0, so the fallback is only live on sites that opt out.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must simulate a site that opted out of on-demand block assets.' );
+
+		$block_type = $this->register_probe_block();
+
+		$this->assertSame( array(), $block_type->style_handles, 'Registration must strip the style so Core does not queue it on every page.' );
+		$this->assertFalse( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'The style must not be queued before the block renders.' );
+
+		$this->assertStringContainsString( 'class="probe"', do_blocks( '<!-- wp:' . self::PROBE_BLOCK . ' /-->' ) );
+		$this->assertTrue( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'Rendering the block must queue its style.' );
+	}
+
+	/**
+	 * Both themes satisfy more than one clause of the fallback's guard under Core's defaults, so this asserts the
+	 * real-world outcome that makes the fallback dormant. The three tests below isolate the individual clauses.
+	 *
+	 * @testdox Should stand down under Core's default block asset settings.
+	 * @testWith ["storefront"]
+	 *           ["twentytwentytwo"]
+	 *
+	 * @param string $theme Theme to activate before the decision is made.
+	 */
+	public function test_stands_down_under_core_default_asset_settings( string $theme ): void {
+		switch_theme( $theme );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'WordPress must already be loading block assets on demand.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only on-demand block assets are enabled.
+	 */
+	public function test_stands_down_when_only_on_demand_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the separate-assets clause off so on-demand is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_true', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be on.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only separate core block assets are enabled.
+	 */
+	public function test_stands_down_when_only_separate_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the on-demand clause off so separate assets is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_true', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertTrue( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be on.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down under a block theme even when block assets are not loaded on demand.
+	 */
+	public function test_stands_down_under_a_block_theme_without_on_demand_assets(): void {
+		switch_theme( 'twentytwentytwo' );
+		$this->assertTrue( wp_is_block_theme(), 'The test must run with a block theme.' );
+
+		// Turn both asset clauses off so the block theme check is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * Asserts that the fallback passed the block args through untouched and unhooked itself.
+	 */
+	private function assert_fallback_stands_down(): void {
+		$args = array( 'style_handles' => array( self::PROBE_STYLE ) );
+
+		$result = $this->block_types_controller->enqueue_block_style_for_classic_themes( $args, self::PROBE_BLOCK );
+
+		$this->assertSame( $args, $result, 'Core queues the style on render already, so the args must pass through untouched.' );
+		$this->assertFalse(
+			has_filter( 'register_block_type_args', array( $this->block_types_controller, 'enqueue_block_style_for_classic_themes' ) ),
+			'The fallback must unhook itself once it decides it is not needed.'
+		);
+	}
+
+	/**
+	 * Registers the probe block and its style through the real registration path.
+	 *
+	 * @return \WP_Block_Type The registered block type.
+	 */
+	private function register_probe_block(): \WP_Block_Type {
+		wp_register_style( self::PROBE_STYLE, false, array(), '1' );
+		$block_type = register_block_type(
+			self::PROBE_BLOCK,
+			array(
+				'style_handles'   => array( self::PROBE_STYLE ),
+				'render_callback' => static fn() => '<div class="probe"></div>',
+			)
+		);
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+
+		return $block_type;
+	}
+
+	/**
+	 * @testdox Should identify blocks that should have data attributes.
+	 */
+	public function test_block_should_have_data_attributes(): void {
 
 		// A block that will not be allowed data attributes.
 		register_block_type(
@@ -120,208 +241,30 @@ class BlockTypesController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should hide post-editor WooCommerce blocks from unrestricted post editors.
+	 * @testdox register_block_patterns() registers the empty cart message patterns referenced by the installed Cart page.
 	 */
-	public function test_edit_post_context_hides_post_editor_block_types_from_unrestricted_list(): void {
-		foreach (
-			array(
-				'core/test-paragraph',
-				'third-party/test-block',
-				'woocommerce/product-search',
-				'woocommerce/breadcrumbs',
-				'woocommerce/product-reviews',
-				'woocommerce/order-confirmation-status',
-			) as $block_type
-		) {
-			$this->register_test_block_type( $block_type );
+	public function test_register_block_patterns_registers_installed_cart_page_patterns(): void {
+		$registry = \WP_Block_Patterns_Registry::get_instance();
+
+		// The default Cart page created at install references these patterns
+		// (see WC_Install::get_cart_block_content()). Registering them here rather than
+		// in the Cart block type means the page can still resolve the references when
+		// the Cart block itself is not registered.
+		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message' );
+
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
 		}
 
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			true,
-			$this->get_block_editor_context( 'core/edit-post' )
-		);
+		$this->block_types_controller->register_block_patterns();
 
-		$this->assertContains( 'core/test-paragraph', $result, 'Non-WooCommerce blocks should remain available.' );
-		$this->assertContains( 'third-party/test-block', $result, 'Third-party blocks should remain available.' );
-		$this->assertContains( 'woocommerce/product-search', $result, 'WooCommerce blocks outside the denylist should remain available.' );
-		$this->assertNotContains( 'woocommerce/breadcrumbs', $result, 'Store Breadcrumbs should be hidden in post editors.' );
-		$this->assertNotContains( 'woocommerce/product-reviews', $result, 'Product Reviews should be hidden in post editors.' );
-		$this->assertNotContains( 'woocommerce/order-confirmation-status', $result, 'Order Confirmation blocks should be hidden in post editors.' );
-	}
-
-	/**
-	 * @testdox Should keep only widget-area WooCommerce blocks in widget editors.
-	 *
-	 * @dataProvider widget_editor_context_provider
-	 *
-	 * @param string $editor_context_name Editor context name.
-	 */
-	public function test_widget_context_hides_woocommerce_blocks_not_allowed_in_widget_areas( string $editor_context_name ): void {
-		foreach (
-			array(
-				'core/test-paragraph',
-				'third-party/test-block',
-				'woocommerce/product-search',
-				'woocommerce/product-filters',
-				'woocommerce/checkout',
-				'woocommerce/order-confirmation-status',
-			) as $block_type
-		) {
-			$this->register_test_block_type( $block_type );
+		foreach ( $slugs as $slug ) {
+			$this->assertTrue(
+				$registry->is_registered( $slug ),
+				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
+			);
 		}
-
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			true,
-			$this->get_block_editor_context( $editor_context_name )
-		);
-
-		$this->assertContains( 'core/test-paragraph', $result, 'Non-WooCommerce blocks should remain available.' );
-		$this->assertContains( 'third-party/test-block', $result, 'Third-party blocks should remain available.' );
-		$this->assertContains( 'woocommerce/product-search', $result, 'Widget-area WooCommerce blocks should remain available.' );
-		$this->assertContains( 'woocommerce/product-filters', $result, 'Widget-area WooCommerce blocks should remain available.' );
-		$this->assertNotContains( 'woocommerce/checkout', $result, 'WooCommerce blocks outside the widget allowlist should be hidden.' );
-		$this->assertNotContains( 'woocommerce/order-confirmation-status', $result, 'WooCommerce blocks outside the widget allowlist should be hidden.' );
-	}
-
-	/**
-	 * @testdox Should leave Site Editor block availability unchanged.
-	 */
-	public function test_site_editor_context_leaves_allowed_block_types_unchanged(): void {
-		$allowed_block_types = array(
-			'core/test-paragraph',
-			'woocommerce/breadcrumbs',
-			'woocommerce/checkout',
-		);
-
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			$allowed_block_types,
-			$this->get_block_editor_context( 'core/edit-site' )
-		);
-
-		$this->assertSame( $allowed_block_types, $result, 'Site Editor block availability should not be changed.' );
-	}
-
-	/**
-	 * @testdox Should preserve an existing post editor allowlist while removing denied WooCommerce blocks.
-	 */
-	public function test_edit_post_context_preserves_existing_allowlist(): void {
-		$allowed_block_types = array(
-			'core/test-paragraph',
-			'woocommerce/product-search',
-			'woocommerce/catalog-sorting',
-			'third-party/test-block',
-		);
-
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			$allowed_block_types,
-			$this->get_block_editor_context( 'core/edit-post' )
-		);
-
-		$this->assertSame(
-			array(
-				'core/test-paragraph',
-				'woocommerce/product-search',
-				'third-party/test-block',
-			),
-			$result,
-			'Existing allowlists should keep their original restrictions.'
-		);
-	}
-
-	/**
-	 * @testdox Should preserve an existing widget editor allowlist while removing disallowed WooCommerce blocks.
-	 */
-	public function test_widget_context_preserves_existing_allowlist(): void {
-		$allowed_block_types = array(
-			'core/test-paragraph',
-			'woocommerce/product-search',
-			'woocommerce/checkout',
-			'third-party/test-block',
-		);
-
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			$allowed_block_types,
-			$this->get_block_editor_context( 'core/edit-widgets' )
-		);
-
-		$this->assertSame(
-			array(
-				'core/test-paragraph',
-				'woocommerce/product-search',
-				'third-party/test-block',
-			),
-			$result,
-			'Existing allowlists should keep their original restrictions.'
-		);
-	}
-
-	/**
-	 * @testdox Should preserve false block availability for restricted editors.
-	 *
-	 * @dataProvider restricted_editor_context_provider
-	 *
-	 * @param string $editor_context_name Editor context name.
-	 */
-	public function test_restricted_context_preserves_false_allowed_block_types( string $editor_context_name ): void {
-		$result = $this->block_types_controller->filter_allowed_block_types(
-			false,
-			$this->get_block_editor_context( $editor_context_name )
-		);
-
-		$this->assertFalse( $result, 'Existing disabled block availability should be preserved.' );
-	}
-
-	/**
-	 * Data provider for widget editor contexts.
-	 *
-	 * @return array<string, array<string>>
-	 */
-	public function widget_editor_context_provider(): array {
-		return array(
-			'widgets editor'    => array( 'core/edit-widgets' ),
-			'customizer editor' => array( 'core/customize-widgets' ),
-		);
-	}
-
-	/**
-	 * Data provider for restricted editor contexts.
-	 *
-	 * @return array<string, array<string>>
-	 */
-	public function restricted_editor_context_provider(): array {
-		return array(
-			'post editor'       => array( 'core/edit-post' ),
-			'widgets editor'    => array( 'core/edit-widgets' ),
-			'customizer editor' => array( 'core/customize-widgets' ),
-		);
-	}
-
-	/**
-	 * Register a block type and track it for cleanup.
-	 *
-	 * @param string $block_type Block type slug.
-	 */
-	private function register_test_block_type( string $block_type ): void {
-		if ( \WP_Block_Type_Registry::get_instance()->is_registered( $block_type ) ) {
-			return;
-		}
-
-		register_block_type( $block_type );
-
-		$this->registered_test_block_types[] = $block_type;
-	}
-
-	/**
-	 * Get a block editor context for tests.
-	 *
-	 * @param string $editor_context_name Editor context name.
-	 * @return \WP_Block_Editor_Context Block editor context.
-	 */
-	private function get_block_editor_context( string $editor_context_name ): \WP_Block_Editor_Context {
-		return new \WP_Block_Editor_Context(
-			array(
-				'name' => $editor_context_name,
-			)
-		);
 	}
 }

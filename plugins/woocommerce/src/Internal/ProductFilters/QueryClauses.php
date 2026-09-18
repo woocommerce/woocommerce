@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -419,12 +420,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( string $sql ): string {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
@@ -579,7 +575,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
-			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
+			if ( isset( $query_vars[ $param ] ) && is_string( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
 				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) ) );
 			}
 		}

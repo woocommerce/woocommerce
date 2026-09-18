@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 if ! wp user get customer --field=ID --path=/var/www/html >/dev/null 2>&1; then
 	wp user create customer customer@woocommerceblockse2etestsuite.com \
 		--user_pass=password \

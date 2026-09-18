@@ -7,10 +7,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,11 +73,6 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 * @return string
 	 */
 	public function get_database_schema(): string {
-
-		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			return '';
-		}
-
 		global $wpdb;
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
@@ -446,9 +441,12 @@ CREATE TABLE $meta_table_name (
 		$where        = array();
 		$where_values = array();
 
-		if ( $args['status'] ) {
-			$where[]        = 'status = %s';
-			$where_values[] = esc_sql( $args['status'] );
+		if ( ! empty( $args['status'] ) ) {
+			$statuses = array_values( array_filter( array_map( 'strval', (array) $args['status'] ) ) );
+			if ( ! empty( $statuses ) ) {
+				$where[]      = 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+				$where_values = array_merge( $where_values, $statuses );
+			}
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
@@ -464,7 +462,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
-			$where_values[] = esc_sql( $args['user_email'] );
+			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {
@@ -564,6 +562,7 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function notification_exists_by_email( int $product_id, string $email ): bool {
 
+		$email = EmailNormalizer::normalize( $email );
 		if ( ! is_email( $email ) ) {
 			return false;
 		}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove the no-op autoprefixer step from the legacy assets CSS build and clean the obsolete vendor prefixes it was stripping from the sources. Built CSS is unchanged.

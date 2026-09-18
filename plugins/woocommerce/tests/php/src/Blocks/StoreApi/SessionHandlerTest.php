@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
 use WC_Unit_Test_Case;
 
@@ -119,5 +120,31 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 	public function test_set_and_get_session_data(): void {
 		$this->sut->set( 'test_key', 'test_value' );
 		$this->assertSame( 'test_value', $this->sut->get( 'test_key' ), 'Should return the value that was set' );
+	}
+
+	/**
+	 * @testdox A guest cart token loads the session it names.
+	 */
+	public function test_guest_token_loads_the_session_it_names(): void {
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( 't_guest_session' );
+
+		$handler = new SessionHandler();
+		$handler->init();
+
+		$this->assertSame( 't_guest_session', $handler->get_customer_id(), 'A guest token should address its own session' );
+	}
+
+	/**
+	 * @testdox A registered customer cart token loads the session it names.
+	 */
+	public function test_customer_token_loads_the_session_it_names(): void {
+		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $customer_id );
+
+		$handler = new SessionHandler();
+		$handler->init();
+
+		$this->assertSame( $customer_id, $handler->get_customer_id(), 'A customer token should address its own session' );
 	}
 }

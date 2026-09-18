@@ -6,6 +6,7 @@ The enum classes make it easier to reference string values and avoid typos. They
 
 ## Available Enumerators
 
+- [CatalogSortOrder](./CatalogSortOrder.php) - Enumerates the possible values of the `woocommerce_default_catalog_orderby` option.
 - [CatalogVisibility](./CatalogVisibility.php) - Enumerates the possible catalog visibility options for a product.
 - [CurrencyPosition](./CurrencyPosition.php) - Enumerates the possible values of the `woocommerce_currency_pos` option.
 - [DefaultCustomerAddress](./DefaultCustomerAddress.php) - Enumerates the possible values of the `woocommerce_default_customer_address` option.
@@ -17,6 +18,7 @@ The enum classes make it easier to reference string values and avoid typos. They
 - [ProductStatus](./ProductStatus.php) - Enumerates the possible statuses of a product.
 - [ProductStockStatus](./ProductStockStatus.php) - Enumerates the possible stock statuses of a product.
 - [ProductType](./ProductType.php) - Enumerates the possible types of a product.
+- [StockDisplayFormat](./StockDisplayFormat.php) - Enumerates the possible values of the `woocommerce_stock_format` option.
 - [TaxBasedOn](./TaxBasedOn.php) - Enumerates the possible values of the `woocommerce_tax_based_on` option.
 - [TaxDisplayMode](./TaxDisplayMode.php) - Enumerates the possible values of the `woocommerce_tax_display_shop` and `woocommerce_tax_display_cart` options.
 - [WeightUnit](./WeightUnit.php) - Enumerates the possible values of the `woocommerce_weight_unit` option.
