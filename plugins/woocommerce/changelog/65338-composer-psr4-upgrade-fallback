@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Register a WooCommerce-scoped Composer PSR-4 fallback autoloader so that future in-place upgrades can resolve newly-added first-party Automattic\WooCommerce classes under src/ that the in-memory Jetpack classmap snapshot would otherwise miss, preventing "class not found" fatals during the upgrade request.

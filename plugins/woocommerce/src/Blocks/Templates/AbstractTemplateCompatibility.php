@@ -154,6 +154,8 @@ abstract class AbstractTemplateCompatibility {
 		 *
 		 * Accepts an array of hooked data. The array should be in the following
 		 * format:
+		 *
+		 * ```text
 		 * [
 		 *   [
 		 *     hook => <hook-name>,
@@ -162,6 +164,8 @@ abstract class AbstractTemplateCompatibility {
 		 *  ],
 		 *  ...
 		 * ]
+		 * ```
+		 *
 		 * Where:
 		 * - hook-name is the name of the hook that have the functions hooked to.
 		 * - function-name is the hooked function name.

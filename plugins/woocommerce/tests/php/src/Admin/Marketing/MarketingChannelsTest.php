@@ -15,6 +15,8 @@ class MarketingChannelsTest extends WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		remove_all_filters( 'woocommerce_marketing_channels' );
 	}
 

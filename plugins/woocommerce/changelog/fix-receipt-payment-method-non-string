@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cast the payment method title to string on printed order receipts so a non-string value from the woocommerce_printable_order_receipt_data filter no longer fatals receipt generation.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Product Collection inner blocks when rendered inside Query Loop post content.

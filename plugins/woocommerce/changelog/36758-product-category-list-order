@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an $orderby argument to wc_get_product_category_list() and order single-product meta categories by hierarchy. Stores on the stock single-product/meta.php template now render categories ancestor-first; return an empty string from woocommerce_product_meta_category_orderby to restore WordPress term-list order.

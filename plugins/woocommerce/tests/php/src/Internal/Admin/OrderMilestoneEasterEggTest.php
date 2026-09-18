@@ -6,14 +6,13 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Unit tests for OrderMilestoneEasterEgg.
  */
 class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
-	use HPOSToggleTrait;
 
 	/** @var OrderMilestoneEasterEgg */
 	private OrderMilestoneEasterEgg $sut;
@@ -22,12 +21,47 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	private int $admin_user_id;
 
 	/**
+	 * Previous HPOS state.
+	 *
+	 * @var bool
+	 */
+	private static bool $hpos_prev_state;
+
+	/**
+	 * Set up the class fixtures.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		if ( ! self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+		}
+	}
+
+	/**
+	 * Tear down the class fixtures.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		}
+
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Set up the test case.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->setup_cot();
-		$this->toggle_cot_feature_and_usage( true );
 
 		$this->sut           = new OrderMilestoneEasterEgg();
 		$this->admin_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
@@ -47,11 +81,8 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_update_order', array( $this->sut, 'clear_milestone_cache' ) );
 		remove_action( 'woocommerce_delete_order', array( $this->sut, 'clear_milestone_cache' ) );
 		remove_action( 'woocommerce_trash_order', array( $this->sut, 'clear_milestone_cache' ) );
+		remove_all_filters( 'wc_order_milestone_egg_map' );
 
-		// Drop HPOS tables before toggling off — avoids the "orders out of sync" exception
-		// that fires when HPOS is disabled while the table still holds unsync'd rows.
-		OrderHelper::delete_order_custom_tables();
-		$this->clean_up_cot_setup();
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}

@@ -4,6 +4,11 @@
 import { devices } from '@playwright/test';
 import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
+/**
+ * Internal dependencies
+ */
+import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
+
 const blockData = {
 	name: 'woocommerce/product-image-gallery',
 	productPage: '/product/hoodie/',
@@ -93,6 +98,44 @@ test.describe( `${ blockData.name } frontend`, () => {
 			activeImageSrc as string
 		);
 	} );
+
+	test( 'aligns the active slide when the gallery width is fractional', async ( {
+		page,
+	} ) => {
+		await page.goto( blockData.productPage );
+
+		const gallery = page.locator( '.woocommerce-product-gallery' );
+		const viewport = page.locator( '.flex-viewport' );
+		const thumbnails = page.locator(
+			'.flex-control-nav.flex-control-thumbs img'
+		);
+
+		await expect( gallery ).toBeVisible();
+		await expect( viewport ).toBeVisible();
+		await expect( gallery ).toHaveCSS( 'opacity', '1' );
+
+		await gallery.evaluate( ( element ) => {
+			( element as HTMLElement ).style.width = '320.5px';
+			window.dispatchEvent( new Event( 'resize' ) );
+		} );
+
+		const targetThumbnail = thumbnails.nth( 1 );
+		await targetThumbnail.click();
+		await expect( targetThumbnail ).toHaveClass( /flex-active/ );
+
+		await expect
+			.poll( async () => {
+				const activeSlideBox = await gallery
+					.locator( '.flex-active-slide' )
+					.boundingBox();
+				const viewportBox = await viewport.boundingBox();
+
+				return activeSlideBox && viewportBox
+					? activeSlideBox.x - viewportBox.x
+					: null;
+			} )
+			.toBeCloseTo( 0, 1 );
+	} );
 } );
 
 test.describe( `${ blockData.name } editor`, () => {
@@ -117,6 +160,48 @@ test.describe( `${ blockData.name } editor`, () => {
 		).toBeHidden();
 
 		await page
+			.getByRole( 'button', {
+				name: 'Use the Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeVisible();
+	} );
+
+	test( 'shows the Add to Cart + Options compatibility notice and can be migrated to the Product Gallery block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		const pageObject = new AddToCartWithOptionsPage( {
+			page,
+			admin,
+			editor,
+		} );
+		await pageObject.updateSingleProductTemplate();
+
+		const productImageGalleryBlock = await editor.getBlockByName(
+			blockData.name
+		);
+		await editor.selectBlocks( productImageGalleryBlock );
+
+		const sidebarSettings = page.getByRole( 'region', {
+			name: 'Editor settings',
+		} );
+
+		await expect(
+			sidebarSettings.getByText(
+				'The classic Product Image Gallery block is not compatible with the Add to Cart + Options block in this template. Switch to the new Product Gallery block for a better experience.'
+			)
+		).toBeVisible();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeHidden();
+
+		await sidebarSettings
 			.getByRole( 'button', {
 				name: 'Use the Product Gallery block',
 			} )

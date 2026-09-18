@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Optimized SQL generation in \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery by removing 'group by' and 'limit' clauses when they are not required.

@@ -12,11 +12,13 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\Email
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Schema\EmailsSettingsSchema;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 use WC_Emails;
 
 /**
@@ -24,7 +26,21 @@ use WC_Emails;
  *
  * @class EmailsSettingsControllerTest
  */
-class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
+class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch email settings requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Email settings controller registered on the test server.
+	 *
+	 * @var Controller
+	 */
+	private $controller;
 
 	/**
 	 * Sample email ID for testing.
@@ -39,6 +55,20 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var WC_Email
 	 */
 	private $email;
+
+	/**
+	 * Email registry to restore after each test.
+	 *
+	 * @var array<string, \WC_Email>
+	 */
+	private array $previous_emails = array();
+
+	/**
+	 * Email singleton to restore after each test.
+	 *
+	 * @var WC_Emails|null
+	 */
+	private ?WC_Emails $previous_emails_instance = null;
 
 	/**
 	 * Shared shop_manager user ID used for REST auth across the class.
@@ -81,6 +111,11 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Setup.
 	 */
 	public function setUp(): void {
+		$instance_property = new \ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance_property->setAccessible( true );
+		$this->previous_emails_instance = $instance_property->getValue();
+		$this->previous_emails          = $this->previous_emails_instance ? $this->previous_emails_instance->emails : array();
+
 		// Enable the v4 REST API feature before bootstrapping.
 		$this->feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
@@ -88,12 +123,12 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		};
 
 		add_filter( 'woocommerce_admin_features', $this->feature_filter );
-
-		// Enable block email editor feature.
 		$this->prev_options['woocommerce_feature_block_email_editor_enabled'] = get_option( 'woocommerce_feature_block_email_editor_enabled', null );
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
 		parent::setUp();
+
+		// Enable block email editor feature.
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
 		// Register personalization tags for testing.
 		$container      = Email_Editor_Container::container();
@@ -104,11 +139,14 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Manually initialize controller with schema that has the registry.
 		// We do this to ensure personalization tags wrapping/unwrapping uses the registry.
-		$controller = new Controller();
-		$schema     = new EmailsSettingsSchema();
+		$this->controller = new Controller();
+		$schema           = new EmailsSettingsSchema();
 		$schema->init();
-		$controller->init( $schema );
-		$controller->register_routes();
+		$this->controller->init( $schema );
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
 		// Snapshot current option values to restore on tearDown.
 		$option_key                        = 'woocommerce_' . self::SAMPLE_EMAIL_ID . '_settings';
@@ -118,32 +156,68 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		WC_Emails::instance()->init();
 		$this->email = WC_Emails::instance()->emails['WC_Email_Customer_Completed_Order'];
 
-		// Generate transactional email template posts.
+		// Create a published, mapped email post for the sample email (posts are
+		// created lazily now, so only the email under test gets one).
 		$email_generator = new WCTransactionalEmailPostsGenerator();
-		$email_generator->initialize();
+		$sample_post_id  = $email_generator->create_draft( $this->email );
+		wp_update_post(
+			array(
+				'ID'          => $sample_post_id,
+				'post_status' => 'publish',
+			)
+		);
+		WCTransactionalEmailPostsManager::get_instance()->save_email_template_post_id( self::SAMPLE_EMAIL_ID, $sample_post_id );
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		if ( isset( $this->feature_filter ) ) {
-			remove_filter( 'woocommerce_admin_features', $this->feature_filter );
-		}
+		$block_email_editor_option = $this->prev_options['woocommerce_feature_block_email_editor_enabled'];
+		unset( $this->prev_options['woocommerce_feature_block_email_editor_enabled'] );
 
-		// Restore previous option values.
-		foreach ( $this->prev_options as $key => $value ) {
-			if ( null === $value ) {
-				delete_option( (string) $key );
-			} else {
-				update_option( (string) $key, $value );
+		try {
+			if ( isset( $this->feature_filter ) ) {
+				remove_filter( 'woocommerce_admin_features', $this->feature_filter );
+			}
+
+			// Restore previous option values.
+			foreach ( $this->prev_options as $key => $value ) {
+				if ( null === $value ) {
+					delete_option( (string) $key );
+				} else {
+					update_option( (string) $key, $value );
+				}
+			}
+
+			// The DB rolls back between tests but the posts manager singleton's
+			// in-memory cache does not — clear it so stale mappings don't leak.
+			WCTransactionalEmailPostsManager::get_instance()->clear_caches();
+			$this->clear_rest_server();
+			unset( $this->server, $this->controller );
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				try {
+					if ( $this->previous_emails_instance ) {
+						$this->previous_emails_instance->emails = $this->previous_emails;
+					}
+					$instance_property = new \ReflectionProperty( WC_Emails::class, 'instance' );
+					$instance_property->setAccessible( true );
+					$instance_property->setValue( null, $this->previous_emails_instance );
+				} finally {
+					if ( null === $block_email_editor_option ) {
+						delete_option( 'woocommerce_feature_block_email_editor_enabled' );
+					} else {
+						update_option( 'woocommerce_feature_block_email_editor_enabled', $block_email_editor_option );
+					}
+					$this->previous_emails          = array();
+					$this->previous_emails_instance = null;
+					$this->prev_options             = array();
+				}
 			}
 		}
-
-		// Clean up email template posts transient.
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
-
-		parent::tearDown();
 	}
 
 	/**

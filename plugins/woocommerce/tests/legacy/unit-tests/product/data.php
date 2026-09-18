@@ -576,15 +576,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product1_id );
 		$this->assertEquals( $product1_id, $product->get_id() );
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>7.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;7.00.</span>', $product->get_price_html() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>7.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;7.00.</span>', $product->get_price_html() );
 
 		$product = wc_get_product( $product2_id );
 		$this->assertEquals( $product2_id, $product->get_id() );
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>20.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;20.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>16.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;16.00.</span>', $product->get_price_html() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>20.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;20.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>16.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;16.00.</span>', $product->get_price_html() );
 
 		$product = wc_get_product( $product3_id );
 		$this->assertEquals( $product3_id, $product->get_id() );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>50.00</bdi></span>', $product->get_price_html() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>50.00</bdi></span>', $product->get_price_html() );
 	}
 
 	/**
@@ -669,14 +669,27 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * @return array Image ID and URL.
 	 */
 	protected function set_product_image( $product ) {
-		global $wpdb;
+		$image_url = 'http://example.org/wp-content/uploads/Dr1Bczxq4q.png';
+		$image_id  = self::factory()->attachment->create(
+			array(
+				'file'           => 'Dr1Bczxq4q.png',
+				'guid'           => $image_url,
+				'post_mime_type' => 'image/png',
+				'post_parent'    => $product->get_id(),
+			)
+		);
 
-		// TODO: find a way to set the product image without performing a HTTP request to make the tests faster.
-		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
+		$this->assertNotWPError( $image_id );
 
-		$this->assertNotWPError( $image_url );
-
-		$image_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		wp_update_attachment_metadata(
+			$image_id,
+			array(
+				'width'  => 186,
+				'height' => 144,
+				'file'   => 'Dr1Bczxq4q.png',
+			)
+		);
+		$image_url = wp_get_attachment_url( $image_id );
 		$product->set_image_id( $image_id );
 		$product->save();
 

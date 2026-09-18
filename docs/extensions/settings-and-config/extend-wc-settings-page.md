@@ -1,6 +1,6 @@
 ---
 post_title: How to add a settings page
-sidebar_label: Add a settings page
+sidebar_label: Settings pages
 sidebar_position: 2
 ---
 
@@ -343,6 +343,8 @@ add_action(
 For older WooCommerce versions, use the filter-based approach documented in [How to add a section to a settings tab](./adding-a-section-to-a-settings-tab.md).
 
 ## Opt in to the React settings UI
+
+> **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
 `WC_Settings_Page` still owns registration, permissions, schema, and persistence when a page opts in to the React settings UI. To render a page with the React settings UI when the feature flag is enabled, return a settings UI adapter from `get_settings_ui_page()`.
 

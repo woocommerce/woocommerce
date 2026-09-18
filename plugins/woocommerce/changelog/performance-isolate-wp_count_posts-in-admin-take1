@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Harden the conditions required to invoke \Automattic\WooCommerce\Internal\Utilities\ProductUtil::get_counts_for_type throughout the codebase.

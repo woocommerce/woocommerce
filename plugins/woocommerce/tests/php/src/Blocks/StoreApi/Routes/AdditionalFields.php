@@ -6,19 +6,29 @@
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use WC_Gateway_BACS;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 /**
  * AdditionalFields Controller Tests.
  *
  *
- * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
  */
-class AdditionalFields extends MockeryTestCase {
+class AdditionalFields extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
 
 	/**
 	 * Fields to register.
@@ -41,15 +51,60 @@ class AdditionalFields extends MockeryTestCase {
 	protected $products;
 
 	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			static fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Virtual Test Product 3',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					),
+					array(
+						'name'          => 'Downloadable Test Product 4',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'downloadable'  => true,
+					),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
 	 * Setup products and a cart, as well as register fields.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		$this->register_fields();
 		$this->controller = Package::container()->get( CheckoutFields::class );
@@ -57,41 +112,9 @@ class AdditionalFields extends MockeryTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 		$fixtures->payments_enable_bacs();
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 3',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Downloadable Test Product 4',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'downloadable'  => true,
-				)
-			),
+		$this->products = array_map(
+			'wc_get_product',
+			self::$product_ids
 		);
 		$this->reset_session();
 	}
@@ -347,6 +370,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without an ID.
 	 */
 	public function test_missing_id_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
@@ -388,6 +412,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid ID.
 	 */
 	public function test_invalid_id_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'invalid-id';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -432,6 +457,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without a label.
 	 */
 	public function test_missing_label_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-label';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -474,6 +500,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without a location key.
 	 */
 	public function test_missing_location_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-location';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -515,6 +542,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid location key (contact, address, additional).
 	 */
 	public function test_invalid_location_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-location';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -560,6 +588,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an existing id.
 	 */
 	public function test_already_registered_field() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/gov-id';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -599,9 +628,10 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
+	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox, date).
 	 */
 	public function test_invalid_type_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-type';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -612,7 +642,7 @@ class AdditionalFields extends MockeryTestCase {
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						$id,
 						'invalid',
-						implode( ', ', array( 'text', 'select', 'checkbox' ) )
+						implode( ', ', array( 'text', 'select', 'checkbox', 'date' ) )
 					)
 				),
 			)
@@ -654,6 +684,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid sanitize callback.
 	 */
 	public function test_invalid_sanitize_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-sanitize';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -700,6 +731,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid validate callback.
 	 */
 	public function test_invalid_validate_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-validate';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -746,6 +778,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid attributes prop.
 	 */
 	public function test_invalid_attribute_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-attribute';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -815,6 +848,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered if a field is registered with invalid attributes values.
 	 */
 	public function test_invalid_attributes_values_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-attribute-values';
 		$invalid_attributes    = array( 'invalidAttribute' );
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
@@ -890,6 +924,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered without options prop.
 	 */
 	public function test_missing_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -935,6 +970,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered with an invalid options array.
 	 */
 	public function test_invalid_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -982,6 +1018,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered with duplicate options.
 	 */
 	public function test_duplicate_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/duplicate-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1051,6 +1088,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a checkbox is registered with invalid required property.
 	 */
 	public function test_invalid_required_prop_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-bad-required-value';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1162,6 +1200,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with an error_message, but it is not required.
 	 */
 	public function test_error_message_non_required_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-required-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1225,6 +1264,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with an invalid required prop.
 	 */
 	public function test_error_message_bad_required_value_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-required-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1284,6 +1324,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with a non-string error_message.
 	 */
 	public function test_non_string_error_message_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-string-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1347,6 +1388,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with hidden set to true.
 	 */
 	public function test_register_hidden_field_error() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/hidden-field';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1396,6 +1438,95 @@ class AdditionalFields extends MockeryTestCase {
 
 		// Ensures the field isn't registered.
 		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
+	}
+
+	/**
+	 * @testdox Date fields reject invalid dates before persistence and accept clean optional values.
+	 *
+	 * @testWith ["cart/update-customer", "billing", "2026-02-31", 400]
+	 *           ["cart/update-customer", "shipping", "2026-02-29", 400]
+	 *           ["cart/update-customer", "billing", "not-a-date", 400]
+	 *           ["cart/update-customer", "billing", "0", 400]
+	 *           ["cart/update-customer", "billing", "2024-02-29", 200]
+	 *           ["cart/update-customer", "shipping", " 2026-08-26 ", 200]
+	 *           ["cart/update-customer", "billing", "", 200]
+	 *           ["cart/update-customer", "billing", null, 200]
+	 *           ["checkout", "billing", "2026-02-31", 400]
+	 *           ["checkout", "shipping", "2026-02-29", 400]
+	 *           ["checkout", "billing", " 2026-08-26 ", 200]
+	 *           ["checkout", "shipping", "", 200]
+	 *           ["checkout", "contact", "2026-02-31", 400]
+	 *           ["checkout", "order", "2026-02-29", 400]
+	 *           ["checkout", "contact", " 2026-08-26 ", 200]
+	 *           ["checkout", "order", " 2026-08-26 ", 200]
+	 *
+	 * @param string      $route           Store API route.
+	 * @param string      $location        Field location or address group.
+	 * @param string|null $value           Submitted date, or null to omit the field.
+	 * @param int         $expected_status Expected response status.
+	 */
+	public function test_date_field_validation_before_persistence( string $route, string $location, ?string $value, int $expected_status ): void {
+		$this->unregister_fields();
+		$id         = 'test/delivery-date';
+		$is_address = in_array( $location, array( 'billing', 'shipping' ), true );
+		$group      = $is_address ? $location : 'other';
+		$param      = $is_address ? $location . '_address' : 'additional_fields';
+
+		$callback_calls = 0;
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => $id,
+				'label'             => 'Delivery date',
+				'location'          => $is_address ? 'address' : $location,
+				'type'              => 'date',
+				'validate_callback' => static function () use ( &$callback_calls ) {
+					++$callback_calls;
+					return true;
+				},
+			)
+		);
+		$this->controller->persist_field_for_customer( $id, '2026-08-01', WC()->customer, $group );
+
+		$address = array(
+			'first_name' => 'Jane',
+			'last_name'  => 'Doe',
+			'address_1'  => '123 Main Street',
+			'city'       => 'New York',
+			'state'      => 'NY',
+			'postcode'   => '10001',
+			'country'    => 'US',
+		);
+		$params  = array(
+			'billing_address'   => array_merge( $address, array( 'email' => 'jane@example.com' ) ),
+			'shipping_address'  => $address,
+			'payment_method'    => WC_Gateway_BACS::ID,
+			'additional_fields' => array(),
+		);
+		if ( null !== $value ) {
+			$params[ $param ][ $id ] = $value;
+		}
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/' . $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $params );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( $expected_status, $response->get_status(), wp_json_encode( $data ) );
+		if ( 'cart/update-customer' === $route ) {
+			$this->assertSame( 0, $callback_calls, 'Address type validation must not add calls to extension callbacks.' );
+		}
+		if ( 400 === $expected_status ) {
+			$this->assertSame( 'rest_invalid_param', $data['code'] );
+			$this->assertStringContainsString( 'Delivery date', wp_json_encode( $data['data']['details'] ) );
+			$this->assertSame( '2026-08-01', $this->controller->get_field_from_object( $id, WC()->customer, $group ) );
+			return;
+		}
+
+		$object   = 'checkout' === $route ? wc_get_order( $data['order_id'] ) : WC()->customer;
+		$expected = null === $value ? '2026-08-01' : trim( $value );
+		$this->assertSame( $expected, $this->controller->get_field_from_object( $id, $object, $group ) );
 	}
 
 	/**
@@ -2270,6 +2401,98 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
+	 * Ensures an additional field is sanitized before it is validated, and the sanitized value is what gets stored.
+	 */
+	public function test_additional_field_is_sanitized_before_it_is_validated() {
+		$id = 'plugin-namespace/upper-code';
+
+		// Uppercasing is the point: no generic sanitizer in the request pipeline does it,
+		// so a lowercase value can only reach a passing validation through this field's
+		// own `sanitize_callback`. Trimming would not work here, because the address
+		// sanitizers already trim whatever the field callback is given.
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => $id,
+				'label'             => 'Upper code',
+				'location'          => 'order',
+				'type'              => 'text',
+				'required'          => true,
+				'sanitize_callback' => function ( $value ) {
+					return strtoupper( $value );
+				},
+				'validate_callback' => function ( $value ) {
+					return ctype_upper( $value );
+				},
+			)
+		);
+
+		// Still invalid after uppercasing, so a rejection here is the field's rule doing
+		// its job rather than the ordering.
+		$response = $this->checkout_with_upper_code( $id, 'ab1' );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
+
+		// Invalid as submitted and valid once uppercased.
+		$response = $this->checkout_with_upper_code( $id, 'abc' );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'ABC', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
+	}
+
+	/**
+	 * Dispatch a checkout request carrying one value for a registered order-location field.
+	 *
+	 * @param string $id Field ID.
+	 * @param string $value Value to submit.
+	 * @return \WP_REST_Response
+	 */
+	private function checkout_with_upper_code( string $id, string $value ) {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'payment_method'    => WC_Gateway_BACS::ID,
+				'additional_fields' => array(
+					'plugin-namespace/job-function'   => 'engineering',
+					'plugin-namespace/leave-on-porch' => true,
+					$id                               => $value,
+				),
+			)
+		);
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
 	 * Ensures that saved values are returned in the checkout response.
 	 */
 	public function test_previous_values_are_loaded_in_checkout() {
@@ -2330,7 +2553,7 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'engineering', $additional_fields['plugin-namespace/job-function'], print_r( $data, true ) );
-		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $additional_fields, print_r( $data, true ) );
+		$this->assertFalse( $additional_fields['plugin-namespace/leave-on-porch'], print_r( $data, true ) );
 	}
 
 	/**
@@ -2548,6 +2771,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong rules schema.
 	 */
 	public function test_invalid_rules_schema() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
@@ -2565,10 +2789,11 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
-	 * Test for errors when providing the wrong validation rules schema.
+	 * @testdox Invalid validation schemas report the keyword and its allowed values.
 	 */
 	public function test_invalid_validation_rules_schema() {
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: The properties must match schema: {properties}' );
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: At "/type": The value must be one of: "array", "boolean", "integer", "null", "number", "object", "string"; The data (string) must match the type: array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => 'namespace/test-id',
@@ -2626,6 +2851,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong required rules schema.
 	 */
 	public function test_invalid_required_rules_schema() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". required: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
@@ -2818,5 +3044,311 @@ class AdditionalFields extends MockeryTestCase {
 		// Clean up.
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 		$this->assertFalse( $this->controller->is_field( $id ), sprintf( '%s is still registered', $id ) );
+	}
+
+	/**
+	 * Returns a rule matching the referral-source value at the given path.
+	 *
+	 * @param string[] $path Property path to the object holding the field (e.g. [ 'checkout', 'additional_fields' ]).
+	 * @param string   $value The value to match.
+	 * @return array The rule schema.
+	 */
+	private function get_referral_source_rule( array $path = array( 'checkout', 'additional_fields' ), string $value = 'other' ) {
+		$rule = array(
+			'type'       => 'object',
+			'properties' => array(
+				'plugin-namespace/referral-source' => array(
+					'type'  => 'string',
+					'const' => $value,
+				),
+			),
+		);
+		foreach ( array_reverse( $path ) as $segment ) {
+			$rule = array(
+				'type'       => 'object',
+				'properties' => array( $segment => $rule ),
+			);
+		}
+		return $rule;
+	}
+
+	/**
+	 * Registers a referral-source select field and a referral-detail field with a conditional rule on it.
+	 *
+	 * @param string $rule_prop Which conditional rule to give the detail field (hidden|required).
+	 * @param string $location The location to register both fields in (order|contact|address).
+	 */
+	private function register_conditional_referral_fields( $rule_prop, $location = 'order' ) {
+		$rule_paths = array(
+			'order'   => array( 'checkout', 'additional_fields' ),
+			'contact' => array( 'customer', 'additional_fields' ),
+			'address' => array( 'customer', 'billing_address' ),
+		);
+		$rule       = $this->get_referral_source_rule( $rule_paths[ $location ] );
+
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-source',
+				'label'    => 'How did you find us?',
+				'location' => $location,
+				'type'     => 'select',
+				'options'  => array(
+					array(
+						'value' => 'search',
+						'label' => 'Search engine',
+					),
+					array(
+						'value' => 'other',
+						'label' => 'Other',
+					),
+				),
+			)
+		);
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-detail',
+				'label'    => 'Please specify',
+				'location' => $location,
+				'type'     => 'text',
+				$rule_prop => 'hidden' === $rule_prop
+					? array( 'not' => $rule )
+					: $rule,
+			)
+		);
+	}
+
+	/**
+	 * Builds a checkout request with a valid address and the given additional field values.
+	 *
+	 * @param string $method The request method (POST|PUT|PATCH).
+	 * @param array  $additional_fields The additional field values to send.
+	 * @param array  $address_fields Additional address field values, merged into both addresses.
+	 * @return \WP_REST_Request The request.
+	 */
+	private function get_checkout_request_with_fields( $method, array $additional_fields, array $address_fields = array() ) {
+		$address = array_merge(
+			array(
+				'first_name' => 'test',
+				'last_name'  => 'test',
+				'address_1'  => 'test',
+				'city'       => 'test',
+				'state'      => '',
+				'postcode'   => 'cb241ab',
+				'country'    => 'GB',
+				'email'      => 'testaccount@test.com',
+			),
+			$address_fields
+		);
+		$request = new \WP_REST_Request( $method, '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) $address,
+				'shipping_address'  => (object) $address,
+				'payment_method'    => WC_Gateway_BACS::ID,
+				'additional_fields' => $additional_fields,
+			)
+		);
+		return $request;
+	}
+
+	/**
+	 * @testdox A conditionally hidden field stays hidden while the field it depends on has no value, so its posted value is cleared.
+	 */
+	public function test_conditional_hidden_field_cleared_when_dependency_has_no_value() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'hidden' );
+
+		$request  = $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-detail' => 'posted while hidden' ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$fields = (array) $data['additional_fields'];
+		$this->assertSame( '', $fields['plugin-namespace/referral-detail'], 'The detail field is hidden while referral-source has no value, so its posted value must be cleared' );
+	}
+
+	/**
+	 * @testdox A conditionally required field is not required while the field it depends on has no value, even when that field's key is absent from the request.
+	 */
+	public function test_conditional_required_field_ignores_missing_dependency_key() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required' );
+
+		// Dependency never given a value: the detail field must not be required.
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		// Dependency set to the trigger value: the detail field is required.
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-source' => 'other' ) ) );
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields(
+				'POST',
+				array(
+					'plugin-namespace/referral-source' => 'other',
+					'plugin-namespace/referral-detail' => 'a friend',
+				)
+			)
+		);
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * @testdox A conditional rule reads the persisted dependency value when the request omits its key, so omitting the trigger field does not bypass a required field.
+	 */
+	public function test_conditional_required_field_uses_persisted_dependency_value() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required' );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-source' => 'other' ) ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		// The POST omits referral-source, but its persisted value still makes the detail field required.
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		// The customer object survives reset_session, so clear the value this test persisted.
+		$this->controller->persist_field_for_customer( 'plugin-namespace/referral-source', '', wc()->customer, 'other' );
+		wc()->customer->save();
+	}
+
+	/**
+	 * @testdox A payment retry cannot clear a field required by a value saved on the order.
+	 * @testWith ["POST"]
+	 *           ["PUT"]
+	 *           ["PATCH"]
+	 * @param string $method The request method.
+	 */
+	public function test_conditional_required_field_uses_pending_order_value( string $method ): void {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$this->products[0]->set_manage_stock( true );
+		$this->products[0]->set_stock_quantity( 10 );
+		$this->products[0]->save();
+
+		$order = wc_create_order();
+		$order->add_product( $this->products[0], 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->set_total( 30 );
+		$order->set_cart_hash( wc()->cart->get_cart_hash() );
+		$this->controller->persist_field_for_order( 'plugin-namespace/referral-source', 'other', $order, 'other', false );
+		$this->controller->persist_field_for_order( 'plugin-namespace/referral-detail', 'a friend', $order, 'other', false );
+		$order->save();
+		wc_reserve_stock_for_order( $order );
+		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'The pending order must hold stock before the retry.' );
+		wc()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		$request  = $this->get_checkout_request_with_fields( $method, array( 'plugin-namespace/referral-detail' => '' ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'a friend', $this->controller->get_field_from_object( 'plugin-namespace/referral-detail', wc_get_order( $order->get_id() ) ), 'Rejected requests must leave the saved field unchanged.' );
+		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'Field validation errors must leave the existing stock hold unchanged.' );
+	}
+
+	/**
+	 * @testdox A partial update matches saved text without changing its punctuation.
+	 * @testWith ["order", "checkout"]
+	 *           ["contact", "customer"]
+	 * @param string $location The field location.
+	 * @param string $context The document object property holding the fields.
+	 */
+	public function test_conditional_hidden_field_uses_raw_saved_text( string $location, string $context ): void {
+		$this->unregister_fields();
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-source',
+				'label'    => 'Source',
+				'location' => $location,
+				'type'     => 'text',
+			)
+		);
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-detail',
+				'label'    => 'Please specify',
+				'location' => $location,
+				'type'     => 'text',
+				'hidden'   => array( 'not' => $this->get_referral_source_rule( array( $context, 'additional_fields' ), "John's" ) ),
+			)
+		);
+
+		$request  = $this->get_checkout_request_with_fields(
+			'PUT',
+			array(
+				'plugin-namespace/referral-source' => "John's",
+				'plugin-namespace/referral-detail' => 'first value',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'first value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'] );
+
+		$request  = $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-detail' => 'second value' ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'second value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'], 'The saved dependency must match the same rule as its posted value.' );
+	}
+
+	/**
+	 * @testdox A conditionally required contact field follows the same rules as order fields when its dependency has no value.
+	 */
+	public function test_conditional_required_contact_field_ignores_missing_dependency_key() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required', 'contact' );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-source' => 'other' ) ) );
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields(
+				'POST',
+				array(
+					'plugin-namespace/referral-source' => 'other',
+					'plugin-namespace/referral-detail' => 'a friend',
+				)
+			)
+		);
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * @testdox A conditionally required address field follows the same rules as order fields when its dependency has no value.
+	 */
+	public function test_conditional_required_address_field_ignores_missing_dependency_key() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required', 'address' );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields( 'POST', array(), array( 'plugin-namespace/referral-source' => 'other' ) )
+		);
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields(
+				'POST',
+				array(),
+				array(
+					'plugin-namespace/referral-source' => 'other',
+					'plugin-namespace/referral-detail' => 'a friend',
+				)
+			)
+		);
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 }

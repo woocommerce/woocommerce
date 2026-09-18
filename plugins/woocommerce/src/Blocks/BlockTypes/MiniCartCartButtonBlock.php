@@ -21,7 +21,7 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$default_view_cart_text = __( 'View my cart', 'woocommerce' );
+		$default_view_cart_text = __( 'View cart', 'woocommerce' );
 		$view_cart_text         = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_view_cart_text;
 		$cart_page_id           = wc_get_page_id( 'cart' );
 		$cart_page_url          = get_permalink( $cart_page_id );

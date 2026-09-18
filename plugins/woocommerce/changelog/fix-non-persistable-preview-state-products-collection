@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Product Collection block from marking the post as dirty when the editor loads.

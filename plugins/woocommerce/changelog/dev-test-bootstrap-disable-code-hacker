@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Allow running the PHPUnit suite without the code hacker by setting the WC_TEST_DISABLE_CODE_HACKER environment variable, for tools such as mutation testers that need to own the file stream wrapper.

@@ -61,7 +61,8 @@ const Harness = ( {
 const editorTarget: SendTestEmailTarget = {
 	endpoint: 'editor',
 	postId: 123,
-	emailType: 'new_order',
+	emailType: 'WC_Email_New_Order',
+	emailTypeId: 'new_order',
 };
 
 const settingsTarget: SendTestEmailTarget = {
@@ -103,6 +104,34 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		expect( sendButton ).toBeEnabled();
 	} );
 
+	it( 'editor target without a post: posts the email type so the server renders the file template', async () => {
+		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+
+		render(
+			<Harness
+				target={ { ...editorTarget, postId: null } }
+				source="email_listing"
+			/>
+		);
+
+		enterEmailAndSend( 'merchant@example.com' );
+
+		await waitFor( () =>
+			expect(
+				screen.getByText( 'Test email sent successfully!' )
+			).toBeInTheDocument()
+		);
+
+		expect( apiFetchMock ).toHaveBeenCalledWith( {
+			path: '/woocommerce-email-editor/v1/send_preview_email',
+			method: 'POST',
+			data: {
+				email: 'merchant@example.com',
+				emailType: 'new_order',
+			},
+		} );
+	} );
+
 	it( 'editor target: posts the post ID to the email editor endpoint and shows the success notice', async () => {
 		apiFetchMock.mockResolvedValue( { success: true, result: true } );
 
@@ -127,7 +156,7 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_successful',
 			{
-				email_type: 'new_order',
+				email_type: 'WC_Email_New_Order',
 				source: 'email_listing',
 			}
 		);
@@ -183,7 +212,7 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_failed',
 			{
-				email_type: 'new_order',
+				email_type: 'WC_Email_New_Order',
 				error: 'Cookie check failed',
 				error_code: 'rest_cookie_invalid_nonce',
 				source: 'email_listing',

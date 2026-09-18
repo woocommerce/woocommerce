@@ -33,6 +33,7 @@ jobs:
   build-prep:
     name: Create changelog PR
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: write
       pull-requests: write

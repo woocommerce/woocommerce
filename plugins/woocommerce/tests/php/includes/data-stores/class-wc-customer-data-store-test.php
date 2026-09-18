@@ -15,29 +15,30 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Runs before all tests in the class.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		OrderHelper::delete_order_custom_tables();
+		OrderHelper::create_order_custom_table_if_not_exist();
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-
-		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables();
-		OrderHelper::create_order_custom_table_if_not_exist();
 	}
 
 	/**
-	 * Destroys system under test.
+	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		// Add back removed filter.
-		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		parent::tearDown();
 	}
 
@@ -58,6 +59,22 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer_datastore->read( $customer );
 		$this->assertEquals( $customer_id, $customer->get_id() );
 		$this->assertEquals( $username, $customer->get_username() );
+	}
+
+	/**
+	 * @testdox WordPress personal preferences are excluded from customer meta data.
+	 */
+	public function test_wordpress_personal_preferences_are_excluded_from_customer_meta_data(): void {
+		$customer = WC_Helper_Customer::create_customer();
+
+		update_user_meta( $customer->get_id(), 'infinite_scrolling', 'true' );
+		update_user_meta( $customer->get_id(), 'custom_preference', 'custom-value' );
+
+		$read_customer = new WC_Customer( $customer->get_id() );
+		$meta_keys     = wp_list_pluck( $read_customer->get_meta_data(), 'key' );
+
+		$this->assertNotContains( 'infinite_scrolling', $meta_keys, 'WordPress personal preferences should not be exposed as customer meta data.' );
+		$this->assertContains( 'custom_preference', $meta_keys, 'Custom user meta should remain available as customer meta data.' );
 	}
 
 	/**
@@ -171,7 +188,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$base_id + 5,
 			$customer_2_id
 		);
-		$wpdb->query( $query );
+		$this->assertSame( 5, $wpdb->query( $query ), 'All custom order table fixtures should be inserted.' );
 		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$sut          = new WC_Customer_Data_Store();

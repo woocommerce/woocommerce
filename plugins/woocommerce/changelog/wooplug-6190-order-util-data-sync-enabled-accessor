@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add OrderUtil::custom_orders_table_data_sync_is_enabled() so extensions can cheaply check whether HPOS data sync is enabled without running the expensive is_custom_order_tables_in_sync() query.

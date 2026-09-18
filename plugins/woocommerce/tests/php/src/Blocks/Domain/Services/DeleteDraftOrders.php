@@ -6,27 +6,58 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Tests Delete Draft Orders functionality
  *
  * @since $VID:$
  */
-class DeleteDraftOrders extends TestCase {
+class DeleteDraftOrders extends \WC_Unit_Test_Case {
 
+	/**
+	 * Draft order service under test.
+	 *
+	 * @var DraftOrders|null
+	 */
 	private $draft_orders_instance;
+
+	/**
+	 * Exception caught by the service's error handler.
+	 *
+	 * @var \Throwable|null
+	 */
 	private $caught_exception;
+
+	/**
+	 * Original PHP error log destination.
+	 *
+	 * @var string|false
+	 */
 	private $original_logging_destination;
+
+	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
 
 	/**
 	 * During setup create some draft orders.
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		global $wpdb;
+
+		parent::setUp();
+
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 
 		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './' ) );
 
@@ -77,28 +108,34 @@ class DeleteDraftOrders extends TestCase {
 			)
 		);
 
-		// set listening for exceptions
-		add_action( 'woocommerce_caught_exception', function($exception_object){
-			$this->caught_exception = $exception_object;
-		});
+		// Listen for exceptions.
+		add_action( 'woocommerce_caught_exception', array( $this, 'capture_exception' ) );
 
 		// temporarily hide error logging we don't care about (and keeps from polluting stdout)
 		$this->original_logging_destination = ini_get('error_log');
 		ini_set('error_log', '/dev/null');
-		parent::setUp();
 	}
 
-	protected function tearDown(): void {
+	/**
+	 * Restore test state.
+	 */
+	public function tearDown(): void {
 		$this->draft_orders_instance = null;
-		// delete all orders
-		$orders = wc_get_orders([]);
-		foreach( $orders as $order ) {
-			$order->delete( true );
-		}
-		remove_all_actions( 'woocommerce_caught_exception' );
+		remove_action( 'woocommerce_caught_exception', array( $this, 'capture_exception' ) );
 		//restore original logging destination
 		ini_set('error_log', $this->original_logging_destination);
+		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
+	}
+
+	/**
+	 * Capture an exception reported by the service.
+	 *
+	 * @param \Throwable $exception_object Reported exception.
+	 */
+	public function capture_exception( $exception_object ): void {
+		$this->caught_exception = $exception_object;
 	}
 
 	/**

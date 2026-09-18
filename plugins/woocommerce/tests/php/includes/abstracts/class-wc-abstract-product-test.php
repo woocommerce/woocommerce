@@ -17,6 +17,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		remove_all_filters( 'woocommerce_get_cogs_total_value' );
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -43,6 +44,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * Setup items we need repeatedly across tests in this class.
 	 */
 	public function set_up() {
+		self::enable_direct_product_attribute_lookup_updates();
 		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );
@@ -65,6 +67,50 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		);
 
 		parent::set_up();
+	}
+
+	/**
+	 * @testdox get_image() hands WordPress an integer attachment ID even when the product was loaded from the database.
+	 */
+	public function test_get_image_passes_an_integer_attachment_id_to_wordpress() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product = wc_get_product( $product->save() );
+
+		$received_id = null;
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( &$received_id ) {
+				if ( null === $received_id ) {
+					$received_id = $attachment_id;
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$product->get_image( 'woocommerce_thumbnail', array(), false );
+
+		$this->assertSame( $image_id, $received_id, 'The attachment ID passed to WordPress should be an integer.' );
+	}
+
+	/**
+	 * @testdox Saving a product with an integer zero image ID leaves no stored thumbnail meta.
+	 */
+	public function test_saving_without_an_image_leaves_no_thumbnail_meta() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product_id = $product->save();
+
+		$this->assertSame( (string) $image_id, get_post_meta( $product_id, '_thumbnail_id', true ), 'A product with an image should store the attachment ID.' );
+
+		$product->set_image_id( 0 );
+		$product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_thumbnail_id' ), 'Clearing the image with integer zero should remove the thumbnail meta row, not store "0".' );
 	}
 
 	/**

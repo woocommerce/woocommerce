@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import defaultConfig, { setupProjects } from '../../playwright.config';
+import defaultConfig, { coreSetupProjects } from '../../playwright.config';
 import { tags } from '../../fixtures/fixtures';
 
 process.env.USE_WP_ENV = 'true';
@@ -10,7 +10,7 @@ process.env.DISABLE_HPOS = '1';
 const config = {
 	...defaultConfig,
 	projects: [
-		...setupProjects,
+		...coreSetupProjects,
 		{
 			name: 'e2e-hpos-disabled',
 			grep: new RegExp( tags.HPOS ),

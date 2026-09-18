@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix deferred product transient shutdown ordering before parent product sync.

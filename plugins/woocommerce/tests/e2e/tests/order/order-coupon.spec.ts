@@ -85,7 +85,6 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for product to add
-			await page.locator( 'text=Search for a product…' ).click();
 			await page
 				.locator( '.select2-search--dropdown' )
 				.getByRole( 'combobox' )
@@ -119,9 +118,7 @@ test.describe(
 					exact: true,
 				} )
 			).toBeVisible();
-		} );
 
-		test( 'can remove a coupon', async ( { page } ) => {
 			await page.goto(
 				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);

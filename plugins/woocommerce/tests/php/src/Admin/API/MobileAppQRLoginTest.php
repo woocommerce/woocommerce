@@ -11,16 +11,53 @@ namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\API\MobileAppQRLogin;
 use Automattic\WooCommerce\Admin\API\RateLimits\QRLoginRateLimits;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Application_Passwords;
 use WP_REST_Request;
+use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * MobileAppQRLogin API controller test.
  *
  * @class MobileAppQRLoginTest.
  */
-class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
+class MobileAppQRLoginTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch QR login requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * QR login controller registered on the test server.
+	 *
+	 * @var MobileAppQRLogin
+	 */
+	private $controller;
+
+	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_admin_id;
+
+	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_shop_manager_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
 
 	/**
 	 * Token generation endpoint.
@@ -141,14 +178,31 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	private $site_url_filters = array();
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_admin_id        = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$fixture_shop_manager_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id   = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->admin_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$this->shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id   = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->controller = new MobileAppQRLogin();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+
+		$this->admin_id        = self::$fixture_admin_id;
+		$this->shop_manager_id = self::$fixture_shop_manager_id;
+		$this->subscriber_id   = self::$fixture_subscriber_id;
 
 		// Remember existing $_SERVER values so we can restore them in tearDown.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
@@ -177,10 +231,6 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-
-		wp_delete_user( $this->admin_id );
-		wp_delete_user( $this->shop_manager_id );
-		wp_delete_user( $this->subscriber_id );
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
@@ -217,6 +267,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			remove_filter( 'pre_option_siteurl', $filter, $priority );
 		}
 		$this->site_url_filters = array();
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 
 		parent::tearDown();
 	}
@@ -2338,6 +2390,50 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $post->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $post->get_data()['state'] );
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
+	}
+
+	/**
+	 * @testdox Session-status is scoped to the session recorded on the token.
+	 */
+	public function test_session_status_is_scoped_to_the_recorded_session(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data        = $this->dispatch_scan( $plaintext )->get_data();
+		$recorded_session = $scan_data['session_id'];
+
+		// A second session id can also resolve to the same token record, while
+		// the record itself still names the scanned session above.
+		$other_session = wp_generate_uuid4();
+		set_transient(
+			MobileAppQRLogin::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $other_session ),
+			$this->token_hash( $plaintext ),
+			MobileAppQRLogin::TOKEN_TTL
+		);
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame( 200, $this->dispatch_approve( $plaintext, $scan_data['real_number'] )->get_status() );
+		wp_set_current_user( 0 );
+
+		$other = $this->dispatch_session_status( $other_session, $plaintext );
+		$this->assertSame( 200, $other->get_status() );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_EXPIRED,
+			$other->get_data()['state'],
+			'State is only returned for the session recorded on the token.'
+		);
+		$this->assertArrayNotHasKey(
+			'exchange_grant',
+			$other->get_data(),
+			'The exchange grant is only returned for the session recorded on the token.'
+		);
+
+		$recorded = $this->dispatch_session_status( $recorded_session, $plaintext );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $recorded->get_data()['state'] );
+		$this->assertNotEmpty(
+			$recorded->get_data()['exchange_grant'],
+			'The recorded session receives its grant.'
+		);
 	}
 
 	// -----------------------------------------------------------------------

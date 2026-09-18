@@ -4,40 +4,31 @@
 import { test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'Product Gallery Thumbnails block', () => {
-	test.beforeEach(
-		async ( { admin, editor, requestUtils, wpCoreVersion } ) => {
-			const template = await requestUtils.createTemplate( 'wp_template', {
-				slug: 'single-product',
-				title: 'Custom Single Product',
-				content: 'placeholder',
-			} );
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'single-product',
+			title: 'Custom Single Product',
+			content: 'placeholder',
+		} );
 
-			await admin.visitSiteEditor( {
-				postId: template.id,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
 
-			// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
-			// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
-			const placeholderLocator =
-				wpCoreVersion >= 7
-					? editor.canvas
-							.frameLocator( 'iframe' )
-							.getByText( 'placeholder' )
-					: editor.canvas.getByText( 'placeholder' );
+		await expect(
+			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+		).toBeVisible();
 
-			await expect( placeholderLocator ).toBeVisible();
+		await editor.insertBlock( {
+			name: 'woocommerce/product-gallery',
+		} );
 
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-		}
-	);
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+	} );
 
 	test( 'renders as expected', async ( { page, editor } ) => {
 		await test.step( 'in editor', async () => {
@@ -175,7 +166,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 
 			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
-				// Set size to 10%
+				// Set size to 50%
 				await thumbnailsSizeInput.fill( '50' );
 
 				const viewerBox = await viewerBlock.boundingBox();
@@ -206,27 +197,18 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
-			// Get the last thumbnail
+			await expect( thumbnailsContainer ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
+
 			const lastThumbnail = thumbnails.last();
+			await lastThumbnail.scrollIntoViewIfNeeded();
 
-			await expect( async () => {
-				await page.reload();
-				// Check if overflow classes are present initially
-				await expect( thumbnailsContainer ).toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
+			await expect( lastThumbnail ).toBeVisible();
 
-				// Scroll to the last thumbnail
-				await lastThumbnail.scrollIntoViewIfNeeded();
-
-				// Verify the last thumbnail is visible
-				await expect( lastThumbnail ).toBeVisible();
-
-				// After scrolling to the end, the bottom overflow should be gone
-				await expect( thumbnailsContainer ).not.toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
-			} ).toPass( { timeout: 3_000 } );
+			await expect( thumbnailsContainer ).not.toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
 		} );
 	} );
 } );

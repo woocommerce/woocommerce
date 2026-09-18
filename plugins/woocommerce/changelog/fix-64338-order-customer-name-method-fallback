@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal error in Analytics Customers DataStore when a plain WC_Order (rather than the Overrides\Order subclass) is passed to get_or_create_customer_from_order(), and harden date_last_active against a missing date_created by cascading through date_modified and date_paid before falling back to null.

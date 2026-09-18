@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Organize Blocks packages into explicit public API and internal runtime directories without changing existing imports, script handles, or globals.

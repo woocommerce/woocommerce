@@ -35,7 +35,7 @@ test.beforeEach( async ( { baseURL } ) => {
 } );
 
 test.skip(
-	process.env.IS_MULTISITE,
+	!! process.env.IS_MULTISITE,
 	'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55082'
 );
 

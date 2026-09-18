@@ -307,6 +307,19 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
 
 		$product_review = get_comment( $product_review_id );
+
+		/*
+		 * Core has already updated wp_posts.comment_count, but the rating meta above was unavailable
+		 * during that update. Refresh the post-meta aggregates directly now that the meta is in place:
+		 * repeating wp_update_comment_count() would add count queries, post writes, edit hooks, and
+		 * deferral where an immediate post-meta aggregate refresh is required. Only an approved rated
+		 * review can change the aggregates, and the refresh targets the comment's own product because
+		 * a rest_pre_insert_product_review callback can send the review to a different one.
+		 */
+		if ( ! empty( $request['rating'] ) && $product_review instanceof WP_Comment && '1' === $product_review->comment_approved ) {
+			WC_Comments::clear_transients( (int) $product_review->comment_post_ID );
+		}
+
 		$this->update_additional_fields_for_object( $product_review, $request );
 
 		/**
@@ -343,18 +356,54 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			return $review;
 		}
 
-		$prepared_review = $this->prepare_item_for_database( $request );
+		$original_product_id = (int) $review->comment_post_ID;
 
-		$updated = wp_update_comment( $prepared_review );
-		if ( 0 === $updated ) {
+		$prepared_review = $this->prepare_item_for_database( $request );
+		if ( is_wp_error( $prepared_review ) ) {
+			return $prepared_review;
+		}
+		if ( ! is_array( $prepared_review ) ) {
 			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
+		/*
+		 * Core stores update-side comment meta before it updates the comment count. Passing the
+		 * rating here lets WooCommerce's count callback see the new value in the same product save.
+		 */
 		if ( ! empty( $request['rating'] ) ) {
-			update_comment_meta( $product_review_id, 'rating', $request['rating'] );
+			if ( array_key_exists( 'comment_meta', $prepared_review ) && ! is_array( $prepared_review['comment_meta'] ) ) {
+				return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+
+			$prepared_review['comment_meta']['rating'] = (int) $request['rating'];
 		}
 
-		$product_review = get_comment( $product_review_id );
+		$core_counted_product_id = (int) ( $prepared_review['comment_post_ID'] ?? $original_product_id );
+
+		/*
+		 * Zero means no comment-table row changed; false is the actual update failure. A rating-only
+		 * request legitimately returns zero while still storing comment_meta and refreshing counts.
+		 */
+		$updated = wp_update_comment( $prepared_review );
+		if ( false === $updated ) {
+			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$product_review     = get_comment( $product_review_id );
+		$current_product_id = $product_review instanceof WP_Comment ? (int) $product_review->comment_post_ID : 0;
+
+		/*
+		 * Core chooses its count target before wp_update_comment_data can redirect the persisted review.
+		 * Refresh each affected product that Core did not count.
+		 */
+		if ( $product_review instanceof WP_Comment ) {
+			foreach ( array_unique( array( $original_product_id, $current_product_id ) ) as $product_id_to_count ) {
+				if ( $product_id_to_count !== $core_counted_product_id ) {
+					wp_update_comment_count( $product_id_to_count );
+				}
+			}
+		}
+
 		$this->update_additional_fields_for_object( $product_review, $request );
 
 		/**

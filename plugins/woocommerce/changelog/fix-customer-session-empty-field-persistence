@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix: allow empty customer session fields to override prior values in WC_Customer_Data_Store_Session

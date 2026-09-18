@@ -8,21 +8,9 @@
 			"type": "number",
 			"default": 0
 		},
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
-		},
 		"textAlign": {
 			"type": "string",
 			"default": ""
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfSingleProductTemplate": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {
@@ -42,8 +30,10 @@
 		"typography": {
 			"fontSize": true,
 			"__experimentalSkipSerialization": true
-		},
-		"__experimentalSelector": ".wc-block-components-product-rating-counter"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-rating-counter.wc-block-components-product-rating-counter, .wp-block-woocommerce-product-rating-counter .wc-block-components-product-rating-counter"
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],

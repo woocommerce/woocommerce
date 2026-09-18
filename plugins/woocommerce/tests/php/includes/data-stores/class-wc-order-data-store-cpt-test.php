@@ -15,11 +15,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Store the COT state before the test.
+	 * Store the COT state before the test class.
 	 *
 	 * @var bool
 	 */
-	private $prev_cot_state;
+	private static $previous_cot_state;
+
+	/**
+	 * Use the CPT order data store for every test in this class.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$previous_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore the order data store used before this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		OrderHelper::toggle_cot_feature_and_usage( self::$previous_cot_state );
+	}
 
 	/**
 	 * Store the COT state before the test.
@@ -28,8 +43,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot_feature_and_usage( false );
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
@@ -39,7 +52,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
@@ -571,6 +583,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox delete_items_by_ids() should reject invalid IDs and preserve items belonging to other orders.
+	 */
+	public function test_delete_items_by_ids_sanitizes_and_scopes_ids_to_order() {
+		$order_1         = WC_Helper_Order::create_order();
+		$order_2         = WC_Helper_Order::create_order();
+		$order_1_item_id = array_key_first( $order_1->get_items() );
+		$order_2_item_id = array_key_first( $order_2->get_items() );
+		$data_store      = $order_1->get_data_store();
+
+		$data_store->delete_items_by_ids( $order_1, array( -$order_1_item_id, 0 ) );
+
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_1_item_id ), 'Negative and zero IDs should be rejected.' );
+
+		$data_store->delete_items_by_ids( $order_1, array( $order_1_item_id, $order_1_item_id, $order_2_item_id ) );
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $order_1_item_id ), 'A valid item belonging to the target order should be deleted.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_2_item_id ), 'An item belonging to another order should remain.' );
+	}
+
+	/**
 	 * @testDox Deleting order item should delete items from only that order.
 	 */
 	public function test_delete_items_multi_order() {
@@ -705,7 +737,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_total_filtering_with_operators() {
 		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
 		foreach ( $order_totals_to_test as $order_total ) {
-			$order = OrderHelper::create_order();
+			$order = wc_create_order();
 			$order->set_total( $order_total );
 			$order->save();
 		}
@@ -794,6 +826,151 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, $read_order->get_total() );
 		$this->assertEquals( WC_VERSION, $read_order->get_version() );
 		$this->assertTrue( $read_order->get_prices_include_tax() );
+	}
+
+	/**
+	 * @testdox An order with missing tax-mode metadata uses the store setting without writing during the read.
+	 */
+	public function test_reading_order_without_prices_include_tax_metadata_uses_store_setting(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+			$order = WC_Helper_Order::create_order();
+			delete_post_meta( $order->get_id(), '_prices_include_tax' );
+			wp_cache_flush();
+
+			$read_order = wc_get_order( $order->get_id() );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'Missing metadata should use the existing CPT fallback to the store setting.'
+			);
+			$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_prices_include_tax' ), 'Reading must not persist the fallback.' );
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testdox A native order draft loads store defaults in memory and persists them on its next CRUD save.
+	 * @dataProvider provide_native_draft_tax_modes
+	 *
+	 * @param string $tax_mode    Store tax-mode setting.
+	 * @param bool   $expected    Expected order tax mode.
+	 * @param string $post_status Post status when WooCommerce first loads the order.
+	 */
+	public function test_native_draft_loads_and_persists_store_defaults( string $tax_mode, bool $expected, string $post_status ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_currency = get_option( 'woocommerce_currency' );
+		$order_id          = 0;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			update_option( 'woocommerce_currency', 'EUR' );
+			$post     = get_default_post_to_edit( 'shop_order', true );
+			$order_id = $post->ID;
+
+			if ( 'auto-draft' !== $post_status ) {
+				// WordPress changes auto-draft to draft before the admin metadata save callbacks run.
+				wp_update_post(
+					array(
+						'ID'          => $order_id,
+						'post_status' => $post_status,
+					)
+				);
+			}
+
+			$sut = new WC_Order( $order_id );
+
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'Missing tax mode should use the store setting.' );
+			$this->assertSame( 'EUR', $sut->get_currency( 'edit' ), 'Missing currency should use the store setting.' );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_prices_include_tax' ), 'Loading must not persist tax metadata.' );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_order_currency' ), 'Loading must not persist currency metadata.' );
+
+			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+			update_option( 'woocommerce_currency', 'USD' );
+			$this->assertSame( $expected, $sut->get_prices_include_tax(), 'The getter should return the loaded property, not reread store settings.' );
+			$this->assertSame( 'EUR', $sut->get_currency(), 'The loaded currency should remain unchanged until the order is reloaded.' );
+
+			$sut->save();
+
+			$this->assertSame( $tax_mode, get_post_meta( $order_id, '_prices_include_tax', true ), 'Saving must write the loaded tax mode even without a setter call.' );
+			$this->assertSame( 'EUR', get_post_meta( $order_id, '_order_currency', true ), 'Saving must write the loaded currency.' );
+
+			$reloaded_order = new WC_Order( $order_id );
+			$this->assertSame( $expected, $reloaded_order->get_prices_include_tax(), 'Persisted tax mode must take precedence over changed store settings.' );
+			$this->assertSame( 'EUR', $reloaded_order->get_currency(), 'Persisted currency must take precedence over changed store settings.' );
+		} finally {
+			if ( $order_id ) {
+				wp_delete_post( $order_id, true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_currency', $previous_currency );
+		}
+	}
+
+	/**
+	 * Provides tax modes for the initial draft load and the first native form submission.
+	 *
+	 * @return array<string, array{string, bool, string}>
+	 */
+	public static function provide_native_draft_tax_modes(): array {
+		return array(
+			'inclusive auto-draft'       => array( 'yes', true, 'auto-draft' ),
+			'exclusive auto-draft'       => array( 'no', false, 'auto-draft' ),
+			'inclusive first submission' => array( 'yes', true, 'draft' ),
+			'exclusive first submission' => array( 'no', false, 'draft' ),
+		);
+	}
+
+	/**
+	 * @testdox A persisted tax mode is preserved when the store setting differs, including explicit false on a draft.
+	 * @dataProvider provide_persisted_order_tax_modes
+	 *
+	 * @param string $tax_mode    Store tax-mode setting.
+	 * @param bool   $saved_value Persisted order tax mode.
+	 * @param string $status      Order status.
+	 */
+	public function test_reading_order_preserves_persisted_tax_mode( string $tax_mode, bool $saved_value, string $status ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$order->set_status( $status );
+			$order->set_prices_include_tax( $saved_value );
+			$order->save();
+
+			$sut = new WC_Order( $order->get_id() );
+			$this->assertSame( $saved_value, $sut->get_prices_include_tax(), 'An existing value must not be replaced with a dynamic default.' );
+			$sut->save();
+			$this->assertSame( $saved_value ? 'yes' : 'no', get_post_meta( $order->get_id(), '_prices_include_tax', true ) );
+		} finally {
+			if ( $order->get_id() ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides persisted tax modes that disagree with the store setting.
+	 *
+	 * @return array<string, array{string, bool, string}>
+	 */
+	public static function provide_persisted_order_tax_modes(): array {
+		return array(
+			'explicit false on draft'           => array( 'yes', false, 'auto-draft' ),
+			'explicit true on draft'            => array( 'no', true, 'auto-draft' ),
+			'explicit false on completed order' => array( 'yes', false, 'completed' ),
+			'explicit true on completed order'  => array( 'no', true, 'completed' ),
+		);
 	}
 
 	/**

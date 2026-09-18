@@ -34,14 +34,14 @@ if [ -n "$matchingRemoteBranches" ]; then
 fi
 
 git fetch origin trunk >/dev/null 2>&1
-changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
+changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json' 'pnpm-workspace.yaml')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
-	pnpm exec syncpack -- list-mismatches
+	pnpm exec syncpack lint
 	if [ $? -ne 0 ]; then
 		echo "[ERR] (aborting)"
 		echo "You must sync the dependencies listed above before you can push this branch."
-		echo "This can usually be accomplished automatically by updating the pinned version in \`.syncpackrc\` and then running \`pnpm sync-dependencies\`."
+		echo "This can usually be accomplished automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running \`pnpm sync-dependencies\`."
 		exit 1
 	fi
 	echo "[OK]"
