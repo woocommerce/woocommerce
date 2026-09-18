@@ -3,7 +3,7 @@
  */
 import { Notice } from '@wordpress/notices';
 import { Page } from '@playwright/test';
-import { Admin, wpCLI } from '@woocommerce/e2e-utils';
+import { Admin } from '@woocommerce/e2e-utils';
 
 type Location = {
 	name: string;
@@ -72,20 +72,6 @@ export class LocalPickupUtils {
 		}
 	}
 
-	async enableLocalPickupCosts() {
-		await this.openLocalPickupSettings();
-
-		const addAPrice = this.page.getByLabel(
-			'Add a price for customers who choose local pickup'
-		);
-
-		if ( ! ( await addAPrice.isChecked() ) ) {
-			await addAPrice.check();
-		}
-
-		await this.saveLocalPickupSettings();
-	}
-
 	async disableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
@@ -107,40 +93,10 @@ export class LocalPickupUtils {
 		await this.saveLocalPickupSettings();
 	}
 
-	async deleteLocations() {
-		await wpCLI( "option update pickup_location_pickup_locations ''" );
-	}
-
-	async deletePickupLocation() {
-		await this.page.getByRole( 'button', { name: 'Edit' } ).click();
-		await this.page
-			.getByRole( 'button', { name: 'Delete location' } )
-			.click();
-
-		await this.saveLocalPickupSettings();
-	}
-
 	async addPickupLocation( { location }: { location: Location } ) {
 		await this.openLocalPickupSettings();
 
 		await this.page.getByText( 'Add pickup location' ).click();
-		await this.page.getByLabel( 'Location name' ).fill( location.name );
-		await this.page.getByPlaceholder( 'Address' ).fill( location.address );
-		await this.page.getByPlaceholder( 'City' ).fill( location.city );
-		await this.page
-			.getByPlaceholder( 'Postcode / ZIP' )
-			.fill( location.postcode );
-		await this.page
-			.getByLabel( 'Country / State' )
-			.selectOption( location.state );
-		await this.page.getByLabel( 'Pickup details' ).fill( location.details );
-		await this.page.getByRole( 'button', { name: 'Done' } ).click();
-
-		await this.saveLocalPickupSettings();
-	}
-
-	async editPickupLocation( { location }: { location: Location } ) {
-		await this.page.getByRole( 'button', { name: 'Edit' } ).click();
 		await this.page.getByLabel( 'Location name' ).fill( location.name );
 		await this.page.getByPlaceholder( 'Address' ).fill( location.address );
 		await this.page.getByPlaceholder( 'City' ).fill( location.city );

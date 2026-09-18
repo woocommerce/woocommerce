@@ -106,7 +106,6 @@
 		"test:unit:watch": "pnpm test:php:watch",
 		"test:unit:env": "pnpm test:php:env",
 		"test:unit:env:watch": "pnpm test:php:env:watch",
-		"update-wp-env": "php ./tests/e2e/bin/update-wp-env.php",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:admin": "pnpm watch:build:project:admin",
 		"watch:build:blocks": "pnpm watch:build:project:blocks",
