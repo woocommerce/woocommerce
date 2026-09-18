@@ -11,10 +11,14 @@ import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
 type ShippingTopology = {
 	defaultRate?: boolean;
+	secondRate?: boolean;
 	gbRate?: boolean;
 	pickup?: boolean;
 	requiresAddress: boolean;
 };
+
+const DEFAULT_RATE_COST = '10';
+const EXPRESS_RATE_COST = '25';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page, requestUtils }, use ) => {
@@ -27,6 +31,7 @@ const configureShippingTopology = async ( topology: ShippingTopology ) => {
 	const encodedTopology = Buffer.from(
 		JSON.stringify( {
 			defaultRate: false,
+			secondRate: false,
 			gbRate: false,
 			pickup: false,
 			...topology,
@@ -56,7 +61,15 @@ const configureShippingTopology = async ( topology: ShippingTopology ) => {
 			$instance_id = $default_zone->add_shipping_method( "flat_rate" );
 			update_option(
 				"woocommerce_flat_rate_{$instance_id}_settings",
-				array( "enabled" => "yes", "title" => "Home delivery", "tax_status" => "none", "cost" => "10" )
+				array( "enabled" => "yes", "title" => "Home delivery", "tax_status" => "none", "cost" => "${ DEFAULT_RATE_COST }" )
+			);
+		}
+
+		if ( $config["secondRate"] ) {
+			$instance_id = $default_zone->add_shipping_method( "flat_rate" );
+			update_option(
+				"woocommerce_flat_rate_{$instance_id}_settings",
+				array( "enabled" => "yes", "title" => "Express delivery", "tax_status" => "none", "cost" => "${ EXPRESS_RATE_COST }" )
 			);
 		}
 
@@ -123,12 +136,13 @@ test.describe( 'Merchant → Shipping', () => {
 } );
 
 test.describe( 'Shopper → Shipping', () => {
-	test( 'Shopper can switch between shipping and local pickup while preserving the effective selected rate', async ( {
+	test( 'Shopper applies a shipping rate, switches to local pickup, and returns to the first offered rate', async ( {
 		frontendUtils,
 		page,
 	} ) => {
 		await configureShippingTopology( {
 			defaultRate: true,
+			secondRate: true,
 			pickup: true,
 			requiresAddress: false,
 		} );
@@ -145,24 +159,62 @@ test.describe( 'Shopper → Shipping', () => {
 		const deliveryRate = page.getByRole( 'radio', {
 			name: /Home delivery/,
 		} );
+		const expressRate = page.getByRole( 'radio', {
+			name: /Express delivery/,
+		} );
 		const pickupRate = page.getByRole( 'radio', {
 			name: /Automattic, Inc\./,
 		} );
+		const shippingTotal = page.locator(
+			'.wc-block-components-totals-shipping'
+		);
+
+		// The rate the cart holds for the shipping package, straight from the
+		// session the Store API writes it to.
+		const selectedRateName = async () => {
+			const response = await page.request.get(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const cart = await response.json();
+			return cart.shipping_rates[ 0 ].shipping_rates.find(
+				( rate: { selected: boolean } ) => rate.selected
+			)?.name;
+		};
 
 		await expect( ship ).toBeChecked();
 		await expect( pickup ).not.toBeChecked();
 		await expect( deliveryRate ).toBeChecked();
+		await expect( expressRate ).not.toBeChecked();
 
+		await expressRate.click();
+		await expect( expressRate ).toBeChecked();
+		await expect( deliveryRate ).not.toBeChecked();
+		await expect( shippingTotal ).toContainText(
+			`$${ EXPRESS_RATE_COST }.00`
+		);
+		await expect.poll( selectedRateName ).toBe( 'Express delivery' );
+
+		// Pickup replaces the delivery rates with the pickup location.
 		await pickup.click();
 		await expect( pickup ).toBeChecked();
 		await expect( ship ).not.toBeChecked();
 		await expect( pickupRate ).toBeChecked();
 		await expect( deliveryRate ).toBeHidden();
+		await expect( expressRate ).toBeHidden();
 
+		// Back on Ship the cart holds the package's first rate again, not the
+		// one the shopper chose before the pickup detour: the rate list remounts
+		// and its control falls back to the first offered rate because the
+		// session holds the pickup rate.
 		await ship.click();
 		await expect( ship ).toBeChecked();
 		await expect( pickup ).not.toBeChecked();
 		await expect( deliveryRate ).toBeChecked();
+		await expect( expressRate ).not.toBeChecked();
+		await expect( shippingTotal ).toContainText(
+			`$${ DEFAULT_RATE_COST }.00`
+		);
+		await expect.poll( selectedRateName ).toBe( 'Home delivery' );
 	} );
 
 	test( 'Shopper sees no matching rates until a complete address reveals the zone rate', async ( {
