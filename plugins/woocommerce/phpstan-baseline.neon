@@ -5329,12 +5329,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order\.\)\: Unexpected token "@user", expected variable at offset 317 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(array Billing fields\.\)\: Unexpected token "Billing", expected variable at offset 146 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -14912,6 +14906,12 @@ parameters:
 			path: includes/class-wc-shipping.php
 
 		-
+			message: '#^Offset mixed might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/class-wc-shipping.php
+
+		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -16570,13 +16570,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -49925,18 +49925,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedItem.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:update_context\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:\$current_item \(WC_Product\|WP_Term\|null\) does not accept WC_Product\|false\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -50349,12 +50337,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/OrderConfirmation/ShippingAddress.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order\|false \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Status.php
 
 		-
 			message: '#^Parameter \#1 \$date of function wc_format_datetime expects WC_DateTime, WC_DateTime\|null given\.$#'
@@ -60115,18 +60097,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
