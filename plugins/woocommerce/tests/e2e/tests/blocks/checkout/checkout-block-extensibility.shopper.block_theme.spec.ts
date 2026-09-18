@@ -42,7 +42,7 @@ test.describe( 'Shopper → Extensibility', () => {
 	} );
 
 	test.describe( 'extensionCartUpdate', () => {
-		test( 'Cart data can be modified by extensions', async ( {
+		test( 'Unpushed customer data is kept or overwritten depending on overwriteDirtyCustomerData, and extension data reaches the cart', async ( {
 			checkoutPageObject,
 		} ) => {
 			const { page } = checkoutPageObject;

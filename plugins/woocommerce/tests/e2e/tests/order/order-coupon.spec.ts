@@ -77,7 +77,7 @@ test.describe(
 			} );
 		} );
 
-		test( 'can apply a coupon', async ( { page } ) => {
+		test( 'can apply and remove a coupon', async ( { page } ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 
 			// open modal for adding line items

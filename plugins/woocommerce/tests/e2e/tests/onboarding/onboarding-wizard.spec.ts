@@ -343,7 +343,7 @@ test.describe(
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
-			await test.step( 'Confirm the selection was installed and the profiler finished', async () => {
+			await test.step( 'Confirm the selection reached the install requests and the profiler finished', async () => {
 				await expect(
 					page.getByRole( 'heading', { name: 'Home', exact: true } )
 				).toBeVisible();

@@ -21,7 +21,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 
 test.describe( 'Product Collection: Collection Pickers', () => {
 	test.describe( 'Hand-Picked Products', () => {
-		test( 'Products are displayed on frontend', async ( {
+		test( 'Selected products survive save and reload and are displayed on frontend', async ( {
 			pageObject,
 			admin,
 			editor,
@@ -149,7 +149,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 	} );
 
 	test.describe( 'Collection switching', () => {
-		test( 'Switching to a non-picker collection displays products immediately', async ( {
+		test( 'Switching collections swaps the picker and then displays products immediately', async ( {
 			pageObject,
 			admin,
 			editor,
