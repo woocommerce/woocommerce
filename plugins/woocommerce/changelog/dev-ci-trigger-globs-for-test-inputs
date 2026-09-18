@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Trigger the PHPUnit, Jest, Blocks E2E, PayPal and email editor CI jobs on the test inputs they read
