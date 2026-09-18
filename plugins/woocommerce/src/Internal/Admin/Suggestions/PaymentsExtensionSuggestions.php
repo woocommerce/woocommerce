@@ -1000,6 +1000,7 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
+			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::ELAVON,
