@@ -966,6 +966,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::AIRWALLEX,
 			self::KUSTOM_CHECKOUT,
 			self::GOCARDLESS,
 			self::ELAVON,
@@ -2182,7 +2183,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 		),
 		'TW' => array(
