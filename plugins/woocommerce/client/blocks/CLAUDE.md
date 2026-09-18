@@ -17,8 +17,8 @@
 
 # Test
 pnpm --filter=@woocommerce/block-library test:js                      # Jest unit tests
-pnpm --filter=@woocommerce/block-library test:js -- path/to/test      # Specific test file
-pnpm --filter=@woocommerce/block-library test:js --watch              # Jest watch mode (flags take no --)
+pnpm --filter=@woocommerce/block-library test:js path/to/test         # Specific test file
+pnpm --filter=@woocommerce/block-library test:js --watch              # Jest watch mode
 pnpm --filter=@woocommerce/block-library test:update                  # Update snapshots
 pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks         # Playwright E2E tests (needs env:start:blocks)
 

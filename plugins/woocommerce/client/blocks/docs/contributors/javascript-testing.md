@@ -32,7 +32,7 @@ The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/tr
 
 Additionally,
 
--   `test:js -- path/to/test` runs a single test file.
+-   `test:js path/to/test` runs a single test file.
 -   `test:js --watch` keeps watch of files and automatically re-runs tests when things change.
 -   `test:update` updates the snapshot tests for components, used if you change a component that has tests attached.
 
