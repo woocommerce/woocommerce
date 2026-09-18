@@ -13,6 +13,15 @@ use WP_UnitTestCase;
 class SingleProductTemplateTests extends WP_UnitTestCase {
 
 	/**
+	 * Remove the image files the attachment fixtures wrote into the uploads directory,
+	 * which the database rollback does not cover.
+	 */
+	public function tearDown(): void {
+		$this->remove_added_uploads();
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should not update Product Catalog template content so Single Product template logic does not leak into other templates.
 	 */
 	public function test_dont_update_single_product_content_for_other_templates() {
@@ -241,6 +250,75 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$this->assertSame( array_merge( $seed_classes, $product_classes ), $filtered_classes );
 			$this->assertContains( 'product', $filtered_classes );
 			$this->assertContains( $type_class, $filtered_classes );
+		} finally {
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
+			// globals it leaves exactly as the test left them.
+			if ( $product_global_existed ) {
+				$GLOBALS['product'] = $product_global;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+
+			if ( $loop_global_existed ) {
+				$GLOBALS['woocommerce_loop'] = $loop_global;
+			} else {
+				unset( $GLOBALS['woocommerce_loop'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should add has-post-thumbnail to the Single Product body classes only for a product that has an image.
+	 */
+	public function test_update_single_product_content_adds_has_post_thumbnail_only_for_imaged_product() {
+		$product_global_existed = array_key_exists( 'product', $GLOBALS );
+		$product_global         = $product_global_existed ? $GLOBALS['product'] : null;
+		$loop_global_existed    = array_key_exists( 'woocommerce_loop', $GLOBALS );
+		$loop_global            = $loop_global_existed ? $GLOBALS['woocommerce_loop'] : null;
+
+		try {
+			// The template under test installs its own body_class callback, so clear the
+			// stack first to isolate it. _restore_hooks() rebuilds the stack afterwards.
+			remove_all_filters( 'body_class' );
+
+			$imaged_product = \WC_Helper_Product::create_simple_product();
+			$imaged_product->set_image_id( $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' ) );
+			$imaged_product->save();
+
+			$imageless_product = \WC_Helper_Product::create_simple_product();
+
+			$GLOBALS['product'] = $imaged_product;
+			$GLOBALS['post']    = get_post( $imaged_product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; tear_down() nulls it again.
+
+			$template          = new \WP_Block_Template();
+			$template->slug    = 'single-product';
+			$template->title   = 'Single Product';
+			$template->content = '<!-- wp:woocommerce/product-price /-->';
+			$template->type    = 'wp_template';
+
+			$single_product_template = new SingleProductTemplate();
+			$single_product_template->update_single_product_content( array( $template ) );
+
+			wc_reset_loop();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
+			$imaged_classes = apply_filters( 'body_class', array() );
+
+			$this->assertContains( 'product', $imaged_classes, 'The imaged product body classes must contain product.' );
+			$this->assertContains( 'product-type-simple', $imaged_classes, 'The imaged product body classes must contain product-type-simple.' );
+			$this->assertContains( 'status-publish', $imaged_classes, 'The imaged product body classes must contain status-publish.' );
+			$this->assertContains( 'has-post-thumbnail', $imaged_classes, 'A product with an image must contribute has-post-thumbnail.' );
+
+			$GLOBALS['product'] = $imageless_product;
+			$GLOBALS['post']    = get_post( $imageless_product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The template reads the current post; tear_down() nulls it again.
+
+			wc_reset_loop();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
+			$imageless_classes = apply_filters( 'body_class', array() );
+
+			$this->assertContains( 'product', $imageless_classes, 'The imageless product body classes must contain product.' );
+			$this->assertContains( 'product-type-simple', $imageless_classes, 'The imageless product body classes must contain product-type-simple.' );
+			$this->assertContains( 'status-publish', $imageless_classes, 'The imageless product body classes must contain status-publish.' );
+			$this->assertNotContains( 'has-post-thumbnail', $imageless_classes, 'A product without an image must not contribute has-post-thumbnail.' );
 		} finally {
 			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
 			// globals it leaves exactly as the test left them.
