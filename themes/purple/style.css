@@ -246,15 +246,6 @@ body {
 	margin-bottom: 5px;
 }
 
-.woocommerce form .form-row label:has(input[type="checkbox"]) {
-	align-items: center;
-	display: inline-flex;
-	font-size: var(--wp--preset--font-size--medium);
-	gap: 0.5em;
-	line-height: 1;
-	margin: 0;
-}
-
 .woocommerce-form-login .form-row:has(.woocommerce-form-login__submit) {
 	align-items: center;
 	display: flex;
@@ -262,7 +253,7 @@ body {
 	gap: 0;
 }
 
-.woocommerce-form-login .woocommerce-form-login__rememberme {
+.woocommerce-form-login .form-row .woocommerce-form-login__rememberme {
 	margin: 0;
 }
 
