@@ -26,12 +26,20 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	private $original_show_avatars;
 
 	/**
+	 * Original avatar_default option value.
+	 *
+	 * @var mixed
+	 */
+	private $original_avatar_default;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->user_id               = $this->factory->user->create();
-		$this->original_show_avatars = get_option( 'show_avatars' );
+		$this->user_id                 = $this->factory->user->create();
+		$this->original_show_avatars   = get_option( 'show_avatars' );
+		$this->original_avatar_default = get_option( 'avatar_default' );
 		update_option( 'show_avatars', 1 );
 	}
 
@@ -43,6 +51,7 @@ class CustomerAccountTest extends WP_UnitTestCase {
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->user_id );
 		update_option( 'show_avatars', $this->original_show_avatars );
+		update_option( 'avatar_default', $this->original_avatar_default );
 		parent::tearDown();
 	}
 
