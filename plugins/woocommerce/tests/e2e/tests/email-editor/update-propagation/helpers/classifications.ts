@@ -21,10 +21,4 @@ export const META_KEYS = {
 	BACKFILLED: '_wc_email_backfilled',
 } as const;
 
-export const BACKFILL_CASES = {
-	A: 'A',
-	B: 'B',
-	C: 'C',
-} as const;
-
 export const TEST_HELPER_API_BASE = 'wc-email-test-helper/v1';
