@@ -747,7 +747,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				).toBeVisible();
 			} );
 
-			await test.step( 'persists reconciled grouped additions after reload', async () => {
+			await test.step( 'persists the cart item count after reload', async () => {
 				await waitForCartIdle();
 
 				await page.reload();
