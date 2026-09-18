@@ -193,7 +193,7 @@ const Form = <
 		previousIsEditing,
 	] );
 
-	// Clear values for hidden fields when fields change.
+	// Clear fields when they become hidden, preserving defaults that started hidden.
 	useEffect( () => {
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
@@ -202,7 +202,14 @@ const Form = <
 			...values,
 			...Object.fromEntries(
 				formFields
-					.filter( ( field ) => field.hidden )
+					.filter(
+						( field ) =>
+							field.hidden &&
+							previousFormFields?.find(
+								( previousField ) =>
+									previousField.key === field.key
+							)?.hidden === false
+					)
 					.map( ( field ) => [ field.key, '' ] )
 			),
 		};
