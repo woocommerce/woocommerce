@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Cover the customer data dirty flag across a completed and a failed customer save
+Cover the customer data dirty flag and the checkout form passing a required checkbox's error message to its control
