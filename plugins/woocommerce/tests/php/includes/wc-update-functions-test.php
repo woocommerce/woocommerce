@@ -1026,7 +1026,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The 11.3.0 update fills empty HPOS paid and completed dates from the pre-3.0 meta keys and leaves set dates alone.
+	 * @testdox The 11.3.0 update restores paid and completed dates from the pre-3.0 meta keys only where those keys are known to describe the order.
 	 */
 	public function test_wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(): void {
 		global $wpdb;
@@ -1035,37 +1035,68 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$op_table   = $wpdb->prefix . 'wc_order_operational_data';
 		$meta_table = $wpdb->prefix . 'wc_orders_meta';
-		$rows       = array(
-			101 => array( null, '2016-05-10 12:00:00' ),
-			102 => array( '2020-01-02 03:04:05', '2016-05-10 12:00:00' ),
-			103 => array( null, '' ),
+		$legacy     = '2016-05-10 12:00:00'; // 10:00 GMT.
+		// order_id => [ version, date_paid_gmt, date_completed_gmt, wc_orders_meta rows, postmeta rows ].
+		$fixtures = array(
+			101 => array( '2.6.14', null, null, array( array( '_paid_date', $legacy ) ), array() ),
+			102 => array( '2.6.14', '2020-01-02 03:04:05', null, array( array( '_paid_date', $legacy ) ), array() ),
+			103 => array( '2.6.14', null, null, array( array( '_paid_date', '' ) ), array() ),
+			104 => array( '2.6.14', null, null, array( array( '_paid_date', '0' ) ), array() ),
+			105 => array( '2.6.14', null, null, array( array( '_paid_date', null ) ), array() ),
+			106 => array( '8.3.1', null, null, array( array( '_paid_date', $legacy ) ), array() ),
+			107 => array( '8.3.1', null, null, array( array( '_paid_date', $legacy ) ), array( array( '_paid_date', $legacy ) ) ),
+			108 => array( '8.3.1', null, null, array( array( '_paid_date', $legacy ) ), array( array( '_paid_date', '' ), array( '_date_paid', '' ) ) ),
+			109 => array( '2.6.14', null, null, array( array( '_completed_date', '2016-05-11 08:30:00' ) ), array() ),
+			110 => array( '2.6.14', null, null, array( array( '_paid_date', '1462881600' ) ), array() ),
+			111 => array( '2.6.14', null, null, array( array( '_paid_date', $legacy ), array( '_paid_date', '2019-01-01 00:00:00' ) ), array() ),
 		);
-		foreach ( $rows as $order_id => list( $date_paid_gmt, $legacy_paid_date ) ) {
+		foreach ( $fixtures as $order_id => list( $version, $date_paid_gmt, $date_completed_gmt, $meta_rows, $post_rows ) ) {
 			$wpdb->insert(
 				$op_table,
 				array(
-					'order_id'      => $order_id,
-					'date_paid_gmt' => $date_paid_gmt,
+					'order_id'            => $order_id,
+					'woocommerce_version' => $version,
+					'date_paid_gmt'       => $date_paid_gmt,
+					'date_completed_gmt'  => $date_completed_gmt,
 				)
 			);
-			$wpdb->insert(
-				$meta_table,
-				array(
-					'order_id'   => $order_id,
-					'meta_key'   => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_value' => $legacy_paid_date, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				)
-			);
+			foreach ( $meta_rows as list( $key, $value ) ) {
+				$wpdb->insert(
+					$meta_table,
+					array(
+						'order_id'   => $order_id,
+						'meta_key'   => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					)
+				);
+			}
+			foreach ( $post_rows as list( $key, $value ) ) {
+				$wpdb->insert(
+					$wpdb->postmeta,
+					array(
+						'post_id'    => $order_id,
+						'meta_key'   => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					)
+				);
+			}
 		}
 
-		$this->assertTrue( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A batch with orders to repair should request another run' );
-		$this->assertFalse( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A run with nothing left to repair should complete' );
+		$this->assertFalse( wc_update_1130_restore_hpos_legacy_paid_and_completed_dates(), 'A batch smaller than the batch size should complete the update' );
 		$this->assertFalse( get_option( 'woocommerce_update_1130_last_legacy_date_order_id' ), 'The cursor should be cleared on completion' );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$dates = $wpdb->get_results( "SELECT order_id, date_paid_gmt FROM {$op_table} WHERE order_id IN ( 101, 102, 103 )", OBJECT_K );
-		$this->assertSame( '2016-05-10 10:00:00', $dates[101]->date_paid_gmt, 'An empty paid date should be filled from _paid_date, in GMT' );
-		$this->assertSame( '2020-01-02 03:04:05', $dates[102]->date_paid_gmt, 'An existing paid date should not be overwritten' );
-		$this->assertNull( $dates[103]->date_paid_gmt, 'An empty legacy value should leave the paid date empty' );
+		$rows = $wpdb->get_results( "SELECT order_id, date_paid_gmt, date_completed_gmt FROM {$op_table} WHERE order_id BETWEEN 101 AND 111", OBJECT_K );
+		$this->assertSame( '2016-05-10 10:00:00', $rows[101]->date_paid_gmt, 'A pre-3.0 order gets its paid date from _paid_date, converted to GMT' );
+		$this->assertSame( '2020-01-02 03:04:05', $rows[102]->date_paid_gmt, 'An existing paid date is not overwritten' );
+		$this->assertNull( $rows[103]->date_paid_gmt, 'An empty legacy value leaves the paid date empty' );
+		$this->assertNull( $rows[104]->date_paid_gmt, 'A legacy value of 0 leaves the paid date empty' );
+		$this->assertNull( $rows[105]->date_paid_gmt, 'A NULL legacy value leaves the paid date empty' );
+		$this->assertNull( $rows[106]->date_paid_gmt, 'A 3.0+ order with no post evidence keeps its cleared paid date' );
+		$this->assertSame( '2016-05-10 10:00:00', $rows[107]->date_paid_gmt, 'A 3.0+ order whose post only has the legacy key is restored' );
+		$this->assertNull( $rows[108]->date_paid_gmt, 'A date cleared under HPOS and synced to the post stays cleared' );
+		$this->assertSame( '2016-05-11 06:30:00', $rows[109]->date_completed_gmt, 'The completed date is restored from _completed_date' );
+		$this->assertSame( '2016-05-10 12:00:00', $rows[110]->date_paid_gmt, 'A numeric legacy value is a timestamp' );
+		$this->assertSame( '2016-05-10 10:00:00', $rows[111]->date_paid_gmt, 'The first legacy row wins when there are several' );
 	}
 }

@@ -638,14 +638,15 @@ WHERE
 	 * @return string Unix timestamp, or an empty string when there is no usable date.
 	 */
 	private function local_date_to_epoch( $value ): string {
+		// The posts data store treats an empty value, '0' included, and the zero date as no date.
+		if ( empty( $value ) || self::ZERO_DATE === $value ) {
+			return '';
+		}
 		if ( is_numeric( $value ) ) {
 			return (string) (int) $value;
 		}
-		if ( ! is_string( $value ) || '' === $value || '0000-00-00 00:00:00' === $value ) {
-			return '';
-		}
-		$datetime = date_create( $value, wp_timezone() );
-		return false === $datetime ? '' : (string) $datetime->getTimestamp();
+		$gmt = is_string( $value ) ? $this->local_date_to_gmt( $value ) : null;
+		return null === $gmt ? '' : (string) strtotime( "$gmt UTC" );
 	}
 
 	/**
@@ -680,7 +681,8 @@ WHERE
 				break;
 			case 'date_epoch':
 				try {
-					if ( '' === $value ) {
+					// The posts data store reads an empty value or '0' as no date.
+					if ( '' === $value || '0' === $value || null === $value ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( "@$value" ) )->format( 'Y-m-d H:i:s' );
@@ -806,7 +808,7 @@ WHERE $where_clause
 			$destination_column = $this->meta_column_mapping[ $meta_datum['meta_key'] ]['destination'];
 			$alias              = "meta_source_{$destination_column}";
 			// The migration stores an empty date as null and lets the next row fill the column, so do the same here.
-			$is_empty_date = '' === ( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null )
+			$is_empty_date = in_array( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null, array( '', '0' ), true )
 				&& in_array( $this->meta_column_mapping[ $meta_datum['meta_key'] ]['type'], array( 'date', 'date_epoch' ), true );
 			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) && ! $is_empty_date ) {
 				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
@@ -945,7 +947,7 @@ WHERE $where_clause
 			$row[ $destination_alias ] = wc_string_to_bool( $row[ $destination_alias ] );
 		}
 		if ( 'date_epoch' === $schema['type'] ) {
-			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
+			if ( '' === $row[ $alias ] || '0' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = null;
 			} else {
 				$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );

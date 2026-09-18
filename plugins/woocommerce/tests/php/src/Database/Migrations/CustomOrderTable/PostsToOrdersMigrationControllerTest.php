@@ -1026,6 +1026,39 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
+	 * @testdox A pre-3.0 paid date of 0 migrates as no date, as the posts data store reads it.
+	 */
+	public function test_migration_treats_zero_legacy_paid_date_as_no_date(): void {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_date_paid' );
+		update_post_meta( $order->get_id(), '_paid_date', '0' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'A legacy value of 0 should not become 1970' );
+		$this->assertEmpty( $this->sut->verify_migrated_orders( array( $order->get_id() ) ), 'Verification should agree with the migration' );
+	}
+
+	/**
+	 * @testdox A current paid date key of 0 counts as empty, so the pre-3.0 key is used, as the posts data store does.
+	 */
+	public function test_migration_falls_back_when_current_key_is_zero(): void {
+		global $wpdb;
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_date_paid', '0' );
+		update_post_meta( $order->get_id(), '_paid_date', '2016-05-10 12:00:00' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertSame( '2016-05-10 10:00:00', $wpdb->get_var( $wpdb->prepare( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'The legacy key should be used when the current key is 0' );
+		$this->assertEmpty( $this->sut->verify_migrated_orders( array( $order->get_id() ) ), 'Verification should agree with the migration' );
+	}
+
+	/**
 	 * @testdox The current paid date key wins over the pre-3.0 one when both have a value.
 	 */
 	public function test_migration_prefers_current_date_key_over_legacy_key(): void {
