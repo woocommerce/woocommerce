@@ -345,11 +345,19 @@ describe( 'CustomizableDashboard section preferences', () => {
 		const choices = await screen.findByRole( 'heading', {
 			name: 'Dashboard Sections',
 		} );
-		await userEvent.click(
-			within( choices.parentElement ).getByRole( 'button', {
-				name: 'Performance',
-			} )
+		const addPerformance = within( choices.parentElement ).getByRole(
+			'button',
+			{ name: 'Performance' }
 		);
+
+		// The button's own label is the bare section title, so the tooltip is
+		// the only place it says what clicking it does.
+		expect( addPerformance ).toHaveAttribute(
+			'title',
+			'Add Performance section'
+		);
+
+		await userEvent.click( addPerformance );
 		await screen.findByRole( 'heading', { name: 'Performance' } );
 
 		expect( await getVisibleSectionTitles() ).toEqual( [
