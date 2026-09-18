@@ -41,7 +41,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 	} );
 
-	test( 'default block notice templates, except for coupon errors, are visible by filter', async ( {
+	test( 'success and error notices use the block templates when a classic theme opts in', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -68,9 +68,24 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await expect(
 			page.getByText( 'Coupon code "testcoupon" already applied!' )
 		).toBeVisible();
-		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-error svg' )
-		).toBeHidden();
+
+		// A non-coupon error: the cart holds a product the store has run out of.
+		const productIdOutput = await wpCLI(
+			`post list --title="${ REGULAR_PRICED_PRODUCT_NAME }" --post_type=product --field=ID`
+		);
+		const productId = productIdOutput.stdout.match( /\d+/g )?.pop();
+		await wpCLI(
+			`eval '$product = wc_get_product( ${ productId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
+		);
+		await page.reload();
+
+		const errorBanner = page.locator(
+			'.wc-block-components-notice-banner.is-error'
+		);
+		await expect( errorBanner ).toContainText(
+			`Sorry, "${ REGULAR_PRICED_PRODUCT_NAME }" is not in stock.`
+		);
+		await expect( errorBanner.locator( 'svg' ) ).toBeVisible();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
