@@ -656,6 +656,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function shipping_topology_provider(): array {
 		return array(
+			'default rate before address'             => array( 'default rate before address', true, false, false, false, 'blank', array( 'default' ), 'default' ),
 			'default and any rates with pickup'       => array( 'default and any rates with pickup', true, true, true, false, 'us', array( 'default', 'pickup' ), 'default' ),
 			'default and any rates without pickup'    => array( 'default and any rates without pickup', true, true, false, false, 'us', array( 'default' ), 'default' ),
 			'default rate only'                       => array( 'default rate only', true, false, false, false, 'us', array( 'default' ), 'default' ),
