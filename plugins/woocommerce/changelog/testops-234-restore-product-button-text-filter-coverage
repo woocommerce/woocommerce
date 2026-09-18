@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cover the Product Button add-to-cart text filter on the AJAX path at the PHPUnit layer
