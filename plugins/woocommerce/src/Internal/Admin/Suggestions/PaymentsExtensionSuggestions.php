@@ -4416,7 +4416,7 @@ class PaymentsExtensionSuggestions {
 				'icon'   => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
 				'plugin' => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'woocommerce-gateway-converge',
+					'slug'  => 'elavon-payment-gateway-for-woocommerce',
 				),
 			),
 			self::FORTISPAY         => array(
