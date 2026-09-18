@@ -545,14 +545,11 @@ WHERE
 			foreach ( $this->core_column_mapping as $column_name => $schema ) {
 				$custom_table_column_name = $schema['destination'] ?? $column_name;
 				$value                    = $entity->$column_name;
-				$value                    = $this->validate_data( $value, $schema['type'] );
-				if ( null === $value && isset( $schema['fallback_column'] ) ) {
-					$value = $this->local_date_to_gmt( $entity->{$schema['fallback_column']} ?? null );
+				if ( isset( $schema['fallback_column'] ) && ( null === $value || '' === $value || self::ZERO_DATE === $value ) ) {
+					// With nothing to fall back to, the original value is stored as it always was.
+					$value = $this->local_date_to_gmt( $entity->{$schema['fallback_column']} ?? null ) ?? $value;
 				}
-				// A zero date with nothing to fall back to is stored as it always was, so existing queries treat the row the same.
-				if ( null === $value && self::ZERO_DATE === $entity->$column_name ) {
-					$value = self::ZERO_DATE;
-				}
+				$value = $this->validate_data( $value, $schema['type'] );
 				if ( is_wp_error( $value ) ) {
 					$error_records[ $entity->primary_key_id ][ $custom_table_column_name ] = $value->get_error_code();
 				} else {
@@ -607,7 +604,7 @@ WHERE
 				break;
 			case 'date':
 				try {
-					if ( null === $value || '' === $value || self::ZERO_DATE === $value ) {
+					if ( '' === $value ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' );
