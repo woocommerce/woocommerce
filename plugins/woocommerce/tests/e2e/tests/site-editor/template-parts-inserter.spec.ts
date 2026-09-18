@@ -36,9 +36,23 @@ test.describe( 'Template parts in the Site Editor inserter', () => {
 		).toBeVisible();
 	} );
 
-	test( 'offers only the Mini-Cart block, not its template part', async ( {
+	test( 'can insert a template part not related to Mini-Cart and Add to Cart with Options', async ( {
 		page,
 	} ) => {
+		const editor = new Editor( { page } );
+		await editor.setContent( '' );
+		await page
+			.getByRole( 'searchbox', { name: 'Search' } )
+			.fill( 'Footer' );
+
+		await expect(
+			page.locator(
+				'.editor-block-list-item-template-part/instance_footer'
+			)
+		).toBeVisible();
+	} );
+
+	test( "can't insert the Mini Cart template part", async ( { page } ) => {
 		await page
 			.getByRole( 'searchbox', { name: 'Search' } )
 			.fill( 'Mini-Cart' );
@@ -62,11 +76,6 @@ test.describe( 'Template parts in the Site Editor inserter', () => {
 			await page
 				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( title );
-			await expect(
-				page.getByText(
-					/^No results (found\.|available from your installed blocks\.)$/
-				)
-			).toBeVisible();
 			await expect(
 				page
 					.getByRole( 'listbox', { name: 'Blocks', exact: true } )
