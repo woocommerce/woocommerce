@@ -471,6 +471,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'airwallex',
 			'kustom_checkout',
 			'gocardless',
 			'elavon',
@@ -1307,9 +1308,6 @@ return array(
 	'KR' => array(
 		'primary_psp' => 'visa_as',
 		'primary_apm' => 'paypal_full_stack',
-		'other_psp'   => array(
-			'airwallex',
-		),
 	),
 	'TW' => array(
 		'primary_psp' => 'visa_as',
