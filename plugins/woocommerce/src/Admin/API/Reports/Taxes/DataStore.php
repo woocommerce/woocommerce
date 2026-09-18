@@ -458,7 +458,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->add_sql_query_params( $query_args );
 		$params = $this->get_limit_params( $query_args );
 
-		if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
+		// The selected tax codes stand in for the row count, but only while nothing else can drop
+		// a row. A location filter can, so counting them would report pages that hold nothing.
+		$counts_the_selected_taxes = isset( $query_args['taxes'] )
+			&& is_array( $query_args['taxes'] )
+			&& ! empty( $query_args['taxes'] )
+			&& '' === self::get_location_filter_condition( $query_args );
+
+		if ( $counts_the_selected_taxes ) {
 			$total_results = count( $query_args['taxes'] );
 			$total_pages   = (int) ceil( $total_results / $params['per_page'] );
 		} else {

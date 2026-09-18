@@ -1869,6 +1869,30 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxes report counts the rows a location filter leaves, not the tax codes asked for.
+	 */
+	public function test_taxes_report_counts_the_rows_left_by_a_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// Two tax codes asked for, one of them outside the filtered location. Counting the codes
+		// would report a page that holds nothing.
+		$sut  = new DataStore();
+		$data = $sut->get_data(
+			$this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+				'taxes'             => array( 201, 202 ),
+				'location_includes' => 'US:CA',
+			)
+		);
+
+		$this->assertCount( 1, $data->data, 'Only the Californian tax code should be reported.' );
+		$this->assertSame( 1, $data->total, 'The total should count the rows the filter leaves.' );
+		$this->assertSame( 1, $data->pages, 'A page beyond the filtered rows should not be offered.' );
+	}
+
+	/**
 	 * @testdox Taxes stats totals count only the tax lines of the filtered location.
 	 */
 	public function test_taxes_stats_totals_honour_the_location_filter(): void {
