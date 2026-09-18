@@ -618,6 +618,11 @@ WHERE
 		foreach ( $meta_data as $datum ) {
 			$row = (array) $datum;
 			if ( ! isset( $fallback_meta_keys[ $row['meta_key'] ] ) ) {
+				// The posts data store reads a main key of '0' as empty and falls back, so the migration does the same.
+				if ( '0' === $row['meta_value'] && isset( $this->meta_column_mapping[ $row['meta_key'] ]['fallback_meta_key'] ) ) {
+					$row['meta_value'] = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- A row already read from the database.
+					$datum             = is_object( $datum ) ? (object) $row : $row;
+				}
 				$main_rows[] = $datum;
 				continue;
 			}
@@ -681,8 +686,7 @@ WHERE
 				break;
 			case 'date_epoch':
 				try {
-					// The posts data store reads an empty value or '0' as no date.
-					if ( '' === $value || '0' === $value || null === $value ) {
+					if ( '' === $value ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( "@$value" ) )->format( 'Y-m-d H:i:s' );
@@ -807,9 +811,10 @@ WHERE $where_clause
 			}
 			$destination_column = $this->meta_column_mapping[ $meta_datum['meta_key'] ]['destination'];
 			$alias              = "meta_source_{$destination_column}";
-			// The migration stores an empty date as null and lets the next row fill the column, so do the same here.
-			$is_empty_date = in_array( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null, array( '', '0' ), true )
-				&& in_array( $this->meta_column_mapping[ $meta_datum['meta_key'] ]['type'], array( 'date', 'date_epoch' ), true );
+			// For a key with a fallback the migration stores an empty date as null and lets the fallback row fill the column,
+			// so do the same here.
+			$is_empty_date = '' === ( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null )
+				&& isset( $this->meta_column_mapping[ $meta_datum['meta_key'] ]['fallback_meta_key'] );
 			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) && ! $is_empty_date ) {
 				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
 				continue;
@@ -947,7 +952,7 @@ WHERE $where_clause
 			$row[ $destination_alias ] = wc_string_to_bool( $row[ $destination_alias ] );
 		}
 		if ( 'date_epoch' === $schema['type'] ) {
-			if ( '' === $row[ $alias ] || '0' === $row[ $alias ] || null === $row[ $alias ] ) {
+			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = null;
 			} else {
 				$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );
