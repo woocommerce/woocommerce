@@ -4,8 +4,10 @@
 import {
 	test,
 	expect,
+	Admin,
 	BlockData,
 	BLOCK_THEME_SLUG,
+	RequestUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -15,6 +17,7 @@ import {
 	getProductsNameFromClassicTemplate,
 	getProductCollectionQuery,
 	getProductsNameFromProductCollection,
+	getProductsNameFromProductQuery,
 	insertProductsQuery,
 } from './utils';
 
@@ -34,6 +37,36 @@ const templates = {
 		slug: 'archive-product',
 		frontendPage: '/shop/',
 		legacyBlockName: 'woocommerce/legacy-template',
+	},
+};
+
+const classicTemplateComparisonRoutes = {
+	'archive-product': {
+		testTitle:
+			'Products block matches the classic template block on the shop page',
+		templateTitle: 'Product Catalog',
+		slug: 'archive-product',
+		frontendPage: '/shop/',
+		legacyBlockName: 'woocommerce/legacy-template',
+		needsCreation: false,
+	},
+	'taxonomy-product_cat': {
+		testTitle:
+			'Products block matches the classic template block on a product category archive',
+		templateTitle: 'Products by Category',
+		slug: 'taxonomy-product_cat',
+		frontendPage: '/product-category/tshirts/',
+		legacyBlockName: 'woocommerce/legacy-template',
+		needsCreation: true,
+	},
+	'product-search-results': {
+		testTitle:
+			'Products block matches the classic template block on product search results',
+		templateTitle: 'Product Search Results',
+		slug: 'product-search-results',
+		frontendPage: '/?s=shirt&post_type=product',
+		legacyBlockName: 'woocommerce/legacy-template',
+		needsCreation: false,
 	},
 };
 
@@ -158,6 +191,78 @@ for ( const {
 			expect( classicProducts.length ).toBeGreaterThan( 1 );
 			expect( productCollectionProducts.length ).toBeGreaterThan( 1 );
 			expect( classicProducts ).toEqual( productCollectionProducts );
+		} );
+	} );
+}
+
+const openRouteTemplateForEditing = async (
+	admin: Admin,
+	requestUtils: RequestUtils,
+	{
+		templateTitle,
+		slug,
+		needsCreation,
+	}: { templateTitle: string; slug: string; needsCreation: boolean }
+) => {
+	if ( needsCreation ) {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug,
+			title: templateTitle,
+			content: '',
+		} );
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		return;
+	}
+
+	await admin.visitSiteEditor( {
+		postId: `${ BLOCK_THEME_SLUG }//${ slug }`,
+		postType: 'wp_template',
+		canvas: 'edit',
+	} );
+};
+
+for ( const {
+	testTitle,
+	templateTitle,
+	slug,
+	frontendPage,
+	legacyBlockName,
+	needsCreation,
+} of Object.values( classicTemplateComparisonRoutes ) ) {
+	test.describe( `${ templateTitle } template, Products block`, () => {
+		test( testTitle, async ( { admin, editor, page, requestUtils } ) => {
+			await openRouteTemplateForEditing( admin, requestUtils, {
+				templateTitle,
+				slug,
+				needsCreation,
+			} );
+			await editor.setContent( '' );
+			await insertProductsQuery( editor );
+			await editor.insertBlock( { name: legacyBlockName } );
+			await editor.canvas.locator( 'body' ).click();
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( frontendPage );
+			await expect(
+				page.locator( '.woocommerce-loop-product__title' ).first()
+			).toBeVisible();
+
+			const classicProducts =
+				await getProductsNameFromClassicTemplate( page );
+			const productQueryProducts =
+				await getProductsNameFromProductQuery( page );
+
+			expect( classicProducts.length ).toBeGreaterThan( 1 );
+			expect( productQueryProducts.length ).toBeGreaterThan( 1 );
+			expect( classicProducts ).toEqual( productQueryProducts );
 		} );
 	} );
 }
