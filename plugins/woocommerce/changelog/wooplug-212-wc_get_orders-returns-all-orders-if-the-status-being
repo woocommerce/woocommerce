@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align wc_get_orders() behaviour between CPT and HPOS for unknown post statuses.
