@@ -170,6 +170,15 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.1.1 2026-XX-XX =
+= 11.1.1 2026-09-18 =
+
+**WooCommerce**
+
+* Fix - Add a stricter dispatch check to REST API key authentication. [#68827](https://github.com/woocommerce/woocommerce/pull/68827)
+* Fix - Prevent unstyled Mini Cart drawer contents from appearing below the footer when the Mini Cart block is hidden. [#68790](https://github.com/woocommerce/woocommerce/pull/68790)
+* Fix - Update legacy options API permission checks. [#68862](https://github.com/woocommerce/woocommerce/pull/68862)
+* Fix - Update mobile app login permission checks. [#68862](https://github.com/woocommerce/woocommerce/pull/68862)
+* Fix - Update session cookie validation. [#68862](https://github.com/woocommerce/woocommerce/pull/68862)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
