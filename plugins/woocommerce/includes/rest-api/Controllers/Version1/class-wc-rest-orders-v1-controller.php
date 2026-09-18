@@ -676,9 +676,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
 		$current_product_id   = (int) $item->get_product_id( 'edit' );
 		$current_variation_id = (int) $item->get_variation_id( 'edit' );
-		// set_product() clears a variation when given its parent. REST partial updates restore it only
-		// when the posted parent and SKU-resolved product still identify the current item.
-		// An explicit variation_id of 0 still demotes the item.
+		// Restore variations only for same-product partial updates. A zero variation ID demotes only
+		// when posted with the parent product ID; by itself it resolves no product.
 		$same_product_update  = 'update' === $action
 			&& array_key_exists( 'product_id', $posted )
 			&& $product instanceof WC_Product
@@ -697,18 +696,21 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( $product && $product !== $item->get_product() ) {
-			$item->set_product( $product );
+			// A parent-only update must refresh product fields and validate the stored variation without
+			// calling set_product(), which would clear its historical attributes.
 			if ( $restore_variation_id ) {
 				try {
 					$item->set_variation_id( $current_variation_id );
+					$item->set_name( $product->get_name() );
+					$item->set_tax_class( $product->get_tax_class() );
 				} catch ( WC_Data_Exception $e ) {
 					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
-					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
-					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
-					// when the post is not a product_variation.
+					// V1 always uses the base item, never a substituted subclass. Its setter uses this code only
+					// when the stored ID is not a variation, so unlike v2/v4 no get_post_type() recheck is
+					// needed. Demote through set_product().
+					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
 							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
@@ -719,6 +721,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						array( 'source' => 'rest-api' )
 					);
 				}
+			} else {
+				$item->set_product( $product );
 			}
 
 			if ( 'create' === $action ) {
