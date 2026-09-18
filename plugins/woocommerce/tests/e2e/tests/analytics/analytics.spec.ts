@@ -631,7 +631,7 @@ test(
 );
 
 test(
-	'shows the import status bar and its manual trigger in scheduled mode',
+	'shows the import status bar and runs its manual trigger in scheduled mode',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
 	},
