@@ -358,13 +358,13 @@ class CustomerAccount extends AbstractBlock {
 			return '';
 		}
 
-		$avatar_default = get_option( 'avatar_default', 'mystery' );
-		if ( 'blank' === $avatar_default ) {
-			$avatar_default = 'mystery';
-		}
-
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
+			$avatar_default = get_option( 'avatar_default', 'mystery' );
+			if ( 'blank' === $avatar_default ) {
+				$avatar_default = 'mystery';
+			}
+
 			$avatar = get_avatar(
 				$user_id,
 				48,
