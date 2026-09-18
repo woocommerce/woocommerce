@@ -31,6 +31,8 @@ import {
 	isoDateFormat,
 	getDateDifferenceInDays,
 	getPreviousDate,
+	getComparePeriods,
+	getDateParamsFromQuery,
 	getChartTypeForQuery,
 	getAllowedIntervalsForQuery,
 	getStoreTimeZoneMoment,
@@ -550,6 +552,18 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 
+		it( 'should return correct values for previous_week', () => {
+			const dateValue = getLastPeriod( 'day', 'previous_week' );
+			const yesterdayLastWeek = yesterday.clone().subtract( 1, 'week' );
+
+			expect(
+				yesterdayLastWeek.isSame( dateValue.secondaryStart, 'day' )
+			).toBe( true );
+			expect(
+				yesterdayLastWeek.isSame( dateValue.secondaryEnd, 'day' )
+			).toBe( true );
+		} );
+
 		it( 'should return correct values for previous_month', () => {
 			const dateValue = getLastPeriod( 'day', 'previous_month' );
 			const yesterdayLastMonth = yesterday.clone().subtract( 1, 'month' );
@@ -671,24 +685,6 @@ describe( 'getLastPeriod', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
 
 			expect( dateValue.secondaryEnd.date() ).toBe( 29 );
-
-			dateNowSpy.mockRestore();
-		} );
-
-		it( 'should return the full month before last month for previous_month', () => {
-			// March 12, 2021: last month is February, the month before is January.
-			const dateNowSpy = jest
-				.spyOn( Date, 'now' )
-				.mockImplementation( () => 1615587095000 );
-
-			const dateValue = getLastPeriod( 'month', 'previous_month' );
-
-			expect( dateValue.secondaryStart.format( isoDateFormat ) ).toBe(
-				'2021-01-01'
-			);
-			expect( dateValue.secondaryEnd.format( isoDateFormat ) ).toBe(
-				'2021-01-31'
-			);
 
 			dateNowSpy.mockRestore();
 		} );
@@ -1465,13 +1461,81 @@ describe( 'getCurrentDates', () => {
 			before: '2026-03-31',
 		} );
 
-		expect( currentDates.secondary.label ).toBe( 'Previous month' );
+		expect( currentDates.secondary.label ).toBe( 'Same day last month' );
 		expect( currentDates.secondary.after.format( isoDateFormat ) ).toBe(
 			'2026-02-28'
 		);
 		expect( currentDates.secondary.before.format( isoDateFormat ) ).toBe(
 			'2026-02-28'
 		);
+	} );
+} );
+
+describe( 'getComparePeriods', () => {
+	const values = ( period: string, after?: string, before?: string ) =>
+		getComparePeriods(
+			period,
+			after ? moment( after ) : null,
+			before ? moment( before ) : null
+		).map( ( { value, label } ) => `${ value }: ${ label }` );
+
+	it( 'should offer the same unit and larger units for a day', () => {
+		const dayOptions = [
+			'previous_period: Previous day',
+			'previous_week: Same day last week',
+			'previous_month: Same day last month',
+			'previous_year: Same day last year',
+		];
+		expect( values( 'today' ) ).toEqual( dayOptions );
+		expect( values( 'yesterday' ) ).toEqual( dayOptions );
+		expect( values( 'custom', '2026-09-01', '2026-09-01' ) ).toEqual(
+			dayOptions
+		);
+	} );
+
+	it( 'should not offer options that repeat the previous period', () => {
+		expect( values( 'last_week' ) ).toEqual( [
+			'previous_period: Previous week',
+			'previous_year: Same week last year',
+		] );
+		expect( values( 'month' ) ).toEqual( [
+			'previous_period: Previous month',
+			'previous_year: Same month last year',
+		] );
+		expect( values( 'quarter' ) ).toEqual( [
+			'previous_period: Previous quarter',
+			'previous_year: Same quarter last year',
+		] );
+		expect( values( 'last_year' ) ).toEqual( [
+			'previous_period: Previous year',
+		] );
+	} );
+
+	it( 'should offer generic options for a multi-day custom range', () => {
+		expect( values( 'custom', '2026-09-01', '2026-09-10' ) ).toEqual( [
+			'previous_period: Previous period',
+			'previous_year: Previous year',
+		] );
+	} );
+} );
+
+describe( 'getDateParamsFromQuery', () => {
+	it( 'should fall back to previous_period when compare is not offered for the period', () => {
+		expect(
+			getDateParamsFromQuery( {
+				period: 'year',
+				compare: 'previous_month',
+			} ).compare
+		).toBe( 'previous_period' );
+	} );
+
+	it( 'should keep a compare value that is offered for the period', () => {
+		expect(
+			getDateParamsFromQuery( {
+				period: 'today',
+				compare: 'previous_week',
+			} ).compare
+		).toBe( 'previous_week' );
 	} );
 } );
 
@@ -1599,6 +1663,25 @@ describe( 'secondary range shift', () => {
 		).toBe( 'offset' );
 		expect(
 			getCurrentPeriod( 'quarter', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+	} );
+
+	it( 'is an offset for the week and month shifted compare options', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
+
+		expect(
+			getCurrentPeriod( 'day', 'previous_week' ).secondaryShift
+		).toBe( 'offset' );
+		expect( getLastPeriod( 'day', 'previous_month' ).secondaryShift ).toBe(
+			'offset'
+		);
+		expect(
+			getCurrentDates( {
+				period: 'custom',
+				compare: 'previous_month',
+				after: '2025-03-15',
+				before: '2025-03-15',
+			} ).secondary.shift
 		).toBe( 'offset' );
 	} );
 

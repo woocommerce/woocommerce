@@ -100,11 +100,133 @@ export const periods = [
 		value: 'previous_year',
 		label: __( 'Previous year', 'woocommerce' ),
 	},
-	{
-		value: 'previous_month',
-		label: __( 'Previous month', 'woocommerce' ),
-	},
 ];
+
+const periodUnits: Record< string, string > = {
+	today: 'day',
+	yesterday: 'day',
+	week: 'week',
+	last_week: 'week',
+	month: 'month',
+	last_month: 'month',
+	quarter: 'quarter',
+	last_quarter: 'quarter',
+	year: 'year',
+	last_year: 'year',
+};
+
+// Compare values that move the primary range back by a fixed unit.
+const compareShifts: Record< string, moment.unitOfTime.DurationConstructor > = {
+	previous_week: 'weeks',
+	previous_month: 'months',
+};
+
+const shiftBack = ( date: moment.Moment, compare: string ) =>
+	date.clone().subtract( 1, compareShifts[ compare ] );
+
+const compareOptions: Record<
+	string,
+	Array< { value: string; label: string } >
+> = {
+	day: [
+		{
+			value: 'previous_period',
+			label: __( 'Previous day', 'woocommerce' ),
+		},
+		{
+			value: 'previous_week',
+			label: __( 'Same day last week', 'woocommerce' ),
+		},
+		{
+			value: 'previous_month',
+			label: __( 'Same day last month', 'woocommerce' ),
+		},
+		{
+			value: 'previous_year',
+			label: __( 'Same day last year', 'woocommerce' ),
+		},
+	],
+	week: [
+		{
+			value: 'previous_period',
+			label: __( 'Previous week', 'woocommerce' ),
+		},
+		{
+			value: 'previous_year',
+			label: __( 'Same week last year', 'woocommerce' ),
+		},
+	],
+	month: [
+		{
+			value: 'previous_period',
+			label: __( 'Previous month', 'woocommerce' ),
+		},
+		{
+			value: 'previous_year',
+			label: __( 'Same month last year', 'woocommerce' ),
+		},
+	],
+	quarter: [
+		{
+			value: 'previous_period',
+			label: __( 'Previous quarter', 'woocommerce' ),
+		},
+		{
+			value: 'previous_year',
+			label: __( 'Same quarter last year', 'woocommerce' ),
+		},
+	],
+	year: [
+		{
+			value: 'previous_period',
+			label: __( 'Previous year', 'woocommerce' ),
+		},
+	],
+};
+
+/**
+ * Get the compare options that make sense for a period. A range is compared to the
+ * previous range of the same unit, or to the same range in a larger unit, without
+ * repeating an option that gives the same dates as the previous period.
+ *
+ * @param {string}             period   - period value, ie `last_week`
+ * @param {moment.Moment|null} [after]  - after date if custom period
+ * @param {moment.Moment|null} [before] - before date if custom period
+ * @return {Array<{value: string, label: string}>} - compare options, the first one is the default
+ */
+export function getComparePeriods(
+	period: string,
+	after?: moment.Moment | null,
+	before?: moment.Moment | null
+) {
+	const isSingleCustomDay =
+		period === 'custom' && after && before && before.isSame( after, 'day' );
+	const unit = isSingleCustomDay ? 'day' : periodUnits[ period ];
+
+	// A custom range of more than one day has no unit, so it keeps the generic options.
+	return compareOptions[ unit ] ?? periods;
+}
+
+/**
+ * Get a compare value that is offered for the period, falling back to the first option.
+ *
+ * @param {string}             period   - period value, ie `last_week`
+ * @param {string}             compare  - compare value, ie `previous_year`
+ * @param {moment.Moment|null} [after]  - after date if custom period
+ * @param {moment.Moment|null} [before] - before date if custom period
+ * @return {string} - a compare value offered for the period
+ */
+export function getValidCompare(
+	period: string,
+	compare: string,
+	after?: moment.Moment | null,
+	before?: moment.Moment | null
+) {
+	const options = getComparePeriods( period, after, before );
+	return options.some( ( option ) => option.value === compare )
+		? compare
+		: options[ 0 ].value;
+}
 
 const isValidMomentInput = ( input: unknown ): input is moment.MomentInput =>
 	moment( input as moment.MomentInput ).isValid();
@@ -472,7 +594,7 @@ ensureMomentStartOfWeek();
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
- * @param {string}                   compare - `previous_period`, `previous_year` or `previous_month`
+ * @param {string}                   compare - `previous_period`, `previous_year`, `previous_week` or `previous_month`
  * @return {DateValue} - DateValue data about the selected period
  */
 export function getLastPeriod(
@@ -505,9 +627,9 @@ export function getLastPeriod(
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
 			secondaryShift = 'offset';
 		}
-	} else if ( compare === 'previous_month' ) {
-		secondaryStart = primaryStart.clone().subtract( 1, 'months' );
-		secondaryEnd = primaryEnd.clone().subtract( 1, 'months' );
+	} else if ( compareShifts[ compare ] ) {
+		secondaryStart = shiftBack( primaryStart, compare );
+		secondaryEnd = shiftBack( primaryEnd, compare );
 		secondaryShift = 'offset';
 	} else if ( period === 'week' ) {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
@@ -536,7 +658,7 @@ export function getLastPeriod(
  * and ends on the current day.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
- * @param {string}                   compare - `previous_period`, `previous_year` or `previous_month`
+ * @param {string}                   compare - `previous_period`, `previous_year`, `previous_week` or `previous_month`
  * @return {DateValue} - DateValue data about the selected period
  */
 export function getCurrentPeriod(
@@ -558,9 +680,9 @@ export function getCurrentPeriod(
 		if ( period !== 'year' ) {
 			secondaryShift = 'offset';
 		}
-	} else if ( compare === 'previous_month' ) {
-		secondaryStart = primaryStart.clone().subtract( 1, 'months' );
-		secondaryEnd = primaryEnd.clone().subtract( 1, 'months' );
+	} else if ( compareShifts[ compare ] ) {
+		secondaryStart = shiftBack( primaryStart, compare );
+		secondaryEnd = shiftBack( primaryEnd, compare );
 		secondaryShift = 'offset';
 	} else {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
@@ -580,7 +702,7 @@ export function getCurrentPeriod(
  * dates, for custom dates.
  *
  * @param {string}             period   - the chosen period
- * @param {string}             compare  - `previous_period`, `previous_year` or `previous_month`
+ * @param {string}             compare  - `previous_period`, `previous_year`, `previous_week` or `previous_month`
  * @param {moment.Moment|null} [after]  - after date if custom period
  * @param {moment.Moment|null} [before] - before date if custom period
  * @return {DateValue} - DateValue data about the selected period
@@ -633,12 +755,12 @@ const getDateValue = memoize<
 						secondaryShift: 'offset',
 					};
 				}
-				if ( compare === 'previous_month' ) {
+				if ( compareShifts[ compare ] ) {
 					return {
 						primaryStart: after,
 						primaryEnd: before,
-						secondaryStart: after.clone().subtract( 1, 'months' ),
-						secondaryEnd: before.clone().subtract( 1, 'months' ),
+						secondaryStart: shiftBack( after, compare ),
+						secondaryEnd: shiftBack( before, compare ),
 						secondaryShift: 'offset',
 					};
 				}
@@ -689,11 +811,18 @@ const getDateParamsFromQueryMemoized = memoize<
 		defaultDateRange: string
 	) => {
 		if ( period && compare ) {
+			const afterMoment = after ? moment( after ) : null;
+			const beforeMoment = before ? moment( before ) : null;
 			return {
 				period,
-				compare,
-				after: after ? moment( after ) : null,
-				before: before ? moment( before ) : null,
+				compare: getValidCompare(
+					period,
+					compare,
+					afterMoment,
+					beforeMoment
+				),
+				after: afterMoment,
+				before: beforeMoment,
 			};
 		}
 		const queryDefaults = parse(
@@ -807,7 +936,7 @@ const getCurrentDatesMemoized = memoize<
 			throw new Error( `Cannot find period: ${ period }` );
 		}
 		const secondaryItem = find(
-			periods,
+			getComparePeriods( period, primaryStart, primaryEnd ),
 			( item ) => item.value === compare
 		);
 		if ( ! secondaryItem ) {

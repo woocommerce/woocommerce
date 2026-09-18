@@ -1,4 +1,4 @@
-Significance: patch
-Type: tweak
+Significance: minor
+Type: update
 
-Span the last item of a SegmentedSelection across both columns when the number of options is odd.
+Show only the compare options that fit the selected date range in DateRangeFilterPicker, and center SegmentedSelection labels in their cell so a one-line label lines up with a label that wraps.

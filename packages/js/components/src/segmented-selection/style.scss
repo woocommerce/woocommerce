@@ -35,7 +35,8 @@
 	background-color: $gray-100;
 	padding: $gap-small $gap-small $gap-small $gap-larger;
 	position: relative;
-	display: block;
+	display: flex;
+	align-items: center;
 	height: 100%;
 
 	&:active {
