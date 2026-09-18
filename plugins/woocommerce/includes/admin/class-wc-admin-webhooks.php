@@ -181,6 +181,44 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Bulk update webhook status.
+	 *
+	 * @param array  $webhooks List of webhook IDs.
+	 * @param string $status   Webhook status.
+	 */
+	public static function bulk_update_status( $webhooks, $status ) {
+		$qty = 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$filter_status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+
+		foreach ( $webhooks as $webhook_id ) {
+			$webhook = new WC_Webhook( (int) $webhook_id );
+
+			if ( ! $webhook->get_id() ) {
+				continue;
+			}
+
+			$webhook->set_status( $status );
+			$webhook->save();
+
+			if ( 'active' === $status && $webhook->get_pending_delivery() ) {
+				$result = $webhook->deliver_ping();
+
+				if ( is_wp_error( $result ) ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $filter_status . '&error=' . rawurlencode( $result->get_error_message() ) ) );
+					exit();
+				}
+			}
+
+			++$qty;
+		}
+
+		// Redirect to webhooks page.
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $filter_status . '&webhooks_updated=' . $qty . '&webhook_status=' . $status ) );
+		exit();
+	}
+
+	/**
 	 * Delete webhook.
 	 */
 	private function delete() {
@@ -247,6 +285,25 @@ class WC_Admin_Webhooks {
 
 			/* translators: %d: count */
 			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook permanently deleted.', '%d webhooks permanently deleted.', $deleted, 'woocommerce' ), $deleted ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['webhooks_updated'], $_GET['webhook_status'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$updated_status = sanitize_text_field( wp_unslash( $_GET['webhook_status'] ) );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$updated = absint( $_GET['webhooks_updated'] );
+
+			if ( 'active' === $updated_status ) {
+				/* translators: %d: count */
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook activated.', '%d webhooks activated.', $updated, 'woocommerce' ), $updated ) );
+			} elseif ( 'paused' === $updated_status ) {
+				/* translators: %d: count */
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook paused.', '%d webhooks paused.', $updated, 'woocommerce' ), $updated ) );
+			} elseif ( 'disabled' === $updated_status ) {
+				/* translators: %d: count */
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook deactivated.', '%d webhooks deactivated.', $updated, 'woocommerce' ), $updated ) );
+			}
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
