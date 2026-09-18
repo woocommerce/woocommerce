@@ -4412,11 +4412,27 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::ELAVON            => array(
-				'_type'  => self::TYPE_PSP,
-				'icon'   => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
-				'plugin' => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Elavon', 'woocommerce' ),
+				'description' => esc_html__( 'Grow your online business with Elavon — a fast, secure and seamless way to accept payments in your WooCommerce store.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'elavon-payment-gateway-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/elavon-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=elavon-payment-gateway',
+					),
 				),
 			),
 			self::FORTISPAY         => array(
