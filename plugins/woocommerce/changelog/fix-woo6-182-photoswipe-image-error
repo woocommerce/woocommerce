@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix unsafe image URLs in product gallery error messages.
