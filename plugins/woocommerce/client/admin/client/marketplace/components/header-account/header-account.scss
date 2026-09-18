@@ -21,6 +21,11 @@
 		margin-right: $grid-unit-10;
 	}
 
+	&__menu-external-icon {
+		flex-shrink: 0;
+		margin-inline-start: $grid-unit-05;
+	}
+
 	&__menu-text {
 		display: flex;
 		flex-direction: column;

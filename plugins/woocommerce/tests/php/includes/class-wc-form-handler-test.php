@@ -75,6 +75,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		$this->reset_cancel_order_handled_flag();
 
 		$_GET = $this->original_get;
 		if ( null === $this->original_request_uri ) {
@@ -161,9 +162,10 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox cancel_order() returns to direct callers when no custom redirect is provided.
+	 * @testdox cancel_order() returns to direct callers outside wp_loaded and does not arm the deferred redirect.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
 	 */
 	public function test_cancel_order_returns_to_direct_callers_without_custom_redirect(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
@@ -174,6 +176,153 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		WC_Form_Handler::cancel_order();
 
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The direct call should cancel the order and return control to the caller.' );
+
+		WC_Form_Handler::redirect_after_cancel_order();
+
+		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The cancellation notice should remain after an unarmed redirect callback.' );
+	}
+
+	/**
+	 * @testdox cancel_order() returns to direct callers inside a wp_loaded callback, and the redirect completes afterwards.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_cancel_order_returns_to_direct_callers_inside_wp_loaded(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate an extension calling the handler from its own wp_loaded callback.
+
+		try {
+			WC_Form_Handler::cancel_order();
+			$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The nested direct call should cancel the order and return control to the caller.' );
+
+			$this->dispatch_redirect_after_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
+		}
+	}
+
+	/**
+	 * @testdox cancel_order() does not handle the same request twice when an earlier wp_loaded callback already called it.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_cancel_order_ignores_repeated_call_for_the_same_request(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate an extension calling the handler before the registered priority 20 dispatch.
+
+		try {
+			WC_Form_Handler::cancel_order();
+			$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
+		}
+
+		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The cancellation notice should be added once.' );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'The repeated dispatch must not add a "can no longer be cancelled" error.' );
+	}
+
+	/**
+	 * @testdox cancel_order() handles each order once per request, in any call order.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_handles_each_order_once_per_request(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$first_order  = WC_Helper_Order::create_order( $user_id );
+		$second_order = WC_Helper_Order::create_order( $user_id );
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate the handler running inside wp_loaded.
+
+		try {
+			$this->prepare_cancel_order_request( $first_order );
+			WC_Form_Handler::cancel_order();
+			WC_Form_Handler::cancel_order();
+
+			$this->prepare_cancel_order_request( $second_order );
+			WC_Form_Handler::cancel_order();
+
+			$this->prepare_cancel_order_request( $first_order );
+			WC_Form_Handler::cancel_order();
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
+		}
+
+		$this->assertTrue( wc_get_order( $first_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The first order should be cancelled.' );
+		$this->assertTrue( wc_get_order( $second_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The second order should be cancelled even though the previous request was deduplicated.' );
+		$this->assertSame( 2, wc_notice_count( 'notice' ), 'Each order should add exactly one cancellation notice.' );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'Neither the immediate repeat nor the later repeat for the first order should add an error notice.' );
+	}
+
+	/**
+	 * @testdox redirect_after_cancel_order() still redirects when an extension re-adds cancel_order() at priority 20 during a real wp_loaded dispatch.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_redirect_after_cancel_order_runs_after_a_re_added_handler(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		remove_action( 'wp_loaded', 'WC_Form_Handler::cancel_order', 20 );
+		add_action( 'wp_loaded', 'WC_Form_Handler::cancel_order', 20 );
+
+		$this->prepare_cancel_order_request( $order );
+
+		$current_filter_backup = $wp_current_filter;
+
+		try {
+			do_action( 'wp_loaded' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( wp_make_link_relative( $order->get_cancel_endpoint() ), $e->getMessage(), 'The deferred redirect should still run after the re-added handler.' );
+			$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The re-added handler should cancel the order before the redirect.' );
+			return;
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The intercepted redirect unwinds do_action() before it pops the action stack.
+		}
+
+		$this->fail( 'Expected the wp_loaded dispatch to redirect after handling the cancellation request.' );
+	}
+
+	/**
+	 * @testdox redirect_after_cancel_order() does nothing when cancel_order() did not handle the request.
+	 *
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_redirect_after_cancel_order_does_nothing_when_handler_did_not_run(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		// An extension can remove cancel_order() from wp_loaded, so only the redirect callback runs.
+		$this->prepare_cancel_order_request( $order );
+		WC_Form_Handler::redirect_after_cancel_order();
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PENDING ), 'The order should stay untouched when only the redirect callback runs.' );
 	}
 
 	/**
@@ -262,6 +411,87 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = add_query_arg( 'order_id', $refund->get_id(), $request_uri );
 
 		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+	}
+
+	/**
+	 * @testdox save_address() persists a valid $address_type address through the selected endpoint.
+	 *
+	 * @dataProvider provide_address_types
+	 * @covers WC_Form_Handler::save_address()
+	 *
+	 * @param string               $address_type Address type.
+	 * @param array<string,string> $fields       Unprefixed address fields.
+	 */
+	public function test_save_address_persists_valid_address( string $address_type, array $fields ): void {
+		global $wp;
+
+		$user_id = self::factory()->user->create(
+			array(
+				'user_login' => $address_type . '-address-customer',
+				'user_email' => $address_type . '-address-customer@example.test',
+				'role'       => 'customer',
+			)
+		);
+
+		wp_set_current_user( $user_id );
+		$wp->query_vars['edit-address'] = $address_type;
+		$this->prepare_address_request( $address_type, $fields );
+
+		$this->dispatch_address_save_expecting_redirect();
+
+		$customer        = new WC_Customer( $user_id );
+		$error_notices   = wc_get_notices( 'error' );
+		$success_notices = wc_get_notices( 'success' );
+
+		$this->assertEmpty( $error_notices, 'A valid address should not add error notices.' );
+		$this->assertCount( 1, $success_notices, 'A valid address should add one success notice.' );
+		$this->assertSame( 'Address changed successfully.', $success_notices[0]['notice'] );
+
+		foreach ( $fields as $field => $expected ) {
+			$getter = "get_{$address_type}_{$field}";
+			$this->assertSame( $expected, $customer->{$getter}(), "The persisted {$address_type}_{$field} value should match the submitted address." );
+		}
+	}
+
+	/**
+	 * Provides complete billing and shipping address requests.
+	 *
+	 * @return array<string,array{string,array<string,string>}>
+	 */
+	public static function provide_address_types(): array {
+		return array(
+			'billing'  => array(
+				'billing',
+				array(
+					'first_name' => 'Ada',
+					'last_name'  => 'Billing',
+					'company'    => 'Analytical Engines',
+					'address_1'  => '123 Market Street',
+					'address_2'  => 'Suite 4',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94105',
+					'country'    => 'US',
+					'phone'      => '4155550100',
+					'email'      => 'ada.billing@example.test',
+				),
+			),
+			'shipping' => array(
+				'shipping',
+				array(
+					'first_name' => 'Grace',
+					'last_name'  => 'Shipping',
+					'company'    => 'Compiler Works',
+					'address_1'  => '456 Madison Avenue',
+					'address_2'  => 'Floor 5',
+					'city'       => 'New York',
+					'state'      => 'NY',
+					'postcode'   => '10010',
+					'country'    => 'US',
+					'phone'      => '2125550100',
+				),
+			),
+		);
 	}
 
 	/**
@@ -450,7 +680,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Dispatches the cancel-order handler and expects a redirect.
+	 * Dispatches the cancel-order handler and its redirect callback in registration order and expects a redirect.
 	 *
 	 * @param string $expected_redirect Expected redirect URL.
 	 */
@@ -462,6 +692,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		try {
 			WC_Form_Handler::cancel_order();
+			WC_Form_Handler::redirect_after_cancel_order();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( $expected_redirect, $e->getMessage(), 'The cancellation request should redirect to a clean URL.' );
 			return;
@@ -469,7 +700,60 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
 		}
 
-		$this->fail( 'Expected cancel_order() to redirect after handling the request.' );
+		$this->fail( 'Expected the cancellation request to redirect after handling.' );
+	}
+
+	/**
+	 * Dispatches only the redirect callback and expects a redirect.
+	 *
+	 * @param string $expected_redirect Expected redirect URL.
+	 */
+	private function dispatch_redirect_after_cancel_order_expecting_redirect( string $expected_redirect ): void {
+		try {
+			WC_Form_Handler::redirect_after_cancel_order();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( $expected_redirect, $e->getMessage(), 'The redirect callback should redirect to a clean URL.' );
+			return;
+		}
+
+		$this->fail( 'Expected redirect_after_cancel_order() to redirect after cancel_order() handled the request.' );
+	}
+
+	/**
+	 * Resets the handled order ID cancel_order() leaves behind so it cannot leak into the next test.
+	 */
+	private function reset_cancel_order_handled_flag(): void {
+		$handled_ids = new ReflectionProperty( WC_Form_Handler::class, 'handled_cancel_order_ids' );
+		$handled_ids->setAccessible( true );
+		$handled_ids->setValue( null, array() );
+
+		$pending = new ReflectionProperty( WC_Form_Handler::class, 'cancel_order_redirect_pending' );
+		$pending->setAccessible( true );
+		$pending->setValue( null, false );
+	}
+
+	/**
+	 * Prepares request globals for the address handler.
+	 *
+	 * @param string               $address_type Address type.
+	 * @param array<string,string> $fields       Unprefixed address fields.
+	 */
+	private function prepare_address_request( string $address_type, array $fields ): void {
+		$prefixed_fields = array();
+
+		foreach ( $fields as $field => $value ) {
+			$prefixed_fields[ $address_type . '_' . $field ] = $value;
+		}
+
+		$_POST    = array_merge(
+			array(
+				'action' => 'edit_address',
+			),
+			$prefixed_fields
+		);
+		$_REQUEST = array(
+			'woocommerce-edit-address-nonce' => wp_create_nonce( 'woocommerce-edit_address' ),
+		);
 	}
 
 	/**
@@ -488,5 +772,23 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->fail( 'Expected save_account_details() to redirect after a successful save.' );
+	}
+
+	/**
+	 * Dispatches the address handler and expects its success redirect.
+	 */
+	private function dispatch_address_save_expecting_redirect(): void {
+		try {
+			WC_Form_Handler::save_address();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame(
+				wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ),
+				$e->getMessage(),
+				'Successful address saves should redirect to Addresses.'
+			);
+			return;
+		}
+
+		$this->fail( 'Expected save_address() to redirect after a successful save. Notices: ' . wp_json_encode( wc_get_notices() ) );
 	}
 }

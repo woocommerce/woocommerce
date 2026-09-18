@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Honor the WooCommerce.com `autoupdate` flag on plugin and theme updates, so a critical extension release can be installed automatically when the package is installable. Theme update items now also report their PHP requirement, so an automatic update is skipped on an incompatible PHP version.

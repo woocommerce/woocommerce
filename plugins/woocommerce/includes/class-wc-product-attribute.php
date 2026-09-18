@@ -61,15 +61,19 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Get taxonomy object.
 	 *
+	 * Returns null when the attribute is not a taxonomy, or when its global attribute is no longer loaded, for example right after it is deleted.
+	 *
 	 * @return array|null
 	 */
 	public function get_taxonomy_object() {
 		global $wc_product_attributes;
-		return $this->is_taxonomy() ? $wc_product_attributes[ $this->get_name() ] : null;
+		return $this->is_taxonomy() && isset( $wc_product_attributes[ $this->get_name() ] ) ? $wc_product_attributes[ $this->get_name() ] : null;
 	}
 
 	/**
 	 * Gets terms from the stored options.
+	 *
+	 * Returns null when the attribute is not a taxonomy, or when its taxonomy is not registered, for example right after the attribute is deleted.
 	 *
 	 * @return array|null
 	 */

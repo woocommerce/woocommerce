@@ -166,7 +166,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 
 			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
-				// Set size to 10%
+				// Set size to 50%
 				await thumbnailsSizeInput.fill( '50' );
 
 				const viewerBox = await viewerBlock.boundingBox();
@@ -197,27 +197,18 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
-			// Get the last thumbnail
+			await expect( thumbnailsContainer ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
+
 			const lastThumbnail = thumbnails.last();
+			await lastThumbnail.scrollIntoViewIfNeeded();
 
-			await expect( async () => {
-				await page.reload();
-				// Check if overflow classes are present initially
-				await expect( thumbnailsContainer ).toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
+			await expect( lastThumbnail ).toBeVisible();
 
-				// Scroll to the last thumbnail
-				await lastThumbnail.scrollIntoViewIfNeeded();
-
-				// Verify the last thumbnail is visible
-				await expect( lastThumbnail ).toBeVisible();
-
-				// After scrolling to the end, the bottom overflow should be gone
-				await expect( thumbnailsContainer ).not.toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
-			} ).toPass( { timeout: 3_000 } );
+			await expect( thumbnailsContainer ).not.toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
 		} );
 	} );
 } );

@@ -353,9 +353,15 @@ class WC_Install {
 		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
-		),
-		'11.2.0-1' => array(
+			'wc_update_1120_delete_surface_cart_checkout_note',
+			'wc_update_1120_cleanup_inherited_variation_images',
 			'wc_update_11201_migrate_tax_lookup_order_items',
+			'wc_update_11201_invalidate_analytics_reports_cache',
+			'wc_update_11202_reset_refund_returning_customer_markers',
+			'wc_update_11203_normalize_stock_notification_emails',
+		),
+		'11.3.0'   => array(
+			'wc_update_1130_repair_hpos_order_dates_from_posts',
 		),
 	);
 
@@ -1337,7 +1343,7 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
-		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 	}
 
 	/**
@@ -2044,7 +2050,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY global_unique_id (global_unique_id(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2108,6 +2115,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
+	taxable_amount double DEFAULT 0 NOT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
@@ -3162,21 +3170,18 @@ EOT;
 <!-- /wp:woocommerce/cart-line-items-block -->
 
 <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
-<div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
-<h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
-
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail"} -->
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
 <!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 
@@ -3230,9 +3235,9 @@ EOT;
 <!-- wp:woocommerce/empty-cart-block -->
 <div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
-<!-- wp:separator {"className":"is-style-dots"} -->
-<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
-<!-- /wp:separator -->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 

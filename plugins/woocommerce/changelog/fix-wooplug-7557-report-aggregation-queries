@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Count the customer and review report totals with aggregate queries instead of one query per bucket.

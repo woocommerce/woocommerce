@@ -36,6 +36,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_args: >
             --allowedTools "Bash(gh pr diff *),Bash(gh pr view *)"
+            --disallowedTools "Read,Glob,Grep,WebFetch,WebSearch,Edit,Write"
             --json-schema '{"type":"object","properties":{"needs_docs":{"type":"boolean"},"confidence":{"type":"string","enum":["high","medium","low"]},"reason":{"type":"string"}},"required":["needs_docs","confidence","reason"]}'
           prompt: |
             Docs update detection for WooCommerce

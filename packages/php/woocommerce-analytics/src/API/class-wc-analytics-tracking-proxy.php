@@ -41,9 +41,8 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'track_events' ),
-					// Unauthenticated by design: this receives front-end events. The route
-					// is registered only while proxy tracking is enabled, and records via
-					// record_client_event(), which strips server-owned properties.
+					// Unauthenticated front-end event endpoint. track_events() validates consent
+					// and records events without client-supplied server-owned properties.
 					'permission_callback' => '__return_true',
 					'schema'              => array( $this, 'get_public_item_schema' ),
 				),
@@ -58,6 +57,16 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function track_events( $request ) {
+		// Cached pages can still post here after proxy tracking is disabled; return a
+		// visible error instead of losing the event to a 404.
+		if ( ! Features::is_proxy_tracking_enabled() ) {
+			return new \WP_Error(
+				'proxy_tracking_disabled',
+				'Proxy tracking is not enabled on this site.',
+				array( 'status' => 403 )
+			);
+		}
+
 		// Check consent before processing any events
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return new \WP_REST_Response(

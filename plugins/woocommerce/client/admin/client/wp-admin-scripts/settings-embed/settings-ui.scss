@@ -160,7 +160,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
-		padding: 0 48px;
+		// Keep WordPress focus rings inside the scrolling tab bar.
+		padding: var(--wpds-dimension-padding-xs) 48px;
 		width: 100%;
 	}
 
@@ -180,9 +181,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&:focus,
 		&:hover,
 		&:active {
-			box-shadow: none;
 			color: var(--wpds-color-foreground-interactive-brand);
-			outline: none;
 		}
 
 		&.is-active {
@@ -191,7 +190,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			&::after {
 				background: var(--wpds-color-stroke-interactive-brand);
 				border-radius: 999px;
-				bottom: 0;
+				inset-block-end: calc(-1 * var(--wpds-dimension-padding-xs));
 				content: "";
 				height: var(--wpds-border-width-sm);
 				left: 0;
@@ -212,29 +211,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		gap: var(--wpds-dimension-gap-xl, 24px);
 		margin: var(--wpds-dimension-gap-2xl) auto 48px;
 		max-width: var(--wpds-dimension-surface-width-xl);
-	}
-
-	.wc-settings-ui__unsaved-changes-modal {
-		.components-modal__header {
-			min-height: 72px;
-			padding: 24px 32px 8px;
-		}
-
-		.components-modal__header-heading {
-			font-size: 20px;
-			font-weight: 500;
-			line-height: 24px;
-		}
-
-		.components-modal__content {
-			padding: 4px 32px 32px;
-		}
-
-		p {
-			font-size: 13px;
-			line-height: 20px;
-			margin: 0;
-		}
 	}
 
 	.wc-settings-ui__unsaved-changes-actions {

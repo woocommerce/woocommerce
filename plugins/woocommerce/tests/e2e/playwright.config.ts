@@ -179,8 +179,8 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
-	// Mutates the global woocommerce_permalinks option (product base and the
-	// derived use_verbose_page_rules flag) and restores it in teardown.
+	// Mutates the global woocommerce_permalinks option (the product base) and
+	// restores it in teardown.
 	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
@@ -189,9 +189,6 @@ const serialRunSpecs = [
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
 	'**/tests/shop/cart-redirection.spec.ts',
-	// Trashes and restores the global Shop page in a fixture; while trashed, every
-	// other worker's shop/cart/account navigation 404s.
-	'**/tests/shop/shop-title-after-deletion.spec.ts',
 ];
 
 /**
