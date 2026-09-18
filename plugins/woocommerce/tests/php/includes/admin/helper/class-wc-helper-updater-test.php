@@ -691,6 +691,23 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Row notices are skipped on a multisite sub-site, where Core renders no update rows.
+	 */
+	public function test_row_notices_are_skipped_on_a_multisite_sub_site(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Sub-site Plugins screens only exist on multisite.' );
+		}
+
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array() );
+
+		$this->assertFalse( is_network_admin(), 'Without a network screen this is a sub-site request.' );
+		$this->assertSame( '', $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() ) );
+		$this->assertSame( '', $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() ) );
+	}
+
+	/**
 	 * @testdox Connect notice is skipped on the Woo Update Manager row.
 	 */
 	public function test_connect_notice_is_skipped_for_the_woo_update_manager(): void {

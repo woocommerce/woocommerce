@@ -337,9 +337,9 @@ class WC_Helper_Updater {
 	/**
 	 * Product ID of the WooCommerce.com plugin a row notice applies to.
 	 *
-	 * Returns 0 when the row should get no notice: the plugin isn't WooCommerce.com hosted, or Core
-	 * already renders an update row for it, which the in_plugin_update_message-{file-name} handlers
-	 * append their own message to.
+	 * Returns 0 when the row should get no notice: the plugin isn't WooCommerce.com hosted, the
+	 * screen is one Core renders no update rows on, or Core already renders an update row for it,
+	 * which the in_plugin_update_message-{file-name} handlers append their own message to.
 	 *
 	 * @since 11.2.0
 	 *
@@ -353,6 +353,11 @@ class WC_Helper_Updater {
 
 		// Core skips its own update rows for these users, so there is nothing to act on here either.
 		if ( is_null( $wp_list_table ) || ! current_user_can( 'update_plugins' ) ) {
+			return 0;
+		}
+
+		// On multisite, plugins are managed from the network admin, and Core renders no update rows on a sub-site's screen.
+		if ( is_multisite() && ! is_network_admin() ) {
 			return 0;
 		}
 
@@ -394,7 +399,7 @@ class WC_Helper_Updater {
 
 		printf(
 			'<tr class="plugin-update-tr %1$s" data-plugin="%2$s" data-plugin-row-type="%3$s"><td colspan="%4$s" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt"><p>%5$s</p></div></td></tr>',
-			esc_attr( is_plugin_active( $plugin_file ) ? 'active' : 'inactive' ),
+			esc_attr( ( is_network_admin() ? is_plugin_active_for_network( $plugin_file ) : is_plugin_active( $plugin_file ) ) ? 'active' : 'inactive' ),
 			esc_attr( $plugin_file ),
 			esc_attr( $row_type ),
 			esc_attr( (string) $wp_list_table->get_column_count() ),
