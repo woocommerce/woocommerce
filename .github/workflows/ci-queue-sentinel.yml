@@ -4,6 +4,10 @@ name: 'CI Queue Sentinel'
 # backs up; ci.yml routes e2e jobs to the "Woo Core Dedicated CI" group while
 # it is set. Variables written here must only be consumed via `env:` or `${{ }}`
 # comparisons, never interpolated into `run:` blocks.
+#
+# Three jobs: `evaluate` does the work, `freshness` reports when no run has
+# succeeded for an hour, and `notify-failure` alerts Slack from outside
+# `evaluate` so a job that fails without starting still alerts.
 on:
   schedule:
     - cron: '*/15 * * * *'
@@ -20,16 +24,22 @@ on:
 
 permissions: {}
 
-# One sentinel at a time; cron and manual dispatches must not race the variable.
-concurrency:
-  group: 'ci-queue-sentinel'
-  cancel-in-progress: false
-
 jobs:
   evaluate:
     name: 'Evaluate CI queue'
     if: ${{ github.repository == 'woocommerce/woocommerce' }}
-    # Under the cron cadence, so a wedged run fails (and alerts) before the next tick.
+    # One evaluation at a time; cron and manual dispatches must not race the
+    # variable. Job-level so the freshness check sits outside the group. A
+    # wedged run must not block later ticks, so a newer run cancels the older
+    # one: the run takes about 15 s and writes the variable last, so a cancelled
+    # run leaves the variable at its previous value and the next tick
+    # re-evaluates.
+    concurrency:
+      group: 'ci-queue-sentinel'
+      cancel-in-progress: true
+    # Under the cron cadence, so a wedged run fails (and alerts) before the next
+    # tick. Only covers a job that reached a runner, which is why a run that
+    # never got one sat here for 14 days; the concurrency group now clears that.
     timeout-minutes: 10
     # Dedicated group: the sentinel must not queue behind the congestion it measures.
     runs-on:
@@ -67,10 +77,93 @@ jobs:
           HYSTERESIS_MIN: '20'
         run: node .github/workflows/scripts/ci-queue-sentinel.js
 
+  freshness:
+    name: 'Alert when the sentinel goes quiet'
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
+    # Outside the concurrency group on purpose: a cancelled run is not a
+    # failure, so nothing else notices a sentinel that stops producing
+    # decisions, and a check inside the group could be held by the same run it
+    # is meant to report. Free hosted runner, so it does not compete for the
+    # group `evaluate` needs and does not share its failure mode.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # checkout
+      actions: read # list runs
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
+        name: 'Checkout'
+        with:
+          sparse-checkout: |
+              ./tools/monorepo-utils
+              .github/workflows
+          persist-credentials: false
+
+      - name: 'Check when the sentinel last succeeded'
+        id: check
+        env:
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Four missed ticks before anyone is told, so a single slow or
+          # superseded run stays quiet.
+          FRESH_AFTER_MIN: '60'
+          CADENCE_MIN: '15'
+          CI_QUEUE_OVERFLOW: ${{ vars.CI_QUEUE_OVERFLOW }}
+        run: node .github/workflows/scripts/ci-queue-sentinel-freshness.js
+
+      # The Slack tooling is only set up when there is something to report, so
+      # the usual tick stays cheap.
+      - uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' # v7.0.0
+        name: 'Setup Node'
+        if: ${{ !cancelled() && steps.check.outputs.alert == 'true' }}
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: 'Setup PNPM'
+        if: ${{ !cancelled() && steps.check.outputs.alert == 'true' }}
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 'Notify Slack that the sentinel is quiet'
+        if: ${{ !cancelled() && steps.check.outputs.alert == 'true' }}
+        env:
+          SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+          SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+          LAST_SUCCESS: ${{ steps.check.outputs.last }}
+          LAST_AGE: ${{ steps.check.outputs.age }}
+          OVERFLOW_VALUE: ${{ steps.check.outputs.overflow }}
+        run: |
+          pnpm utils slack ":rotating_light: CI Queue Sentinel has not succeeded since $LAST_SUCCESS ($LAST_AGE), so CI_QUEUE_OVERFLOW is stranded at $OVERFLOW_VALUE and the queue is unwatched.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View this check>"
+
+  notify-failure:
+    name: 'Notify Slack on failure'
+    needs: [ evaluate ]
+    # failure() and not cancelled(): the concurrency group now cancels older
+    # runs on purpose. A separate job so an evaluate job that fails before any
+    # step runs (for example, no runner assigned) still alerts.
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # checkout
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' # v7.0.1
+        name: 'Checkout'
+        with:
+          sparse-checkout: |
+              ./tools/monorepo-utils
+          persist-credentials: false
+
+      - uses: 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' # v7.0.0
+        name: 'Setup Node'
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: 'Setup PNPM'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
       - name: 'Notify Slack on failure'
-        if: ${{ failure() }}
         env:
           SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
           SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
         run: |
-          pnpm utils slack ":warning: CI Queue Sentinel failed — the CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
+          pnpm utils slack ":warning: CI Queue Sentinel failed. The CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
