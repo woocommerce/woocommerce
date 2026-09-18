@@ -319,7 +319,30 @@ jQuery( function ( $ ) {
 			$( document.body )
 				.on( 'wc_backbone_modal_loaded', this.backbone.init )
 				.on( 'wc_backbone_modal_before_response', this.backbone.validate_response )
-				.on( 'wc_backbone_modal_response', this.backbone.response );
+				.on( 'wc_backbone_modal_response', this.backbone.response )
+				.on( 'click', '#woocommerce-order-actions button.save_order, #publish', function( event ) {
+					if ( ! wc_meta_boxes_order_items.validate_quantity_inputs() ) {
+						event.preventDefault();
+						return false;
+					}
+				} );
+
+			$( '#woocommerce-order-items' ).closest( 'form' ).on( 'submit', function( event ) {
+				if ( ! wc_meta_boxes_order_items.validate_quantity_inputs() ) {
+					event.preventDefault();
+					return false;
+				}
+			} );
+
+			// When native constraint validation triggers on a hidden quantity input,
+			// reveal its row so the field is focusable and the error is visible.
+			document.addEventListener( 'invalid', function( event ) {
+				if ( $( event.target ).is( '#woocommerce-order-items input.quantity' ) ) {
+					var row = $( event.target ).closest( 'tr' );
+					row.find( '.view' ).hide();
+					row.find( '.edit' ).show();
+				}
+			}, true );
 		},
 
 		block: function() {
@@ -711,25 +734,23 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Return the first of the given inputs whose value is below its min
-		 * attribute, or null when none is. Only the minimum (rangeUnderflow)
-		 * is checked; other constraints are deliberately ignored so they keep
-		 * their previous behaviour.
+		 * Return the first of the given inputs whose value violates its min
+		 * or step attribute, or null when none does.
 		 *
 		 * @param {NodeList|jQuery} inputs Quantity inputs to check.
-		 * @return {HTMLInputElement|null} First input below its minimum.
+		 * @return {HTMLInputElement|null} First input with an invalid quantity.
 		 */
 		find_input_with_qty_below_min: function( inputs ) {
 			return Array.prototype.find.call( inputs, function( input ) {
-				return input.validity.rangeUnderflow;
+				return input.validity.rangeUnderflow || input.validity.stepMismatch;
 			} ) || null;
 		},
 
 		/**
-		 * Check the quantity inputs in the items panel against their minimum,
-		 * revealing and reporting the first one below it.
+		 * Check the quantity inputs in the items panel against their minimum and step,
+		 * revealing and reporting the first invalid one.
 		 *
-		 * @return {boolean} True when every quantity input meets its minimum.
+		 * @return {boolean} True when every quantity input is valid.
 		 */
 		validate_quantity_inputs: function() {
 			var input = wc_meta_boxes_order_items.find_input_with_qty_below_min(
