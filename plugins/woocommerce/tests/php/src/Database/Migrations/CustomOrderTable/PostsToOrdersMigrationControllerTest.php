@@ -1059,6 +1059,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
+	 * @testdox A fallback meta key on a column that is not a date_epoch is ignored.
+	 */
+	public function test_fallback_meta_key_is_ignored_for_non_date_columns(): void {
+		global $wpdb;
+		$migrator = new class() extends \Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderOpTableMigrator {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function get_meta_column_config(): array {
+				$config                                    = parent::get_meta_column_config();
+				$config['_order_key']['fallback_meta_key'] = '_legacy_order_key';
+				return $config;
+			}
+		};
+		$order    = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_order_key' );
+		update_post_meta( $order->get_id(), '_legacy_order_key', 'should-be-ignored' );
+
+		$migrator->process_migration_batch_for_ids( array( $order->get_id() ) );
+
+		$this->assertSame( '', (string) $wpdb->get_var( $wpdb->prepare( "SELECT order_key FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'A string column should not take a fallback value' );
+	}
+
+	/**
 	 * @testdox The current paid date key wins over the pre-3.0 one when both have a value.
 	 */
 	public function test_migration_prefers_current_date_key_over_legacy_key(): void {

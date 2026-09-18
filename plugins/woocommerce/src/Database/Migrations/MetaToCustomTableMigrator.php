@@ -592,7 +592,8 @@ WHERE
 	private function get_fallback_meta_keys(): array {
 		$fallback_meta_keys = array();
 		foreach ( $this->meta_column_mapping as $meta_key => $schema ) {
-			if ( isset( $schema['fallback_meta_key'] ) ) {
+			// The fallback value is converted as a local datetime, which only makes sense for date_epoch columns.
+			if ( isset( $schema['fallback_meta_key'] ) && 'date_epoch' === ( $schema['type'] ?? '' ) ) {
 				$fallback_meta_keys[ $schema['fallback_meta_key'] ] = $meta_key;
 			}
 		}
@@ -619,7 +620,7 @@ WHERE
 			$row = (array) $datum;
 			if ( ! isset( $fallback_meta_keys[ $row['meta_key'] ] ) ) {
 				// The posts data store reads a main key of '0' as empty and falls back, so the migration does the same.
-				if ( '0' === $row['meta_value'] && isset( $this->meta_column_mapping[ $row['meta_key'] ]['fallback_meta_key'] ) ) {
+				if ( '0' === $row['meta_value'] && in_array( $row['meta_key'], $fallback_meta_keys, true ) ) {
 					$row['meta_value'] = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- A row already read from the database.
 					$datum             = is_object( $datum ) ? (object) $row : $row;
 				}
@@ -786,7 +787,8 @@ WHERE $where_clause
 		$meta_key_column       = $this->schema_config['source']['meta']['meta_key_column'];
 		$meta_value_column     = $this->schema_config['source']['meta']['meta_value_column'];
 		$meta_id_column        = $this->schema_config['source']['meta']['meta_id_column'];
-		$meta_columns          = array_merge( array_keys( $this->meta_column_mapping ), array_keys( $this->get_fallback_meta_keys() ) );
+		$fallback_meta_keys    = $this->get_fallback_meta_keys();
+		$meta_columns          = array_merge( array_keys( $this->meta_column_mapping ), array_keys( $fallback_meta_keys ) );
 
 		$meta_columns_placeholder = implode( ', ', array_fill( 0, count( $meta_columns ), '%s' ) );
 		$source_ids_placeholder   = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
@@ -814,7 +816,7 @@ WHERE $where_clause
 			// For a key with a fallback the migration stores an empty date as null and lets the fallback row fill the column,
 			// so do the same here.
 			$is_empty_date = '' === ( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ?? null )
-				&& isset( $this->meta_column_mapping[ $meta_datum['meta_key'] ]['fallback_meta_key'] );
+				&& in_array( $meta_datum['meta_key'], $fallback_meta_keys, true );
 			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) && ! $is_empty_date ) {
 				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
 				continue;
