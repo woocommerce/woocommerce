@@ -196,8 +196,13 @@ test.describe( 'Shopper → Store shipping disabled', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
+		// The Cart block labels its shipping row "Shipping". Wait for the totals
+		// the block does render, so the absence below is the row's own.
 		await expect(
-			page.getByText( 'Delivery', { exact: true } )
+			page.locator( '.wc-block-components-totals-footer-item' )
+		).toBeVisible();
+		await expect(
+			page.locator( '.wc-block-components-totals-shipping' )
 		).toBeHidden();
 
 		await frontendUtils.goToCheckout();
