@@ -77,8 +77,8 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
-			'kustom_checkout',
 			'gocardless',
+			'kustom_checkout',
 			'elavon',
 		),
 		'other_express_checkout' => array(
@@ -314,6 +314,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -363,6 +364,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 			'elavon',
 		),
 		'other_express_checkout' => array(
@@ -384,6 +386,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -402,6 +405,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 	),
 	'LI' => array(
@@ -420,6 +424,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'airwallex',
+			'gocardless',
 		),
 	),
 	'LU' => array(
@@ -430,6 +435,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -443,6 +449,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
+			'gocardless',
 		),
 	),
 	'MD' => array(
@@ -465,6 +472,7 @@ return array(
 			'visa_as',
 			'viva_wallet',
 			'kustom_checkout',
+			'gocardless',
 			'elavon',
 		),
 		'other_express_checkout' => array(
@@ -516,6 +524,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -555,6 +564,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -567,6 +577,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'gocardless',
 		),
 	),
 	'ES' => array(
@@ -581,6 +592,7 @@ return array(
 			'monei',
 			'airwallex',
 			'viva_wallet',
+			'gocardless',
 			'elavon',
 		),
 		'other_express_checkout' => array(
@@ -603,6 +615,7 @@ return array(
 			'viva_wallet',
 			'kustom_checkout',
 			'nexi_checkout',
+			'gocardless',
 			'elavon',
 		),
 		'other_express_checkout' => array(
@@ -1236,6 +1249,7 @@ return array(
 			'eway',
 			'visa_as',
 			'airwallex',
+			'gocardless',
 		),
 		'other_bnpl'  => array(
 			'afterpay',

@@ -263,8 +263,8 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::KUSTOM_CHECKOUT,
 			self::GOCARDLESS,
+			self::KUSTOM_CHECKOUT,
 			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -722,6 +722,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -820,6 +821,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -853,6 +855,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -883,6 +886,7 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 		),
 		'LI' => array(
@@ -903,6 +907,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::AIRWALLEX,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 		),
 		'LU' => array(
@@ -912,6 +917,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -922,6 +928,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 		),
 		'MD' => array(
@@ -960,6 +967,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
+			self::GOCARDLESS,
 			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -1043,6 +1051,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -1117,6 +1126,7 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -1139,6 +1149,7 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 		),
 		'ES' => array(
@@ -1164,6 +1175,7 @@ class PaymentsExtensionSuggestions {
 			self::MONEI,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS,
 			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -1198,6 +1210,7 @@ class PaymentsExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
+			self::GOCARDLESS,
 			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -2059,6 +2072,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::VISA,
 			self::AIRWALLEX,
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AFTERPAY,
 			self::KLARNA => array(
