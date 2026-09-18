@@ -111,8 +111,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'order_tax'               => 'SUM(order_tax) as order_tax',
 			'shipping_tax'            => 'SUM(shipping_tax) as shipping_tax',
 			'taxable_amount'          => 'SUM(taxable_amount) as taxable_amount',
-			'order_taxable_amount'    => 'SUM(order_taxable_amount) as order_taxable_amount',
-			'shipping_taxable_amount' => 'SUM(shipping_taxable_amount) as shipping_taxable_amount',
+			'order_taxable_amount'    => self::taxable_amount_part_column( 'order_taxable_amount' ),
+			'shipping_taxable_amount' => self::taxable_amount_part_column( 'shipping_taxable_amount' ),
 			// parent_id stays unqualified: wc_order_stats is the only joined table carrying it, and
 			// this string is carried by the public woocommerce_admin_report_columns filter, so it must
 			// match the released form for extension callbacks that inspect or rewrite it.
@@ -128,6 +128,34 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! static::has_taxable_amount_split_columns() ) {
 			unset( $this->report_columns['order_taxable_amount'], $this->report_columns['shipping_taxable_amount'] );
 		}
+	}
+
+	/**
+	 * SQL selecting one part of the taxable amount of a tax rate, or NULL while the rate holds a
+	 * row the rebuild has not reached.
+	 *
+	 * A report row sums the lookup rows of a rate over the reporting period, and a row recorded
+	 * before the split carries a base with both parts at zero. Summing it in with the rows that do
+	 * carry a split reports a part that is short by whatever those rows hold, and that number
+	 * reads as a filing figure since nothing about it says it is incomplete. The tax charged does
+	 * not say it either: it is non-zero on the rows that were left out, and a zero-rated rate has
+	 * no tax to read at all. So the sum says so itself, and `get_noncached_data()` drops the part
+	 * from the row, which is the shape the report already has while the columns are missing.
+	 *
+	 * @param string $column Column holding the part, `order_taxable_amount` or `shipping_taxable_amount`.
+	 * @return string
+	 */
+	private static function taxable_amount_part_column( string $column ): string {
+		// Without the base there is nothing to tell an unrebuilt row from a rate that really did
+		// apply to nothing, so the sum is all there is to report.
+		if ( ! static::has_taxable_amount_column() ) {
+			return "SUM({$column}) as {$column}";
+		}
+
+		// The same row shape the rebuild counts as pending. See OrderTaxLookupMigrator.
+		$unsplit_rows = 'SUM( CASE WHEN order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0 THEN 1 ELSE 0 END )';
+
+		return "CASE WHEN {$unsplit_rows} > 0 THEN NULL ELSE SUM({$column}) END as {$column}";
 	}
 
 	/**
@@ -158,36 +186,49 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Columns of the lookup table this request has seen, keyed by blog id since the schema is per
+	 * site. Only a column that is there sticks: the schema update can land while a request runs
+	 * (the "Verify base database tables" tool applies it right before the tools list re-renders),
+	 * and a cached miss would outlive it. This is the same rule `$lookup_keyed_by_order_item`
+	 * follows, for the same reason.
+	 *
+	 * @var array<int, array<string, true>>
+	 */
+	private static $lookup_columns = array();
+
+	/**
 	 * Check if the wc_order_tax_lookup table has a column.
 	 *
 	 * @param string $column Column name.
 	 * @return bool
 	 */
 	private static function lookup_has_column( string $column ): bool {
-		return in_array( $column, self::get_lookup_columns(), true );
+		$blog_id = get_current_blog_id();
+
+		if ( isset( self::$lookup_columns[ $blog_id ][ $column ] ) ) {
+			return true;
+		}
+
+		// One schema read answers for every column, so a store holding them all reads once a
+		// request however many times this is called: imports reach it once per synced order.
+		foreach ( self::read_lookup_columns() as $name ) {
+			self::$lookup_columns[ $blog_id ][ $name ] = true;
+		}
+
+		return isset( self::$lookup_columns[ $blog_id ][ $column ] );
 	}
 
 	/**
 	 * The columns the wc_order_tax_lookup table holds.
 	 *
-	 * Asks the schema on every request rather than caching the answer in an option, so a
-	 * column that appears or disappears behind WooCommerce's back (a partial restore, a
-	 * manual drop) corrects the report on the next request.
+	 * Asks the schema rather than caching the answer in an option, so a column that appears or
+	 * disappears behind WooCommerce's back (a partial restore, a manual drop) corrects the report
+	 * by itself.
 	 *
 	 * @return string[] Column names, empty while the table does not exist.
 	 */
-	private static function get_lookup_columns(): array {
+	private static function read_lookup_columns(): array {
 		global $wpdb;
-
-		// One schema read per request, however many columns are asked about: imports reach
-		// this once per synced order. Keyed by blog id since the schema is per site.
-		static $columns = array();
-
-		$blog_id = get_current_blog_id();
-
-		if ( isset( $columns[ $blog_id ] ) ) {
-			return $columns[ $blog_id ];
-		}
 
 		$table_name = self::get_db_table_name();
 
@@ -200,16 +241,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		if ( ! $table_exists ) {
-			$columns[ $blog_id ] = array();
-			return $columns[ $blog_id ];
+			return array();
 		}
 
-		$columns[ $blog_id ] = $wpdb->get_col(
+		return $wpdb->get_col(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
 			"SHOW COLUMNS FROM `{$table_name}`"
 		);
-
-		return $columns[ $blog_id ];
 	}
 
 	/**
@@ -370,6 +408,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return $data;
 		}
 
+		$tax_data = array_map( array( $this, 'drop_unknown_taxable_amount_parts' ), $tax_data );
 		$tax_data = array_map( array( $this, 'cast_numbers' ), $tax_data );
 		$data     = (object) array(
 			'data'    => $tax_data,
@@ -379,6 +418,27 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		return $data;
+	}
+
+	/**
+	 * Leave out the parts of the taxable amount of a report row that the rate cannot report yet.
+	 *
+	 * `taxable_amount_part_column()` selects NULL for those, which has to go before the row is
+	 * cast, since a float cast would turn it into the zero the NULL is there to avoid. A row
+	 * without the key reads as unknown in the table and as an empty cell in the export, the same
+	 * way a row from a store still missing the columns does.
+	 *
+	 * @param array $row Single report row.
+	 * @return array
+	 */
+	private function drop_unknown_taxable_amount_parts( $row ) {
+		foreach ( array( 'order_taxable_amount', 'shipping_taxable_amount' ) as $column ) {
+			if ( array_key_exists( $column, $row ) && null === $row[ $column ] ) {
+				unset( $row[ $column ] );
+			}
+		}
+
+		return $row;
 	}
 
 	/**
