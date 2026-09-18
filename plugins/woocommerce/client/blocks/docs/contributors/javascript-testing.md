@@ -22,18 +22,19 @@ All the following tests require that the dependencies are installed (`npm instal
 
 Unit tests are implemented near the code they test, in `*.test.js` files.
 
-Use the following command to run the unit tests:
+Use the following command to run the unit tests, from the monorepo root:
 
 ```sh
-npm run test
+pnpm --filter=@woocommerce/block-library test:js
 ```
 
 The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scripts) to run jest for component and unit testing.
 
 Additionally,
 
+-   `test:js -- path/to/test` runs a single test file.
+-   `test:js --watch` keeps watch of files and automatically re-runs tests when things change.
 -   `test:update` updates the snapshot tests for components, used if you change a component that has tests attached.
--   `test:watch` keeps watch of files and automatically re-runs tests when things change.
 
 ## How to run end-to-end tests
 
