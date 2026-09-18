@@ -15,6 +15,7 @@ class ProductButton extends \WP_UnitTestCase {
 	/**
 	 * Set up test options.
 	 *
+	 * Renders run with AJAX add to cart off unless a test turns it on.
 	 * Both writes land inside the per-test transaction, which tear_down() rolls back.
 	 */
 	protected function setUp(): void {
@@ -37,9 +38,38 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Filtered add-to-cart text renders one visible Product Button for the expected product.
+	 * Render the Product Button block on its own, from the global product.
+	 *
+	 * A Single Product block rewrites data-wp-interactive and data-wp-context on the first
+	 * div of its content, which is the Product Button wrapper when the button is its only
+	 * inner block. Rendering the button alone keeps the button's own Interactivity context.
+	 *
+	 * @param \WC_Product $product Product to render. Left in the product global for the caller to restore.
+	 * @return string Rendered block markup.
 	 */
-	public function test_filtered_add_to_cart_text_renders_visible_button(): void {
+	private function render_product_button_from_global_product( \WC_Product $product ): string {
+		$GLOBALS['product'] = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The block falls back to the product global when it has no post context.
+
+		return do_blocks( '<!-- wp:woocommerce/product-button /-->' );
+	}
+
+	/**
+	 * Render the Product Button block from a post context, the way a product template supplies it.
+	 *
+	 * @param \WC_Product $product Product the post context points at.
+	 * @return string Rendered block markup.
+	 */
+	private function render_product_button_from_post_context( \WC_Product $product ): string {
+		$parsed_blocks = parse_blocks( '<!-- wp:woocommerce/product-button /-->' );
+		$block         = new \WP_Block( $parsed_blocks[0], array( 'postId' => $product->get_id() ) );
+
+		return $block->render();
+	}
+
+	/**
+	 * @testdox Filtered add-to-cart text renders one non-AJAX Product Button link for the expected product.
+	 */
+	public function test_filtered_add_to_cart_text_renders_in_the_non_ajax_link(): void {
 		$had_product      = array_key_exists( 'product', $GLOBALS );
 		$previous_product = $GLOBALS['product'] ?? null;
 		$product          = WC_Helper_Product::create_simple_product(
@@ -88,6 +118,145 @@ class ProductButton extends \WP_UnitTestCase {
 		} finally {
 			// _restore_hooks() drops the filter and the rollback drops the product;
 			// the product global is this test's own to put back.
+			if ( $had_product ) {
+				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Filtered add-to-cart text labels the AJAX Product Button rendered from the product global through its Interactivity context.
+	 */
+	public function test_filtered_add_to_cart_text_reaches_the_ajax_button_context(): void {
+		$had_product      = array_key_exists( 'product', $GLOBALS );
+		$previous_product = $GLOBALS['product'] ?? null;
+		$product          = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Product Button AJAX add-to-cart text fixture',
+				'regular_price' => '10',
+			)
+		);
+		$filter           = static function (): string {
+			return 'Buy Now';
+		};
+
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		add_filter( 'woocommerce_product_add_to_cart_text', $filter );
+
+		try {
+			$markup    = $this->render_product_button_from_global_product( $product );
+			$processor = new \WP_HTML_Tag_Processor( $markup );
+
+			$this->assertTrue(
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'button',
+						'class_name' => 'wc-block-components-product-button__button',
+					)
+				),
+				'A purchasable simple product should render the Product Button as a button when AJAX add to cart is on.'
+			);
+			$this->assertTrue( $processor->has_class( 'ajax_add_to_cart' ), 'The AJAX Product Button should carry the ajax_add_to_cart class.' );
+
+			$processor = new \WP_HTML_Tag_Processor( $markup );
+			$this->assertTrue(
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'div',
+						'class_name' => 'wc-block-components-product-button',
+					)
+				),
+				'The AJAX Product Button should render its wrapper.'
+			);
+
+			$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+			$this->assertIsArray( $context, 'The wrapper should carry an Interactivity context the client can decode.' );
+			$this->assertArrayHasKey( 'addToCartText', $context, 'The Interactivity context should carry the button label.' );
+			$this->assertSame( 'Buy Now', $context['addToCartText'], 'The real product text filter should reach the Interactivity context.' );
+
+			$processor      = new \WP_HTML_Tag_Processor( $markup );
+			$span_directive = null;
+
+			while ( $processor->next_tag( array( 'tag_name' => 'span' ) ) ) {
+				$directive = $processor->get_attribute( 'data-wp-text' );
+
+				if ( null !== $directive ) {
+					$span_directive = $directive;
+					break;
+				}
+			}
+
+			$this->assertSame( 'state.addToCartText', $span_directive, 'The AJAX Product Button label span should bind to the Interactivity state.' );
+			$this->assertStringContainsString( '>Buy Now</span>', $markup, 'Server-side directive processing should label the AJAX button span from the Interactivity state.' );
+		} finally {
+			// _restore_hooks() drops the filter and the rollback drops both the product
+			// and the option write; the product global is this test's own to put back.
+			if ( $had_product ) {
+				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Filtered add-to-cart text labels an AJAX Product Button that takes its product from the post context.
+	 */
+	public function test_filtered_add_to_cart_text_reaches_the_ajax_button_resolved_from_post_context(): void {
+		$had_product      = array_key_exists( 'product', $GLOBALS );
+		$previous_product = $GLOBALS['product'] ?? null;
+		$product          = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Product Button post-context add-to-cart text fixture',
+				'regular_price' => '10',
+			)
+		);
+		$filter           = static function (): string {
+			return 'Buy Now';
+		};
+
+		unset( $GLOBALS['product'] );
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		add_filter( 'woocommerce_product_add_to_cart_text', $filter );
+
+		try {
+			$markup    = $this->render_product_button_from_post_context( $product );
+			$processor = new \WP_HTML_Tag_Processor( $markup );
+
+			$this->assertTrue(
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'button',
+						'class_name' => 'ajax_add_to_cart',
+					)
+				),
+				'A product supplied through the post context should render the AJAX Product Button.'
+			);
+			$this->assertSame( (string) $product->get_id(), $processor->get_attribute( 'data-product_id' ), 'The button should render for the product the post context names.' );
+
+			$processor = new \WP_HTML_Tag_Processor( $markup );
+			$this->assertTrue(
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'div',
+						'class_name' => 'wc-block-components-product-button',
+					)
+				),
+				'The Product Button should render its wrapper.'
+			);
+
+			$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+			$this->assertIsArray( $context, 'The wrapper should carry an Interactivity context the client can decode.' );
+			$this->assertArrayHasKey( 'addToCartText', $context, 'The Interactivity context should carry the button label.' );
+			$this->assertSame( 'Buy Now', $context['addToCartText'], 'The real product text filter should reach the Interactivity context.' );
+			$this->assertStringContainsString( '>Buy Now</span>', $markup, 'Server-side directive processing should label the button span from the Interactivity state.' );
+		} finally {
+			// _restore_hooks() drops the filter and the rollback drops both the product
+			// and the option write; the product global is this test's own to put back.
 			if ( $had_product ) {
 				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
 			} else {
