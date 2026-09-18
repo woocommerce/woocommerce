@@ -80,7 +80,6 @@
 		"env:stop": "pnpm run wp-env stop",
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.js",
-		"test:watch": "pnpm run test -- --watch",
 		"ts:check": "tsc --build",
 		"ts:log-errors": "npm --silent run ts:check | npx -y @bartekbp/typescript-checkstyle > checkstyle.xml",
 		"wp-env": "wp-env",
