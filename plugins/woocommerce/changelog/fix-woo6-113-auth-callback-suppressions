@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reject array values for the wc-auth handshake parameters so they no longer cause a fatal error, and replace legacy WPCS suppression comments in the auth, REST authentication and PayPal IPN handlers with exact PHPCS annotations.

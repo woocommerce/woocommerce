@@ -6,7 +6,6 @@ import { Button, Modal, Notice } from '@wordpress/components';
 import {
 	Component,
 	createElement,
-	RawHTML,
 	useCallback,
 	useEffect,
 	useMemo,
@@ -19,31 +18,22 @@ import type { ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { createDataFormAdapter } from './dataform-adapter';
+import { DataForm } from './dataform-runtime';
 import { HiddenInputs } from './hidden-inputs';
-import { error, warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
-import {
-	isNativeSettingsFieldType,
-	NativeSettingsField,
-} from './native-fields';
-import {
-	resolveFieldComponentForRendering,
-	resolveFieldVisibilityPredicate,
-	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
-	resolveSaveHandler,
-} from './registry';
+import { error } from './diagnostics';
+import { resolveRegionComponent, resolveSaveHandler } from './registry';
 import type {
 	SettingsUIField,
-	SettingsUIGroup,
 	SettingsUIShellBadgeIntent,
+	SettingsUIShellNavigationItem,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
 	SettingsFieldContext,
 	SettingsValue,
 	SettingsValues,
 } from './types';
-import { areValuesEqual, valueMatchesVisibilityRule } from './values';
+import { areValuesEqual } from './values';
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -87,14 +77,6 @@ const getChangedValues = (
 	return changedValues;
 };
 
-const getFieldTypeClassName = ( type: string ) =>
-	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
-
-const getActionVariant = ( variant?: string ) =>
-	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
-		? variant
-		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
-
 const BADGE_INTENTS = {
 	default: true,
 	info: true,
@@ -113,10 +95,6 @@ const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
-const clearLegacyFormPrompt = () => {
-	window.onbeforeunload = null;
-};
-
 const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	let redirectInput = form.querySelector< HTMLInputElement >(
 		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
@@ -132,7 +110,7 @@ const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	redirectInput.value = href;
 };
 
-const shouldPromptForNavigation = ( event: MouseEvent ) => {
+const getNavigationHref = ( event: MouseEvent ) => {
 	if (
 		event.defaultPrevented ||
 		event.button !== 0 ||
@@ -141,29 +119,9 @@ const shouldPromptForNavigation = ( event: MouseEvent ) => {
 		event.shiftKey ||
 		event.altKey
 	) {
-		return false;
+		return undefined;
 	}
 
-	const target = event.target;
-
-	if ( ! ( target instanceof Element ) ) {
-		return false;
-	}
-
-	const link = target.closest( 'a[href]' );
-
-	if ( ! ( link instanceof HTMLAnchorElement ) ) {
-		return false;
-	}
-
-	if ( link.target && link.target !== '_self' ) {
-		return false;
-	}
-
-	return Boolean( link.href ) && link.href !== window.location.href;
-};
-
-const getNavigationHref = ( event: MouseEvent ) => {
 	const target = event.target;
 
 	if ( ! ( target instanceof Element ) ) {
@@ -172,7 +130,20 @@ const getNavigationHref = ( event: MouseEvent ) => {
 
 	const link = target.closest( 'a[href]' );
 
-	return link instanceof HTMLAnchorElement ? link.href : undefined;
+	if ( ! ( link instanceof HTMLAnchorElement ) ) {
+		return undefined;
+	}
+
+	if (
+		link.hasAttribute( 'download' ) ||
+		( link.target && link.target.toLowerCase() !== '_self' )
+	) {
+		return undefined;
+	}
+
+	return link.href && link.href !== window.location.href
+		? link.href
+		: undefined;
 };
 
 const UnsavedChangesModal = ( {
@@ -222,89 +193,6 @@ const UnsavedChangesModal = ( {
 			</div>
 		</Modal>
 	);
-};
-
-const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
-	const hasHeaderContent =
-		group.title || group.description || ( group.actions || [] ).length > 0;
-
-	if ( ! hasHeaderContent ) {
-		return null;
-	}
-
-	return (
-		<header className="wc-settings-ui__section-header">
-			<div className="wc-settings-ui__section-heading">
-				{ group.title ? <h2>{ group.title }</h2> : null }
-				{ group.description ? (
-					<div className="wc-settings-ui__section-description">
-						<RawHTML>
-							{ sanitizeSettingsHtml( group.description ) }
-						</RawHTML>
-					</div>
-				) : null }
-			</div>
-			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__section-actions">
-					{ group.actions.map( ( action ) => (
-						<Button
-							key={ action.id }
-							variant={ getActionVariant( action.variant ) }
-							href={ action.href }
-							target={ action.target }
-							rel={ action.rel }
-						>
-							{ action.label }
-						</Button>
-					) ) }
-				</div>
-			) : null }
-		</header>
-	);
-};
-
-const getVisible = ( {
-	id,
-	kind,
-	field,
-	values,
-	initialValues,
-	context,
-	schema,
-}: {
-	id: string;
-	kind: 'field' | 'group';
-	field?: SettingsUIField;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-} ) => {
-	const predicate =
-		kind === 'field'
-			? resolveFieldVisibilityPredicate( id, context )
-			: resolveGroupVisibilityPredicate( id, context );
-
-	if ( predicate ) {
-		try {
-			return predicate( { values, initialValues, context, schema } );
-		} catch ( predicateError ) {
-			warn(
-				`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
-				{ error: predicateError, context }
-			);
-			return true;
-		}
-	}
-
-	if ( field?.visibility ) {
-		return valueMatchesVisibilityRule(
-			values[ field.visibility.controller ],
-			field.visibility.value
-		);
-	}
-
-	return true;
 };
 
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
@@ -383,6 +271,32 @@ export class SettingsUIErrorBoundary extends Component<
 		return this.props.children;
 	}
 }
+
+const SettingsNavigation = ( {
+	items,
+	label,
+}: {
+	items?: SettingsUIShellNavigationItem[];
+	label: string;
+} ) =>
+	items?.length ? (
+		<nav className="wc-settings-ui-shell__tabs" aria-label={ label }>
+			{ items.map( ( item ) => (
+				<a
+					className={
+						item.active
+							? 'wc-settings-ui-shell__tab is-active'
+							: 'wc-settings-ui-shell__tab'
+					}
+					aria-current={ item.active ? 'page' : undefined }
+					href={ item.href }
+					key={ item.id }
+				>
+					{ item.label }
+				</a>
+			) ) }
+		</nav>
+	) : null;
 
 const ShellHeader = ( {
 	schema,
@@ -473,50 +387,14 @@ const ShellHeader = ( {
 			) : null }
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
-					{ shell.navigation && shell.navigation.length > 0 ? (
-						<nav
-							className="wc-settings-ui-shell__tabs"
-							aria-label={ __( 'Settings pages', 'woocommerce' ) }
-						>
-							{ shell.navigation.map( ( item ) => (
-								<a
-									className={
-										item.active
-											? 'wc-settings-ui-shell__tab is-active'
-											: 'wc-settings-ui-shell__tab'
-									}
-									href={ item.href }
-									key={ item.id }
-								>
-									{ item.label }
-								</a>
-							) ) }
-						</nav>
-					) : null }
-					{ shell.sectionNavigation &&
-					shell.sectionNavigation.length > 0 ? (
-						<nav
-							className="wc-settings-ui-shell__tabs"
-							aria-label={ __(
-								'Settings sections',
-								'woocommerce'
-							) }
-						>
-							{ shell.sectionNavigation.map( ( item ) => (
-								<a
-									className={
-										item.active
-											? 'wc-settings-ui-shell__tab is-active'
-											: 'wc-settings-ui-shell__tab'
-									}
-									href={ item.href }
-									key={ item.id }
-								>
-									{ item.label }
-								</a>
-							) ) }
-						</nav>
-					) : null }
+					<SettingsNavigation
+						items={ shell.navigation }
+						label={ __( 'Settings pages', 'woocommerce' ) }
+					/>
+					<SettingsNavigation
+						items={ shell.sectionNavigation }
+						label={ __( 'Settings sections', 'woocommerce' ) }
+					/>
 					{ NavigationComponent ? (
 						<NavigationComponent
 							values={ values }
@@ -580,19 +458,8 @@ export const SettingsUIPage = ( {
 		setPendingNavigation( null );
 	}, [ schema ] );
 
-	const setValue = useCallback(
-		( fieldId: string, nextValue: SettingsValue ) => {
-			setValuesState( ( currentValues ) => ( {
-				...currentValues,
-				[ fieldId ]: nextValue,
-			} ) );
-		},
-		[]
-	);
-
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
-		clearLegacyFormPrompt();
 	}, [] );
 
 	const submitSettingsForm = useCallback(
@@ -619,25 +486,6 @@ export const SettingsUIPage = ( {
 			form.requestSubmit();
 		},
 		[ allowNavigation ]
-	);
-
-	const setValues = useCallback(
-		( nextValues: Partial< SettingsValues > ) => {
-			setValuesState( ( currentValues ) => {
-				const mergedValues: SettingsValues = { ...currentValues };
-
-				Object.entries( nextValues ).forEach(
-					( [ fieldId, value ] ) => {
-						if ( typeof value !== 'undefined' ) {
-							mergedValues[ fieldId ] = value;
-						}
-					}
-				);
-
-				return mergedValues;
-			} );
-		},
-		[]
 	);
 
 	const handleCustomSave = useCallback( async () => {
@@ -734,8 +582,7 @@ export const SettingsUIPage = ( {
 				// The classic section links render outside the shell on top-level pages.
 				! target.closest(
 					'.wc-settings-ui-shell, #mainform .subsubsub'
-				) ||
-				! shouldPromptForNavigation( event )
+				)
 			) {
 				return;
 			}
@@ -796,39 +643,48 @@ export const SettingsUIPage = ( {
 		submitSettingsForm,
 	] );
 
-	const visibleGroups = useMemo(
-		() =>
-			Object.values( schema.groups )
-				.filter( ( group ) =>
-					getVisible( {
-						id: group.id,
-						kind: 'group',
-						values,
-						initialValues,
-						context,
-						schema,
-					} )
-				)
-				.map( ( group ) => ( {
-					...group,
-					fields: group.fields.filter( ( field ) =>
-						getVisible( {
-							id: field.id,
-							kind: 'field',
-							field,
-							values,
-							initialValues,
-							context,
-							schema,
-						} )
-					),
-				} ) )
-				.filter( ( group ) => group.fields.length > 0 ),
-		[ context, initialValues, schema, values ]
+	const dataFormAdapter = useMemo(
+		() => createDataFormAdapter( { schema, context, initialValues } ),
+		[ schema, context, initialValues ]
+	);
+	const dataForm = useMemo(
+		() => dataFormAdapter.getForm( values ),
+		[ dataFormAdapter, values ]
+	);
+	const allFields = useMemo( () => getAllFields( schema ), [ schema ] );
+	const fieldsById = useMemo(
+		() => new Map( allFields.map( ( field ) => [ field.id, field ] ) ),
+		[ allFields ]
+	);
+	const handleDataFormChange = useCallback(
+		( nextValues: Record< string, SettingsValue | undefined > ) => {
+			setValuesState( ( currentValues ) => {
+				const mergedValues = { ...currentValues };
+				Object.entries( nextValues ).forEach(
+					( [ fieldId, value ] ) => {
+						const field = fieldsById.get( fieldId );
+						if ( ! field ) {
+							return;
+						}
+						const fieldType = field.type;
+						const emptyValue =
+							fieldType === 'number' ||
+							fieldType === 'integer' ||
+							fieldType === 'datetime-local'
+								? null
+								: '';
+						mergedValues[ fieldId ] =
+							value === undefined ? emptyValue : value;
+					}
+				);
+				return mergedValues;
+			} );
+		},
+		[ fieldsById ]
 	);
 
 	const formPostFields =
-		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
+		saveStrategy.adapter === 'form_post' ? allFields : [];
 
 	const showHeader = schema.shell?.header === 'visible';
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
@@ -881,69 +737,12 @@ export const SettingsUIPage = ( {
 				</Notice>
 			) : null }
 			<div className="wc-settings-ui">
-				{ visibleGroups.map( ( group ) => (
-					<section
-						className="wc-settings-ui__section"
-						key={ group.id }
-					>
-						<div className="wc-settings-ui__section-card">
-							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__section-fields">
-								{ group.fields.map( ( field ) => {
-									const RegisteredFieldComponent =
-										resolveFieldComponentForRendering(
-											field,
-											context
-										);
-
-									if (
-										! RegisteredFieldComponent &&
-										! isNativeSettingsFieldType(
-											field.type
-										)
-									) {
-										throw new Error(
-											`Field type "${ field.type }" is not supported.`
-										);
-									}
-
-									const FieldComponent =
-										RegisteredFieldComponent ||
-										NativeSettingsField;
-									const value = values[ field.id ];
-
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
-							</div>
-						</div>
-					</section>
-				) ) }
+				<DataForm
+					data={ values }
+					fields={ dataFormAdapter.fields }
+					form={ dataForm }
+					onChange={ handleDataFormChange }
+				/>
 				{ ! showHeader && saveButton ? (
 					<div className="wc-settings-ui__footer-actions">
 						{ saveButton }
@@ -956,6 +755,9 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							initialCanonicalValue={ initialValues[ field.id ] }
+							serializeDateTimeAsStoreLocal
+							strict
 							key={ field.id }
 						/>
 					) ) }

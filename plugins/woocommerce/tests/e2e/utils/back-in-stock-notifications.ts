@@ -13,9 +13,11 @@ import {
  */
 import { deleteOption, setOption } from './options';
 import { expectEmail } from './email';
+import { setFilterValue } from './filters';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
+import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../playwright.config';
 
 /**
  * Names of the Back in Stock Notifications options in core.
@@ -40,19 +42,13 @@ export const BIS_FEATURE_OPTION =
 /**
  * Fail early, with the fix, when the env can't run these specs.
  *
- * Both are provisioned by `bin/test-env-setup.sh`, which only runs on env
- * create or `--update`. On a stale env the feature UI simply never renders and
- * notification batches keep their one-minute delay, so every spec fails as an
- * unexplained timeout.
+ * Provisioned by `bin/test-env-setup.sh`, which only runs on env create or
+ * `--update`. On a stale env the notification batches keep their one-minute
+ * delay, so every spec fails as an unexplained timeout.
  */
 export async function assertBISEnvReady(): Promise< void > {
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
 	const checks = [
-		{
-			command: `wp option get ${ BIS_FEATURE_OPTION }`,
-			expected: /^yes$/m,
-			problem: `the "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders`,
-		},
 		{
 			command: 'wp plugin list --status=active --field=name',
 			expected: /^woocommerce-e2e-test-helper$/m,
@@ -426,10 +422,9 @@ export async function restockProduct(
  * Locator for the PDP sign-up form wrapper.
  *
  * The wrapper is rendered whenever the product allows signups, and core's
- * `back-in-stock-form.js` toggles its `hidden` class from the `show_variation`
- * event — the class the variation specs assert on. A product whose parent opts
- * out of signups renders no wrapper at all, so that case is asserted on
- * presence instead.
+ * `back-in-stock-form.js` toggles its `hidden` attribute from the
+ * `show_variation` event. A product whose parent opts out of signups renders no
+ * wrapper at all, so that case is asserted on presence instead.
  *
  * @param {Page} page Playwright page on the product detail.
  */
@@ -479,7 +474,28 @@ export async function selectVariation(
 }
 
 /**
+ * Switch the sign-up rate limiter off for this page's context.
+ *
+ * Core locks a client and an e-mail address out for a while after each
+ * sign-up. The suite submits the form far more often than that from one
+ * customer and one IP, so it is disabled through the `e2e-filters`
+ * cookie the test helper plugin reads.
+ *
+ * @param {Page} page Playwright page whose context will submit the form.
+ */
+export async function disableSignupRateLimit( page: Page ): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+		{ enabled: false }
+	);
+}
+
+/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
+ *
+ * The rate limiter is switched off for the submitting context first, so
+ * back-to-back sign-ups within a spec are not refused.
  *
  * @param {Page}   page         Playwright page on the product detail.
  * @param {Object} [opts]       Fill options.
@@ -491,6 +507,8 @@ export async function signUpOnProductPage(
 		email?: string;
 	} = {}
 ): Promise< void > {
+	await disableSignupRateLimit( page );
+
 	if ( opts.email !== undefined ) {
 		await page
 			.getByRole( 'textbox', {
@@ -500,6 +518,69 @@ export async function signUpOnProductPage(
 	}
 
 	await page.getByRole( 'button', { name: /Notify me/i } ).click();
+}
+
+/**
+ * Submit the PDP signup form in a fresh browser context and wait for the success notice.
+ *
+ * Runs in its own context so the caller's page (usually an admin session that
+ * goes on to read the mail log) is left untouched.
+ *
+ * @param {Browser} browser                          The test's browser fixture.
+ * @param {string}  permalink                        The product permalink.
+ * @param {Object}  opts                             Signup options.
+ * @param {Object}  [opts.storageState]              Storage state for the signup context; a logged-out guest by default.
+ * @param {string}  [opts.email]                     Email to enter; omit for a logged-in signup, where the field isn't rendered.
+ * @param {RegExp}  [opts.expectedNotice]            Notice to wait for after the post; a generic success match by default.
+ * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
+ * @param {Object}  [opts.selectVariation.product]   The variable product handle.
+ * @param {Object}  [opts.selectVariation.variation] The variation to select.
+ */
+export async function signUpInNewContext(
+	browser: Browser,
+	permalink: string,
+	opts: {
+		storageState?: string | { cookies: []; origins: [] };
+		email?: string;
+		expectedNotice?: RegExp;
+		selectVariation?: {
+			product: BISVariableProduct;
+			variation: BISVariation;
+		};
+	} = {}
+): Promise< void > {
+	const context = await browser.newContext( {
+		storageState: opts.storageState ?? { cookies: [], origins: [] },
+	} );
+	const page = await context.newPage();
+
+	// Closed in `finally`: these specs run on a single worker, so a context
+	// left open by a failed signup would otherwise outlive the test.
+	try {
+		await page.goto( permalink );
+
+		if ( opts.selectVariation ) {
+			await selectVariation(
+				page,
+				opts.selectVariation.product,
+				opts.selectVariation.variation
+			);
+		}
+
+		await signUpOnProductPage( page, { email: opts.email } );
+
+		// The form posts and reloads the PDP with a notice. Wait for that notice
+		// before closing the context, or the submission can be aborted mid-flight
+		// and the spec fails later, looking like a missing email.
+		await expect(
+			page.getByText(
+				opts.expectedNotice ??
+					/You have successfully signed up|Thanks for signing up/i
+			)
+		).toBeVisible();
+	} finally {
+		await context.close();
+	}
 }
 
 /**
@@ -524,33 +605,66 @@ export async function signUpAsGuest(
 		};
 	} = {}
 ): Promise< void > {
-	const guestContext = await browser.newContext( {
-		storageState: { cookies: [], origins: [] },
-	} );
-	const guestPage = await guestContext.newPage();
-	await guestPage.goto( permalink );
-
-	if ( opts.selectVariation ) {
-		await selectVariation(
-			guestPage,
-			opts.selectVariation.product,
-			opts.selectVariation.variation
-		);
-	}
-
-	await signUpOnProductPage( guestPage, { email } );
-
-	// The form posts and reloads the PDP with a notice. Wait for that notice
-	// before closing the context, or the submission can be aborted mid-flight
-	// and the spec fails later, looking like a missing email.
-	await expect(
-		guestPage.getByText(
-			/You have successfully signed up|Thanks for signing up/i
-		)
-	).toBeVisible();
-
-	await guestContext.close();
+	await signUpInNewContext( browser, permalink, { email, ...opts } );
 }
+
+/**
+ * Submit the PDP signup form as the shared logged-in customer, regardless of the test's storageState.
+ *
+ * The signup binds to the customer's account, which is what makes the emails
+ * take their logged-in branch.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {string}  permalink The product permalink.
+ */
+export async function signUpAsCustomer(
+	browser: Browser,
+	permalink: string
+): Promise< void > {
+	await signUpInNewContext( browser, permalink, {
+		storageState: CUSTOMER_STATE_PATH,
+	} );
+}
+
+/**
+ * Make every verification link look expired to the server for this page's context.
+ *
+ * Expiry is filter-driven rather than an option, so it is set through the
+ * `e2e-filters` cookie the test helper plugin reads. A negative threshold
+ * makes `time() - timestamp > threshold` true for any link, however fresh.
+ *
+ * @param {Page} page Playwright page whose context will follow the link.
+ */
+export async function expireVerificationLinks( page: Page ): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_verification_expiration_time_threshold',
+		-1
+	);
+}
+
+/**
+ * Replace the action key in an email link with one that cannot match.
+ *
+ * @param {string} link The verify or unsubscribe link from the email.
+ */
+export function corruptEmailLinkKey( link: string ): string {
+	const url = new URL( link );
+	url.searchParams.set( 'email_link_action_key', 'not-the-real-key' );
+	return url.toString();
+}
+
+/**
+ * Text the email footer renders for a signup bound to an account.
+ *
+ * @see templates/emails/customer-stock-notification.php
+ * @see templates/emails/customer-stock-notification-verified.php
+ */
+export const BIS_EMAIL_FOOTER = {
+	loggedIn:
+		/To manage your notifications, click here to log in to your account\./,
+	guest: /To stop receiving these messages, click here to unsubscribe\./,
+} as const;
 
 /**
  * Build the admin notifications-list URL, optionally filtered to one product.
@@ -562,6 +676,17 @@ export async function signUpAsGuest(
  */
 export function bisAdminListUrl( productId: number ): string {
 	return `wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ productId }`;
+}
+
+/**
+ * Generate a unique guest email address for a test so mail-log assertions don't collide.
+ *
+ * @param {string} prefix Short descriptor of the test.
+ */
+export function uniqueGuestEmail( prefix = 'bis' ): string {
+	return `${ prefix }-${ Date.now() }-${ Math.floor(
+		Math.random() * 1000
+	) }@example.com`;
 }
 
 /**
@@ -707,6 +832,64 @@ export function escapeRegExp( value: string ): string {
 }
 
 /**
+ * Sign-up notices core prints on the PDP after the form posts.
+ *
+ * Success notices are bound to the product name where core interpolates it,
+ * so a notice for the wrong product fails instead of passing.
+ *
+ * @see SignupService::get_signup_user_message()
+ * @see SignupService::get_error_message()
+ * @see EmailActionController
+ */
+export const bisNotice = {
+	/**
+	 * Single opt-in success.
+	 *
+	 * @param {string} productName The product name.
+	 */
+	success: ( productName: string ): RegExp =>
+		new RegExp(
+			`You have successfully signed up! You will be notified when "${ escapeRegExp(
+				productName
+			) }" is back in stock\\.`
+		),
+	doubleOptIn:
+		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
+	alreadyJoined: /You have already joined this waitlist\./,
+	accountRequired: /Please log in to sign up for stock notifications\./,
+	/**
+	 * Printed on the shop page after a verify link is followed.
+	 *
+	 * @param {string} productName The product name.
+	 */
+	verified: ( productName: string ): RegExp =>
+		new RegExp(
+			`Successfully verified stock notifications for "${ escapeRegExp(
+				productName
+			) }"\\.`
+		),
+	/**
+	 * Printed on the shop page after an unsubscribe link is followed.
+	 *
+	 * @param {string} email       The unsubscribed email address.
+	 * @param {string} productName The product name.
+	 */
+	unsubscribed: ( email: string, productName: string ): RegExp =>
+		new RegExp(
+			`Successfully unsubscribed ${ escapeRegExp(
+				email
+			) }\\. You will not receive a notification when "${ escapeRegExp(
+				productName
+			) }" becomes available\\.`
+		),
+	errors: {
+		invalidEmail: /Invalid email address\./,
+		invalidProduct: /Invalid product\./,
+		failed: /Failed to sign up\. Please try again\./,
+	},
+} as const;
+
+/**
  * Subject matchers for the three BIS emails, bound to a specific product.
  *
  * The product name is interpolated rather than wildcarded so a notification for
@@ -742,6 +925,41 @@ export const bisEmailSubject = {
 	backInStock: ( productName: string ): RegExp =>
 		subjectMatcher( `"${ productName }" is back in stock!` ),
 } as const;
+
+/**
+ * Assert an email landed in the mail log, from a throwaway admin context.
+ *
+ * For specs whose own page is a guest or customer session: WP Mail Logging
+ * is an admin-only screen. The context is closed in `finally` so a missing
+ * email fails the test without leaking a context into the rest of the run.
+ *
+ * @param {Browser} browser              The test's browser fixture.
+ * @param {string}  receiverEmailAddress The recipient email address.
+ * @param {RegExp}  subject              The email subject (regular expression).
+ * @param {number}  [expectedCount]      Expected number of matching rows. Defaults to 1.
+ */
+export async function expectEmailAsAdmin(
+	browser: Browser,
+	receiverEmailAddress: string,
+	subject: RegExp,
+	expectedCount = 1
+): Promise< void > {
+	const adminContext = await browser.newContext( {
+		storageState: ADMIN_STATE_PATH,
+	} );
+
+	try {
+		const adminPage = await adminContext.newPage();
+		await expectEmail(
+			adminPage,
+			receiverEmailAddress,
+			subject,
+			expectedCount
+		);
+	} finally {
+		await adminContext.close();
+	}
+}
 
 /**
  * Open the WP Mail Logging entry for a given recipient and subject, leaving its modal open.
@@ -848,15 +1066,4 @@ export async function triggerStockNotificationsBatch(
 	page: Page
 ): Promise< void > {
 	await page.goto( '?process-waiting-actions' );
-}
-
-/**
- * Generate a unique guest email address for a test so mail-log assertions don't collide.
- *
- * @param {string} prefix Short descriptor of the test.
- */
-export function uniqueGuestEmail( prefix = 'bis' ): string {
-	return `${ prefix }-${ Date.now() }-${ Math.floor(
-		Math.random() * 1000
-	) }@example.com`;
 }

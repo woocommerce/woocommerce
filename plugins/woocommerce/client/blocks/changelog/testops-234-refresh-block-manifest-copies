@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refresh generated block.json copies exactly and prune stale ones so PHP test metadata matches the source manifests.

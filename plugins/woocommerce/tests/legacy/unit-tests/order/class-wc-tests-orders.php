@@ -161,7 +161,7 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Refunds of products with Cost of Goods Sold have the proper cost value, and calculate_totals in the order substracts it from the order cost.
+	 * @testdox Refunds of products with Cost of Goods Sold have the proper cost value, and calculate_totals in the order subtracts it from the order cost.
 	 */
 	public function test_calculate_cogs_for_orders_with_refunds() {
 		$this->enable_cogs_feature();

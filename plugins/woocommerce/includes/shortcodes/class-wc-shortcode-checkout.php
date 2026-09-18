@@ -87,11 +87,11 @@ class WC_Shortcode_Checkout {
 		// Pay for existing order.
 		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			try {
-				$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
+				$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 				$order     = wc_get_order( $order_id );
 
 				// Order or payment link is invalid.
-				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+				if ( ! $order instanceof WC_Order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 				}
 
@@ -195,8 +195,20 @@ class WC_Shortcode_Checkout {
 				);
 				WC()->customer->save();
 
-				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-				WC()->payment_gateways()->set_current_gateway( $available_gateways );
+				$available_gateways  = WC()->payment_gateways()->get_available_payment_gateways();
+				$preselected_gateway = self::get_order_preselected_gateway( $order, $available_gateways );
+
+				// The method a merchant set on an admin-created order is the default selection; the shopper can still pick another.
+				if ( $preselected_gateway ) {
+					// Third party code may have marked another gateway as current, which would leave two of them expanded on the form.
+					foreach ( $available_gateways as $gateway ) {
+						$gateway->chosen = false;
+					}
+
+					$preselected_gateway->set_current();
+				} else {
+					WC()->payment_gateways()->set_current_gateway( $available_gateways );
+				}
 
 				/**
 				 * Allows the text of the submit button on the Pay for Order page to be changed.
@@ -233,7 +245,7 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step.
-			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
+			$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			$order     = wc_get_order( $order_id );
 
 			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
@@ -257,6 +269,27 @@ class WC_Shortcode_Checkout {
 	}
 
 	/**
+	 * Get the gateway to pre-select on the pay page, when it should differ from the default selection.
+	 *
+	 * A merchant assigns the method when creating an order in admin, so that assignment is the pre-selection.
+	 * Orders placed through checkout carry the method the shopper picked, so those keep the default selection.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Order             $order              Order being paid for.
+	 * @param WC_Payment_Gateway[] $available_gateways Gateways available on the pay page, keyed by gateway ID.
+	 * @return WC_Payment_Gateway|null
+	 */
+	private static function get_order_preselected_gateway( WC_Order $order, array $available_gateways ) {
+		if ( ! $order->is_created_via( 'admin' ) ) {
+			return null;
+		}
+
+		$payment_method = $order->get_payment_method();
+
+		return $payment_method && isset( $available_gateways[ $payment_method ] ) ? $available_gateways[ $payment_method ] : null;
+	}
+
+	/**
 	 * Show the thanks page.
 	 *
 	 * @param int $order_id Order ID.
@@ -265,8 +298,20 @@ class WC_Shortcode_Checkout {
 		$order = false;
 
 		// Get the order.
-		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // WPCS: input var ok, CSRF ok.
+		/**
+		 * Filters the ID of the order shown on the thanks page.
+		 *
+		 * @since 2.0.0
+		 * @param int $order_id The order ID resolved from the request.
+		 */
+		$order_id = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
+		/**
+		 * Filters the order key used to validate the order shown on the thanks page.
+		 *
+		 * @since 2.0.0
+		 * @param string $order_key The order key read from the request, or an empty string.
+		 */
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', ( empty( $_GET['key'] ) || ! is_string( $_GET['key'] ) ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Bearer-style order-key lookup; the value is compared with hash_equals() below and a nonce cannot apply to links emailed to the customer.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );

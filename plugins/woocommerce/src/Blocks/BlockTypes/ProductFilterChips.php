@@ -52,14 +52,34 @@ final class ProductFilterChips extends AbstractBlock {
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$display_limit   = 'woocommerce/product-filters' === $store_namespace ? 15 : 30;
-		$classes         = '';
-		$style           = '';
 
-		$tags = new \WP_HTML_Tag_Processor( $content );
+		$classes = '';
+		$style   = '';
+		$tags    = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-chips' ) ) ) {
-			$classes = $tags->get_attribute( 'class' );
-			$style   = $tags->get_attribute( 'style' );
+			$saved_classes = $tags->get_attribute( 'class' );
+			$saved_style   = $tags->get_attribute( 'style' );
+			$classes       = is_string( $saved_classes ) ? $saved_classes : '';
+			$style         = is_string( $saved_style ) ? $saved_style : '';
 		}
+
+		$has_visual_swatches     = self::has_visual_swatches( $items );
+		$item_classes_and_styles = wp_parse_args(
+			$has_visual_swatches ? array() : wp_style_engine_get_styles(
+				array(
+					'border'  => array(
+						'radius' => $attributes['style']['border']['radius'] ?? null,
+					),
+					'spacing' => array(
+						'padding' => $attributes['style']['spacing']['padding'] ?? null,
+					),
+				)
+			),
+			array(
+				'css'        => '',
+				'classnames' => '',
+			)
+		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
@@ -94,12 +114,11 @@ final class ProductFilterChips extends AbstractBlock {
 		$visible_items           = array_merge( $first_items, $overflow_selected_items );
 		$hidden_count            = count( $items ) - count( $visible_items );
 
-		$first_item          = reset( $items );
-		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = self::has_visual_swatches( $items );
-		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
+		$first_item  = reset( $items );
+		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$button_role = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
-		if ( $has_visual_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
+		if ( $has_visual_swatches && ! str_contains( $classes, 'is-style-swatch' ) ) {
 			$classes                    .= ' is-style-swatch';
 			$wrapper_attributes['class'] = esc_attr( $classes );
 		}
@@ -116,7 +135,10 @@ final class ProductFilterChips extends AbstractBlock {
 					foreach ( $visible_items as $item ) :
 						?>
 						<button
-							class="wc-block-product-filter-chips__item"
+							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?>"
+							<?php if ( $item_classes_and_styles['css'] ) : ?>
+								style="<?php echo esc_attr( $item_classes_and_styles['css'] ); ?>"
+							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
 							id="<?php echo esc_attr( $item['id'] ); ?>"
@@ -166,7 +188,10 @@ final class ProductFilterChips extends AbstractBlock {
 						data-wp-each-key="context.item.id"
 					>
 						<button
-							class="wc-block-product-filter-chips__item"
+							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?>"
+							<?php if ( $item_classes_and_styles['css'] ) : ?>
+								style="<?php echo esc_attr( $item_classes_and_styles['css'] ); ?>"
+							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
 							data-wp-bind--id="context.item.id"
