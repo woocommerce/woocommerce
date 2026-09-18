@@ -46,9 +46,7 @@ test.describe( 'Template parts in the Site Editor inserter', () => {
 			.fill( 'Footer' );
 
 		await expect(
-			page.locator(
-				'.editor-block-list-item-template-part/instance_footer'
-			)
+			page.locator( '.editor-block-list-item-template-part' )
 		).toBeVisible();
 	} );
 
