@@ -126,6 +126,10 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
 			await newPage.waitForSelector( '.wp-block-heading' );
 			await page.close(); // close the original tab.
+			// The editor strips preview_nonce from the preview link but keeps
+			// preview=true, which is what makes WordPress serve the unsaved
+			// post rather than the published one.
+			expect( newPage.url() ).toContain( 'preview=true' );
 			await expect( newPage.locator( 'body' ) ).toContainText(
 				'New order: #12345'
 			);
