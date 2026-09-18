@@ -114,9 +114,9 @@ describe( 'registerProductBlockType', () => {
 		expect( mockUnsubscribe ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'keeps the Single Product ancestor outside a Single Product template', () => {
+	it( 'keeps the Single Product ancestor in the Cart page template', () => {
 		mockPostType = 'wp_template';
-		mockTemplateSlug = 'twentytwentyfour//coming-soon';
+		mockTemplateSlug = 'twentytwentyfour//page-cart';
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
@@ -134,6 +134,31 @@ describe( 'registerProductBlockType', () => {
 			} )
 		);
 		expect( mockUnregisterBlockType ).not.toHaveBeenCalled();
+	} );
+
+	it( 'drops the Single Product ancestor in a per-product Single Product template', () => {
+		mockPostType = 'wp_template';
+		mockTemplateSlug = 'single-product-v-neck-t-shirt';
+		mockIsSiteEditor = true;
+		const registerProductBlockType = loadRegistrationFunction();
+
+		registerProductBlockType(
+			'woocommerce/per-product-template-block',
+			blockSettings
+		);
+		mockContextSubscription();
+
+		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 2 );
+		expect( mockUnregisterBlockType ).toHaveBeenCalledWith(
+			'woocommerce/per-product-template-block'
+		);
+		expect( mockRegisterBlockType ).toHaveBeenLastCalledWith(
+			'woocommerce/per-product-template-block',
+			expect.objectContaining( {
+				title: 'Test product block',
+				ancestor: undefined,
+			} )
+		);
 	} );
 
 	it( 're-registers a block with the ancestor required by each template', () => {
