@@ -1000,4 +1000,103 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$cart_discount_tax = $wpdb->get_var( $wpdb->prepare( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
 		$this->assertEquals( 12.37, $cart_discount_tax );
 	}
+
+	/**
+	 * @testdox Orders carrying only the pre-3.0 paid and completed date keys keep those dates, converted from the site timezone.
+	 */
+	public function test_migration_falls_back_to_legacy_paid_and_completed_date_keys(): void {
+		global $wpdb;
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_date_paid', '' );
+		delete_post_meta( $order->get_id(), '_date_completed' );
+		update_post_meta( $order->get_id(), '_paid_date', '2016-05-10 12:00:00' );
+		update_post_meta( $order->get_id(), '_completed_date', '2016-05-11 08:30:00' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$dates = $wpdb->get_row( $wpdb->prepare( "SELECT date_paid_gmt, date_completed_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
+		$this->assertSame( '2016-05-10 10:00:00', $dates->date_paid_gmt, 'The paid date should come from _paid_date, in GMT' );
+		$this->assertSame( '2016-05-11 06:30:00', $dates->date_completed_gmt, 'The completed date should come from _completed_date, in GMT' );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Intentional for informative debug message.
+		$this->assertEmpty( $errors, 'Errors found in migrated data: ' . print_r( $errors, true ) );
+	}
+
+	/**
+	 * @testdox A pre-3.0 paid date of 0 migrates as no date, as the posts data store reads it.
+	 */
+	public function test_migration_treats_zero_legacy_paid_date_as_no_date(): void {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_date_paid' );
+		update_post_meta( $order->get_id(), '_paid_date', '0' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'A legacy value of 0 should not become 1970' );
+		$this->assertEmpty( $this->sut->verify_migrated_orders( array( $order->get_id() ) ), 'Verification should agree with the migration' );
+	}
+
+	/**
+	 * @testdox A current paid date key of 0 counts as empty, so the pre-3.0 key is used, as the posts data store does.
+	 */
+	public function test_migration_falls_back_when_current_key_is_zero(): void {
+		global $wpdb;
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_date_paid', '0' );
+		update_post_meta( $order->get_id(), '_paid_date', '2016-05-10 12:00:00' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$this->assertSame( '2016-05-10 10:00:00', $wpdb->get_var( $wpdb->prepare( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'The legacy key should be used when the current key is 0' );
+		$this->assertEmpty( $this->sut->verify_migrated_orders( array( $order->get_id() ) ), 'Verification should agree with the migration' );
+	}
+
+	/**
+	 * @testdox A fallback meta key on a column that is not a date_epoch is ignored.
+	 */
+	public function test_fallback_meta_key_is_ignored_for_non_date_columns(): void {
+		global $wpdb;
+		$migrator = new class() extends \Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderOpTableMigrator {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function get_meta_column_config(): array {
+				$config                                    = parent::get_meta_column_config();
+				$config['_order_key']['fallback_meta_key'] = '_legacy_order_key';
+				return $config;
+			}
+		};
+		$order    = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_order_key' );
+		update_post_meta( $order->get_id(), '_legacy_order_key', 'should-be-ignored' );
+
+		$migrator->process_migration_batch_for_ids( array( $order->get_id() ) );
+
+		$this->assertSame( '', (string) $wpdb->get_var( $wpdb->prepare( "SELECT order_key FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) ), 'A string column should not take a fallback value' );
+	}
+
+	/**
+	 * @testdox The current paid date key wins over the pre-3.0 one when both have a value.
+	 */
+	public function test_migration_prefers_current_date_key_over_legacy_key(): void {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		// The legacy key is added first so it has the lower meta ID.
+		delete_post_meta( $order->get_id(), '_date_paid' );
+		delete_post_meta( $order->get_id(), '_paid_date' );
+		add_post_meta( $order->get_id(), '_paid_date', '2016-05-10 12:00:00' );
+		add_post_meta( $order->get_id(), '_date_paid', (string) strtotime( '2020-01-02 03:04:05 UTC' ) );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$date_paid = $wpdb->get_var( $wpdb->prepare( "SELECT date_paid_gmt FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
+		$this->assertSame( '2020-01-02 03:04:05', $date_paid, 'The value of _date_paid should be migrated' );
+		$this->assertEmpty( $this->sut->verify_migrated_orders( array( $order->get_id() ) ), 'Verification should agree with the migration' );
+	}
 }
