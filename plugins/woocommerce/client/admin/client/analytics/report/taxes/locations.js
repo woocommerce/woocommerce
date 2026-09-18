@@ -7,6 +7,9 @@ import { resolveSelect } from '@wordpress/data';
 import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
 import { Flag } from '@woocommerce/components';
 
+// Cache the locations to avoid rebuilding a few thousand of them on every keystroke.
+let allLocations = null;
+
 /**
  * The locations a tax code can belong to: every country, plus every state of that country.
  *
@@ -16,13 +19,17 @@ import { Flag } from '@woocommerce/components';
  * @return {Promise<Array<{key: string, label: string, country: string, keywords: string[]}>>} Locations.
  */
 async function getLocations() {
+	if ( allLocations ) {
+		return allLocations;
+	}
+
 	const countries =
 		await resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
 
-	return ( countries || [] ).reduce( ( locations, country ) => {
+	const locations = ( countries || [] ).reduce( ( carry, country ) => {
 		const countryName = decodeEntities( country.name );
 
-		locations.push( {
+		carry.push( {
 			key: country.code,
 			label: countryName,
 			country: country.code,
@@ -33,7 +40,7 @@ async function getLocations() {
 			const stateName = decodeEntities( state.name );
 			const key = `${ country.code }:${ state.code }`;
 
-			locations.push( {
+			carry.push( {
 				key,
 				// The country code rather than its name: the filter input is narrow, and a
 				// long label wraps a character at a time in the results list.
@@ -48,8 +55,14 @@ async function getLocations() {
 			} );
 		} );
 
-		return locations;
+		return carry;
 	}, [] );
+
+	if ( locations.length ) {
+		allLocations = locations;
+	}
+
+	return locations;
 }
 
 /**
