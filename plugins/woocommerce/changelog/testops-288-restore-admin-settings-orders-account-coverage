@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Render the My Account shipping address, the onboarding currency position, the order items Paid row and the settings form values in PHPUnit
