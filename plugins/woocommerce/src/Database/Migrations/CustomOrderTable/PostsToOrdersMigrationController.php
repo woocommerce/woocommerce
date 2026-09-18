@@ -48,17 +48,22 @@ class PostsToOrdersMigrationController {
 	private const MIGRATION_LOCK_OPTION = 'wc_posts_to_orders_migration_lock';
 
 	/**
-	 * Seconds a held lock stays valid before another process may take it over. Also how long a process waits for it.
+	 * Seconds a held lock stays valid before another process may take it over, and how long a process polls for it.
 	 * The holder pushes its release time forward between migration steps, so only a single step has to fit in it.
+	 * While the holder's transaction is open its refresh also row-locks the option, so a contender's INSERT waits
+	 * inside MySQL for the commit rather than polling.
 	 */
 	private const MIGRATION_LOCK_TTL = 15.0;
 
 	/**
-	 * Release time of the lock this process holds, or null when it holds none.
+	 * Every release time this process has written to the lock row during the current batch, latest last.
 	 *
-	 * @var string|null
+	 * A refresh runs inside the batch's transaction, so a rollback puts an earlier value back. Matching on any of
+	 * them keeps the lock refreshable and releasable after a failed step. Empty when this process holds no lock.
+	 *
+	 * @var string[]
 	 */
-	private $migration_lock_expiry = null;
+	private $migration_lock_expiries = array();
 
 	/**
 	 * PostsToOrdersMigrationController constructor.
@@ -111,21 +116,29 @@ class PostsToOrdersMigrationController {
 			return;
 		}
 
-		$this->refresh_migration_lock();
+		$still_holds_lock = $this->refresh_migration_lock();
+		if ( ! $still_holds_lock ) {
+			return;
+		}
 		$using_transactions = $this->maybe_start_transaction();
 
 		foreach ( $this->all_migrators as $name => $migrator ) {
-			$results = $migrator->process_migration_data( $data[ $name ] );
-			$this->refresh_migration_lock();
-
+			$results   = $migrator->process_migration_data( $data[ $name ] );
 			$errors    = array_unique( $results['errors'] );
 			$exception = $results['exception'];
 
-			if ( null === $exception && empty( $errors ) ) {
-				continue;
+			if ( null !== $exception || ! empty( $errors ) ) {
+				$this->handle_migration_error( $order_post_ids, $errors, $exception, $using_transactions, $name );
+				return;
 			}
-			$this->handle_migration_error( $order_post_ids, $errors, $exception, $using_transactions, $name );
-			return;
+
+			// Another process took the lock over, so the batch is theirs now: leave it unwritten for them.
+			if ( ! $this->refresh_migration_lock() ) {
+				if ( $using_transactions ) {
+					$this->rollback_transaction();
+				}
+				return;
+			}
 		}
 
 		if ( $using_transactions ) {
@@ -139,14 +152,19 @@ class PostsToOrdersMigrationController {
 	 *
 	 * Two batch processes (the CLI sync and the background sync) migrating the same orders at once each insert
 	 * the orders' meta, so the batch paths take this lock. Single-order syncs on save do not, so a save never
-	 * waits for a running batch.
+	 * waits for a running batch. Nothing is written without the lock: if it cannot be taken, or is lost to
+	 * another process mid-batch, the batch is left unwritten and its orders stay pending for the next run.
 	 *
+	 * @internal
 	 * @since 11.3.0
 	 *
 	 * @param array $order_post_ids List of post IDs of the orders to migrate.
 	 */
 	public function migrate_orders_with_lock( array $order_post_ids ): void {
-		$this->acquire_migration_lock();
+		if ( ! $this->acquire_migration_lock() ) {
+			$this->log_lock_warning( sprintf( 'Could not take the orders migration lock within %d seconds, skipping this batch. The orders stay pending.', self::MIGRATION_LOCK_TTL ) );
+			return;
+		}
 		try {
 			$this->migrate_orders( $order_post_ids );
 		} finally {
@@ -159,14 +177,15 @@ class PostsToOrdersMigrationController {
 	 *
 	 * The lock is a row in the options table, as in BatchProcessingController: the unique option name makes the
 	 * INSERT fail while another process holds it, and a lock whose release time has passed can be taken over.
-	 * If the lock cannot be taken within the TTL the migration goes ahead without it, as it always did.
+	 *
+	 * @return bool Whether the lock was taken.
 	 */
-	private function acquire_migration_lock(): void {
+	private function acquire_migration_lock(): bool {
 		global $wpdb;
 
-		$this->migration_lock_expiry = null;
-		$deadline                    = microtime( true ) + self::MIGRATION_LOCK_TTL;
-		$suppress                    = $wpdb->suppress_errors( true );
+		$this->migration_lock_expiries = array();
+		$deadline                      = microtime( true ) + self::MIGRATION_LOCK_TTL;
+		$suppress                      = $wpdb->suppress_errors( true );
 		try {
 			do {
 				$time   = microtime( true );
@@ -185,8 +204,8 @@ class PostsToOrdersMigrationController {
 				);
 
 				if ( $acquired ) {
-					$this->migration_lock_expiry = $expiry;
-					return;
+					$this->migration_lock_expiries[] = $expiry;
+					return true;
 				}
 
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -199,15 +218,15 @@ class PostsToOrdersMigrationController {
 					)
 				);
 				if ( $taken_over ) {
-					$this->migration_lock_expiry = $expiry;
+					$this->migration_lock_expiries[] = $expiry;
 					$this->log_lock_warning( 'Took over an expired orders migration lock. The process holding it may have died mid-batch.' );
-					return;
+					return true;
 				}
 
 				usleep( 50000 );
 			} while ( microtime( true ) < $deadline );
 
-			$this->log_lock_warning( sprintf( 'Could not take the orders migration lock within %d seconds, migrating without it.', self::MIGRATION_LOCK_TTL ) );
+			return false;
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
@@ -215,33 +234,35 @@ class PostsToOrdersMigrationController {
 
 	/**
 	 * Push the held lock's release time forward so a long batch does not lose it between steps.
+	 *
+	 * @return bool False if this process held the lock and has lost it to another process; true otherwise,
+	 *              including when this process never held a lock (the single-order sync path).
 	 */
-	private function refresh_migration_lock(): void {
+	private function refresh_migration_lock(): bool {
 		global $wpdb;
 
-		if ( null === $this->migration_lock_expiry ) {
-			return;
+		if ( empty( $this->migration_lock_expiries ) ) {
+			return true;
 		}
 
 		$expiry = number_format( microtime( true ) + self::MIGRATION_LOCK_TTL, 6, '.', '' );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- The IN list is %s placeholders generated per expiry.
 		$refreshed = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
-				$expiry,
-				self::MIGRATION_LOCK_OPTION,
-				$this->migration_lock_expiry
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value IN ( {$this->own_expiries_placeholders()} )",
+				array_merge( array( $expiry, self::MIGRATION_LOCK_OPTION ), $this->migration_lock_expiries )
 			)
 		);
+		// phpcs:enable
 
 		if ( $refreshed ) {
-			$this->migration_lock_expiry = $expiry;
-			return;
+			$this->migration_lock_expiries[] = $expiry;
+			return true;
 		}
 
-		// Another process took the lock over, so it is theirs now: finish this batch without it.
-		$this->migration_lock_expiry = null;
-		$this->log_lock_warning( 'Lost the orders migration lock mid-batch, finishing the batch without it.' );
+		$this->migration_lock_expiries = array();
+		$this->log_lock_warning( 'Lost the orders migration lock to another process mid-batch, leaving the batch for it.' );
+		return false;
 	}
 
 	/**
@@ -250,20 +271,28 @@ class PostsToOrdersMigrationController {
 	private function release_migration_lock(): void {
 		global $wpdb;
 
-		if ( null === $this->migration_lock_expiry ) {
+		if ( empty( $this->migration_lock_expiries ) ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete(
-			$wpdb->options,
-			array(
-				'option_name'  => self::MIGRATION_LOCK_OPTION,
-				'option_value' => $this->migration_lock_expiry,
-			),
-			array( '%s', '%s' )
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- The IN list is %s placeholders generated per expiry.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value IN ( {$this->own_expiries_placeholders()} )",
+				array_merge( array( self::MIGRATION_LOCK_OPTION ), $this->migration_lock_expiries )
+			)
 		);
-		$this->migration_lock_expiry = null;
+		// phpcs:enable
+		$this->migration_lock_expiries = array();
+	}
+
+	/**
+	 * Placeholder list for the release times this process has written, for use in an IN clause.
+	 *
+	 * @return string Comma-separated %s placeholders.
+	 */
+	private function own_expiries_placeholders(): string {
+		return implode( ', ', array_fill( 0, count( $this->migration_lock_expiries ), '%s' ) );
 	}
 
 	/**

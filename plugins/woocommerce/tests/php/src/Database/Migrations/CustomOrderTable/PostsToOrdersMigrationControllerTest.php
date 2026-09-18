@@ -991,7 +991,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testdox A process whose lock was taken over mid-batch does not delete the new holder's lock.
+	 * @testdox A process whose lock was taken over mid-batch leaves the batch to the new holder and keeps its lock.
 	 */
 	public function test_lost_migration_lock_is_not_released_by_the_previous_holder(): void {
 		global $wpdb;
@@ -1010,8 +1010,63 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
 
 		$this->assertSame( $other, $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" ), 'The new holder\'s lock should survive' );
-		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The batch should still finish' );
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The batch should be left for the new holder' );
 		$wpdb->delete( $wpdb->options, array( 'option_name' => 'wc_posts_to_orders_migration_lock' ) );
+	}
+
+	/**
+	 * @testdox A batch whose step fails inside the transaction still releases the lock, even though the rollback undid the refresh.
+	 */
+	public function test_migration_lock_is_released_when_a_step_fails_in_a_transaction(): void {
+		global $wpdb;
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		$order = OrderHelper::create_order();
+		$this->replace_migrators_with_failing_stub();
+
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
+
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name = 'wc_posts_to_orders_migration_lock'" ), 'The lock row should be gone after a failed batch' );
+	}
+
+	/**
+	 * @testdox A batch that cannot get the lock is skipped and its orders stay unmigrated.
+	 */
+	public function test_batch_is_skipped_when_the_lock_cannot_be_taken(): void {
+		global $wpdb;
+		$order = OrderHelper::create_order();
+		$this->insert_migration_lock( microtime( true ) + 3600 );
+
+		$this->sut->migrate_orders_with_lock( array( $order->get_id() ) );
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) ), 'The order should not be migrated without the lock' );
+		$wpdb->delete( $wpdb->options, array( 'option_name' => 'wc_posts_to_orders_migration_lock' ) );
+	}
+
+	/**
+	 * Replace the controller's migrators with one whose write step always fails.
+	 */
+	private function replace_migrators_with_failing_stub(): void {
+		$stub = new class() extends \Automattic\WooCommerce\Database\Migrations\TableMigrator {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			public function fetch_sanitized_migration_data( array $entity_ids ) {
+				return array(
+					'data'   => $entity_ids,
+					'errors' => array(),
+				);
+			}
+			public function process_migration_data( array $data ) {
+				return array(
+					'errors'    => array( 'stub failure' ),
+					'exception' => null,
+				);
+			}
+			protected function process_migration_batch_for_ids_core( array $entity_ids ): void {}
+			// phpcs:enable
+		};
+
+		$migrators = new \ReflectionProperty( PostsToOrdersMigrationController::class, 'all_migrators' );
+		$migrators->setAccessible( true );
+		$migrators->setValue( $this->sut, array( 'stub' => $stub ) );
 	}
 
 	/**
