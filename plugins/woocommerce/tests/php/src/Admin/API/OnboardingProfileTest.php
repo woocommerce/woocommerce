@@ -174,4 +174,61 @@ class OnboardingProfileTest extends WC_REST_Unit_Test_Case {
 			update_option( $field, $value );
 		}
 	}
+
+	/**
+	 * Test that the price format of the selected country's locale is stored, including a currency position other than 'left'.
+	 *
+	 * @dataProvider provider_locale_price_formats
+	 *
+	 * @param string                $country_code Country code sent with the request.
+	 * @param array<string, string> $expected     Option values the locale should store.
+	 * @return void
+	 */
+	public function test_update_store_currency_and_measurement_units_stores_the_locale_price_format( string $country_code, array $expected ) {
+		$this->request(
+			'/update-store-currency-and-measurement-units',
+			array(
+				'country_code' => $country_code,
+			)
+		);
+
+		// get_option() hands back whatever update_option() cached, so an unchanged
+		// option is a string while a changed one keeps the type it was written with.
+		$stored = array();
+		foreach ( array_keys( $expected ) as $option_name ) {
+			$stored[ $option_name ] = (string) get_option( $option_name );
+		}
+
+		$this->assertSame( $expected, $stored );
+	}
+
+	/**
+	 * Locales whose price format differs from the US one, keyed by country name.
+	 *
+	 * @return array<string, array{string, array<string, string>}>
+	 */
+	public function provider_locale_price_formats(): array {
+		return array(
+			'Afghanistan' => array(
+				'AF',
+				array(
+					'woocommerce_currency'           => 'AFN',
+					'woocommerce_currency_pos'       => 'left_space',
+					'woocommerce_price_thousand_sep' => '.',
+					'woocommerce_price_decimal_sep'  => ',',
+					'woocommerce_price_num_decimals' => '0',
+				),
+			),
+			'Germany'     => array(
+				'DE',
+				array(
+					'woocommerce_currency'           => 'EUR',
+					'woocommerce_currency_pos'       => 'right_space',
+					'woocommerce_price_thousand_sep' => '.',
+					'woocommerce_price_decimal_sep'  => ',',
+					'woocommerce_price_num_decimals' => '2',
+				),
+			),
+		);
+	}
 }
