@@ -1787,6 +1787,36 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxes report reports nothing when an included location names a state it cannot read.
+	 */
+	public function test_taxes_report_reports_nothing_for_an_included_state_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		foreach ( array( 'US:', 'US:!!!' ) as $location ) {
+			$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => $location ) );
+
+			$this->assertCount( 0, $rows, "An include naming a state that reads as nothing ({$location}) should not fall back to its country." );
+		}
+	}
+
+	/**
+	 * @testdox Taxes report keeps every row when an excluded location names a state it cannot read.
+	 */
+	public function test_taxes_report_ignores_an_excluded_state_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => 'US:!!!' ) );
+
+		$this->assertCount( 3, $rows, 'An exclude naming a state that reads as nothing should not drop its country.' );
+	}
+
+	/**
 	 * @testdox Taxes stats totals count only the tax lines of the filtered location.
 	 */
 	public function test_taxes_stats_totals_honour_the_location_filter(): void {

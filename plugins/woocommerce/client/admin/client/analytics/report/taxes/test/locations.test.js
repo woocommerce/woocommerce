@@ -25,11 +25,13 @@ const countries = [
 	},
 ];
 
+// The module builds the list once and holds on to it, so every test here reads the same
+// countries. A test needing different ones has to run in its own module registry.
+const getCountries = jest.fn( () => Promise.resolve( countries ) );
+
 describe( 'Taxes report locations', () => {
 	beforeEach( () => {
-		resolveSelect.mockReturnValue( {
-			getCountries: () => Promise.resolve( countries ),
-		} );
+		resolveSelect.mockReturnValue( { getCountries } );
 	} );
 
 	it( 'offers every country and every state of that country', async () => {
@@ -64,5 +66,13 @@ describe( 'Taxes report locations', () => {
 			{ key: 'DE', label: 'Germany' },
 			{ key: 'US:CA', label: 'California (US)' },
 		] );
+	} );
+
+	it( 'reads the countries once and answers the rest from the list it built', async () => {
+		await locationsAutocompleter.options();
+		await locationsAutocompleter.options();
+		await getLocationLabels( 'DE' );
+
+		expect( getCountries ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

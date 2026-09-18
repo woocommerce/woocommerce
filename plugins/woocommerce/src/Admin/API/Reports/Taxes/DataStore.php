@@ -137,6 +137,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
 	 *
+	 * A location the code cannot read is left out, and so is one whose state it cannot read, so a
+	 * filter never matches wider than the locations it names.
+	 *
 	 * @param string $locations  Comma separated list of locations.
 	 * @param bool   $is_include True to match the locations, false to match everything else.
 	 * @return string SQL condition. An include naming no readable location matches nothing; an
@@ -156,7 +159,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				continue;
 			}
 
-			$state  = isset( $parts[1] ) ? self::normalize_location_code( $parts[1] ) : '';
+			$state = isset( $parts[1] ) ? self::normalize_location_code( $parts[1] ) : '';
+
+			// A location naming a state the code cannot read is not the country it names. Falling
+			// back to the country prefix would answer an include with every row of that country
+			// instead of narrowing it, and say nothing about having ignored the state.
+			if ( isset( $parts[1] ) && '' === $state ) {
+				continue;
+			}
+
 			$prefix = '' === $state ? "{$country}-" : "{$country}-{$state}-";
 
 			$conditions[] = $wpdb->prepare(
