@@ -65,6 +65,10 @@ const filterConfig = {
 	filters: [
 		{ label: __( 'All products', 'woocommerce' ), value: 'all' },
 		{
+			label: __( 'Unsold products', 'woocommerce' ),
+			value: 'unsold',
+		},
+		{
 			label: __( 'Single product', 'woocommerce' ),
 			value: 'select_product',
 			chartMode: 'item-comparison',

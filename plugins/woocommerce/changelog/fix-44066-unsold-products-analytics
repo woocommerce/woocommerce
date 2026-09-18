@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an "Unsold products" filter to Analytics > Products that lists products with no sales in the selected period, a "Last sold" column showing when each product last sold, and lifetime sales in the product details. Also available as an unsold parameter on the products report REST endpoint.
