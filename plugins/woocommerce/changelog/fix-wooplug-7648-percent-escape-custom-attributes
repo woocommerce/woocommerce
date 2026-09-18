@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve percent sequences in custom variation attribute values when adding to the cart or ordering again, so options like Black%20White validate instead of being rejected.
