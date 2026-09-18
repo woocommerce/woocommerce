@@ -101,6 +101,41 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The preview link an email post opens keeps preview=true, which is what
+	 * makes WordPress serve the unsaved revision, and drops the nonce.
+	 */
+	public function testItStripsOnlyThePreviewNonceFromAnEmailPreviewLink(): void {
+		$post = get_post( $this->create_email_post( 'publish' ) );
+
+		$link = apply_filters(
+			'preview_post_link',
+			'http://example.com/?p=1&preview=true&preview_nonce=abc123',
+			$post
+		);
+
+		$this->assertSame( 'http://example.com/?p=1&preview=true', $link );
+	}
+
+	/**
+	 * A post of another type keeps the preview link WordPress built for it.
+	 */
+	public function testItLeavesThePreviewLinkOfANonEmailPostUntouched(): void {
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
+		$link    = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
+
+		$this->assertSame( $link, apply_filters( 'preview_post_link', $link, get_post( $post_id ) ) );
+	}
+
+	/**
+	 * Without a post to inspect the preview link passes through unchanged.
+	 */
+	public function testItLeavesThePreviewLinkUntouchedWhenThereIsNoPost(): void {
+		$link = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
+
+		$this->assertSame( $link, apply_filters( 'preview_post_link', $link, null ) );
+	}
+
+	/**
 	 * Create an email post of the registered custom type.
 	 *
 	 * @param string $status The post status.
