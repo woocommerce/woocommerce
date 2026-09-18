@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Exception;
 use RuntimeException;
@@ -1532,5 +1533,104 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$response = $controller->index( $request );
 
 		$this->assertCount( 1, $response->get_data()['tokens'] );
+	}
+
+	/**
+	 * @testdox Should return only the given user's tokens when user_id is set.
+	 */
+	public function test_index_filters_by_user_id(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-user-1' );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-user-2' );
+		$this->create_index_token( $data_store, $this->other_shop_manager_id, 'filter-user-3' );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$request->set_param( 'user_id', $this->other_shop_manager_id );
+		$response = $controller->index( $request );
+
+		$tokens = $response->get_data()['tokens'];
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( $this->other_shop_manager_id, $tokens[0]['user_id'] );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @testdox Should return only the matching device's token when device_uuid is set.
+	 */
+	public function test_index_filters_by_device_uuid(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-device-1' );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-device-2' );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$request->set_param( 'device_uuid', 'filter-device-2' );
+		$response = $controller->index( $request );
+
+		$tokens = $response->get_data()['tokens'];
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'token-filter-device-2', $tokens[0]['token'] );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @testdox Should reject a user_id below 1.
+	 */
+	public function test_index_rejects_a_zero_user_id(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'user_id', 0 );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should reject a device_uuid longer than the registration limit.
+	 */
+	public function test_index_rejects_an_overlong_device_uuid(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'device_uuid', str_repeat( 'a', PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH + 1 ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Creates a token for the index filter tests, named so the token and
+	 * device UUID can be asserted on.
+	 *
+	 * @param PushTokensDataStore $data_store The data store.
+	 * @param int                 $user_id    The owner.
+	 * @param string              $name       Used as the device UUID and, prefixed, as the token.
+	 * @return PushToken
+	 */
+	private function create_index_token( PushTokensDataStore $data_store, int $user_id, string $name ): PushToken {
+		return $data_store->create(
+			array(
+				'user_id'       => $user_id,
+				'token'         => 'token-' . $name,
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => $name,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
 	}
 }
