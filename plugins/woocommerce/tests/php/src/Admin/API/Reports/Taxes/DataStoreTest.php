@@ -1759,6 +1759,58 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxes report keeps the rows of a state whose code holds a space.
+	 */
+	public function test_taxes_report_filters_rows_by_a_state_code_holding_a_space(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// `HONG KONG` and `NEW TERRITORIES` are state codes in `i18n/states.php`, and the filter
+		// input offers them, so dropping the space would answer with an empty report.
+		$this->seed_order_with_tax_lines(
+			array(
+				array(
+					'code'         => 'HK-HONG KONG-VAT-1',
+					'label'        => 'VAT',
+					'rate_id'      => 401,
+					'rate_percent' => 5.0,
+					'tax_total'    => 5.0,
+				),
+				array(
+					'code'         => 'HK-KOWLOON-VAT-1',
+					'label'        => 'VAT',
+					'rate_id'      => 402,
+					'rate_percent' => 5.0,
+					'tax_total'    => 3.0,
+				),
+			),
+			'2023-02-10 10:00:00',
+			'2023-02-10 10:00:00'
+		);
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'HK:HONG KONG' ) );
+
+		$this->assertCount( 1, $rows, 'A state code holding a space should still select its rows, and Kowloon should stay out.' );
+		$this->assertSame( 5.0, $rows[0]['total_tax'], 'The reported row should be the Hong Kong Island one.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports nothing when a location holds a character no tax code carries.
+	 */
+	public function test_taxes_report_does_not_rewrite_a_location_holding_an_unexpected_character(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		foreach ( array( 'US:C@A', 'U$S', 'US%', 'US:C_' ) as $location ) {
+			$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => $location ) );
+
+			$this->assertCount( 0, $rows, "Dropping the unexpected character of {$location} would answer with another location's tax." );
+		}
+	}
+
+	/**
 	 * @testdox Taxes report reports nothing when an included location holds no code to read.
 	 */
 	public function test_taxes_report_reports_nothing_for_an_included_location_holding_no_code(): void {

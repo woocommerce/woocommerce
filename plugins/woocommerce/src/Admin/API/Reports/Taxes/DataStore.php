@@ -132,18 +132,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * (`DE-BW`) and the rate names that hold one working.
 	 *
 	 * Codes are normalized the way `WC_Tax` normalizes them before writing a rate, so a filter
-	 * value always reads as the stored code does.
+	 * value always reads as the stored code does. A code the store never wrote simply matches no
+	 * row, and a location naming no code at all is left out, so a filter never matches wider than
+	 * the locations it names.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
 	 *
-	 * A location the code cannot read is left out, and so is one whose state it cannot read, so a
-	 * filter never matches wider than the locations it names.
-	 *
 	 * @param string $locations  Comma separated list of locations.
 	 * @param bool   $is_include True to match the locations, false to match everything else.
-	 * @return string SQL condition. An include naming no readable location matches nothing; an
-	 *                exclude naming none is an empty string, so it filters nothing.
+	 * @return string SQL condition. An include naming no location matches nothing; an exclude
+	 *                naming none is an empty string, so it filters nothing.
 	 */
 	public static function get_location_condition( string $locations, bool $is_include ): string {
 		global $wpdb;
@@ -161,8 +160,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$state = isset( $parts[1] ) ? self::normalize_location_code( $parts[1] ) : '';
 
-			// A location naming a state the code cannot read is not the country it names. Falling
-			// back to the country prefix would answer an include with every row of that country
+			// A location naming an empty state (`US:`) is not the country it names. Falling back
+			// to the country prefix would answer an include with every row of that country
 			// instead of narrowing it, and say nothing about having ignored the state.
 			if ( isset( $parts[1] ) && '' === $state ) {
 				continue;
@@ -189,11 +188,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Normalize a country or state code the way `WC_Tax` does before it writes a rate.
 	 *
+	 * `WC_Tax` only uppercases the code, so this does the same. Dropping the characters it keeps
+	 * would hide the state codes that hold one, `HK-HONG KONG` among them, and rewriting a code
+	 * that holds an unexpected character would answer with a different location instead of with
+	 * nothing. A code the store never wrote is left as it is and matches no row.
+	 *
 	 * @param string $code Country or state code.
 	 * @return string
 	 */
 	private static function normalize_location_code( string $code ): string {
-		return strtoupper( sanitize_key( $code ) );
+		return strtoupper( trim( $code ) );
 	}
 
 	/**
