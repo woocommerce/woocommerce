@@ -116,6 +116,22 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should fall back to the mystery avatar when the WP default avatar is blank.
+	 */
+	public function test_falls_back_to_mystery_avatar_when_default_is_blank(): void {
+		wp_set_current_user( $this->user_id );
+		update_option( 'avatar_default', 'blank' );
+
+		$markup = $this->render_customer_account(
+			'{"iconClass":"wc-block-customer-account__account-icon"}'
+		);
+
+		$this->assertStringContainsString( 'wc-block-customer-account__avatar', $markup );
+		$this->assertStringContainsString( 'd=mm', $markup );
+		$this->assertStringNotContainsString( 'd=blank', $markup );
+	}
+
+	/**
 	 * Data provider for displayStyle attribute tests.
 	 *
 	 * @return array<string, array{string, bool, bool, bool}>
