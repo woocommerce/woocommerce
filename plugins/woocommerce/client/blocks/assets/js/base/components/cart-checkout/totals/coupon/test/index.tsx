@@ -3,55 +3,220 @@
  */
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { dispatch } from '@wordpress/data';
-import { validationStore } from '@woocommerce/block-data';
+import { dispatch, select } from '@wordpress/data';
+import { checkoutStore, validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
 import { TotalsCoupon } from '..';
 
+const ERROR_ID = 'wc-block-components-totals-coupon__error-coupon';
+
 describe( 'TotalsCoupon', () => {
-	beforeEach( () => {
-		// Clear validation errors before each test
-		const { clearValidationErrors } = dispatch( validationStore );
-		act( () => {
-			clearValidationErrors();
-		} );
-	} );
-	afterAll( () => {
-		// Clear validation errors after all tests to ensure no data store state is leaked.
-		const { clearValidationErrors } = dispatch( validationStore );
-		act( () => {
-			clearValidationErrors();
-		} );
-	} );
+	describe( 'Rejected coupons', () => {
+		it( 'shows the message from a rejected submit and keeps the validation store empty', async () => {
+			const user = userEvent.setup();
+			const message =
+				'Coupon code "5fixedcheckout" has already been applied.';
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValue( new Error( message ) );
 
-	it( "Shows a validation error when one is in the wc/store/validation data store and doesn't show one when there isn't", async () => {
-		const user = userEvent.setup();
-		const { rerender } = render( <TotalsCoupon instanceId={ 'coupon' } /> );
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
 
-		const openCouponFormButton = screen.getByText( 'Add coupons' );
-		expect( openCouponFormButton ).toBeInTheDocument();
-		await act( async () => {
-			await user.click( openCouponFormButton );
+			const couponInput = screen.getByLabelText( 'Enter code' );
+
+			await act( async () => {
+				await user.type( couponInput, '5fixedcheckout' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+
+			expect( mockOnSubmit ).toHaveBeenCalledWith( '5fixedcheckout' );
+			expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
+				message
+			);
+
+			// The input points at the message so assistive tech can read it.
+			expect( document.getElementById( ERROR_ID ) ).toHaveTextContent(
+				message
+			);
+			expect( couponInput ).toHaveAttribute( 'aria-invalid', 'true' );
+			expect( couponInput ).toHaveAttribute(
+				'aria-describedby',
+				ERROR_ID
+			);
+			expect( couponInput ).toHaveAttribute(
+				'aria-errormessage',
+				ERROR_ID
+			);
+			expect(
+				couponInput.closest( '.wc-block-components-text-input' )
+			).toHaveClass( 'has-error' );
+
+			// The shopper can correct the code without retyping it.
+			expect( couponInput ).toHaveValue( '5fixedcheckout' );
+			expect( couponInput ).toHaveFocus();
+
+			// The failure must not enter the store that blocks checkout.
+			expect( select( validationStore ).hasValidationErrors() ).toBe(
+				false
+			);
 		} );
-		expect(
-			screen.queryByText( 'Invalid coupon code' )
-		).not.toBeInTheDocument();
 
-		const { setValidationErrors } = dispatch( validationStore );
-		act( () => {
-			setValidationErrors( {
-				coupon: {
-					hidden: false,
-					message: 'Invalid coupon code',
-				},
+		it.each( [
+			'Usage limit for coupon "limited_coupon" has been reached.',
+			'Coupons are disabled.',
+			'"nope" is an invalid coupon code.',
+		] )( 'shows the server message "%s"', async ( message ) => {
+			const user = userEvent.setup();
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValue( new Error( message ) );
+
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			await act( async () => {
+				await user.type( screen.getByLabelText( 'Enter code' ), 'x' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+
+			expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
+				message
+			);
+		} );
+
+		it( 'clears the message when the code is edited', async () => {
+			const user = userEvent.setup();
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValue( new Error( 'Invalid coupon code' ) );
+
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			const couponInput = screen.getByLabelText( 'Enter code' );
+
+			await act( async () => {
+				await user.type( couponInput, 'bad' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+			expect( await screen.findByRole( 'alert' ) ).toBeInTheDocument();
+
+			await act( async () => {
+				await user.type( couponInput, '2' );
+			} );
+
+			expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+			expect( couponInput ).toHaveAttribute( 'aria-invalid', 'false' );
+			expect( couponInput ).not.toHaveAttribute( 'aria-describedby' );
+		} );
+
+		it( 'clears the message when a later submit succeeds', async () => {
+			const user = userEvent.setup();
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValueOnce( new Error( 'Invalid coupon code' ) )
+				.mockResolvedValueOnce( true );
+
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			await act( async () => {
+				await user.type( screen.getByLabelText( 'Enter code' ), 'bad' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+			expect( await screen.findByRole( 'alert' ) ).toBeInTheDocument();
+
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+
+			await waitFor( () => {
+				expect(
+					screen.queryByLabelText( 'Enter code' )
+				).not.toBeInTheDocument();
+			} );
+			expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+		} );
+
+		it( 'clears the message when the checkout leaves the idle state', async () => {
+			const user = userEvent.setup();
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValue( new Error( 'Invalid coupon code' ) );
+
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			await act( async () => {
+				await user.type( screen.getByLabelText( 'Enter code' ), 'bad' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+			expect( await screen.findByRole( 'alert' ) ).toBeInTheDocument();
+
+			// Placing the order moves the checkout out of idle.
+			act( () => {
+				dispatch( checkoutStore ).__internalSetProcessing();
+			} );
+
+			await waitFor( () => {
+				expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+			} );
+
+			act( () => {
+				dispatch( checkoutStore ).__internalSetIdle();
 			} );
 		} );
-		rerender( <TotalsCoupon instanceId={ 'coupon' } /> );
-
-		expect( screen.getByText( 'Invalid coupon code' ) ).toBeInTheDocument();
 	} );
 
 	describe( 'API Response Scenarios', () => {
@@ -129,159 +294,6 @@ describe( 'TotalsCoupon', () => {
 
 			// Input should be focused for retry
 			expect( couponInput ).toHaveFocus();
-		} );
-
-		it( 'handles onSubmit that returns Promise that rejects', async () => {
-			const user = userEvent.setup();
-
-			// Create a proper promise-returning mock that catches the rejection
-			const mockOnSubmit = jest.fn().mockImplementation( () => {
-				return Promise.reject( {
-					code: 'woocommerce_rest_cart_coupon_error',
-					message: 'Coupon "expired_coupon" has already expired.',
-				} ).catch( () => {
-					// Handle the rejection internally to prevent unhandled promise
-					return false;
-				} );
-			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			const couponInput = screen.getByLabelText( 'Enter code' );
-			const applyButton = screen.getByRole( 'button', { name: 'Apply' } );
-
-			// Enter an expired coupon code
-			await act( async () => {
-				await user.type( couponInput, 'expired_coupon' );
-			} );
-
-			// Submit the coupon
-			await act( async () => {
-				await user.click( applyButton );
-			} );
-
-			// Verify the API was called
-			expect( mockOnSubmit ).toHaveBeenCalledWith( 'expired_coupon' );
-
-			// Component should handle the case gracefully
-			expect( couponInput ).toHaveValue( 'expired_coupon' );
-		} );
-
-		it( 'handles duplicate coupon application', async () => {
-			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
-
-			// Set up validation error as would happen from the API response
-			const { setValidationErrors } = dispatch( validationStore );
-			act( () => {
-				setValidationErrors( {
-					coupon: {
-						hidden: false,
-						message:
-							'Coupon code "5fixedcheckout" has already been applied.',
-					},
-				} );
-			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			// Verify error message is displayed
-			expect(
-				screen.getByText(
-					'Coupon code "5fixedcheckout" has already been applied.'
-				)
-			).toBeInTheDocument();
-
-			const couponInput = screen.getByLabelText( 'Enter code' );
-			const applyButton = screen.getByRole( 'button', { name: 'Apply' } );
-
-			// Try to apply the same coupon again
-			await act( async () => {
-				await user.type( couponInput, '5fixedcheckout' );
-			} );
-
-			await act( async () => {
-				await user.click( applyButton );
-			} );
-
-			expect( mockOnSubmit ).toHaveBeenCalledWith( '5fixedcheckout' );
-
-			// Input should retain value and stay focused on failure
-			await waitFor( () => {
-				expect( couponInput ).toHaveValue( '5fixedcheckout' );
-				expect( couponInput ).toHaveFocus();
-			} );
-		} );
-
-		it( 'handles usage limit exceeded error', async () => {
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
-
-			// Set up validation error for usage limit
-			const { setValidationErrors } = dispatch( validationStore );
-			act( () => {
-				setValidationErrors( {
-					coupon: {
-						hidden: false,
-						message:
-							'Usage limit for coupon "limited_coupon" has been reached.',
-					},
-				} );
-			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			// Verify error message is displayed
-			expect(
-				screen.getByText(
-					'Usage limit for coupon "limited_coupon" has been reached.'
-				)
-			).toBeInTheDocument();
-		} );
-
-		it( 'handles coupons disabled error', async () => {
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
-
-			// Set up validation error for disabled coupons
-			const { setValidationErrors } = dispatch( validationStore );
-			act( () => {
-				setValidationErrors( {
-					coupon: {
-						hidden: false,
-						message: 'Coupons are disabled.',
-					},
-				} );
-			} );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			// Verify error message is displayed
-			expect(
-				screen.getByText( 'Coupons are disabled.' )
-			).toBeInTheDocument();
 		} );
 	} );
 
