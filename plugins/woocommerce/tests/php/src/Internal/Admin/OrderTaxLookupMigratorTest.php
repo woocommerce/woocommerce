@@ -50,6 +50,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Reports::reset_stats_dbs();
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		$this->sut = wc_get_container()->get( OrderTaxLookupMigrator::class );
@@ -61,6 +62,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( OrderTaxLookupMigrator::class );
 
@@ -600,21 +602,45 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The taxable amount split update runs the rebuild over the whole table again.
+	 * @testdox The taxable amount split update runs the rebuild over the whole table again, on a cursor of its own.
 	 */
 	public function test_taxable_amount_split_update_restarts_the_rebuild(): void {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
-		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, 9999 );
+
+		// An order the earlier pass has already been through, holding a base with no split.
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $order->get_id(), 215.0 );
+		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $order->get_id() + 1 );
+
 		$cache_version = ReportsCache::get_version();
 
 		wc_update_1130_split_tax_lookup_taxable_amount();
 
-		// Every row the store holds predates the split, including the ones an earlier pass has
-		// been through, so the cursor has to go.
-		$this->assertFalse( get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The update should clear the cursor of the earlier pass.' );
+		// The earlier pass keeps its place, so an order it could not rebuild is not put back in
+		// front of it, and the split pass still reaches that order because it starts at the top of
+		// the table on a cursor of its own.
+		$this->assertSame( $order->get_id() + 1, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The update should leave the cursor of the earlier pass alone.' );
+		$this->assertFalse( get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should start at the top of the table.' );
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should reach an order the earlier pass has stepped past.' );
 		$this->assertTrue( $batch_processor->is_enqueued( OrderTaxLookupMigrator::class ), 'The update should hand the rebuild to the batch processing controller.' );
 		$this->assertNotSame( $cache_version, ReportsCache::get_version(), 'The update should invalidate the cached report responses, which last a week.' );
+	}
+
+	/**
+	 * @testdox A batch steps each pass past the orders it covered, and leaves a pass that is already further along.
+	 */
+	public function test_each_pass_keeps_its_own_cursor(): void {
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $order->get_id(), 215.0 );
+
+		$stepped_past = $order->get_id() + 1000;
+		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $stepped_past );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should step past the order it went through.' );
+		$this->assertSame( $stepped_past, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'A pass already further along should not be rewound to the batch.' );
 	}
 
 	/**

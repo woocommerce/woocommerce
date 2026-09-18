@@ -333,16 +333,16 @@ function wc_update_11201_migrate_tax_lookup_order_items() {
  * into its order and shipping parts.
  *
  * Every row the store already holds predates the split, including the ones an earlier pass has
- * been through, so the cursor is cleared to run the rebuild over the whole table again. Until a
- * row has been rebuilt the Taxes report shows its order and shipping parts as unknown rather than
- * as a zero, so nothing waits on this finishing.
+ * been through, so the rebuild goes over the whole table again. It does that on a cursor of its
+ * own rather than by clearing the one the earlier pass left behind, which a batch in flight could
+ * write straight back. Until a rate has been rebuilt the Taxes report shows its order and shipping
+ * parts as unknown, so nothing waits on this finishing.
  *
  * @since 11.3.0
  *
  * @return void
  */
 function wc_update_1130_split_tax_lookup_taxable_amount() {
-	delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
 	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 
 	// Report responses are cached for a week and keyed on the query arguments alone. The rebuild
