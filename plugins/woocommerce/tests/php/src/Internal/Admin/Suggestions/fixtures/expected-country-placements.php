@@ -493,6 +493,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
+			'viva_wallet',
 			'kustom_checkout',
 			'nexi_checkout',
 			'elavon',
