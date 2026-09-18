@@ -19,12 +19,17 @@ use Exception;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Rebuilds the `wc_order_tax_lookup` rows of orders recorded before the table held one row per tax
- * order item, by re-syncing each order through the Taxes data store.
+ * Rebuilds the `wc_order_tax_lookup` rows of orders recorded before the table held the full tax
+ * detail the reports read today, by re-syncing each order through the Taxes data store.
  *
- * Rows written before then carry the zero default of the `order_item_id` column, and the Taxes
- * report keeps matching those on their tax rate id alone, the way it did before the column
- * existed. So reporting stays as it was while this runs, and an order the processor cannot rebuild
+ * Two shapes qualify, one pass over the table each. A row written before the table held one row
+ * per tax order item carries the zero default of the `order_item_id` column, and the Taxes report
+ * keeps matching those on their tax rate id alone, the way it did before the column existed. A row
+ * written before the taxable amount was split into its order and shipping parts carries a base but
+ * no split, and the report shows the parts of every rate holding such a row as unknown rather than
+ * as the short sum of the rows it has been through.
+ *
+ * Either way reporting stays as it was while this runs, and an order the processor cannot rebuild
  * keeps reporting the way it did.
  *
  * Additionally, this class manages the "Rebuild analytics tax data" tool.
@@ -35,18 +40,33 @@ defined( 'ABSPATH' ) || exit;
 class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksInterface {
 
 	/**
-	 * Option holding the highest order id the processor has been through.
+	 * Option holding the highest order id the tax order item pass has been through.
 	 *
 	 * The cursor is what bounds progress, so it outlives the run. An order the processor could not
 	 * rebuild keeps its rows at zero; without the cursor every later batch would pick that order up
 	 * again and the processor would never reach the end of the table. Such an order is recorded as
 	 * a failed analytics import instead, which is retried from Analytics settings. That is also why
 	 * the option is left behind once the pass is done: clearing it would put those orders back in
-	 * front of the next pass. Delete it by hand to run the rebuild over the whole table again.
+	 * front of the next pass.
 	 *
 	 * @var string
 	 */
 	const CURSOR_OPTION = 'woocommerce_order_tax_lookup_migration_last_order_id';
+
+	/**
+	 * Option holding the highest order id the taxable amount split pass has been through.
+	 *
+	 * Each pass carries its own cursor so that a new one starts at the beginning of the table
+	 * without touching the cursor of the pass before it. Resetting a shared cursor instead would
+	 * race the batch in flight while the update runs: that batch writes the cursor it read before
+	 * the reset, which parks the new pass past every row it never went through, and the count the
+	 * tool shows reads from the cursor, so nothing would say so.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string
+	 */
+	const SPLIT_CURSOR_OPTION = 'woocommerce_order_tax_lookup_split_migration_last_order_id';
 
 	/**
 	 * How far `get_total_pending_count()` counts before it reports "this many or more".
@@ -84,12 +104,65 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * @return string Description of what this processor does.
 	 */
 	public function get_description(): string {
-		return 'Rebuilds wc_order_tax_lookup rows recorded before the table held one row per tax order item, so that Analytics tax reports account for every tax line an order carries.';
+		return 'Rebuilds wc_order_tax_lookup rows recorded before the table held the full tax detail the reports read today, so that Analytics tax reports account for every tax line an order carries and for the amounts each rate applied to.';
 	}
 
 	/**
-	 * Get the number of orders left to go through that still hold rows in the shape that predates
-	 * the tax order item column, up to PENDING_COUNT_LIMIT.
+	 * The passes the rebuild makes over the lookup table: the rows each one rewrites, and the
+	 * cursor that bounds it.
+	 *
+	 * A pass is only offered once the columns it reads are there, so that a store still waiting on
+	 * the schema update counts and rebuilds the rows it can.
+	 *
+	 * @return array[] List of `array( 'condition' => string, 'cursor' => string )`.
+	 */
+	private function get_pending_passes(): array {
+		$passes = array(
+			// A row written before the table held one row per tax order item sits at the zero
+			// default of the column.
+			array(
+				'condition' => 'order_item_id = 0',
+				'cursor'    => self::CURSOR_OPTION,
+			),
+		);
+
+		// The base says a row predates the split, so both it and the split columns have to be
+		// there to tell such a row apart from one that really did apply to nothing.
+		if ( TaxesDataStore::has_taxable_amount_column() && TaxesDataStore::has_taxable_amount_split_columns() ) {
+			// A row holding a base but no split predates the split; one whose base is zero has
+			// nothing to split, so rebuilding it would change nothing and it is left alone.
+			$passes[] = array(
+				'condition' => 'order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0',
+				'cursor'    => self::SPLIT_CURSOR_OPTION,
+			);
+		}
+
+		return $passes;
+	}
+
+	/**
+	 * SQL matching the lookup rows the rebuild would rewrite, each pass from its own cursor.
+	 *
+	 * @return array `array( 'where' => string, 'values' => int[] )`, the values in placeholder order.
+	 */
+	private function get_pending_rows_sql(): array {
+		$clauses = array();
+		$values  = array();
+
+		foreach ( $this->get_pending_passes() as $pass ) {
+			$clauses[] = "( order_id > %d AND ( {$pass['condition']} ) )";
+			$values[]  = $this->get_cursor( $pass['cursor'] );
+		}
+
+		return array(
+			'where'  => '( ' . implode( ' OR ', $clauses ) . ' )',
+			'values' => $values,
+		);
+	}
+
+	/**
+	 * Get the number of orders left to go through that still hold rows in a shape that predates
+	 * the tax detail the reports read today, up to PENDING_COUNT_LIMIT.
 	 *
 	 * Counts from the cursor, the same place `get_next_batch_to_process()` reads from, so the
 	 * number the tool shows is the number the rebuild will actually get through. Counting the whole
@@ -107,13 +180,13 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		}
 
 		$table_name = TaxesDataStore::get_db_table_name();
+		$pending    = $this->get_pending_rows_sql();
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE order_id > %d AND order_item_id = 0 LIMIT %d ) AS pending",
-				$this->get_cursor(),
-				self::PENDING_COUNT_LIMIT
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the conditions are built above, one per pass.
+				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE {$pending['where']} LIMIT %d ) AS pending",
+				array_merge( $pending['values'], array( self::PENDING_COUNT_LIMIT ) )
 			)
 		);
 	}
@@ -141,13 +214,13 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		}
 
 		$table_name = TaxesDataStore::get_db_table_name();
+		$pending    = $this->get_pending_rows_sql();
 
 		$order_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"SELECT DISTINCT order_id FROM {$table_name} WHERE order_id > %d AND order_item_id = 0 ORDER BY order_id ASC LIMIT %d",
-				$this->get_cursor(),
-				$size
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the conditions are built above, one per pass.
+				"SELECT DISTINCT order_id FROM {$table_name} WHERE {$pending['where']} ORDER BY order_id ASC LIMIT %d",
+				array_merge( $pending['values'], array( $size ) )
 			)
 		);
 
@@ -207,9 +280,24 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		// Step past every order in the batch, including any that could not be rebuilt, which are
 		// left to the failed import retry. See CURSOR_OPTION.
-		update_option( self::CURSOR_OPTION, max( array_map( 'absint', $batch ) ), false );
+		$this->advance_cursors( max( array_map( 'absint', $batch ) ) );
 
 		ReportsCache::invalidate();
+	}
+
+	/**
+	 * Step every pass past the orders the batch covered.
+	 *
+	 * A pass already further along keeps its place. The batch is read from the lowest cursor of
+	 * them all and in order, so a pass whose cursor sits above the batch has been through those
+	 * orders already, and moving it back would hand them to it a second time.
+	 *
+	 * @param int $order_id Highest order id in the batch.
+	 */
+	private function advance_cursors( int $order_id ): void {
+		foreach ( $this->get_pending_passes() as $pass ) {
+			update_option( $pass['cursor'], max( $order_id, $this->get_cursor( $pass['cursor'] ) ), false );
+		}
 	}
 
 	/**
@@ -240,7 +328,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
 				'button'   => __( 'Rebuild', 'woocommerce' ),
 				'disabled' => true,
-				'desc'     => __( 'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The database change the rebuild needs is missing on this store. Run "Verify base database tables" to apply it, then come back here.', 'woocommerce' ),
+				'desc'     => __( 'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. The database change the rebuild needs is missing on this store. Run "Verify base database tables" to apply it, then come back here.', 'woocommerce' ),
 			);
 
 			return $tools;
@@ -261,7 +349,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
 				'button'   => __( 'Rebuild', 'woocommerce' ),
 				'disabled' => true,
-				'desc'     => __( 'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There are currently no orders to rebuild.', 'woocommerce' ),
+				'desc'     => __( 'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. There are currently no orders to rebuild.', 'woocommerce' ),
 			);
 		} elseif ( $batch_processor->is_enqueued( self::class ) ) {
 			$tools['stop_rebuild_analytics_tax_data'] = array(
@@ -271,8 +359,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'desc'             => sprintf(
 					/* translators: %s: number of orders still to rebuild. */
 					_n(
-						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There is currently %s order left to rebuild.',
-						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There are currently %s orders left to rebuild.',
+						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. There is currently %s order left to rebuild.',
+						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. There are currently %s orders left to rebuild.',
 						$pending_count,
 						'woocommerce'
 					),
@@ -288,8 +376,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'desc'             => sprintf(
 					/* translators: %s: number of orders to rebuild. */
 					_n(
-						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There is currently %s order to rebuild.',
-						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There are currently %s orders to rebuild.',
+						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. The rebuild happens over time in the background (via Action Scheduler). There is currently %s order to rebuild.',
+						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept the full tax detail it reports today. The rebuild happens over time in the background (via Action Scheduler). There are currently %s orders to rebuild.',
 						$pending_count,
 						'woocommerce'
 					),
@@ -362,11 +450,12 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	}
 
 	/**
-	 * Highest order id the processor has been through.
+	 * Highest order id a pass has been through.
 	 *
+	 * @param string $option Cursor option of the pass.
 	 * @return int
 	 */
-	private function get_cursor(): int {
-		return (int) get_option( self::CURSOR_OPTION, 0 );
+	private function get_cursor( string $option ): int {
+		return (int) get_option( $option, 0 );
 	}
 }

@@ -14,6 +14,23 @@ import { CurrencyContext } from '@woocommerce/currency';
  */
 import { getTaxCode } from './utils';
 import ReportTable from '../../components/report-table';
+
+/**
+ * Whether a taxable amount was recorded for a report row.
+ *
+ * The report leaves the amount out when it cannot report one, which it does while a rate holds
+ * a row the rebuild has not reached and on a store still missing the column. A zero base under
+ * a non-zero tax marks a lookup row recorded before that base existed (or a manual tax line) -
+ * unknown, not zero.
+ *
+ * @param {number|undefined} amount Taxable amount.
+ * @param {number}           tax    Tax charged on that amount.
+ * @return {boolean} True when the amount is known.
+ */
+function hasTaxableAmount( amount, tax ) {
+	return amount !== undefined && ! ( amount === 0 && tax !== 0 );
+}
+
 class TaxesReportTable extends Component {
 	constructor() {
 		super();
@@ -59,6 +76,16 @@ class TaxesReportTable extends Component {
 				isSortable: true,
 			},
 			{
+				label: __( 'Order gross', 'woocommerce' ),
+				key: 'order_taxable_amount',
+				isSortable: true,
+			},
+			{
+				label: __( 'Shipping gross', 'woocommerce' ),
+				key: 'shipping_taxable_amount',
+				isSortable: true,
+			},
+			{
 				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
@@ -76,6 +103,17 @@ class TaxesReportTable extends Component {
 			getCurrencyConfig,
 		} = this.context;
 
+		const renderTaxableAmount = ( amount, taxCharged ) =>
+			hasTaxableAmount( amount, taxCharged )
+				? {
+						display: renderCurrency( amount ),
+						value: getCurrencyFormatDecimal( amount ),
+				  }
+				: {
+						display: __( 'N/A', 'woocommerce' ),
+						value: '',
+				  };
+
 		return map( taxes, ( tax ) => {
 			const { query } = this.props;
 			const {
@@ -86,12 +124,9 @@ class TaxesReportTable extends Component {
 				total_tax: totalTax,
 				shipping_tax: shippingTax,
 				taxable_amount: taxableAmount,
+				order_taxable_amount: orderTaxableAmount,
+				shipping_taxable_amount: shippingTaxableAmount,
 			} = tax;
-			// A zero base under a non-zero tax marks a lookup row recorded before the
-			// taxable amount existed (or a manual tax line) - unknown, not zero.
-			const hasTaxableAmount =
-				taxableAmount !== undefined &&
-				! ( taxableAmount === 0 && totalTax !== 0 );
 			const taxCode = getTaxCode( tax );
 
 			const persistedQuery = getPersistedQuery( query );
@@ -130,14 +165,9 @@ class TaxesReportTable extends Component {
 					display: renderCurrency( shippingTax ),
 					value: getCurrencyFormatDecimal( shippingTax ),
 				},
-				{
-					display: hasTaxableAmount
-						? renderCurrency( taxableAmount )
-						: __( 'N/A', 'woocommerce' ),
-					value: hasTaxableAmount
-						? getCurrencyFormatDecimal( taxableAmount )
-						: '',
-				},
+				renderTaxableAmount( taxableAmount, totalTax ),
+				renderTaxableAmount( orderTaxableAmount, orderTax ),
+				renderTaxableAmount( shippingTaxableAmount, shippingTax ),
 				{
 					display: formatValue(
 						getCurrencyConfig(),
