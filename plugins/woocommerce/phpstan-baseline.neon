@@ -5329,12 +5329,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order\.\)\: Unexpected token "@user", expected variable at offset 317 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(array Billing fields\.\)\: Unexpected token "Billing", expected variable at offset 146 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -14908,6 +14902,12 @@ parameters:
 		-
 			message: '#^Method WC_Shipping\:\:unregister_shipping_methods\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-shipping.php
+
+		-
+			message: '#^Offset mixed might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: includes/class-wc-shipping.php
 
