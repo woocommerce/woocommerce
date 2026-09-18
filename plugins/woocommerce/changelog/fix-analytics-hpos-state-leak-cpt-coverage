@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stop the sales report tests leaking HPOS storage state into the rest of the PHPUnit suite, and pin the long-custom-status Analytics tests to the storage they actually exercise. Also restore order storage after the orders admin page controller tests, which left it switched off for every later class in the same process.
