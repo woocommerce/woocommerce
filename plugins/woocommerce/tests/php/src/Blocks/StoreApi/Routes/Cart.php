@@ -230,6 +230,107 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart items serialize the price an extension sets on woocommerce_before_calculate_totals.
+	 */
+	public function test_cart_item_prices_follow_a_price_set_on_before_calculate_totals(): void {
+		$set_cart_item_price = static function ( \WC_Cart $cart ): void {
+			foreach ( $cart->get_cart() as $cart_item ) {
+				$cart_item['data']->set_price( 50 );
+			}
+		};
+
+		add_action( 'woocommerce_before_calculate_totals', $set_cart_item_price );
+
+		try {
+			// The Store API serves totals that have already been calculated, so the extension callback has to run before the request.
+			// What is asserted below is that the serializer reads the live cart product; whether a fresh request recalculates
+			// totals is owned by the cart-update routes.
+			wc()->cart->calculate_totals();
+
+			$response = $this->getApiResponse( '/wc/store/v1/cart' );
+		} finally {
+			remove_action( 'woocommerce_before_calculate_totals', $set_cart_item_price );
+		}
+
+		$data = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'The cart request should succeed.' );
+		$this->assertCount( 2, $data['items'], 'Both fixture products should still be in the cart.' );
+
+		$rounding_precision = wc_get_rounding_precision();
+
+		foreach ( $data['items'] as $item ) {
+			$prices = (array) $item['prices'];
+
+			$this->assertArrayHasKey( 'price', $prices, 'Every cart item should serialize a current price.' );
+			$this->assertArrayHasKey( 'raw_prices', $prices, 'Every cart item should serialize raw prices.' );
+
+			$raw_prices = (array) $prices['raw_prices'];
+
+			$this->assertSame( $rounding_precision, $raw_prices['precision'], 'Raw cart prices should use the store rounding precision.' );
+			$this->assertSame( $this->format_money( 50, wc_get_price_decimals() ), $prices['price'], 'The cart item price should be the price the extension set while totals were calculated.' );
+			$this->assertSame( $this->format_money( 50, $rounding_precision ), $raw_prices['price'], 'The raw cart item price should be the price the extension set while totals were calculated.' );
+			$this->assertSame( $this->format_money( 10, $rounding_precision ), $raw_prices['regular_price'], 'The raw regular price should stay the price stored on the product.' );
+			$this->assertSame( $this->format_money( 50, $rounding_precision ), $raw_prices['sale_price'], 'A product without a stored sale price should serialize its current raw price as the sale price.' );
+		}
+	}
+
+	/**
+	 * Format an amount through the same money formatter the Store API serializes prices with.
+	 *
+	 * @param float $amount Amount in the store currency.
+	 * @param int   $decimals Number of decimals to format the amount with.
+	 * @return string
+	 */
+	private function format_money( float $amount, int $decimals ): string {
+		return $this->mock_extend->get_formatter( 'money' )->format( $amount, array( 'decimals' => $decimals ) );
+	}
+
+	/**
+	 * @testdox Cart item raw prices keep the stored regular and sale prices next to the current price.
+	 */
+	public function test_cart_item_raw_prices_keep_regular_and_sale_prices_distinct_from_the_current_price(): void {
+		$fixtures     = new FixtureData();
+		$sale_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Sale Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 20,
+				'sale_price'    => 15,
+				'weight'        => 10,
+			)
+		);
+
+		wc()->cart->add_to_cart( $sale_product->get_id() );
+
+		$response = $this->getApiResponse( '/wc/store/v1/cart' );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'The cart request should succeed.' );
+
+		$rounding_precision       = wc_get_rounding_precision();
+		$raw_prices_by_product_id = array();
+		foreach ( $data['items'] as $item ) {
+			$prices                                  = (array) $item['prices'];
+			$raw_prices_by_product_id[ $item['id'] ] = (array) $prices['raw_prices'];
+		}
+
+		$this->assertArrayHasKey( $sale_product->get_id(), $raw_prices_by_product_id, 'The sale product should be serialized as a cart item.' );
+
+		$sale_raw_prices = $raw_prices_by_product_id[ $sale_product->get_id() ];
+
+		$this->assertSame( $this->format_money( 15, $rounding_precision ), $sale_raw_prices['price'], 'A product on sale should serialize the sale price as its current raw price.' );
+		$this->assertSame( $this->format_money( 20, $rounding_precision ), $sale_raw_prices['regular_price'], 'A product on sale should still serialize its stored regular price.' );
+		$this->assertSame( $this->format_money( 15, $rounding_precision ), $sale_raw_prices['sale_price'], 'A product on sale should serialize its stored sale price.' );
+
+		$full_price_raw_prices = $raw_prices_by_product_id[ self::$product_ids[0] ];
+
+		$this->assertSame( $this->format_money( 10, $rounding_precision ), $full_price_raw_prices['price'], 'A product that is not on sale should serialize its stored price.' );
+		$this->assertSame( $full_price_raw_prices['price'], $full_price_raw_prices['regular_price'], 'A product that is not on sale should serialize the same current and regular raw price.' );
+		$this->assertSame( $this->format_money( 10, $rounding_precision ), $full_price_raw_prices['sale_price'], 'A product without a stored sale price should serialize its current raw price as the sale price.' );
+	}
+
+	/**
 	 * Test removing a nonexistent cart item. This should return 409 conflict with updated cart data.
 	 */
 	public function test_remove_bad_cart_item() {
