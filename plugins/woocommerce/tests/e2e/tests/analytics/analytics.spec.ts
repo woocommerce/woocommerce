@@ -511,7 +511,17 @@ test(
 				name: 'Custom (Jan 1 - 30, 2022) vs. Previous year (Jan 1 - 30, 2021)',
 			} )
 		).toBeVisible();
-		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
+		for ( const label of [
+			'Gross sales',
+			'Returns',
+			'Coupons',
+			'Net sales',
+			'Taxes',
+			'Shipping',
+			'Total sales',
+		] ) {
+			await expect( summaryTile( page, label, '$0.00' ) ).toBeVisible();
+		}
 	}
 );
 
@@ -730,10 +740,25 @@ test(
 
 		await indicatorsResponse;
 
-		// A tile with a value beside its label, rather than a store-wide figure:
-		// the shared store makes exact totals flaky across parallel specs.
-		await expect(
-			page.getByRole( 'menuitem', { name: /^Orders \d/ } ).first()
-		).toBeVisible();
+		// Each default indicator by label with some value beside it, rather than
+		// a store-wide figure: the shared store makes exact totals flaky across
+		// parallel specs.
+		//
+		// Require a value (a digit or `$`) after the label so this matches the
+		// rendered tile ("Total sales $1,229.30 …") and not a bare-label
+		// `menuitem` the indicator picker also contributes to the DOM.
+		for ( const label of [
+			'Total sales',
+			'Net sales',
+			'Orders',
+			'Products sold',
+			'Variations Sold',
+		] ) {
+			await expect(
+				page.getByRole( 'menuitem', {
+					name: new RegExp( `^${ escapeRegExp( label ) } [\\d$]` ),
+				} )
+			).toBeVisible();
+		}
 	}
 );
