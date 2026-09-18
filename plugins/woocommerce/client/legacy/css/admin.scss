@@ -2281,8 +2281,25 @@ ul.wc_coupon_list_block {
 	}
 }
 
+// The order screens are registered as embedded WooCommerce Admin pages, so they
+// get even 20px gutters from `.woocommerce-admin-page` / `.woocommerce-embed-page`.
+// This screen isn't embedded, so it falls back to WordPress' lopsided `.wrap`
+// margins. Match the order screens instead.
+body.woocommerce_page_wc-customer-stock-notifications {
+
+	#wpcontent {
+		padding-inline-start: 0;
+	}
+
+	.wrap {
+		margin: 0;
+		padding-inline: 20px;
+	}
+}
+
 body.post-type-shop_order,
-body.woocommerce_page_wc-orders {
+body.woocommerce_page_wc-orders,
+body.woocommerce_page_wc-customer-stock-notifications {
 
 	.order_actions {
 		display: flex;
@@ -2330,6 +2347,13 @@ body.woocommerce_page_wc-orders {
 				}
 			}
 
+			// Screens without a delete link (the create screen) leave the submit
+			// button as the row's only child, so space-between would park it on
+			// the left.
+			&.wide:has(.save_order):not(:has(#delete-action)) {
+				justify-content: flex-end;
+			}
+
 			// Action row (top): select + Apply button. Replaces the legacy
 			// float layout where the Apply button was forced to width: 24px
 			// (a squished pill) and the select to a hardcoded 225px (overflowed
@@ -2343,6 +2367,10 @@ body.woocommerce_page_wc-orders {
 					flex: 1;
 					min-width: 0; // prevent flex blow-out on long option labels.
 					width: auto;
+					// WordPress caps selects at 400px on small screens. The order
+					// screens escape that through `.meta-box-sortables select`,
+					// which screens without sortable meta boxes never match.
+					max-width: 100%;
 					box-sizing: border-box;
 					float: none;
 				}
@@ -9180,7 +9208,8 @@ table.bar_chart {
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
-	&.woocommerce_page_wc-orders {
+	&.woocommerce_page_wc-orders,
+	&.woocommerce_page_wc-customer-stock-notifications {
 
 		.postbox,
 		#postdivrich {
