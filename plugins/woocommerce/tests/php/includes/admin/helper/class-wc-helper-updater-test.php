@@ -1049,6 +1049,103 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'add-to-cart=123', $output );
 		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_purchase', $output );
+	}
+
+	/**
+	 * @testdox The no-subscription update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_purchase_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription(
+			$this->woo_plugin_data(),
+			(object) array(
+				'id'  => 'woocommerce-com-123',
+				'url' => 'https://woocommerce.com/products/test-woo-extension/',
+			)
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' ', $output, 'Core has already printed its own sentence on the row.' );
+		$this->assertStringContainsString( "You don't have an active subscription for this product.", $output );
+		$this->assertStringContainsString( '>Subscribe</a> now for security updates, product improvements, and support.', $output );
+		$this->assertStringContainsString( 'products/test-woo-extension', $output, 'The update row links to the product page like the plugin row does.' );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
+	}
+
+	/**
+	 * @testdox The expired update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_expired_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'               => true,
+						'product_regular_price' => '&#36;59',
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' ', $output, 'Core has already printed its own sentence on the row.' );
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringNotContainsString( '&#36;59', $output, 'The price no longer appears in the link text.' );
+	}
+
+	/**
+	 * @testdox The expiring update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_expiring_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => strtotime( '2030-03-03' ),
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3rd.', $output );
+		$this->assertStringContainsString( '>Enable auto-renew</a> to keep getting updates and support.', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_enable_autorenew', $output );
+	}
+
+	/**
+	 * @testdox The connect update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_connect_notice_shares_the_plugin_row_wording(): void {
+		ob_start();
+		WC_Helper_Updater::add_connect_woocom_plugin_message();
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' Extension distributed via WooCommerce.com.', $output );
+		$this->assertStringContainsString( '>Connect your store</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_connect', $output );
+		$this->assertStringContainsString( 'tab=my-subscriptions', $output );
 	}
 
 	/**
