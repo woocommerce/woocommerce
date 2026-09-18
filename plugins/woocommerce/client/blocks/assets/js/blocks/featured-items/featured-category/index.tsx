@@ -17,6 +17,7 @@ import deprecated from './deprecated';
 
 register( Block, example, metadata, {
 	deprecated,
+	supports: metadata.supports,
 	icon: {
 		src: (
 			<Icon

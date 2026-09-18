@@ -1,0 +1,112 @@
+/**
+ * External dependencies
+ */
+import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerCoreBlocks } from '@wordpress/block-library';
+
+/**
+ * Internal dependencies
+ */
+import { migrateToCover } from '../migrate-to-cover';
+
+beforeAll( () => {
+	registerCoreBlocks();
+	for ( const name of [
+		'woocommerce/category-title',
+		'woocommerce/category-description',
+	] ) {
+		registerBlockType( name, {
+			apiVersion: 3,
+			title: name,
+			category: 'text',
+			attributes: {
+				level: { type: 'number' },
+				isLink: { type: 'boolean' },
+				textAlign: { type: 'string' },
+				style: { type: 'object' },
+			},
+			save: () => null,
+		} );
+	}
+} );
+
+describe( 'Featured Category Cover migration helper', () => {
+	it( 'defaults generated v0 content to centered alignment without parser defaults', () => {
+		const [ , [ cover ] ] = migrateToCover(
+			{ categoryId: 42, editMode: false },
+			[]
+		);
+		expect(
+			cover.innerBlocks
+				.slice( 0, 2 )
+				.map( ( block ) => block.attributes.textAlign )
+		).toEqual( [ 'center', 'center' ] );
+	} );
+
+	it.each( [ 'left', 'center', 'right' ] )(
+		'preserves %s positioning, natural image sizing and appearance',
+		( position ) => {
+			const child = createBlock( 'core/paragraph', {
+				content: 'Custom content',
+			} );
+			const [ attributes, [ cover ] ] = migrateToCover(
+				{
+					categoryId: 42,
+					contentAlign: position,
+					focalPoint: { x: 0.2, y: 0.8 },
+					dimRatio: 30,
+					minHeight: 620,
+					backgroundColor: 'cyan-bluish-gray',
+					borderColor: 'vivid-red',
+					style: {
+						typography: { lineHeight: '1.8' },
+						spacing: { padding: '12px' },
+					},
+				},
+				[ child ]
+			);
+			expect( attributes ).toMatchObject( {
+				categoryId: 42,
+				layout: 'cover',
+			} );
+			expect( attributes ).not.toHaveProperty( 'focalPoint' );
+			expect( cover.attributes ).toMatchObject( {
+				contentPosition: `center ${ position }`,
+				focalPoint: { x: 0.2, y: 0.8 },
+				dimRatio: 30,
+				minHeight: 620,
+				backgroundColor: 'cyan-bluish-gray',
+				borderColor: 'vivid-red',
+				style: {
+					typography: { lineHeight: '1.8' },
+					spacing: { padding: '12px' },
+				},
+			} );
+			expect( cover.attributes.className ).toContain( 'natural-image' );
+			expect( cover.attributes.metadata.bindings ).toBeUndefined();
+			expect(
+				cover.attributes.metadata[
+					'woocommerce/featured-category-image'
+				]
+			).toMatchObject( {
+				size: 'large',
+				url: '',
+			} );
+			expect( cover.attributes.url ).toBe( '' );
+			expect( cover.innerBlocks[ 0 ].innerBlocks[ 0 ] ).toBe( child );
+		}
+	);
+	it( 'keeps a custom attachment tied to its ID and preserves full sizing for wide cards', () => {
+		const [ , [ cover ] ] = migrateToCover(
+			{ categoryId: 42, mediaId: 99, align: 'wide', imageFit: 'cover' },
+			[]
+		);
+		expect(
+			cover.attributes.metadata[ 'woocommerce/featured-category-image' ]
+		).toMatchObject( {
+			attachmentId: 99,
+			size: 'full',
+		} );
+		expect( cover.attributes.className ).not.toContain( 'natural-image' );
+	} );
+} );

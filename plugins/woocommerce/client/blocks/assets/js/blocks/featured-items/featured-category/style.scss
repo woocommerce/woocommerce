@@ -7,3 +7,12 @@
 .wc-block-featured-category {
 	@include wc-block-featured-item();
 }
+
+// Preserve legacy "Image fit: None" after migration: keep the image's natural size
+// instead of Cover's default scaling to fill the block, for both img and CSS backgrounds.
+.wc-block-featured-category__natural-image {
+	> .wp-block-cover__image-background {
+		object-fit: none;
+		background-size: auto;
+	}
+}
