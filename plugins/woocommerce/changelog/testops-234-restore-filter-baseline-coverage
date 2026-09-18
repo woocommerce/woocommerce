@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Assert the unfiltered product count before every legacy filter interaction in the browser and cover the Price Filter block seeding its range from the URL in Jest
