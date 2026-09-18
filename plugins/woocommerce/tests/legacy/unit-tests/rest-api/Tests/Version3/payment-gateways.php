@@ -28,6 +28,18 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Rebuild the gateway registry so a read goes through gateway construction, as the next request would.
+	 *
+	 * Clearing first matters: init() writes each gateway into a slot keyed by its order, so on its own it
+	 * leaves stale gateways behind in the slots the new order no longer uses.
+	 */
+	private function rebuild_payment_gateways() {
+		$gateways                   = WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
+	}
+
+	/**
 	 * Test route registration.
 	 *
 	 * @since 3.5.0
@@ -303,8 +315,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
 
-		// Rebuild the registry so the read goes through gateway construction, as the next request would.
-		WC()->payment_gateways->init();
+		$this->rebuild_payment_gateways();
 
 		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
 		$this->assertTrue( $data['enabled'] );
@@ -321,7 +332,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
 
-		WC()->payment_gateways->init();
+		$this->rebuild_payment_gateways();
 
 		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
 		$this->assertSame( 'Post the check to our office.', $data['settings']['instructions']['value'] );
@@ -345,7 +356,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		}
 
 		// Order lives in its own option, and the registry reads it to sort gateways.
-		WC()->payment_gateways->init();
+		$this->rebuild_payment_gateways();
 
 		$gateways = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) )->get_data();
 		$by_id    = array_column( $gateways, null, 'id' );
