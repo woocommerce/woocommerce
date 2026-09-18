@@ -139,9 +139,33 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
+		} else {
+			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
 		$customer->set_object_read( true );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address when the store defaults the shipping destination
+	 * to the billing address (the "Shipping destination" shipping option).
+	 *
+	 * Only runs when the customer is loaded fresh from their account (no session snapshot yet), so a shipping
+	 * address the customer explicitly set during the session is never overwritten.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Customer $customer Customer object.
+	 */
+	protected function maybe_default_shipping_to_billing( &$customer ): void {
+		if ( 'shipping' === get_option( 'woocommerce_ship_to_destination', 'billing' ) || ! $customer->get_billing_country() ) {
+			return;
+		}
+
+		foreach ( $customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
+				$customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
 	}
 
 	/**
@@ -156,14 +180,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 			if ( ! $customer->get_billing_country() ) {
 				$customer->set_billing_country( $default['country'] );
+
+				// The default state only makes sense together with the default country: a saved address in a country
+				// without states must not pick up the store's base state.
+				if ( ! $customer->get_billing_state() ) {
+					$customer->set_billing_state( $default['state'] );
+				}
 			}
 
 			if ( ! $customer->get_shipping_country() && ! $has_shipping_address ) {
 				$customer->set_shipping_country( $customer->get_billing_country() );
-			}
-
-			if ( ! $customer->get_billing_state() ) {
-				$customer->set_billing_state( $default['state'] );
 			}
 
 			if ( ! $customer->get_shipping_state() && ! $has_shipping_address ) {
