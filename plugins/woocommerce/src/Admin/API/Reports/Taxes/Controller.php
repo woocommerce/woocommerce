@@ -121,67 +121,79 @@ class Controller extends GenericController implements ExportableInterface {
 			'title'      => 'report_taxes',
 			'type'       => 'object',
 			'properties' => array(
-				'tax_rate_id'    => array(
+				'tax_rate_id'             => array(
 					'description' => __( 'Tax rate ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name'           => array(
+				'name'                    => array(
 					'description' => __( 'Tax rate name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'tax_rate'       => array(
+				'tax_rate'                => array(
 					'description' => __( 'Tax rate.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'country'        => array(
+				'country'                 => array(
 					'description' => __( 'Country / Region.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'state'          => array(
+				'state'                   => array(
 					'description' => __( 'State.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'priority'       => array(
+				'priority'                => array(
 					'description' => __( 'Priority.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'total_tax'      => array(
+				'total_tax'               => array(
 					'description' => __( 'Total tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'order_tax'      => array(
+				'order_tax'               => array(
 					'description' => __( 'Order tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'shipping_tax'   => array(
+				'shipping_tax'            => array(
 					'description' => __( 'Shipping tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'taxable_amount' => array(
+				'taxable_amount'          => array(
 					'description' => __( 'Taxable amount.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'orders_count'   => array(
+				'order_taxable_amount'    => array(
+					'description' => __( 'Taxable amount of line items and fees.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'shipping_taxable_amount' => array(
+					'description' => __( 'Taxable amount of shipping.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'orders_count'            => array(
 					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -211,6 +223,8 @@ class Controller extends GenericController implements ExportableInterface {
 				'total_tax',
 				'shipping_tax',
 				'taxable_amount',
+				'order_taxable_amount',
+				'shipping_taxable_amount',
 				'orders_count',
 			)
 		);
@@ -234,13 +248,15 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'tax_code'       => __( 'Tax code', 'woocommerce' ),
-			'rate'           => __( 'Rate', 'woocommerce' ),
-			'total_tax'      => __( 'Total tax', 'woocommerce' ),
-			'order_tax'      => __( 'Order tax', 'woocommerce' ),
-			'shipping_tax'   => __( 'Shipping tax', 'woocommerce' ),
-			'taxable_amount' => __( 'Taxable amount', 'woocommerce' ),
-			'orders_count'   => __( 'Orders', 'woocommerce' ),
+			'tax_code'                => __( 'Tax code', 'woocommerce' ),
+			'rate'                    => __( 'Rate', 'woocommerce' ),
+			'total_tax'               => __( 'Total tax', 'woocommerce' ),
+			'order_tax'               => __( 'Order tax', 'woocommerce' ),
+			'shipping_tax'            => __( 'Shipping tax', 'woocommerce' ),
+			'taxable_amount'          => __( 'Taxable amount', 'woocommerce' ),
+			'order_taxable_amount'    => __( 'Order gross', 'woocommerce' ),
+			'shipping_taxable_amount' => __( 'Shipping gross', 'woocommerce' ),
+			'orders_count'            => __( 'Orders', 'woocommerce' ),
 		);
 
 		/**
@@ -260,7 +276,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'tax_code'       => \WC_Tax::get_rate_code(
+			'tax_code'                => \WC_Tax::get_rate_code(
 				(object) array(
 					'tax_rate_id'       => $item['tax_rate_id'],
 					'tax_rate_country'  => $item['country'],
@@ -269,12 +285,14 @@ class Controller extends GenericController implements ExportableInterface {
 					'tax_rate_priority' => $item['priority'],
 				)
 			),
-			'rate'           => $item['tax_rate'],
-			'total_tax'      => self::csv_number_format( $item['total_tax'] ),
-			'order_tax'      => self::csv_number_format( $item['order_tax'] ),
-			'shipping_tax'   => self::csv_number_format( $item['shipping_tax'] ),
-			'taxable_amount' => $this->prepare_taxable_amount_for_export( $item ),
-			'orders_count'   => $item['orders_count'],
+			'rate'                    => $item['tax_rate'],
+			'total_tax'               => self::csv_number_format( $item['total_tax'] ),
+			'order_tax'               => self::csv_number_format( $item['order_tax'] ),
+			'shipping_tax'            => self::csv_number_format( $item['shipping_tax'] ),
+			'taxable_amount'          => $this->prepare_taxable_amount_for_export( $item, 'taxable_amount', 'total_tax' ),
+			'order_taxable_amount'    => $this->prepare_taxable_amount_for_export( $item, 'order_taxable_amount', 'order_tax' ),
+			'shipping_taxable_amount' => $this->prepare_taxable_amount_for_export( $item, 'shipping_taxable_amount', 'shipping_tax' ),
+			'orders_count'            => $item['orders_count'],
 		);
 
 		/**
@@ -289,22 +307,24 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Format the taxable amount of a report row for export.
+	 * Format a taxable amount of a report row for export.
 	 *
-	 * A zero base under a non-zero tax marks a lookup row recorded before the taxable
-	 * amount existed (or a manual tax line) - unknown, so exported as an empty cell
+	 * A zero base under a non-zero tax marks a lookup row recorded before that base
+	 * existed (or a manual tax line) - unknown, so exported as an empty cell
 	 * rather than a zero a merchant could mistake for a filing figure.
 	 *
-	 * @param array $item Single report item/row.
+	 * @param array  $item       Single report item/row.
+	 * @param string $amount_key Key of the taxable amount to format.
+	 * @param string $tax_key    Key of the tax charged on that amount.
 	 * @return string
 	 */
-	private function prepare_taxable_amount_for_export( $item ) {
-		if ( ! isset( $item['taxable_amount'] ) ) {
+	private function prepare_taxable_amount_for_export( $item, $amount_key, $tax_key ) {
+		if ( ! isset( $item[ $amount_key ] ) ) {
 			return '';
 		}
 
-		$unknown = 0.0 === (float) $item['taxable_amount'] && 0.0 !== (float) ( $item['total_tax'] ?? 0 );
+		$unknown = 0.0 === (float) $item[ $amount_key ] && 0.0 !== (float) ( $item[ $tax_key ] ?? 0 );
 
-		return $unknown ? '' : self::csv_number_format( $item['taxable_amount'] );
+		return $unknown ? '' : self::csv_number_format( $item[ $amount_key ] );
 	}
 }
