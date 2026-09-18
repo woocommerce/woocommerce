@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Internal\ScheduledSaleBatchProcessor;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -846,33 +847,25 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
+ * Products are processed in batches by ScheduledSaleBatchProcessor. Before hooks run
+ * before any batch is primed; after hooks run after the last batch's caches are cleared.
+ *
  * @since 3.0.0
  */
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
-	$product_util           = wc_get_container()->get( ProductUtil::class );
+	$processor              = wc_get_container()->get( ScheduledSaleBatchProcessor::class );
 	$must_refresh_transient = false;
 
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$processor->process( $product_ids, 'start' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
-				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
-				// which schedules the end AS event.
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -880,19 +873,11 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$processor->process( $product_ids, 'end' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'end' );
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
