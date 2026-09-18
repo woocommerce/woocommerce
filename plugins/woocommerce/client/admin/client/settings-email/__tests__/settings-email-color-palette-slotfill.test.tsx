@@ -70,6 +70,22 @@ describe( 'registerSettingsEmailColorPaletteFill', () => {
 		}
 	);
 
+	it( 'registers the fill in the scope the settings slot renders', () => {
+		renderMount( true, 'no' );
+
+		registerSettingsEmailColorPaletteFill();
+
+		expect( registerPluginMock ).toHaveBeenCalledTimes( 1 );
+		const [ name, settings ] = registerPluginMock.mock.calls[ 0 ];
+		expect( name ).toBe( 'woocommerce-admin-settings-email-color-palette' );
+		// settings-slots.js renders a PluginArea with this exact scope for the
+		// wc_settings_email_color_palette_slotfill mount, and its own test pins
+		// the same literal, so a rename on either side fails.
+		expect( settings.scope ).toBe(
+			'woocommerce-email-color-palette-settings'
+		);
+	} );
+
 	it( 'does not register the fill without the auto-sync input', () => {
 		document.body.innerHTML =
 			'<div id="wc_settings_email_color_palette_slotfill"></div>';

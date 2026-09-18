@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -82,5 +83,32 @@ describe( 'UpdateBannerPlugin', () => {
 		expect(
 			document.body.querySelector( '.wc-update-banner' )
 		).not.toBeNull();
+	} );
+
+	it( 'wires the banner dismiss control to dismiss, not autoDismiss', async () => {
+		const dismiss = jest.fn();
+		const autoDismiss = jest.fn();
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: true,
+			dismiss,
+			autoDismiss,
+		} );
+
+		render( <UpdateBannerPlugin /> );
+
+		expect(
+			document.body.querySelector( '.wc-update-banner' )
+		).not.toBeNull();
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Dismiss for this session' } )
+		);
+
+		// The two callbacks differ in one observable way: only `dismiss` reports
+		// the `_dismissed` Tracks event, so the × in the default banner has to
+		// reach `dismiss` and leave `autoDismiss` untouched.
+		expect( dismiss ).toHaveBeenCalledTimes( 1 );
+		expect( autoDismiss ).not.toHaveBeenCalled();
 	} );
 } );
