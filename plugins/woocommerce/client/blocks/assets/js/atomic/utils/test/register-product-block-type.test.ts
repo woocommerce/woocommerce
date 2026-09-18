@@ -33,7 +33,9 @@ const getDataMock = () => ( {
 		}
 
 		if ( storeName === 'core/edit-site' ) {
-			return mockIsSiteEditor ? {} : undefined;
+			return mockIsSiteEditor
+				? { getEditedPostType: () => mockPostType }
+				: undefined;
 		}
 
 		return undefined;
@@ -114,9 +116,9 @@ describe( 'registerProductBlockType', () => {
 		expect( mockUnsubscribe ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'keeps the Single Product ancestor outside a Single Product template', () => {
+	it( 'keeps the Single Product ancestor in the Cart page template', () => {
 		mockPostType = 'wp_template';
-		mockTemplateSlug = 'twentytwentyfour//coming-soon';
+		mockTemplateSlug = 'twentytwentyfour//page-cart';
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
@@ -134,6 +136,61 @@ describe( 'registerProductBlockType', () => {
 			} )
 		);
 		expect( mockUnregisterBlockType ).not.toHaveBeenCalled();
+	} );
+
+	it( 'drops the Single Product ancestor in a per-product Single Product template', () => {
+		mockPostType = 'wp_template';
+		mockTemplateSlug = 'single-product-v-neck-t-shirt';
+		mockIsSiteEditor = true;
+		const registerProductBlockType = loadRegistrationFunction();
+
+		registerProductBlockType(
+			'woocommerce/per-product-template-block',
+			blockSettings
+		);
+		mockContextSubscription();
+
+		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 2 );
+		expect( mockUnregisterBlockType ).toHaveBeenCalledWith(
+			'woocommerce/per-product-template-block'
+		);
+		expect( mockRegisterBlockType ).toHaveBeenLastCalledWith(
+			'woocommerce/per-product-template-block',
+			expect.objectContaining( {
+				title: 'Test product block',
+				ancestor: undefined,
+			} )
+		);
+	} );
+
+	it( 'registers post-editor-enabled blocks with the Single Product ancestor while editing a pattern without the site editor store', () => {
+		mockPostType = 'wp_block';
+		mockTemplateSlug = 'on-sale-products-pattern';
+		mockIsSiteEditor = false;
+		const registerProductBlockType = loadRegistrationFunction();
+
+		registerProductBlockType( 'woocommerce/pattern-block', {
+			...blockSettings,
+			isAvailableOnPostEditor: true,
+		} );
+		registerProductBlockType(
+			'woocommerce/site-editor-only-block',
+			blockSettings
+		);
+		mockContextSubscription();
+
+		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
+		expect( mockRegisterBlockType ).toHaveBeenCalledWith(
+			'woocommerce/pattern-block',
+			expect.objectContaining( {
+				title: 'Test product block',
+				ancestor: [ 'woocommerce/single-product' ],
+			} )
+		);
+		expect( mockRegisterBlockType ).not.toHaveBeenCalledWith(
+			'woocommerce/site-editor-only-block',
+			expect.anything()
+		);
 	} );
 
 	it( 're-registers a block with the ancestor required by each template', () => {

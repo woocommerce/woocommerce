@@ -616,8 +616,10 @@ describe( 'Product Collection inspector control contracts', () => {
 	it.each( [
 		[ 'MIN', '10', { max: 20, min: 10 } ],
 		[ 'MAX', '30', { max: 30, min: 5 } ],
+		[ 'MIN', '15.28', { max: 20, min: 15.28 } ],
+		[ 'MAX', '15.28', { max: 15.28, min: 5 } ],
 	] as const )(
-		'writes the %s price boundary',
+		'writes the %s price boundary as %s',
 		( label, value, expectedPriceRange ) => {
 			const attributes = createAttributes( {
 				query: {
