@@ -19,6 +19,17 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	},
 } );
 
+// Every product the seed puts on sale, by permalink path.
+const ON_SALE_PRODUCT_PATHS = [
+	'/product/beanie/',
+	'/product/beanie-with-logo/',
+	'/product/belt/',
+	'/product/cap/',
+	'/product/hoodie/',
+	'/product/hoodie-with-pocket/',
+	'/product/single/',
+];
+
 test.describe( 'Product Collection: Inspector Controls', () => {
 	test( 'persists display controls and renders their frontend output', async ( {
 		pageObject,
@@ -121,6 +132,12 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		expect( customProductPaths ).not.toHaveLength( 0 );
 		expect( customProductPaths ).not.toEqual( inheritedProductPaths );
 
+		// The custom criteria are on-sale products, not merely a different list.
+		for ( const path of customProductPaths ) {
+			expect( ON_SALE_PRODUCT_PATHS ).toContain( path );
+		}
+		expect( customProductPaths ).toContain( '/product/beanie/' );
+
 		await defaultQueryType.click();
 		await expect( onSaleControl ).toBeHidden();
 		await expect
@@ -142,6 +159,24 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		await expect
 			.poll( async () => pageObject.getProductPermalinkPaths() )
 			.toEqual( customProductPaths );
+
+		// Saved back in the inherit state, the shop page renders the catalog
+		// query itself rather than the block's own.
+		await pageObject.goToEditorTemplate();
+		await pageObject.focusProductCollection();
+		await editor.openDocumentSettingsSidebar();
+		await defaultQueryType.click();
+		await expect( onSaleControl ).toBeHidden();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+		await pageObject.goToProductCatalogFrontend();
+		await expect(
+			pageObject.productTitles.getByRole( 'link' ).first()
+		).toBeVisible();
+		await expect
+			.poll( async () => pageObject.getProductPermalinkPaths() )
+			.toEqual( inheritedProductPaths );
 	} );
 
 	test( 'correctly combines editor and front-end filters', async ( {
@@ -184,6 +219,11 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		await expect( pageObject.products ).toHaveCount( 1 );
 	} );
 
+	/**
+	 * The suite's only browser proof that the Query type control is offered to a
+	 * collection in a post, where a collection can opt into page-context
+	 * filtering outside an archive template.
+	 */
 	test( 'scopes Query Type and Product Filters to the first eligible collection', async ( {
 		pageObject,
 		editor,

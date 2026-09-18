@@ -64,6 +64,14 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await checkoutPageObject.verifyOrderConfirmationDetails();
 
 		const orderReceivedURL = page.url();
+		const wrongKeyURL = new URL( orderReceivedURL );
+		wrongKeyURL.searchParams.set( 'key', 'wc_order_wrong' );
+
+		// The owner is logged in and still sees nothing: the key is checked on
+		// its own, before the account the order belongs to is considered.
+		await page.goto( wrongKeyURL.toString() );
+		await checkoutPageObject.verifyOrderConfirmationDetails( false );
+
 		await page.context().clearCookies();
 		await page.goto( '/my-account' );
 		await expect(
@@ -78,14 +86,18 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await page.goto( missingKeyURL.toString() );
 		await checkoutPageObject.verifyOrderConfirmationDetails( false );
 
-		const wrongKeyURL = new URL( orderReceivedURL );
-		wrongKeyURL.searchParams.set( 'key', 'wc_order_wrong' );
 		await page.goto( wrongKeyURL.toString() );
 		await checkoutPageObject.verifyOrderConfirmationDetails( false );
 
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-order-confirmation-filters'
 		);
+
+		// With the filter lifting the owner requirement, the key is the only
+		// thing left standing between a guest and the details.
+		await page.goto( wrongKeyURL.toString() );
+		await checkoutPageObject.verifyOrderConfirmationDetails( false );
+
 		await page.goto( orderReceivedURL );
 		await checkoutPageObject.verifyOrderConfirmationDetails();
 	} );
@@ -219,7 +231,13 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 				exact: true,
 			} );
 			await expect( downloadLink ).toBeVisible();
-			await expect( downloadLink ).toHaveAttribute( 'href', /.+/ );
+
+			// The link is the entitlement, not the product page: it carries the
+			// file, the order and the download key.
+			await expect( downloadLink ).toHaveAttribute(
+				'href',
+				/download_file=.*[?&]order=.*[?&]key=/
+			);
 		}
 	} );
 } );

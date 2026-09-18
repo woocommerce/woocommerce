@@ -359,6 +359,12 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		},
 	].forEach( ( collection ) => {
 		collection.previewLabelTemplate.forEach( ( template ) => {
+			/**
+			 * The suite's only browser proof that a template slug maps to the
+			 * location a collection requires — Single Product to the product
+			 * location and Cart to the cart location — since the preview label
+			 * appears only when that mapping holds.
+			 */
 			test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
 				admin,
 				pageObject,

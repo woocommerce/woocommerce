@@ -54,7 +54,7 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'shows the Product Filters inner-block structure and List View names', async ( {
+	test( 'shows the Active and Color inner filters and their List View names', async ( {
 		editor,
 		pageObject,
 	} ) => {

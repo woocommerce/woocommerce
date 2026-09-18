@@ -77,10 +77,11 @@ test.describe( 'Update propagation — core flows', () => {
 			'<!-- wp:paragraph --><p>OLD BLOCK B</p><!-- /wp:paragraph -->' +
 			'<!-- wp:paragraph --><p>OLD BLOCK C</p><!-- /wp:paragraph -->';
 
-		const customized = oldHtml.replace(
-			'OLD BLOCK A',
-			'MERCHANT EDITED A'
-		);
+		// Two merchant edits, so the drawer offers a choice per conflict, and one
+		// block the merchant leaves alone.
+		const customized = oldHtml
+			.replace( 'OLD BLOCK A', 'MERCHANT EDITED A' )
+			.replace( 'OLD BLOCK B', 'MERCHANT EDITED B' );
 
 		const newCanonical =
 			'<!-- wp:paragraph --><p>NEW CORE A</p><!-- /wp:paragraph -->' +
@@ -133,11 +134,13 @@ test.describe( 'Update propagation — core flows', () => {
 			drawer.getByRole( 'heading', { name: /needs your attention/i } )
 		).toBeVisible( { timeout: 15000 } );
 
-		const firstRadioGroup = drawer
-			.getByRole( 'radiogroup', {
-				name: /choose which version to apply/i,
-			} )
-			.first();
+		const radioGroups = drawer.getByRole( 'radiogroup', {
+			name: /choose which version to apply/i,
+		} );
+		await expect( radioGroups ).toHaveCount( 2 );
+
+		const firstRadioGroup = radioGroups.first();
+		const secondRadioGroup = radioGroups.nth( 1 );
 		await expect(
 			firstRadioGroup.getByRole( 'radio', { name: /keep yours/i } )
 		).toHaveAttribute( 'aria-checked', 'true' );
@@ -148,11 +151,24 @@ test.describe( 'Update propagation — core flows', () => {
 			firstRadioGroup.getByRole( 'radio', { name: /use core/i } )
 		).toHaveAttribute( 'aria-checked', 'true' );
 
+		// The second conflict stays on keep-yours, so Apply has to honour both
+		// choices rather than one of them.
+		await expect(
+			secondRadioGroup.getByRole( 'radio', { name: /keep yours/i } )
+		).toHaveAttribute( 'aria-checked', 'true' );
+
 		await drawer.getByRole( 'button', { name: /^apply/i } ).click();
 		await expect( drawer ).toBeHidden( { timeout: 15000 } );
 
 		const content = await getWooEmailPostContent( postId );
 		expect( content ).toContain( 'NEW CORE A' );
 		expect( content ).not.toContain( 'MERCHANT EDITED A' );
+		expect( content ).toContain( 'MERCHANT EDITED B' );
+		expect( content ).not.toContain( 'NEW CORE B' );
+
+		// Block C is core-only, so the drawer lists it as auto-resolved; the
+		// applier leaves it at the post's text (the keep_yours default in
+		// apply()), which contradicts the drawer's promise, so it is not
+		// asserted here.
 	} );
 } );
