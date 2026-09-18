@@ -34,7 +34,7 @@ addFilter(
 				) {
 					return {
 						...variation,
-						scope: variation.scope?.filter(
+						scope: ( variation.scope ?? [] ).filter(
 							( scope ) => scope !== 'inserter'
 						),
 					};
