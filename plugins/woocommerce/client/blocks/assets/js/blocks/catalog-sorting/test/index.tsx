@@ -89,7 +89,7 @@ describe( 'Catalog Sorting block registration', () => {
 } );
 
 describe( 'Catalog Sorting editor placeholder', () => {
-	it( 'renders the default sorting option without a visual label', () => {
+	it( 'renders the Default sorting option when the visual label is off', () => {
 		render(
 			<Edit
 				attributes={ { useLabel: false } }

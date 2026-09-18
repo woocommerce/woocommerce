@@ -361,7 +361,7 @@ describe( 'Product Reviews contracts', () => {
 		} );
 	} );
 
-	describe( 'Offset control', () => {
+	describe( 'offset control', () => {
 		it( 'renders a zero default offset', () => {
 			render(
 				<>
@@ -385,27 +385,30 @@ describe( 'Product Reviews contracts', () => {
 			[ 'an empty value', '', undefined ],
 			[ 'a fractional value', '1.5', undefined ],
 			[ 'a negative integer', '-2', undefined ],
-		] )( 'accepts or rejects %s', ( _name, value, expected ) => {
-			const setAttributes = jest.fn();
-			render(
-				<>
-					{ getSharedReviewListControls(
-						createAttributes( { offset: 1 } ),
-						setAttributes,
-						{ showOffset: true }
-					) }
-				</>
-			);
+		] )(
+			'writes %s only when it is a valid offset',
+			( _name, value, expected ) => {
+				const setAttributes = jest.fn();
+				render(
+					<>
+						{ getSharedReviewListControls(
+							createAttributes( { offset: 1 } ),
+							setAttributes,
+							{ showOffset: true }
+						) }
+					</>
+				);
 
-			fireEvent.change(
-				screen.getByRole( 'spinbutton', { name: 'Offset' } ),
-				{ target: { value } }
-			);
+				fireEvent.change(
+					screen.getByRole( 'spinbutton', { name: 'Offset' } ),
+					{ target: { value } }
+				);
 
-			expect( setAttributes.mock.calls ).toEqual(
-				expected ? [ [ expected ] ] : []
-			);
-		} );
+				expect( setAttributes.mock.calls ).toEqual(
+					expected ? [ [ expected ] ] : []
+				);
+			}
+		);
 
 		it.each( [
 			[

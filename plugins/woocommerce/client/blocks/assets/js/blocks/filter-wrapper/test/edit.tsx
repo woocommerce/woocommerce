@@ -318,6 +318,7 @@ describe( 'legacy filter editor ownership', () => {
 				showFilterButton: false,
 			},
 			listOption: 'Rated 1 out of 5',
+			caseName: 'Rating',
 		},
 		{
 			Edit: StockFilterEdit,
@@ -331,9 +332,10 @@ describe( 'legacy filter editor ownership', () => {
 				showFilterButton: false,
 			},
 			listOption: 'In stock',
+			caseName: 'Stock',
 		},
 	] )(
-		'maps $listOption display and Apply controls to preview behavior',
+		'maps $caseName display and Apply controls to preview behavior',
 		async ( row ) => {
 			const user = userEvent.setup();
 			const setAttributes = jest.fn();

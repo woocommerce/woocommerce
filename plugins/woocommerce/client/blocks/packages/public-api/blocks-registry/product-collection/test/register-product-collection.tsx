@@ -392,32 +392,32 @@ describe( '__experimentalRegisterProductCollection', () => {
 
 	it.each( [
 		{
-			id: 'product',
+			caseName: 'product',
 			matchingLocations: [ { type: LocationType.Product } ],
 			usesReference: [ LocationType.Product ],
 			expectedNonmatchingState:
 				ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER,
 		},
 		{
-			id: 'cart',
+			caseName: 'cart',
 			matchingLocations: [ { type: LocationType.Cart } ],
 			usesReference: [ LocationType.Cart ],
 			expectedNonmatchingState: ProductCollectionUIStatesInEditor.VALID,
 		},
 		{
-			id: 'order',
+			caseName: 'order',
 			matchingLocations: [ { type: LocationType.Order } ],
 			usesReference: [ LocationType.Order ],
 			expectedNonmatchingState: ProductCollectionUIStatesInEditor.VALID,
 		},
 		{
-			id: 'archive',
+			caseName: 'archive',
 			matchingLocations: [ { type: LocationType.Archive } ],
 			usesReference: [ LocationType.Archive ],
 			expectedNonmatchingState: ProductCollectionUIStatesInEditor.VALID,
 		},
 		{
-			id: 'multiple',
+			caseName: 'multiple',
 			matchingLocations: [
 				{ type: LocationType.Product },
 				{ type: LocationType.Order },
@@ -427,17 +427,17 @@ describe( '__experimentalRegisterProductCollection', () => {
 				ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER,
 		},
 	] )(
-		'routes $id reference contexts through the registered edit wrapper and real UI-state hook',
+		'routes $caseName reference contexts through the registered edit wrapper and real UI-state hook',
 		( {
-			id,
+			caseName,
 			matchingLocations,
 			usesReference,
 			expectedNonmatchingState,
 		} ) => {
-			const name = `${ TEST_NAMESPACE }/context-${ id }`;
+			const name = `${ TEST_NAMESPACE }/context-${ caseName }`;
 			registerCollection( {
 				name,
-				title: `${ id } context collection`,
+				title: `${ caseName } context collection`,
 				usesReference,
 			} );
 
