@@ -61,6 +61,20 @@ class BlockHooksTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should not hook the mock block when hooked blocks are turned off with "no".
+	 */
+	public function test_mocked_block_does_not_get_hooked_when_disabled(): void {
+		new BlockHooksTestBlock();
+		update_option( self::$option_name, 'no', false );
+		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
+		$this->assertNotContains(
+			'woocommerce/test-block',
+			$hooked_block_types,
+			'Hooked block should not be added when the option is "no"'
+		);
+	}
+
+	/**
 	 * @testdox Should not hook the mock block when the configured version is lower than required.
 	 */
 	public function test_mocked_block_does_not_get_hooked_with_lower_version(): void {
