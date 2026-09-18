@@ -225,6 +225,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * would repeat a row for every line of the order sharing its rate; an EXISTS check reads
 	 * the same names without bringing rows back.
 	 *
+	 * A row written per tax line names its line, so it reads that one item by its primary key.
+	 * Only a row recorded before the lookup held one row per line has no line to read, and it
+	 * falls back to searching the order for the tax items sharing its rate. Keeping the two
+	 * apart is what stops the search reading every rate_id in the store for the common case.
+	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
 	 *
@@ -245,13 +250,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$item_meta  = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$tax_type   = OrderItemType::TAX;
 
-		return "EXISTS ( SELECT 1 FROM {$items}
-			JOIN {$item_meta} location_rate_id ON location_rate_id.order_item_id = {$items}.order_item_id AND location_rate_id.meta_key = 'rate_id'
-			WHERE {$items}.order_id = {$table_name}.order_id
-			AND {$items}.order_item_type = '{$tax_type}'
-			AND location_rate_id.meta_value = {$table_name}.tax_rate_id
-			AND ( {$table_name}.order_item_id = {$items}.order_item_id OR {$table_name}.order_item_id = 0 )
-			AND {$condition} )";
+		return "( ( {$table_name}.order_item_id > 0 AND EXISTS ( SELECT 1 FROM {$items}
+				WHERE {$items}.order_item_id = {$table_name}.order_item_id
+				AND {$condition} ) )
+			OR ( {$table_name}.order_item_id = 0 AND EXISTS ( SELECT 1 FROM {$items}
+				JOIN {$item_meta} location_rate_id ON location_rate_id.order_item_id = {$items}.order_item_id AND location_rate_id.meta_key = 'rate_id'
+				WHERE {$items}.order_id = {$table_name}.order_id
+				AND {$items}.order_item_type = '{$tax_type}'
+				AND location_rate_id.meta_value = {$table_name}.tax_rate_id
+				AND {$condition} ) ) )";
 	}
 
 	/**

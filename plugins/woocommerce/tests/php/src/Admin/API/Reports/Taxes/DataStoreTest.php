@@ -1849,6 +1849,29 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxes stats filter rows written before the lookup was keyed by tax order item.
+	 */
+	public function test_taxes_stats_filter_rows_written_before_the_grain_change(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// Until the rebuild runs, every row sits at the column default and names no tax line, so
+		// the filter has to find its code through the rate id the row carries.
+		$this->unmigrate_lookup_rows( $order->get_id() );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' );
+
+		$included = $sut->get_data( $query + array( 'location_includes' => 'US:CA' ) );
+		$this->assertSame( 7.25, $included->totals->total_tax, 'A row waiting on the migration should still answer to its own location.' );
+
+		$excluded = $sut->get_data( $query + array( 'location_excludes' => 'US' ) );
+		$this->assertSame( 19.0, $excluded->totals->total_tax, 'Excluding a country should drop the rows waiting on the migration too.' );
+	}
+
+	/**
 	 * @testdox The country and state report columns keep the released SQL the report columns filter carries.
 	 */
 	public function test_report_columns_keep_their_released_sql(): void {
