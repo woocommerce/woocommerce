@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -82,13 +83,22 @@ class SingleProduct extends AbstractBlock {
 	 * @return array Updated block context.
 	 */
 	public function update_context( $context, $block, $parent_block ) {
-		if ( 'woocommerce/single-product' === $block['blockName']
-			&& isset( $block['attrs']['productId'] ) ) {
+		if ( 'woocommerce/single-product' === $block['blockName'] ) {
+			$place_product_id = isset( $block['attrs']['productId'] )
+				? (int) $block['attrs']['productId']
+				: (int) ( $context['postId'] ?? 0 );
+
+			ProductScopes::enter_place(
+				array( $place_product_id, ProductScopes::current_place() )
+			);
+
+			if ( isset( $block['attrs']['productId'] ) ) {
 				$this->product_id = $block['attrs']['productId'];
 
 				$this->single_product_inner_blocks_names = array_reverse(
 					$this->extract_single_product_inner_block_names( $block )
 				);
+			}
 		}
 
 		$this->replace_post_for_single_product_inner_block( $block, $context );
@@ -183,6 +193,8 @@ class SingleProduct extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		$scope_name = ProductScopes::leave_place();
+
 		$product = wc_get_product( $block->context['postId'] );
 
 		if (
@@ -217,16 +229,13 @@ class SingleProduct extends AbstractBlock {
 			$product_id
 		);
 
-		$interactivity_context = array(
-			'productId'   => $product_id,
-			'variationId' => null,
-		);
+		$interactivity_context = ProductScopes::get_scope_context( $product_id, array(), $scope_name );
 
 		$html = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
 			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-			$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$html->set_attribute( 'data-wp-context', 'woocommerce::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 		}
 
 		$updated_html = $html->get_updated_html();

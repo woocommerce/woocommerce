@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use WP_Block;
 
 /**
@@ -105,8 +106,11 @@ class ProductTemplate extends AbstractBlock {
 				return $context;
 			};
 
+			$query_id = $block->context['queryId'] ?? '';
+
 			// Use an early priority so that other 'render_block_context' filters have access to the values.
 			add_filter( 'render_block_context', $filter_block_context, 1 );
+			ProductScopes::enter_place( array( $product_id, ProductScopes::current_place(), $query_id ) );
 			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 			// `render_callback` and ensure that no wrapper markup is included.
 			$block_content = (
@@ -115,6 +119,7 @@ class ProductTemplate extends AbstractBlock {
 					$block->context
 				)
 			)->render( array( 'dynamic' => false ) );
+			$scope_name    = ProductScopes::leave_place();
 			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			// Load product into the shared products store.
@@ -123,11 +128,8 @@ class ProductTemplate extends AbstractBlock {
 				$product_id
 			);
 			$product_context_directive = wp_interactivity_data_wp_context(
-				array(
-					'productId'   => $product_id,
-					'variationId' => null,
-				),
-				'woocommerce/products'
+				ProductScopes::get_scope_context( $product_id, array(), $scope_name ),
+				'woocommerce'
 			);
 
 			$li_directives = '

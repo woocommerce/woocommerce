@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use WP_Query;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
@@ -205,15 +206,12 @@ class ProductQuery extends AbstractBlock {
 
 			wc_interactivity_api_load_product( 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce', $product_id );
 
-			$product_context = array(
-				'productId'   => $product_id,
-				'variationId' => null,
-			);
+			$scope_name = ProductScopes::name_scope_element( array( $product_id ) );
 
-			$processor->set_attribute( 'data-wp-interactive', 'woocommerce/products' );
+			$processor->set_attribute( 'data-wp-interactive', 'woocommerce' );
 			$processor->set_attribute(
 				'data-wp-context',
-				'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+				'woocommerce::' . wp_json_encode( ProductScopes::get_scope_context( $product_id, array(), $scope_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 			);
 			$processor->set_attribute( 'data-wp-key', 'product-item-' . $product_id );
 		}

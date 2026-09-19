@@ -4,12 +4,23 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use WC_Helper_Product;
 
 /**
  * Tests for the SingleProduct block type.
  */
 class SingleProduct extends \WP_UnitTestCase {
+
+	/**
+	 * Reset the scope helper's per-request state so occurrence counts and
+	 * open places do not bleed between tests.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		ProductScopes::reset();
+	}
+
 	/**
 	 * Creates a simple product with a featured image and gallery images.
 	 *
@@ -209,6 +220,106 @@ class SingleProduct extends \WP_UnitTestCase {
 				$markup,
 				'Draft products should not render any Single Product block output.'
 			);
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * Extract the `woocommerce`-namespaced `data-wp-context` declared on the
+	 * Single Product block's wrapper `div`.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return array{namespace: string, context: array} The namespace and decoded context of the first `data-wp-context` found.
+	 */
+	private function get_wrapper_scope_context( string $markup ): array {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-single-product' ) ) );
+
+		$context = $processor->get_attribute( 'data-wp-context' );
+		$this->assertIsString( $context );
+
+		list( $namespace, $json_context ) = explode( '::', $context, 2 );
+
+		return array(
+			'namespace' => $namespace,
+			'context'   => json_decode( $json_context, true ),
+		);
+	}
+
+	/**
+	 * @testdox The wrapper declares productId, variation and scopeName together in the woocommerce namespace.
+	 */
+	public function test_wrapper_declares_woocommerce_scope_context(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%d} --><div class="wp-block-woocommerce-single-product"></div><!-- /wp:woocommerce/single-product -->',
+					$product->get_id()
+				)
+			);
+
+			$scope = $this->get_wrapper_scope_context( $markup );
+
+			$this->assertSame( 'woocommerce', $scope['namespace'] );
+			$this->assertSame( $product->get_id(), $scope['context']['productId'] );
+			$this->assertSame( array(), $scope['context']['variation'] );
+			$this->assertIsString( $scope['context']['scopeName'] );
+			$this->assertNotSame( '', $scope['context']['scopeName'] );
+			$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'No context should be declared in the retired woocommerce/products namespace.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * @testdox Two Single Product blocks for the same product receive different scopeName values and neither leaves a place open.
+	 */
+	public function test_two_single_product_blocks_for_same_product_get_different_scope_names(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			$block = sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%d} --><div class="wp-block-woocommerce-single-product"></div><!-- /wp:woocommerce/single-product -->',
+				$product->get_id()
+			);
+
+			$markup = do_blocks( $block . $block );
+
+			$processor   = new \WP_HTML_Tag_Processor( $markup );
+			$scope_names = array();
+			while ( $processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-single-product' ) ) ) {
+				list( , $json_context ) = explode( '::', $processor->get_attribute( 'data-wp-context' ), 2 );
+				$scope_names[]          = json_decode( $json_context, true )['scopeName'];
+			}
+
+			$this->assertCount( 2, $scope_names );
+			$this->assertNotSame( $scope_names[0], $scope_names[1], 'Two Single Product blocks for the same product should get different scopeName values.' );
+			$this->assertSame( '', ProductScopes::current_place(), 'No place should be left open after both blocks render.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * @testdox A Single Product block saved with no productId attribute still renders its wrapper's scopeName and leaves no place open.
+	 */
+	public function test_single_product_without_product_id_attribute_still_declares_scope(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			$this->go_to( get_permalink( $product->get_id() ) );
+
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product --><div class="wp-block-woocommerce-single-product"></div><!-- /wp:woocommerce/single-product -->' );
+
+			$scope = $this->get_wrapper_scope_context( $markup );
+
+			$this->assertSame( $product->get_id(), $scope['context']['productId'] );
+			$this->assertIsString( $scope['context']['scopeName'] );
+			$this->assertNotSame( '', $scope['context']['scopeName'] );
+			$this->assertSame( '', ProductScopes::current_place(), 'No place should be left open behind a productId-less block.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

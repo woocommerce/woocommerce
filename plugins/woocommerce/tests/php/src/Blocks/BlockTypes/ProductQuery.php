@@ -59,26 +59,33 @@ class ProductQuery extends \WP_UnitTestCase {
 			);
 		}
 
+		$scope_names = array();
+
 		foreach (
 			array(
 				'first-product'  => $product_ids[0],
 				'second-product' => $product_ids[1],
 			) as $item_id => $product_id
 		) {
-			$this->assertSame( 'woocommerce/products', $items[ $item_id ]['interactive'] );
+			$this->assertSame( 'woocommerce', $items[ $item_id ]['interactive'] );
 			$this->assertSame( 'product-item-' . $product_id, $items[ $item_id ]['key'] );
 			$context = $items[ $item_id ]['context'];
 			$this->assertIsString( $context );
 			list( $namespace, $json_context ) = explode( '::', $context, 2 );
-			$this->assertSame( 'woocommerce/products', $namespace );
-			$this->assertSame(
-				array(
-					'productId'   => $product_id,
-					'variationId' => null,
-				),
-				json_decode( $json_context, true )
-			);
+			$this->assertSame( 'woocommerce', $namespace );
+			$decoded_context = json_decode( $json_context, true );
+			$this->assertSame( $product_id, $decoded_context['productId'] );
+			$this->assertSame( array(), $decoded_context['variation'] );
+			$this->assertIsString( $decoded_context['scopeName'] );
+			$this->assertNotSame( '', $decoded_context['scopeName'] );
+			$scope_names[] = $decoded_context['scopeName'];
 		}
+
+		$this->assertSame(
+			$scope_names,
+			array_unique( $scope_names ),
+			'Two legacy Products items for different products should receive different scopeName values.'
+		);
 
 		foreach ( array( 'missing-id', 'malformed-id', 'non-product' ) as $item_id ) {
 			$this->assertNull( $items[ $item_id ]['interactive'], "$item_id should not become interactive." );
@@ -327,7 +334,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			$merged_query['tax_query']
 		);
 
-		$fn = function() {
+		$fn = function () {
 			return 'yes';
 		};
 
