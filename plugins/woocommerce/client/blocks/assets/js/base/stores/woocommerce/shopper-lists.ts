@@ -57,7 +57,6 @@ export type RawShopperListItem = {
 
 export type ShopperListState = {
 	items: RawShopperListItem[];
-	isLoading: boolean;
 };
 
 export type AddItemPayload = {
@@ -82,16 +81,11 @@ export type Store = {
 		lists: Record< string, ShopperListState >;
 	};
 	actions: {
-		loadList: ( slug: string ) => Promise< void >;
 		addItem: ( slug: string, payload: AddItemPayload ) => Promise< void >;
 		removeItem: ( slug: string, key: string ) => Promise< void >;
 		showNoticeError: ( error: Error ) => Promise< void >;
 	};
 };
-
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const isShopperListItem = ( value: unknown ): value is RawShopperListItem =>
 	!! value &&
@@ -104,7 +98,7 @@ const ensureListState = (
 ): ShopperListState => {
 	let list = state.lists[ slug ];
 	if ( ! list ) {
-		list = { items: [], isLoading: false };
+		list = { items: [] };
 		state.lists[ slug ] = list;
 	}
 	return list;
@@ -175,42 +169,6 @@ const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
-			*loadList( slug: string ): AsyncAction< void > {
-				const list = ensureListState( state, slug );
-				list.isLoading = true;
-
-				try {
-					const response = ( yield restRequest<
-						RawShopperListItem[]
-					>(
-						state,
-						`wc/store/v1/shopper-lists/${ encodeURIComponent(
-							slug
-						) }/items`,
-						{ method: 'GET' }
-					) ) as TypeYield<
-						typeof restRequest< RawShopperListItem[] >
-					>;
-
-					if ( ! Array.isArray( response ) ) {
-						throw new Error( 'Invalid shopper list response.' );
-					}
-
-					const items = response.filter( isShopperListItem );
-
-					// TODO: track in-flight mutation count and skip applying
-					// load results when mutations are pending, so a slow
-					// loadList cannot clobber a fresh add/remove.
-					list.items = items;
-				} catch ( error ) {
-					// No user trigger to attach a banner to; log for ops.
-					// eslint-disable-next-line no-console
-					console.error( error );
-				} finally {
-					list.isLoading = false;
-				}
-			},
-
 			*addItem(
 				slug: string,
 				payload: AddItemPayload
@@ -295,7 +253,9 @@ const { state, actions } = store< Store >(
 				const { actions: noticeActions } = store< StoreNotices >(
 					'woocommerce/store-notices',
 					{},
-					{ lock: universalLock }
+					{
+						lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+					}
 				);
 
 				noticeActions.addNotice( {
@@ -309,16 +269,16 @@ const { state, actions } = store< Store >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 // Listen for shopper-list item additions emitted from the wp.data side (e.g.
 // the cart store's saveForLater thunk). Mirrors the cart's iAPI → wp.data
 // sync direction, which also ships a payload (`from_iAPI` carries
 // `quantityChanges`). The event carries the saved item directly so we can
-// splice it in without an extra GET — keeps the merge ordering deterministic
-// and avoids the loadList-vs-mutation race the iAPI store's loadList still
-// has a TODO about.
+// splice it in without an extra GET.
 //
 // Keeps the discriminator + payload contract in sync with
 // `packages/public-api/block-data/cart/thunks.ts::saveForLater`.

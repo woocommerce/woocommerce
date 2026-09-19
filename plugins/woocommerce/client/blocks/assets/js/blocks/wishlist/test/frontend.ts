@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
+import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce';
 import type { RawShopperListItem } from '@woocommerce/stores/woocommerce/shopper-lists';
 
 type BlockActions = {
@@ -57,7 +57,7 @@ jest.mock(
 jest.mock( '@woocommerce/stores/woocommerce/shopper-lists', () => ( {} ), {
 	virtual: true,
 } );
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 jest.mock( '@woocommerce/sanitize', () => ( { sanitizeHTML: jest.fn() } ), {
@@ -232,5 +232,42 @@ describe( 'Wishlist onClickAddToCart', () => {
 		await runAction( actions.onClickAddToCart() );
 
 		expect( mockContext.pendingKeys[ 'list-key-1' ] ).toBeUndefined();
+	} );
+
+	it( 'posts quantity 1 with no quantityToAdd, type, or notice options for a simple product', async () => {
+		mockContext.listItem = makeListItem();
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		// A single-argument call is what keeps the cart-update notices
+		// showing: passing no `options` leaves `addCartItem`'s
+		// `showCartUpdatesNotices` default (`true`) in place.
+		expect( mockAddCartItem ).toHaveBeenCalledWith( {
+			id: 42,
+			quantity: 1,
+		} );
+	} );
+
+	it( 'forwards the mapped variation for a variable product, still with no quantityToAdd or type', async () => {
+		mockContext.listItem = makeListItem( {
+			variation_id: 99,
+			variation: [
+				{
+					raw_attribute: 'attribute_pa_color',
+					attribute: 'Color',
+					value: 'Red',
+				},
+			],
+		} );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		expect( mockAddCartItem ).toHaveBeenCalledWith( {
+			id: 42,
+			quantity: 1,
+			variation: [ { attribute: 'attribute_pa_color', value: 'Red' } ],
+		} );
 	} );
 } );

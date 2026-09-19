@@ -88,8 +88,7 @@ final class Wishlist extends AbstractBlock {
 				'nonce'   => wp_create_nonce( 'wc_store_api' ),
 				'lists'   => array(
 					self::LIST_SLUG => array(
-						'items'     => $items,
-						'isLoading' => false,
+						'items' => $items,
 					),
 				),
 			)

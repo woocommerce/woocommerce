@@ -7,10 +7,9 @@ import {
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/shopper-lists';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -20,9 +19,6 @@ import type {
  * Internal dependencies
  */
 import { matchVariationItem } from './match-variation-item';
-
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const LIST_SLUG = 'wishlist';
 
@@ -41,14 +37,6 @@ type BlockContext = {
 	isPending: boolean;
 };
 
-// The narrow slice of ATCWO's iAPI context this block consumes. Reuses
-// `SelectedAttributes` from the cart store — the same type ATCWO uses for
-// its own `selectedAttributes` context field — so any shape change there
-// (e.g. adding a `taxonomy` field) flows through here automatically.
-type ATCWOContext = {
-	selectedAttributes: SelectedAttributes[];
-};
-
 type BlockStore = {
 	state: {
 		effectiveProductId: number;
@@ -62,17 +50,21 @@ type BlockStore = {
 	};
 };
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
 		'woocommerce/shopper-lists',
 		{},
-		{ lock: universalLock }
+		{
+			lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+		}
 	);
 
 const { state } = store< BlockStore >(
@@ -80,22 +72,17 @@ const { state } = store< BlockStore >(
 	{
 		state: {
 			// For variable products, the effective product is the selected
-			// variation — resolved through the products store's
-			// `productInContext` derived getter, which already encapsulates
-			// "variation if one is selected, otherwise the parent." Returns
-			// 0 when the current resolution is still the variable parent
-			// (i.e. the shopper hasn't picked attributes yet), which
-			// `isDisabled` reads as "not yet selectable."
+			// variation — resolved through the shared product scope's
+			// `productVariation`, `null` while the shopper hasn't picked
+			// attributes yet, which `isDisabled` reads as "not yet
+			// selectable." For every other product type it's the scope's
+			// `baseProduct`.
 			get effectiveProductId(): number {
-				const product = productsState.productInContext;
-				if ( ! product ) {
-					return 0;
-				}
 				const context = getContext< BlockContext >();
-				if ( context.isVariableType && product.type === 'variable' ) {
-					return 0;
-				}
-				return product.id;
+				const product = context.isVariableType
+					? wooState.productScope.productVariation
+					: wooState.productScope.baseProduct;
+				return product?.id ?? 0;
 			},
 
 			get currentItem(): RawShopperListItem | null {
@@ -119,10 +106,7 @@ const { state } = store< BlockStore >(
 						list.items.find( ( item ) => item.id === id ) ?? null
 					);
 				}
-				const addToCartContext = getContext< ATCWOContext >(
-					'woocommerce/add-to-cart-with-options'
-				);
-				const selected = addToCartContext?.selectedAttributes ?? [];
+				const selected = wooState.productScope.variation;
 				return (
 					list.items.find( ( item ) =>
 						matchVariationItem( item, id, selected )
@@ -174,44 +158,32 @@ const { state } = store< BlockStore >(
 							existing.key
 						);
 					} else {
-						// We inherit ATCWO's iAPI context because this block
-						// is an inner block of ATCWO (enforced by
-						// `ancestor` in `block.json`). That lets us read
-						// the shopper-picked attributes — needed for
-						// variations with "any" slots, where the server
-						// can't resolve the line item without them.
+						// We read the shared product scope this block
+						// already sits in (enforced by `ancestor` in
+						// `block.json`, which keeps it inside ATCWO's form).
+						// That's how we get the shopper-picked attributes —
+						// needed for variations with "any" slots, where the
+						// server can't resolve the line item without them.
 						//
-						// ATCWO stores them by display label ("Color"), but
-						// the shopper-lists route expects taxonomy slugs
+						// The scope stores them by display label ("Color"),
+						// but the shopper-lists route expects taxonomy slugs
 						// ("pa_color"). Map via the parent product's
 						// `attributes` table; fall back to the raw name for
 						// non-taxonomy custom attributes.
-						//
-						// TODO: drop this mapping once ATCWO exposes the
-						// taxonomy on `selectedAttributes` directly.
-						const addToCartContext = getContext< ATCWOContext >(
-							'woocommerce/add-to-cart-with-options'
-						);
-						const parent = productsState.mainProductInContext;
+						const parent = wooState.productScope.baseProduct;
 						const attrMap = new Map< string, string >();
-						parent?.attributes?.forEach(
-							( a: {
-								name?: string;
-								taxonomy?: string | null;
-							} ) => {
-								if ( a.name ) {
-									attrMap.set( a.name, a.taxonomy || a.name );
-								}
+						parent?.attributes.forEach( ( a ) => {
+							if ( a.name ) {
+								attrMap.set( a.name, a.taxonomy || a.name );
 							}
+						} );
+						const variation = wooState.productScope.variation.map(
+							( { attribute, value } ) => ( {
+								attribute:
+									attrMap.get( attribute ) ?? attribute,
+								value,
+							} )
 						);
-						const variation =
-							addToCartContext?.selectedAttributes?.map(
-								( { attribute, value } ) => ( {
-									attribute:
-										attrMap.get( attribute ) ?? attribute,
-									value,
-								} )
-							) ?? [];
 						yield shopperListsActions.addItem( LIST_SLUG, {
 							product_id: id,
 							...( variation.length && { variation } ),
@@ -223,5 +195,7 @@ const { state } = store< BlockStore >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );

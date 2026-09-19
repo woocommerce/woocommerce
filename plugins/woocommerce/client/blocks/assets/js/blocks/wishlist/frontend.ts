@@ -9,15 +9,15 @@ import {
 	type AsyncAction,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/shopper-lists';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
 import type {
 	AddCartItemOutcome,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+	WooCommerceStore,
+} from '@woocommerce/stores/woocommerce';
 /**
  * Internal dependencies
  */
@@ -25,9 +25,6 @@ import {
 	swapPreformattedHtml,
 	LIST_ITEM_HTML_CONFIG,
 } from '../../base/utils/preformatted-html';
-
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const LIST_SLUG = 'wishlist';
 
@@ -66,13 +63,17 @@ const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
 		'woocommerce/shopper-lists',
 		{},
-		{ lock: universalLock }
+		{
+			lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+		}
 	);
 
-const { actions: cartActions } = store< WooCommerce >(
+const { actions: cartActions } = store< WooCommerceStore >(
 	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const decodeEntities = ( encoded: string ): string => {
@@ -119,7 +120,7 @@ store< BlockStore >(
 				if ( ! list ) {
 					return false;
 				}
-				return ! list.isLoading && list.items.length === 0;
+				return list.items.length === 0;
 			},
 
 			get isPriceHidden(): boolean {
@@ -218,8 +219,7 @@ store< BlockStore >(
 					// sum the cart ourselves.
 					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
-						quantityToAdd: 1,
-						type: isVariation ? 'variation' : 'simple',
+						quantity: 1,
 						...( isVariation && { variation } ),
 					} ) ) as AddCartItemOutcome;
 
@@ -261,5 +261,7 @@ store< BlockStore >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
