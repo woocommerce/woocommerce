@@ -787,6 +787,54 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Update-row notices are skipped while the last subscriptions fetch is still failing.
+	 */
+	public function test_update_row_notices_are_skipped_while_the_api_is_failing(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 500,
+				'message' => 'Server error',
+			),
+			HOUR_IN_SECONDS
+		);
+		$response = (object) array( 'id' => 'woocommerce-com-123' );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription( $this->woo_plugin_data(), $response );
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions( $this->woo_plugin_data(), $response );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output, 'The update row must not claim a subscription is missing on a stale list.' );
+	}
+
+	/**
+	 * @testdox One plugin row reads the subscription list once.
+	 */
+	public function test_subscription_notice_reads_the_subscription_list_once(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
+
+		$reads   = 0;
+		$counter = function ( $pre ) use ( &$reads ) {
+			++$reads;
+			return $pre;
+		};
+
+		add_filter( 'pre_transient__woocommerce_helper_subscriptions', $counter );
+		try {
+			$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+		} finally {
+			remove_filter( 'pre_transient__woocommerce_helper_subscriptions', $counter );
+		}
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'The row still renders its notice.' );
+		$this->assertSame( 1, $reads, 'Filtering the whole list twice per row is wasted work on a screen full of extensions.' );
+	}
+
+	/**
 	 * @testdox Subscription notice is skipped for a subscription that needs no action.
 	 */
 	public function test_subscription_notice_is_skipped_for_a_healthy_subscription(): void {

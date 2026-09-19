@@ -450,21 +450,58 @@ class WC_Helper_Updater {
 			return;
 		}
 
-		// While the last subscriptions fetch is still failing, the list is stale or empty, so a
-		// missing subscription would be a guess rather than a fact.
-		if ( null !== WC_Helper::get_api_error() ) {
-			return;
-		}
-
-		$notice = WC_Helper::has_product_subscription( $product_id )
-			? self::get_renewal_notice( $product_id, self::CAMPAIGN_PLUGIN_ROW )
-			: self::get_purchase_notice( $product_id, self::get_product_page_url( $plugin_file ), self::CAMPAIGN_PLUGIN_ROW );
-
+		$notice = self::get_subscription_notice( $product_id, self::get_product_page_url( $plugin_file ), self::CAMPAIGN_PLUGIN_ROW );
 		if ( '' === $notice ) {
 			return;
 		}
 
 		self::print_plugin_row_notice( $plugin_file, 'woo-subscription-notice', $notice );
+	}
+
+	/**
+	 * Message for a product's subscription state, or an empty string when there is nothing to say.
+	 *
+	 * Resolves the product's subscriptions once and hands them to whichever message needs them,
+	 * so a screen full of WooCommerce.com plugins doesn't filter the whole list twice per row.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $product_id       WooCommerce.com product ID.
+	 * @param string $product_page_url WooCommerce.com product page URL, or an empty string.
+	 * @param string $campaign_prefix  Prefix for the link's utm_campaign value.
+	 *
+	 * @return string
+	 */
+	private static function get_subscription_notice( int $product_id, string $product_page_url, string $campaign_prefix ): string {
+		// While the last subscriptions fetch is still failing, the list is stale or empty, so a
+		// missing subscription would be a guess rather than a fact.
+		if ( null !== WC_Helper::get_api_error() ) {
+			return '';
+		}
+
+		$subscriptions = self::get_subscriptions_for_product( $product_id );
+		if ( empty( $subscriptions ) ) {
+			return self::get_purchase_notice( $product_id, $product_page_url, $campaign_prefix );
+		}
+
+		return self::get_renewal_notice( $subscriptions, $campaign_prefix );
+	}
+
+	/**
+	 * Every subscription the account holds for a product.
+	 *
+	 * Read straight from get_subscriptions() so the per-request static caches in
+	 * get_installed_subscriptions() and get_unconnected_subscriptions() don't pin the first
+	 * result for the rest of the request.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int $product_id WooCommerce.com product ID.
+	 *
+	 * @return array
+	 */
+	private static function get_subscriptions_for_product( int $product_id ): array {
+		return wp_list_filter( WC_Helper::get_subscriptions(), array( 'product_id' => $product_id ) );
 	}
 
 	/**
@@ -541,13 +578,13 @@ class WC_Helper_Updater {
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param int    $product_id      WooCommerce.com product ID.
+	 * @param array  $subscriptions   Every subscription the account holds for the product.
 	 * @param string $campaign_prefix Prefix for the link's utm_campaign value.
 	 *
 	 * @return string
 	 */
-	private static function get_renewal_notice( int $product_id, string $campaign_prefix ): string {
-		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions_for_product( $product_id );
+	private static function get_renewal_notice( array $subscriptions, string $campaign_prefix ): string {
+		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions( $subscriptions );
 
 		if ( ! empty( $expired_subscription ) ) {
 			return sprintf(
@@ -702,19 +739,14 @@ class WC_Helper_Updater {
 	 * because renewing and buying can be done from any store. Nothing is returned while another
 	 * subscription still covers the product, so a store that keeps its updates stays quiet.
 	 *
-	 * Read straight from get_subscriptions() so the per-request static caches in
-	 * get_installed_subscriptions() and get_unconnected_subscriptions() don't pin the first
-	 * result for the rest of the request.
-	 *
 	 * @since 11.2.0
 	 *
-	 * @param int $product_id WooCommerce.com product ID.
+	 * @param array $subscriptions Every subscription the account holds for the product.
 	 *
 	 * @return array A pair of subscriptions, each an array or false: the expired one, then the
 	 *               lapsing one without auto-renew.
 	 */
-	private static function get_renewable_subscriptions_for_product( $product_id ): array {
-		$subscriptions = wp_list_filter( WC_Helper::get_subscriptions(), array( 'product_id' => $product_id ) );
+	private static function get_renewable_subscriptions( array $subscriptions ): array {
 		if ( empty( $subscriptions ) ) {
 			return array( false, false );
 		}
@@ -757,11 +789,11 @@ class WC_Helper_Updater {
 	 */
 	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
 		$product_id = self::get_product_id_from_update_response( $response );
-		if ( 0 === $product_id ) {
+		if ( 0 === $product_id || null !== WC_Helper::get_api_error() ) {
 			return;
 		}
 
-		self::print_update_row_message( self::get_renewal_notice( $product_id, self::CAMPAIGN_UPDATE_ROW ) );
+		self::print_update_row_message( self::get_renewal_notice( self::get_subscriptions_for_product( $product_id ), self::CAMPAIGN_UPDATE_ROW ) );
 	}
 
 	/**
@@ -776,7 +808,12 @@ class WC_Helper_Updater {
 	 */
 	public static function display_notice_for_plugins_without_subscription( $plugin_data, $response ) {
 		$product_id = self::get_product_id_from_update_response( $response );
-		if ( 0 === $product_id || WC_Helper::has_product_subscription( $product_id ) ) {
+		if ( 0 === $product_id || null !== WC_Helper::get_api_error() ) {
+			return;
+		}
+
+		// An empty list after a failed fetch would be a guess, which the guard above rules out.
+		if ( ! empty( self::get_subscriptions_for_product( $product_id ) ) ) {
 			return;
 		}
 
