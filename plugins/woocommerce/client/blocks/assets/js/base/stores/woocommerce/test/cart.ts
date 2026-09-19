@@ -56,10 +56,10 @@ jest.mock(
 		getConfig: jest.fn(),
 		getContext: jest.fn( () => mockContext ),
 		// `notices.ts` pulls in `does-cart-item-match-attributes.ts`, which
-		// registers the (untouched, unrelated) `woocommerce/products` store
-		// as a side effect of module load. `cart-actions.ts` itself never
-		// calls `store()` — see `bindCartState`'s docblock — so this generic
-		// stand-in only ever backs that one incidental registration.
+		// calls `store()` for its own read of `state.products` /
+		// `state.productVariations`. `cart-actions.ts` itself never calls
+		// `store()` — see `bindCartState`'s docblock — so this generic
+		// stand-in only ever backs that one incidental call.
 		store: jest.fn( () => ( {
 			state: { products: {}, productVariations: {} },
 			actions: {},

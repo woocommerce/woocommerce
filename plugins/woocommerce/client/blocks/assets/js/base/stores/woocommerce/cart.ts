@@ -8,11 +8,10 @@
  * `blocks/add-to-cart-with-options/frontend.ts` and its
  * `grouped-product-selector`, `blocks/wishlist/frontend.ts`,
  * `blocks/saved-for-later/frontend.ts`, `blocks/add-to-wishlist-button/frontend.ts`,
- * `blocks/product-gallery/types.ts`, and
- * `base/utils/variations/does-cart-item-match-attributes.ts` — keep
- * compiling and, at run time, load the one unified store instead of
- * registering the `woocommerce` namespace a second time. T18 deletes this
- * file once every consumer migrates to `@woocommerce/stores/woocommerce`.
+ * and `blocks/product-gallery/types.ts` — keep compiling and, at run time,
+ * load the one unified store instead of registering the `woocommerce`
+ * namespace a second time. T18 deletes this file once every consumer
+ * migrates to `@woocommerce/stores/woocommerce`.
  */
 
 /**

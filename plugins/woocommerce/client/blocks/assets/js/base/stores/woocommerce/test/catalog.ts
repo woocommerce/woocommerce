@@ -94,12 +94,22 @@ describe( 'woocommerce store — catalog layer', () => {
 
 	describe( 'store registration', () => {
 		it( 'registers the woocommerce store exactly once, with the shared acknowledgement string', () => {
-			const woocommerceCalls = ( store as jest.Mock ).mock.calls.filter(
-				( [ namespace ] ) => namespace === 'woocommerce'
+			// A consumer this require graph pulls in — e.g.
+			// `does-cart-item-match-attributes.ts`, via `notices.ts` —
+			// also calls `store( 'woocommerce', {}, { lock } )` to retrieve
+			// the already-registered store. That is a read, not a second
+			// registration, so it is excluded by requiring a non-empty
+			// definition.
+			const woocommerceRegistrations = (
+				store as jest.Mock
+			 ).mock.calls.filter(
+				( [ namespace, definition ] ) =>
+					namespace === 'woocommerce' &&
+					( definition?.state || definition?.actions )
 			);
 
-			expect( woocommerceCalls ).toHaveLength( 1 );
-			expect( woocommerceCalls[ 0 ][ 2 ] ).toEqual( {
+			expect( woocommerceRegistrations ).toHaveLength( 1 );
+			expect( woocommerceRegistrations[ 0 ][ 2 ] ).toEqual( {
 				lock: universalLock,
 			} );
 		} );
