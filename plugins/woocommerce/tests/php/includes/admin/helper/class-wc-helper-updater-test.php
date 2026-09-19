@@ -958,6 +958,144 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Renewal notice renders for an expired subscription attached to another store.
+	 */
+	public function test_subscription_notice_renders_renewal_for_a_subscription_expired_elsewhere(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'     => true,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'Renewing can be started from any store.' );
+		$this->assertStringContainsString( 'renew_product=123', $output );
+	}
+
+	/**
+	 * @testdox Renewal notice is skipped while another subscription still covers the product.
+	 */
+	public function test_subscription_notice_is_skipped_when_another_subscription_is_active(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription( array( 'expired' => true ) ),
+				$this->subscription( array( 'connections' => array( 45 ) ) ),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'The product is still covered, so the expired one needs no action.' );
+	}
+
+	/**
+	 * @testdox A lifetime subscription keeps the product covered.
+	 */
+	public function test_subscription_notice_is_skipped_for_a_lifetime_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'  => true,
+						'lifetime' => true,
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'A lifetime subscription never lapses.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice is skipped while another subscription outlives the lapsing one.
+	 */
+	public function test_subscription_notice_is_skipped_when_another_subscription_outlives_the_lapsing_one(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+					)
+				),
+				$this->subscription( array( 'connections' => array( 45 ) ) ),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Coverage continues after the lapsing subscription ends.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice renders when every subscription is lapsing.
+	 */
+	public function test_subscription_notice_renders_autorenew_when_every_subscription_is_lapsing(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => strtotime( '2030-03-03' ),
+					)
+				),
+				$this->subscription(
+					array(
+						'expiring'    => true,
+						'autorenew'   => false,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3rd.', $output );
+		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output );
+	}
+
+	/**
+	 * @testdox The update-row message renews a subscription attached to another store too.
+	 */
+	public function test_update_row_notice_renews_a_subscription_expired_elsewhere(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'     => true,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+	}
+
+	/**
 	 * A subscription record as the WooCommerce.com API returns it.
 	 *
 	 * @param array $overrides Fields to override on the default record.

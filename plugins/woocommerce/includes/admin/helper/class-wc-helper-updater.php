@@ -686,58 +686,55 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Expired and expiring subscriptions the connected account holds for a product.
+	 * Expired and lapsing subscriptions for a product that the merchant should act on.
 	 *
-	 * Looks at connected and unconnected subscriptions alike, since a store can hold a subscription
-	 * it hasn't attached to this site.
+	 * Every subscription the account holds for the product counts, wherever it is connected,
+	 * because renewing and buying can be done from any store. Nothing is returned while another
+	 * subscription still covers the product, so a store that keeps its updates stays quiet.
+	 *
+	 * Read straight from get_subscriptions() so the per-request static caches in
+	 * get_installed_subscriptions() and get_unconnected_subscriptions() don't pin the first
+	 * result for the rest of the request.
 	 *
 	 * @since 11.2.0
 	 *
 	 * @param int $product_id WooCommerce.com product ID.
 	 *
 	 * @return array A pair of subscriptions, each an array or false: the expired one, then the
-	 *               expiring one without auto-renew.
+	 *               lapsing one without auto-renew.
 	 */
 	private static function get_renewable_subscriptions_for_product( $product_id ): array {
-		$auth    = WC_Helper_Options::get( 'auth' );
-		$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
-		if ( 0 === $site_id ) {
-			return array( false, false );
-		}
-
-		// The same set as get_installed_subscriptions() plus get_unconnected_subscriptions(), read
-		// straight from get_subscriptions() so the per-request static caches in those two don't pin
-		// the first result for the rest of the request.
-		$subscriptions = array_filter(
-			wp_list_filter( WC_Helper::get_subscriptions(), array( 'product_id' => $product_id ) ),
-			function ( $subscription ) use ( $site_id ) {
-				return empty( $subscription['connections'] ) || in_array( $site_id, $subscription['connections'], true );
-			}
-		);
-
+		$subscriptions = wp_list_filter( WC_Helper::get_subscriptions(), array( 'product_id' => $product_id ) );
 		if ( empty( $subscriptions ) ) {
 			return array( false, false );
 		}
 
-		$expired = current(
-			array_filter(
-				$subscriptions,
-				function ( $subscription ) {
-					return ! empty( $subscription['expired'] ) && ! $subscription['lifetime'];
-				}
-			)
+		// A lifetime subscription never lapses, so an expired flag on one is nothing to act on.
+		$active = array_filter(
+			$subscriptions,
+			function ( $subscription ) {
+				return empty( $subscription['expired'] ) || ! empty( $subscription['lifetime'] );
+			}
 		);
 
-		$expiring = current(
-			array_filter(
-				$subscriptions,
-				function ( $subscription ) {
-					return ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'];
-				}
-			)
+		// Nothing covers the product any more, so renewing is what restores updates.
+		if ( empty( $active ) ) {
+			return array( current( $subscriptions ), false );
+		}
+
+		$lapsing = array_filter(
+			$active,
+			function ( $subscription ) {
+				return ! empty( $subscription['expiring'] ) && empty( $subscription['autorenew'] );
+			}
 		);
 
-		return array( $expired, $expiring );
+		// One subscription that outlives the others keeps the product covered.
+		if ( count( $lapsing ) !== count( $active ) ) {
+			return array( false, false );
+		}
+
+		return array( false, current( $lapsing ) );
 	}
 
 	/**
