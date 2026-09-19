@@ -49,9 +49,13 @@ jest.mock(
 				// resolves it.
 				mockRegisteredStore ??= { state: {} as CatalogState };
 				if ( definition?.state ) {
-					Object.assign(
+					// `Object.defineProperties` (not `Object.assign`)
+					// preserves accessor properties (e.g. the scope layer's
+					// `productScope` getter) as live getters instead of
+					// invoking them once and freezing the result.
+					Object.defineProperties(
 						mockRegisteredStore.state,
-						definition.state
+						Object.getOwnPropertyDescriptors( definition.state )
 					);
 				}
 				return mockRegisteredStore;
