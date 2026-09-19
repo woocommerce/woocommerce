@@ -151,7 +151,6 @@ class MiniCart extends \WP_UnitTestCase {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 
@@ -160,6 +159,11 @@ class MiniCart extends \WP_UnitTestCase {
 		if ( $this->original_block_type ) {
 			$registry->register( $this->original_block_type );
 		}
+
+		// parent::tearDown() must run last: it issues the transaction ROLLBACK,
+		// so any database work above stays inside the test's own transaction
+		// instead of opening a fresh one that never gets closed.
+		parent::tearDown();
 	}
 
 	/**
