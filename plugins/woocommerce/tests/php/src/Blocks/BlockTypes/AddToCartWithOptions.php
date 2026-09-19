@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
@@ -35,6 +36,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		ProductScopes::reset();
 
 		if ( ! self::$are_blocks_registered ) {
 			// We need to register the blocks after set up. They are no registered
@@ -756,6 +759,325 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		} finally {
 			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
+		}
+	}
+
+	/**
+	 * Extract, for every `<form>` in document order, whether it declares its
+	 * own `woocommerce` scope context and, when it does, that context decoded.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return array<int, array{declares_scope: bool, context: ?array}>
+	 */
+	private function get_form_context_declarations( string $markup ): array {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$forms     = array();
+
+		while ( $processor->next_tag( 'form' ) ) {
+			$context        = $processor->get_attribute( 'data-wp-context' );
+			$declares_scope = false;
+			$decoded        = null;
+
+			if ( is_string( $context ) ) {
+				if ( 0 === strpos( $context, 'woocommerce::' ) ) {
+					$declares_scope = true;
+					$decoded        = json_decode( substr( $context, strlen( 'woocommerce::' ) ), true );
+				} else {
+					$decoded = json_decode( $context, true );
+				}
+			}
+
+			$forms[] = array(
+				'declares_scope' => $declares_scope,
+				'context'        => $decoded,
+			);
+		}
+
+		return $forms;
+	}
+
+	/**
+	 * Build hand-picked Product Collection markup showing a single product, embedding the given inner block markup
+	 * inside its Product Template.
+	 *
+	 * @param int    $product_id  Product ID to hand-pick.
+	 * @param string $inner_block Inner block markup rendered for the tile.
+	 * @param int    $query_id    The collection's queryId, so two collections on one page are distinguishable.
+	 * @return string Product Collection block markup.
+	 */
+	private function get_product_collection_markup_with_inner_block( int $product_id, string $inner_block, int $query_id = 0 ): string {
+		$attributes = array(
+			'queryId'    => $query_id,
+			'query'      => array(
+				'perPage'                       => 1,
+				'pages'                         => 1,
+				'offset'                        => 0,
+				'postType'                      => 'product',
+				'order'                         => 'asc',
+				'orderBy'                       => 'post__in',
+				'search'                        => '',
+				'exclude'                       => array(),
+				'inherit'                       => false,
+				'taxQuery'                      => array(),
+				'isProductCollectionBlock'      => true,
+				'featured'                      => false,
+				'woocommerceOnSale'             => false,
+				'woocommerceStockStatus'        => array( 'instock' ),
+				'woocommerceAttributes'         => array(),
+				'woocommerceHandPickedProducts' => array( $product_id ),
+				'filterable'                    => false,
+			),
+			'collection' => 'woocommerce/product-collection/hand-picked',
+		);
+
+		return sprintf(
+			'<!-- wp:woocommerce/product-collection %1$s -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+%2$s
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection -->',
+			wp_json_encode( $attributes ),
+			$inner_block
+		);
+	}
+
+	/**
+	 * @testdox The first form for a product in a place declares no scope; a second form for the same product in the same place declares its own.
+	 */
+	public function test_first_form_declares_nothing_second_declares_own_scope(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$product_id
+				)
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 2, $forms );
+			$this->assertFalse( $forms[0]['declares_scope'], 'The first form in a place should declare no scope of its own.' );
+			$this->assertTrue( $forms[1]['declares_scope'], 'A second form for the same product in the same place should declare its own scope.' );
+			$this->assertSame( $product_id, $forms[1]['context']['productId'] );
+			$this->assertIsString( $forms[1]['context']['scopeName'] );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A form in each of two Single Product blocks for the same product renders no scopeName on either.
+	 */
+	public function test_forms_in_two_single_product_blocks_for_same_product_declare_nothing(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$block  = sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+				$product_id
+			);
+			$markup = do_blocks( $block . $block );
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 2, $forms );
+			$this->assertFalse( $forms[0]['declares_scope'] );
+			$this->assertFalse( $forms[1]['declares_scope'] );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A form in each of two collection tiles for the same product renders no scopeName on either.
+	 */
+	public function test_forms_in_two_collection_tiles_for_same_product_declare_nothing(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$inner_block = '<!-- wp:woocommerce/single-product --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->';
+
+			$markup = do_blocks(
+				$this->get_product_collection_markup_with_inner_block( $product_id, $inner_block, 0 )
+				. $this->get_product_collection_markup_with_inner_block( $product_id, $inner_block, 1 )
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 2, $forms );
+			$this->assertFalse( $forms[0]['declares_scope'] );
+			$this->assertFalse( $forms[1]['declares_scope'] );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A template form rendered beside a Single Product block for the page's product declares no scope on either.
+	 */
+	public function test_template_form_beside_single_product_block_declares_nothing_on_either(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$this->go_to( get_permalink( $product_id ) );
+
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$product_id
+				)
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 2, $forms );
+			$this->assertFalse( $forms[0]['declares_scope'], 'The template-level form should declare no scope of its own.' );
+			$this->assertFalse( $forms[1]['declares_scope'], 'The form inside the Single Product block should declare no scope of its own.' );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox No rendered form carries a selectedAttributes context key, and a variation product's attributes appear as the declared scope's variation.
+	 */
+	public function test_no_selected_attributes_key_and_variation_appears_in_declared_scope(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Variation Scope Product' );
+		$product->set_attributes(
+			array( \WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) ) )
+		);
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+
+		try {
+			// Two forms directly for the variation in the same place, so the second declares its own scope.
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$variation->get_id()
+				)
+			);
+
+			$this->assertStringNotContainsString( 'selectedAttributes', $markup, 'No rendered form should carry a selectedAttributes context key.' );
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 2, $forms );
+			$this->assertTrue( $forms[1]['declares_scope'] );
+			$this->assertSame(
+				array(
+					array(
+						'attribute' => 'attribute_pa_color',
+						'value'     => 'blue',
+					),
+				),
+				$forms[1]['context']['variation']
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A grouped form's own context carries groupedScopeNames listing its children's scope names, in groupedProductIds order, matching each row's own scopeName.
+	 */
+	public function test_grouped_form_context_carries_grouped_scope_names_matching_child_rows(): void {
+		$child_a = new \WC_Product_Simple();
+		$child_a->set_regular_price( 10 );
+		$child_a_id = $child_a->save();
+
+		$child_b = new \WC_Product_Simple();
+		$child_b->set_regular_price( 20 );
+		$child_b_id = $child_b->save();
+
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_children( array( $child_a_id, $child_b_id ) );
+		$grouped_id = $grouped->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$grouped_id
+				)
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+			$this->assertCount( 1, $forms );
+			$this->assertArrayHasKey( 'groupedScopeNames', $forms[0]['context'] );
+			$this->assertArrayNotHasKey( 'selectedAttributes', $forms[0]['context'] );
+
+			// Collect each child row's own scopeName from the `woocommerce` context on its row wrapper.
+			$processor              = new \WP_HTML_Tag_Processor( $markup );
+			$scope_name_by_child_id = array();
+			while ( $processor->next_tag() ) {
+				$context = $processor->get_attribute( 'data-wp-context' );
+				if ( ! is_string( $context ) || 0 !== strpos( $context, 'woocommerce::' ) ) {
+					continue;
+				}
+				$decoded = json_decode( substr( $context, strlen( 'woocommerce::' ) ), true );
+				if ( in_array( $decoded['productId'], array( $child_a_id, $child_b_id ), true ) ) {
+					$scope_name_by_child_id[ $decoded['productId'] ] = $decoded['scopeName'];
+				}
+			}
+
+			$this->assertCount( 2, $scope_name_by_child_id );
+			$this->assertNotSame( $scope_name_by_child_id[ $child_a_id ], $scope_name_by_child_id[ $child_b_id ] );
+
+			$expected_scope_names = array_map(
+				function ( $child_id ) use ( $scope_name_by_child_id ) {
+					return $scope_name_by_child_id[ $child_id ];
+				},
+				$forms[0]['context']['groupedProductIds']
+			);
+
+			$this->assertSame( $expected_scope_names, $forms[0]['context']['groupedScopeNames'] );
+		} finally {
+			$grouped->delete( true );
+			$child_a->delete( true );
+			$child_b->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Rendering the same page twice, resetting the scope helper between passes, yields the same scopeName values in the same places.
+	 */
+	public function test_rendering_same_page_twice_yields_same_scope_names(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$block = sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+				$product_id
+			);
+
+			$first_pass = $this->get_form_context_declarations( do_blocks( $block ) );
+			ProductScopes::reset();
+			$second_pass = $this->get_form_context_declarations( do_blocks( $block ) );
+
+			$this->assertSame( $first_pass[1]['context']['scopeName'], $second_pass[1]['context']['scopeName'] );
+		} finally {
+			$product->delete( true );
 		}
 	}
 }

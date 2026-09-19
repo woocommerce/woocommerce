@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -149,7 +150,8 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
-	 * Modifies the block context for product button blocks when inside the Add to Cart + Options block.
+	 * Modifies the block context for product button blocks when inside the Add to Cart + Options block, and
+	 * forwards the form's name to every inner block rendered through do_blocks() (see render()).
 	 *
 	 * @param array $context The block context.
 	 * @param array $block   The parsed block.
@@ -159,6 +161,8 @@ class AddToCartWithOptions extends AbstractBlock {
 		if ( 'woocommerce/product-button' === $block['blockName'] ) {
 			$context['woocommerce/isDescendantOfAddToCartWithOptions'] = true;
 		}
+
+		$context['formName'] = ProductScopes::get_current_form_name();
 
 		return $context;
 	}
@@ -247,6 +251,10 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$product_id = $product->get_id();
 
+			$form_scope     = ProductScopes::name_form( array( ProductScopes::current_place(), $product_id ) );
+			$form_name      = $form_scope['name'];
+			$declares_scope = $form_scope['declares'];
+
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
@@ -300,9 +308,12 @@ class AddToCartWithOptions extends AbstractBlock {
 				'validationErrors' => array(),
 			);
 
-			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$context['selectedAttributes'] = array();
+			// The initial variation, empty when the product has none. It becomes
+			// part of the scope element's declared context below, never a
+			// context key of its own.
+			$variation = array();
 
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				// Load all variations into the shared store with full REST API data.
 				$variations = wc_interactivity_api_load_variations(
 					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
@@ -318,7 +329,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
 				$variation_attributes = $product->get_variation_attributes();
-				$formatted_attributes = array_map(
+				$variation            = array_map(
 					function ( $key, $value ) {
 						return [
 							'attribute' => $key,
@@ -328,8 +339,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					array_keys( $variation_attributes ),
 					$variation_attributes
 				);
-
-				$context['selectedAttributes'] = $formatted_attributes;
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Load purchasable child products into the shared store with full REST API data.
 				$child_products = wc_interactivity_api_load_purchasable_child_products(
@@ -338,6 +347,15 @@ class AddToCartWithOptions extends AbstractBlock {
 				);
 
 				$context['groupedProductIds'] = array_keys( $child_products );
+
+				// Each child row's scope name, in groupedProductIds order, so the
+				// form-level add button can address a child's own scope.
+				$context['groupedScopeNames'] = array_map(
+					function ( $child_product_id ) use ( $form_name ) {
+						return ProductScopes::get_grouped_child_scope_name( $form_name, $child_product_id );
+					},
+					$context['groupedProductIds']
+				);
 
 				// Add quantity context for purchasable child products.
 				$context['quantity'] = array_fill_keys(
@@ -539,7 +557,9 @@ class AddToCartWithOptions extends AbstractBlock {
 			// Because we are printing the template part using do_blocks, context from the outside is lost.
 			// This filter is used to add the isDescendantOfAddToCartWithOptions context back.
 			add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ), 10, 2 );
+			ProductScopes::set_current_form_name( $form_name );
 			$template_part_blocks = do_blocks( $template_part_contents );
+			ProductScopes::clear_current_form_name();
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
 
 			$wrapper_attributes = array(
@@ -597,40 +617,61 @@ class AddToCartWithOptions extends AbstractBlock {
 				</div>';
 			}
 
-			$form_html = sprintf(
-				'<form %1$s %2$s>%3$s%4$s%5$s%6$s</form>',
-				get_block_wrapper_attributes(
-					array_merge(
-						$wrapper_attributes,
-						$form_attributes,
-						array(
-							'class' => implode(
-								' ',
-								array_filter(
-									array(
-										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
-										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
-										// Add the `is-layout-flow` class so inner elements automatically get the
-										// default vertical margin from the theme. That's especially useful for
-										// elements added by extensions like express payment method buttons.
-										// In the future, we want to use `supports.layout` in block.json instead
-										// of hardcoding the class here. However, right now that wouldn't work
-										// because the wrapper element of the block is the notices `<div>`, so the
-										// `is-layout-flow` class would be applied to the notices container instead
-										// of the `<form>` as we want.
-										'is-layout-flow',
-									)
+			$form_wrapper_attributes = get_block_wrapper_attributes(
+				array_merge(
+					$wrapper_attributes,
+					$form_attributes,
+					array(
+						'class' => implode(
+							' ',
+							array_filter(
+								array(
+									isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
+									isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
+									// Add the `is-layout-flow` class so inner elements automatically get the
+									// default vertical margin from the theme. That's especially useful for
+									// elements added by extensions like express payment method buttons.
+									// In the future, we want to use `supports.layout` in block.json instead
+									// of hardcoding the class here. However, right now that wouldn't work
+									// because the wrapper element of the block is the notices `<div>`, so the
+									// `is-layout-flow` class would be applied to the notices container instead
+									// of the `<form>` as we want.
+									'is-layout-flow',
 								)
-							),
-						)
+							)
+						),
 					)
-				),
-				$context_directive,
-				$hooks_before,
-				$template_part_blocks,
-				$hooks_after,
-				$hidden_input
+				)
 			);
+
+			$form_inner_html = $hooks_before . $template_part_blocks . $hooks_after . $hidden_input;
+
+			if ( $declares_scope ) {
+				// This form is not the first for its product in this place, so it
+				// declares its own product scope directly on the <form> element
+				// (D5). Its own store context moves to a wrapping element,
+				// since an element can declare context for only one
+				// Interactivity API namespace.
+				$scope_context_directive = wp_interactivity_data_wp_context(
+					ProductScopes::get_scope_context( $product_id, $variation, $form_name ),
+					'woocommerce'
+				);
+
+				$form_html = sprintf(
+					'<form %1$s %2$s><div %3$s>%4$s</div></form>',
+					$form_wrapper_attributes,
+					$scope_context_directive,
+					$context_directive,
+					$form_inner_html
+				);
+			} else {
+				$form_html = sprintf(
+					'<form %1$s %2$s>%3$s</form>',
+					$form_wrapper_attributes,
+					$context_directive,
+					$form_inner_html
+				);
+			}
 
 			ob_start();
 
