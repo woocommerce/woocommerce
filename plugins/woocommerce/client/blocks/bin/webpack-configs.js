@@ -72,6 +72,7 @@ const getSharedPlugins = ( {
 			} ),
 		new DependencyExtractionWebpackPlugin( {
 			injectPolyfill: true,
+			bundledPackages: [ '@woocommerce/input-mask' ],
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
 			requestToExternal: dependencyRequestToExternal,
