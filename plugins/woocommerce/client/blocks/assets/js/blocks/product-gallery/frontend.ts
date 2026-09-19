@@ -9,8 +9,8 @@ import {
 	withSyncEvent,
 	getConfig,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -23,10 +23,6 @@ import type {
 import { checkOverflow } from './utils';
 import { subscribeLegacyJQueryFormVariations } from './legacy-jquery-form';
 import { SELECTORS, CLASSES } from './constants';
-
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
@@ -364,13 +360,15 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
-const lastSeenVariationId = new Map< string, number | null | undefined >();
+const lastSeenVariationId = new Map< string, number | undefined >();
 
 const productGallery = {
 	state: {
@@ -653,11 +651,11 @@ const productGallery = {
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
-		 * `productsState.variationId` changes.
+		 * the gallery's own scope's selected variation changes.
 		 */
 		listenToProductDataChanges: () => {
 			const context = getContext();
-			const variationId = productsState.variationId;
+			const variationId = wooState.productScope.productVariation?.id;
 			const prevVariationId = lastSeenVariationId.get(
 				context.productId
 			);
@@ -673,7 +671,7 @@ const productGallery = {
 
 			lastSeenVariationId.set( context.productId, variationId );
 
-			const product = productsState.mainProductInContext;
+			const product = wooState.productScope.baseProduct;
 			if ( ! product ) {
 				return;
 			}
@@ -942,7 +940,9 @@ const productGallery = {
 		// See https://github.com/woocommerce/woocommerce/issues/59810.
 		hideGhostOverflow: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return;
+			if ( ! element ) {
+				return;
+			}
 
 			const { clientWidth, scrollWidth } = element;
 
