@@ -10,12 +10,12 @@ import {
 	useRef,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/store-notices';
 import type {
-	Store as WooCommerce,
+	WooCommerceStore,
 	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
@@ -33,9 +33,6 @@ import {
 	buildCartItemDataAttr,
 } from './utils/item-data';
 import type { ItemData, CartItemDataAttr } from './utils/item-data';
-
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const {
 	currency,
@@ -168,10 +165,12 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		  ).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
-const { state: woocommerceState, actions } = store< WooCommerce >(
+const { state: woocommerceState, actions } = store< WooCommerceStore >(
 	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
@@ -185,7 +184,9 @@ const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 const { state } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 store< MiniCart >(
@@ -411,7 +412,9 @@ store< MiniCart >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 /**
@@ -449,14 +452,12 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id, key, variation },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem = ( woocommerceState.findItemInCart( {
-					id,
-					key,
-					variation,
-				} ) || {} ) as CartItem;
+				const cartItem = ( woocommerceState.findProductScope( {
+					cartItemKey: key,
+				} ).cartItem || {} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
 				cartItem.item_data = cartItem.item_data || [];
@@ -869,18 +870,9 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateCartItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -891,36 +883,18 @@ const { state: cartItemState } = store(
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateCartItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateCartItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
