@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationDescriptionMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
@@ -44,6 +45,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			// on `init` because `init` is called with a classic theme.
 			new AddToCartWithOptionsMock();
 			new AddToCartWithOptionsQuantitySelectorMock();
+			new AddToCartWithOptionsVariationDescriptionMock();
 			new AddToCartWithOptionsGroupedProductSelectorMock();
 			new AddToCartWithOptionsGroupedProductItemMock();
 			new AddToCartWithOptionsGroupedProductItemSelectorMock();
@@ -686,6 +688,65 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 				"The quantity selector wrapper includes the configured {$border_radius}."
 			);
 		}
+	}
+
+	/**
+	 * @testdox The Quantity Selector block binds its min/max/step attributes to the unified store's productScope.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::render
+	 */
+	public function test_quantity_selector_binds_min_max_step_to_the_unified_product_scope(): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		\WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$markup = do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector /--><!-- /wp:woocommerce/single-product -->'
+		);
+
+		$this->assertStringContainsString( 'data-wp-bind--min="woocommerce::state.productScope.product.add_to_cart.minimum"', $markup, 'The min attribute should bind to the unified productScope.' );
+		$this->assertStringContainsString( 'data-wp-bind--max="woocommerce::state.productScope.product.add_to_cart.maximum"', $markup, 'The max attribute should bind to the unified productScope.' );
+		$this->assertStringContainsString( 'data-wp-bind--step="woocommerce::state.productScope.product.add_to_cart.multiple_of"', $markup, 'The step attribute should bind to the unified productScope.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
+		$this->assertStringNotContainsString( 'productInContext', $markup, 'The old productInContext getter should not be referenced.' );
+	}
+
+	/**
+	 * @testdox The Variation Description block binds its hidden attribute to the unified store's productScope.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationDescription::render
+	 */
+	public function test_variation_description_binds_to_the_unified_product_scope(): void {
+		global $product;
+		$previous_product = $product;
+		$product          = \WC_Helper_Product::create_variation_product();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/add-to-cart-with-options-variation-description /-->' );
+
+		$product = $previous_product;
+
+		$this->assertStringContainsString( 'data-wp-bind--hidden="woocommerce::!state.productScope.productVariation.description"', $markup, 'The hidden attribute should bind to the unified productScope.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
+		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The old productVariationInContext getter should not be referenced.' );
+	}
+
+	/**
+	 * @testdox The hidden variation_id input binds to the resolved variation's id through the unified store's productScope.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_hidden_variation_id_input_binds_to_the_unified_product_scope(): void {
+		global $product;
+		$previous_product = $product;
+		$product          = \WC_Helper_Product::create_variation_product();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$product = $previous_product;
+
+		$this->assertStringContainsString( 'data-wp-bind--value="woocommerce::state.productScope.productVariation.id"', $markup, 'The hidden variation_id input should bind to the resolved variation through the unified productScope.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
+		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The old productVariationInContext getter should not be referenced.' );
 	}
 
 	/**

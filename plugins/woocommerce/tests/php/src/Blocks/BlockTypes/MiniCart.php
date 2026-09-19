@@ -518,4 +518,18 @@ class MiniCart extends \WP_UnitTestCase {
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
+
+	/**
+	 * Test that the document-level cart events call the unified store's refreshCart action.
+	 *
+	 * @return void
+	 */
+	public function test_document_events_call_refresh_cart_action() {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCart"', $output, 'The added-to-cart document event should call the unified refreshCart action.' );
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCart"', $output, 'The removed-from-cart document event should call the unified refreshCart action.' );
+		$this->assertStringNotContainsString( 'refreshCartItems', $output, 'The old refreshCartItems action should not be referenced.' );
+	}
 }
