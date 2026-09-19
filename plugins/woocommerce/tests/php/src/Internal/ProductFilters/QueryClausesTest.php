@@ -519,14 +519,4 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		return array( $where, $posts );
 	}
-
-	/**
-	 * Reset the static params cache, which no base class owns.
-	 */
-	private function clear_params_cache(): void {
-		$reflection      = new \ReflectionClass( Params::class );
-		$params_property = $reflection->getProperty( 'params' );
-		$params_property->setAccessible( true );
-		$params_property->setValue( array() );
-	}
 }
