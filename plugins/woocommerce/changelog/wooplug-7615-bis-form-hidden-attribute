@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Back in Stock: hide the sign-up form with the hidden attribute so it stays hidden for in-stock variations on themes that replace the WooCommerce stylesheet.
