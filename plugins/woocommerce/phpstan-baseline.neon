@@ -10910,12 +10910,6 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Data_Store\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
 			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10936,12 +10930,6 @@ parameters:
 		-
 			message: '#^Method WC_Data_Store\:\:read_multiple\(\) has parameter \$objects with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
-			message: '#^Method WC_Data_Store\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-data-store.php
 

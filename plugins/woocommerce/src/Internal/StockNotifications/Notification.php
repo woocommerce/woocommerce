@@ -370,9 +370,13 @@ class Notification extends \WC_Data {
 		}
 
 		if ( $this->get_id() ) {
-			$this->data_store->update( $this );
+			$result = $this->data_store->update( $this );
 		} else {
-			$this->data_store->create( $this );
+			$result = $this->data_store->create( $this );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
 		return $this->get_id();
