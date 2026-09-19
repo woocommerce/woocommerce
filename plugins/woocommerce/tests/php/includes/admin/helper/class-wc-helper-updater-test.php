@@ -57,6 +57,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		try {
 			// The fixture theme lives on disk and in a global, neither of which the parent teardown resets.
 			$this->cleanup_theme_fixture();
+			$this->cleanup_plugins_screen();
 		} finally {
 			parent::tearDown();
 		}
@@ -614,6 +615,907 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			$this->call_should_use_cached_update_data( $data, $hash ),
 			'Should accept valid data with extra keys'
 		);
+	}
+
+	/**
+	 * Plugin list entry for a WooCommerce.com hosted plugin.
+	 *
+	 * @var array
+	 */
+	private $woo_plugin_file = 'test-woo-extension/test-woo-extension.php';
+
+	/**
+	 * @testdox Connect notice renders on a Woo plugin row that has no pending update.
+	 */
+	public function test_connect_notice_renders_without_pending_update(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'woo-connect-notice', $output, 'The notice row should be rendered.' );
+		$this->assertStringContainsString( 'woocommerce-connect-your-store', $output, 'The notice should link to the connect page.' );
+		$this->assertStringContainsString( '>Connect your store</a> for security updates, product improvements, and support.', $output );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
+	 */
+	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->prepare_plugins_screen();
+
+		$transient                                     = new stdClass();
+		$transient->response                           = array();
+		$transient->response[ $this->woo_plugin_file ] = (object) array(
+			'id'          => 'woocommerce-com-123',
+			'new_version' => '2.0.0',
+			'package'     => '',
+		);
+		set_site_transient( 'update_plugins', $transient );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Core already carries the connect prompt on its update row.' );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped for plugins that are not hosted on WooCommerce.com.
+	 */
+	public function test_connect_notice_is_skipped_for_non_woo_plugins(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice(
+			'some-other-plugin/some-other-plugin.php',
+			array(
+				'Name'    => 'Some Other Plugin',
+				'Version' => '1.0.0',
+				'Woo'     => '',
+			)
+		);
+
+		$this->assertSame( '', $output, 'Only WooCommerce.com hosted plugins should get the notice.' );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped for users who cannot update plugins.
+	 */
+	public function test_connect_notice_is_skipped_without_the_update_plugins_capability(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Core renders no update row for these users either.' );
+	}
+
+	/**
+	 * @testdox Row notices are skipped on a multisite sub-site, where Core renders no update rows.
+	 */
+	public function test_row_notices_are_skipped_on_a_multisite_sub_site(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Sub-site Plugins screens only exist on multisite.' );
+		}
+
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array() );
+
+		$this->assertFalse( is_network_admin(), 'Without a network screen this is a sub-site request.' );
+		$this->assertSame( '', $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() ) );
+		$this->assertSame( '', $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() ) );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped on the Woo Update Manager row.
+	 */
+	public function test_connect_notice_is_skipped_for_the_woo_update_manager(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice(
+			WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE,
+			array(
+				'Name'    => 'WooCommerce.com Update Manager',
+				'Version' => '1.0.3',
+				'Woo'     => '18734003407318:abcdef',
+			)
+		);
+
+		$this->assertSame( '', $output, 'The Update Manager delivers these updates, so it gets no prompt of its own.' );
+	}
+
+	/**
+	 * @testdox Purchase notice links to the product page when the connected account holds no subscription.
+	 */
+	public function test_purchase_notice_renders_without_a_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		$transient                                      = new stdClass();
+		$transient->response                            = array();
+		$transient->no_update                           = array();
+		$transient->no_update[ $this->woo_plugin_file ] = (object) array(
+			'id'  => 'woocommerce-com-123',
+			'url' => 'https://woocommerce.com/products/test-woo-extension/',
+		);
+		set_site_transient( 'update_plugins', $transient );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'woo-subscription-notice', $output, 'The notice row should be rendered.' );
+		$this->assertStringContainsString( 'products/test-woo-extension', $output, 'The link should point at the product page.' );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_row_purchase', $output, 'The link should carry the campaign parameters.' );
+		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output, 'The link should carry the tracked class.' );
+		$this->assertStringNotContainsString( 'target=', $output, 'Links in the notices stay in the admin tab.' );
+		$this->assertStringContainsString( '>Subscribe</a> now for security updates, product improvements, and support.', $output );
+	}
+
+	/**
+	 * @testdox Purchase notice falls back to the cart when the update data carries no product URL.
+	 */
+	public function test_purchase_notice_falls_back_to_the_cart_without_a_product_url(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array() );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'add-to-cart=123', $output, 'The link should add the product to the WooCommerce.com cart.' );
+	}
+
+	/**
+	 * @testdox Subscription notice is skipped while the last subscriptions fetch is still failing.
+	 */
+	public function test_subscription_notice_is_skipped_while_the_api_is_failing(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 500,
+				'message' => 'Server error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
+	 * @testdox Update-row notices are skipped while the last subscriptions fetch is still failing.
+	 */
+	public function test_update_row_notices_are_skipped_while_the_api_is_failing(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 500,
+				'message' => 'Server error',
+			),
+			HOUR_IN_SECONDS
+		);
+		$response = (object) array( 'id' => 'woocommerce-com-123' );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription( $this->woo_plugin_data(), $response );
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions( $this->woo_plugin_data(), $response );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output, 'The update row must not claim a subscription is missing on a stale list.' );
+	}
+
+	/**
+	 * @testdox One plugin row reads the subscription list once.
+	 */
+	public function test_subscription_notice_reads_the_subscription_list_once(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
+
+		$reads   = 0;
+		$counter = function ( $pre ) use ( &$reads ) {
+			++$reads;
+			return $pre;
+		};
+
+		add_filter( 'pre_transient__woocommerce_helper_subscriptions', $counter );
+		try {
+			$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+		} finally {
+			remove_filter( 'pre_transient__woocommerce_helper_subscriptions', $counter );
+		}
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'The row still renders its notice.' );
+		$this->assertSame( 1, $reads, 'Filtering the whole list twice per row is wasted work on a screen full of extensions.' );
+	}
+
+	/**
+	 * @testdox Subscription notice is skipped for a subscription that needs no action.
+	 */
+	public function test_subscription_notice_is_skipped_for_a_healthy_subscription(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array( $this->subscription() ) );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Nothing to say about a current subscription.' );
+	}
+
+	/**
+	 * @testdox Renewal notice renders when the subscription has expired.
+	 */
+	public function test_subscription_notice_renders_renewal_for_an_expired_subscription(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'               => true,
+						'product_regular_price' => '&#36;59',
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringNotContainsString( '&#036;59', $output, 'The price is no longer part of the message.' );
+		$this->assertStringContainsString( 'renew_product=123', $output, 'Renewal should renew the subscription, not buy a new one.' );
+		$this->assertStringContainsString( 'product_key=key', $output, 'The link should name the subscription being renewed.' );
+		$this->assertStringContainsString( 'order_id=456', $output, 'The link should name the order being renewed.' );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
+		$this->assertStringContainsString( 'woocommerce-renew-subscription', $output, 'The link should carry the tracked class.' );
+		$this->assertStringNotContainsString( 'target=', $output, 'Links in the notices stay in the admin tab.' );
+	}
+
+	/**
+	 * @testdox Renewal falls back to adding the product to the cart when the record cannot name the subscription.
+	 *
+	 * @dataProvider provider_records_missing_a_renewal_identifier
+	 *
+	 * @param array $overrides Fields to change on the expired subscription record.
+	 */
+	public function test_subscription_notice_falls_back_to_the_cart_without_renewal_identifiers( array $overrides ): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array( $this->subscription( array_merge( array( 'expired' => true ), $overrides ) ) ) );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'The merchant still learns the subscription expired.' );
+		$this->assertStringContainsString( 'add-to-cart=123', $output, 'A link that buys the product beats one that renews nothing.' );
+		$this->assertStringNotContainsString( 'renew_product', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_row_renew', $output );
+	}
+
+	/**
+	 * @testdox Renewal accepts an order ID sent as a digit string.
+	 */
+	public function test_subscription_notice_renews_with_a_digit_string_order_id(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'  => true,
+						'order_id' => '456',
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'renew_product=123', $output );
+		$this->assertStringContainsString( 'order_id=456', $output );
+	}
+
+	/**
+	 * Expired records that cannot be renewed by reference.
+	 *
+	 * @return array[]
+	 */
+	public function provider_records_missing_a_renewal_identifier(): array {
+		return array(
+			'no product key'         => array( array( 'product_key' => '' ) ),
+			'product key is false'   => array( array( 'product_key' => false ) ),
+			'product key is a list'  => array( array( 'product_key' => array( 'key' ) ) ),
+			'no order ID'            => array( array( 'order_id' => '' ) ),
+			'order ID absent'        => array( array( 'order_id' => null ) ),
+			'order ID is zero'       => array( array( 'order_id' => 0 ) ),
+			'order ID is false'      => array( array( 'order_id' => false ) ),
+			'order ID is a list'     => array( array( 'order_id' => array( 456 ) ) ),
+			'order ID is not digits' => array( array( 'order_id' => '45a6' ) ),
+		);
+	}
+
+	/**
+	 * @testdox The update-row message renews the exact expired subscription too.
+	 */
+	public function test_update_row_notice_renews_the_expired_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'renew_product=123', $output );
+		$this->assertStringContainsString( 'product_key=key', $output );
+		$this->assertStringContainsString( 'order_id=456', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_renew', $output );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
+	}
+
+	/**
+	 * @testdox Auto-renew notice renders for a subscription lapsing without auto-renew.
+	 */
+	public function test_subscription_notice_renders_autorenew_for_an_expiring_subscription(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output, 'The link should point at auto-renew.' );
+		$this->assertStringContainsString( 'my-subscriptions', $output, 'Auto-renew is enabled from the My Subscriptions page.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice is skipped when the lapsing subscription already auto-renews.
+	 */
+	public function test_subscription_notice_is_skipped_when_autorenew_is_on(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => true,
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Auto-renew already covers this subscription.' );
+	}
+
+	/**
+	 * @testdox Renewal notice renders for an expired subscription attached to another store.
+	 */
+	public function test_subscription_notice_renders_renewal_for_a_subscription_expired_elsewhere(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'     => true,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'Renewing can be started from any store.' );
+		$this->assertStringContainsString( 'renew_product=123', $output );
+	}
+
+	/**
+	 * @testdox Renewal notice is skipped while another subscription still covers the product.
+	 */
+	public function test_subscription_notice_is_skipped_when_another_subscription_is_active(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription( array( 'expired' => true ) ),
+				$this->subscription( array( 'connections' => array( 45 ) ) ),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'The product is still covered, so the expired one needs no action.' );
+	}
+
+	/**
+	 * @testdox A lifetime subscription keeps the product covered.
+	 */
+	public function test_subscription_notice_is_skipped_for_a_lifetime_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'  => true,
+						'lifetime' => true,
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'A lifetime subscription never lapses.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice is skipped while another subscription outlives the lapsing one.
+	 */
+	public function test_subscription_notice_is_skipped_when_another_subscription_outlives_the_lapsing_one(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+					)
+				),
+				$this->subscription( array( 'connections' => array( 45 ) ) ),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Coverage continues after the lapsing subscription ends.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice renders when every subscription is lapsing.
+	 */
+	public function test_subscription_notice_renders_autorenew_when_every_subscription_is_lapsing(): void {
+		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'F j, Y' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => strtotime( '2030-03-03' ),
+					)
+				),
+				$this->subscription(
+					array(
+						'expiring'    => true,
+						'autorenew'   => false,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3, 2030.', $output );
+		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output );
+	}
+
+	/**
+	 * @testdox The update-row message renews a subscription attached to another store too.
+	 */
+	public function test_update_row_notice_renews_a_subscription_expired_elsewhere(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'     => true,
+						'connections' => array( 999 ),
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+	}
+
+	/**
+	 * @testdox The expiry date follows the store's date format and time zone.
+	 */
+	public function test_expiry_date_uses_the_store_date_format_and_time_zone(): void {
+		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'j F Y' );
+		update_option( 'timezone_string', 'Pacific/Auckland' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						// Late on 3 March in UTC is already 4 March in Auckland.
+						'expires'   => strtotime( '2030-03-03 23:30:00 UTC' ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'expires on 4 March 2030.', $output, 'The date is the store\'s, in the store\'s format.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice drops the date, not the prompt, for a record with no usable expiry.
+	 *
+	 * @dataProvider provider_unusable_expiry_values
+	 *
+	 * @param mixed $expires The expiry value on the subscription record.
+	 */
+	public function test_subscription_notice_omits_the_date_without_a_usable_expiry( $expires ): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => $expires,
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension expires soon.', $output, 'Auto-renew still needs turning on.' );
+		$this->assertStringContainsString( '>Enable auto-renew</a> to keep getting updates and support.', $output );
+		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output, 'The link keeps its tracked class.' );
+		$this->assertStringNotContainsString( 'expires on', $output, 'A date that is not known must not be named.' );
+	}
+
+	/**
+	 * Expiry values that name no day.
+	 *
+	 * @return array[]
+	 */
+	public function provider_unusable_expiry_values(): array {
+		return array(
+			'absent'      => array( null ),
+			'empty'       => array( '' ),
+			'not a date'  => array( 'not a timestamp' ),
+			'is an array' => array( array( 123 ) ),
+			'is a bool'   => array( true ),
+		);
+	}
+
+	/**
+	 * A subscription record as the WooCommerce.com API returns it.
+	 *
+	 * @param array $overrides Fields to override on the default record.
+	 * @return array
+	 */
+	private function subscription( array $overrides = array() ): array {
+		return array_merge(
+			array(
+				'product_id'  => 123,
+				'product_key' => 'key',
+				'order_id'    => 456,
+				'expired'     => false,
+				'expiring'    => false,
+				'lifetime'    => false,
+				'autorenew'   => true,
+				'expires'     => time() + DAY_IN_SECONDS,
+				'connections' => array(),
+			),
+			$overrides
+		);
+	}
+
+	/**
+	 * Stand in a subscriptions payload, which WC_Helper reads from its transient.
+	 *
+	 * @param array $subscriptions Subscription records.
+	 * @return void
+	 */
+	private function set_subscriptions( array $subscriptions ): void {
+		WC_Helper_Options::update( 'auth', array( 'site_id' => 45 ) );
+		set_transient( '_woocommerce_helper_subscriptions', $subscriptions, HOUR_IN_SECONDS );
+	}
+
+	/**
+	 * @testdox Subscription notice is skipped when Core already renders an update row for the plugin.
+	 */
+	public function test_subscription_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		$transient                                     = new stdClass();
+		$transient->response                           = array();
+		$transient->response[ $this->woo_plugin_file ] = (object) array(
+			'id'          => 'woocommerce-com-123',
+			'new_version' => '2.0.0',
+			'package'     => '',
+		);
+		set_site_transient( 'update_plugins', $transient );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'display_notice_for_plugins_without_subscription() covers that row.' );
+	}
+
+	/**
+	 * @testdox Update-row notices ignore a response whose ID is not one WooCommerce wrote.
+	 *
+	 * @dataProvider provider_foreign_update_response_ids
+	 *
+	 * @param mixed $id The response ID, or null for a response without one.
+	 */
+	public function test_update_row_notices_ignore_foreign_response_ids( $id ): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
+
+		$response = is_null( $id ) ? new stdClass() : (object) array( 'id' => $id );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions( $this->woo_plugin_data(), $response );
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription( $this->woo_plugin_data(), $response );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output, 'Digits must not be scraped out of an ID that is not ours.' );
+	}
+
+	/**
+	 * Response IDs that must not resolve to product 123.
+	 *
+	 * @return array[]
+	 */
+	public function provider_foreign_update_response_ids(): array {
+		return array(
+			'missing'                => array( null ),
+			'empty'                  => array( '' ),
+			'not a string'           => array( 123 ),
+			'WordPress.org plugin'   => array( 'w.org/plugins/some-plugin' ),
+			'digits in the wrong id' => array( 'woocommerce-com-12foo3' ),
+			'prefix only'            => array( 'woocommerce-com-' ),
+			'trailing characters'    => array( 'woocommerce-com-123-beta' ),
+		);
+	}
+
+	/**
+	 * @testdox The no-subscription update-row notice renders for an ID WooCommerce wrote.
+	 */
+	public function test_update_row_notice_renders_for_a_product_without_a_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'add-to-cart=123', $output );
+		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_purchase', $output );
+	}
+
+	/**
+	 * @testdox The no-subscription update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_purchase_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription(
+			$this->woo_plugin_data(),
+			(object) array(
+				'id'  => 'woocommerce-com-123',
+				'url' => 'https://woocommerce.com/products/test-woo-extension/',
+			)
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' ', $output, 'Core has already printed its own sentence on the row.' );
+		$this->assertStringContainsString( "You don't have an active subscription for this product.", $output );
+		$this->assertStringContainsString( '>Subscribe</a> now for security updates, product improvements, and support.', $output );
+		$this->assertStringContainsString( 'products/test-woo-extension', $output, 'The update row links to the product page like the plugin row does.' );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
+	}
+
+	/**
+	 * @testdox The expired update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_expired_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'               => true,
+						'product_regular_price' => '&#36;59',
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' ', $output, 'Core has already printed its own sentence on the row.' );
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringNotContainsString( '&#36;59', $output, 'The price no longer appears in the link text.' );
+	}
+
+	/**
+	 * @testdox The expiring update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_expiring_notice_shares_the_plugin_row_wording(): void {
+		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'F j, Y' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => strtotime( '2030-03-03' ),
+					)
+				),
+			)
+		);
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3, 2030.', $output );
+		$this->assertStringContainsString( '>Enable auto-renew</a> to keep getting updates and support.', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_enable_autorenew', $output );
+	}
+
+	/**
+	 * @testdox The connect update-row notice says the same thing as the plugin-row notice.
+	 */
+	public function test_update_row_connect_notice_shares_the_plugin_row_wording(): void {
+		ob_start();
+		WC_Helper_Updater::add_connect_woocom_plugin_message();
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( ' Extension distributed via WooCommerce.com.', $output );
+		$this->assertStringContainsString( '>Connect your store</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_connect', $output );
+		$this->assertStringContainsString( 'tab=my-subscriptions', $output );
+	}
+
+	/**
+	 * Capture what the subscription notice callback prints for a plugin row.
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 * @return string
+	 */
+	private function render_subscription_notice( string $plugin_file, array $plugin_data ): string {
+		ob_start();
+		WC_Helper_Updater::display_subscription_notice_for_woo_plugins( $plugin_file, $plugin_data );
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Plugin metadata for the WooCommerce.com hosted plugin used by these tests.
+	 *
+	 * @return array
+	 */
+	private function woo_plugin_data(): array {
+		return array(
+			'Name'    => 'Test Woo Extension',
+			'Version' => '1.0.0',
+			'Woo'     => '123:abcdef',
+		);
+	}
+
+	/**
+	 * Set up the plugins screen state that the after_plugin_row callback reads from.
+	 *
+	 * get_plugins() returns whatever is in the 'plugins' cache group, which lets these tests
+	 * stand in a plugin list without touching the filesystem.
+	 *
+	 * @return void
+	 */
+	private function prepare_plugins_screen(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin    = new WP_User( $admin_id );
+		$admin->add_cap( 'update_plugins' );
+		wp_set_current_user( $admin_id );
+
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$this->woo_plugin_file => $this->woo_plugin_data(),
+					'some-other-plugin/some-other-plugin.php' => array(
+						'Name'    => 'Some Other Plugin',
+						'Version' => '1.0.0',
+						'Woo'     => '',
+					),
+				),
+			),
+			'plugins'
+		);
+
+		$list_table = $this->getMockBuilder( stdClass::class )
+			->addMethods( array( 'get_column_count' ) )
+			->getMock();
+		$list_table->method( 'get_column_count' )->willReturn( 4 );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stands in for the plugins screen list table; cleanup_plugins_screen() unsets it.
+		$GLOBALS['wp_list_table'] = $list_table;
+	}
+
+	/**
+	 * Capture what the after_plugin_row callback prints for a plugin row.
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 * @return string
+	 */
+	private function render_connect_notice( string $plugin_file, array $plugin_data ): string {
+		ob_start();
+		WC_Helper_Updater::display_connect_notice_for_woo_plugins( $plugin_file, $plugin_data );
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Clean up the plugins screen state set up by prepare_plugins_screen().
+	 *
+	 * @return void
+	 */
+	private function cleanup_plugins_screen(): void {
+		WC_Helper_Options::update( 'auth', array() );
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
+		wp_cache_delete( 'plugins', 'plugins' );
+		delete_site_transient( 'update_plugins' );
+		unset( $GLOBALS['wp_list_table'] );
+		wp_set_current_user( 0 );
 	}
 
 	/**
