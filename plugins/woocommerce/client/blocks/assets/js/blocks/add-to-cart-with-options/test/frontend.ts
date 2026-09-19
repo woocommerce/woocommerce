@@ -5,30 +5,49 @@ import type { AddToCartWithOptionsStore, Context } from '../frontend';
 
 type RegisteredStore = {
 	state: AddToCartWithOptionsStore[ 'state' ];
-	actions: AddToCartWithOptionsStore[ 'actions' ];
+	actions: AddToCartWithOptionsStore[ 'actions' ] & {
+		batchAddToCart?: () => void;
+		validateGroupedProductQuantity?: () => void;
+	};
+};
+
+type ScopeRecord = { draftCartItem?: Record< string, unknown > };
+type ProductScope = {
+	productId: number;
+	variation: Array< { attribute: string; value: string } >;
+	baseProduct: Record< string, unknown > | null;
+	product: Record< string, unknown > | null;
+	draftCartItem: Record< string, unknown >;
 };
 
 const mockAddCartItem = jest.fn();
-const mockBatchAddCartItems = jest.fn();
 const mockAddNotice = jest.fn();
 const mockRemoveNotice = jest.fn();
 const mockGetConfig = jest.fn();
 
 let mockContext: Context;
+let mockScopeContext: { scopeName?: string };
 let mockQuantitySelectorContext: { inputElement?: HTMLInputElement };
 let mockRegisteredStore: RegisteredStore | null;
 let mockAddToCartStore: RegisteredStore;
+let mockWooScopes: Record< string, ScopeRecord >;
+let mockProductScope: ProductScope;
 
-const mockProductsState = {
-	productId: 0,
-	productInContext: null as Record< string, unknown > | null,
-	mainProductInContext: null as Record< string, unknown > | null,
-	findProduct: jest.fn(),
+const mockWooState = {
+	get productScopes() {
+		return mockWooScopes;
+	},
+	get productScope() {
+		return mockProductScope;
+	},
 };
 
 const mockStore = jest.fn( ( namespace, definition ) => {
-	if ( namespace === 'woocommerce/products' ) {
-		return { state: mockProductsState };
+	if ( namespace === 'woocommerce' ) {
+		return {
+			state: mockWooState,
+			actions: { addCartItem: mockAddCartItem },
+		};
 	}
 
 	if ( namespace === 'woocommerce/add-to-cart-with-options' ) {
@@ -54,15 +73,6 @@ const mockStore = jest.fn( ( namespace, definition ) => {
 		};
 	}
 
-	if ( namespace === 'woocommerce' ) {
-		return {
-			actions: {
-				addCartItem: mockAddCartItem,
-				batchAddCartItems: mockBatchAddCartItems,
-			},
-		};
-	}
-
 	return {};
 } );
 
@@ -70,20 +80,25 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		store: mockStore,
-		getContext: jest.fn( ( namespace?: string ) =>
-			namespace ===
-			'woocommerce/add-to-cart-with-options-quantity-selector'
-				? mockQuantitySelectorContext
-				: mockContext
-		),
+		getContext: jest.fn( ( namespace?: string ) => {
+			if ( namespace === 'woocommerce' ) {
+				return mockScopeContext;
+			}
+			if (
+				namespace ===
+				'woocommerce/add-to-cart-with-options-quantity-selector'
+			) {
+				return mockQuantitySelectorContext;
+			}
+			return mockContext;
+		} ),
 		getConfig: mockGetConfig,
 		withSyncEvent: ( action: unknown ) => action,
 	} ),
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ) );
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ) );
 jest.mock( '@woocommerce/stores/store-notices', () => ( {} ) );
 
 const getRegisteredStore = (): RegisteredStore => {
@@ -107,31 +122,38 @@ describe( 'Add to Cart + Options interactivity store', () => {
 		jest.clearAllMocks();
 
 		mockContext = {
-			selectedAttributes: [],
-			quantity: { 42: 2 },
+			initialQuantity: { 42: 2 },
 			validationErrors: [],
-			tempQuantity: 0,
+			noticeIds: [],
 			groupedProductIds: [],
 		};
+		mockScopeContext = {};
 		mockQuantitySelectorContext = {};
 		mockRegisteredStore = null;
 		mockAddToCartStore = {
 			state: {} as AddToCartWithOptionsStore[ 'state' ],
-			actions: {} as AddToCartWithOptionsStore[ 'actions' ],
+			actions: {} as RegisteredStore[ 'actions' ],
 		};
-		mockProductsState.productId = 42;
-		mockProductsState.productInContext = {
-			id: 42,
-			type: 'simple',
-			is_purchasable: true,
-			is_in_stock: true,
-			add_to_cart: {
-				minimum: 1,
-				maximum: 5,
+		mockWooScopes = {};
+		mockProductScope = {
+			productId: 42,
+			variation: [],
+			baseProduct: {
+				id: 42,
+				type: 'simple',
 			},
+			product: {
+				id: 42,
+				type: 'simple',
+				is_purchasable: true,
+				is_in_stock: true,
+				add_to_cart: {
+					minimum: 1,
+					maximum: 5,
+				},
+			},
+			draftCartItem: {},
 		};
-		mockProductsState.mainProductInContext =
-			mockProductsState.productInContext;
 		mockGetConfig.mockReturnValue( {
 			errorMessages: {
 				invalidQuantities: 'Choose a valid quantity.',
@@ -145,15 +167,15 @@ describe( 'Add to Cart + Options interactivity store', () => {
 
 	it( 'validates zero and out-of-range quantities with the configured message', () => {
 		const registeredStore = getRegisteredStore();
-		mockProductsState.productInContext = {
-			...mockProductsState.productInContext,
+		mockProductScope.product = {
+			...mockProductScope.product,
 			add_to_cart: {
 				minimum: 0,
 				maximum: 5,
 			},
 		};
 
-		registeredStore.actions.validateQuantity( 42, 0 );
+		registeredStore.actions.validateQuantity( 0 );
 
 		expect( registeredStore.state.validationErrors ).toEqual( [
 			{
@@ -164,24 +186,24 @@ describe( 'Add to Cart + Options interactivity store', () => {
 		] );
 		expect( registeredStore.state.isFormValid ).toBe( false );
 
-		registeredStore.actions.validateQuantity( 42, 6 );
+		registeredStore.actions.validateQuantity( 6 );
 		expect( registeredStore.state.validationErrors ).toHaveLength( 1 );
 
-		registeredStore.actions.validateQuantity( 42, 3 );
+		registeredStore.actions.validateQuantity( 3 );
 		expect( registeredStore.state.validationErrors ).toEqual( [] );
 		expect( registeredStore.state.isFormValid ).toBe( true );
 	} );
 
 	it( 'rejects a positive quantity below the product minimum', () => {
-		mockProductsState.productInContext = {
-			...mockProductsState.productInContext,
+		mockProductScope.product = {
+			...mockProductScope.product,
 			add_to_cart: {
 				minimum: 4,
 				maximum: 5,
 			},
 		};
 
-		getRegisteredStore().actions.validateQuantity( 42, 2 );
+		getRegisteredStore().actions.validateQuantity( 2 );
 
 		expect( getRegisteredStore().state.validationErrors ).toEqual( [
 			{
@@ -192,28 +214,74 @@ describe( 'Add to Cart + Options interactivity store', () => {
 		] );
 	} );
 
+	it( 'falls back to the initial quantity when nothing has been typed', () => {
+		mockContext.initialQuantity = { 42: 3 };
+
+		expect( getRegisteredStore().state.effectiveQuantity ).toBe( 3 );
+	} );
+
+	it( 'reads the typed quantity from the scope record once one exists, never the fallback', () => {
+		mockContext.initialQuantity = { 42: 3 };
+		mockWooScopes._default = { draftCartItem: { quantity: 1 } };
+
+		expect( getRegisteredStore().state.effectiveQuantity ).toBe( 1 );
+	} );
+
+	it( 'writes a typed quantity to the scope record, never to initialQuantity', () => {
+		getRegisteredStore().actions.setQuantity( 5 );
+
+		expect( mockProductScope.draftCartItem.quantity ).toBe( 5 );
+		expect( mockContext.initialQuantity ).toEqual( { 42: 2 } );
+	} );
+
+	it( 'validates a plain quantity outside a grouped form', () => {
+		mockContext.groupedProductIds = [];
+
+		getRegisteredStore().actions.setQuantity( 0 );
+
+		expect( getRegisteredStore().state.validationErrors ).toHaveLength(
+			1
+		);
+	} );
+
+	it( 'delegates to grouped validation from inside a grouped form', () => {
+		const mockValidateGroupedProductQuantity = jest.fn();
+		mockAddToCartStore.actions.validateGroupedProductQuantity =
+			mockValidateGroupedProductQuantity;
+		mockContext.groupedProductIds = [ 10, 11 ];
+
+		getRegisteredStore().actions.setQuantity( 1 );
+
+		expect( mockValidateGroupedProductQuantity ).toHaveBeenCalledTimes(
+			1
+		);
+	} );
+
 	it.each( [
 		{
 			title: 'simple product',
 			type: 'simple',
-			selectedAttributes: [],
+			variation: [],
 		},
 		{
 			title: 'selected variation',
 			type: 'variation',
-			selectedAttributes: [
+			variation: [
 				{ attribute: 'attribute_pa_color', value: 'blue' },
 				{ attribute: 'Logo', value: 'No' },
 			],
 		},
 	] )(
-		'forwards the exact $title cart payload',
-		async ( { type, selectedAttributes } ) => {
-			mockContext.selectedAttributes = selectedAttributes;
-			mockProductsState.productInContext = {
-				...mockProductsState.productInContext,
+		'forwards the exact $title cart payload, with quantityToAdd/type dropped',
+		async ( { type, variation } ) => {
+			mockProductScope.variation = variation;
+			mockProductScope.product = {
+				...mockProductScope.product,
 				id: 42,
 				type,
+			};
+			mockWooScopes._default = {
+				draftCartItem: { id: 42, variation, quantity: 2 },
 			};
 			const preventDefault = jest.fn();
 
@@ -227,14 +295,73 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			expect( mockAddCartItem ).toHaveBeenCalledWith(
 				{
 					id: 42,
-					quantityToAdd: 2,
-					variation: selectedAttributes,
-					type,
+					variation,
+					quantity: 2,
 				},
 				{ showCartUpdatesNotices: false }
 			);
 		}
 	);
+
+	it( 'forwards extension props written on the scope record', async () => {
+		mockWooScopes._default = {
+			draftCartItem: {
+				id: 42,
+				variation: [],
+				quantity: 2,
+				giftWrap: true,
+			},
+		};
+
+		await runGenerator(
+			getRegisteredStore().actions.addToCart( {
+				preventDefault: jest.fn(),
+			} as unknown as SubmitEvent )
+		);
+
+		expect( mockAddCartItem ).toHaveBeenCalledWith(
+			{
+				id: 42,
+				variation: [],
+				quantity: 2,
+				giftWrap: true,
+			},
+			{ showCartUpdatesNotices: false }
+		);
+	} );
+
+	it( 'posts the initial quantity, not 1, when nothing was typed', async () => {
+		mockContext.initialQuantity = { 42: 4 };
+
+		await runGenerator(
+			getRegisteredStore().actions.addToCart( {
+				preventDefault: jest.fn(),
+			} as unknown as SubmitEvent )
+		);
+
+		expect( mockAddCartItem ).toHaveBeenCalledWith(
+			expect.objectContaining( { quantity: 4 } ),
+			{ showCartUpdatesNotices: false }
+		);
+	} );
+
+	it( 'delegates to batchAddToCart for a grouped product without posting directly', async () => {
+		const mockBatchAddToCart = jest.fn();
+		mockAddToCartStore.actions.batchAddToCart = mockBatchAddToCart;
+		mockProductScope.product = {
+			...mockProductScope.product,
+			type: 'grouped',
+		};
+
+		await runGenerator(
+			getRegisteredStore().actions.addToCart( {
+				preventDefault: jest.fn(),
+			} as unknown as SubmitEvent )
+		);
+
+		expect( mockBatchAddToCart ).toHaveBeenCalledTimes( 1 );
+		expect( mockAddCartItem ).not.toHaveBeenCalled();
+	} );
 
 	it( 'surfaces validation errors without sending a cart request', async () => {
 		const registeredStore = getRegisteredStore();

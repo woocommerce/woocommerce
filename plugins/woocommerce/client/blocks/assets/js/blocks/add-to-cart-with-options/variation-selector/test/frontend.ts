@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { TemplateVariationAttribute } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -13,7 +13,6 @@ type RegisteredStore = VariableProductAddToCartWithOptionsStore;
 type VariationContext = {
 	name: string;
 	selectedValue: string | null;
-	selectedAttributes: SelectedAttributes[];
 	variationAttributeOptions: Array< {
 		id: string;
 		label: string;
@@ -21,7 +20,6 @@ type VariationContext = {
 	} >;
 	autoselect: boolean;
 	disabledAttributesAction?: 'disable' | 'hide';
-	quantity: Record< number, number >;
 };
 
 const mockClearErrors = jest.fn();
@@ -31,22 +29,34 @@ const mockGetConfig = jest.fn();
 const mockGetElement = jest.fn();
 
 let mockContext: VariationContext;
-let mockProductContext: { variationId?: number | null } | null;
 let mockRegisteredStore: RegisteredStore | null;
 let mockAddToCartStore: RegisteredStore;
+let mockVariation: TemplateVariationAttribute[];
+let mockBaseProduct: Record< string, unknown > | null;
+let mockProductVariation: Record< string, unknown > | null;
 
-const mockProductsState = {
-	productId: 100,
-	variationId: null as number | null,
-	mainProductInContext: null as Record< string, unknown > | null,
-	productVariationInContext: null as Record< string, unknown > | null,
-	productVariations: {} as Record< number, Record< string, unknown > >,
-	findProduct: jest.fn(),
+const mockWooState = {
+	get productScope() {
+		return {
+			get variation(): TemplateVariationAttribute[] {
+				return mockVariation;
+			},
+			set variation( value: TemplateVariationAttribute[] ) {
+				mockVariation = value;
+			},
+			get baseProduct() {
+				return mockBaseProduct;
+			},
+			get productVariation() {
+				return mockProductVariation;
+			},
+		};
+	},
 };
 
 const mockStore = jest.fn( ( namespace, definition ) => {
-	if ( namespace === 'woocommerce/products' ) {
-		return { state: mockProductsState };
+	if ( namespace === 'woocommerce' ) {
+		return { state: mockWooState };
 	}
 
 	if ( namespace === 'woocommerce/add-to-cart-with-options' ) {
@@ -73,18 +83,14 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		store: mockStore,
-		getContext: jest.fn( ( namespace?: string ) =>
-			namespace === 'woocommerce/products'
-				? mockProductContext
-				: mockContext
-		),
+		getContext: jest.fn( () => mockContext ),
 		getConfig: mockGetConfig,
 		getElement: mockGetElement,
 	} ),
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ) );
 
 const getRegisteredStore = (): RegisteredStore => {
 	if ( ! mockRegisteredStore ) {
@@ -106,16 +112,16 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		mockContext = {
 			name: 'Color',
 			selectedValue: '',
-			selectedAttributes: [],
 			variationAttributeOptions: [],
 			autoselect: false,
 			disabledAttributesAction: 'disable',
-			quantity: {},
 		};
-		mockProductContext = { variationId: null };
+		mockVariation = [];
+		mockBaseProduct = null;
+		mockProductVariation = null;
 		mockRegisteredStore = null;
 		mockAddToCartStore = {
-			state: {} as RegisteredStore[ 'state' ],
+			state: { effectiveQuantity: 0 } as RegisteredStore[ 'state' ],
 			actions: {
 				clearErrors: mockClearErrors,
 				addError: mockAddError,
@@ -123,10 +129,6 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			} as unknown as RegisteredStore[ 'actions' ],
 			callbacks: {} as RegisteredStore[ 'callbacks' ],
 		};
-		mockProductsState.mainProductInContext = null;
-		mockProductsState.productVariationInContext = null;
-		mockProductsState.productVariations = {};
-		mockProductsState.findProduct.mockReturnValue( null );
 		mockGetConfig.mockReturnValue( {
 			errorMessages: {
 				variableProductMissingAttributes: 'Choose options.',
@@ -145,7 +147,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 	] as const )(
 		'marks invalid choices for the $action action',
 		( { action, hidden } ) => {
-			mockProductsState.mainProductInContext = {
+			mockBaseProduct = {
 				id: 100,
 				type: 'variable',
 				variations: [
@@ -163,14 +165,14 @@ describe( 'Add to Cart + Options variation selector store', () => {
 				...mockContext,
 				name: 'Size',
 				disabledAttributesAction: action,
-				selectedAttributes: [
-					{ attribute: 'attribute_pa_color', value: 'blue' },
-				],
 				variationAttributeOptions: [
 					{ id: 'size-l', label: 'L', value: 'l' },
 					{ id: 'size-xl', label: 'XL', value: 'xl' },
 				],
 			};
+			mockVariation = [
+				{ attribute: 'attribute_pa_color', value: 'blue' },
+			];
 
 			const selectableByValue = Object.fromEntries(
 				getRegisteredStore().state.selectableItems.map( ( item ) => [
@@ -195,7 +197,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 	);
 
 	it( 'preserves a custom attribute slug while matching its Store API label', () => {
-		mockProductsState.mainProductInContext = {
+		mockBaseProduct = {
 			id: 100,
 			type: 'variable',
 			variations: [
@@ -215,13 +217,13 @@ describe( 'Add to Cart + Options variation selector store', () => {
 
 		getRegisteredStore().actions.toggle( item );
 
-		expect( mockContext.selectedAttributes ).toEqual( [
+		expect( mockVariation ).toEqual( [
 			{ attribute: 'attribute_pa_numeric-size', value: '42' },
 		] );
 	} );
 
 	it( 'autoselects only unique valid options outside the changed attribute', () => {
-		mockProductsState.mainProductInContext = {
+		mockBaseProduct = {
 			id: 100,
 			type: 'variable',
 			variations: [
@@ -245,19 +247,17 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			],
 		};
 		mockContext.autoselect = true;
-		mockContext.selectedAttributes = [
-			{ attribute: 'Color', value: 'blue' },
-		];
+		mockVariation = [ { attribute: 'Color', value: 'blue' } ];
 
 		getRegisteredStore().actions.autoselectAttributes( {
 			excludedAttributes: [ 'attribute_pa_color' ],
 		} );
 
-		expect( mockContext.selectedAttributes ).not.toContainEqual( {
+		expect( mockVariation ).not.toContainEqual( {
 			attribute: 'Material',
 			value: 'cotton',
 		} );
-		expect( mockContext.selectedAttributes ).toEqual( [
+		expect( mockVariation ).toEqual( [
 			{ attribute: 'Color', value: 'blue' },
 			{ attribute: 'Type', value: 't-shirt' },
 			{ attribute: 'Size', value: 'xl' },
@@ -265,7 +265,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 	} );
 
 	it( 'does not rewrite a changed custom attribute slug when its Store API label is excluded', () => {
-		mockProductsState.mainProductInContext = {
+		mockBaseProduct = {
 			id: 100,
 			type: 'variable',
 			variations: [
@@ -275,22 +275,22 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		mockContext = {
 			...mockContext,
 			autoselect: true,
-			selectedAttributes: [
-				{ attribute: 'attribute_pa_color', value: 'blue' },
-			],
 		};
+		mockVariation = [
+			{ attribute: 'attribute_pa_color', value: 'blue' },
+		];
 
 		getRegisteredStore().actions.autoselectAttributes( {
 			excludedAttributes: [ 'attribute_pa_color' ],
 		} );
 
-		expect( mockContext.selectedAttributes ).toEqual( [
+		expect( mockVariation ).toEqual( [
 			{ attribute: 'attribute_pa_color', value: 'blue' },
 		] );
 	} );
 
 	it( 'accepts any-value variations when another selected attribute matches', () => {
-		mockProductsState.mainProductInContext = {
+		mockBaseProduct = {
 			id: 100,
 			type: 'variable',
 			variations: [
@@ -303,46 +303,57 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		mockContext = {
 			...mockContext,
 			name: 'Color',
-			selectedAttributes: [ { attribute: 'Size', value: 'large' } ],
 			variationAttributeOptions: [
 				{ id: 'color-blue', label: 'Blue', value: 'blue' },
 			],
 		};
+		mockVariation = [ { attribute: 'Size', value: 'large' } ];
 
 		expect( getRegisteredStore().state.selectableItems[ 0 ].disabled ).toBe(
 			false
 		);
 	} );
 
-	it( 'updates the selected variation ID and reports missing or unavailable matches', () => {
-		const selectedAttributes = [ { attribute: 'Color', value: 'blue' } ];
-		mockProductsState.mainProductInContext = {
+	it( 'preserves the in-place order when replacing an already-selected attribute', () => {
+		mockBaseProduct = {
+			id: 100,
+			type: 'variable',
+			variations: [
+				variation( 101, [
+					{ name: 'Color', value: 'blue' },
+					{ name: 'Size', value: 'l' },
+				] ),
+				variation( 102, [
+					{ name: 'Color', value: 'blue' },
+					{ name: 'Size', value: 'xl' },
+				] ),
+			],
+		};
+		mockVariation = [
+			{ attribute: 'Color', value: 'blue' },
+			{ attribute: 'Size', value: 'l' },
+		];
+
+		getRegisteredStore().actions.setAttribute( 'Size', 'xl' );
+
+		expect( mockVariation ).toEqual( [
+			{ attribute: 'Color', value: 'blue' },
+			{ attribute: 'Size', value: 'xl' },
+		] );
+	} );
+
+	it( 'reports missing or unavailable variation matches', () => {
+		mockBaseProduct = {
 			id: 100,
 			variations: [ variation( 101, [] ) ],
 		};
-		mockContext.selectedAttributes = selectedAttributes;
-		mockProductsState.findProduct.mockImplementation(
-			( { id, selectedAttributes: receivedAttributes } ) => {
-				const selectedColor = receivedAttributes?.find(
-					( attribute ) => attribute.attribute === 'Color'
-				);
-
-				return id === 100 &&
-					receivedAttributes?.length === 1 &&
-					selectedColor?.value === 'blue'
-					? { id: 101 }
-					: mockProductsState.mainProductInContext;
-			}
-		);
-		mockProductsState.productVariations[ 101 ] = {
+		mockProductVariation = {
 			id: 101,
 			is_in_stock: false,
 		};
 
-		getRegisteredStore().callbacks.setSelectedVariationId();
 		getRegisteredStore().callbacks.validateVariation();
 
-		expect( mockProductContext?.variationId ).toBe( 101 );
 		expect( mockAddError ).toHaveBeenCalledWith( {
 			code: 'variableProductOutOfStock',
 			message: 'Variation unavailable.',
@@ -350,15 +361,22 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		} );
 
 		mockAddError.mockClear();
-		mockProductsState.findProduct.mockReturnValue(
-			mockProductsState.mainProductInContext
-		);
+		mockProductVariation = null;
 		getRegisteredStore().callbacks.validateVariation();
 		expect( mockAddError ).toHaveBeenCalledWith( {
 			code: 'variableProductMissingAttributes',
 			message: 'Choose options.',
 			group: 'variable-product',
 		} );
+	} );
+
+	it( 'does not validate a product with no variations', () => {
+		mockBaseProduct = { id: 100, variations: [] };
+
+		getRegisteredStore().callbacks.validateVariation();
+
+		expect( mockClearErrors ).toHaveBeenCalledWith( 'variable-product' );
+		expect( mockAddError ).not.toHaveBeenCalled();
 	} );
 
 	it.each( [
@@ -371,15 +389,31 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			input.type = 'number';
 			input.value = String( current );
 			mockGetElement.mockReturnValue( { ref: input } );
-			mockProductsState.productVariationInContext = {
+			mockProductVariation = {
 				id: 101,
 				add_to_cart: { minimum: 4, maximum: 8 },
 			};
-			mockContext.quantity = { 101: current };
+			mockAddToCartStore.state.effectiveQuantity = current;
 
 			getRegisteredStore().callbacks.watchQuantityConstraints();
 
-			expect( mockSetQuantity ).toHaveBeenCalledWith( 101, expected );
+			expect( mockSetQuantity ).toHaveBeenCalledWith( expected );
 		}
 	);
+
+	it( 'does nothing when the input is idle and already matches the effective quantity', () => {
+		const input = document.createElement( 'input' );
+		input.type = 'number';
+		input.value = '4';
+		mockGetElement.mockReturnValue( { ref: input } );
+		mockProductVariation = {
+			id: 101,
+			add_to_cart: { minimum: 4, maximum: 8 },
+		};
+		mockAddToCartStore.state.effectiveQuantity = 4;
+
+		getRegisteredStore().callbacks.watchQuantityConstraints();
+
+		expect( mockSetQuantity ).not.toHaveBeenCalled();
+	} );
 } );

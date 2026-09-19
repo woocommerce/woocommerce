@@ -7,9 +7,11 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type {
+	WooCommerceStore,
+	TemplateVariationAttribute,
+} from '@woocommerce/stores/woocommerce';
 import type { ProductResponseItem, SelectableItem } from '@woocommerce/types';
 
 /**
@@ -46,13 +48,12 @@ type ToggleContext = Context & {
 	item?: SelectableItem< { visual?: VisualAttributeTerm } >;
 };
 
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const isAttributeValueValid = ( {
@@ -62,7 +63,7 @@ const isAttributeValueValid = ( {
 }: {
 	attributeName: string;
 	attributeValue: string;
-	selectedAttributes: SelectedAttributes[];
+	selectedAttributes: TemplateVariationAttribute[];
 } ) => {
 	if (
 		! attributeName ||
@@ -85,7 +86,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { mainProductInContext: product } = productsState;
+	const product = wooState.productScope.baseProduct;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -181,7 +182,6 @@ const getProductAttributesAndOptions = (
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			selectedAttributes: SelectedAttributes[];
 			selectableItems: readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
 			} >[];
@@ -199,7 +199,6 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
-			setSelectedVariationId: () => void;
 			validateVariation: () => void;
 			watchQuantityConstraints: () => void;
 		};
@@ -209,13 +208,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return [];
-				}
-				return context.selectedAttributes || [];
-			},
 			get selectableItems(): readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
 			} >[] {
@@ -228,7 +220,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					disabledAttributesAction,
 					variationAttributeOptions,
 				} = context;
-				const { selectedAttributes } = state;
+				const selectedAttributes = wooState.productScope.variation;
 				const hideInvalid = disabledAttributesAction === 'hide';
 
 				if ( ! Array.isArray( variationAttributeOptions ) ) {
@@ -264,46 +256,38 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		actions: {
 			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
-				const index = selectedAttributes.findIndex(
-					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
-				);
-
 				if ( value === '' ) {
-					if ( index >= 0 ) {
-						selectedAttributes.splice( index, 1 );
-					}
+					actions.removeAttribute( attribute );
 					return;
 				}
 
-				if ( index >= 0 ) {
-					selectedAttributes[ index ] = {
-						attribute,
-						value,
-					};
-				} else {
-					selectedAttributes.push( {
-						attribute,
-						value,
-					} );
-				}
+				const current = wooState.productScope.variation;
+				const index = current.findIndex( ( selectedAttribute ) =>
+					attributeNamesMatch(
+						selectedAttribute.attribute,
+						attribute
+					)
+				);
+
+				// Full reassignment, never in-place mutation: the envelope's
+				// `variation` setter is what keeps the declared context and
+				// the scope's record in sync (D7).
+				wooState.productScope.variation =
+					index >= 0
+						? current.map( ( entry, i ) =>
+								i === index ? { attribute, value } : entry
+						  )
+						: [ ...current, { attribute, value } ];
 			},
 			removeAttribute( attribute: string ) {
-				const { selectedAttributes } = getContext< Context >();
-				const index = selectedAttributes.findIndex(
-					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
-				);
-				if ( index >= 0 ) {
-					selectedAttributes.splice( index, 1 );
-				}
+				wooState.productScope.variation =
+					wooState.productScope.variation.filter(
+						( selectedAttribute ) =>
+							! attributeNamesMatch(
+								selectedAttribute.attribute,
+								attribute
+							)
+					);
 			},
 			toggle(
 				itemArg?:
@@ -320,7 +304,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const { selectedAttributes } = state;
+				const selectedAttributes = wooState.productScope.variation;
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -350,15 +334,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = state;
+				const selectedAttributes = wooState.productScope.variation;
 
-				const { mainProductInContext: product } = productsState;
+				const product = wooState.productScope.baseProduct;
 				if ( ! product ) {
 					return;
 				}
 
 				// Normalize included/excluded attributes to lowercase for comparison
-				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
+				// with Store API labels (e.g., "Color" vs "attribute_pa_color").
 				const normalizedIncluded = includedAttributes.map( ( attr ) =>
 					normalizeAttributeName( attr )
 				);
@@ -422,52 +406,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					includedAttributes: [ context.name ],
 				} );
 			},
-			setSelectedVariationId: () => {
-				const { mainProductInContext: product } = productsState;
-
-				if ( ! product?.variations?.length ) {
-					return;
-				}
-
-				const { selectedAttributes } = getContext< Context >();
-				const result = productsState.findProduct( {
-					id: product.id,
-					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
-				const matchedVariation =
-					result && result.id !== product.id ? result : null;
-
-				const variationId = matchedVariation?.id ?? null;
-				const productContext = getContext< {
-					variationId?: number | null;
-				} >( 'woocommerce/products' );
-
-				// If there is context, update the context. Otherwise, update the state directly.
-				( productContext
-					? productContext
-					: productsState
-				).variationId = variationId;
-			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { mainProductInContext: product } = productsState;
+				const product = wooState.productScope.baseProduct;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
-				const result = productsState.findProduct( {
-					id: product.id,
-					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
-				const matchedVariation =
-					result && result.id !== product.id ? result : null;
+				// `productVariation` is "a variation or nothing": only an
+				// actual matched variation is accepted, matching the old
+				// `findProduct` guard against it returning the parent.
+				const matchedVariation = wooState.productScope.productVariation;
 
 				const { errorMessages } = getConfig();
 
@@ -482,16 +433,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// Check stock status from productVariations store.
-				const variationData =
-					productsState.productVariations[ matchedVariation.id ];
-
-				if ( ! variationData ) {
-					// Variation data not loaded - this is a data consistency issue.
-					return;
-				}
-
-				if ( ! variationData.is_in_stock ) {
+				if ( ! matchedVariation.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
@@ -513,16 +455,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { productVariationInContext: variation } = productsState;
+				const variation = wooState.productScope.productVariation;
 
 				if ( ! variation ) {
 					return;
 				}
 
 				const { minimum, maximum } = variation.add_to_cart;
-
-				const { quantity } = getContext< Context >();
-				const currentValue = quantity[ variation.id ];
+				const currentValue = state.effectiveQuantity;
 
 				let newValue = currentValue;
 				if ( currentValue < minimum ) {
@@ -535,10 +475,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					newValue !== ref.valueAsNumber ||
 					newValue !== currentValue
 				) {
-					actions.setQuantity( variation.id, newValue );
+					actions.setQuantity( newValue );
 				}
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );

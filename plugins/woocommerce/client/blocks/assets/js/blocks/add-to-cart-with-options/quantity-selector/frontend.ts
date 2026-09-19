@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
+
 /**
  * Internal dependencies
  */
@@ -13,20 +15,20 @@ export type Context = {
 	inputElement?: HTMLInputElement | null;
 };
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 export type QuantitySelectorStore = {
@@ -52,7 +54,7 @@ store< QuantitySelectorStore >(
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return true;
@@ -61,52 +63,49 @@ store< QuantitySelectorStore >(
 				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
+				const currentQuantity =
+					addToCartWithOptionsStore.state.effectiveQuantity;
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return true;
 				}
 
-				const { id, add_to_cart: addToCart } = product;
-
-				const currentQuantity = quantity[ id ] || 0;
+				const { add_to_cart: addToCart } = product;
 
 				const { allowZero } = getContext< Context >();
 				return (
 					( allowZero && currentQuantity > 0 ) ||
-					currentQuantity - addToCart.multiple_of >= addToCart.minimum
+					currentQuantity - addToCart.multiple_of >=
+						addToCart.minimum
 				);
 			},
 			get allowsIncrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
+				const currentQuantity =
+					addToCartWithOptionsStore.state.effectiveQuantity;
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return true;
 				}
 
-				const { id, add_to_cart: addToCart } = product;
-
-				const currentQuantity = quantity[ id ] || 0;
+				const { add_to_cart: addToCart } = product;
 
 				return (
-					currentQuantity + addToCart.multiple_of <= addToCart.maximum
+					currentQuantity + addToCart.multiple_of <=
+					addToCart.maximum
 				);
 			},
 			get inputQuantity(): number {
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return 0;
 				}
 
-				const quantity =
-					addToCartWithOptionsStore.state.quantity?.[ product.id ];
-
-				return quantity === undefined ? 0 : quantity;
+				return addToCartWithOptionsStore.state.effectiveQuantity;
 			},
 		},
 		actions: {
@@ -117,14 +116,14 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { id: productId, add_to_cart: addToCart } = product;
+				const { add_to_cart: addToCart } = product;
 				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
 				const newValue = Math.max(
@@ -132,10 +131,7 @@ store< QuantitySelectorStore >(
 					Math.min( maximum, currentValue + multipleOf )
 				);
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
-					newValue
-				);
+				addToCartWithOptionsStore.actions.setQuantity( newValue );
 			},
 			decreaseQuantity: () => {
 				const { allowZero, inputElement } = getContext< Context >();
@@ -144,14 +140,14 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { id: productId, add_to_cart: addToCart } = product;
+				const { add_to_cart: addToCart } = product;
 				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
 				let newValue = currentValue - multipleOf;
@@ -169,10 +165,7 @@ store< QuantitySelectorStore >(
 				}
 
 				if ( newValue !== currentValue ) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
-						newValue
-					);
+					addToCartWithOptionsStore.actions.setQuantity( newValue );
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -181,23 +174,20 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, inputElement } = getContext< Context >();
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;
 				}
 
-				const { id: productId, add_to_cart: addToCart } = product;
+				const { add_to_cart: addToCart } = product;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
 				if (
 					allowZero &&
 					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
-						0
-					);
+					addToCartWithOptionsStore.actions.setQuantity( 0 );
 					return;
 				}
 
@@ -207,10 +197,7 @@ store< QuantitySelectorStore >(
 				const newValue =
 					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
-					newValue
-				);
+				addToCartWithOptionsStore.actions.setQuantity( newValue );
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -219,14 +206,13 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;
 				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					product.id,
 					element.ref.checked ? 1 : 0
 				);
 			},
@@ -243,5 +229,7 @@ store< QuantitySelectorStore >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );

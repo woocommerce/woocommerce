@@ -7,13 +7,12 @@ import {
 	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce';
 import type {
-	Store as WooCommerce,
-	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+	WooCommerceStore,
+	ProductScopeContext,
+} from '@woocommerce/stores/woocommerce';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -23,10 +22,9 @@ import type { Context as QuantitySelectorContext } from './quantity-selector/fro
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {
-	selectedAttributes: SelectedAttributes[];
-	quantity: Record< number, number >;
+	initialQuantity: Record< number, number >;
 	validationErrors: AddToCartError[];
-	tempQuantity: number;
+	noticeIds: string[];
 	groupedProductIds: number[];
 };
 
@@ -53,14 +51,12 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 export type AddToCartWithOptionsStore = {
@@ -69,12 +65,16 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 		isFormValid: boolean;
 		allowsAddingToCart: boolean;
-		quantity: Record< number, number >;
-		selectedAttributes: SelectedAttributes[];
+		/**
+		 * The effective quantity (D8) of the scope the reading element sits
+		 * in: the typed quantity when the scope has a record, and its
+		 * `initialQuantity` entry otherwise.
+		 */
+		effectiveQuantity: number;
 	};
 	actions: {
-		validateQuantity: ( productId: number, value?: number ) => void;
-		setQuantity: ( productId: number, value: number ) => void;
+		validateQuantity: ( value?: number ) => void;
+		setQuantity: ( value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: ( event: SubmitEvent ) => void;
@@ -88,13 +88,18 @@ type MergedAddToCartWithOptionsStores = AddToCartWithOptionsStore &
 const { state } = store< MergedAddToCartWithOptionsStores >(
 	'woocommerce/add-to-cart-with-options',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 const { actions } = store< MergedAddToCartWithOptionsStores >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			noticeIds: [],
+			get noticeIds(): string[] {
+				const context = getContext< Context >();
+				return context?.noticeIds ?? [];
+			},
 			get validationErrors(): Array< AddToCartError > {
 				const context = getContext< Context >();
 
@@ -108,7 +113,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return false;
@@ -123,17 +128,29 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 
 				return product.is_purchasable && product.is_in_stock;
 			},
-			get quantity(): Record< number, number > {
-				const context = getContext< Context >();
-				return context.quantity;
-			},
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< Context >();
-				return context.selectedAttributes || [];
+			get effectiveQuantity(): number {
+				const scopeName =
+					getContext< ProductScopeContext >( 'woocommerce' )
+						?.scopeName ?? '_default';
+				// Read the record directly rather than through
+				// `draftCartItem.quantity`: the draft's fallback of `1`
+				// cannot tell "typed 1" from "nothing typed".
+				const typedQuantity =
+					wooState.productScopes[ scopeName ]?.draftCartItem
+						?.quantity;
+
+				if ( typeof typedQuantity === 'number' ) {
+					return typedQuantity;
+				}
+
+				const { initialQuantity } = getContext< Context >();
+				return (
+					initialQuantity?.[ wooState.productScope.productId ] ?? 0
+				);
 			},
 		},
 		actions: {
-			validateQuantity( productId: number, value?: number ) {
+			validateQuantity( value?: number ) {
 				actions.clearErrors( 'invalid-quantities' );
 
 				if ( typeof value !== 'number' ) {
@@ -141,7 +158,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				}
 
 				// If selected quantity is invalid, add an error.
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if (
 					value === 0 ||
@@ -158,58 +175,35 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					} );
 				}
 			},
-			setQuantity( productId: number, value: number ) {
-				const context = getContext< Context >();
+			setQuantity( value: number ) {
 				const quantitySelectorContext =
 					getContext< QuantitySelectorContext >(
 						'woocommerce/add-to-cart-with-options-quantity-selector'
 					);
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
+				const { draftCartItem } = wooState.productScope;
 
-				const { mainProductInContext: productFromStore } =
-					productsState;
-				const variationIds =
-					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
-
-				if ( variationIds.length > 0 ) {
-					// Set the quantity for all variations, so when switching
-					// variations the quantity persists.
-					const idsToUpdate = [ productId, ...variationIds ];
-
-					idsToUpdate.forEach( ( id ) => {
-						if ( isValueNaN ) {
-							// Modify the value first before setting the real
-							// value to ensure that a signal update happens.
-							context.quantity[ Number( id ) ] = NaN;
-						}
-
-						context.quantity[ Number( id ) ] = value;
-					} );
-				} else {
+				if ( draftCartItem ) {
 					if ( isValueNaN ) {
-						// Modify the value first before setting the real value
-						// to ensure that a signal update happens.
-						context.quantity = {
-							...context.quantity,
-							[ productId ]: NaN,
-						};
+						// Modify the value first before setting the real
+						// value to ensure that a signal update happens.
+						draftCartItem.quantity = NaN;
 					}
 
-					context.quantity = {
-						...context.quantity,
-						[ productId ]: value,
-					};
+					draftCartItem.quantity = value;
 				}
 
-				const parentProduct = productsState.findProduct( {
-					id: productsState.productId,
-					selectedAttributes: context.selectedAttributes,
-				} );
-				if ( parentProduct?.type === 'grouped' ) {
+				// `validateGroupedProductQuantity` reads every child's own
+				// quantity, so a change from inside any one child's own
+				// scope still needs to trigger it; `groupedProductIds`
+				// inherits down from the form's own context regardless of
+				// which scope this element sits in.
+				const { groupedProductIds } = getContext< Context >();
+				if ( groupedProductIds && groupedProductIds.length > 0 ) {
 					actions.validateGroupedProductQuantity();
 				} else {
-					actions.validateQuantity( productId, value );
+					actions.validateQuantity( value );
 				}
 
 				if ( inputElement ) {
@@ -253,7 +247,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						'woocommerce/store-notices',
 						{},
 						{
-							lock: universalLock,
+							lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
 						}
 					);
 
@@ -280,11 +274,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;
@@ -295,20 +285,21 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				const { quantity, selectedAttributes } =
-					getContext< Context >();
+				// The payload form: it removes no record, so the form keeps
+				// its selection and quantity after adding.
+				const scopeName =
+					getContext< ProductScopeContext >( 'woocommerce' )
+						?.scopeName ?? '_default';
+				const record =
+					wooState.productScopes[ scopeName ]?.draftCartItem;
+				const { productId, variation } = wooState.productScope;
 
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
 				yield wooActions.addCartItem(
 					{
-						id: product.id,
-						quantityToAdd: quantity[ product.id ],
-						variation: selectedAttributes,
-						type: product.type,
+						...record,
+						id: productId,
+						variation,
+						quantity: state.effectiveQuantity,
 					},
 					{
 						showCartUpdatesNotices: false,
@@ -317,5 +308,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 			} ),
 		},
 	},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
