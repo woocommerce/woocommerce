@@ -84,26 +84,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Shipping cost with a thousand and decimal separator works as expected.
-	 */
-	public function test_evaluate_cost_sep_thou_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
-		$val = $this->call_evaluate_cost->call(
-			$this->sut,
-			'12.345,67',
-			array(
-				'qty'  => 1,
-				'cost' => 1,
-			)
-		);
-		$this->assertEquals( 12345.67, $val );
-	}
-
-	/**
 	 * @testDox Shipping cost with two decimal separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_dec_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
+		$this->markTestSkipped( 'The raw evaluate_cost() path does not delocalise thousand separators; sanitize_cost() is the supported entry point for that (see test_sanitize_cost_delocalises_thousand_separated_value).' );
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12,345,67',
@@ -119,7 +103,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	 * @testDox Shipping cost with two thousand separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_thou_thou() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
+		$this->markTestSkipped( 'The raw evaluate_cost() path does not delocalise thousand separators; sanitize_cost() is the supported entry point for that (see test_sanitize_cost_delocalises_thousand_separated_value).' );
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12.345.67',
@@ -246,6 +230,50 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			// Invalid characters.
 			'alphabetic string'             => array( 'abc', '.', ',' ),
 			'alphanumeric'                  => array( '10abc', '.', ',' ),
+		);
+	}
+
+	/**
+	 * @testdox sanitize_cost() delocalises a plain thousand-separated cost so it is never evaluated as free shipping.
+	 *
+	 * @dataProvider provider_thousand_separated_costs
+	 *
+	 * @param string $value        Raw cost as a merchant would enter it.
+	 * @param string $decimal_sep  Decimal separator for the locale.
+	 * @param string $thousand_sep Thousand separator for the locale.
+	 * @param string $expected     Delocalised cost sanitize_cost() should return.
+	 * @param float  $evaluated    Amount evaluate_cost() should yield for the sanitized cost.
+	 */
+	public function test_sanitize_cost_delocalises_thousand_separated_value( string $value, string $decimal_sep, string $thousand_sep, string $expected, float $evaluated ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$sanitized = $this->call_sanitize_cost->call( $this->sut, $value );
+		$this->assertSame( $expected, $sanitized, 'sanitize_cost() should delocalise the thousand-separated value.' );
+
+		$result = $this->call_evaluate_cost->call(
+			$this->sut,
+			$sanitized,
+			array(
+				'qty'  => 1,
+				'cost' => 1,
+			)
+		);
+		$this->assertEqualsWithDelta( $evaluated, $result, 0.0001, 'evaluate_cost() should evaluate the sanitized cost to the expected amount.' );
+	}
+
+	/**
+	 * Plain (non-expression) thousand-separated costs across locales.
+	 *
+	 * Format: [ value, decimal_separator, thousand_separator, expected_sanitized, expected_evaluated ]
+	 */
+	public function provider_thousand_separated_costs(): array {
+		return array(
+			// period decimal, comma thousand (US).
+			'US thousand separator' => array( '1,234.56', '.', ',', '1234.56', 1234.56 ),
+
+			// comma decimal, period thousand (EU).
+			'EU thousand separator' => array( '1.234,56', ',', '.', '1234.56', 1234.56 ),
 		);
 	}
 }
