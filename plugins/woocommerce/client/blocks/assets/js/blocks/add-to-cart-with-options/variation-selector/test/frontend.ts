@@ -276,9 +276,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			...mockContext,
 			autoselect: true,
 		};
-		mockVariation = [
-			{ attribute: 'attribute_pa_color', value: 'blue' },
-		];
+		mockVariation = [ { attribute: 'attribute_pa_color', value: 'blue' } ];
 
 		getRegisteredStore().actions.autoselectAttributes( {
 			excludedAttributes: [ 'attribute_pa_color' ],

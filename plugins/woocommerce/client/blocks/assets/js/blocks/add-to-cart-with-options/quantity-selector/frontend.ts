@@ -77,8 +77,7 @@ store< QuantitySelectorStore >(
 				const { allowZero } = getContext< Context >();
 				return (
 					( allowZero && currentQuantity > 0 ) ||
-					currentQuantity - addToCart.multiple_of >=
-						addToCart.minimum
+					currentQuantity - addToCart.multiple_of >= addToCart.minimum
 				);
 			},
 			get allowsIncrease() {
@@ -94,8 +93,7 @@ store< QuantitySelectorStore >(
 				const { add_to_cart: addToCart } = product;
 
 				return (
-					currentQuantity + addToCart.multiple_of <=
-					addToCart.maximum
+					currentQuantity + addToCart.multiple_of <= addToCart.maximum
 				);
 			},
 			get inputQuantity(): number {

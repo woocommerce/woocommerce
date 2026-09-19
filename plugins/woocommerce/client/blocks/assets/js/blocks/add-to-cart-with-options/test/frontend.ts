@@ -239,9 +239,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 
 		getRegisteredStore().actions.setQuantity( 0 );
 
-		expect( getRegisteredStore().state.validationErrors ).toHaveLength(
-			1
-		);
+		expect( getRegisteredStore().state.validationErrors ).toHaveLength( 1 );
 	} );
 
 	it( 'delegates to grouped validation from inside a grouped form', () => {
@@ -252,9 +250,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 
 		getRegisteredStore().actions.setQuantity( 1 );
 
-		expect( mockValidateGroupedProductQuantity ).toHaveBeenCalledTimes(
-			1
-		);
+		expect( mockValidateGroupedProductQuantity ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it.each( [
