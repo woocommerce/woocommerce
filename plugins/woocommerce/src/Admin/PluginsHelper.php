@@ -1005,7 +1005,7 @@ class PluginsHelper {
 			/* translators: 1: Product price */
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
-		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
+		$expiry_date   = (string) wp_date( get_option( 'date_format' ), (int) $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
 				'product_id'   => $product_id,
