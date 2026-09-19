@@ -1058,6 +1058,54 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Two grouped products sharing one child render two different scopeName values for that child.
+	 */
+	public function test_two_grouped_products_sharing_one_child_get_different_scope_names(): void {
+		$shared_child = new \WC_Product_Simple();
+		$shared_child->set_regular_price( 10 );
+		$shared_child_id = $shared_child->save();
+
+		$grouped_a = new \WC_Product_Grouped();
+		$grouped_a->set_children( array( $shared_child_id ) );
+		$grouped_a_id = $grouped_a->save();
+
+		$grouped_b = new \WC_Product_Grouped();
+		$grouped_b->set_children( array( $shared_child_id ) );
+		$grouped_b_id = $grouped_b->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$grouped_a_id,
+					$grouped_b_id
+				)
+			);
+
+			$processor   = new \WP_HTML_Tag_Processor( $markup );
+			$scope_names = array();
+			while ( $processor->next_tag() ) {
+				$context = $processor->get_attribute( 'data-wp-context' );
+				if ( ! is_string( $context ) || 0 !== strpos( $context, 'woocommerce::' ) ) {
+					continue;
+				}
+				$decoded = json_decode( substr( $context, strlen( 'woocommerce::' ) ), true );
+				if ( $shared_child_id === $decoded['productId'] ) {
+					$scope_names[] = $decoded['scopeName'];
+				}
+			}
+
+			$this->assertCount( 2, $scope_names, 'The shared child should render one row per grouped product.' );
+			$this->assertNotSame( $scope_names[0], $scope_names[1], 'The shared child should get a different scopeName in each grouped product.' );
+		} finally {
+			$grouped_a->delete( true );
+			$grouped_b->delete( true );
+			$shared_child->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox Rendering the same page twice, resetting the scope helper between passes, yields the same scopeName values in the same places.
 	 */
 	public function test_rendering_same_page_twice_yields_same_scope_names(): void {
