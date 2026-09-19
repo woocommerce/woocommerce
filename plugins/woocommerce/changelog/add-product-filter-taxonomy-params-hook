@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add the woocommerce_product_filter_taxonomy_params filter so plugins can rename or release the URL query params Product Filters claims for product taxonomies.
+Add the woocommerce_product_filter_taxonomy_params filter so plugins can rename or release the URL query params (categories, tags, brands) that Product Filters has claimed since 10.2.0.

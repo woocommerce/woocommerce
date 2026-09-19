@@ -92,6 +92,9 @@ class Params implements FilterUrlParam {
 		 * map must stay stable for the whole request. A return value that is not an array falls back to the
 		 * unfiltered map, and entries that are not non-empty string pairs are discarded.
 		 *
+		 * This hook is public API for extension authors: the `@internal` notice on the enclosing class
+		 * covers the class itself, not this filter.
+		 *
 		 * @hook woocommerce_product_filter_taxonomy_params
 		 * @since 11.3.0
 		 *
