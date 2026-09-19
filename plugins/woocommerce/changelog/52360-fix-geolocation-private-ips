@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip the geolocation API lookup for private, reserved, and loopback IP addresses (e.g. 127.0.0.1, 0.0.0.0, 192.168.0.1), since they can never be geolocated.
