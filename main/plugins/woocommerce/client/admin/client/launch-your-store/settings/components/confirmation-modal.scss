@@ -1,0 +1,24 @@
+.site-visibility-settings-confirmation-modal {
+	.site-visibility-settings-confirmation-modal__content {
+		margin-top: 15px;
+	}
+
+	.site-visibility-settings-confirmation-modal__buttons {
+		display: flex;
+		flex-flow: row-reverse;
+	}
+
+	// Hacky solution for a divider line that spans over its container's paddings.
+	.divider-container {
+		height: 1px;
+		margin-bottom: 30px;
+		margin-top: 25px;
+
+		& > hr {
+			position: absolute;
+			width: 100%;
+			left: 0;
+			right: 0;
+		}
+	}
+}

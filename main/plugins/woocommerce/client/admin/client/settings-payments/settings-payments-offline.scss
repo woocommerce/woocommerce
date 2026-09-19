@@ -1,0 +1,14 @@
+@import "settings-payments-main.scss";
+
+.settings-payments-offline__container {
+	@extend .settings-payments-main__container;
+
+	.settings-payment-gateways {
+		border: 0;
+		box-shadow: none;
+	}
+}
+
+#wpbody:has(.settings-payments-offline__container) {
+	margin-top: 0;
+}

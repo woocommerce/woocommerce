@@ -1,0 +1,58 @@
+$ces-feedback-height: 64px;
+
+h1.woocommerce-task-progress-header__title + .woocommerce-task-dashboard__container.setup-task-list {
+	margin-top: $gap-large;
+}
+
+.woocommerce-task-card.completed {
+	.components-card__header {
+		display: block;
+		padding: 0;
+	}
+
+	.woocommerce-task-card__header {
+		align-items: center;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		padding: $gap-large $gap-larger;
+		position: relative;
+		text-align: center;
+		width: 100%;
+	}
+
+	.woocommerce-task-card__header-subtitle {
+		color: $gray-700;
+		margin: $gap-smaller 0 $gap-large;
+	}
+
+	.woocommerce-task-card__finished-header-image {
+		max-width: 75%;
+	}
+
+	.woocommerce-task-card__header-menu {
+		position: absolute;
+		right: $gap;
+		top: $gap;
+	}
+}
+
+.customer-feedback-simple__container {
+	height: $ces-feedback-height;
+}
+
+.woocommerce-task-card__header-ces-feedback {
+	height: $ces-feedback-height;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.woocommerce-task-header__contents-container img.svg-background {
+	padding-right: 16px;
+	padding-top: 9px; // align with header text
+}
+
+.woocommerce-task-header__contents-container.woocommerce-task-header__launch_your_store img.svg-background {
+	padding: 8px;
+}

@@ -1,0 +1,339 @@
+.woocommerce-activity-panel .woocommerce-activity-card {
+	position: relative;
+	padding: $fallback-gutter;
+	padding: $gutter;
+	background: $studio-white;
+	border-bottom: 1px solid $gray-200;
+	color: $gray-text;
+	@include font-size( 13 );
+
+	&:not(.woocommerce-empty-activity-card) {
+		display: grid;
+		grid-template-columns: 50px 1fr;
+		grid-template-areas:
+			"icon header"
+			"icon body"
+			"icon actions";
+	}
+
+	&__button {
+		display: block;
+		height: unset;
+		background: none;
+		align-items: unset;
+		transition: unset;
+		text-align: left;
+		width: 100%;
+		padding: 0;
+	}
+}
+
+.woocommerce-activity-card__unread {
+	position: absolute;
+	top: calc(#{$fallback-gutter} - 6px);
+	top: calc(#{$gutter} - 6px);
+	right: calc(#{$fallback-gutter} - 6px);
+	right: calc(#{$gutter} - 6px);
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: $core-orange;
+}
+
+.woocommerce-activity-card__icon {
+	grid-area: icon;
+	fill: $gray-200;
+}
+
+.woocommerce-activity-card__header {
+	margin-bottom: $gap;
+	display: flex;
+	flex-direction: column;
+
+	.woocommerce-activity-card__title {
+		margin: 0;
+		@include font-size( 14 );
+		order: 2;
+
+		.woocommerce-empty-activity-card & {
+			color: $gray-900;
+			font-style: normal;
+			line-height: 24px;
+			font-weight: normal;
+		}
+
+		.woocommerce-activity-card__button & {
+			margin-bottom: $gap-smaller;
+		}
+
+		a {
+			text-decoration: none;
+		}
+	}
+
+	.woocommerce-activity-card__date {
+		color: $gray-700;
+		@include font-size( 12 );
+		margin-bottom: $gap-small;
+		order: 1;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		order: 3;
+		.woocommerce-activity-card__button & {
+			margin-bottom: $gap-smallest;
+		}
+	}
+
+	@include breakpoint( ">782px" ) {
+		grid-area: header;
+		display: grid;
+		grid-template:
+			"title date"
+			"subtitle date" /
+			1fr auto;
+
+		.woocommerce-activity-card__title {
+			grid-area: title;
+		}
+
+		.woocommerce-activity-card__date {
+			display: block;
+			grid-area: date;
+			justify-self: end;
+			margin-bottom: 0;
+		}
+
+		.woocommerce-activity-card__subtitle {
+			grid-area: subtitle;
+		}
+	}
+}
+
+.woocommerce-activity-card__body {
+	grid-area: body;
+
+	& > p:first-child {
+		margin-top: 0;
+	}
+
+	& > p:last-child {
+		margin-bottom: 0;
+	}
+	.woocommerce-empty-activity-card & {
+		color: $gray-700;
+		font-style: normal;
+		font-weight: normal;
+		@include font-size( 13 );
+		line-height: 20px;
+	}
+}
+
+.woocommerce-activity-card__actions {
+	grid-area: actions;
+	margin-top: $gap;
+
+	// Ensures any immediate child with a sibling has space between the items
+	& > * + * {
+		margin-left: 0.5em;
+	}
+
+	.components-button {
+		height: 24px;
+		padding: 4px 10px;
+		@include font-size( 11 );
+		&.is-destructive {
+			&:not(:hover) {
+				box-shadow: none;
+			}
+		}
+	}
+}
+
+.woocommerce-activity-card.is-loading {
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		height: 16px;
+	}
+
+	.woocommerce-activity-card__title {
+		width: 80%;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		margin-top: $gap-smallest;
+	}
+
+	.woocommerce-activity-card__date {
+		width: 100%;
+		margin-bottom: $gap;
+
+		@include breakpoint( ">782px" ) {
+			text-align: right;
+			margin-bottom: 0;
+		}
+
+		.is-placeholder {
+			// Fixed width for a fake date
+			width: 68px;
+		}
+	}
+
+	.woocommerce-activity-card__icon {
+		margin-right: $fallback-gutter;
+		margin-right: $gutter;
+
+		.is-placeholder {
+			height: 33px;
+			width: 33px;
+		}
+	}
+
+	.woocommerce-activity-card__body .is-placeholder {
+		width: 100%;
+		margin-bottom: $gap-smallest;
+
+		&:last-of-type {
+			width: 65%;
+			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-activity-card__actions {
+		.is-placeholder {
+			width: 91px;
+			height: 24px;
+		}
+	}
+}
+
+// Needs the double-class for specificity
+.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-order-activity-card {
+	grid-template-columns: 1fr;
+	grid-template-areas:
+		"header"
+		"body"
+		"actions";
+
+	.woocommerce-activity-card__icon {
+		display: none;
+	}
+
+	.woocommerce-flag {
+		display: inline-block;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		span + span::before {
+			content: " \2022\ ";
+		}
+	}
+}
+
+// Needs the double-class for specificity
+.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-inbox-activity-card {
+	grid-template-columns: 72px 1fr;
+	height: 100%;
+	opacity: 1;
+	padding: $fallback-gutter;
+	padding: $gutter;
+
+	@media screen and ( prefers-reduced-motion: no-preference ) {
+		transition: opacity 0.3s, height 0s, padding 0s;
+	}
+
+	@include breakpoint( "<782px" ) {
+		grid-template-columns: 64px 1fr;
+	}
+
+	.woocommerce-activity-card__header {
+		margin-bottom: $gap-small;
+	}
+
+	&.actioned {
+		height: 0;
+		opacity: 0;
+		padding: 0;
+		@media screen and ( prefers-reduced-motion: no-preference ) {
+			transition: opacity 0.3s, height 0s 0.3s, padding 0s 0.3s;
+		}
+	}
+}
+
+.woocommerce-stock-activity-card__image-overlay__product,
+.woocommerce-review-activity-card__image-overlay__product {
+	position: relative;
+	display: inline-block;
+
+	&.is-placeholder {
+		&::before {
+			background-color: $gray-700;
+			border-radius: 2px;
+			content: "";
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			top: 0;
+			opacity: 0.1;
+		}
+
+		.woocommerce-product-image {
+			display: block;
+		}
+	}
+}
+
+.woocommerce-stock-activity-card {
+	@media screen and ( prefers-reduced-motion: no-preference ) {
+		transition: opacity 0.3s;
+	}
+
+	&.is-dimmed {
+		opacity: 0.7;
+	}
+
+	.woocommerce-stock-activity-card__stock-quantity {
+		background: $gray-100;
+		color: $gray-700;
+		padding: 3px $gap-smaller;
+		border-radius: 3px;
+
+		&.out-of-stock {
+			color: $alert-red;
+		}
+	}
+
+	.woocommerce-stock-activity-card__edit-quantity {
+		display: inline-flex;
+		width: 50px;
+		margin-right: 10px;
+
+		input {
+			border-radius: 2px;
+			height: 30px;
+
+			&[type="number"] {
+				-moz-appearance: textfield;
+
+				&::-webkit-outer-spin-button,
+				&::-webkit-inner-spin-button {
+					-webkit-appearance: none;
+					margin: 0;
+				}
+			}
+		}
+	}
+
+	.woocommerce-activity-card__subtitle {
+		color: $gray-700;
+		@include font-size( 12 );
+	}
+}
+
+.woocommerce-empty-activity-card {
+	background: $gray-100;
+	margin: 20px;
+	border-bottom: unset;
+}

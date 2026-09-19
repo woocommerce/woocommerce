@@ -1,0 +1,10 @@
+.woocommerce-profiler-progress-bar__container {
+	height: 8px;
+	width: 100%;
+}
+
+// Min width equal to height. This means small values look like each other, but all bars have a consistent radius.
+.woocommerce-profiler-progress-bar__filler {
+	height: 100%;
+	min-width: 8px;
+}

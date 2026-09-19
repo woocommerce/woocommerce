@@ -1,0 +1,10 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	&__discover {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 40px;
+	}
+}

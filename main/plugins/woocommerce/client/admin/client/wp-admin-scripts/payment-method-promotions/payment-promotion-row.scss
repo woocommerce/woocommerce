@@ -1,0 +1,55 @@
+[data-gateway_id="pre_install_woocommerce_payments_promotion"] {
+	> .status a {
+		visibility: hidden !important;
+	}
+
+	> .action {
+		.is-secondary,
+		&.is-secondary:hover {
+			box-shadow: none;
+		}
+
+		a {
+			position: relative;
+			display: none;
+		}
+	}
+}
+
+.wc_gateways {
+	.name {
+		.wc-payment-gateway-method-name {
+			display: inline-flex;
+			img {
+				height: 24px;
+				width: auto;
+				margin-left: 4px;
+			}
+		}
+	}
+
+	.wc-payment-gateway-method__name {
+		display: flex;
+
+		.pre-install-payment-gateway__subtitle {
+			margin-left: $gap;
+			> img {
+				height: 24px;
+				width: auto;
+				margin-left: 4px;
+			}
+		}
+	}
+
+	.pre-install-payment-gateway__actions {
+		display: flex;
+	}
+
+	.pre-install-payment-gateway__actions-menu {
+		margin-right: $gap-large;
+	}
+
+	.pre-install-payment-gateway__actions-menu-options {
+		text-align: center;
+	}
+}
