@@ -1529,6 +1529,13 @@ describe( 'getDateParamsFromQuery', () => {
 		).toBe( 'previous_period' );
 	} );
 
+	it( 'should fall back to previous_period for a default range that is not offered', () => {
+		expect(
+			getDateParamsFromQuery( {}, 'period=year&compare=previous_year' )
+				.compare
+		).toBe( 'previous_period' );
+	} );
+
 	it( 'should keep a compare value that is offered for the period', () => {
 		expect(
 			getDateParamsFromQuery( {

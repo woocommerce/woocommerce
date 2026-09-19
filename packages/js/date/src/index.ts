@@ -847,18 +847,25 @@ const getDateParamsFromQueryMemoized = memoize<
 			queryDefaults.compare = '';
 		}
 
+		const defaultAfter =
+			queryDefaults.after && isValidMomentInput( queryDefaults.after )
+				? moment( queryDefaults.after )
+				: null;
+		const defaultBefore =
+			queryDefaults.before && isValidMomentInput( queryDefaults.before )
+				? moment( queryDefaults.before )
+				: null;
+
 		return {
 			period: queryDefaults.period,
-			compare: queryDefaults.compare,
-			after:
-				queryDefaults.after && isValidMomentInput( queryDefaults.after )
-					? moment( queryDefaults.after )
-					: null,
-			before:
-				queryDefaults.before &&
-				isValidMomentInput( queryDefaults.before )
-					? moment( queryDefaults.before )
-					: null,
+			compare: getValidCompare(
+				queryDefaults.period,
+				queryDefaults.compare,
+				defaultAfter,
+				defaultBefore
+			),
+			after: defaultAfter,
+			before: defaultBefore,
 		};
 	},
 	( period, compare, after, before, defaultDateRange ) =>
