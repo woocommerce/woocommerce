@@ -120,7 +120,6 @@ async function runAction( action: unknown ): Promise< unknown > {
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const resolved = await next.value;
 			next = iterator.next( resolved );
 		} catch ( error ) {
@@ -585,9 +584,7 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 				} )
 			);
 
-			expect( captured[ 0 ].body.giftMessage ).toBe(
-				'Happy birthday!'
-			);
+			expect( captured[ 0 ].body.giftMessage ).toBe( 'Happy birthday!' );
 		} );
 
 		it( 'bumps a matching existing line by the posted delta, optimistically', async () => {
@@ -1300,9 +1297,9 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 			);
 
 			expect( captured ).toHaveLength( N );
-			expect(
-				captured.every( ( r ) => r.body.quantity === 1 )
-			).toBe( true );
+			expect( captured.every( ( r ) => r.body.quantity === 1 ) ).toBe(
+				true
+			);
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( N );
 		} );
@@ -1507,12 +1504,10 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 				mockState.findItemInCart( { id: 42, key: 'server-key-abc' } )
 					?.key
 			).toBe( 'server-key-abc' );
-			expect(
-				mockState.findItemInCart( { id: 42 } )?.key
-			).toBe( 'server-key-abc' );
-			expect(
-				mockState.findItemInCart( { id: 999 } )
-			).toBeUndefined();
+			expect( mockState.findItemInCart( { id: 42 } )?.key ).toBe(
+				'server-key-abc'
+			);
+			expect( mockState.findItemInCart( { id: 999 } ) ).toBeUndefined();
 		} );
 
 		it( 'addCartItem( { key, quantity, ... } ) — the keyed compatibility form — delegates to update-item, ignoring the caller’s id/variation/type', async () => {
@@ -1601,9 +1596,9 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 				);
 
 				expect( captured ).toHaveLength( 2 );
-				expect(
-					captured.find( ( r ) => r.body.id === 99 )?.path
-				).toBe( '/wc/store/v1/cart/add-item' );
+				expect( captured.find( ( r ) => r.body.id === 99 )?.path ).toBe(
+					'/wc/store/v1/cart/add-item'
+				);
 				expect(
 					captured.find( ( r ) => r.body.key === 'server-key-abc' )
 						?.path
@@ -1678,9 +1673,7 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 				);
 
 				expect(
-					updateNoticesCalls().some(
-						( n ) => n.type === 'error'
-					)
+					updateNoticesCalls().some( ( n ) => n.type === 'error' )
 				).toBe( true );
 			} );
 
