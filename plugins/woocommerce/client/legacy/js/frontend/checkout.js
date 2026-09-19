@@ -5,6 +5,11 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	// sessionStorage is shared by every site on an origin, so the key carries the site's own AJAX
+	// path to keep the sites of a subdirectory multisite install from sharing the flag.
+	var stale_nonce_reload_key =
+		'wc_checkout_stale_nonce_reload:' + wc_checkout_params.wc_ajax_url;
+
 	/**
 	 * Percent-encode literal apostrophes in an already URL-encoded request body.
 	 *
@@ -534,6 +539,53 @@ jQuery( function ( $ ) {
 				$( 'div.shipping_address' ).slideDown();
 			}
 		},
+		/**
+		 * Reload the checkout once when its nonce is rejected.
+		 *
+		 * A 403 from update_order_review means the page was rendered for a different session, typically
+		 * because the browser restored a checkout from before the shopper logged in. Reloading fetches a
+		 * fresh page. The flag stays set until an update succeeds, so a page that keeps being rejected
+		 * shows the notice instead of reloading again.
+		 *
+		 * @return {boolean} Whether a reload was started.
+		 */
+		reload_once_for_stale_nonce: function () {
+			try {
+				if ( window.sessionStorage.getItem( stale_nonce_reload_key ) ) {
+					return false;
+				}
+
+				window.sessionStorage.setItem( stale_nonce_reload_key, '1' );
+			} catch ( e ) {
+				// Without storage there is no way to break a reload loop, so let the notice handle it.
+				return false;
+			}
+
+			window.location.reload();
+			return true;
+		},
+		clear_stale_nonce_reload_flag: function () {
+			try {
+				window.sessionStorage.removeItem( stale_nonce_reload_key );
+			} catch ( e ) {
+				// Nothing to clear.
+			}
+		},
+		/**
+		 * Whether a failed update_order_review response is a rejected nonce.
+		 *
+		 * check_ajax_referer() answers a bad nonce with a 403 whose body is "-1". Other 403s, for
+		 * example from a firewall or CDN, carry their own page and are not a reason to reload.
+		 *
+		 * @param {Object} jqXHR The failed request.
+		 * @return {boolean} Whether the nonce was rejected.
+		 */
+		is_stale_nonce_response: function ( jqXHR ) {
+			return (
+				403 === jqXHR.status &&
+				'-1' === String( jqXHR.responseText || '' ).trim()
+			);
+		},
 		reset_update_checkout_timer: function () {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
@@ -754,6 +806,8 @@ jQuery( function ( $ ) {
 					.replace( '%%endpoint%%', 'update_order_review' ),
 				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
+					wc_checkout_form.clear_stale_nonce_reload_flag();
+
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
 						window.location.reload();
@@ -919,6 +973,47 @@ jQuery( function ( $ ) {
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
+				},
+				error: function ( jqXHR, textStatus, errorThrown ) {
+					// A request superseded by a newer one is aborted on purpose.
+					if ( 'abort' === textStatus ) {
+						return;
+					}
+
+					var stale_nonce =
+						wc_checkout_form.is_stale_nonce_response( jqXHR );
+
+					if (
+						stale_nonce &&
+						wc_checkout_form.reload_once_for_stale_nonce()
+					) {
+						return;
+					}
+
+					$(
+						'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
+					).unblock();
+
+					if ( stale_nonce ) {
+						// The localized string is expected, but fall back to the response's status text
+						// like the place order handler does if something removed it.
+						var errorMessage = errorThrown;
+
+						if (
+							typeof wc_checkout_params.i18n_checkout_stale ===
+								'string' &&
+							wc_checkout_params.i18n_checkout_stale.trim() !== ''
+						) {
+							errorMessage = wc_checkout_params.i18n_checkout_stale;
+						}
+
+						// role="alert" announces the notice and tabindex="-1" lets submit_error focus it.
+						wc_checkout_form.submit_error(
+							'<div role="alert"><div class="woocommerce-error" tabindex="-1">' +
+								errorMessage +
+								'</div></div>'
+						);
+					}
 				},
 			} );
 		},

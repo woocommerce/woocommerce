@@ -9,6 +9,7 @@ const BILLING_EMAIL = "o'brien@example.com";
 
 describe( 'createCheckoutPlaceOrderApi', () => {
 	let $allNotices;
+	let $blockedSections;
 	let $checkoutFields;
 	let $couponForm;
 	let $form;
@@ -97,6 +98,11 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		$checkoutNotices = {
 			remove: jest.fn(),
 		};
+		// The payment and order review sections that update_order_review blocks while it runs.
+		$blockedSections = {
+			block: jest.fn( () => $blockedSections ),
+			unblock: jest.fn( () => $blockedSections ),
+		};
 
 		$form = {
 			addClass: jest.fn( () => $form ),
@@ -148,9 +154,11 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				return { length: 0, trigger: jest.fn() };
 			} ),
 			prepend: jest.fn(),
+			removeClass: jest.fn( () => $form ),
 			serialize: jest.fn( () => serializedCheckoutData ),
 			trigger: jest.fn(),
 			triggerHandler: jest.fn( () => true ),
+			unblock: jest.fn( () => $form ),
 		};
 
 		// Add methods to $form for checkout.js initialization
@@ -323,6 +331,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				selectorOrCallback === '.woocommerce-NoticeGroup-checkout'
 			) {
 				return $checkoutNotices;
+			}
+			if (
+				selectorOrCallback ===
+				'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
+			) {
+				return $blockedSections;
 			}
 			if (
 				selectorOrCallback === 'form.checkout_coupon' ||
@@ -826,6 +840,206 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'validate'
 			);
 			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
+		} );
+	} );
+
+	// A checkout restored by the browser from before the shopper logged in carries the old
+	// session's nonce, so update_order_review answers 403. The first 403 reloads the page once;
+	// a sessionStorage flag turns every later one into a notice instead of a reload loop.
+	describe( 'Checkout update request failures', () => {
+		// The key is suffixed with the site's wc_ajax_url from wc_checkout_params.
+		const STALE_FLAG = 'wc_checkout_stale_nonce_reload:/?wc-ajax=%%endpoint%%';
+		const STALE_NOTICE = 'This checkout page is out of date.';
+
+		// This jsdom seals window.location, so reload() can't be stubbed. It reports
+		// each attempt as a "Not implemented: navigation" console error instead, which
+		// @wordpress/jest-console already captures, so the tests count those.
+		const expectReloads = ( count ) => {
+			// eslint-disable-next-line no-console -- reading the spy jest-console installed.
+			const reloads = console.error.mock.calls.filter( ( [ error ] ) =>
+				String( error ).includes( 'Not implemented: navigation' )
+			);
+			expect( reloads ).toHaveLength( count );
+			if ( count > 0 ) {
+				expect( console ).toHaveErrored();
+			}
+		};
+
+		beforeEach( () => {
+			jest.useFakeTimers();
+			window.sessionStorage.clear();
+			global.window.wc_checkout_params.i18n_checkout_stale = STALE_NOTICE;
+		} );
+
+		afterEach( () => {
+			window.sessionStorage.clear();
+			jest.clearAllTimers();
+			jest.useRealTimers();
+		} );
+
+		const sendCheckoutUpdate = () => {
+			mockBody.trigger( 'update_checkout', [
+				{ update_shipping_method: false },
+			] );
+			jest.runOnlyPendingTimers();
+
+			const request = capturedAjaxRequests
+				.filter( ( options ) =>
+					options.url.includes( 'update_order_review' )
+				)
+				.pop();
+			expect( request ).toBeDefined();
+
+			return request;
+		};
+
+		const failCheckoutUpdate = ( jqXHR, textStatus, errorThrown ) => {
+			sendCheckoutUpdate().error(
+				jqXHR,
+				textStatus || 'error',
+				errorThrown || ''
+			);
+		};
+
+		// What check_ajax_referer() sends back for a bad nonce: wp_die( -1, 403 ).
+		const rejectNonce = ( errorThrown ) =>
+			failCheckoutUpdate(
+				{ status: 403, responseText: '-1' },
+				'error',
+				errorThrown
+			);
+
+		test( 'should reload once when the nonce is rejected', () => {
+			rejectNonce();
+
+			expectReloads( 1 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
+			expect( $blockedSections.unblock ).not.toHaveBeenCalled();
+			expect( $form.prepend ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should show a notice instead of reloading again when the fresh page is rejected too', () => {
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			rejectNonce();
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
+			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( STALE_NOTICE )
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'role="alert"' )
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'tabindex="-1"' )
+			);
+			expect( mockBody.trigger ).toHaveBeenCalledWith(
+				'checkout_error',
+				expect.anything()
+			);
+		} );
+
+		test( 'should fall back to the status text when the localized notice is missing', () => {
+			// A woocommerce_get_script_data callback can drop or blank the string.
+			delete global.window.wc_checkout_params.i18n_checkout_stale;
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			rejectNonce( 'Forbidden' );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'tabindex="-1">Forbidden</div>' )
+			);
+			expect( $form.prepend ).not.toHaveBeenCalledWith(
+				expect.stringContaining( 'undefined' )
+			);
+		} );
+
+		test( 'should keep showing the notice on later rejections instead of reloading again', () => {
+			// Field changes keep sending update_order_review. On a page that is always
+			// rejected, clearing the flag on the notice would reload on every other change.
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			rejectNonce();
+			rejectNonce();
+			rejectNonce();
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBe( '1' );
+			expect( $form.prepend ).toHaveBeenCalledTimes( 3 );
+		} );
+
+		test( 'should show the notice without reloading when storage is unavailable', () => {
+			const setItem = jest
+				.spyOn( Storage.prototype, 'setItem' )
+				.mockImplementation( () => {
+					throw new Error( 'QuotaExceededError' );
+				} );
+
+			try {
+				rejectNonce();
+			} finally {
+				setItem.mockRestore();
+			}
+
+			expectReloads( 0 );
+			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( STALE_NOTICE )
+			);
+		} );
+
+		test( 'should treat a 403 that is not a rejected nonce like any other failure', () => {
+			// A firewall or CDN block answers 403 with its own page, not "-1".
+			failCheckoutUpdate( {
+				status: 403,
+				responseText: '<html><body>Access denied</body></html>',
+			} );
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should unblock without a notice or reload on other failures', () => {
+			failCheckoutUpdate( { status: 500 } );
+
+			expectReloads( 0 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should ignore a request aborted by a newer update', () => {
+			failCheckoutUpdate( { status: 0 }, 'abort' );
+
+			expectReloads( 0 );
+			expect( $blockedSections.unblock ).not.toHaveBeenCalled();
+			expect( $form.prepend ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should clear the reload flag on a successful update', () => {
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			sendCheckoutUpdate().success( {
+				result: 'success',
+				has_errors: false,
+				messages: '',
+			} );
+
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+		} );
+
+		test( 'should clear the reload flag before a server-requested reload', () => {
+			// Otherwise the next genuinely stale page would skip its one automatic reload.
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+
+			sendCheckoutUpdate().success( { reload: true } );
+
+			expectReloads( 1 );
+			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
 		} );
 	} );
 } );
