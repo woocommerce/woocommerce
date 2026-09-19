@@ -1,4 +1,4 @@
-useNodeVersion: 24.15.0
+nodeVersion: 24.15.0
 
 catalogs:
 	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
@@ -120,7 +120,6 @@ patchedDependencies:
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
-confirmModulesPurge: false
 modulesCacheMaxAge: 20160  # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
