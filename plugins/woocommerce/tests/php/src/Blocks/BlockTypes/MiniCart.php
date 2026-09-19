@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCart as MiniCartBlock;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
@@ -144,6 +145,25 @@ class MiniCart extends \WP_UnitTestCase {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
+		$this->reset_cart_checkout_page_cache();
+	}
+
+	/**
+	 * Reset CartCheckoutUtils's static is-cart/is-checkout page cache.
+	 *
+	 * A prior test that navigates to the real cart or checkout page memoizes
+	 * the result for the rest of the process, since the class exposes no
+	 * public reset. Reflection clears it so this class's tests see a fresh
+	 * page each time, regardless of what ran before them.
+	 */
+	private function reset_cart_checkout_page_cache(): void {
+		$reflection = new \ReflectionClass( CartCheckoutUtils::class );
+
+		foreach ( array( 'is_cart_page', 'is_checkout_page' ) as $name ) {
+			$property = $reflection->getProperty( $name );
+			$property->setAccessible( true );
+			$property->setValue( null, null );
+		}
 	}
 
 	/**
