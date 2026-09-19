@@ -58,6 +58,31 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down test. Called after every test.
+	 *
+	 * Clears the two namespaces this class is the only caller of
+	 * `wp_interactivity_process_directives()` for: neither
+	 * `wp_interactivity_state()` nor `wp_interactivity_config()` reset
+	 * between tests, so the `isFormValid` closure and the config this class
+	 * seeds would otherwise remain registered on the singleton
+	 * `WP_Interactivity_API` instance for the rest of the process.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		$interactivity = wp_interactivity();
+		$reflection    = new \ReflectionClass( $interactivity );
+
+		foreach ( array( 'state_data', 'config_data' ) as $property_name ) {
+			$property = $reflection->getProperty( $property_name );
+			$property->setAccessible( true );
+			$value = $property->getValue( $interactivity );
+			unset( $value['woocommerce/add-to-cart-with-options'], $value['woocommerce/add-to-cart-with-options-quantity-selector'] );
+			$property->setValue( $interactivity, $value );
+		}
+	}
+
+	/**
 	 * Print custom product type add to cart markup.
 	 *
 	 * Outputs the HTML markup for the custom product type add to cart form.
