@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -21,7 +21,8 @@ const mockGetContext = jest.fn();
 const mockGetElement = jest.fn();
 
 let mockContext: { collection: CoreCollectionNames } | null = null;
-let mockProductsState: ProductsStore[ 'state' ];
+let mockProduct: WooCommerceStore[ 'state' ][ 'productScope' ][ 'product' ];
+let mockWooState: WooCommerceStore[ 'state' ];
 let mockProductCollectionDescriptor: ProductCollectionStoreDescriptor | null =
 	null;
 
@@ -31,8 +32,8 @@ jest.mock(
 		getContext: mockGetContext,
 		getElement: mockGetElement,
 		store: jest.fn( ( namespace, descriptor ) => {
-			if ( namespace === 'woocommerce/products' ) {
-				return { state: mockProductsState };
+			if ( namespace === 'woocommerce' ) {
+				return { state: mockWooState };
 			}
 
 			if ( namespace === 'woocommerce/product-collection' ) {
@@ -66,9 +67,12 @@ const runGenerator = ( callback: () => Generator ) => {
 describe( 'product collection frontend events', () => {
 	beforeEach( () => {
 		mockContext = null;
-		mockProductsState = {
-			productInContext: null,
-		} as ProductsStore[ 'state' ];
+		mockProduct = null;
+		mockWooState = {
+			get productScope() {
+				return { product: mockProduct };
+			},
+		} as WooCommerceStore[ 'state' ];
 		mockProductCollectionDescriptor = null;
 		mockGetContext.mockImplementation( () => mockContext );
 		mockGetElement.mockReset();
@@ -82,7 +86,7 @@ describe( 'product collection frontend events', () => {
 	afterEach( () => {
 		document.body.replaceChildren();
 		mockContext = null;
-		mockProductsState = {} as ProductsStore[ 'state' ];
+		mockProduct = null;
 		mockProductCollectionDescriptor = null;
 		mockGetContext.mockReset();
 		mockGetElement.mockReset();
@@ -141,16 +145,16 @@ describe( 'product collection frontend events', () => {
 		}
 	} );
 
-	it( 'dispatches a viewed-product event only when the context product has an ID', () => {
+	it( 'dispatches a viewed-product event only when the scoped product has an ID', () => {
 		const collection = CoreCollectionNames.RELATED;
 		const events: CustomEvent[] = [];
 		const listener = ( event: Event ) =>
 			events.push( event as CustomEvent );
 
 		mockContext = { collection };
-		mockProductsState.productInContext = {
+		mockProduct = {
 			id: 42,
-		} as ProductsStore[ 'state' ][ 'productInContext' ];
+		} as WooCommerceStore[ 'state' ][ 'productScope' ][ 'product' ];
 		document.addEventListener( 'wc-blocks_viewed_product', listener );
 
 		try {
@@ -169,7 +173,7 @@ describe( 'product collection frontend events', () => {
 				cancelable: true,
 			} );
 
-			mockProductsState.productInContext = null;
+			mockProduct = null;
 			runGenerator( actions.viewProduct );
 
 			expect( events ).toHaveLength( 1 );

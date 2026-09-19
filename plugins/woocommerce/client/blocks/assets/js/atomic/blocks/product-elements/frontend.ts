@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { getElement, store, getContext } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -14,14 +14,12 @@ import {
 	PRODUCT_ELEMENT_HTML_CONFIG,
 } from '../../../base/utils/preformatted-html';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 type Context = {
@@ -33,7 +31,7 @@ store(
 	{
 		callbacks: {
 			updateValue: () => {
-				const product = productsState.productInContext;
+				const product = wooState.productScope.product;
 
 				if ( ! product ) {
 					return;

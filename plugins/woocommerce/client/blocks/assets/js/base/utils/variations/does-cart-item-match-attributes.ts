@@ -5,23 +5,25 @@ import { store } from '@wordpress/interactivity';
 import type {
 	OptimisticCartItem,
 	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+	WooCommerceStore,
+} from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
  */
 import { attributeNamesMatch } from './attribute-matching';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+// No `import '@woocommerce/stores/woocommerce'` side effect here: this
+// module's only caller is `notices.ts`, itself only reachable through the
+// unified store's own module graph, so the store is always registering by
+// the time this file loads. Importing the module directly here would create
+// a cycle back into it.
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 export const doesCartItemMatchAttributes = (
@@ -39,10 +41,9 @@ export const doesCartItemMatchAttributes = (
 		return false;
 	}
 
-	const parentProductId =
-		productsState.productVariations[ cartItem.id ]?.parent;
+	const parentProductId = wooState.productVariations[ cartItem.id ]?.parent;
 	const productAttributes =
-		productsState.products[ parentProductId ]?.attributes ?? [];
+		wooState.products[ parentProductId ]?.attributes ?? [];
 
 	return cartItem.variation.every( ( { attribute, value: termName } ) =>
 		selectedAttributes.some( ( selectedAttr: SelectedAttributes ) => {

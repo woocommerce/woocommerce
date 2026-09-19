@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -14,14 +14,12 @@ import {
 import { CoreCollectionNames } from './types';
 import './style.scss';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 export type ProductCollectionStoreContext = {
@@ -208,7 +206,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			const productId = productsState.productInContext?.id;
+			const productId = wooState.productScope.product?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
