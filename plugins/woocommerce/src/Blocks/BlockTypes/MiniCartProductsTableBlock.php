@@ -31,7 +31,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
-				'cartItem' => function () {
+				'cartItem'    => function () {
 					$context = wp_interactivity_get_context( 'woocommerce' );
 					$cart_state = wp_interactivity_state( 'woocommerce' );
 					$item_key = $context['cartItem']['key'];
@@ -43,6 +43,11 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 					}
 
 					return null;
+				},
+				'cartItemKey' => function () {
+					$context = wp_interactivity_get_context( 'woocommerce' );
+
+					return $context['cartItem']['key'] ?? null;
 				},
 			)
 		);

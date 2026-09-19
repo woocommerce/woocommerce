@@ -380,8 +380,8 @@ class MiniCart extends AbstractBlock {
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupJQueryEventBridge"
-				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCartItems"
-				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCart"
+				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCart"
 				<?php if ( 'open_drawer' === $attributes['addToCartBehaviour'] ) : ?>
 				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
 				<?php endif; ?>
