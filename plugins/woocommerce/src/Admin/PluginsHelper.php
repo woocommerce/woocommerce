@@ -860,6 +860,7 @@ class PluginsHelper {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-purchase-subscription' );
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
 		wp_enqueue_script( 'woo-enable-autorenew' );
 		wp_enqueue_script( 'woo-renew-subscription' );
