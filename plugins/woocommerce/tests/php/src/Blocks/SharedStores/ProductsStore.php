@@ -26,7 +26,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $store_namespace = 'woocommerce/products';
+	protected $store_namespace = 'woocommerce';
 
 	/**
 	 * Captured original Hydration registry entry for restoration in tearDown.
@@ -74,7 +74,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_product() hydrates interactivity state with the product payload.
+	 * @testdox load_product() hydrates interactivity state with the product payload under the woocommerce namespace.
 	 */
 	public function test_load_product_populates_state(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -87,6 +87,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
 		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
+
+		$legacy_state = wp_interactivity_state( 'woocommerce/products' );
+		$this->assertArrayNotHasKey( 'products', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
 
 		$product->delete( true );
 	}
@@ -116,7 +119,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_variations() hydrates interactivity state with every child variation.
+	 * @testdox load_variations() hydrates interactivity state with every child variation under the woocommerce namespace.
 	 */
 	public function test_load_variations_populates_state(): void {
 		$product       = WC_Helper_Product::create_variation_product();
@@ -136,6 +139,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 				"Variation {$variation_id} should be in state."
 			);
 		}
+
+		$legacy_state = wp_interactivity_state( 'woocommerce/products' );
+		$this->assertArrayNotHasKey( 'productVariations', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
 
 		$product->delete( true );
 	}
@@ -304,9 +310,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register_getters() registers the derived state closures exactly once.
+	 * @testdox register_getters() registers the productScope closure exactly once.
 	 */
-	public function test_register_getters_is_idempotent(): void {
+	public function test_register_getters_registers_product_scope_once(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$reflection = new \ReflectionClass( TestedProductsStore::class );
@@ -324,104 +330,390 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertTrue( $flag->getValue(), 'getters_registered should remain true.' );
 
 		$state = wp_interactivity_state( $this->store_namespace );
-		$this->assertArrayHasKey( 'mainProductInContext', $state );
-		$this->assertArrayHasKey( 'productVariationInContext', $state );
-		$this->assertArrayHasKey( 'productInContext', $state );
-		$this->assertInstanceOf( \Closure::class, $state['mainProductInContext'] );
-		$this->assertInstanceOf( \Closure::class, $state['productVariationInContext'] );
-		$this->assertInstanceOf( \Closure::class, $state['productInContext'] );
+		$this->assertArrayHasKey( 'productScope', $state );
+		$this->assertInstanceOf( \Closure::class, $state['productScope'] );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox state.mainProductInContext resolves to the hydrated product matching state.productId.
+	 * @testdox state.productScope.scopeName defaults to _default when the context declares none.
 	 */
-	public function test_product_getter_reads_from_state(): void {
-		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
+	public function test_scope_name_defaults_to_default(): void {
+		$this->push_woocommerce_context( array() );
 
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( '_default', $envelope['scopeName']() );
+	}
+
+	/**
+	 * @testdox state.productScope.product resolves to the matching variation, and .baseProduct to the parent, when the context declares a matching variation.
+	 */
+	public function test_product_scope_resolves_matching_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$huge_red_zero = wc_get_product( $variation_ids[2] );
+		$selected      = array(
+			array(
+				'attribute' => 'size',
+				'value'     => 'huge',
+			),
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+			array(
+				'attribute' => 'number',
+				'value'     => '0',
+			),
+		);
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => $product->get_id(),
+				'variation' => $selected,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( $huge_red_zero->get_id(), $resolved_variation['id'] );
+
+		$resolved_product = $envelope['product']();
+		$this->assertSame( $huge_red_zero->get_id(), $resolved_product['id'] );
+
+		$base_product = $envelope['baseProduct']();
+		$this->assertSame( $product->get_id(), $base_product['id'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.product resolves to the product itself, and .productVariation is null, when the context declares no variation.
+	 */
+	public function test_product_scope_resolves_base_product_without_a_variation(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->push_woocommerce_context( array( 'productId' => $product->get_id() ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation'](), 'No variation should resolve without a selection.' );
+
+		$resolved_product = $envelope['product']();
+		$this->assertSame( $product->get_id(), $resolved_product['id'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope members resolve from state.template when the context declares no productId.
+	 */
+	public function test_product_scope_resolves_from_template_without_a_declared_product_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		wp_interactivity_state(
+			$this->store_namespace,
+			array( 'template' => array( 'productId' => $product->get_id() ) )
+		);
+
+		$this->push_woocommerce_context( array() );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $product->get_id(), $envelope['productId']() );
+
+		$resolved_product = $envelope['product']();
+		$this->assertSame( $product->get_id(), $resolved_product['id'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox a state.productScopes record wins over the declared context for the same scopeName.
+	 */
+	public function test_product_scope_record_wins_over_declared_context(): void {
+		$context_product = WC_Helper_Product::create_simple_product();
+		$record_product  = WC_Helper_Product::create_simple_product();
+
+		TestedProductsStore::load_product( $this->consent, $context_product->get_id() );
+		TestedProductsStore::load_product( $this->consent, $record_product->get_id() );
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'productId' => $record_product->get_id() ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => $context_product->get_id(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $record_product->get_id(), $envelope['productId']() );
+
+		$context_product->delete( true );
+		$record_product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.draftCartItem.quantity reads 1 for a scope with no record.
+	 */
+	public function test_draft_cart_item_defaults_to_quantity_one_without_a_record(): void {
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 42,
+				'variation' => array(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$draft    = $envelope['draftCartItem']();
+
+		$this->assertSame( 42, $draft['id'] );
+		$this->assertSame( array(), $draft['variation'] );
+		$this->assertSame( 1, $draft['quantity'] );
+	}
+
+	/**
+	 * @testdox state.productScope.draftCartItem.quantity reads the seeded record's value.
+	 */
+	public function test_draft_cart_item_reads_the_seeded_records_quantity(): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array(
+						'draftCartItem' => array(
+							'id'        => 42,
+							'variation' => array(),
+							'quantity'  => 3,
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'scopeName' => 'my-scope' ) );
+
+		$envelope = $this->get_product_scope();
+		$draft    = $envelope['draftCartItem']();
+
+		$this->assertSame( 3, $draft['quantity'] );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem matches the line named by the context's cartItemKey, regardless of id.
+	 */
+	public function test_cart_item_matches_by_cart_item_key(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => $product->get_id(),
+							'type' => 'simple',
+						),
+						array(
+							'key'  => 'line-2',
+							'id'   => 999999,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId'   => $product->get_id(),
+				'cartItemKey' => 'line-2',
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem matches a non-variable line by product id when no cartItemKey is declared.
+	 */
+	public function test_cart_item_matches_simple_product_by_id(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
 		TestedProductsStore::load_product( $this->consent, $product->get_id() );
 
 		wp_interactivity_state(
 			$this->store_namespace,
-			array( 'productId' => $product->get_id() )
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => $product->get_id(),
+							'type' => 'simple',
+						),
+					),
+				),
+			)
 		);
 
-		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['mainProductInContext'];
-		$this->assertInstanceOf( \Closure::class, $closure );
+		$this->push_woocommerce_context( array( 'productId' => $product->get_id() ) );
 
-		$resolved = $closure();
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
 
-		$this->assertIsArray( $resolved );
-		$this->assertSame( $product->get_name(), $resolved['name'] );
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox state.productVariationInContext resolves to the hydrated variation matching state.variationId.
+	 * @testdox state.productScope.cartItem matches a variation line whose label-valued attributes resolve to the selection.
 	 */
-	public function test_selected_variation_getter_reads_from_state(): void {
-		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
-
+	public function test_cart_item_matches_variation_by_attributes(): void {
 		$product       = WC_Helper_Product::create_variation_product();
 		$variation_ids = $product->get_children();
-		$variation_id  = (int) $variation_ids[0];
+		$huge_red_zero = wc_get_product( $variation_ids[2] );
+		$selected      = array(
+			array(
+				'attribute' => 'size',
+				'value'     => 'huge',
+			),
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+			array(
+				'attribute' => 'number',
+				'value'     => '0',
+			),
+		);
 
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
 		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
 
 		wp_interactivity_state(
 			$this->store_namespace,
-			array( 'variationId' => $variation_id )
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => $huge_red_zero->get_id(),
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'size',
+									'value'     => 'huge',
+								),
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+								array(
+									'attribute' => 'number',
+									'value'     => '0',
+								),
+							),
+						),
+					),
+				),
+			)
 		);
 
-		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['productVariationInContext'];
-		$this->assertInstanceOf( \Closure::class, $closure );
+		$this->push_woocommerce_context(
+			array(
+				'productId' => $product->get_id(),
+				'variation' => $selected,
+			)
+		);
 
-		$resolved = $closure();
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
 
-		$this->assertIsArray( $resolved );
-		$this->assertSame( $variation_id, $resolved['id'] );
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox state.productInContext unwraps closure getters and falls back to the product when no variation is selected.
+	 * @testdox state.productScope.cartItem is null when no cart line matches.
 	 */
-	public function test_product_in_context_unwraps_closure_selected_variation(): void {
-		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
-
+	public function test_cart_item_is_null_when_nothing_matches(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
 		TestedProductsStore::load_product( $this->consent, $product->get_id() );
 
-		wp_interactivity_state(
-			$this->store_namespace,
-			array( 'productId' => $product->get_id() )
-		);
+		wp_interactivity_state( $this->store_namespace, array( 'cart' => array( 'items' => array() ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => $product->get_id() ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * Build the `productScope` envelope from the current interactivity
+	 * state, registering the closure first when no loader call has done so.
+	 *
+	 * @return array<string, \Closure> The envelope, keyed by member name.
+	 */
+	private function get_product_scope(): array {
+		$reflection = new \ReflectionClass( TestedProductsStore::class );
+		$method     = $reflection->getMethod( 'register_getters' );
+		$method->setAccessible( true );
+		$method->invoke( null );
 
 		$state = wp_interactivity_state( $this->store_namespace );
 
-		$this->assertInstanceOf(
-			\Closure::class,
-			$state['productVariationInContext'],
-			'productVariationInContext should still be a Closure at the point productInContext unwraps it.'
-		);
+		return $state['productScope']();
+	}
 
-		$resolved = $state['productInContext']();
-
-		$this->assertIsArray(
-			$resolved,
-			'productInContext should unwrap the closures and fall through to the product branch when no variation is selected.'
-		);
-		$this->assertSame( $product->get_name(), $resolved['name'] );
-
-		$product->delete( true );
+	/**
+	 * Push a `woocommerce` context frame onto the global interactivity API
+	 * instance, simulating an element rendering with the given declared
+	 * context. tearDown() resets the stack back to its idle (null) state.
+	 *
+	 * @param array $context The `woocommerce` context to simulate.
+	 */
+	private function push_woocommerce_context( array $context ): void {
+		$api        = wp_interactivity();
+		$reflection = new \ReflectionClass( $api );
+		$property   = $reflection->getProperty( 'context_stack' );
+		$property->setAccessible( true );
+		$property->setValue( $api, array( array( $this->store_namespace => $context ) ) );
 	}
 
 	/**
@@ -541,9 +833,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clear the global WP_Interactivity_API state store so tests do not bleed
-	 * state into each other. WordPress core does not expose a public reset
-	 * helper, so we reach in via reflection.
+	 * Clear the global WP_Interactivity_API state and context stores so
+	 * tests do not bleed state into each other. WordPress core does not
+	 * expose a public reset helper, so we reach in via reflection.
 	 */
 	private function reset_interactivity_state(): void {
 		if ( ! function_exists( 'wp_interactivity' ) ) {
@@ -563,6 +855,12 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$property = $reflection->getProperty( $name );
 			$property->setAccessible( true );
 			$property->setValue( $api, array() );
+		}
+
+		if ( $reflection->hasProperty( 'context_stack' ) ) {
+			$property = $reflection->getProperty( 'context_stack' );
+			$property->setAccessible( true );
+			$property->setValue( $api, null );
 		}
 	}
 }
