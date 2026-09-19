@@ -63,14 +63,18 @@ class SingleProductTemplate extends AbstractTemplate {
 				// state closures can resolve it during server-side rendering.
 				ProductsStore::load_product( $consent, $product->get_id() );
 
-				// Set the current product context. The derived state
-				// closures (mainProductInContext, productVariationInContext, productInContext)
-				// are registered by ProductsStore::register_state().
+				// Seed the page-level scope every element on the template
+				// resolves when it declares no scope of its own: the `productScope`
+				// closure registered by ProductsStore falls back to
+				// `state.template` once neither a `productScopes` record nor a
+				// declared `woocommerce` context wins.
 				wp_interactivity_state(
-					'woocommerce/products',
+					'woocommerce',
 					array(
-						'productId'   => $product->get_id(),
-						'variationId' => null,
+						'template' => array(
+							'productId' => $product->get_id(),
+							'variation' => array(),
+						),
 					)
 				);
 			}

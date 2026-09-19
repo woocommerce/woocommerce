@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use WC_Helper_Product;
 use WP_UnitTestCase;
 
 /**
@@ -570,5 +571,32 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
 			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
+	}
+
+	/**
+	 * @testdox Should seed state.template's productId and variation in the woocommerce namespace, and no page-wide productId or variationId.
+	 */
+	public function test_render_block_template_seeds_woocommerce_template_state() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			$this->go_to( get_permalink( $product->get_id() ) );
+
+			$single_product_template = new SingleProductTemplate();
+			$single_product_template->render_block_template();
+
+			$state = wp_interactivity_state( 'woocommerce' );
+
+			$this->assertArrayHasKey( 'template', $state );
+			$this->assertSame( $product->get_id(), $state['template']['productId'] );
+			$this->assertSame( array(), $state['template']['variation'] );
+			$this->assertArrayNotHasKey( 'productId', $state );
+			$this->assertArrayNotHasKey( 'variationId', $state );
+
+			$legacy_state = wp_interactivity_state( 'woocommerce/products' );
+			$this->assertArrayNotHasKey( 'productId', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
 	}
 }
