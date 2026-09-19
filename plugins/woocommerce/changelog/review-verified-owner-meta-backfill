@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Backfill missing verified-owner review meta via a daily Action Scheduler task with cluster-friendly batched processing.

@@ -10549,30 +10549,6 @@ parameters:
 			path: includes/class-wc-comments.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Cannot access property \$comment_author_email on WP_Comment\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Cannot access property \$comment_post_ID on WP_Comment\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Cannot access property \$user_id on WP_Comment\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-comments.php
-
-		-
 			message: '#^Method WC_Comments\:\:add_comment_rating\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10629,23 +10605,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$post of function get_post_type expects int\|WP_Post\|null, string given\.$#'
 			identifier: argument.type
-			count: 5
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Parameter \#2 \$user_id of function wc_customer_bought_product expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
+			count: 4
 			path: includes/class-wc-comments.php
 
 		-
 			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{code\: 403\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Parameter \#3 \$product_id of function wc_customer_bought_product expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-comments.php
