@@ -16,7 +16,10 @@ import { normalizeAttributeName, attributeNamesMatch } from '../catalog';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-let mockRegisteredStore: { state: CatalogState } | null = null;
+let mockRegisteredStore: {
+	state: CatalogState;
+	actions: Record< string, unknown >;
+} | null = null;
 
 let mockStoreState: CatalogState;
 
@@ -47,7 +50,10 @@ jest.mock(
 				// shared object and returns the same registered store, so a
 				// later call passing the shared acknowledgement string still
 				// resolves it.
-				mockRegisteredStore ??= { state: {} as CatalogState };
+				mockRegisteredStore ??= {
+					state: {} as CatalogState,
+					actions: {},
+				};
 				if ( definition?.state ) {
 					// `Object.defineProperties` (not `Object.assign`)
 					// preserves accessor properties (e.g. the scope layer's
@@ -56,6 +62,17 @@ jest.mock(
 					Object.defineProperties(
 						mockRegisteredStore.state,
 						Object.getOwnPropertyDescriptors( definition.state )
+					);
+				}
+				if ( definition?.actions ) {
+					// The cart plane (`cart-actions.ts`) merges its actions
+					// into this same registration; carry them through so
+					// `index.ts`'s own post-registration binding (which
+					// reads back the registered `refreshCart`) has something
+					// to call.
+					Object.assign(
+						mockRegisteredStore.actions,
+						definition.actions
 					);
 				}
 				return mockRegisteredStore;

@@ -1,47 +1,69 @@
 /**
  * External dependencies
  */
-import type { Cart, CartItem } from '@woocommerce/types';
-import type { Notice } from '@woocommerce/stores/store-notices';
 import { getConfig } from '@wordpress/interactivity';
 import { speak } from '@wordpress/a11y';
+import type { Cart, CartItem } from '@woocommerce/types';
+import type { Notice } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../cart';
+import type {
+	CartActionsState,
+	OptimisticCartItem,
+	AddCartItemOutcome,
+} from '../cart-actions';
+import type { ScopeState, ProductScopeContext } from '../scope';
+import type { CatalogState } from '../catalog';
 import { triggerAddedToCartEvent } from '../legacy-events';
+import { showNoticeError, updateNotices } from '../notices';
 
-type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
+type MockState = CatalogState &
+	ScopeState &
+	CartActionsState & {
+		restUrl: string;
+		nonce: string;
+	};
 
-let mockRegisteredStore: MockStore | null = null;
-const mockState = {
-	restUrl: 'https://example.com/wp-json/',
-	nonce: 'test-nonce-123',
-} as Store[ 'state' ];
+/**
+ * The cart plane's raw, undriven generator-function actions, exactly as
+ * `cart-actions.ts` exports them — not `CartActionsActions`, whose
+ * signatures are the Promise-returning shape `store()` hands back to real
+ * callers (see `cartActions`'s own docblock in `cart-actions.ts`). This
+ * suite drives the raw generators itself, via {@link runAction}.
+ */
+type RawCartActions = typeof import('../cart-actions').cartActions;
+
+let mockContext: ProductScopeContext | null = null;
+let mockState: MockState;
+let cartActions: RawCartActions;
+
+/**
+ * The `restUrl` / `nonce` every test's mock state seeds, mirroring what
+ * `BlocksSharedState.php` seeds onto the real store.
+ */
+function baseState(): Pick< MockState, 'restUrl' | 'nonce' > {
+	return {
+		restUrl: 'https://example.com/wp-json/',
+		nonce: 'test-nonce-123',
+	};
+}
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
-		store: jest.fn( ( _name, definition ) => {
-			// The cart store calls `store()` twice: once to read `state` and
-			// once to register `actions`. Merge the definition's `state`
-			// descriptors (e.g. the `findItemInCart` selector) onto the shared
-			// mock state so the real selector runs against seeded cart lines,
-			// and carry the action generators through both calls.
-			if ( definition?.state ) {
-				Object.defineProperties(
-					mockState,
-					Object.getOwnPropertyDescriptors( definition.state )
-				);
-			}
-			mockRegisteredStore = {
-				state: mockState,
-				actions: definition?.actions ?? mockRegisteredStore?.actions,
-			} as MockStore;
-			return mockRegisteredStore;
-		} ),
+		getContext: jest.fn( () => mockContext ),
+		// `notices.ts` pulls in `does-cart-item-match-attributes.ts`, which
+		// registers the (untouched, unrelated) `woocommerce/products` store
+		// as a side effect of module load. `cart-actions.ts` itself never
+		// calls `store()` — see `bindCartState`'s docblock — so this generic
+		// stand-in only ever backs that one incidental registration.
+		store: jest.fn( () => ( {
+			state: { products: {}, productVariations: {} },
+			actions: {},
+		} ) ),
 	} ),
 	{ virtual: true }
 );
@@ -54,6 +76,16 @@ jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
 } ) );
 
+// `showNoticeError` / `updateNotices` are mocked so tests can assert what a
+// mutation reports without a real store-notices round trip; every other
+// export (the pure diff/matching helpers `addCartItem`/`removeCartItem`
+// actually rely on) keeps its real implementation via `requireActual`.
+jest.mock( '../notices', () => ( {
+	...jest.requireActual( '../notices' ),
+	showNoticeError: jest.fn(),
+	updateNotices: jest.fn(),
+} ) );
+
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
  */
@@ -63,7 +95,7 @@ type CapturedRequest = {
 	/** The HTTP method of the mutation. */
 	method: string;
 	/** The parsed JSON body posted for the mutation. */
-	body: OptimisticCartItem;
+	body: OptimisticCartItem & Record< string, unknown >;
 };
 
 /**
@@ -97,6 +129,87 @@ async function runAction( action: unknown ): Promise< unknown > {
 		}
 	}
 	return next.value;
+}
+
+/**
+ * Loads a fresh copy of the cart plane: binds `scope.ts` and `cart-actions.ts`
+ * to a shared mock state, exactly as `index.ts` does for the real store, and
+ * resolves the nonce gate.
+ *
+ * The modules are re-required in isolation so each test starts from a clean
+ * mutation queue and a fresh module-level nonce-ready promise. The initial
+ * `refreshCart()` is then driven to completion so that the singleton
+ * nonce-ready promise resolves and queued mutations are allowed to flush;
+ * tests seed `state.cart` afterwards via {@link seedCart}.
+ *
+ * @return A promise resolving to the freshly bound cart plane's actions.
+ */
+async function loadCartStore(): Promise< RawCartActions > {
+	jest.isolateModules( () => {
+		const catalogModule =
+			require( '../catalog' ) as typeof import('../catalog');
+		const scopeModule = require( '../scope' ) as typeof import('../scope');
+		const cartActionsModule =
+			require( '../cart-actions' ) as typeof import('../cart-actions');
+
+		mockState = {
+			...catalogModule.catalogState,
+			...cartActionsModule.cartActionsState,
+			...baseState(),
+		} as MockState;
+		Object.defineProperties(
+			mockState,
+			Object.getOwnPropertyDescriptors( scopeModule.scopeState )
+		);
+		scopeModule.bindState( mockState );
+
+		cartActions = cartActionsModule.cartActions;
+		// The registered-actions parameter only matters for the retry
+		// timeout and the page-sync listener (both untested here, and
+		// no-ops against these raw, undriven generator functions); the
+		// test drives `refreshCart` itself, below. `bindCartState`'s own
+		// state type additionally reads `restUrl` / `nonce` /
+		// `errorMessages`, no longer part of the published `WooCommerceStore`
+		// state type `MockState` merges — hence the cast, as `index.ts`
+		// itself does for the same reason.
+		cartActionsModule.bindCartState(
+			mockState as unknown as Parameters<
+				typeof cartActionsModule.bindCartState
+			>[ 0 ],
+			{ refreshCart: cartActions.refreshCart }
+		);
+	} );
+
+	// Drive the refresh so the module-level nonce-ready promise resolves.
+	await runAction( cartActions.refreshCart() );
+	return cartActions;
+}
+
+/**
+ * Seeds the shared mock state with the provided cart lines.
+ *
+ * @param items The cart lines to expose via `state.cart.items`.
+ */
+function seedCart( items: ( CartItem | OptimisticCartItem )[] ): void {
+	mockState.cart = {
+		items,
+		totals: {},
+		errors: [],
+	} as unknown as MockState[ 'cart' ];
+}
+
+/**
+ * Builds a minimal successful server cart payload from the provided lines.
+ *
+ * @param items The cart lines the server should report.
+ * @return A cart object shaped like a successful Store API cart response.
+ */
+function makeServerCart( items: CartItem[] ): Cart {
+	return {
+		items,
+		totals: {},
+		errors: [],
+	} as unknown as Cart;
 }
 
 /**
@@ -146,68 +259,14 @@ function mockBatchFetch(): CapturedRequest[] {
 }
 
 /**
- * Loads a fresh copy of the cart store, resolves its nonce gate, and returns
- * its registered actions.
- *
- * The module is re-required in isolation so each test starts from a clean
- * mutation queue and a fresh module-level nonce-ready promise. The initial
- * `refreshCartItems()` is then driven to completion so that the singleton
- * nonce-ready promise resolves and queued mutations are allowed to flush; tests
- * seed `state.cart` afterwards via {@link seedCart}.
- *
- * @return A promise resolving to the freshly registered cart store actions.
- */
-async function loadCartStore(): Promise< Store[ 'actions' ] > {
-	jest.isolateModules( () => require( '../cart' ) );
-	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
-	// Drive the refresh so the module-level nonce-ready promise resolves.
-	await runAction( actions.refreshCartItems() );
-	return actions;
-}
-
-/**
- * Seeds the shared mock state with the provided cart lines.
- *
- * @param items The cart lines to expose via `state.cart.items`.
- */
-function seedCart( items: ( CartItem | OptimisticCartItem )[] ): void {
-	mockState.cart = {
-		items,
-		totals: {},
-		errors: [],
-	} as unknown as Store[ 'state' ][ 'cart' ];
-}
-
-/**
- * Builds a minimal successful server cart payload from the provided lines.
- *
- * @param items The cart lines the server should report.
- * @return A cart object shaped like a successful Store API cart response.
- */
-function makeServerCart( items: CartItem[] ): Cart {
-	return {
-		items,
-		totals: {},
-		errors: [],
-	} as unknown as Cart;
-}
-
-/**
  * Installs a `global.fetch` mock whose batch responses return a caller-supplied
  * server cart instead of echoing the post-optimistic cart.
- *
- * This lets a test reproduce a server response that diverges from the
- * optimistic state — e.g. a keyless add that the server resolves as a brand new
- * standalone line while leaving a matched keyed meta line at its pre-add
- * quantity. Each successful batch response carries `serverCart` as its body, so
- * it becomes the action's `result.data` used for the notice diff.
  *
  * @param serverCart The cart the batch endpoint should report as server state.
  */
 function mockBatchFetchReturning( serverCart: Cart ): void {
 	global.fetch = jest.fn(
 		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
-			// The GET refresh has no body; reply with an empty cart and a nonce.
 			if ( ! init?.body ) {
 				return new Response(
 					JSON.stringify( { items: [], totals: {}, errors: [] } ),
@@ -229,64 +288,11 @@ function mockBatchFetchReturning( serverCart: Cart ): void {
 }
 
 /**
- * Replaces the registered `updateNotices` action with a spy and returns the
- * flat list of notices it receives across all invocations.
- *
- * The cart actions funnel every info/error notice through
- * `actions.updateNotices`, resolved by property access at call time on the
- * registered actions object. The caller `yield`s the result, and {@link
- * runAction} only `await`s each yielded value; a yielded generator object would
- * not be driven, so the spy records synchronously at call time and returns
- * `undefined`. The spy is installed after {@link loadCartStore}.
- *
- * @return The accumulating list of notices passed to `updateNotices`.
- */
-function spyOnUpdateNotices(): Notice[] {
-	const received: Notice[] = [];
-	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
-	actions.updateNotices = jest.fn( ( notices: Notice[] = [] ) => {
-		received.push( ...notices );
-		return undefined;
-	} ) as unknown as Store[ 'actions' ][ 'updateNotices' ];
-	return received;
-}
-
-/**
- * Replaces the registered `showNoticeError` action with a spy and returns the
- * list of errors it receives.
- *
- * The error/`catch` path of the cart actions surfaces a failed mutation by
- * calling `actions.showNoticeError( error )` — the error-notice boundary,
- * distinct from the auto-update info-notice boundary `actions.updateNotices`.
- * Asserting on this spy proves a genuine cap surfaced as an error notice rather
- * than an auto-update notice. The spy is installed after {@link loadCartStore}.
- *
- * @return The accumulating list of errors passed to `showNoticeError`.
- */
-function spyOnShowNoticeError(): Error[] {
-	const received: Error[] = [];
-	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
-	actions.showNoticeError = jest.fn( ( error: Error ) => {
-		received.push( error );
-		return undefined;
-	} ) as unknown as Store[ 'actions' ][ 'showNoticeError' ];
-	return received;
-}
-
-/**
  * Installs a `global.fetch` mock whose batch responses reject one targeted
  * mutation with an HTTP error status, reproducing a genuine server cap.
  *
- * The GET refresh still resolves the nonce gate. Each batch request whose body
- * targets `failForPath` gets a non-2xx response entry carrying the supplied
- * error `code`/`message`; every other request echoes the post-optimistic cart
- * as a success. A failed entry makes the mutation queue roll the optimistic
- * change back (no successful server state for it) and reject that request's
- * promise, which surfaces through the action's `catch` path.
- *
  * @param options             Failure configuration.
- * @param options.failForPath The Store API path whose mutation should fail,
- *                            e.g. `/wc/store/v1/cart/add-item`.
+ * @param options.failForPath The Store API path whose mutation should fail.
  * @param options.status      The HTTP status to report for the failed mutation.
  * @param options.code        The error code carried in the failed response body.
  * @param options.message     The human-readable error message in the body.
@@ -306,7 +312,6 @@ function mockBatchFetchFailing( {
 	const captured: CapturedRequest[] = [];
 	global.fetch = jest.fn(
 		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
-			// The GET refresh has no body; reply with an empty cart and a nonce.
 			if ( ! init?.body ) {
 				return new Response(
 					JSON.stringify( { items: [], totals: {}, errors: [] } ),
@@ -336,12 +341,6 @@ function mockBatchFetchFailing( {
  * mutation(s) targeting a specific product id, letting every other mutation
  * in the same batch succeed.
  *
- * Unlike {@link mockBatchFetchFailing} (which fails every request matching a
- * given path), this discriminates by the posted product id so two mutations
- * hitting the same endpoint (e.g. two `add-item` calls) can settle
- * differently within one batch — reproducing one accepted and one rejected
- * product in the same request cycle.
- *
  * @param options           Failure configuration.
  * @param options.failForId The product id whose mutation(s) should fail.
  * @param options.status    The HTTP status to report for the failed mutation.
@@ -361,7 +360,6 @@ function mockBatchFetchFailingProduct( {
 } ): void {
 	global.fetch = jest.fn(
 		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
-			// The GET refresh has no body; reply with an empty cart and a nonce.
 			if ( ! init?.body ) {
 				return new Response(
 					JSON.stringify( { items: [], totals: {}, errors: [] } ),
@@ -389,23 +387,16 @@ function mockBatchFetchFailingProduct( {
  * non-2xx response to the outer `/batch` POST itself, not a per-item
  * rejection — reproducing a whole-batch/transport failure with no
  * per-product server error code.
- *
- * The GET refresh still resolves the nonce gate. The batch POST resolves with
- * a non-2xx HTTP status, which the mutation queue reports as one `Error`
- * (lacking a `code` property) shared by every tracked request in the cycle.
  */
 function mockBatchFetchWholeBatchFailure(): void {
 	global.fetch = jest.fn(
 		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
-			// The GET refresh has no body; reply with an empty cart and a nonce.
 			if ( ! init?.body ) {
 				return new Response(
 					JSON.stringify( { items: [], totals: {}, errors: [] } ),
 					{ headers: { Nonce: 'test-nonce-123' } }
 				);
 			}
-			// The whole batch request fails at the HTTP level (no per-item
-			// responses are ever parsed).
 			return new Response( 'Internal Server Error', { status: 500 } );
 		}
 	) as unknown as typeof fetch;
@@ -462,11 +453,6 @@ function captureSyncEvents(): {
  * Waits for a macrotask boundary, letting every microtask (promise
  * `.then`/`.catch` chain) queued so far run to completion.
  *
- * Used after driving an action to its generator's `done` return value, since
- * the screen-reader announcement may still be chained on the a11y module's
- * import promise and settle in a microtask queued during — but not
- * necessarily flushed by the end of — the action's own settlement.
- *
  * @return A promise that resolves after the next macrotask tick.
  */
 function flushMicrotasks(): Promise< void > {
@@ -493,7 +479,21 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 	} as CartItem;
 }
 
-describe( 'WooCommerce Cart Interactivity API Store', () => {
+/** The flat list of notices every `updateNotices` mock call received so far. */
+function updateNoticesCalls(): Notice[] {
+	return ( updateNotices as jest.Mock ).mock.calls.flatMap(
+		( [ notices ] ) => ( notices ?? [] ) as Notice[]
+	);
+}
+
+/** The errors every `showNoticeError` mock call received so far. */
+function showNoticeErrorCalls(): Error[] {
+	return ( showNoticeError as jest.Mock ).mock.calls.map(
+		( [ error ] ) => error as Error
+	);
+}
+
+describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 		// `getConfig` may have been given a per-test `mockReturnValue` (e.g. to
@@ -501,10 +501,11 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		// history, so reset it explicitly to avoid leaking config into later
 		// tests.
 		( getConfig as jest.Mock ).mockReset();
-		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
+		mockContext = null;
+		delete ( mockState as Partial< MockState > ).cart;
 	} );
 
-	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
+	it( 'refreshCart passes cache: no-store to fetch to prevent browser caching', () => {
 		const mockFetch = jest
 			.fn()
 			.mockResolvedValue(
@@ -514,12 +515,29 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 		global.fetch = mockFetch;
 
-		jest.isolateModules( () => require( '../cart' ) );
+		jest.isolateModules( () => {
+			const scopeModule =
+				require( '../scope' ) as typeof import('../scope');
+			mockState = { ...baseState() } as MockState;
+			Object.defineProperties(
+				mockState,
+				Object.getOwnPropertyDescriptors( scopeModule.scopeState )
+			);
+			scopeModule.bindState( mockState );
+			const cartActionsModule =
+				require( '../cart-actions' ) as typeof import('../cart-actions');
+			cartActions = cartActionsModule.cartActions;
+			cartActionsModule.bindCartState(
+				mockState as unknown as Parameters<
+					typeof cartActionsModule.bindCartState
+				>[ 0 ],
+				{ refreshCart: cartActions.refreshCart }
+			);
+		} );
 
-		const iterator = mockRegisteredStore?.actions.refreshCartItems();
-
-		// Async actions are typed as void for consumers, but are actually generators internally.
-		( iterator as unknown as Iterator< void > ).next();
+		// Async actions are typed as void for consumers, but are actually
+		// generators internally.
+		( cartActions.refreshCart() as unknown as Iterator< void > ).next();
 
 		expect( mockFetch ).toHaveBeenCalledWith(
 			'https://example.com/wp-json/wc/store/v1/cart',
@@ -530,269 +548,212 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		);
 	} );
 
-	describe( 'addCartItem endpoint selection', () => {
-		it( 'issues add-item (never update-item) for a keyless add that matches a keyed line by product id', async () => {
+	describe( 'addCartItem( payload ) — posts as given', () => {
+		it( 'posts to add-item with the payload unchanged', async () => {
 			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			seedCart( [] );
 
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 42, quantity: 2 } ) );
 
 			expect( captured ).toHaveLength( 1 );
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-			expect( captured[ 0 ].path ).not.toContain( 'update-item' );
+			expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 2 } );
 		} );
 
-		it( 'posts the requested delta (not the matched line absolute quantity) for a keyless add against a keyed line', async () => {
+		it( 'carries no type or quantityToAdd in the posted body', async () => {
 			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			seedCart( [] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 2 } ) );
+
+			expect( captured[ 0 ].body ).not.toHaveProperty( 'type' );
+			expect( captured[ 0 ].body ).not.toHaveProperty( 'quantityToAdd' );
+		} );
+
+		it( 'forwards extension props to the Store API as given', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
 
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
+					giftMessage: 'Happy birthday!',
 				} )
 			);
 
-			expect( captured[ 0 ].body.quantity ).toBe( 1 );
-			expect( captured[ 0 ].body.quantity ).not.toBe( 4 );
-		} );
-
-		it( 'accumulates the running optimistic delta across rapid keyless adds', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			// Two rapid keyless adds queued before the batch flushes. Each must
-			// post its own delta (1) computed against the running optimistic
-			// quantity, never an absolute quantity off the matched line.
-			await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-			] );
-
-			expect( captured ).toHaveLength( 2 );
-			expect(
-				captured.every( ( r ) => r.path.endsWith( 'add-item' ) )
-			).toBe( true );
-			expect( captured[ 0 ].body.quantity ).toBe( 1 );
-			expect( captured[ 1 ].body.quantity ).toBe( 1 );
-		} );
-
-		it( 'never includes the matched line key in the request body for a keyless add', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+			expect( captured[ 0 ].body.giftMessage ).toBe(
+				'Happy birthday!'
 			);
-
-			expect( captured[ 0 ].body.key ).toBeUndefined();
 		} );
 
-		it( 'issues update-item with the absolute quantity for an explicit key (key-first path unchanged)', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					key: 'server-key-abc',
-					quantity: 5,
-					type: 'simple',
-				} )
-			);
-
-			expect( captured[ 0 ].path ).toBe(
-				'/wc/store/v1/cart/update-item'
-			);
-			expect( captured[ 0 ].body.quantity ).toBe( 5 );
-			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
-		} );
-
-		it( 'optimistically bumps a matched keyed line in place on a keyless re-add (no duplicate line)', async () => {
+		it( 'bumps a matching existing line by the posted delta, optimistically', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
 		} );
 
-		it( 'optimistically pushes a new line when no line matches a keyless add', async () => {
+		it( 'does not bump a sold-individually line ahead of the server', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					id: 42,
+					quantity: 1,
+					sold_individually: true,
+				} ),
+			] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 1 );
+		} );
+
+		it( 'pushes a new optimistic line when no line matches', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
-			await runAction(
-				actions.addCartItem( {
-					id: 99,
-					quantityToAdd: 2,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 99, quantity: 2 } ) );
 
 			expect( mockState.cart.items ).toHaveLength( 2 );
 			const added = mockState.cart.items.find(
 				( item ) => item.id === 99
 			);
-			expect( added ).toBeDefined();
 			expect( added?.quantity ).toBe( 2 );
 		} );
 
-		it( 'ignores the matched line item_data when deciding the endpoint and body for a keyless add', async () => {
-			const captured = mockBatchFetch();
+		it( 'defaults the posted quantity to 1 when omitted, for the optimistic bump', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
-			// Same product id and quantity, only item_data differs. The
-			// add/update decision must not depend on item_data, so both adds
-			// must produce an identical endpoint and request body.
-			const richItemData = [
-				{ key: 'subscription', value: 'monthly' },
-			] as CartItem[ 'item_data' ];
+			await runAction( actions.addCartItem( { id: 42 } ) );
 
-			const withEmptyItemData = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, item_data: [] } ),
-			] );
-			await runAction(
-				withEmptyItemData.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+		} );
 
-			const withRichItemData = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					id: 42,
-					quantity: 3,
-					item_data: richItemData,
-				} ),
-			] );
-			await runAction(
-				withRichItemData.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+		it( 'removes no scope record when called with a payload', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			mockContext = { productId: 42, scopeName: 'my-scope' };
+			// Writing the draft creates the record.
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.quantity = 5;
+			expect( mockState.productScopes[ 'my-scope' ] ).toBeDefined();
 
-			expect( captured ).toHaveLength( 2 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-			expect( captured[ 1 ].path ).toBe( captured[ 0 ].path );
-			expect( captured[ 1 ].body ).toEqual( captured[ 0 ].body );
+			await runAction( actions.addCartItem( { id: 99, quantity: 1 } ) );
+
+			expect( mockState.productScopes[ 'my-scope' ] ).toBeDefined();
 		} );
 	} );
 
-	describe( 'addCartItem keyless-requires-delta invariant guard', () => {
-		it( 'throws when called keyless with an absolute quantity (no quantityToAdd)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantity: 5,
-						type: 'simple',
-					} )
-				)
-			).rejects.toThrow();
-		} );
-
-		it( 'does not throw and proceeds on the add-item path for a keyless quantityToAdd delta', async () => {
+	describe( 'addCartItem() — the no-payload draft form', () => {
+		it( 'posts the reading element scope’s draft identity and quantity', async () => {
 			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			seedCart( [] );
+			mockContext = {
+				productId: 42,
+				variation: [ { attribute: 'Color', value: 'Blue' } ],
+				scopeName: 'my-scope',
+			};
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.quantity = 3;
 
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				)
-			).resolves.toEqual( { success: true } );
+			await runAction( actions.addCartItem() );
 
-			expect( captured ).toHaveLength( 1 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
+			expect( captured[ 0 ].body ).toEqual( {
+				id: 42,
+				variation: [ { attribute: 'Color', value: 'Blue' } ],
+				quantity: 3,
+			} );
 		} );
 
-		it( 'does not throw for an explicit key with an absolute quantity (key-first stepper path unaffected)', async () => {
-			mockBatchFetch();
+		it( 'forwards extension props written on the draft', async () => {
+			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
+			seedCart( [] );
+			mockContext = { productId: 42, scopeName: 'my-scope' };
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.giftMessage = 'Hi!';
 
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-						type: 'simple',
-					} )
-				)
-			).resolves.toEqual( { success: true } );
+			await runAction( actions.addCartItem() );
+
+			expect( captured[ 0 ].body.giftMessage ).toBe( 'Hi!' );
 		} );
 
-		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
+		it( 'defaults to quantity 1 when the shopper never set one', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			mockContext = { productId: 7 };
+
+			await runAction( actions.addCartItem() );
+
+			expect( captured[ 0 ].body ).toEqual( { id: 7, quantity: 1 } );
+		} );
+
+		it( 'behaves the same when called with a DOM Event as its first argument (directive-bound call)', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			mockContext = { productId: 7 };
+
+			await runAction( actions.addCartItem( new Event( 'click' ) ) );
+
+			expect( captured[ 0 ].body ).toEqual( { id: 7, quantity: 1 } );
+		} );
+
+		it( 'removes the scope’s record when the server accepts the add', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			seedCart( [] );
+			mockContext = { productId: 42, scopeName: 'my-scope' };
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.quantity = 2;
+			expect( mockState.productScopes[ 'my-scope' ] ).toBeDefined();
 
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantity: 5,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				)
-			).rejects.toThrow();
+			await runAction( actions.addCartItem() );
+
+			expect( mockState.productScopes[ 'my-scope' ] ).toBeUndefined();
+		} );
+
+		it( 'removes no record when the server rejects the add', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [] );
+			mockContext = { productId: 42, scopeName: 'my-scope' };
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.quantity = 2;
+
+			await runAction( actions.addCartItem() );
+
+			expect( mockState.productScopes[ 'my-scope' ] ).toBeDefined();
+		} );
+
+		it( 'falls back to the unnamed _default scope when the context declares no scopeName', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			mockContext = { productId: 42 };
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			mockState.productScope.draftCartItem!.quantity = 1;
+
+			await runAction( actions.addCartItem() );
+
+			expect( mockState.productScopes._default ).toBeUndefined();
 		} );
 	} );
 
@@ -800,14 +761,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		it( 'resolves { success: true } when the Store API accepts the request', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			seedCart( [] );
 
 			const outcome = await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 42, quantity: 1 } )
 			);
 
 			expect( outcome ).toEqual( { success: true } );
@@ -822,14 +779,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			} );
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			spyOnShowNoticeError();
 
 			const outcome = await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 42, quantity: 1 } )
 			);
 
 			expect( outcome ).toEqual( {
@@ -845,14 +797,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			mockBatchFetchWholeBatchFailure();
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			spyOnShowNoticeError();
 
 			const outcome = ( await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 42, quantity: 1 } )
 			) ) as AddCartItemOutcome;
 
 			if ( outcome.success ) {
@@ -873,23 +820,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			} );
 			const actions = await loadCartStore();
 			seedCart( [] );
-			spyOnShowNoticeError();
 
 			const [ acceptedOutcome, rejectedOutcome ] = await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
+				runAction( actions.addCartItem( { id: 42, quantity: 1 } ) ),
+				runAction( actions.addCartItem( { id: 99, quantity: 1 } ) ),
 			] );
 
 			expect( acceptedOutcome ).toEqual( { success: true } );
@@ -906,20 +840,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			spyOnShowNoticeError();
-			// Simulate a client bug in post-success processing (e.g. a notices
-			// import rejection or a11y chunk-load failure): the captured
-			// success outcome must survive this throw.
-			actions.updateNotices = jest.fn( () => {
+			// Simulate a client bug in post-success processing (e.g. a
+			// notices import rejection): the captured success outcome must
+			// survive this throw.
+			( updateNotices as jest.Mock ).mockImplementationOnce( () => {
 				throw new Error( 'post-success client bug' );
-			} ) as unknown as Store[ 'actions' ][ 'updateNotices' ];
+			} );
 
 			const outcome = await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 42, quantity: 1 } )
 			);
 
 			expect( outcome ).toEqual( { success: true } );
@@ -940,311 +869,17 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
 			const outcome = await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 42, quantity: 1 } )
 			);
 
 			expect( outcome ).toEqual( { success: true } );
 		} );
 	} );
 
-	describe( 'batchAddCartItems endpoint selection', () => {
-		it( 'issues add-item (never update-item) for a keyless batch item that matches a keyed line by product id', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured ).toHaveLength( 1 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-			expect( captured[ 0 ].path ).not.toContain( 'update-item' );
-		} );
-
-		it( 'posts the requested delta (not the matched line absolute quantity) for a keyless batch item against a keyed line', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.quantity ).toBe( 1 );
-			expect( captured[ 0 ].body.quantity ).not.toBe( 4 );
-		} );
-
-		it( 'never includes the matched line key in the request body for a keyless batch item', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.key ).toBeUndefined();
-		} );
-
-		it( 'issues update-item with the absolute quantity for a batch item that supplies an explicit key', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].path ).toBe(
-				'/wc/store/v1/cart/update-item'
-			);
-			expect( captured[ 0 ].body.quantity ).toBe( 5 );
-			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
-		} );
-
-		it( 'derives the keyless add-item delta identically to the single-item addCartItem path', async () => {
-			// Same seeded keyed line and same keyless request through both
-			// paths must produce the same endpoint and posted quantity.
-			const singleCaptured = mockBatchFetch();
-			const singleActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				singleActions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			const batchCaptured = mockBatchFetch();
-			const batchActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				batchActions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( batchCaptured ).toHaveLength( 1 );
-			expect( singleCaptured ).toHaveLength( 1 );
-			expect( batchCaptured[ 0 ].path ).toBe( singleCaptured[ 0 ].path );
-			expect( batchCaptured[ 0 ].body.quantity ).toBe(
-				singleCaptured[ 0 ].body.quantity
-			);
-			expect( batchCaptured[ 0 ].body.key ).toBe(
-				singleCaptured[ 0 ].body.key
-			);
-		} );
-
-		it( 'optimistically bumps a matched keyed line in place on a keyless batch re-add (no duplicate line)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 1 );
-			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
-		} );
-
-		it( 'optimistically pushes a new line when no line matches a keyless batch item', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 99,
-						quantityToAdd: 2,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 2 );
-			const added = mockState.cart.items.find(
-				( item ) => item.id === 99
-			);
-			expect( added ).toBeDefined();
-			expect( added?.quantity ).toBe( 2 );
-		} );
-	} );
-
-	describe( 'notice-diff suppression for keyless meta-only adds', () => {
-		// The quantity-changed info notice template the auto-UPDATE branch emits.
+	describe( 'addCartItem notices', () => {
 		const QUANTITY_CHANGED = 'was changed to';
 
-		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
-			// The product is present only as a single keyed meta line at qty 3.
-			// A keyless add optimistically bumps that line to 4, but the server
-			// keeps the meta line at 3 and adds a separate standalone line. The
-			// keyless-scoped baseline (3) must be compared against the server
-			// quantity (3) so no spurious "quantity changed" notice fires.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 3,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-new',
-						id: 42,
-						quantity: 1,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
-			// The product is present as two distinct keyed meta lines (qty 3 and
-			// qty 2). A keyless add matches and optimistically bumps only the
-			// first line (server-key-1) to 4. The server keeps both meta lines at
-			// their pre-add quantities and adds a separate standalone line. The
-			// bumped line's pre-optimistic baseline (3) must be diffed against the
-			// server quantity (3) so no spurious notice fires; the untouched
-			// second line (still 2 in both snapshots) must not notify either.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-1',
-						id: 42,
-						quantity: 3,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-2',
-						id: 42,
-						quantity: 2,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-new',
-						id: 42,
-						quantity: 1,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-1', id: 42, quantity: 3 } ),
-				makeKeyedLine( { key: 'server-key-2', id: 42, quantity: 2 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'still emits the quantity-changed notice for a keyed mini-cart stepper change returned at its pre-stepper quantity', async () => {
-			// A keyed update (explicit key + absolute quantity) is never recorded
-			// in the keyless baseline set, so the override does not apply. The
-			// server returning the line at its pre-stepper quantity (3) must still
-			// diff against the post-optimistic snapshot (5) and notify.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 3,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					key: 'server-key-abc',
-					quantity: 5,
-					type: 'simple',
-				} )
-			);
-
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( true );
-		} );
-
-		it( 'still emits the quantity-changed notice when a keyless-add-bumped line diverges from its captured baseline', async () => {
-			// A genuine concurrent server change: the matched keyed line is
-			// reported at quantity 7, which differs from its pre-optimistic
-			// baseline of 3. The notice must still fire for that line.
+		it( 'with { showCartUpdatesNotices: false } shows no auto-update notice', async () => {
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1258,18 +893,40 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [
 				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
 			] );
-			const notices = spyOnUpdateNotices();
 
 			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem(
+					{ id: 42, quantity: 1 },
+					{ showCartUpdatesNotices: false }
+				)
 			);
 
 			expect(
-				notices.some(
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( QUANTITY_CHANGED )
+				)
+			).toBe( false );
+		} );
+
+		it( 'with the option omitted shows the auto-update notice for a genuine server change', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 7,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			expect(
+				updateNoticesCalls().some(
 					( n ) =>
 						n.notice.includes( QUANTITY_CHANGED ) &&
 						n.notice.includes( '7' )
@@ -1277,11 +934,88 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
-			// Same meta-only scenario through the batch path: the matched keyed
-			// line is bumped optimistically to 4, the server keeps it at 3 and
-			// adds a standalone line. The batch must capture the baseline (3) and
-			// suppress the spurious notice.
+		it( 'shows the auto-removal notice for a line the server dropped', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-keep',
+						id: 42,
+						quantity: 3,
+						name: 'Kept Product',
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-keep',
+					id: 42,
+					quantity: 3,
+					name: 'Kept Product',
+				} ),
+				makeKeyedLine( {
+					key: 'server-key-gone',
+					id: 7,
+					quantity: 1,
+					name: 'Vanished Product',
+				} ),
+			] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			expect(
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( 'Vanished Product' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'shows a dismissible error notice with the server’s message for a failed mutation, not an auto-update notice', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			const errors = showNoticeErrorCalls();
+			expect( errors ).toHaveLength( 1 );
+			expect( errors[ 0 ].message ).toBe(
+				'You cannot add that amount to the cart.'
+			);
+			expect( ( errors[ 0 ] as Error & { code?: string } ).code ).toBe(
+				'woocommerce_rest_cart_product_no_stock'
+			);
+			expect(
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( QUANTITY_CHANGED )
+				)
+			).toBe( false );
+		} );
+
+		it( 'rolls the optimistic bump back when the add-item request is capped (HTTP 400)', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+
+		it( 'shows no quantity-changed notice for an exact add the server caps (server total equals pre-add total plus posted delta)', async () => {
+			// Pre-add: matched line at qty 3. Delta: +1. Expected total: 4.
+			// Server returns the line at exactly 4 → the add was exact, so no
+			// "quantity changed" notice fires even though the server chose a
+			// different line internally than the one bumped optimistically.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1300,244 +1034,17 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [
 				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
 			] );
-			const notices = spyOnUpdateNotices();
 
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
 
 			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
-			// Pre-add: matched line at qty 3. Keyless add delta: +1.
-			// Expected total: 3 + 1 = 4. Server returns the line at 4.
-			// Since serverTotal (4) === expectedTotal (4), the add was exact →
-			// no "quantity changed" notice must fire.
-			// This also indirectly guards the by-value pre-add capture: if
-			// preAddTotal were captured after the optimistic bump (reading 4
-			// instead of 3), expectedTotal would be 4+1=5 ≠ server 4, which
-			// would keep the key un-suppressed and fire the notice, failing
-			// this assertion.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 4,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			// Server total (4) === expected total (3+1=4) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas', async () => {
-			// Pre-add: matched line at qty 3. Batch deltas: +1 and +1.
-			// A real /batch endpoint compounds server-side: each add-item
-			// sub-request runs sequentially against one WC_Cart session, so the
-			// server accumulates both deltas and lands at 5, not 4.
-			// Expected total: 3 + (1+1) = 5. Server returns the line at 5.
-			// Since serverTotal (5) === expectedTotal (5), suppress → no notice.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 5,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-
-			// Server total (5) === expected total (3+1+1=5) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'still emits the quantity-changed notice for a keyless batch re-add when the server total diverges from expected', async () => {
-			// Same setup: pre-add qty 3, batch (+1,+1), expectedTotal = 5.
-			// Server returns 6 (a genuine concurrent change or cap artefact).
-			// Since serverTotal (6) !== expectedTotal (5), do not suppress →
-			// the notice must fire reporting the server quantity 6.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 6,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-
-			expect(
-				notices.some(
-					( n ) =>
-						n.notice.includes( QUANTITY_CHANGED ) &&
-						n.notice.includes( '6' )
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( QUANTITY_CHANGED )
 				)
-			).toBe( true );
-		} );
-
-		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
-			// Product 42 occupies two lines: a meta-differentiated line ordered
-			// first (server-key-meta, qty 1) and a plain standalone line second
-			// (server-key-standalone, qty 1). findItemInCart matches the meta line
-			// first, so addCartItem bumps it optimistically. The server, however,
-			// grows the standalone line instead and leaves the meta line unchanged.
-			// Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
-			// Server returns meta(1) + standalone(2) = 3 === expected → suppress
-			// for both pre-existing keys. No "quantity changed" notice must fire.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-meta',
-						id: 42,
-						quantity: 1,
-						name: 'Test Product',
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-standalone',
-						id: 42,
-						quantity: 2,
-						name: 'Test Product',
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-meta',
-					id: 42,
-					quantity: 1,
-				} ),
-				makeKeyedLine( {
-					key: 'server-key-standalone',
-					id: 42,
-					quantity: 1,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
-			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two
-			// lines: meta first (qty 1) then standalone (qty 1). The batch item
-			// bumps the meta line optimistically; the server grows the standalone
-			// line. Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
-			// Server returns meta(1)+standalone(2)=3 === expected → suppress.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-meta',
-						id: 42,
-						quantity: 1,
-						name: 'Test Product',
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-standalone',
-						id: 42,
-						quantity: 2,
-						name: 'Test Product',
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-meta',
-					id: 42,
-					quantity: 1,
-				} ),
-				makeKeyedLine( {
-					key: 'server-key-standalone',
-					id: 42,
-					quantity: 1,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
-			// A variation line (type: variation, id: 42, variation: [Color:Red])
-			// is matched by id+variation. Keyless add delta: +1. Pre-add qty: 2.
-			// Expected total: 2+1=3. Server returns the variation line at 3.
-			// Since serverTotal (3) === expectedTotal (3) → suppress.
+		it( 'matches a variation line by id and variation for the exactness check', async () => {
 			const colorRedVariation = [
 				{ attribute: 'Color', value: 'Red' },
 			] as CartItem[ 'variation' ];
@@ -1566,28 +1073,83 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					variation: colorRedVariation,
 				} as CartItem,
 			] );
-			const notices = spyOnUpdateNotices();
 
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'variation',
+					quantity: 1,
 					variation: colorRedVariation,
 				} )
 			);
 
-			// Server total (3) === expected total (2+1=3) → suppress.
 			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( QUANTITY_CHANGED )
+				)
 			).toBe( false );
 		} );
+	} );
 
-		it( 'leaves removeCartItem notice behavior unchanged (auto-DELETE still fires)', async () => {
-			// removeCartItem must not pass the new baseline; the auto-DELETE
-			// branch is untouched. Removing one of two lines while the server
-			// reports the OTHER line auto-removed must still emit a removal
-			// notice for that server-removed line.
+	describe( 'updateCartItem', () => {
+		it( 'sets the cart line’s absolute quantity via update-item', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			await runAction(
+				actions.updateCartItem( { key: 'server-key-abc', quantity: 5 } )
+			);
+
+			expect( captured[ 0 ].path ).toBe(
+				'/wc/store/v1/cart/update-item'
+			);
+			expect( captured[ 0 ].body.quantity ).toBe( 5 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 5 );
+		} );
+
+		it( 'shows the quantity-changed notice unconditionally (no exactness suppression) for a keyed change', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			await runAction(
+				actions.updateCartItem( { key: 'server-key-abc', quantity: 5 } )
+			);
+
+			expect(
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( 'was changed to' )
+				)
+			).toBe( true );
+		} );
+	} );
+
+	describe( 'removeCartItem', () => {
+		it( 'removes the line immediately (optimistically)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			await runAction( actions.removeCartItem( 'server-key-abc' ) );
+
+			expect( mockState.cart.items ).toHaveLength( 0 );
+		} );
+
+		it( 'still emits the auto-removal notice for another server-removed line (unaffected by the keyless suppression rule)', async () => {
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1613,89 +1175,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					name: 'Vanished Product',
 				} ),
 			] );
-			const notices = spyOnUpdateNotices();
 
 			await runAction( actions.removeCartItem( 'server-key-keep' ) );
 
-			// The server-removed line (server-key-gone) was present in the
-			// post-optimistic snapshot and absent from the server cart, so the
-			// auto-DELETE notice must still fire.
 			expect(
-				notices.some( ( n ) => n.notice.includes( 'Vanished Product' ) )
-			).toBe( true );
-		} );
-	} );
-
-	describe( 'genuine add-path cap surfaces as an error notice (not an auto-update notice)', () => {
-		// The quantity-changed info notice template the auto-UPDATE branch emits.
-		const QUANTITY_CHANGED = 'was changed to';
-
-		it( 'routes an HTTP 400 add-item failure to an error notice and never to an auto-update notice', async () => {
-			// A plain keyless re-add the server caps (e.g. out of stock) returns a
-			// non-2xx batch entry. That rejects the mutation, so the action takes
-			// the throw/catch path: the failure must surface as an error notice
-			// via showNoticeError, not as an auto-update "quantity changed" notice
-			// through updateNotices.
-			mockBatchFetchFailing( {
-				failForPath: '/wc/store/v1/cart/add-item',
-				status: 400,
-				code: 'woocommerce_rest_cart_product_no_stock',
-				message: 'You cannot add that amount to the cart.',
-			} );
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			const autoUpdateNotices = spyOnUpdateNotices();
-			const errors = spyOnShowNoticeError();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			// The cap surfaced through the error-notice boundary carrying the
-			// server-supplied message and code.
-			expect( errors ).toHaveLength( 1 );
-			expect( errors[ 0 ].message ).toBe(
-				'You cannot add that amount to the cart.'
-			);
-			expect( ( errors[ 0 ] as Error & { code?: string } ).code ).toBe(
-				'woocommerce_rest_cart_product_no_stock'
-			);
-
-			// No auto-update "quantity changed" notice was emitted for the cap.
-			expect(
-				autoUpdateNotices.some( ( n ) =>
-					n.notice.includes( QUANTITY_CHANGED )
+				updateNoticesCalls().some( ( n ) =>
+					n.notice.includes( 'Vanished Product' )
 				)
-			).toBe( false );
-		} );
-
-		it( 'rolls the optimistic bump back when the add-item request is capped (HTTP 400)', async () => {
-			// The optimistic update bumps the matched line 3 -> 4 before the
-			// request flushes. Because the only mutation fails, the queue has no
-			// successful server state and must roll the cart back to its
-			// pre-cycle snapshot, leaving the line at its original quantity 3.
-			mockBatchFetchFailing( {
-				failForPath: '/wc/store/v1/cart/add-item',
-				status: 400,
-			} );
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			spyOnShowNoticeError();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 1 );
-			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+			).toBe( true );
 		} );
 	} );
 
@@ -1709,13 +1196,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [] );
 			const { events, cleanup } = captureSyncEvents();
 
-			await runAction(
-				actions.addCartItem( {
-					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 1, quantity: 1 } ) );
 			await flushMicrotasks();
 
 			expect( events ).toHaveLength( 1 );
@@ -1733,47 +1214,97 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			cleanup();
 		} );
 
-		it( 'dispatches exactly one sync event, one legacy event, and one announcement for a cycle of concurrent successful addCartItem calls', async () => {
+		it( 'A5 — dispatches one batch request and one set of page-sync effects for a same-tick burst of addCartItem calls', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {
 				messages: { addedToCartText: 'Added to your cart.' },
 			} );
 			const captured = mockBatchFetch();
+			const fetchMock = global.fetch as jest.Mock;
 			const actions = await loadCartStore();
 			seedCart( [] );
 			const { events, cleanup } = captureSyncEvents();
 
 			await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 1,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 2,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 3,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
+				runAction( actions.addCartItem( { id: 1, quantity: 1 } ) ),
+				runAction( actions.addCartItem( { id: 2, quantity: 1 } ) ),
+				runAction( actions.addCartItem( { id: 3, quantity: 1 } ) ),
 			] );
 			await flushMicrotasks();
 
-			// Sanity check: all three mutations landed in the same cycle/batch.
+			// One POST wc/store/v1/batch request carrying the three mutations
+			// (the GET /cart refresh from loadCartStore is the only other
+			// fetch call).
+			const batchCalls = fetchMock.mock.calls.filter( ( [ url ] ) =>
+				String( url ).includes( 'wc/store/v1/batch' )
+			);
+			expect( batchCalls ).toHaveLength( 1 );
 			expect( captured ).toHaveLength( 3 );
+
+			// One set of page-sync effects: one sync event, one legacy event,
+			// one announcement.
 			expect( events ).toHaveLength( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
 
 			cleanup();
+		} );
+
+		it( 'A7 — N same-tick adds of a product at quantity 1 each post N deltas of 1, and the cart line lands at quantity N once the server’s merged response commits', async () => {
+			// A real Store API batch runs each `add-item` sub-request
+			// sequentially against one `WC_Cart` session, so N same-tick
+			// deltas of 1 land the server on quantity N. Reproduce that
+			// merged response directly, since the optimistic layer alone
+			// cannot know the other same-tick calls will land on the same
+			// line before the server confirms it (D8's "N rapid clicks add
+			// N" claim is about the posted deltas and the settled result,
+			// not the transient optimistic render).
+			const N = 3;
+			const captured: CapturedRequest[] = [];
+			global.fetch = jest.fn(
+				async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+					if ( ! init?.body ) {
+						return new Response(
+							JSON.stringify( {
+								items: [],
+								totals: {},
+								errors: [],
+							} ),
+							{ headers: { Nonce: 'test-nonce-123' } }
+						);
+					}
+					const parsed = JSON.parse( init.body as string ) as {
+						requests: CapturedRequest[];
+					};
+					parsed.requests.forEach( ( request ) =>
+						captured.push( request )
+					);
+					const serverCart = makeServerCart( [
+						makeKeyedLine( { id: 1, quantity: N } ),
+					] );
+					const responses = parsed.requests.map( () => ( {
+						status: 200,
+						body: serverCart,
+					} ) );
+					return new Response( JSON.stringify( { responses } ), {
+						headers: { Nonce: 'test-nonce-123' },
+					} );
+				}
+			) as unknown as typeof fetch;
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			await Promise.all(
+				Array.from( { length: N }, () =>
+					runAction( actions.addCartItem( { id: 1, quantity: 1 } ) )
+				)
+			);
+
+			expect( captured ).toHaveLength( N );
+			expect(
+				captured.every( ( r ) => r.body.quantity === 1 )
+			).toBe( true );
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( N );
 		} );
 
 		it( 'still dispatches exactly one sync event for a cycle mixing a successful and a failed mutation, and surfaces the failure as its own error notice', async () => {
@@ -1782,23 +1313,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const actions = await loadCartStore();
 			seedCart( [] );
 			const { events, cleanup } = captureSyncEvents();
-			const errors = spyOnShowNoticeError();
 
 			const [ acceptedOutcome, rejectedOutcome ] = await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
+				runAction( actions.addCartItem( { id: 42, quantity: 1 } ) ),
+				runAction( actions.addCartItem( { id: 99, quantity: 1 } ) ),
 			] );
 			await flushMicrotasks();
 
@@ -1807,7 +1325,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				false
 			);
 			expect( events ).toHaveLength( 1 );
-			expect( errors ).toHaveLength( 1 );
+			expect( showNoticeErrorCalls() ).toHaveLength( 1 );
 
 			cleanup();
 		} );
@@ -1823,21 +1341,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const actions = await loadCartStore();
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 			const { events, cleanup } = captureSyncEvents();
-			const errors = spyOnShowNoticeError();
 
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
 			await flushMicrotasks();
 
 			expect( events ).toHaveLength( 0 );
 			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
 			expect( speak ).not.toHaveBeenCalled();
-			expect( errors ).toHaveLength( 1 );
+			expect( showNoticeErrorCalls() ).toHaveLength( 1 );
 
 			cleanup();
 		} );
@@ -1861,19 +1372,11 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const { events, cleanup } = captureSyncEvents();
 
 			await Promise.all( [
+				runAction( actions.addCartItem( { id: 99, quantity: 1 } ) ),
 				runAction(
-					actions.addCartItem( {
-						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 42,
+					actions.updateCartItem( {
 						key: 'server-key-abc',
 						quantity: 5,
-						type: 'simple',
 					} )
 				),
 				runAction( actions.removeCartItem( 'server-key-gone' ) ),
@@ -1899,20 +1402,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const { events, cleanup } = captureSyncEvents();
 
 			await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
+				runAction( actions.addCartItem( { id: 42, quantity: 1 } ) ),
+				runAction( actions.addCartItem( { id: 42, quantity: 1 } ) ),
 			] );
 			await flushMicrotasks();
 
@@ -1952,83 +1443,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			cleanup();
 		} );
 
-		it( 'dispatches one merged sync event, one legacy event, and one announcement for a cycle mixing a successful add and a successful remove', async () => {
-			( getConfig as jest.Mock ).mockReturnValue( {
-				messages: { addedToCartText: 'Added to your cart.' },
-			} );
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-gone',
-					id: 7,
-					quantity: 1,
-				} ),
-			] );
-			const { events, cleanup } = captureSyncEvents();
-
-			await Promise.all( [
-				runAction(
-					actions.addCartItem( {
-						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				),
-				runAction( actions.removeCartItem( 'server-key-gone' ) ),
-			] );
-			await flushMicrotasks();
-
-			expect( events ).toHaveLength( 1 );
-			expect( events[ 0 ].quantityChanges ).toEqual( {
-				productsPendingAdd: [ 99 ],
-				cartItemsPendingDelete: [ 'server-key-gone' ],
-			} );
-			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
-			expect( speak ).toHaveBeenCalledTimes( 1 );
-
-			cleanup();
-		} );
-
-		it( "dispatches exactly one sync/legacy/announcement for a batchAddCartItems call where the last item fails but an earlier item succeeds, unioning only the successful item's changes", async () => {
-			( getConfig as jest.Mock ).mockReturnValue( {
-				messages: { addedToCartText: 'Added to your cart.' },
-			} );
-			mockBatchFetchFailingProduct( { failForId: 99 } );
-			const actions = await loadCartStore();
-			seedCart( [] );
-			const { events, cleanup } = captureSyncEvents();
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 99, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-			await flushMicrotasks();
-
-			expect( events ).toHaveLength( 1 );
-			expect( events[ 0 ].quantityChanges ).toEqual( {
-				productsPendingAdd: [ 42 ],
-			} );
-			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
-			expect( speak ).toHaveBeenCalledTimes( 1 );
-			// The failed item (id 99) still surfaces its own error notice.
-			expect(
-				notices.some(
-					( n ) => n.type === 'error' && n.notice.includes( '99' )
-				) ||
-					notices.some(
-						( n ) =>
-							n.type === 'error' &&
-							n.notice.includes( 'cannot add' )
-					)
-			).toBe( true );
-
-			cleanup();
-		} );
-
 		it( 'announces once via the already-resolved a11y binding on a later call in the same store instance', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {
 				messages: { addedToCartText: 'Added to your cart.' },
@@ -2037,28 +1451,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const actions = await loadCartStore();
 			seedCart( [] );
 
-			// First call kicks off — and, given the many awaits already
-			// driven through by `runAction`, very likely resolves — the
-			// preloaded a11y module import.
-			await runAction(
-				actions.addCartItem( {
-					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 1, quantity: 1 } ) );
 			await flushMicrotasks();
 
-			// A second call's announcement — whether it takes the
-			// already-resolved synchronous branch or still has to chain on
-			// the import promise — must still fire exactly once more.
-			await runAction(
-				actions.addCartItem( {
-					id: 2,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 2, quantity: 1 } ) );
 			await flushMicrotasks();
 
 			expect( speak ).toHaveBeenCalledTimes( 2 );
@@ -2078,13 +1474,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [] );
 
 			// Warm up: resolve the a11y binding via a first successful call.
-			await runAction(
-				actions.addCartItem( {
-					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
+			await runAction( actions.addCartItem( { id: 1, quantity: 1 } ) );
 			await flushMicrotasks();
 
 			( speak as jest.Mock ).mockImplementation( () => {
@@ -2093,11 +1483,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			const { events, cleanup } = captureSyncEvents();
 			const outcome = await runAction(
-				actions.addCartItem( {
-					id: 2,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
+				actions.addCartItem( { id: 2, quantity: 1 } )
 			);
 			await flushMicrotasks();
 
@@ -2106,6 +1492,224 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 2 );
 
 			cleanup();
+		} );
+	} );
+
+	describe( 'compatibility members (T18 deletes these)', () => {
+		it( 'findItemInCart matches by key, then by id and variation', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			expect(
+				mockState.findItemInCart( { id: 42, key: 'server-key-abc' } )
+					?.key
+			).toBe( 'server-key-abc' );
+			expect(
+				mockState.findItemInCart( { id: 42 } )?.key
+			).toBe( 'server-key-abc' );
+			expect(
+				mockState.findItemInCart( { id: 999 } )
+			).toBeUndefined();
+		} );
+
+		it( 'addCartItem( { key, quantity, ... } ) — the keyed compatibility form — delegates to update-item, ignoring the caller’s id/variation/type', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 999,
+					key: 'server-key-abc',
+					quantity: 5,
+					variation: [ { attribute: 'Color', value: 'Red' } ],
+					type: 'simple',
+				} )
+			);
+
+			expect( captured[ 0 ].path ).toBe(
+				'/wc/store/v1/cart/update-item'
+			);
+			expect( captured[ 0 ].body.quantity ).toBe( 5 );
+			expect( captured[ 0 ].body.id ).toBe( 42 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 5 );
+		} );
+
+		it( 'refreshCartItems is an alias for refreshCart', async () => {
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine() ] );
+			mockBatchFetchReturning( makeServerCart( [] ) );
+
+			await runAction( actions.refreshCartItems() );
+
+			expect( mockState.cart.items ).toHaveLength( 0 );
+		} );
+
+		it( 'waitForIdle resolves once a pending mutation settles', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			const addPromise = runAction(
+				actions.addCartItem( { id: 1, quantity: 1 } )
+			);
+			// Let `sendCartRequest`'s own microtask boundary (its `await
+			// isNonceReady`) run, so the mutation queue exists before
+			// `waitForIdle` reads it.
+			await flushMicrotasks();
+			await runAction( actions.waitForIdle() );
+			await addPromise;
+
+			expect( mockState.cart.items[ 0 ]?.quantity ).toBe( 1 );
+		} );
+
+		it( 'waitForIdle resolves immediately when the queue is idle', async () => {
+			const actions = await loadCartStore();
+
+			await expect(
+				runAction( actions.waitForIdle() )
+			).resolves.toBeUndefined();
+		} );
+
+		describe( 'batchAddCartItems', () => {
+			it( 'issues add-item for a keyless item and update-item for a keyed item in the same call', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.batchAddCartItems( [
+						{ id: 99, quantityToAdd: 2, type: 'simple' },
+						{
+							id: 42,
+							key: 'server-key-abc',
+							quantity: 5,
+							type: 'simple',
+						},
+					] )
+				);
+
+				expect( captured ).toHaveLength( 2 );
+				expect(
+					captured.find( ( r ) => r.body.id === 99 )?.path
+				).toBe( '/wc/store/v1/cart/add-item' );
+				expect(
+					captured.find( ( r ) => r.body.key === 'server-key-abc' )
+						?.path
+				).toBe( '/wc/store/v1/cart/update-item' );
+			} );
+
+			it( 'bumps a matched keyless line optimistically by the delta and sets a keyed line to its absolute quantity', async () => {
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.batchAddCartItems( [
+						{ id: 42, quantityToAdd: 1, type: 'simple' },
+					] )
+				);
+
+				expect( mockState.cart.items ).toHaveLength( 1 );
+				expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+			} );
+
+			it( 'produces one combined set of notices and suppresses an exact keyless add across the whole call', async () => {
+				mockBatchFetchReturning(
+					makeServerCart( [
+						makeKeyedLine( {
+							key: 'server-key-abc',
+							id: 42,
+							quantity: 5,
+						} ),
+					] )
+				);
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.batchAddCartItems( [
+						{ id: 42, quantityToAdd: 1, type: 'simple' },
+						{ id: 42, quantityToAdd: 1, type: 'simple' },
+					] )
+				);
+
+				// Server total (5) === expected total (3+1+1=5) → suppress.
+				expect(
+					updateNoticesCalls().some( ( n ) =>
+						n.notice.includes( 'was changed to' )
+					)
+				).toBe( false );
+			} );
+
+			it( 'shows the error notice for a failed item without surfacing it as an unhandled rejection', async () => {
+				mockBatchFetchFailingProduct( { failForId: 99 } );
+				const actions = await loadCartStore();
+				seedCart( [] );
+
+				await runAction(
+					actions.batchAddCartItems( [
+						{ id: 42, quantityToAdd: 1, type: 'simple' },
+						{ id: 99, quantityToAdd: 1, type: 'simple' },
+					] )
+				);
+
+				expect(
+					updateNoticesCalls().some(
+						( n ) => n.type === 'error'
+					)
+				).toBe( true );
+			} );
+
+			it( 'dispatches exactly one sync/legacy/announcement set for a call where one item fails and another succeeds', async () => {
+				( getConfig as jest.Mock ).mockReturnValue( {
+					messages: { addedToCartText: 'Added to your cart.' },
+				} );
+				mockBatchFetchFailingProduct( { failForId: 99 } );
+				const actions = await loadCartStore();
+				seedCart( [] );
+				const { events, cleanup } = captureSyncEvents();
+
+				await runAction(
+					actions.batchAddCartItems( [
+						{ id: 42, quantityToAdd: 1, type: 'simple' },
+						{ id: 99, quantityToAdd: 1, type: 'simple' },
+					] )
+				);
+				await flushMicrotasks();
+
+				expect( events ).toHaveLength( 1 );
+				expect( events[ 0 ].quantityChanges ).toEqual( {
+					productsPendingAdd: [ 42 ],
+				} );
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+				expect( speak ).toHaveBeenCalledTimes( 1 );
+
+				cleanup();
+			} );
 		} );
 	} );
 } );

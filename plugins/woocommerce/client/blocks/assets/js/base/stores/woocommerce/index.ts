@@ -8,6 +8,7 @@ import { store } from '@wordpress/interactivity';
  */
 import { catalogState } from './catalog';
 import { scopeState, bindState } from './scope';
+import { cartActionsState, cartActions, bindCartState } from './cart-actions';
 import type { WooCommerceStore } from './types';
 
 export type {
@@ -21,6 +22,16 @@ export type {
 	ProductScopesState,
 	DraftCartItem,
 	DraftCartItemRecord,
+	CartActionsState,
+	CartActionsActions,
+	AddCartItemPayload,
+	AddCartItemOptions,
+	AddCartItemError,
+	AddCartItemOutcome,
+	OptimisticCartItem,
+	SelectedAttributes,
+	ClientCartItem,
+	WooCommerceConfig,
 } from './types';
 
 // The acknowledgement string the other stores in this folder pass to
@@ -37,7 +48,7 @@ const universalLock =
 // `Object.defineProperties` returns its target's own type, not the type of
 // the properties it defines.
 const initialState = Object.defineProperties(
-	{ ...catalogState } as WooCommerceStore[ 'state' ],
+	{ ...catalogState, ...cartActionsState } as WooCommerceStore[ 'state' ],
 	Object.getOwnPropertyDescriptors( scopeState )
 );
 
@@ -46,21 +57,29 @@ const initialState = Object.defineProperties(
  *
  * This is the module's one `store()` registration. Its implementation is
  * split by concern across sibling files — this file assembles them into a
- * single call — starting with the catalog layer (`catalog.ts`) and the
- * product scope envelope (`scope.ts`).
+ * single call — the catalog layer (`catalog.ts`), the product scope envelope
+ * (`scope.ts`), and the cart plane (`cart-actions.ts`).
  */
-const { state } = store< WooCommerceStore >(
+const { state, actions } = store< WooCommerceStore >(
 	'woocommerce',
 	{
 		state: initialState,
+		actions: cartActions,
 	},
 	{ lock: universalLock }
 );
 
-// `scope.ts` reads and writes the cart layer's `findItemInCart` for
-// `cartItem` even though the cart layer (`cart.ts`) is not part of
-// `WooCommerceStore` yet (it registers onto the same `woocommerce` store
-// through its own separate `store()` calls until T9 folds it into this
-// module) — hence the cast, widening today's assembled type to the fuller
-// shape `scope.ts` reads at runtime.
-bindState( state as unknown as Parameters< typeof bindState >[ 0 ] );
+// `scope.ts` reads and writes the cart plane's `findItemInCart` for
+// `cartItem`, and `cart-actions.ts` reads and writes `scope.ts`'s
+// `productScopes` / `productScope` for `addCartItem()`'s draft form —
+// hence binding both to the same returned state reference, immediately
+// after the one registration above.
+bindState( state );
+// `cart-actions.ts`'s own state type additionally reads `restUrl` / `nonce`
+// / `errorMessages`, seeded by PHP (`BlocksSharedState.php`) but no longer
+// part of `WooCommerceStore`'s published state type — hence the cast,
+// widening today's assembled type to the fuller shape it reads at runtime.
+bindCartState(
+	state as unknown as Parameters< typeof bindCartState >[ 0 ],
+	actions
+);
