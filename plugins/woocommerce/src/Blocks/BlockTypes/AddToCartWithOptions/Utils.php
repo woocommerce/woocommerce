@@ -99,6 +99,10 @@ class Utils {
 	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
+	 * Seeds the input's own initial quantity into its own context, added to
+	 * the given $context, rather than into page-wide interactivity state, so
+	 * two quantity inputs on the same page each carry their own value.
+	 *
 	 * @param string $quantity_html The quantity HTML.
 	 * @param array  $wrapper_attributes Optional wrapper attributes.
 	 * @param array  $input_attributes Optional input attributes.
@@ -122,12 +126,7 @@ class Utils {
 			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
 			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
-			wp_interactivity_state(
-				'woocommerce/add-to-cart-with-options-quantity-selector',
-				array(
-					'inputQuantity' => $input_quantity,
-				)
-			);
+			$context['inputQuantity'] = $input_quantity;
 
 			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
 			$processor->set_attribute( 'data-wp-bind--value', 'state.inputQuantity' );

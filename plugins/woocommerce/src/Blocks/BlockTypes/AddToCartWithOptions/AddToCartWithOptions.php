@@ -258,8 +258,23 @@ class AddToCartWithOptions extends AbstractBlock {
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => function () use ( $product_id ) {
-						$product = wc_get_product( $product_id );
+					/**
+					 * Whether the form asking is valid: a grouped product or
+					 * one with unselected options (e.g. a variable product)
+					 * starts invalid until the shopper makes a selection.
+					 *
+					 * Reads the product id from the asking element's own
+					 * `woocommerce` scope context, falling back to the
+					 * page-level `template` scope, so this one closure
+					 * answers correctly for every form on the page instead
+					 * of being bound to whichever form's render() call
+					 * happened to register it last.
+					 */
+					'isFormValid' => function () {
+						$scope_context = wp_interactivity_get_context( 'woocommerce' );
+						$template      = wp_interactivity_state( 'woocommerce' )['template'] ?? array();
+						$product_id    = $scope_context['productId'] ?? ( $template['productId'] ?? null );
+						$product       = $product_id ? wc_get_product( $product_id ) : null;
 
 						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
@@ -267,6 +282,18 @@ class AddToCartWithOptions extends AbstractBlock {
 						return true;
 					},
 				)
+			);
+
+			// The out-of-stock message names this form's own product, so it
+			// is seeded into the form's own context below rather than here:
+			// config is shared page-wide and cannot hold a per-form value.
+			$out_of_stock_message = sprintf(
+				/* translators: %s: product name */
+				esc_html__(
+					'You cannot add &quot;%s&quot; to the cart because the product is out of stock.',
+					'woocommerce'
+				),
+				$product->get_name()
 			);
 
 			wp_interactivity_config(
@@ -285,14 +312,6 @@ class AddToCartWithOptions extends AbstractBlock {
 							'Please select product attributes before adding to cart.',
 							'woocommerce'
 						),
-						'variableProductOutOfStock'        => sprintf(
-							/* translators: %s: product name */
-							esc_html__(
-								'You cannot add &quot;%s&quot; to the cart because the product is out of stock.',
-								'woocommerce'
-							),
-							$product->get_name()
-						),
 					),
 				)
 			);
@@ -304,8 +323,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			$context = array(
-				'quantity'         => array( $product->get_id() => $default_quantity ),
-				'validationErrors' => array(),
+				'initialQuantity'   => array( $product->get_id() => $default_quantity ),
+				'validationErrors'  => array(),
+				'noticeIds'         => array(),
+				'outOfStockMessage' => $out_of_stock_message,
 			);
 
 			// The initial variation, empty when the product has none. It becomes
@@ -320,12 +341,12 @@ class AddToCartWithOptions extends AbstractBlock {
 					$product->get_id()
 				);
 
-				// Set up quantity context for each variation.
+				// Set up the initial quantity for each variation.
 				// We intentionally set the default quantity to the product's min purchase quantity
 				// instead of the variation's min purchase quantity. That's because we use the same
 				// input for all variations, so we want quantities to be in sync.
 				foreach ( array_keys( $variations ) as $variation_id ) {
-					$context['quantity'][ $variation_id ] = $default_quantity;
+					$context['initialQuantity'][ $variation_id ] = $default_quantity;
 				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
 				$variation_attributes = $product->get_variation_attributes();
@@ -357,8 +378,8 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['groupedProductIds']
 				);
 
-				// Add quantity context for purchasable child products.
-				$context['quantity'] = array_fill_keys(
+				// Add the initial quantity for purchasable child products.
+				$context['initialQuantity'] = array_fill_keys(
 					$context['groupedProductIds'],
 					0
 				);
@@ -367,11 +388,11 @@ class AddToCartWithOptions extends AbstractBlock {
 				foreach ( $child_products as $child_product_id => $child_product_data ) {
 					$default_child_quantity = isset( $_POST['quantity'][ $child_product_id ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $child_product_id ] ) ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-					$context['quantity'][ $child_product_id ] = $default_child_quantity;
+					$context['initialQuantity'][ $child_product_id ] = $default_child_quantity;
 
 					// Check for any "sold individually" products and set their default quantity to 0.
 					if ( $child_product_data['sold_individually'] ) {
-						$context['quantity'][ $child_product_id ] = 0;
+						$context['initialQuantity'][ $child_product_id ] = 0;
 					}
 				}
 			}
