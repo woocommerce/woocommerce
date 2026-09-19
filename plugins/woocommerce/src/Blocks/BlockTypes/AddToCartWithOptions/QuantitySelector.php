@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -74,10 +75,13 @@ class QuantitySelector extends AbstractBlock {
 			return '';
 		}
 
+		$form_name = $block->context['formName'] ?? '';
+
 		ob_start();
 
 		woocommerce_quantity_input(
 			array(
+				'input_id'    => 'quantity_' . $form_name,
 				'min_value'   => $product->get_min_purchase_quantity(),
 				'max_value'   => $product->get_max_purchase_quantity(),
 				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use WP_Block;
 
 /**
@@ -47,10 +48,12 @@ class GroupedProductItemLabel extends AbstractBlock {
 				);
 			} else {
 				// Checkbox.
+				$scope_name = ProductScopes::get_grouped_child_scope_name( $block->context['formName'] ?? '', $product->get_id() );
+
 				$markup = sprintf(
 					'<label %1$s for="%2$s">%3$s</label>',
 					$wrapper_attributes,
-					esc_attr( 'quantity_' . $product->get_id() ),
+					esc_attr( 'quantity_' . $scope_name ),
 					esc_html( $title )
 				);
 			}

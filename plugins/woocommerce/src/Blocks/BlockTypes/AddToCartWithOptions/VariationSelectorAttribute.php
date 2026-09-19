@@ -58,11 +58,12 @@ class VariationSelectorAttribute extends AbstractBlock {
 
 		$content = '';
 
+		$form_name                     = $block->context['formName'] ?? '';
 		$product_attributes            = $product->get_variation_attributes();
 		$available_values_by_attribute = $this->get_available_variation_values_by_attribute_slug();
 
 		foreach ( $product_attributes as $product_attribute_name => $product_attribute_terms ) {
-			$content .= $this->render_attribute_row( $product_attribute_name, $product_attribute_terms, $block, $attributes, $available_values_by_attribute );
+			$content .= $this->render_attribute_row( $product_attribute_name, $product_attribute_terms, $block, $attributes, $available_values_by_attribute, $form_name );
 		}
 
 		return $content;
@@ -76,9 +77,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * @param WP_Block $block The Block.
 	 * @param array    $attributes Template block attributes (displayStyle, autoselect, etc.).
 	 * @param array    $available_values_by_attribute Variation values keyed by attribute slug.
+	 * @param string   $form_name The enclosing form's scope name, used to derive this row's ids.
 	 * @return string Row HTML
 	 */
-	private function render_attribute_row( string $attribute_name, array $product_attribute_terms, WP_Block $block, array $attributes, array $available_values_by_attribute ): string {
+	private function render_attribute_row( string $attribute_name, array $product_attribute_terms, WP_Block $block, array $attributes, array $available_values_by_attribute, string $form_name ): string {
 		$inner_blocks = $block->parsed_block['innerBlocks'] ?? array();
 
 		if ( empty( $inner_blocks ) ) {
@@ -96,10 +98,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 			return '';
 		}
 
+		$attribute_id     = 'wc_product_attribute_' . $form_name . '_' . sanitize_title( $attribute_name );
 		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
-		$variation_items  = $this->build_variation_selectable_items( $attribute_name, $attribute_slug, $attribute_terms, $default_selected );
+		$variation_items  = $this->build_variation_selectable_items( $attribute_name, $attribute_id, $attribute_terms, $default_selected );
 		$attribute_label  = wc_attribute_label( $attribute_name );
-		$attribute_id     = 'wc_product_attribute_' . uniqid();
 		$context          = array(
 			'woocommerce/attributeId'     => $attribute_id,
 			'woocommerce/attributeName'   => $attribute_name,
@@ -277,13 +279,12 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * Build selectable items for the inner block protocol and client context.
 	 *
 	 * @param string      $attribute_name Product attribute name.
-	 * @param string      $attribute_slug Attribute slug.
+	 * @param string      $attribute_id   The attribute row's own id (already scoped to its form), prefixed onto each item's id.
 	 * @param array       $attribute_terms Terms from context.
 	 * @param string|null $default_selected Default selected attribute value.
 	 * @return array
 	 */
-	private function build_variation_selectable_items( string $attribute_name, string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
-		$id_prefix    = sanitize_title( $attribute_slug );
+	private function build_variation_selectable_items( string $attribute_name, string $attribute_id, array $attribute_terms, ?string $default_selected ): array {
 		$items        = array();
 		$term_visuals = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $attribute_name )
 			? VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) )
@@ -297,7 +298,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 			$term_name = wp_specialchars_decode( $attribute_term['label'], ENT_QUOTES );
 			$slug      = sanitize_title( $value );
 			$item      = array(
-				'id'        => $id_prefix . '-' . $slug,
+				'id'        => $attribute_id . '-' . $slug,
 				'label'     => $term_name,
 				'value'     => $value,
 				'ariaLabel' => $term_name,

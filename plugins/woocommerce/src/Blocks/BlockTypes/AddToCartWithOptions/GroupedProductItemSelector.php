@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use WP_Block;
 
 /**
@@ -36,10 +37,11 @@ class GroupedProductItemSelector extends AbstractBlock {
 	/**
 	 * Gets the quantity selector markup for a product.
 	 *
-	 * @param \WC_Product $product The product object.
+	 * @param \WC_Product $product    The product object.
+	 * @param string      $scope_name The child row's scope name, used to derive the input's id.
 	 * @return string The HTML markup for the quantity selector.
 	 */
-	private function get_quantity_selector_markup( $product ) {
+	private function get_quantity_selector_markup( $product, string $scope_name ) {
 		ob_start();
 
 		$min_value = $product->get_min_purchase_quantity();
@@ -52,7 +54,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 		woocommerce_quantity_input(
 			array(
 				'input_name'  => 'quantity[' . $product->get_id() . ']',
-				'input_id'    => 'quantity_' . $product->get_id(),
+				'input_id'    => 'quantity_' . $scope_name,
 				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				'min_value'   => 0,
 				'max_value'   => $max_value,
@@ -123,10 +125,11 @@ class GroupedProductItemSelector extends AbstractBlock {
 	/**
 	 * Gets the checkbox markup for a product.
 	 *
-	 * @param \WC_Product $product The product object.
+	 * @param \WC_Product $product    The product object.
+	 * @param string      $scope_name The child row's scope name, used to derive the checkbox's id.
 	 * @return string The HTML markup for the checkbox input and label.
 	 */
-	private function get_checkbox_markup( $product ) {
+	private function get_checkbox_markup( $product, string $scope_name ) {
 		if ( $product->is_on_sale() ) {
 			$label = sprintf(
 				/* translators: %1$s: Product name. %2$s: Sale price. %3$s: Regular price */
@@ -146,7 +149,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 
 		// The checkbox's product scope comes from the grouped child row's
 		// `woocommerce` context, declared by GroupedProductItem.
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" aria-label="' . esc_attr( $label ) . '"/>';
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $scope_name ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" aria-label="' . esc_attr( $label ) . '"/>';
 	}
 
 	/**
@@ -165,15 +168,17 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$markup  = '';
 
 		if ( $product ) {
+			$scope_name = ProductScopes::get_grouped_child_scope_name( $block->context['formName'] ?? '', $product->get_id() );
+
 			$is_interactive = false;
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
 				$is_interactive = true;
-				$markup         = $this->get_checkbox_markup( $product );
+				$markup         = $this->get_checkbox_markup( $product, $scope_name );
 			} else {
 				$is_interactive = true;
-				$markup         = $this->get_quantity_selector_markup( $product );
+				$markup         = $this->get_quantity_selector_markup( $product, $scope_name );
 			}
 
 			if ( $is_interactive ) {
