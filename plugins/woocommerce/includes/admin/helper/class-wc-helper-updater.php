@@ -566,6 +566,16 @@ class WC_Helper_Updater {
 				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
 			);
 
+			// Auto-renew still needs turning on when the record carries no usable expiry; only
+			// the date is unknown, so name everything except the day.
+			if ( ! is_numeric( $expiring_subscription['expires'] ?? null ) ) {
+				return sprintf(
+					/* translators: 1: URL of the My Subscriptions page */
+					__( 'Your subscription for this extension expires soon. <a href="%1$s" class="woocommerce-enable-autorenew">Enable auto-renew</a> to keep getting updates and support.', 'woocommerce' ),
+					esc_url( $autorenew_link )
+				);
+			}
+
 			return sprintf(
 				/* translators: 1: Expiry date, 2: URL of the My Subscriptions page */
 				__( 'Your subscription for this extension expires on %1$s. <a href="%2$s" class="woocommerce-enable-autorenew">Enable auto-renew</a> to keep getting updates and support.', 'woocommerce' ),
@@ -725,10 +735,7 @@ class WC_Helper_Updater {
 		$lapsing = array_filter(
 			$active,
 			function ( $subscription ) {
-				// Without a usable expiry there is no date to name, so the message has nothing to say.
-				return ! empty( $subscription['expiring'] )
-					&& empty( $subscription['autorenew'] )
-					&& is_numeric( $subscription['expires'] ?? null );
+				return ! empty( $subscription['expiring'] ) && empty( $subscription['autorenew'] );
 			}
 		);
 

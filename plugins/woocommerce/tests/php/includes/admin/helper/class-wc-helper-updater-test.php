@@ -1122,9 +1122,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Auto-renew notice is skipped for a record carrying no usable expiry.
+	 * @testdox Auto-renew notice drops the date, not the prompt, for a record with no usable expiry.
+	 *
+	 * @dataProvider provider_unusable_expiry_values
+	 *
+	 * @param mixed $expires The expiry value on the subscription record.
 	 */
-	public function test_subscription_notice_is_skipped_without_a_usable_expiry(): void {
+	public function test_subscription_notice_omits_the_date_without_a_usable_expiry( $expires ): void {
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions(
 			array(
@@ -1132,7 +1136,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 					array(
 						'expiring'  => true,
 						'autorenew' => false,
-						'expires'   => 'not a timestamp',
+						'expires'   => $expires,
 					)
 				),
 			)
@@ -1140,7 +1144,25 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
 
-		$this->assertSame( '', $output, 'Naming no date beats naming a wrong one.' );
+		$this->assertStringContainsString( 'Your subscription for this extension expires soon.', $output, 'Auto-renew still needs turning on.' );
+		$this->assertStringContainsString( '>Enable auto-renew</a> to keep getting updates and support.', $output );
+		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output, 'The link keeps its tracked class.' );
+		$this->assertStringNotContainsString( 'expires on', $output, 'A date that is not known must not be named.' );
+	}
+
+	/**
+	 * Expiry values that name no day.
+	 *
+	 * @return array[]
+	 */
+	public function provider_unusable_expiry_values(): array {
+		return array(
+			'absent'      => array( null ),
+			'empty'       => array( '' ),
+			'not a date'  => array( 'not a timestamp' ),
+			'is an array' => array( array( 123 ) ),
+			'is a bool'   => array( true ),
+		);
 	}
 
 	/**
