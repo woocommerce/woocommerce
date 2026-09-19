@@ -82,7 +82,9 @@ class Params implements FilterUrlParam {
 	private function filter_taxonomy_params( array $taxonomy_params ): array {
 		/**
 		 * Filters the URL query parameter that product filters claim for each product taxonomy, as a map
-		 * keyed by taxonomy name: by default `array( 'product_cat' => 'categories', 'product_tag' => 'tags' )`.
+		 * keyed by taxonomy name. Defaults: `product_cat => categories`, `product_tag => tags`,
+		 * `product_brand => brands` while that taxonomy is registered, and `filter_{taxonomy}` for every
+		 * other public product taxonomy.
 		 * Prefer renaming a parameter to dropping its entry, since `ProductFilterTaxonomy::render()` renders
 		 * nothing for a taxonomy that is missing from the map.
 		 *
@@ -91,6 +93,11 @@ class Params implements FilterUrlParam {
 		 * renames the param here but never registers it, and filtering stops working; for the same reason the
 		 * map must stay stable for the whole request. A return value that is not an array falls back to the
 		 * unfiltered map, and entries that are not non-empty string pairs are discarded.
+		 *
+		 * If your plugin also registers the parameter as a public query var, releasing or renaming it here
+		 * drops the original name from the front-page allowlist in `WC_Query`, so on a site where Shop is
+		 * the static front page that request is no longer routed to the product catalog. Reading the
+		 * parameter from `$_GET` avoids this; a plugin that does so is unaffected.
 		 *
 		 * This hook is public API for extension authors: the `@internal` notice on the enclosing class
 		 * covers the class itself, not this filter.
