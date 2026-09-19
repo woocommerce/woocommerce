@@ -2,10 +2,8 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import type {
-	ClientCartItem,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
@@ -27,6 +25,12 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
@@ -38,6 +42,33 @@ export type GroupedProductAddToCartWithOptionsStore =
 		};
 	};
 
+/**
+ * Resolves a grouped child's effective quantity: the typed quantity when its
+ * own scope holds one, and the form's `initialQuantity` entry for that child
+ * otherwise (0 when the child was never touched).
+ *
+ * @param childProductId  The child's product id.
+ * @param scopeName       The child row's own scope name.
+ * @param initialQuantity The form's `initialQuantity` context map.
+ * @return The child's effective quantity.
+ */
+function getChildEffectiveQuantity(
+	childProductId: number,
+	scopeName: string,
+	initialQuantity: Record< number, number >
+): number {
+	// Read the record directly rather than through `draftCartItem.quantity`:
+	// the draft's fallback of `1` cannot tell "typed 1" from "nothing typed".
+	const typedQuantity =
+		wooState.productScopes[ scopeName ]?.draftCartItem?.quantity;
+
+	if ( typeof typedQuantity === 'number' ) {
+		return typedQuantity;
+	}
+
+	return initialQuantity?.[ childProductId ] ?? 0;
+}
+
 const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -46,13 +77,25 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				actions.clearErrors( 'invalid-quantities' );
 
 				const { errorMessages } = getConfig();
-				const context =
-					getContext< AddToCartWithOptionsStoreContext >();
+				const {
+					groupedProductIds,
+					groupedScopeNames,
+					initialQuantity,
+				} = getContext< AddToCartWithOptionsStoreContext >();
+
+				const effectiveQuantities = groupedProductIds.map(
+					( childProductId, index ) =>
+						getChildEffectiveQuantity(
+							childProductId,
+							groupedScopeNames[ index ],
+							initialQuantity
+						)
+				);
 
 				// Validate that at least one product quantity is above 0.
-				const hasNonZeroQuantity = Object.values(
-					context.quantity
-				).some( ( qty ) => qty > 0 );
+				const hasNonZeroQuantity = effectiveQuantities.some(
+					( qty ) => qty > 0
+				);
 
 				if ( ! hasNonZeroQuantity ) {
 					actions.addError( {
@@ -67,19 +110,19 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				}
 
 				// Validate that all product quantities are within the min and max (or 0).
-				const hasInvalidQuantity = Object.entries(
-					context.quantity
-				).some( ( [ id, qty ] ) => {
-					const product = productsState.findProduct( {
-						id: Number( id ),
-						selectedAttributes: context.selectedAttributes,
-					} );
-					if ( ! product ) {
-						return false;
+				const hasInvalidQuantity = groupedProductIds.some(
+					( childProductId, index ) => {
+						const qty = effectiveQuantities[ index ];
+						const product = productsState.findProduct( {
+							id: childProductId,
+						} );
+						if ( ! product ) {
+							return false;
+						}
+						const { minimum, maximum } = product.add_to_cart;
+						return qty !== 0 && ( qty < minimum || qty > maximum );
 					}
-					const { minimum, maximum } = product.add_to_cart;
-					return qty !== 0 && ( qty < minimum || qty > maximum );
-				} );
+				);
 
 				if ( hasInvalidQuantity ) {
 					actions.addError( {
@@ -90,46 +133,51 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				}
 			},
 			*batchAddToCart() {
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
+				const {
+					groupedProductIds,
+					groupedScopeNames,
+					initialQuantity,
+				} = getContext< AddToCartWithOptionsStoreContext >();
 
-				const { quantity, selectedAttributes, groupedProductIds } =
-					getContext< AddToCartWithOptionsStoreContext >();
+				const promises: ReturnType< typeof wooActions.addCartItem >[] =
+					[];
 
-				const addedItems: ClientCartItem[] = [];
+				groupedProductIds.forEach( ( childProductId, index ) => {
+					const scopeName = groupedScopeNames[ index ];
+					const quantity = getChildEffectiveQuantity(
+						childProductId,
+						scopeName,
+						initialQuantity
+					);
 
-				for ( const childProductId of groupedProductIds ) {
-					if ( quantity[ childProductId ] === 0 ) {
-						continue;
+					if ( quantity === 0 ) {
+						return;
 					}
 
-					const product = productsState.findProduct( {
-						id: Number( childProductId ),
-						selectedAttributes,
+					const envelope = wooState.findProductScope( {
+						productId: childProductId,
+						scopeName,
 					} );
+					const record =
+						wooState.productScopes[ scopeName ]?.draftCartItem;
 
-					if ( ! product ) {
-						continue;
-					}
-
-					addedItems.push( {
-						id: Number( childProductId ),
-						quantityToAdd: quantity[ childProductId ],
-						variation: selectedAttributes,
-						type: product.type,
-					} );
-				}
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
+					promises.push(
+						wooActions.addCartItem(
+							{
+								...record,
+								id: envelope.productId,
+								variation: envelope.variation,
+								quantity,
+							},
+							{ showCartUpdatesNotices: false }
+						)
+					);
 				} );
+
+				// All calls are issued above, in the same tick, so the
+				// mutation batcher below them coalesces them into one batch
+				// request; this only waits for the combined result.
+				yield Promise.all( promises );
 			},
 		},
 		callbacks: {

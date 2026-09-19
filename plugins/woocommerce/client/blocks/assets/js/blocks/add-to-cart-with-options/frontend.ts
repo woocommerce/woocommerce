@@ -26,6 +26,8 @@ export type Context = {
 	validationErrors: AddToCartError[];
 	noticeIds: string[];
 	groupedProductIds: number[];
+	/** Each grouped child's own scope name, in `groupedProductIds` order. */
+	groupedScopeNames: string[];
 };
 
 export type AddToCartError = {

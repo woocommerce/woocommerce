@@ -126,6 +126,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			validationErrors: [],
 			noticeIds: [],
 			groupedProductIds: [],
+			groupedScopeNames: [],
 		};
 		mockScopeContext = {};
 		mockQuantitySelectorContext = {};
