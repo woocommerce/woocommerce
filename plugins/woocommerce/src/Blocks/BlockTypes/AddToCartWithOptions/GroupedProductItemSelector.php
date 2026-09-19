@@ -86,10 +86,10 @@ class GroupedProductItemSelector extends AbstractBlock {
 			'allowZero' => true, // The item is optional in grouped products.
 		);
 
-		// Add interactive data attribute for the stepper functionality.
-		// Pass $set_product_context = true because each grouped product child needs its own
-		// products context scope (the inherited context points to the grouped parent).
-		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, true );
+		// Add interactive data attribute for the stepper functionality. The
+		// child's own product scope comes from the grouped child row's
+		// `woocommerce` context, declared by GroupedProductItem.
+		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context );
 
 		return $quantity_html;
 	}
@@ -144,14 +144,9 @@ class GroupedProductItemSelector extends AbstractBlock {
 			);
 		}
 
-		$product_context_directive = wp_interactivity_data_wp_context(
-			array(
-				'productId'   => $product->get_id(),
-				'variationId' => null,
-			),
-			'woocommerce/products'
-		);
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/>';
+		// The checkbox's product scope comes from the grouped child row's
+		// `woocommerce` context, declared by GroupedProductItem.
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" aria-label="' . esc_attr( $label ) . '"/>';
 	}
 
 	/**

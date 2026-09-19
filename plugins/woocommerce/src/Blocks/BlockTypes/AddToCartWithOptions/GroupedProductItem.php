@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use WP_Block;
 
 /**
@@ -23,7 +24,9 @@ class GroupedProductItem extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-grouped-product-item';
 
 	/**
-	 * Modifies the block context for product price blocks when inside the Grouped Product Selector block.
+	 * Modifies the block context for product price blocks when inside the Grouped Product Selector block, and
+	 * forwards the enclosing form's name to every descendant so a child row rebuilt with a fresh block context
+	 * (see get_product_row()) can still derive its own scope name from it.
 	 *
 	 * @param array $context The block context.
 	 * @param array $block   The parsed block.
@@ -36,6 +39,9 @@ class GroupedProductItem extends AbstractBlock {
 		) {
 			$context['isDescendantOfGroupedProductSelector'] = true;
 		}
+
+		$context['formName'] = ProductScopes::get_current_form_name();
+
 		return $context;
 	}
 
@@ -76,7 +82,36 @@ class GroupedProductItem extends AbstractBlock {
 
 		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = $previous_product;
-		return $block_content;
+
+		$scope_name = ProductScopes::get_grouped_child_scope_name( ProductScopes::get_current_form_name(), (int) $product_id );
+
+		return $this->declare_row_scope( $block_content, (int) $product_id, $scope_name );
+	}
+
+	/**
+	 * Declare the row's `woocommerce` context on its wrapper element, so
+	 * Product Price, Stock Indicator and the child's own add to cart controls
+	 * resolve `state.productScope.*` against this specific child.
+	 *
+	 * @param string $block_content The rendered row HTML.
+	 * @param int    $product_id    The child row's product id.
+	 * @param string $scope_name    The child row's scope name.
+	 * @return string The row HTML with its `woocommerce` context declared on the wrapper element.
+	 */
+	private function declare_row_scope( string $block_content, int $product_id, string $scope_name ): string {
+		$processor = new \WP_HTML_Tag_Processor( $block_content );
+
+		if ( $processor->next_tag() ) {
+			$processor->set_attribute(
+				'data-wp-context',
+				'woocommerce::' . wp_json_encode(
+					ProductScopes::get_scope_context( $product_id, array(), $scope_name ),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
+			);
+		}
+
+		return $processor->get_updated_html();
 	}
 
 	/**
