@@ -271,7 +271,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				// Full reassignment, never in-place mutation: the envelope's
 				// `variation` setter is what keeps the declared context and
-				// the scope's record in sync (D7).
+				// the scope's record in sync.
 				wooState.productScope.variation =
 					index >= 0
 						? current.map( ( entry, i ) =>
@@ -415,9 +415,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// `productVariation` is "a variation or nothing": only an
-				// actual matched variation is accepted, matching the old
-				// `findProduct` guard against it returning the parent.
+				// `productVariation` resolves to a matched variation or
+				// nothing, never the parent product.
 				const matchedVariation = wooState.productScope.productVariation;
 
 				const { errorMessages } = getConfig();

@@ -66,8 +66,8 @@ export type AddToCartWithOptionsStore = {
 		isFormValid: boolean;
 		allowsAddingToCart: boolean;
 		/**
-		 * The effective quantity (D8) of the scope the reading element sits
-		 * in: the typed quantity when the scope has a record, and its
+		 * The effective quantity of the scope the reading element sits in:
+		 * the typed quantity when the scope has a record, and its
 		 * `initialQuantity` entry otherwise.
 		 */
 		effectiveQuantity: number;
