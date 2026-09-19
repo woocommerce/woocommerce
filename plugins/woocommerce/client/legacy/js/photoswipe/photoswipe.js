@@ -2872,7 +2872,7 @@ var _getItemAt,
 				item.container.innerHTML = '';
 			}
 
-			item.container.innerHTML = _options.errorMsg.replace('%url%',  item.src );
+			item.container.innerHTML = _options.errorMsg;
 			return true;
 			
 		}
