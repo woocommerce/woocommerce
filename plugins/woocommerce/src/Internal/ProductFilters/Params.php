@@ -27,14 +27,10 @@ class Params implements FilterUrlParam {
 	 * @return array
 	 */
 	public function get_param_keys(): array {
-		if ( empty( self::$params ) ) {
-			$this->init_params();
-		}
-
 		$keys = array();
-		foreach ( self::$params as $taxonomy => $params ) {
+		foreach ( $this->get_params() as $type => $params ) {
 			$keys = array_merge( $keys, array_values( $params ) );
-			if ( 'attribute' === $taxonomy ) {
+			if ( 'attribute' === $type ) {
 				$query_type_params = array_map(
 					function ( $param ) {
 						return 'query_type_' . $param;
@@ -55,11 +51,78 @@ class Params implements FilterUrlParam {
 	 * @return array
 	 */
 	public function get_param( string $type ): array {
+		return $this->get_params()[ $type ] ?? array();
+	}
+
+	/**
+	 * Get all params, with the taxonomy map passed through its filter.
+	 *
+	 * The cached map is left unfiltered and the filter is applied on read, so that callbacks
+	 * registered after the cache was warmed still take effect.
+	 *
+	 * @return array
+	 */
+	private function get_params(): array {
 		if ( empty( self::$params ) ) {
 			$this->init_params();
 		}
 
-		return self::$params[ $type ] ?? array();
+		$params             = self::$params;
+		$params['taxonomy'] = $this->filter_taxonomy_params( $params['taxonomy'] ?? array() );
+
+		return $params;
+	}
+
+	/**
+	 * Pass the taxonomy param map through its filter, discarding unusable values.
+	 *
+	 * @param array $taxonomy_params Map of taxonomy name to URL query parameter name.
+	 * @return array
+	 */
+	private function filter_taxonomy_params( array $taxonomy_params ): array {
+		/**
+		 * Filters the URL query parameter that product filters claim for each product taxonomy, as a map
+		 * keyed by taxonomy name. Defaults: `product_cat => categories`, `product_tag => tags`,
+		 * `product_brand => brands` while that taxonomy is registered, and `filter_{taxonomy}` for every
+		 * other public product taxonomy.
+		 * Prefer renaming a parameter to dropping its entry, since `ProductFilterTaxonomy::render()` renders
+		 * nothing for a taxonomy that is missing from the map.
+		 *
+		 * Register the callback before `parse_request` runs, on `plugins_loaded` or `init`. The param names
+		 * become public query vars through the one-shot `query_vars` filter, so a callback added after that
+		 * renames the param here but never registers it, and filtering stops working; for the same reason the
+		 * map must stay stable for the whole request. A return value that is not an array falls back to the
+		 * unfiltered map, and entries that are not non-empty string pairs are discarded.
+		 *
+		 * If your plugin also registers the parameter as a public query var, releasing or renaming it here
+		 * drops the original name from the front-page allowlist in `WC_Query`, so on a site where Shop is
+		 * the static front page that request is no longer routed to the product catalog. Reading the
+		 * parameter from `$_GET` avoids this; a plugin that does so is unaffected.
+		 *
+		 * This hook is public API for extension authors: the `@internal` notice on the enclosing class
+		 * covers the class itself, not this filter.
+		 *
+		 * @hook woocommerce_product_filter_taxonomy_params
+		 * @since 11.3.0
+		 *
+		 * @param array $taxonomy_params Map of taxonomy name to URL query parameter name.
+		 * @return array Map of taxonomy name to URL query parameter name.
+		 */
+		$filtered = apply_filters( 'woocommerce_product_filter_taxonomy_params', $taxonomy_params );
+
+		if ( ! is_array( $filtered ) ) {
+			return $taxonomy_params;
+		}
+
+		$valid = array();
+
+		foreach ( $filtered as $taxonomy => $param ) {
+			if ( is_string( $taxonomy ) && '' !== $taxonomy && is_string( $param ) && '' !== $param ) {
+				$valid[ $taxonomy ] = $param;
+			}
+		}
+
+		return $valid;
 	}
 
 	/**
