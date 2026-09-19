@@ -45,7 +45,8 @@ jest.mock(
 				// Simulate the real library's behaviour: every `store()`
 				// call for the same namespace merges its state onto one
 				// shared object and returns the same registered store, so a
-				// later call passing the shared lock still resolves it.
+				// later call passing the shared acknowledgement string still
+				// resolves it.
 				mockRegisteredStore ??= { state: {} as CatalogState };
 				if ( definition?.state ) {
 					Object.assign(
@@ -71,7 +72,7 @@ describe( 'woocommerce store — catalog layer', () => {
 	} );
 
 	describe( 'store registration', () => {
-		it( 'registers the woocommerce store exactly once, with the shared store lock', () => {
+		it( 'registers the woocommerce store exactly once, with the shared acknowledgement string', () => {
 			const woocommerceCalls = ( store as jest.Mock ).mock.calls.filter(
 				( [ namespace ] ) => namespace === 'woocommerce'
 			);
