@@ -2,7 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WP_Upgrader;
 
 /**
@@ -49,7 +50,7 @@ class PTKPatternsStore {
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 		add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 		add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
-		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
+		$this->ensure_recurring_fetch_patterns_if_enabled();
 
 		// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
 		add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
@@ -72,26 +73,34 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an async action to fetch the PTK patterns when the scheduler is initialized.
+	 * Schedule the recurring fetch of PTK patterns as soon as the scheduler is ready.
 	 *
 	 * @return void
 	 */
 	private function schedule_fetch_patterns() {
-		if ( did_action( 'action_scheduler_init' ) ) {
-			$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
-		} else {
-			add_action(
-				'action_scheduler_init',
-				function () {
-					$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
-				}
-			);
-		}
+		$this->get_scheduler()->when_ready(
+			function () {
+				$this->get_scheduler()->schedule_recurring(
+					time(),
+					DAY_IN_SECONDS,
+					self::FETCH_PATTERNS_ACTION,
+					array(),
+					'woocommerce',
+					array(
+						'unique' => true,
+						'queue'  => SchedulerQueue::DEFAULT,
+					)
+				);
+			},
+			array( 'queue' => SchedulerQueue::DEFAULT )
+		);
 	}
 
 	/**
-	 * Ensure a recurring fetch patterns action is scheduled.
-	 * This is called by the `action_scheduler_ensure_recurring_actions` hook.
+	 * Keep the recurring fetch patterns action registered with the scheduler while tracking is enabled.
+	 *
+	 * The scheduler re-asserts the registration whenever Action Scheduler asks for recurring actions,
+	 * as a unique action, so a pending or in-progress fetch is never duplicated.
 	 *
 	 * @return void
 	 */
@@ -100,21 +109,23 @@ class PTKPatternsStore {
 			return;
 		}
 
-		$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
+		$this->get_scheduler()->ensure_recurring(
+			time(),
+			DAY_IN_SECONDS,
+			self::FETCH_PATTERNS_ACTION,
+			array(),
+			'woocommerce',
+			array( 'queue' => SchedulerQueue::DEFAULT )
+		);
 	}
 
 	/**
-	 * Schedule an action if it's not already pending.
+	 * Get the scheduler.
 	 *
-	 * @param string $action The action name to schedule.
-	 * @return void
+	 * @return Scheduler
 	 */
-	private function schedule_action_if_not_pending( $action ) {
-		if ( ActionSchedulerUtil::has_scheduled_action( $action, array(), 'woocommerce' ) ) {
-			return;
-		}
-
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -184,28 +195,19 @@ class PTKPatternsStore {
 	/**
 	 * Reset the cached patterns to fetch them again from the PTK.
 	 *
-	 * @since 10.4.1 Unscheduling is deferred if Action Scheduler hasn't initialized yet.
+	 * @since 10.4.1 Unscheduling is deferred if the scheduler is not ready yet.
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
 
-		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
-			return;
-		}
-
-		// Unschedule any existing fetch_patterns actions.
-		// Defer unscheduling until Action Scheduler is ready to avoid errors during early initialization.
-		if ( did_action( 'action_scheduler_init' ) ) {
-			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-		} else {
-			add_action(
-				'action_scheduler_init',
-				function () {
-					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-				}
-			);
-		}
+		// Unschedule any existing fetch_patterns actions once the scheduler can accept calls.
+		$this->get_scheduler()->when_ready(
+			function () {
+				$this->get_scheduler()->cancel_all( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce', array( 'queue' => SchedulerQueue::DEFAULT ) );
+			},
+			array( 'queue' => SchedulerQueue::DEFAULT )
+		);
 	}
 
 	/**

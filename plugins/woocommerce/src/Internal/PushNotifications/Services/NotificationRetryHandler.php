@@ -8,6 +8,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Exception;
 
 /**
@@ -111,7 +113,7 @@ class NotificationRetryHandler {
 			return;
 		}
 
-		as_schedule_single_action(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time() + $delay,
 			self::RETRY_HOOK,
 			array(
@@ -120,7 +122,10 @@ class NotificationRetryHandler {
 				'attempt'     => $next_attempt,
 			),
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
-			true
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
 		);
 	}
 

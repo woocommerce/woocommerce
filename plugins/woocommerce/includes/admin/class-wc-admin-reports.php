@@ -10,7 +10,8 @@
  * @version     2.0.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -60,9 +61,11 @@ class WC_Admin_Reports {
 			static $skip_consequent;
 
 			// Schedule the deletion, cap the execution to single pending event at any given time.
-			$schedule = ! $skip_consequent && ! ActionSchedulerUtil::has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
+			$scheduler = wc_get_container()->get( Scheduler::class );
+			$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+			$schedule  = ! $skip_consequent && ! $scheduler->has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce', $options );
 			if ( $schedule ) {
-				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
+				$scheduler->schedule_single( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce', $options );
 			}
 			$skip_consequent = true;
 

@@ -2,7 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Exception;
 use WC_Order;
 
@@ -71,19 +72,36 @@ class DraftOrders {
 	 * @internal
 	 */
 	public function unschedule_cronjobs() {
-		WC()->queue()->cancel_all( self::DRAFT_CLEANUP_EVENT_HOOK );
+		$this->get_scheduler()->cancel_all( self::DRAFT_CLEANUP_EVENT_HOOK );
 	}
 
 	/**
 	 * Maybe create cron events.
 	 */
 	protected function maybe_create_cronjobs() {
-		if ( ! ActionSchedulerUtil::has_scheduled_action( self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
-			$midnight_tonight = strtotime( 'midnight tonight' );
-			if ( false !== $midnight_tonight ) {
-				as_schedule_recurring_action( $midnight_tonight, DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
-			}
+		$midnight_tonight = strtotime( 'midnight tonight' );
+		if ( false !== $midnight_tonight ) {
+			$this->get_scheduler()->schedule_recurring(
+				$midnight_tonight,
+				DAY_IN_SECONDS,
+				self::DRAFT_CLEANUP_EVENT_HOOK,
+				array(),
+				'',
+				array(
+					'unique' => true,
+					'queue'  => SchedulerQueue::DEFAULT,
+				)
+			);
 		}
+	}
+
+	/**
+	 * Get the scheduler.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -207,8 +225,8 @@ class DraftOrders {
 					++$count;
 				}
 			}
-			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( self::DRAFT_CLEANUP_EVENT_HOOK );
+			if ( $batch_size === $count ) {
+				$this->get_scheduler()->enqueue_async( self::DRAFT_CLEANUP_EVENT_HOOK, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );

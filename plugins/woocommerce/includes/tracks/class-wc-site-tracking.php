@@ -249,7 +249,7 @@ class WC_Site_Tracking {
 	 */
 	public static function maybe_unschedule_deferred_tracks( $new_option_value ) {
 		if ( 'yes' !== $new_option_value ) {
-			as_unschedule_all_actions( '', array(), 'woocommerce-tracks' );
+			wc_get_container()->get( \Automattic\WooCommerce\Queue\Scheduler::class )->cancel_all( '', array(), 'woocommerce-tracks', array( 'queue' => \Automattic\WooCommerce\Enums\SchedulerQueue::DEFAULT ) );
 		}
 		return $new_option_value;
 	}

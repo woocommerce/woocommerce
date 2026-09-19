@@ -16,6 +16,8 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1146,18 +1148,20 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	private static function schedule_variation_summary_regeneration( $action_name, $args, $warning_message, $group = 'woocommerce' ) {
-		if ( function_exists( 'as_schedule_single_action' ) ) {
-			// Prevent duplicate scheduling of the action.
-			$when = as_next_scheduled_action( $action_name, $args, $group );
-			if ( ! $when ) {
-				as_schedule_single_action( time() + 1, $action_name, $args, $group );
-			}
-		} else {
+		$scheduler = wc_get_container()->get( Scheduler::class );
+		$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+
+		if ( ! $scheduler->is_ready( $options ) ) {
 			wc_get_logger()->warning(
 				'Action Scheduler unavailable for product variation summary regeneration. ' . $warning_message,
 				array( 'source' => 'woocommerce-variations' )
 			);
+			return;
 		}
+
+		// A unique action prevents duplicate scheduling while one is pending or running.
+		$options['unique'] = true;
+		$scheduler->schedule_single( time() + 1, $action_name, $args, $group, $options );
 	}
 
 	/**

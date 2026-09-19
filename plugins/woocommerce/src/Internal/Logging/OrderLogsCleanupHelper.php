@@ -6,7 +6,9 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Utilities\LoggingUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Logger;
@@ -46,17 +48,26 @@ class OrderLogsCleanupHelper {
 	private DataSynchronizer $data_synchronizer;
 
 	/**
+	 * The scheduler used for the extended cleanup action.
+	 *
+	 * @var Scheduler
+	 */
+	private Scheduler $scheduler;
+
+	/**
 	 * Initialize the instance and register hooks.
 	 * This is invoked by the dependency injection container.
 	 *
 	 * @internal
 	 *
 	 * @param DataSynchronizer $data_synchronizer The instance of DataSynchronizer to use.
+	 * @param Scheduler        $scheduler         The scheduler used for the extended cleanup action.
 	 *
 	 * @return void
 	 */
-	final public function init( DataSynchronizer $data_synchronizer ): void {
+	final public function init( DataSynchronizer $data_synchronizer, Scheduler $scheduler ): void {
 		$this->data_synchronizer = $data_synchronizer;
+		$this->scheduler         = $scheduler;
 
 		add_action( self::EXTENDED_CLEANUP_HOOK, array( $this, 'cleanup' ) );
 	}
@@ -152,13 +163,9 @@ class OrderLogsCleanupHelper {
 	 * Schedule a follow-up cleanup run to continue draining the backlog.
 	 */
 	private function schedule_extended_cleanup(): void {
-		if ( ! function_exists( 'as_schedule_single_action' ) || ! function_exists( 'as_get_scheduled_actions' ) ) {
-			return;
-		}
-
 		// Only pending actions count: when this runs as the extended cleanup callback, the
 		// current action is in-progress and would otherwise match, blocking the follow-up.
-		$pending = as_get_scheduled_actions(
+		$pending = $this->scheduler->search(
 			array(
 				'hook'     => self::EXTENDED_CLEANUP_HOOK,
 				'args'     => array(),
@@ -167,14 +174,15 @@ class OrderLogsCleanupHelper {
 				'per_page' => 1,
 				'orderby'  => 'none',
 			),
-			'ids'
+			'ids',
+			array( 'queue' => SchedulerQueue::DEFAULT )
 		);
 
 		if ( $pending ) {
 			return;
 		}
 
-		as_schedule_single_action( time() + self::EXTENDED_CLEANUP_DELAY, self::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' );
+		$this->scheduler->schedule_single( time() + self::EXTENDED_CLEANUP_DELAY, self::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**

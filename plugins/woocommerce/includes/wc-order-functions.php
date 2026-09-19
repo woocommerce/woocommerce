@@ -18,6 +18,8 @@ use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1091,10 +1093,11 @@ add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 function wc_cancel_unpaid_orders() {
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
+	$scheduler = wc_get_container()->get( Scheduler::class );
+	$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+
 	// Clear existing scheduled events (both Action Scheduler and WP-Cron).
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-	}
+	$scheduler->cancel_all( 'woocommerce_cancel_unpaid_orders', array(), '', $options );
 	// Always clear WP-Cron events as well in case they exist.
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 
@@ -1117,12 +1120,8 @@ function wc_cancel_unpaid_orders() {
 		return;
 	}
 
-	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
-	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
-	} else {
-		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-	}
+	// Schedule the next event.
+	$scheduler->schedule_single( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', $options );
 
 	$data_store    = WC_Data_Store::load( 'order' );
 	$unpaid_orders = $data_store->get_unpaid_orders( strtotime( '-' . absint( $held_duration ) . ' MINUTES', current_time( 'timestamp' ) ) );

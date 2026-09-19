@@ -48,6 +48,8 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Main WooCommerce Class.
@@ -1633,11 +1635,14 @@ final class WooCommerce {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function unschedule_unwrapped_actions() {
+		$scheduler = $this->get_scheduler();
+		$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+
 		// Unschedule the unwrapped actions.
-		as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
-		as_unschedule_all_actions( 'wc_admin_daily' );
-		as_unschedule_all_actions( 'generate_category_lookup_table' );
-		as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
+		$scheduler->cancel_all( 'woocommerce_tracker_send_event', array(), '', $options );
+		$scheduler->cancel_all( 'wc_admin_daily', array(), '', $options );
+		$scheduler->cancel_all( 'generate_category_lookup_table', array(), '', $options );
+		$scheduler->cancel_all( 'woocommerce_cleanup_rate_limits', array(), '', $options );
 	}
 
 	/**
@@ -1722,7 +1727,20 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Get the scheduler that core background work goes through.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
+	}
+
+	/**
 	 * Register recurring actions.
+	 *
+	 * Runs on `action_scheduler_ensure_recurring_actions` rather than registering with the scheduler's
+	 * recurring registry, because the first-run times and intervals below come from options and filters
+	 * that other plugins attach after this class is constructed.
 	 *
 	 * @return void
 	 */
@@ -1730,10 +1748,11 @@ final class WooCommerce {
 		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
 		$this->unschedule_unwrapped_actions();
 
-		// Check if Action Scheduler is available.
-		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
-			return;
-		}
+		$scheduler = $this->get_scheduler();
+		$options   = array(
+			'unique' => true,
+			'queue'  => SchedulerQueue::DEFAULT,
+		);
 
 		$gmt_offset   = get_option( 'gmt_offset' );
 		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
@@ -1744,7 +1763,7 @@ final class WooCommerce {
 			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
 		}
 
-		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', $options );
 
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
@@ -1756,8 +1775,7 @@ final class WooCommerce {
 			 */
 			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 
-			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
-
+			$scheduler->schedule_single( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', $options );
 		}
 
 		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
@@ -1773,23 +1791,23 @@ final class WooCommerce {
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
 		// a daily cron that gets lost due to a race condition. WC_Privacy's background
 		// processing instance updates the cron schedule from within a cron job.
-		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', $options );
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', $options );
 
-		as_schedule_recurring_action( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', $options );
 
-		as_schedule_recurring_action( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', $options );
 
 		// Schedule the action to send tracking events if tracking is enabled.
 		$this->schedule_tracking_action();
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', $options );
 
-		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+		$scheduler->schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', $options );
 
 		// Note: this is potentially redundant when the core package exists.
-		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
+		$scheduler->schedule_single( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', $options );
 	}
 
 	/**
@@ -1806,7 +1824,7 @@ final class WooCommerce {
 			return;
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
-			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+			$this->get_scheduler()->cancel_all( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', array( 'queue' => SchedulerQueue::DEFAULT ) );
 			delete_option( 'woocommerce_tracker_send_failures' );
 		} else {
 			$this->schedule_tracking_action();
@@ -1833,7 +1851,17 @@ final class WooCommerce {
 		$tracker_recurrence = is_string( $tracker_recurrence ) ? $tracker_recurrence : 'daily';
 		$core_internals     = wp_get_schedules();
 		$interval           = $core_internals[ $tracker_recurrence ]['interval'] ?? DAY_IN_SECONDS;
-		as_schedule_recurring_action( time() + 10, $interval, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
+		$this->get_scheduler()->schedule_recurring(
+			time() + 10,
+			$interval,
+			'woocommerce_tracker_send_event_wrapper',
+			array(),
+			'woocommerce',
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
+		);
 	}
 
 	/**

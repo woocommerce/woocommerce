@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal;
 
+use Automattic\WooCommerce\Queue\Scheduler;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -29,7 +31,7 @@ class AssignDefaultCategory {
 	 * @return void
 	 */
 	public function schedule_action() {
-		WC()->queue()->schedule_single(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time(),
 			'wc_schedule_update_product_default_cat',
 			array(),

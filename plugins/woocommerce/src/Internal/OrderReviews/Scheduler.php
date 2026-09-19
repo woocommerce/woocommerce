@@ -8,6 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler as QueueScheduler;
 use WC_Email_Customer_Review_Request;
 use WC_Order;
 
@@ -63,6 +65,15 @@ class Scheduler {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+	}
+
+	/**
+	 * Get the scheduler, resolving it on first use.
+	 *
+	 * @return QueueScheduler
+	 */
+	private function get_scheduler(): QueueScheduler {
+		return wc_get_container()->get( QueueScheduler::class );
 	}
 
 	/**
@@ -164,7 +175,7 @@ class Scheduler {
 		}
 
 		$when = time() + $email->get_delay_seconds();
-		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order_id ) );
+		$this->get_scheduler()->schedule_single( $when, self::ACTION_HOOK, array( $order_id ), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 		$order->update_meta_data( self::SCHEDULED_META_KEY, (string) $when );
 		$order->save();
@@ -186,8 +197,8 @@ class Scheduler {
 	public function handle_cancellation( int $order_id ): void {
 		// Always attempt to unschedule, even when the order or meta is missing,
 		// so an out-of-sync meta value cannot leave a stray scheduled send.
-		// `as_unschedule_action()` is a no-op when no matching action exists.
-		as_unschedule_action( self::ACTION_HOOK, array( $order_id ) );
+		// Cancelling is a no-op when no matching action exists.
+		$this->get_scheduler()->cancel( self::ACTION_HOOK, array( $order_id ), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 		$order = wc_get_order( $order_id );
 		if ( $order instanceof WC_Order && $order->get_meta( self::SCHEDULED_META_KEY ) ) {
