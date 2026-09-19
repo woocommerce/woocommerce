@@ -81,25 +81,16 @@ class Params implements FilterUrlParam {
 	 */
 	private function filter_taxonomy_params( array $taxonomy_params ): array {
 		/**
-		 * Filters the URL query parameter that product filters claim for each product taxonomy.
+		 * Filters the URL query parameter that product filters claim for each product taxonomy, as a map
+		 * keyed by taxonomy name: by default `array( 'product_cat' => 'categories', 'product_tag' => 'tags' )`.
+		 * Prefer renaming a parameter to dropping its entry, since `ProductFilterTaxonomy::render()` renders
+		 * nothing for a taxonomy that is missing from the map.
 		 *
-		 * The map is keyed by taxonomy name, with the URL query parameter as the value, for
-		 * example `array( 'product_cat' => 'categories' )`. Use it to rename a parameter that
-		 * collides with one another plugin already owns.
-		 *
-		 * Prefer renaming a parameter over removing its entry: `ProductFilterTaxonomy::render()`
-		 * returns an empty string for a taxonomy that is missing from this map, so releasing a
-		 * parameter also hides the core filter block for that taxonomy.
-		 *
-		 * Register the callback before `parse_request` runs, on `plugins_loaded` or `init`. The
-		 * param names are registered as public query vars through the one-shot `query_vars`
-		 * filter, which WordPress fires once per request in `WP::parse_request()`; a callback
-		 * added after that renames the param here but never registers it, so `get_query_var()`
-		 * returns an empty string and filtering stops working. For the same reason the map must
-		 * be stable for the whole request: do not vary it by the current query or request URI.
-		 *
-		 * A return value that is not an array is discarded in favour of the unfiltered map, as
-		 * are entries whose taxonomy name or param name is not a non-empty string.
+		 * Register the callback before `parse_request` runs, on `plugins_loaded` or `init`. The param names
+		 * become public query vars through the one-shot `query_vars` filter, so a callback added after that
+		 * renames the param here but never registers it, and filtering stops working; for the same reason the
+		 * map must stay stable for the whole request. A return value that is not an array falls back to the
+		 * unfiltered map, and entries that are not non-empty string pairs are discarded.
 		 *
 		 * @hook woocommerce_product_filter_taxonomy_params
 		 * @since 11.3.0

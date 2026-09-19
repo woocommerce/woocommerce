@@ -407,14 +407,4 @@ class ParamsTest extends AbstractProductFiltersTest {
 			$this->assertIsString( $param_key, 'get_param_keys() must only expose strings, since they become public query vars.' );
 		}
 	}
-
-	/**
-	 * Helper method to clear params cache for testing.
-	 */
-	private function clear_params_cache() {
-		$reflection      = new \ReflectionClass( Params::class );
-		$params_property = $reflection->getProperty( 'params' );
-		$params_property->setAccessible( true );
-		$params_property->setValue( array() );
-	}
 }
