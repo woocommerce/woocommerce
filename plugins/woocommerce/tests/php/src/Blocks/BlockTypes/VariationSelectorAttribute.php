@@ -163,6 +163,35 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the attribute row's ids derive from the attribute name and, when a form scope is
+	 * available through the block's context, from that scope too, with each chip's id prefixed by it.
+	 *
+	 * @testdox VariationSelectorAttribute derives its attribute id from the attribute name and every chip id from the attribute id.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::build_variation_selectable_items
+	 */
+	public function test_derives_attribute_and_chip_ids_from_the_attribute_name(): void {
+		$variable_product = $this->create_variable_product_with_variations();
+		$inner_blocks     = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
+
+		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+		$this->assertMatchesRegularExpression(
+			'/id="wc_product_attribute_[a-z0-9_-]*color_label"/',
+			$markup,
+			'The attribute id should derive from the attribute name.'
+		);
+
+		preg_match( '/id="(wc_product_attribute_[a-z0-9_-]*color)_label"/', $markup, $attribute_id_match );
+		$this->assertNotEmpty( $attribute_id_match, 'The attribute id should be present in the markup.' );
+
+		$this->assertStringContainsString(
+			'id="' . $attribute_id_match[1] . '-',
+			$markup,
+			'Each chip id should be prefixed with the attribute row\'s own id.'
+		);
+	}
+
+	/**
 	 * Tests that wc-visual attribute terms render chips with swatch markup and classes.
 	 *
 	 * @testdox VariationSelectorAttribute renders wc-visual attribute options with swatch classes and colors.

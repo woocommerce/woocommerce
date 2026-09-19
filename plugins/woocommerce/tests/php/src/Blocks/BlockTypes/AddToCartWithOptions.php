@@ -1189,4 +1189,480 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$product->delete( true );
 		}
 	}
+
+	/**
+	 * Collect every `id` attribute value in document order, duplicates included.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return string[] Every `id` attribute value found.
+	 */
+	private function get_all_ids( string $markup ): array {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$ids       = array();
+
+		while ( $processor->next_tag() ) {
+			$id = $processor->get_attribute( 'id' );
+			if ( is_string( $id ) && '' !== $id ) {
+				$ids[] = $id;
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Split markup into one fragment per top-level `<form>...</form>`, since
+	 * Add to Cart with Options forms never nest one inside another.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return string[] One HTML fragment per form, in document order.
+	 */
+	private function extract_form_fragments( string $markup ): array {
+		preg_match_all( '/<form\b.*?<\/form>/s', $markup, $matches );
+
+		return $matches[0];
+	}
+
+	/**
+	 * Whether a form fragment's own `<form>` tag carries the given class,
+	 * as a class token rather than a raw substring: the fragment's
+	 * `data-wp-class--is-invalid` directive attribute always contains the
+	 * text "is-invalid", whether or not the class itself was ever added.
+	 *
+	 * @param string $form_fragment A single `<form>...</form>` fragment.
+	 * @param string $class_name    The class to look for.
+	 * @return bool Whether the form's own class attribute carries it.
+	 */
+	private function form_has_class( string $form_fragment, string $class_name ): bool {
+		$processor = new \WP_HTML_Tag_Processor( $form_fragment );
+
+		return $processor->next_tag( 'form' ) && $processor->has_class( $class_name );
+	}
+
+	/**
+	 * Decode every `data-wp-context` JSON payload that carries an
+	 * `initialQuantity` map, keyed by the product id that map names, so a
+	 * test can look up the context belonging to a specific product's form
+	 * regardless of whether that form declares its own `woocommerce` scope.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return array<int, array> Decoded context, keyed by product id.
+	 */
+	private function get_add_to_cart_with_options_contexts( string $markup ): array {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$contexts  = array();
+
+		while ( $processor->next_tag() ) {
+			$context = $processor->get_attribute( 'data-wp-context' );
+			if ( ! is_string( $context ) ) {
+				continue;
+			}
+
+			$json    = 0 === strpos( $context, 'woocommerce::' ) ? substr( $context, strlen( 'woocommerce::' ) ) : $context;
+			$decoded = json_decode( $json, true );
+
+			if ( is_array( $decoded ) && isset( $decoded['initialQuantity'] ) && is_array( $decoded['initialQuantity'] ) ) {
+				$product_id              = (int) array_key_first( $decoded['initialQuantity'] );
+				$contexts[ $product_id ] = $decoded;
+			}
+		}
+
+		return $contexts;
+	}
+
+	/**
+	 * @testdox No `id` attribute value appears twice on a page with two forms, including two grouped products sharing one child.
+	 */
+	public function test_no_duplicate_ids_across_two_forms_including_shared_grouped_child(): void {
+		$shared_child = new \WC_Product_Simple();
+		$shared_child->set_regular_price( 10 );
+		$shared_child_id = $shared_child->save();
+
+		$grouped_a = new \WC_Product_Grouped();
+		$grouped_a->set_children( array( $shared_child_id ) );
+		$grouped_a_id = $grouped_a->save();
+
+		$grouped_b = new \WC_Product_Grouped();
+		$grouped_b->set_children( array( $shared_child_id ) );
+		$grouped_b_id = $grouped_b->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$grouped_a_id,
+					$grouped_b_id
+				)
+			);
+
+			$ids = $this->get_all_ids( $markup );
+
+			$this->assertSame( array_unique( $ids ), array_values( $ids ), 'No id attribute value should appear twice.' );
+			$this->assertStringContainsString( 'name="quantity[' . $shared_child_id . ']"', $markup, 'The shared child keeps its product-id-based name attribute.' );
+		} finally {
+			$grouped_a->delete( true );
+			$grouped_b->delete( true );
+			$shared_child->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Every label for and every aria-labelledby inside a form resolves to an element inside that same form.
+	 */
+	public function test_labels_and_aria_labelledby_resolve_within_their_own_form(): void {
+		$fixtures = new FixtureData();
+
+		$product_a = $fixtures->get_variable_product(
+			array( 'name' => 'Form Fragment A' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$fixtures->get_variation_product(
+			$product_a->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $product_a->get_id() );
+
+		$product_b = $fixtures->get_variable_product(
+			array( 'name' => 'Form Fragment B' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$fixtures->get_variation_product(
+			$product_b->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $product_b->get_id() );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					wc_get_product( $product_a->get_id() )->get_id(),
+					wc_get_product( $product_b->get_id() )->get_id()
+				)
+			);
+
+			$forms = $this->extract_form_fragments( $markup );
+			$this->assertCount( 2, $forms );
+
+			foreach ( $forms as $index => $form_fragment ) {
+				$processor   = new \WP_HTML_Tag_Processor( $form_fragment );
+				$ids_in_form = array();
+				while ( $processor->next_tag() ) {
+					$id = $processor->get_attribute( 'id' );
+					if ( is_string( $id ) && '' !== $id ) {
+						$ids_in_form[] = $id;
+					}
+				}
+
+				$processor = new \WP_HTML_Tag_Processor( $form_fragment );
+				while ( $processor->next_tag() ) {
+					$for = $processor->get_attribute( 'for' );
+					if ( is_string( $for ) && '' !== $for ) {
+						$this->assertContains( $for, $ids_in_form, "Form {$index}'s label for=\"{$for}\" should resolve inside the same form." );
+					}
+
+					$labelledby = $processor->get_attribute( 'aria-labelledby' );
+					if ( is_string( $labelledby ) && '' !== $labelledby ) {
+						$this->assertContains( $labelledby, $ids_in_form, "Form {$index}'s aria-labelledby=\"{$labelledby}\" should resolve inside the same form." );
+					}
+				}
+			}
+		} finally {
+			$product_a->delete( true );
+			$product_b->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Rendering a page with two forms twice, resetting the scope helper between passes, yields identical ids in the same order.
+	 */
+	public function test_rendering_two_forms_twice_yields_identical_ids(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$block = sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+				$product_id
+			);
+
+			$first_pass_ids = $this->get_all_ids( do_blocks( $block ) );
+			ProductScopes::reset();
+			$second_pass_ids = $this->get_all_ids( do_blocks( $block ) );
+
+			$this->assertSame( $first_pass_ids, $second_pass_ids );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A simple and a variable product's initialQuantity map holds exactly what their quantity map held on the base branch, and no rendered form carries a quantity context key.
+	 */
+	public function test_initial_quantity_matches_base_branch_quantity_values_for_simple_and_variable_products(): void {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product_id = $simple_product->save();
+
+		$filter = function ( $min, $product ) use ( $simple_product_id ) {
+			return $product->get_id() === $simple_product_id ? 3 : $min;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $filter, 10, 2 );
+
+		$fixtures            = new FixtureData();
+		$variable_product    = $fixtures->get_variable_product(
+			array( 'name' => 'Initial Quantity Variable' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$variable_product_id = $variable_product->get_id();
+		$variation_a         = $fixtures->get_variation_product(
+			$variable_product_id,
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		$variation_b         = $fixtures->get_variation_product(
+			$variable_product_id,
+			array( 'pa_color' => 'blue-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $variable_product_id );
+		$variable_product = wc_get_product( $variable_product_id );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$simple_product_id,
+					$variable_product_id
+				)
+			);
+
+			$this->assertStringNotContainsString( '"quantity":', $markup, 'No rendered form should carry a quantity context key.' );
+
+			$contexts = $this->get_add_to_cart_with_options_contexts( $markup );
+
+			$this->assertSame( array( $simple_product_id => 3 ), $contexts[ $simple_product_id ]['initialQuantity'] );
+
+			$variable_initial_quantity = $contexts[ $variable_product_id ]['initialQuantity'];
+			$this->assertSame( $variable_product->get_min_purchase_quantity(), $variable_initial_quantity[ $variable_product_id ] );
+			$this->assertSame( $variable_product->get_min_purchase_quantity(), $variable_initial_quantity[ $variation_a->get_id() ] );
+			$this->assertSame( $variable_product->get_min_purchase_quantity(), $variable_initial_quantity[ $variation_b->get_id() ] );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter, 10 );
+			$simple_product->delete( true );
+			$variable_product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A grouped product's initialQuantity map holds, per child, 0, the resubmitted $_POST value, or 0 when sold individually, exactly as its quantity map held on the base branch.
+	 */
+	public function test_initial_quantity_matches_base_branch_quantity_values_for_grouped_product(): void {
+		$child_untouched = new \WC_Product_Simple();
+		$child_untouched->set_regular_price( 5 );
+		$child_untouched_id = $child_untouched->save();
+
+		$child_resubmitted = new \WC_Product_Simple();
+		$child_resubmitted->set_regular_price( 5 );
+		$child_resubmitted_id = $child_resubmitted->save();
+
+		$child_sold_individually = new \WC_Product_Simple();
+		$child_sold_individually->set_regular_price( 5 );
+		$child_sold_individually->set_sold_individually( true );
+		$child_sold_individually_id = $child_sold_individually->save();
+
+		$grouped_product = new \WC_Product_Grouped();
+		$grouped_product->set_children( array( $child_untouched_id, $child_resubmitted_id, $child_sold_individually_id ) );
+		$grouped_product_id = $grouped_product->save();
+
+		$_POST['quantity']                                = array();
+		$_POST['quantity'][ $child_resubmitted_id ]       = '4';
+		$_POST['quantity'][ $child_sold_individually_id ] = '2';
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$grouped_product_id
+				)
+			);
+
+			$this->assertStringNotContainsString( '"quantity":', $markup, 'No rendered form should carry a quantity context key.' );
+
+			$contexts                 = $this->get_add_to_cart_with_options_contexts( $markup );
+			$grouped_initial_quantity = $contexts[ $child_untouched_id ]['initialQuantity'];
+
+			$this->assertSame(
+				array(
+					$child_untouched_id         => 0,
+					$child_resubmitted_id       => 4,
+					$child_sold_individually_id => 0,
+				),
+				$grouped_initial_quantity
+			);
+		} finally {
+			unset( $_POST['quantity'] );
+			$grouped_product->delete( true );
+			$child_untouched->delete( true );
+			$child_resubmitted->delete( true );
+			$child_sold_individually->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox With two forms for two different products, one out of stock, the initial HTML shows each form's own quantity, its own validity, and the out-of-stock message only in the out-of-stock product's form, naming that product; none of these values are written into page-wide interactivity state or config.
+	 */
+	public function test_per_form_values_resolve_independently_and_are_not_seeded_page_wide(): void {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_name( 'Independent Simple Product' );
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$simple_product_id = $simple_product->save();
+
+		$fixtures            = new FixtureData();
+		$variable_product    = $fixtures->get_variable_product(
+			array( 'name' => 'Independent Variable Product' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$variable_product_id = $variable_product->get_id();
+		$fixtures->get_variation_product(
+			$variable_product_id,
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $variable_product_id );
+		$variable_product = wc_get_product( $variable_product_id );
+
+		$min_quantities = array(
+			$simple_product_id   => 2,
+			$variable_product_id => 5,
+		);
+		$filter         = function ( $min, $product ) use ( $min_quantities ) {
+			return $min_quantities[ $product->get_id() ] ?? $min;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $filter, 10, 2 );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$simple_product_id,
+					$variable_product_id
+				)
+			);
+
+			$contexts = $this->get_add_to_cart_with_options_contexts( $markup );
+
+			$this->assertSame( array( $simple_product_id => 2 ), $contexts[ $simple_product_id ]['initialQuantity'] );
+			$this->assertStringContainsString( 'Independent Simple Product', $contexts[ $simple_product_id ]['outOfStockMessage'] );
+			$this->assertStringNotContainsString( 'Independent Variable Product', $contexts[ $simple_product_id ]['outOfStockMessage'] );
+
+			$this->assertSame( 5, $contexts[ $variable_product_id ]['initialQuantity'][ $variable_product_id ] );
+			$this->assertStringContainsString( 'Independent Variable Product', $contexts[ $variable_product_id ]['outOfStockMessage'] );
+			$this->assertStringNotContainsString( 'Independent Simple Product', $contexts[ $variable_product_id ]['outOfStockMessage'] );
+
+			$processed = wp_interactivity_process_directives( $markup );
+			$forms     = $this->extract_form_fragments( $processed );
+
+			$this->assertCount( 2, $forms );
+			$this->assertFalse( $this->form_has_class( $forms[0], 'is-invalid' ), 'The simple product form should be valid.' );
+			$this->assertTrue( $this->form_has_class( $forms[1], 'is-invalid' ), 'The variable product form should start invalid until a variation is selected.' );
+
+			$config = wp_interactivity_config( 'woocommerce/add-to-cart-with-options' );
+			$this->assertArrayNotHasKey( 'variableProductOutOfStock', $config['errorMessages'] ?? array(), 'The out-of-stock message should not be written into page-wide config.' );
+			$this->assertArrayHasKey( 'invalidQuantities', $config['errorMessages'] ?? array(), 'The other error messages stay in page-wide config.' );
+
+			$quantity_selector_state = wp_interactivity_state( 'woocommerce/add-to-cart-with-options-quantity-selector' );
+			$this->assertArrayNotHasKey( 'inputQuantity', $quantity_selector_state, 'inputQuantity should not be written into page-wide interactivity state.' );
+
+			$this->assertStringNotContainsString( 'productScopes', $markup, 'No productScopes record should be seeded.' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter, 10 );
+			$simple_product->delete( true );
+			$variable_product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Two forms for two different variable products sharing an attribute name render different attribute group ids, each with its own chip ids.
+	 */
+	public function test_two_variable_product_forms_render_different_attribute_and_chip_ids(): void {
+		$fixtures = new FixtureData();
+
+		$product_a = $fixtures->get_variable_product(
+			array( 'name' => 'Attribute Scope A' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$fixtures->get_variation_product(
+			$product_a->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $product_a->get_id() );
+
+		$product_b = $fixtures->get_variable_product(
+			array( 'name' => 'Attribute Scope B' ),
+			array( $fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ) )
+		);
+		$fixtures->get_variation_product(
+			$product_b->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+		\WC_Product_Variable::sync( $product_b->get_id() );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					wc_get_product( $product_a->get_id() )->get_id(),
+					wc_get_product( $product_b->get_id() )->get_id()
+				)
+			);
+
+			preg_match_all( '/id="(wc_product_attribute_[^"]*)_label"/', $markup, $attribute_id_matches );
+
+			$this->assertCount( 2, $attribute_id_matches[1], 'Each form should render its own attribute group id.' );
+			$this->assertNotSame( $attribute_id_matches[1][0], $attribute_id_matches[1][1], 'The two forms should render different attribute ids for the same attribute.' );
+
+			foreach ( $attribute_id_matches[1] as $attribute_id ) {
+				$this->assertStringContainsString( 'id="' . $attribute_id . '-', $markup, "Chips should be prefixed with the attribute id \"{$attribute_id}\"." );
+			}
+
+			$ids = $this->get_all_ids( $markup );
+			$this->assertSame( array_unique( $ids ), array_values( $ids ), 'No id attribute value should appear twice.' );
+		} finally {
+			$product_a->delete( true );
+			$product_b->delete( true );
+		}
+	}
 }
