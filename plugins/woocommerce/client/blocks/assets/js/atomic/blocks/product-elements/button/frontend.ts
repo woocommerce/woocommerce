@@ -2,21 +2,16 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type {
+	WooCommerceStore,
+	ProductScopeContext,
+} from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
  */
-import type {
-	Context as AddToCartWithOptionsContext,
-	AddToCartWithOptionsStore,
-} from '../../../../blocks/add-to-cart-with-options/frontend';
-
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 interface Context {
 	addToCartText: string;
@@ -43,43 +38,32 @@ type ServerState = {
 	};
 };
 
-const { state: wooState } = store< WooCommerce >(
+const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
 	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{},
-	{ lock: universalLock }
-);
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
+	{
+		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+	}
 );
 
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = productsState.productInContext;
+			const product = wooState.productScope.product;
 
 			if ( ! product ) {
 				return 0;
 			}
 
-			const formContext = getContext< AddToCartWithOptionsContext >(
-				'woocommerce/add-to-cart-with-options'
-			);
-
-			const item = wooState.findItemInCart( {
-				id: product.id,
-				variation: formContext?.selectedAttributes,
-			} );
-
-			return item?.quantity ?? 0;
+			return wooState.productScope.cartItem?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -108,13 +92,13 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productsState.productInContext?.type === 'grouped' ) {
+			if ( wooState.productScope.product?.type === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.findItemInCart( {
-							id: productId,
-						} );
-						return product?.quantity || 0;
+						const cartItem = wooState.findProductScope( {
+							productId,
+						} ).cartItem;
+						return cartItem?.quantity || 0;
 					}
 				);
 				if (
@@ -134,37 +118,38 @@ const productButtonStore = {
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
-			if ( ! displayViewCart ) return false;
+			if ( ! displayViewCart ) {
+				return false;
+			}
 			return state.quantity > 0;
 		},
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const product = productsState.productInContext;
+			const product = wooState.productScope.product;
 
 			if ( ! product ) {
 				return;
 			}
 
-			// Todo: Use the module exports instead of `store()` once the
-			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
-
-			const { actions } = store< WooCommerce >(
-				'woocommerce',
-				{},
-				{ lock: universalLock }
-			);
-
 			const context = getContext< Context >();
+			const scopeContext =
+				getContext< ProductScopeContext >( 'woocommerce' );
+			const scopeName = scopeContext?.scopeName ?? '_default';
+			const record = wooState.productScopes[ scopeName ]?.draftCartItem;
+			const { productId, variation } = wooState.productScope;
 
-			// Pass quantityToAdd as a delta. The cart store will add this
-			// to the current quantity, ensuring rapid clicks compound correctly.
-			yield actions.addCartItem(
+			// The payload form: it removes no record, so a shopper's typed
+			// quantity in a form sharing this scope survives the click, as
+			// today. The button has no quantity input of its own, so it
+			// always posts its own filtered `quantityToAdd`, never the
+			// scope's draft quantity.
+			yield wooActions.addCartItem(
 				{
-					id: product.id,
-					quantityToAdd: context.quantityToAdd,
-					type: product.type,
+					...record,
+					id: productId,
+					variation,
+					quantity: context.quantityToAdd,
 				},
 				{
 					showCartUpdatesNotices: false,
@@ -173,16 +158,8 @@ const productButtonStore = {
 
 			context.displayViewCart = true;
 		},
-		*refreshCartItems() {
-			// Todo: Use the module exports instead of `store()` once the
-			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store< WooCommerce >(
-				'woocommerce',
-				{},
-				{ lock: universalLock }
-			);
-			void actions.refreshCartItems();
+		*refreshCart() {
+			yield wooActions.refreshCart();
 		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
