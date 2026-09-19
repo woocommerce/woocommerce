@@ -1044,6 +1044,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_subscription_notice_renders_autorenew_when_every_subscription_is_lapsing(): void {
 		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'F j, Y' );
 		$this->set_subscriptions(
 			array(
 				$this->subscription(
@@ -1065,7 +1066,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
 
-		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3rd.', $output );
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3, 2030.', $output );
 		$this->assertStringContainsString( 'woocommerce-enable-autorenew', $output );
 	}
 
@@ -1093,6 +1094,53 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+	}
+
+	/**
+	 * @testdox The expiry date follows the store's date format and time zone.
+	 */
+	public function test_expiry_date_uses_the_store_date_format_and_time_zone(): void {
+		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'j F Y' );
+		update_option( 'timezone_string', 'Pacific/Auckland' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						// Late on 3 March in UTC is already 4 March in Auckland.
+						'expires'   => strtotime( '2030-03-03 23:30:00 UTC' ),
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'expires on 4 March 2030.', $output, 'The date is the store\'s, in the store\'s format.' );
+	}
+
+	/**
+	 * @testdox Auto-renew notice is skipped for a record carrying no usable expiry.
+	 */
+	public function test_subscription_notice_is_skipped_without_a_usable_expiry(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expiring'  => true,
+						'autorenew' => false,
+						'expires'   => 'not a timestamp',
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Naming no date beats naming a wrong one.' );
 	}
 
 	/**
@@ -1265,6 +1313,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_update_row_expiring_notice_shares_the_plugin_row_wording(): void {
 		$this->prepare_plugins_screen();
+		update_option( 'date_format', 'F j, Y' );
 		$this->set_subscriptions(
 			array(
 				$this->subscription(
@@ -1284,7 +1333,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		);
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3rd.', $output );
+		$this->assertStringContainsString( 'Your subscription for this extension expires on March 3, 2030.', $output );
 		$this->assertStringContainsString( '>Enable auto-renew</a> to keep getting updates and support.', $output );
 		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_enable_autorenew', $output );
 	}

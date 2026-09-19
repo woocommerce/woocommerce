@@ -569,7 +569,7 @@ class WC_Helper_Updater {
 			return sprintf(
 				/* translators: 1: Expiry date, 2: URL of the My Subscriptions page */
 				__( 'Your subscription for this extension expires on %1$s. <a href="%2$s" class="woocommerce-enable-autorenew">Enable auto-renew</a> to keep getting updates and support.', 'woocommerce' ),
-				date_i18n( 'F jS', $expiring_subscription['expires'] ),
+				wp_date( get_option( 'date_format' ), (int) $expiring_subscription['expires'] ),
 				esc_url( $autorenew_link )
 			);
 		}
@@ -725,7 +725,10 @@ class WC_Helper_Updater {
 		$lapsing = array_filter(
 			$active,
 			function ( $subscription ) {
-				return ! empty( $subscription['expiring'] ) && empty( $subscription['autorenew'] );
+				// Without a usable expiry there is no date to name, so the message has nothing to say.
+				return ! empty( $subscription['expiring'] )
+					&& empty( $subscription['autorenew'] )
+					&& is_numeric( $subscription['expires'] ?? null );
 			}
 		);
 
