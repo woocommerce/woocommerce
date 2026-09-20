@@ -74,9 +74,10 @@ test.describe( 'Add to Cart + Options Block: Navigation', () => {
 		);
 	} );
 
-	test( 'paging a Product Collection tile away and back resets an in-progress variation selection and quantity', async ( {
+	test( 'paging a Product Collection tile away and back keeps an in-progress variation selection and quantity, which the tile then submits, and a full reload resets the tile', async ( {
 		page,
 		editor,
+		frontendUtils,
 		productCollectionPageObject,
 	} ) => {
 		await productCollectionPageObject.createNewPostAndInsertBlock(
@@ -151,15 +152,58 @@ test.describe( 'Add to Cart + Options Block: Navigation', () => {
 			} )
 		).toBeVisible();
 
-		// Today, client-side navigation rebuilds the tile's block context from
-		// scratch, so the selection and typed quantity are gone (A1).
+		// Client-side navigation away and back re-renders the tile under the
+		// same server-derived scope name, so its record is found again and
+		// the selection and typed quantity survive (A3, A8).
 		await expect(
 			addToCartForm
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Blue', exact: true } )
+		).toBeChecked();
+		await expect(
+			addToCartForm
+				.getByRole( 'radiogroup', { name: 'Size' } )
+				.getByRole( 'radio', { name: 'Small', exact: true } )
+		).toBeChecked();
+		await expect( page.getByLabel( 'Product quantity' ) ).toHaveValue(
+			'3'
+		);
+
+		await addToCartForm
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.click();
+		await expect(
+			addToCartForm.getByRole( 'button', { name: '3 in cart' } )
+		).toBeVisible();
+
+		// Submitting posts the typed quantity that survived the round trip,
+		// not the product's minimum purchase quantity (A8).
+		await frontendUtils.goToCart();
+		await expect(
+			page.getByLabel(
+				'Quantity of AAA Navigation Variable Product in your cart.'
+			)
+		).toHaveValue( '3' );
+		await expect( page.getByText( 'Color: Blue' ) ).toBeVisible();
+		await expect( page.getByText( 'Size: Small' ) ).toBeVisible();
+
+		// A full browser load rebuilds the tile from scratch instead of
+		// re-rendering under a surviving name, so it shows its initial state
+		// again: no selection, and the product's minimum purchase quantity.
+		await page.goto( `/?p=${ postId }` );
+		await expect(
+			page.getByRole( 'heading', {
+				name: 'AAA Navigation Variable Product',
+			} )
+		).toBeVisible();
+		const reloadedForm = page.locator( '.wp-block-add-to-cart-with-options' );
+		await expect(
+			reloadedForm
 				.getByRole( 'radiogroup', { name: 'Color' } )
 				.getByRole( 'radio', { checked: true } )
 		).toHaveCount( 0 );
 		await expect(
-			addToCartForm
+			reloadedForm
 				.getByRole( 'radiogroup', { name: 'Size' } )
 				.getByRole( 'radio', { checked: true } )
 		).toHaveCount( 0 );
