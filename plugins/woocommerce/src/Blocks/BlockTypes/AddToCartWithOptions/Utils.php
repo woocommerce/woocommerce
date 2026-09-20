@@ -11,6 +11,13 @@ use Automattic\WooCommerce\Enums\ProductType;
  */
 class Utils {
 	/**
+	 * Whether the `inputQuantity` derived-state getter has been registered.
+	 *
+	 * @var bool
+	 */
+	private static bool $input_quantity_getter_registered = false;
+
+	/**
 	 * Check if the HTML content has a visible quantity input.
 	 *
 	 * @param string $html_content The HTML content.
@@ -97,11 +104,55 @@ class Utils {
 	}
 
 	/**
+	 * Register the `inputQuantity` derived-state getter once.
+	 *
+	 * Mirrors the client's `effectiveQuantity` getter
+	 * (client/blocks/assets/js/blocks/add-to-cart-with-options/frontend.ts),
+	 * so a `data-wp-bind--value="state.inputQuantity"` resolves during
+	 * server-side rendering: the scope's typed quantity when one was seeded,
+	 * otherwise the reading input's own initial quantity. Because the
+	 * closure reads `wp_interactivity_get_context()` and
+	 * `wp_interactivity_state()` at call time, one registration answers for
+	 * every quantity input on the page.
+	 *
+	 * @return void
+	 */
+	private static function register_input_quantity_getter(): void {
+		if ( self::$input_quantity_getter_registered ) {
+			return;
+		}
+
+		self::$input_quantity_getter_registered = true;
+
+		wp_interactivity_state(
+			'woocommerce/add-to-cart-with-options-quantity-selector',
+			array(
+				'inputQuantity' => function () {
+					$scope_context  = wp_interactivity_get_context( 'woocommerce' );
+					$scope_name     = $scope_context['scopeName'] ?? '_default';
+					$scope_state    = wp_interactivity_state( 'woocommerce' );
+					$record         = $scope_state['productScopes'][ $scope_name ] ?? array();
+					$typed_quantity = $record['draftCartItem']['quantity'] ?? null;
+
+					if ( is_numeric( $typed_quantity ) ) {
+						return $typed_quantity;
+					}
+
+					$input_context = wp_interactivity_get_context( 'woocommerce/add-to-cart-with-options-quantity-selector' );
+					return $input_context['inputQuantity'] ?? 0;
+				},
+			)
+		);
+	}
+
+	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
 	 * Seeds the input's own initial quantity into its own context, added to
 	 * the given $context, rather than into page-wide interactivity state, so
-	 * two quantity inputs on the same page each carry their own value.
+	 * two quantity inputs on the same page each carry their own value. The
+	 * input's rendered value is resolved by the `inputQuantity` getter
+	 * registered below, which answers per element instead of page-wide.
 	 *
 	 * @param string $quantity_html The quantity HTML.
 	 * @param array  $wrapper_attributes Optional wrapper attributes.
@@ -117,6 +168,8 @@ class Utils {
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
+
+		self::register_input_quantity_getter();
 
 		if (
 			$processor->next_tag( 'input' ) &&
