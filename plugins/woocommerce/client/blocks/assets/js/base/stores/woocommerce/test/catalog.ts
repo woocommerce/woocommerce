@@ -8,7 +8,11 @@ import type { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import type { CatalogState } from '../types';
-import { normalizeAttributeName, attributeNamesMatch } from '../catalog';
+import {
+	normalizeAttributeName,
+	attributeNamesMatch,
+	catalogState,
+} from '../catalog';
 
 // The acknowledgement string the module's `store()` call passes. Copied
 // here rather than imported, so the test fails if the source value ever
@@ -172,9 +176,17 @@ describe( 'woocommerce store — catalog layer', () => {
 			] );
 		} );
 
-		it( 'defaults to no product and an empty variation before the server seeds it', () => {
-			expect( mockStoreState.template.productId ).toBe( 0 );
-			expect( mockStoreState.template.variation ).toEqual( [] );
+		it( 'carries no concrete default, so registering the store never overrides a server-seeded value', () => {
+			// `store()` merges the client's initial state onto the
+			// server-seeded state with `override: true`, so a concrete
+			// literal here would replace the server's real `template`
+			// rather than fall back to it. Asserting the key is altogether
+			// absent — not present with a `{ productId: 0, variation: [] }`
+			// value — is what catches that regression; the mock store
+			// mirrors this by never defining a `template` property when
+			// the source object never had one.
+			expect( 'template' in catalogState ).toBe( false );
+			expect( mockStoreState.template ).toBeUndefined();
 		} );
 	} );
 } );

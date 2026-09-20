@@ -173,7 +173,7 @@ function resolveProductId(
 	if ( locator?.productId !== undefined ) {
 		return locator.productId;
 	}
-	return state.template.productId;
+	return state.template?.productId ?? 0;
 }
 
 /**
@@ -196,7 +196,7 @@ function resolveVariation(
 	if ( locator?.variation !== undefined ) {
 		return locator.variation;
 	}
-	return state.template.variation;
+	return state.template?.variation ?? [];
 }
 
 /**
@@ -586,8 +586,8 @@ export const scopeState: ScopeState = {
 		const getLocator = () => ref;
 		const resolveName = () => ref.scopeName ?? null;
 		return createEnvelope( resolveName, getLocator, () => ( {
-			productId: ref.productId ?? state.template.productId,
-			variation: ref.variation ?? state.template.variation,
+			productId: ref.productId ?? state.template?.productId ?? 0,
+			variation: ref.variation ?? state.template?.variation ?? [],
 		} ) );
 	},
 };

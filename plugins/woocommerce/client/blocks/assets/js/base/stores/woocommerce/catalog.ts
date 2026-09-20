@@ -28,9 +28,12 @@ export type CatalogState = {
 	productVariations: Record< number, ProductResponseItem >;
 	/**
 	 * The single-product template's current product and variation
-	 * selection, seeded by `SingleProductTemplate`.
+	 * selection, seeded by `SingleProductTemplate`. Only that template seeds
+	 * it, so it is absent on every other page — `resolveProductId` and
+	 * `resolveVariation` (`scope.ts`) fall back to product id `0` and an
+	 * empty variation when it is missing.
 	 */
-	template: {
+	template?: {
 		/** The product ID for the current single-product template. */
 		productId: number;
 		/** The selected attributes for the current variation, if any. */
@@ -66,12 +69,15 @@ export const attributeNamesMatch = ( a: string, b: string ): boolean =>
  * The catalog layer's initial state, merged into the `woocommerce` store.
  * Server loaders populate `products` and `productVariations`;
  * `SingleProductTemplate` seeds `template`.
+ *
+ * `template` carries no initial default: `store()` merges this object onto
+ * the server-seeded state with `override: true` (unlike the server's own
+ * merge, which never overrides the client), so a concrete literal here
+ * would replace the server's real value rather than fall back to it —
+ * exactly the rule `cart-actions.ts`'s `cartActionsState` already follows
+ * for `cart`.
  */
 export const catalogState: CatalogState = {
 	products: {},
 	productVariations: {},
-	template: {
-		productId: 0,
-		variation: [],
-	},
 };

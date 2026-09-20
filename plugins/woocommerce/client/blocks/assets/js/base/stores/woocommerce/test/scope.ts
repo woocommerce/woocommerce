@@ -174,6 +174,27 @@ describe( 'woocommerce store — product scope envelope', () => {
 				{ attribute: 'a', value: 'v' },
 			] );
 		} );
+
+		it( 'resolves productId 0 and an empty variation, without throwing, when the server never seeded template', () => {
+			// Every page other than the single-product template reaches
+			// this store with no `template` seeded at all.
+			mockState.template = undefined;
+			mockContext = {};
+
+			expect( () => scopeState.productScope.productId ).not.toThrow();
+			expect( scopeState.productScope.productId ).toBe( 0 );
+			expect( scopeState.productScope.variation ).toEqual( [] );
+		} );
+
+		it( 'resolves findProductScope to productId 0 and an empty variation when the ref and template are both empty', () => {
+			mockState.template = undefined;
+
+			const envelope = scopeState.findProductScope( {} );
+
+			expect( () => envelope.productId ).not.toThrow();
+			expect( envelope.productId ).toBe( 0 );
+			expect( envelope.variation ).toEqual( [] );
+		} );
 	} );
 
 	describe( 'draftCartItem defaults', () => {
