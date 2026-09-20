@@ -133,7 +133,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			frontendUtils,
 		} ) => {
 			// Saved-for-later "Move to cart" and wishlist "Add to cart" call the
-			// same keyless `addCartItem` path this exercises (quantityToAdd, no
+			// same keyless `addCartItem` path this exercises (quantity, no
 			// key). Here we assert the cart outcome those consumers depend on —
 			// a new standalone line beside the untouched meta line, no error
 			// notice. The consumer-specific guarantees (list entry removed, no

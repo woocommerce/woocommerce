@@ -786,29 +786,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 				.first();
 
+			// Set up waitForResponse BEFORE the click to avoid race condition
+			// where page.reload() executes before the cart is updated.
+			const batchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await addedToCartButton.click();
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 4' )
 			).toBeVisible();
+
+			await batchPromise;
 		} );
 
 		await test.step( 'verify cart state persists after reload', async () => {
-			// Reloading while a batch request is still in flight aborts it,
-			// losing the re-add server-side.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-				await actions.waitForIdle();
-			} );
-
 			await page.reload();
 
 			await expect(

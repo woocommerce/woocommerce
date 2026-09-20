@@ -84,7 +84,8 @@ test.describe( 'Cart Store', () => {
 			( await refreshCartResponse ).headers().nonce || null;
 		expect( refreshCartNonce ).toBeTruthy();
 
-		// Adding a product should use the nonce from refreshCartItems.
+		// Adding a product should use the nonce from the store's initial
+		// refreshCart() load.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		expect( initialBatchRequestNonce ).toBe( refreshCartNonce );
 

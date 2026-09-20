@@ -41,13 +41,13 @@ test.describe( 'Mutation Batcher', () => {
 			const unlockKey =
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-			await import( '@woocommerce/stores/woocommerce/cart' );
+			await import( '@woocommerce/stores/woocommerce' );
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Each await breaks the microtick — each call becomes its own batch.
-			await actions.addCartItem( { id: 18, quantityToAdd: 1 } );
-			await actions.addCartItem( { id: 19, quantityToAdd: 1 } );
-			await actions.addCartItem( { id: 20, quantityToAdd: 1 } );
+			await actions.addCartItem( { id: 18, quantity: 1 } );
+			await actions.addCartItem( { id: 19, quantity: 1 } );
+			await actions.addCartItem( { id: 20, quantity: 1 } );
 		} );
 
 		// Each call should have produced its own batch request.
@@ -73,21 +73,21 @@ test.describe( 'Mutation Batcher', () => {
 			const unlockKey =
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-			await import( '@woocommerce/stores/woocommerce/cart' );
+			await import( '@woocommerce/stores/woocommerce' );
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Batch 1: two sync calls
-			const p1 = actions.addCartItem( { id: 21, quantityToAdd: 1 } );
-			const p2 = actions.addCartItem( { id: 22, quantityToAdd: 1 } );
+			const p1 = actions.addCartItem( { id: 21, quantity: 1 } );
+			const p2 = actions.addCartItem( { id: 22, quantity: 1 } );
 			await Promise.all( [ p1, p2 ] );
 
 			// Batch 2: one call after await
-			await actions.addCartItem( { id: 23, quantityToAdd: 1 } );
+			await actions.addCartItem( { id: 23, quantity: 1 } );
 
 			// Batch 3: three sync calls
-			const p3 = actions.addCartItem( { id: 24, quantityToAdd: 1 } );
-			const p4 = actions.addCartItem( { id: 25, quantityToAdd: 1 } );
-			const p5 = actions.addCartItem( { id: 26, quantityToAdd: 1 } );
+			const p3 = actions.addCartItem( { id: 24, quantity: 1 } );
+			const p4 = actions.addCartItem( { id: 25, quantity: 1 } );
+			const p5 = actions.addCartItem( { id: 26, quantity: 1 } );
 			await Promise.all( [ p3, p4, p5 ] );
 		} );
 
@@ -106,7 +106,7 @@ test.describe( 'Mutation Batcher', () => {
 			const unlockKey =
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-			await import( '@woocommerce/stores/woocommerce/cart' );
+			await import( '@woocommerce/stores/woocommerce' );
 			const { actions, state } = store(
 				'woocommerce',
 				{},
@@ -114,7 +114,7 @@ test.describe( 'Mutation Batcher', () => {
 			);
 
 			// Refresh to start with known state.
-			await actions.refreshCartItems();
+			await actions.refreshCart();
 
 			// Remove all existing items to start clean.
 			const existingKeys = state.cart.items.map(
@@ -125,9 +125,9 @@ test.describe( 'Mutation Batcher', () => {
 			}
 
 			// Now add 3 products synchronously (one batch).
-			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
-			const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
-			const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
+			const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
+			const p2 = actions.addCartItem( { id: 16, quantity: 1 } );
+			const p3 = actions.addCartItem( { id: 17, quantity: 1 } );
 			await Promise.all( [ p1, p2, p3 ] );
 
 			// Return the product IDs now in the cart.
@@ -212,14 +212,14 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
@@ -241,7 +241,7 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
@@ -271,9 +271,9 @@ test.describe( 'Mutation Batcher', () => {
 
 				// Three concurrent adds for three distinct products, no
 				// await between them — one microtick, one cycle.
-				const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
-				const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
-				const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
+				const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
+				const p2 = actions.addCartItem( { id: 16, quantity: 1 } );
+				const p3 = actions.addCartItem( { id: 17, quantity: 1 } );
 				await Promise.all( [ p1, p2, p3 ] );
 
 				return {
@@ -317,14 +317,14 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
@@ -332,9 +332,9 @@ test.describe( 'Mutation Batcher', () => {
 					await actions.removeCartItem( key );
 				}
 
-				await actions.addCartItem( { id: 15, quantityToAdd: 1 } );
-				await actions.addCartItem( { id: 16, quantityToAdd: 1 } );
-				await actions.addCartItem( { id: 17, quantityToAdd: 1 } );
+				await actions.addCartItem( { id: 15, quantity: 1 } );
+				await actions.addCartItem( { id: 16, quantity: 1 } );
+				await actions.addCartItem( { id: 17, quantity: 1 } );
 
 				return state.cart.items.map(
 					( item: { key: string } ) => item.key
@@ -349,7 +349,7 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
@@ -422,14 +422,14 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
@@ -451,7 +451,7 @@ test.describe( 'Mutation Batcher', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions, state } = store(
 					'woocommerce',
 					{},
@@ -481,12 +481,12 @@ test.describe( 'Mutation Batcher', () => {
 
 				// Two valid adds and one invalid product id, no await
 				// between them — one microtick, one cycle.
-				const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+				const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
 				const p2 = actions.addCartItem( {
 					id: 999999,
-					quantityToAdd: 1,
+					quantity: 1,
 				} ); // Invalid.
-				const p3 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+				const p3 = actions.addCartItem( { id: 16, quantity: 1 } );
 
 				// addCartItem catches errors internally, so all three
 				// promises resolve rather than reject; Promise.allSettled
