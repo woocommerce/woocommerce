@@ -269,16 +269,16 @@ describe( 'woocommerce store — use cases no core block produces', () => {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			scopeState.productScope.draftCartItem!.quantity = 3;
 
-			expect( mockState.productScopes[ 't-shirt-page' ].draftCartItem ).toEqual(
-				{
-					id: 100,
-					variation: [
-						{ attribute: 'attribute_pa_color', value: 'Blue' },
-						{ attribute: 'attribute_pa_size', value: 'Small' },
-					],
-					quantity: 3,
-				}
-			);
+			expect(
+				mockState.productScopes[ 't-shirt-page' ].draftCartItem
+			).toEqual( {
+				id: 100,
+				variation: [
+					{ attribute: 'attribute_pa_color', value: 'Blue' },
+					{ attribute: 'attribute_pa_size', value: 'Small' },
+				],
+				quantity: 3,
+			} );
 
 			// The change made on the bar is read back on the form, and vice
 			// versa — the shared record, and both still resolve the matched
@@ -365,9 +365,15 @@ describe( 'woocommerce store — use cases no core block produces', () => {
 			delete mockState.productScopes[ 'bundle:slot-1' ];
 			delete mockState.productScopes[ 'bundle:slot-2' ];
 
-			expect( mockState.productScopes[ 'bundle:slot-1' ] ).toBeUndefined();
-			expect( mockState.productScopes[ 'bundle:slot-2' ] ).toBeUndefined();
-			expect( mockState.productScopes[ 'unrelated-scope' ] ).toBeDefined();
+			expect(
+				mockState.productScopes[ 'bundle:slot-1' ]
+			).toBeUndefined();
+			expect(
+				mockState.productScopes[ 'bundle:slot-2' ]
+			).toBeUndefined();
+			expect(
+				mockState.productScopes[ 'unrelated-scope' ]
+			).toBeDefined();
 
 			expect( captured ).toHaveLength( 1 );
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
@@ -557,7 +563,10 @@ describe( 'woocommerce store — use cases no core block produces', () => {
 				id: 200,
 				type: 'variable',
 				variations: [
-					{ id: 701, attributes: [ { name: 'Size', value: 'Large' } ] },
+					{
+						id: 701,
+						attributes: [ { name: 'Size', value: 'Large' } ],
+					},
 				],
 			} );
 			mockState.productVariations[ 701 ] = mockProduct( { id: 701 } );
@@ -608,7 +617,9 @@ describe( 'woocommerce store — use cases no core block produces', () => {
 				mockState.productScopes[ 'switcher:200' ].draftCartItem
 			).toEqual( {
 				id: 200,
-				variation: [ { attribute: 'attribute_pa_size', value: 'Large' } ],
+				variation: [
+					{ attribute: 'attribute_pa_size', value: 'Large' },
+				],
 				quantity: 3,
 			} );
 
