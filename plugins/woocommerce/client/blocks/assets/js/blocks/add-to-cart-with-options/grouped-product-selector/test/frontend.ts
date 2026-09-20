@@ -16,10 +16,10 @@ let mockProductScopes: Record<
 	string,
 	{ draftCartItem?: Record< string, unknown > }
 >;
-
-const mockProductsState = {
-	findProduct: jest.fn(),
-};
+let mockScopeProducts: Record<
+	string,
+	{ add_to_cart: { minimum: number; maximum: number } }
+>;
 
 type MockScopeRef = { productId: number; scopeName: string };
 
@@ -31,6 +31,7 @@ const mockFindProductScope = jest.fn( ( ref: MockScopeRef ) => {
 			( record?.variation as
 				| Array< { attribute: string; value: string } >
 				| undefined ) ?? [],
+		product: mockScopeProducts[ ref.scopeName ] ?? null,
 	};
 } );
 
@@ -42,10 +43,6 @@ const mockWooState = {
 };
 
 const mockStore = jest.fn( ( namespace, definition ) => {
-	if ( namespace === 'woocommerce/products' ) {
-		return { state: mockProductsState };
-	}
-
 	if ( namespace === 'woocommerce/add-to-cart-with-options' ) {
 		if ( definition?.actions ) {
 			Object.assign( mockAddToCartStore.actions, definition.actions );
@@ -80,7 +77,6 @@ jest.mock(
 );
 
 jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ) );
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
 
 const getRegisteredStore = (): GroupedProductAddToCartWithOptionsStore => {
 	if ( ! mockRegisteredStore ) {
@@ -110,6 +106,7 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 			groupedScopeNames: [],
 		};
 		mockProductScopes = {};
+		mockScopeProducts = {};
 		mockRegisteredStore = null;
 		mockAddToCartStore = {
 			state: {} as GroupedProductAddToCartWithOptionsStore[ 'state' ],
@@ -126,7 +123,6 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 				invalidQuantities: 'Choose valid quantities.',
 			},
 		} );
-		mockProductsState.findProduct.mockReturnValue( null );
 
 		jest.isolateModules( () => {
 			jest.requireActual( '../frontend' );
@@ -152,10 +148,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11, 12 ];
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 4, 12: 1 };
-		mockProductsState.findProduct.mockImplementation( ( { id } ) => ( {
-			id,
-			add_to_cart: { minimum: 1, maximum: id === 11 ? 3 : 1 },
-		} ) );
+		mockScopeProducts = {
+			'form:11': { add_to_cart: { minimum: 1, maximum: 3 } },
+			'form:12': { add_to_cart: { minimum: 1, maximum: 1 } },
+		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
 
@@ -170,10 +166,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11, 12 ];
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 2, 12: 0 };
-		mockProductsState.findProduct.mockImplementation( ( { id } ) => ( {
-			id,
-			add_to_cart: { minimum: id === 11 ? 3 : 1, maximum: 5 },
-		} ) );
+		mockScopeProducts = {
+			'form:11': { add_to_cart: { minimum: 3, maximum: 5 } },
+			'form:12': { add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
 
@@ -188,10 +184,25 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11, 12 ];
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 0, 12: 1 };
-		mockProductsState.findProduct.mockImplementation( ( { id } ) => ( {
-			id,
-			add_to_cart: { minimum: 1, maximum: 2 },
-		} ) );
+		mockScopeProducts = {
+			'form:11': { add_to_cart: { minimum: 1, maximum: 2 } },
+			'form:12': { add_to_cart: { minimum: 1, maximum: 2 } },
+		};
+
+		getRegisteredStore().actions.validateGroupedProductQuantity();
+
+		expect( mockAddError ).not.toHaveBeenCalled();
+	} );
+
+	it( "does not report a child whose product the store's catalog does not hold", () => {
+		mockContext.groupedProductIds = [ 11, 12 ];
+		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
+		mockContext.initialQuantity = { 11: 9, 12: 1 };
+		// Child 11's scope carries no catalog entry, so its bounds are
+		// unknown; only child 12's is seeded.
+		mockScopeProducts = {
+			'form:12': { add_to_cart: { minimum: 1, maximum: 2 } },
+		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
 
@@ -203,10 +214,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 0, 12: 0 };
 		mockProductScopes[ 'form:11' ] = { draftCartItem: { quantity: 2 } };
-		mockProductsState.findProduct.mockImplementation( ( { id } ) => ( {
-			id,
-			add_to_cart: { minimum: 1, maximum: 5 },
-		} ) );
+		mockScopeProducts = {
+			'form:11': { add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:12': { add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
 

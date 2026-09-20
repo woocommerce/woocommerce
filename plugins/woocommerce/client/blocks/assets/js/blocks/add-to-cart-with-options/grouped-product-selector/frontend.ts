@@ -4,8 +4,6 @@
 import { store, getContext, getConfig } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce';
 import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -18,12 +16,6 @@ import type {
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
 	'woocommerce',
@@ -113,8 +105,9 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const hasInvalidQuantity = groupedProductIds.some(
 					( childProductId, index ) => {
 						const qty = effectiveQuantities[ index ];
-						const product = productsState.findProduct( {
-							id: childProductId,
+						const { product } = wooState.findProductScope( {
+							productId: childProductId,
+							scopeName: groupedScopeNames[ index ],
 						} );
 						if ( ! product ) {
 							return false;
