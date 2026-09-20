@@ -22,7 +22,7 @@ use InvalidArgumentException;
  *   element's `woocommerce` context, then the seeded `template`.
  *
  * The envelope is mirrored in the JS store
- * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
+ * (client/blocks/assets/js/base/stores/woocommerce/scope.ts) so that
  * directive bindings like `state.productScope.product.sku` resolve during
  * server-side rendering as well as on the client.
  *
@@ -94,7 +94,7 @@ class ProductsStore {
 	 * Register the `productScope` derived-state getter once.
 	 *
 	 * The closure mirrors the JS `productScope` getter in
-	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
+	 * client/blocks/assets/js/base/stores/woocommerce/scope.ts so that
 	 * directives referencing state.productScope.* resolve during SSR.
 	 * Because it reads wp_interactivity_get_context() and
 	 * wp_interactivity_state() at call time, it only needs to be
@@ -214,7 +214,7 @@ class ProductsStore {
 
 	/**
 	 * Find the loaded variation matching a resolved selection, the way
-	 * `findProduct` does in products.ts: the base product's own
+	 * `scope.ts`'s `findMatchingVariationId` does: the base product's own
 	 * `variations` summary (each entry's `attributes` a list of
 	 * `{ name, value }`) is matched against the selection to find the
 	 * variation's ID, which is then looked up in the full loaded
@@ -277,7 +277,7 @@ class ProductsStore {
 
 	/**
 	 * Find the cart line matching a resolved product ID and variation
-	 * selection, the way `findItemInCart` does in cart.ts.
+	 * selection, the way `cart-actions.ts`'s `findCartLine` does.
 	 *
 	 * @param array      $items     The seeded cart lines.
 	 * @param array      $state     The full `woocommerce` state, for attribute matching.
