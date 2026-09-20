@@ -64,6 +64,45 @@ jest.mock(
 	{ virtual: true }
 );
 
+/**
+ * A minimal stand-in for the one behaviour of `@wordpress/interactivity`'s
+ * real state proxy this module's first-write defect depends on: the first
+ * read of a key that does not exist yet freezes what every later read of
+ * that key returns, even after a write lands on the underlying raw object
+ * rather than through the proxy. A write made through the proxy itself
+ * always updates what later reads see, and any nested object value is
+ * wrapped the same way, recursively.
+ *
+ * @param target The raw object to wrap.
+ * @return A proxy over `target` with that one behaviour.
+ */
+function makeReactive< T extends Record< string, unknown > >( target: T ): T {
+	const frozen = new Map< string, unknown >();
+	const wrap = ( value: unknown ): unknown =>
+		value !== null && typeof value === 'object'
+			? makeReactive( value as Record< string, unknown > )
+			: value;
+	return new Proxy( target, {
+		get( obj, key ) {
+			if ( typeof key !== 'string' ) {
+				return Reflect.get( obj, key );
+			}
+			if ( ! frozen.has( key ) ) {
+				frozen.set( key, wrap( Reflect.get( obj, key ) ) );
+			}
+			return frozen.get( key );
+		},
+		set( obj, key, value ) {
+			if ( typeof key !== 'string' ) {
+				return Reflect.set( obj, key, value );
+			}
+			Reflect.set( obj, key, value );
+			frozen.set( key, wrap( value ) );
+			return true;
+		},
+	} ) as T;
+}
+
 const mockProduct = ( overrides: Partial< ProductResponseItem > = {} ) =>
 	( { id: 1, type: 'simple', ...overrides } ) as ProductResponseItem;
 
@@ -861,6 +900,93 @@ describe( 'woocommerce store — product scope envelope', () => {
 					expect( envelope.productVariation ).toBeNull();
 				} );
 			} );
+		} );
+	} );
+
+	// The suites above bind a plain object as the store's state, which has
+	// no traps and no signals: a raw write and a write through the state
+	// reference are indistinguishable there, so they cannot see a scope's
+	// first write land on the wrong one. `makeReactive` reproduces the one
+	// real-proxy behaviour this defect depends on — reading a key that does
+	// not exist yet fixes what every later read of that key returns, even
+	// after a raw write past the proxy — so these tests fail against
+	// `ensureRecord`/`writeIdentity` as they read before this task.
+	describe( 'a scope record reaching a reactive state (first-write coverage)', () => {
+		let reactiveScopeState: ScopeState;
+		let productScopes: ProductScopesState;
+
+		beforeEach( () => {
+			mockContext = null;
+
+			const reactiveProductScopes = makeReactive(
+				{} as ProductScopesState
+			);
+			const reactiveMockState: MockState = {
+				products: {},
+				productVariations: {},
+				template: { productId: 0, variation: [] },
+				productScopes: reactiveProductScopes,
+				findItemInCart: jest.fn( () => undefined ),
+			};
+			productScopes = reactiveProductScopes;
+
+			jest.isolateModules( () => {
+				const scopeModule =
+					require( '../scope' ) as typeof import('../scope');
+				scopeModule.bindState( reactiveMockState );
+				reactiveScopeState = scopeModule.scopeState;
+			} );
+		} );
+
+		it( 'leaves the first draftCartItem.quantity write on a fresh scope readable through the state reference, and a second write replaces it', () => {
+			mockContext = { productId: 10, scopeName: 'fresh' };
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reactiveScopeState.productScope.draftCartItem!.quantity = 2;
+
+			expect( productScopes.fresh.draftCartItem?.quantity ).toBe( 2 );
+			expect( productScopes.fresh.draftCartItem?.id ).toBe( 10 );
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reactiveScopeState.productScope.draftCartItem!.quantity = 5;
+
+			expect( productScopes.fresh.draftCartItem?.quantity ).toBe( 5 );
+			expect( productScopes.fresh.draftCartItem?.id ).toBe( 10 );
+		} );
+
+		it( 'leaves the first draftCartItem.variation write on a fresh scope with no locator readable through the variation accessor', () => {
+			mockContext = null;
+			const attrs = [ { attribute: 'a', value: 'v' } ];
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reactiveScopeState.productScope.draftCartItem!.variation = attrs;
+
+			expect( reactiveScopeState.productScope.variation ).toEqual(
+				attrs
+			);
+		} );
+
+		it( 'still updates the locator when writing draftCartItem.variation on a fresh scope that declares one', () => {
+			mockContext = { productId: 30, scopeName: 'withlocator' };
+			const attrs = [ { attribute: 'a', value: 'v' } ];
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reactiveScopeState.productScope.draftCartItem!.variation = attrs;
+
+			expect( mockContext.variation ).toEqual( attrs );
+		} );
+
+		it( 'a record created by writing only variation still carries the id resolved before the write', () => {
+			mockContext = { productId: 40, scopeName: 'idcarry' };
+			const attrs = [ { attribute: 'a', value: 'v' } ];
+
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reactiveScopeState.productScope.draftCartItem!.variation = attrs;
+
+			expect( productScopes.idcarry.draftCartItem?.id ).toBe( 40 );
+			expect( productScopes.idcarry.draftCartItem?.variation ).toEqual(
+				attrs
+			);
 		} );
 	} );
 } );

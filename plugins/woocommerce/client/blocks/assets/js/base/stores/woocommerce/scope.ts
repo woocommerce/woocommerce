@@ -205,6 +205,16 @@ function resolveVariation(
  * `id` and `variation`, so a record created by writing only one of them
  * still carries a complete identity.
  *
+ * The identity is resolved before the record is published, and the record
+ * is always published, and read back, through `state.productScopes` itself
+ * rather than through a local variable. Publishing a plain object through
+ * the state proxy hands that key's reactive slot a *proxy* of the object,
+ * not the object itself; resolving the identity first means that proxy is
+ * handed a `draftCartItem` that already has its final value, and reading
+ * the record back through `state.productScopes` means every write this
+ * function and its callers make lands on that same proxy instead of on the
+ * raw object underneath it, which the proxy would no longer be watching.
+ *
  * @param name    The scope's name.
  * @param locator The context or ref used to resolve the identity to snapshot.
  * @return The scope's record, with `draftCartItem` guaranteed present.
@@ -213,18 +223,20 @@ function ensureRecord(
 	name: string,
 	locator: ProductScopeContext | null
 ): Required< ProductScopeRecord > {
-	let record = state.productScopes[ name ];
-	if ( ! record ) {
-		record = {};
-		state.productScopes[ name ] = record;
-	}
-	if ( ! record.draftCartItem ) {
-		record.draftCartItem = {
+	if ( ! state.productScopes[ name ] ) {
+		state.productScopes[ name ] = {
+			draftCartItem: {
+				id: resolveProductId( name, locator ),
+				variation: resolveVariation( name, locator ),
+			},
+		};
+	} else if ( ! state.productScopes[ name ].draftCartItem ) {
+		state.productScopes[ name ].draftCartItem = {
 			id: resolveProductId( name, locator ),
 			variation: resolveVariation( name, locator ),
 		};
 	}
-	return record as Required< ProductScopeRecord >;
+	return state.productScopes[ name ] as Required< ProductScopeRecord >;
 }
 
 /**
