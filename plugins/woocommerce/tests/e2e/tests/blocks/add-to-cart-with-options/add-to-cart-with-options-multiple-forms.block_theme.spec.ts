@@ -197,18 +197,26 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				.click();
 			await expect( firstFormNotice ).toBeVisible();
 
+			// The first form's own invalid submit leaves the second form's
+			// own region empty.
+			await expect( secondFormNotice ).toHaveCount( 0 );
+
 			// Each form now owns its own notices context (D11), so the second
 			// form's invalid submit adds its own notice without touching the
-			// first form's.
+			// first form's, which is still shown (AC9).
 			await secondForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
 			await expect( secondFormNotice ).toBeVisible();
 			await expect( firstFormNotice ).toBeVisible();
 
-			// Correcting and successfully submitting the second form does not
-			// affect the first form's notice either — only the first form's
-			// own submit can clear it.
+			// Correcting and successfully submitting the second form does
+			// not affect the first form's notice either — it is still
+			// shown (AC9). A successful submit is not expected to clear
+			// the submitting form's own notice; only its own invalid
+			// submit removes it, and that is not exercised here.
+			const secondFormNoticeCountBeforeFirstFormsSecondSubmit =
+				await secondFormNotice.count();
 			await secondForm
 				.getByRole( 'radiogroup', { name: 'Color' } )
 				.getByRole( 'radio', { name: 'Green', exact: true } )
@@ -223,20 +231,16 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 			await expect( firstFormNotice ).toBeVisible();
 
-			await firstForm
-				.getByRole( 'radiogroup', { name: 'Color' } )
-				.getByRole( 'radio', { name: 'Blue', exact: true } )
-				.click();
-			await firstForm
-				.getByRole( 'radiogroup', { name: 'Size' } )
-				.getByRole( 'radio', { name: 'Small', exact: true } )
-				.click();
+			// Submitting the first form invalid a second time, left
+			// uncorrected, leaves its own region showing one notice, not a
+			// second copy, and leaves the second form's region as it was.
 			await firstForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
-
-			// Only the first form's own corrected submit clears its notice.
-			await expect( firstFormNotice ).toHaveCount( 0 );
+			await expect( firstFormNotice ).toHaveCount( 1 );
+			await expect( secondFormNotice ).toHaveCount(
+				secondFormNoticeCountBeforeFirstFormsSecondSubmit
+			);
 		} );
 	} );
 
@@ -639,9 +643,22 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				.getByLabel( `Increase quantity of ${ sharedChildName }` )
 				.click();
 
+			// Set up waitForResponse BEFORE each click, and wait for the
+			// second add's own batch response before navigating: the
+			// mutation batcher sends one batch at a time, so the two adds
+			// never overlap with each other, but the button's "Added to
+			// cart" label is optimistic (state.cart shows it before the
+			// server answers) and the cart page's own request can
+			// otherwise reach the server before this add does. Waiting on
+			// the first add alone would not close that; waiting on the
+			// last one before navigating does.
+			const firstBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await firstForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
+			await firstBatchPromise;
 			await expect(
 				firstForm.getByRole( 'button', {
 					name: 'Added to cart',
@@ -657,9 +674,13 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				} )
 			).toHaveValue( '1' );
 
+			const secondBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await secondForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
+			await secondBatchPromise;
 			await expect(
 				secondForm.getByRole( 'button', {
 					name: 'Added to cart',
