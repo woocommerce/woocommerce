@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes as TestedProductScopes;
-use LogicException;
 
 /**
  * Tests for the ProductScopes shared helper.
@@ -82,12 +81,25 @@ class ProductScopes extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox leave_place() throws when no place is open instead of corrupting the stack.
+	 * @testdox leave_place() called with no place open reports the misuse, returns '' and leaves the stack as it found it.
 	 */
-	public function test_leave_place_without_open_place_throws(): void {
-		$this->expectException( LogicException::class );
+	public function test_leave_place_without_open_place_reports_and_returns_empty(): void {
+		$values = array( 42, '' );
 
+		$first_name = TestedProductScopes::enter_place( $values );
 		TestedProductScopes::leave_place();
+
+		$this->setExpectedIncorrectUsage( 'leave_place' );
+
+		$left = TestedProductScopes::leave_place();
+
+		$this->assertSame( '', $left, 'An unpaired leave should return the page-level name.' );
+		$this->assertSame( '', TestedProductScopes::current_place(), 'The unpaired call should leave no place open.' );
+
+		$second_name = TestedProductScopes::enter_place( $values );
+		TestedProductScopes::leave_place();
+
+		$this->assertSame( $first_name . '-2', $second_name, 'The unpaired call should not have consumed or added an occurrence, so entering the same values again should return the same name a normal second occurrence would.' );
 	}
 
 	/**

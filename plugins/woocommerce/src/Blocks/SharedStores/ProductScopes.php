@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\SharedStores;
 
-use LogicException;
-
 /**
  * Names the product scopes that hold a `productId`, `variation` and
  * `scopeName` together in the `woocommerce` Interactivity API namespace.
@@ -109,12 +107,13 @@ class ProductScopes {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @return string The name entering this place returned.
-	 * @throws LogicException When no place is open.
+	 * @return string The name entering this place returned, or '' when no
+	 *                place was open.
 	 */
 	public static function leave_place(): string {
 		if ( empty( self::$open_places ) ) {
-			throw new LogicException( 'ProductScopes::leave_place() was called with no place open.' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'leave_place() was called with no place open.', 'woocommerce' ), '11.3.0' );
+			return '';
 		}
 
 		return array_pop( self::$open_places );
