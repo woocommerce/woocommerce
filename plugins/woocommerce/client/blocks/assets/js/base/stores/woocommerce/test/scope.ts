@@ -301,9 +301,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 				variations: [
 					{
 						id: 501,
-						attributes: [
-							{ name: 'Color', value: 'Blue' },
-						],
+						attributes: [ { name: 'Color', value: 'Blue' } ],
 					},
 				],
 			} );
@@ -332,9 +330,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 				variations: [
 					{
 						id: 501,
-						attributes: [
-							{ name: 'Color', value: 'Blue' },
-						],
+						attributes: [ { name: 'Color', value: 'Blue' } ],
 					},
 				],
 			} );
