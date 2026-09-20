@@ -293,6 +293,120 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 	} );
 
+	describe( 'cartItem', () => {
+		it( 'matches a selected variation by its own id, not the parent’s', () => {
+			mockState.products[ 100 ] = mockProduct( {
+				id: 100,
+				type: 'variable',
+				variations: [
+					{
+						id: 501,
+						attributes: [
+							{ name: 'Color', value: 'Blue' },
+						],
+					},
+				],
+			} );
+			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
+			const variation = [
+				{ attribute: 'attribute_pa_color', value: 'Blue' },
+			];
+			const line = {
+				id: 501,
+				key: 'variation-line',
+				type: 'variation',
+				variation,
+			} as FakeCartLine;
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ line ] )
+			);
+			mockContext = { productId: 100, variation };
+
+			expect( scopeState.productScope.cartItem ).toEqual( line );
+		} );
+
+		it( 'resolves to null when the cart does not hold the selected variation', () => {
+			mockState.products[ 100 ] = mockProduct( {
+				id: 100,
+				type: 'variable',
+				variations: [
+					{
+						id: 501,
+						attributes: [
+							{ name: 'Color', value: 'Blue' },
+						],
+					},
+				],
+			} );
+			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
+			mockState.findItemInCart = jest.fn( fakeFindItemInCart( [] ) );
+			mockContext = {
+				productId: 100,
+				variation: [
+					{ attribute: 'attribute_pa_color', value: 'Blue' },
+				],
+			};
+
+			expect( scopeState.productScope.cartItem ).toBeNull();
+		} );
+
+		it( 'resolves by cartItemKey regardless of productId and variation', () => {
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ { id: 1, key: 'k1' } as FakeCartLine ] )
+			);
+			mockContext = { productId: 999, cartItemKey: 'k1' };
+
+			expect( scopeState.productScope.cartItem ).toEqual( {
+				id: 1,
+				key: 'k1',
+			} );
+		} );
+
+		it( 'matches a simple product by its own id, unchanged', () => {
+			mockState.products[ 7 ] = mockProduct( { id: 7 } );
+			const line = { id: 7, key: 'l7' } as FakeCartLine;
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ line ] )
+			);
+			mockContext = { productId: 7 };
+
+			expect( scopeState.productScope.cartItem ).toEqual( line );
+		} );
+
+		it( 'matches directly when productId is itself a variation id, unchanged', () => {
+			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
+			const line = { id: 501, key: 'l501' } as FakeCartLine;
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ line ] )
+			);
+			mockContext = { productId: 501 };
+
+			expect( scopeState.productScope.cartItem ).toEqual( line );
+		} );
+
+		it( 'falls back to the raw productId when no product resolves, unchanged', () => {
+			const line = { id: 404, key: 'l404' } as FakeCartLine;
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ line ] )
+			);
+			mockContext = { productId: 404 };
+
+			expect( scopeState.productScope.cartItem ).toEqual( line );
+		} );
+
+		it( 'findProductScope resolves a grouped child’s cart line by the ref’s productId, unchanged', () => {
+			mockState.products[ 55 ] = mockProduct( { id: 55 } );
+			const line = { id: 55, key: 'child' } as FakeCartLine;
+			mockState.findItemInCart = jest.fn(
+				fakeFindItemInCart( [ line ] )
+			);
+
+			const envelope = scopeState.findProductScope( { productId: 55 } );
+
+			expect( envelope.cartItem ).toEqual( line );
+		} );
+	} );
+
 	describe( 'no record is created by reading', () => {
 		it( 'creates no record after reading every member of a scope with none', () => {
 			mockContext = { productId: 9, scopeName: 'readonly-scope' };

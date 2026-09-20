@@ -394,8 +394,12 @@ function resolveProductMembers(
 
 /**
  * Resolves a scope's `cartItem`: the committed line matching `cartItemKey`
- * when given, otherwise the line matching `productId` and `variation` —
- * `state.findItemInCart`'s own matching, unchanged.
+ * when given, otherwise the line matching the scope's resolved product — the
+ * same entity the `product` accessor returns, which is a selected variation's
+ * own id rather than its parent's — falling back to `productId` itself when
+ * no product resolves. `variation` is passed through unchanged, so a
+ * variation line still has to match on attributes as well as on id.
+ * `state.findItemInCart`'s own matching is otherwise untouched.
  *
  * @param productId   The scope's resolved product id.
  * @param variation   The scope's resolved selected variation attributes.
@@ -407,9 +411,10 @@ function resolveCartItem(
 	variation: TemplateVariationAttribute[],
 	cartItemKey: string | undefined
 ): CartLine | null {
+	const { product } = resolveProductMembers( productId, variation );
 	return (
 		state.findItemInCart( {
-			id: productId,
+			id: product?.id ?? productId,
 			key: cartItemKey,
 			variation,
 		} ) ?? null
