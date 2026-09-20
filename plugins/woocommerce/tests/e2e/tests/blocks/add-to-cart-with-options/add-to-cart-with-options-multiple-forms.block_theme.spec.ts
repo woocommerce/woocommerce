@@ -76,7 +76,7 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			);
 		} );
 
-		test( "submitting the first form adds only its own selection, and the second form keeps its own", async ( {
+		test( 'submitting the first form adds only its own selection, and the second form keeps its own', async ( {
 			page,
 			editor,
 			pageObject,
@@ -180,10 +180,14 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			// The notices region wraps its own form (it is the form's parent,
 			// not a descendant), so each form's notice is scoped through the
 			// region that wraps it, in the same document order as the forms.
-			const noticeRegions = page.locator( '.wc-block-components-notices' );
+			const noticeRegions = page.locator(
+				'.wc-block-components-notices'
+			);
 			const noticeText =
 				'Please select product attributes before adding to cart.';
-			const firstFormNotice = noticeRegions.nth( 0 ).getByText( noticeText );
+			const firstFormNotice = noticeRegions
+				.nth( 0 )
+				.getByText( noticeText );
 			const secondFormNotice = noticeRegions
 				.nth( 1 )
 				.getByText( noticeText );
@@ -304,9 +308,7 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				firstBlock.locator( '.wp-block-woocommerce-product-price' )
 			).toHaveText( '$45.00' );
 			await expect( async () => {
-				expect( await galleryImageIds( firstBlock ) ).toContain(
-					'35'
-				);
+				expect( await galleryImageIds( firstBlock ) ).toContain( '35' );
 			} ).toPass();
 
 			// The second block's own form is untouched by the first block's
@@ -333,9 +335,7 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				firstBlock.locator( '.wp-block-woocommerce-product-price' )
 			).toHaveText( '$45.00' );
 			await expect( async () => {
-				expect( await galleryImageIds( firstBlock ) ).toContain(
-					'35'
-				);
+				expect( await galleryImageIds( firstBlock ) ).toContain( '35' );
 			} ).toPass();
 		} );
 	} );
@@ -813,7 +813,9 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				.getByRole( 'radiogroup', { name: 'Style' } )
 				.getByRole( 'radio', { name: 'Unavailable', exact: true } )
 				.click();
-			await expect( fixtureForm.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect(
+				fixtureForm.getByText( 'Out of stock' )
+			).toBeVisible();
 			await expect( tShirtForm.getByText( 'Out of stock' ) ).toHaveCount(
 				0
 			);

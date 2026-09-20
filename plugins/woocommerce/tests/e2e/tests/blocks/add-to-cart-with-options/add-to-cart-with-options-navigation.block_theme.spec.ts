@@ -196,7 +196,9 @@ test.describe( 'Add to Cart + Options Block: Navigation', () => {
 				name: 'AAA Navigation Variable Product',
 			} )
 		).toBeVisible();
-		const reloadedForm = page.locator( '.wp-block-add-to-cart-with-options' );
+		const reloadedForm = page.locator(
+			'.wp-block-add-to-cart-with-options'
+		);
 		await expect(
 			reloadedForm
 				.getByRole( 'radiogroup', { name: 'Color' } )
