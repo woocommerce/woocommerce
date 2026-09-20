@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, customerFile, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	customerFile,
+	wpCLI,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -27,15 +32,13 @@ import {
  * site editor setup runs as the admin the `page` fixture defaults to.
  */
 
-const test = base.extend< { addToCartWithOptionsPage: AddToCartWithOptionsPage } >(
-	{
-		addToCartWithOptionsPage: async ( { page, admin, editor }, use ) => {
-			await use(
-				new AddToCartWithOptionsPage( { page, admin, editor } )
-			);
-		},
-	}
-);
+const test = base.extend< {
+	addToCartWithOptionsPage: AddToCartWithOptionsPage;
+} >( {
+	addToCartWithOptionsPage: async ( { page, admin, editor }, use ) => {
+		await use( new AddToCartWithOptionsPage( { page, admin, editor } ) );
+	},
+} );
 
 test.describe( 'Wishlist', () => {
 	test.beforeEach( async () => {
