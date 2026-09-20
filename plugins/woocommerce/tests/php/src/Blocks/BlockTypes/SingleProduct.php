@@ -275,6 +275,94 @@ class SingleProduct extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Creates a variable product with one taxonomy attribute and a single variation selecting it.
+	 *
+	 * @return array{product: \WC_Product_Variable, variation: \WC_Product_Variation}
+	 */
+	private function create_single_attribute_variation() {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Scope Variation Product' );
+		$product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) ) )
+		);
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+
+		return array(
+			'product'   => $product,
+			'variation' => $variation,
+		);
+	}
+
+	/**
+	 * Deletes the fixture created by {@see create_single_attribute_variation()}.
+	 *
+	 * @param array{product: \WC_Product_Variable, variation: \WC_Product_Variation} $data Fixture data.
+	 */
+	private function delete_single_attribute_variation( array $data ) {
+		$data['variation']->delete( true );
+		$data['product']->delete( true );
+	}
+
+	/**
+	 * @testdox The wrapper declares a variation product's own attributes as its variation.
+	 */
+	public function test_wrapper_declares_a_variations_own_attributes_as_its_variation(): void {
+		$data = $this->create_single_attribute_variation();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%d} --><div class="wp-block-woocommerce-single-product"></div><!-- /wp:woocommerce/single-product -->',
+					$data['variation']->get_id()
+				)
+			);
+
+			$scope = $this->get_wrapper_scope_context( $markup );
+
+			$this->assertSame(
+				array(
+					array(
+						'attribute' => 'attribute_pa_color',
+						'value'     => 'blue',
+					),
+				),
+				$scope['context']['variation']
+			);
+		} finally {
+			$this->delete_single_attribute_variation( $data );
+		}
+	}
+
+	/**
+	 * @testdox The wrapper still renders an empty variation when the product itself is not a variation.
+	 */
+	public function test_wrapper_variation_is_empty_for_a_variable_parent_product(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%d} --><div class="wp-block-woocommerce-single-product"></div><!-- /wp:woocommerce/single-product -->',
+					$product->get_id()
+				)
+			);
+
+			$scope = $this->get_wrapper_scope_context( $markup );
+
+			$this->assertSame( array(), $scope['context']['variation'] );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
 	 * @testdox Two Single Product blocks for the same product receive different scopeName values and neither leaves a place open.
 	 */
 	public function test_two_single_product_blocks_for_same_product_get_different_scope_names(): void {

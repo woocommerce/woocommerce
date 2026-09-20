@@ -1083,6 +1083,78 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A Single Product block wrapper declares the same variation attributes a second form for the same product declares on its own form element.
+	 */
+	public function test_wrapper_variation_matches_a_second_forms_declared_variation(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Wrapper Variation Scope Product' );
+		$product->set_attributes(
+			array( \WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) ) )
+		);
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+
+		try {
+			// Two forms directly for the variation in the same place, so the second declares its own scope.
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><div class="wp-block-woocommerce-single-product"><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--></div><!-- /wp:woocommerce/single-product -->',
+					$variation->get_id()
+				)
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+			$this->assertCount( 2, $forms );
+			$this->assertTrue( $forms[1]['declares_scope'] );
+
+			$processor = new \WP_HTML_Tag_Processor( $markup );
+			$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-single-product' ) ) );
+			list( , $wrapper_json ) = explode( '::', $processor->get_attribute( 'data-wp-context' ), 2 );
+			$wrapper_context        = json_decode( $wrapper_json, true );
+
+			$this->assertNotSame( array(), $wrapper_context['variation'], 'A variation product should declare a non-empty variation.' );
+			$this->assertSame(
+				$forms[1]['context']['variation'],
+				$wrapper_context['variation'],
+				"The wrapper's variation should equal the one a second form for the same product declares on its own form element."
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A single form for a variation inside a Single Product block still declares no scope of its own.
+	 */
+	public function test_single_form_for_a_variation_declares_nothing(): void {
+		$product       = \WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					current( $variation_ids )
+				)
+			);
+
+			$forms = $this->get_form_context_declarations( $markup );
+
+			$this->assertCount( 1, $forms );
+			$this->assertFalse( $forms[0]['declares_scope'], 'The only form for a variation in a place should declare no scope of its own.' );
+		} finally {
+			\WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
 	 * @testdox A grouped form's own context carries groupedScopeNames listing its children's scope names, in groupedProductIds order, matching each row's own scopeName.
 	 */
 	public function test_grouped_form_context_carries_grouped_scope_names_matching_child_rows(): void {

@@ -181,6 +181,71 @@ class ProductScopes extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_scope_variation() returns a variation's own attributes as { attribute, value } entries.
+	 */
+	public function test_get_scope_variation_returns_a_variations_own_attributes(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Scope Variation Product' );
+		$product->set_attributes(
+			array( \WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) ) )
+		);
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		try {
+			$result = TestedProductScopes::get_scope_variation( $variation->get_id() );
+
+			$this->assertSame(
+				array(
+					array(
+						'attribute' => 'attribute_pa_color',
+						'value'     => 'blue',
+					),
+				),
+				$result
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox get_scope_variation() returns an empty array for a product that is not itself a variation.
+	 * @testWith ["simple"]
+	 *           ["variable"]
+	 *           ["grouped"]
+	 *
+	 * @param string $product_type The product type to create: "simple", "variable" or "grouped".
+	 */
+	public function test_get_scope_variation_returns_empty_for_non_variation_products( string $product_type ): void {
+		switch ( $product_type ) {
+			case 'variable':
+				$product = \WC_Helper_Product::create_variation_product();
+				break;
+			case 'grouped':
+				$product = \WC_Helper_Product::create_grouped_product();
+				break;
+			default:
+				$product = \WC_Helper_Product::create_simple_product();
+		}
+
+		$this->assertSame( array(), TestedProductScopes::get_scope_variation( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox get_scope_variation() returns an empty array for an id that does not resolve to a product.
+	 */
+	public function test_get_scope_variation_returns_empty_for_unknown_product_id(): void {
+		$this->assertSame( array(), TestedProductScopes::get_scope_variation( 0 ) );
+	}
+
+	/**
 	 * @testdox The current-form surface returns the most recently set name and nothing once cleared.
 	 */
 	public function test_current_form_name_set_get_and_clear(): void {
