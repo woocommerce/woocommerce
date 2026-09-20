@@ -17,7 +17,7 @@ import {
 // The acknowledgement string the module's `store()` call passes. Copied
 // here rather than imported, so the test fails if the source value ever
 // drifts from what the other stores in this folder pass.
-const universalLock =
+const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 let mockRegisteredStore: {
@@ -114,7 +114,7 @@ describe( 'woocommerce store — catalog layer', () => {
 
 			expect( woocommerceRegistrations ).toHaveLength( 1 );
 			expect( woocommerceRegistrations[ 0 ][ 2 ] ).toEqual( {
-				lock: universalLock,
+				lock: storeConsent,
 			} );
 		} );
 
@@ -124,7 +124,7 @@ describe( 'woocommerce store — catalog layer', () => {
 			const { state: laterState } = store< { state: CatalogState } >(
 				'woocommerce',
 				{},
-				{ lock: universalLock }
+				{ lock: storeConsent }
 			);
 
 			expect( laterState.products[ 42 ] ).toBe( mockProduct );

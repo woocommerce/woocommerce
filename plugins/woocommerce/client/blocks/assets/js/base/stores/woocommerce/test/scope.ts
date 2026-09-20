@@ -13,6 +13,7 @@ import type {
 	ProductScopesState,
 } from '../scope';
 import type { CatalogState } from '../catalog';
+import { findCartLine } from '../cart-actions';
 
 type FakeCartLine = CartItem & {
 	variation?: ProductScopeContext[ 'variation' ];
@@ -20,20 +21,19 @@ type FakeCartLine = CartItem & {
 
 type MockState = CatalogState & {
 	productScopes: ProductScopesState;
-	findItemInCart: jest.Mock;
 };
 
 let mockContext: ProductScopeContext | null = null;
 
 /**
- * A minimal stand-in for `state.findItemInCart` (the real matcher lives in
- * `cart.ts` and has its own test suite): matches by `key` when given,
- * otherwise by `id` and a shallow `variation` comparison.
+ * A minimal stand-in for `cart-actions.ts`'s `findCartLine` (which has its
+ * own test suite): matches by `key` when given, otherwise by `id` and a
+ * shallow `variation` comparison.
  *
  * @param lines The seeded cart lines to match against.
- * @return A function with the same call shape `state.findItemInCart` has.
+ * @return A function with the same call shape `findCartLine` has.
  */
-function fakeFindItemInCart( lines: FakeCartLine[] ) {
+function fakeFindCartLine( lines: FakeCartLine[] ) {
 	return ( {
 		id,
 		key,
@@ -63,6 +63,13 @@ jest.mock(
 	} ),
 	{ virtual: true }
 );
+
+// `scope.ts` calls `cart-actions.ts`'s `findCartLine` directly for
+// `cartItem`; each test controls its return value via
+// `( findCartLine as jest.Mock ).mockImplementation( ... )`.
+jest.mock( '../cart-actions', () => ( {
+	findCartLine: jest.fn( () => undefined ),
+} ) );
 
 /**
  * A minimal stand-in for the one behaviour of `@wordpress/interactivity`'s
@@ -113,13 +120,13 @@ describe( 'woocommerce store — product scope envelope', () => {
 	beforeEach( () => {
 		mockContext = null;
 		( getContext as jest.Mock ).mockClear();
+		( findCartLine as jest.Mock ).mockReset().mockReturnValue( undefined );
 
 		mockState = {
 			products: {},
 			productVariations: {},
 			template: { productId: 0, variation: [] },
 			productScopes: {},
-			findItemInCart: jest.fn( () => undefined ),
 		};
 
 		// `scope.ts` never calls `store()` itself (see `bindState`'s
@@ -315,8 +322,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 				type: 'variation',
 				variation,
 			} as FakeCartLine;
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ line ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ line ] )
 			);
 			mockContext = { productId: 100, variation };
 
@@ -335,7 +342,9 @@ describe( 'woocommerce store — product scope envelope', () => {
 				],
 			} );
 			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
-			mockState.findItemInCart = jest.fn( fakeFindItemInCart( [] ) );
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [] )
+			);
 			mockContext = {
 				productId: 100,
 				variation: [
@@ -347,8 +356,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 
 		it( 'resolves by cartItemKey regardless of productId and variation', () => {
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ { id: 1, key: 'k1' } as FakeCartLine ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ { id: 1, key: 'k1' } as FakeCartLine ] )
 			);
 			mockContext = { productId: 999, cartItemKey: 'k1' };
 
@@ -361,8 +370,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 		it( 'matches a simple product by its own id, unchanged', () => {
 			mockState.products[ 7 ] = mockProduct( { id: 7 } );
 			const line = { id: 7, key: 'l7' } as FakeCartLine;
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ line ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ line ] )
 			);
 			mockContext = { productId: 7 };
 
@@ -372,8 +381,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 		it( 'matches directly when productId is itself a variation id, unchanged', () => {
 			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
 			const line = { id: 501, key: 'l501' } as FakeCartLine;
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ line ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ line ] )
 			);
 			mockContext = { productId: 501 };
 
@@ -382,8 +391,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 
 		it( 'falls back to the raw productId when no product resolves, unchanged', () => {
 			const line = { id: 404, key: 'l404' } as FakeCartLine;
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ line ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ line ] )
 			);
 			mockContext = { productId: 404 };
 
@@ -393,8 +402,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 		it( 'findProductScope resolves a grouped child’s cart line by the ref’s productId, unchanged', () => {
 			mockState.products[ 55 ] = mockProduct( { id: 55 } );
 			const line = { id: 55, key: 'child' } as FakeCartLine;
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ line ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ line ] )
 			);
 
 			const envelope = scopeState.findProductScope( { productId: 55 } );
@@ -452,8 +461,8 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 
 		it( 'pairs cartItem via the ref, independent of any record', () => {
-			mockState.findItemInCart = jest.fn(
-				fakeFindItemInCart( [ { id: 1, key: 'k1' } as FakeCartLine ] )
+			( findCartLine as jest.Mock ).mockImplementation(
+				fakeFindCartLine( [ { id: 1, key: 'k1' } as FakeCartLine ] )
 			);
 
 			const envelope = scopeState.findProductScope( { productId: 1 } );
@@ -654,18 +663,20 @@ describe( 'woocommerce store — product scope envelope', () => {
 	} );
 
 	// Carried over from the deleted `test/products.test.ts`: every assertion
-	// it made about `findProduct`, `mainProductInContext`,
-	// `productVariationInContext` and `productInContext`, expressed against
+	// it made about the old `findProduct` matcher and its derived-getter
+	// trio (the old main-product getter, the old selected-variation getter,
+	// and the old resolved-product getter), expressed against
 	// `findProductScope` and `productScope`'s `baseProduct` / `productVariation`
 	// / `product`. One deliberate divergence: old `findProduct` returned `null`
 	// outright when selected attributes matched a candidate that was not yet
 	// populated in `productVariations`; the new `product` accessor instead
-	// falls back to `baseProduct` in that case (matching old `productInContext`,
-	// and this task's own `product is productVariation when one resolved,
-	// otherwise baseProduct` rule) — so that specific truth is carried onto
-	// `productVariation` (which stays `null` either way) rather than `product`.
+	// falls back to `baseProduct` in that case (matching the old resolved-product
+	// getter, and this task's own `product is productVariation when one
+	// resolved, otherwise baseProduct` rule) — so that specific truth is
+	// carried onto `productVariation` (which stays `null` either way) rather
+	// than `product`.
 	describe( 'carried over from products.test.ts', () => {
-		describe( 'baseProduct (was mainProductInContext)', () => {
+		describe( 'baseProduct (was the old main-product getter)', () => {
 			it( 'returns the product regardless of a selected variation', () => {
 				mockState.products[ 42 ] = mockProduct( { id: 42 } );
 				mockContext = {
@@ -700,7 +711,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			} );
 		} );
 
-		describe( 'productVariation (was productVariationInContext)', () => {
+		describe( 'productVariation (was the old selected-variation getter)', () => {
 			it( 'returns null when nothing is selected on a simple product', () => {
 				mockState.products[ 42 ] = mockProduct( { id: 42 } );
 				mockContext = { productId: 42 };
@@ -760,7 +771,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			} );
 		} );
 
-		describe( 'product (was productInContext / findProduct)', () => {
+		describe( 'product (was the old resolved-product getter / findProduct)', () => {
 			it( 'returns null when the product is not in the store (findProduct)', () => {
 				const envelope = scopeState.findProductScope( {
 					productId: 999,
@@ -1100,7 +1111,6 @@ describe( 'woocommerce store — product scope envelope', () => {
 				productVariations: {},
 				template: { productId: 0, variation: [] },
 				productScopes: reactiveProductScopes,
-				findItemInCart: jest.fn( () => undefined ),
 			};
 			productScopes = reactiveProductScopes;
 

@@ -4,8 +4,9 @@
 import { store } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
+// The acknowledgement string the `woocommerce` store's own registration
+// passes to `store()`.
+const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const getInputElementFromEvent = (
@@ -135,5 +136,5 @@ store(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{ lock: storeConsent }
 );

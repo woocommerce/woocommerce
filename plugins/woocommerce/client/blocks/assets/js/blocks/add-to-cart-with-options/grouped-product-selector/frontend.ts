@@ -13,14 +13,15 @@ import type {
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
+// The acknowledgement string the `woocommerce` store's own registration
+// passes to `store()`.
+const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { state: wooState, actions: wooActions } = store< WooCommerceStore >(
 	'woocommerce',
 	{},
-	{ lock: universalLock }
+	{ lock: storeConsent }
 );
 
 export type GroupedProductAddToCartWithOptionsStore =
@@ -184,5 +185,5 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{ lock: storeConsent }
 );

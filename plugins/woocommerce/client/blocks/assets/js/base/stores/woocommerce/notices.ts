@@ -19,8 +19,9 @@ import type {
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import type { OptimisticCartItem, SelectedAttributes } from './cart-actions';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
+// The acknowledgement string this module's own `store()` calls pass, matching
+// what the other stores in this folder pass.
+const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 /**
@@ -97,34 +98,9 @@ export const generateInfoNotice = ( message: string ): Notice => ( {
 } );
 
 /**
- * Computes the canonical product token for accumulating per-product totals
- * across a batch.
- *
- * The token is stable: simple items produce `"<id>"` and variation items
- * produce `"<id>|<attr1>=<val1>&..."` with attributes sorted alphabetically
- * by name so insertion order differences do not produce different tokens.
- *
- * @param id        The product id.
- * @param variation The variation attributes, if any.
- * @return A canonical string token that uniquely identifies this product.
- */
-export function productToken(
-	id: number,
-	variation?: CartVariationItem[] | SelectedAttributes[]
-): string {
-	if ( ! variation || variation.length === 0 ) {
-		return String( id );
-	}
-	const attrs = [ ...variation ]
-		.sort( ( a, b ) => a.attribute.localeCompare( b.attribute ) )
-		.map( ( v ) => `${ v.attribute }=${ v.value }` )
-		.join( '&' );
-	return `${ id }|${ attrs }`;
-}
-
-/**
  * Returns `true` when the given cart line matches the product identified by
- * `id` and `variation`, using the same matching logic as `findItemInCart`.
+ * `id` and `variation`, using the same matching logic as `cart-actions.ts`'s
+ * `findCartLine`.
  *
  * Simple items match by `id` equality. Variation items additionally require
  * `variation.length` equality and `doesCartItemMatchAttributes`.
@@ -176,7 +152,7 @@ export type ProductCapture = {
  *
  * For each product entry in `products`, computes:
  *   - `serverTotal` = sum of the committed server cart's lines matching that
- *     product (using the same matcher as `findItemInCart`).
+ *     product (using the same matcher as `cart-actions.ts`'s `findCartLine`).
  *   - `expectedTotal` = pre-add total + sum of posted deltas.
  *
  * When `serverTotal === expectedTotal`, the add was exact for that product
@@ -188,9 +164,9 @@ export type ProductCapture = {
  * the diff fires normally, reporting the server's actual quantity.
  *
  * Only keyless adds should call this helper. A keyed quantity change
- * (`updateCartItem`, and the compatibility keyed `addCartItem` form) never
- * populates `products`; leaving their line keys out of the suppression set
- * ensures the "your change was undone" notice keeps firing.
+ * (`updateCartItem`) never populates `products`; leaving its line keys out
+ * of the suppression set ensures the "your change was undone" notice keeps
+ * firing.
  *
  * @param products   Per-product capture records, one per added product.
  * @param serverCart The committed server cart to sum against.
@@ -327,7 +303,7 @@ export function* showNoticeError(
 	const { actions: noticeActions } = store< StoreNotices >(
 		'woocommerce/store-notices',
 		{},
-		{ lock: universalLock }
+		{ lock: storeConsent }
 	);
 
 	const { code, message } = error as ApiErrorResponse;
@@ -372,7 +348,7 @@ export function* updateNotices(
 		store< StoreNotices >(
 			'woocommerce/store-notices',
 			{},
-			{ lock: universalLock }
+			{ lock: storeConsent }
 		);
 
 	// Todo: Check what should happen if the notice is already displayed.

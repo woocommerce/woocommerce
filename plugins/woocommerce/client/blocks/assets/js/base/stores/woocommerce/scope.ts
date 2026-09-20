@@ -9,7 +9,8 @@ import type { ProductResponseItem, CartItem } from '@woocommerce/types';
  */
 import { attributeNamesMatch } from './catalog';
 import type { CatalogState, TemplateVariationAttribute } from './catalog';
-import type { Store as CartStore, OptimisticCartItem } from './cart';
+import { findCartLine } from './cart-actions';
+import type { OptimisticCartItem } from './cart-actions';
 
 /**
  * The `{ productId, variation, scopeName, cartItemKey }` a scope element
@@ -134,14 +135,13 @@ export type ScopeState = {
 
 /**
  * The slice of the shared `woocommerce` state this module reads: the
- * catalog layer, this module's own `productScopes` records, and
- * `findItemInCart` from the cart layer (`cart.ts`) for `cartItem`. It
- * excludes `productScope` and `findProductScope` themselves — this module
- * defines those, it does not read them back.
+ * catalog layer and this module's own `productScopes` records. It excludes
+ * `productScope` and `findProductScope` themselves — this module defines
+ * those, it does not read them back. The cart-line lookup `cartItem` needs
+ * comes from `cart-actions.ts`'s `findCartLine`, called directly rather than
+ * read off this state.
  */
-type SharedState = CatalogState &
-	Pick< ScopeState, 'productScopes' > &
-	Pick< CartStore[ 'state' ], 'findItemInCart' >;
+type SharedState = CatalogState & Pick< ScopeState, 'productScopes' >;
 
 // Bound once, by `index.ts`, to the store's own returned state reference
 // right after its single `store()` registration — before any directive can
@@ -407,7 +407,7 @@ function resolveProductMembers(
  * own id rather than its parent's — falling back to `productId` itself when
  * no product resolves. `variation` is passed through unchanged, so a
  * variation line still has to match on attributes as well as on id.
- * `state.findItemInCart`'s own matching is otherwise untouched.
+ * `findCartLine`'s own matching is otherwise untouched.
  *
  * @param productId   The scope's resolved product id.
  * @param variation   The scope's resolved selected variation attributes.
@@ -421,7 +421,7 @@ function resolveCartItem(
 ): CartLine | null {
 	const { product } = resolveProductMembers( productId, variation );
 	return (
-		state.findItemInCart( {
+		findCartLine( {
 			id: product?.id ?? productId,
 			key: cartItemKey,
 			variation,

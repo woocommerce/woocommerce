@@ -45,12 +45,8 @@ const entries = {
 	// Other
 	'@woocommerce/stores/woocommerce':
 		'./assets/js/base/stores/woocommerce/index.ts',
-	'@woocommerce/stores/woocommerce/cart':
-		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
-	'@woocommerce/stores/woocommerce/products':
-		'./assets/js/base/stores/woocommerce/products.ts',
 	'@woocommerce/stores/woocommerce/shopper-lists':
 		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
 };

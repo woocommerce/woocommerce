@@ -253,7 +253,7 @@ describe( 'Mini-Cart interactivity store', () => {
 	} );
 
 	describe( 'resolving a row by its cartItemKey', () => {
-		it( "pairs a row's line through the unified store's product scope, never findItemInCart", () => {
+		it( "pairs a row's line through the unified store's product scope, not a direct cart-line lookup", () => {
 			mockWooContext = { cartItem: { key: 'item-key-42' } };
 			const cartItem = buildCartItem( { key: 'item-key-42' } );
 			mockFindProductScope.mockReturnValue( { cartItem } );

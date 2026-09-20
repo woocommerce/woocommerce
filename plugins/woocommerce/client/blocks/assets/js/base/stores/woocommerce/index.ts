@@ -30,14 +30,13 @@ export type {
 	AddCartItemOutcome,
 	OptimisticCartItem,
 	SelectedAttributes,
-	ClientCartItem,
 	WooCommerceConfig,
 } from './types';
 
 // The acknowledgement string the other stores in this folder pass to
 // `store()`. Reusing it here is what lets a consumer that already knows it
 // call `store( 'woocommerce', {}, { lock } )` and still resolve this store.
-const universalLock =
+const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // `scopeState.productScope` is a getter, so it is merged with
@@ -66,10 +65,10 @@ const { state, actions } = store< WooCommerceStore >(
 		state: initialState,
 		actions: cartActions,
 	},
-	{ lock: universalLock }
+	{ lock: storeConsent }
 );
 
-// `scope.ts` reads and writes the cart plane's `findItemInCart` for
+// `scope.ts` calls `cart-actions.ts`'s `findCartLine` directly for
 // `cartItem`, and `cart-actions.ts` reads and writes `scope.ts`'s
 // `productScopes` / `productScope` for `addCartItem()`'s draft form —
 // hence binding both to the same returned state reference, immediately

@@ -24,7 +24,6 @@ export type {
 	AddCartItemOutcome,
 	OptimisticCartItem,
 	SelectedAttributes,
-	ClientCartItem,
 	WooCommerceConfig,
 } from './cart-actions';
 

@@ -29,7 +29,6 @@ import {
 	isApiErrorResponse,
 	generateErrorNotice,
 	lineMatchesProduct,
-	productToken,
 	computeKeylessAddSuppressKeys,
 	getInfoNoticesFromCartUpdates,
 	showNoticeError,
@@ -81,22 +80,6 @@ export type AddCartItemPayload = {
 	[ extensionKey: string ]: unknown;
 };
 
-/**
- * @deprecated Compatibility type for the six consumers still calling the old
- * `addCartItem`/`batchAddCartItems` surface (`quantityToAdd`, `key`, `type`).
- * T18 removes it once every consumer migrates to `AddCartItemPayload`.
- */
-export type ClientCartItem = {
-	key?: string;
-	id: number;
-	type: string;
-	variation?: SelectedAttributes[];
-	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
-	quantity?: number;
-	/** Optional: add this delta to current quantity instead of setting absolute quantity */
-	quantityToAdd?: number;
-};
-
 export type AddCartItemOptions = { showCartUpdatesNotices?: boolean };
 
 /**
@@ -123,27 +106,15 @@ export type AddCartItemOutcome =
 	| { success: true }
 	| { success: false; error: AddCartItemError };
 
-/** `state.cart` and the compatibility cart-line matcher, the cart plane's public surface. */
+/** `state.cart`, the cart plane's public surface. */
 export type CartActionsState = {
 	cart: Omit< Cart, 'items' > & {
 		items: ( OptimisticCartItem | CartItem )[];
 		totals: CartResponseTotals;
 	};
-	/**
-	 * @deprecated Compatibility member kept for
-	 * `atomic/blocks/product-elements/button/frontend.ts` and
-	 * `blocks/mini-cart/frontend.ts`, and used internally by the scope
-	 * envelope's `cartItem` accessor. T18 deletes the external uses; this
-	 * member stays only as long as the scope envelope needs it.
-	 */
-	findItemInCart: ( args: {
-		id: ClientCartItem[ 'id' ];
-		key?: ClientCartItem[ 'key' ];
-		variation?: ClientCartItem[ 'variation' ];
-	} ) => CartItem | OptimisticCartItem | undefined;
 };
 
-/** The cart plane's actions: the four designed actions plus temporary compatibility members. */
+/** The cart plane's actions: the four designed actions. */
 export type CartActionsActions = {
 	addCartItem: (
 		payload?: AddCartItemPayload | Event,
@@ -155,27 +126,6 @@ export type CartActionsActions = {
 	} ) => Promise< void >;
 	removeCartItem: ( key: string ) => Promise< void >;
 	refreshCart: () => Promise< void >;
-	/**
-	 * @deprecated Compatibility member kept for
-	 * `blocks/add-to-cart-with-options/grouped-product-selector/frontend.ts:130`.
-	 * T18 deletes it; D3 replaces it with one `addCartItem` call per child.
-	 */
-	batchAddCartItems: (
-		items: ClientCartItem[],
-		options?: AddCartItemOptions
-	) => Promise< void >;
-	/**
-	 * @deprecated Compatibility alias for `refreshCart`, kept for
-	 * `atomic/blocks/product-elements/button/frontend.ts:185`. T18 deletes it.
-	 */
-	refreshCartItems: () => Promise< void >;
-	/**
-	 * @deprecated Compatibility member: the store-level action the old
-	 * surface exposed. The mutation queue's own internal `waitForIdle()`
-	 * (used by `sendCartRequest`'s reconciliation) is unaffected and stays.
-	 * T18 deletes this action.
-	 */
-	waitForIdle: () => Promise< void >;
 };
 
 type QuantityChanges = {
@@ -193,11 +143,11 @@ type CartMutationMeta = {
 	/** The quantity changes this single mutation contributes, if it succeeds. */
 	quantityChanges: QuantityChanges;
 	/**
-	 * Whether this mutation was issued by an add-style action (`addCartItem`,
-	 * `updateCartItem`, or the compatibility `batchAddCartItems`, regardless
-	 * of whether it hit the `add-item` or `update-item` endpoint) or by
-	 * `removeCartItem`. Only `'add'`-origin successes trigger the legacy
-	 * added-to-cart event and the screen-reader announcement.
+	 * Whether this mutation was issued by an add-style action (`addCartItem`
+	 * or `updateCartItem`, regardless of whether it hit the `add-item` or
+	 * `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
+	 * successes trigger the legacy added-to-cart event and the
+	 * screen-reader announcement.
 	 */
 	origin: 'add' | 'remove';
 };
@@ -206,8 +156,7 @@ type CartMutationMeta = {
  * The shape of the scope layer's records and reading-element envelope this
  * module needs for `addCartItem()`'s draft form: enough to read and clear a
  * scope's record without importing `scope.ts`'s own `ScopeState` type, which
- * (through the `cart.ts` compatibility shim) would otherwise create a
- * circular type reference back to this module.
+ * would otherwise create a circular type reference back to this module.
  */
 type ScopeAccess = {
 	/** Every scope's client-only record, keyed by name (`scope.ts`). */
@@ -225,10 +174,10 @@ type ScopeAccess = {
 
 /**
  * The slice of the shared `woocommerce` state this module reads and writes:
- * its own `cart` and `findItemInCart`, the scope layer's records (to build
- * and clear an `addCartItem()` draft), and `restUrl` / `nonce` /
- * `errorMessages`, seeded by PHP (`BlocksSharedState.php`) but no longer part
- * of the module's designed, published state type.
+ * its own `cart`, the scope layer's records (to build and clear an
+ * `addCartItem()` draft), and `restUrl` / `nonce` / `errorMessages`, seeded
+ * by PHP (`BlocksSharedState.php`) but no longer part of the module's
+ * designed, published state type.
  */
 type SharedState = CartActionsState &
 	ScopeAccess & {
@@ -528,9 +477,8 @@ type CartSnapshotBox = { current: CartActionsState[ 'cart' ] | null };
 
 /**
  * Sets one cart line's absolute quantity via the Store API's `update-item`
- * endpoint. Shared by the designed `updateCartItem` action and `addCartItem`'s
- * compatibility keyed form, both of which resolve the same
- * `AddCartItemOutcome` even though `updateCartItem` itself discards it.
+ * endpoint, resolving an `AddCartItemOutcome` even though `updateCartItem`
+ * itself discards it.
  *
  * @param key      The cart line's key.
  * @param quantity The absolute quantity to set.
@@ -595,6 +543,31 @@ function* performUpdate(
 }
 
 /**
+ * Finds the cart line matching an id/key/variation triple: an exact `key`
+ * match when given, otherwise the first line matching the product and
+ * variation. Used by `performAdd`'s existing-line lookup, and by the scope
+ * envelope's `cartItem` accessor (`scope.ts`), which imports it directly.
+ *
+ * @param args           The lookup.
+ * @param args.id        The product id.
+ * @param args.key       An exact cart-line key, if known.
+ * @param args.variation The selected variation attributes, if any.
+ * @return The matching cart line, or `undefined`.
+ */
+export function findCartLine( args: {
+	id: number;
+	key?: string | undefined;
+	variation?: SelectedAttributes[] | undefined;
+} ): CartItem | OptimisticCartItem | undefined {
+	return state.cart.items.find( ( cartItem ) => {
+		if ( args.key ) {
+			return args.key === cartItem.key;
+		}
+		return lineMatchesProduct( cartItem, args.id, args.variation );
+	} );
+}
+
+/**
  * Posts a payload to the Store API's `add-item` endpoint, bumping a matching
  * cart line (or pushing a new one) optimistically, and applies the same
  * notice and cross-cutting-effect machinery every mutation shares.
@@ -613,7 +586,7 @@ function* performAdd(
 ): AsyncAction< AddCartItemOutcome > {
 	const { id, variation } = payload;
 	const delta = typeof payload.quantity === 'number' ? payload.quantity : 1;
-	const existingItem = state.findItemInCart( { id, variation } );
+	const existingItem = findCartLine( { id, variation } );
 
 	const quantityChanges: QuantityChanges = { productsPendingAdd: [ id ] };
 
@@ -701,20 +674,6 @@ function* performAdd(
 }
 
 /**
- * Type guard for `addCartItem`'s compatibility keyed form: a payload object
- * carrying a truthy `key`, the shape `blocks/mini-cart/frontend.ts`'s
- * quantity stepper still posts.
- *
- * @param payload The payload `addCartItem` received.
- * @return `true` when `payload.key` is a non-empty string.
- */
-function isKeyedCompatPayload(
-	payload: AddCartItemPayload
-): payload is AddCartItemPayload & { key: string; quantity: number } {
-	return typeof payload.key === 'string' && payload.key.length > 0;
-}
-
-/**
  * Type guard for `addCartItem`'s directive-bound call shape: a DOM `Event`
  * (what the Interactivity runtime passes as the first argument when the
  * action is bound to an event listener). Guarded by `typeof Event` in case
@@ -734,11 +693,6 @@ function isEvent( value: unknown ): value is Event {
  * removes that scope's record when the server accepts it. With a payload,
  * posts the payload as given and removes no record.
  *
- * A payload carrying a truthy `key` is the compatibility keyed form some
- * not-yet-migrated consumers still call (`blocks/mini-cart/frontend.ts`);
- * it is a thin delegation to the same logic `updateCartItem` uses. T18
- * removes that branch once T14 migrates Mini-Cart.
- *
  * Resolves `{ success: true }` or `{ success: false, error }` for every
  * outcome, including a server rejection or a transport failure, and never
  * rejects.
@@ -757,15 +711,8 @@ function* addCartItem(
 ): AsyncAction< AddCartItemOutcome > {
 	preloadA11y();
 
-	// A real payload — not the no-payload/Event draft form. Narrowing on
-	// this check (rather than a separately-computed boolean) is what lets
-	// TypeScript treat `payloadOrEvent` as `AddCartItemPayload` in this
-	// branch and in `isKeyedCompatPayload`'s own narrowing below.
+	// A real payload — not the no-payload/Event draft form.
 	if ( payloadOrEvent !== undefined && ! isEvent( payloadOrEvent ) ) {
-		if ( isKeyedCompatPayload( payloadOrEvent ) ) {
-			const { key, quantity } = payloadOrEvent;
-			return yield* performUpdate( key, quantity );
-		}
 		return yield* performAdd( payloadOrEvent, showCartUpdatesNotices );
 	}
 
@@ -926,232 +873,12 @@ function* refreshCart(): AsyncAction< void > {
 	}
 }
 
-/**
- * @deprecated Compatibility alias for `refreshCart`, kept for
- * `atomic/blocks/product-elements/button/frontend.ts:185`. T18 deletes it.
- */
-function* refreshCartItems(): AsyncAction< void > {
-	yield* refreshCart();
-}
-
-/**
- * @deprecated Compatibility member: the store-level action the old surface
- * exposed. Waits for the mutation queue's current cycle to settle. T18
- * deletes it.
- */
-function* waitForIdle(): AsyncAction< void > {
-	if ( cartQueue ) {
-		yield cartQueue.waitForIdle();
-	}
-}
-
-/**
- * @deprecated Compatibility member kept for
- * `blocks/add-to-cart-with-options/grouped-product-selector/frontend.ts:130`.
- * D3 replaces batched grouped adds with one `addCartItem` call per child;
- * T18 deletes this action once that migration lands.
- *
- * Posts every item of `items` in the same tick — each through `add-item` or
- * `update-item` depending on whether it carries a `key` — and reports one
- * combined set of auto-update/auto-removal notices for the whole call, diffed
- * against the last successful item's server cart.
- *
- * @param      items                          The items to post.
- * @param      options                        Call options.
- * @param      options.showCartUpdatesNotices Whether a successful call may show the
- *                                            auto-update/auto-removal info notices.
- *                                            Defaults to `true`.
- */
-function* batchAddCartItems(
-	items: ClientCartItem[],
-	{ showCartUpdatesNotices = true }: AddCartItemOptions = {}
-): AsyncAction< void > {
-	preloadA11y();
-
-	try {
-		// Per-product capture for the keyless-add exactness test, accumulated
-		// across all keyless batch items. The map key is a canonical product
-		// token so multiple batch items for the same product accumulate into
-		// one entry. Keyed items never contribute to this map.
-		const batchProductCaptures = new Map<
-			string,
-			{
-				id: number;
-				variation?: SelectedAttributes[] | undefined;
-				preAddTotal: number;
-				deltaTotal: number;
-				preExistingKeys: string[];
-			}
-		>();
-		const promises = items.map( ( item ) => {
-			const isUpdate = !! item.key;
-			const endpoint = isUpdate ? 'update-item' : 'add-item';
-			const existingItem = isUpdate
-				? state.cart.items.find(
-						( cartItem ) => cartItem.key === item.key
-				  )
-				: state.findItemInCart( {
-						id: item.id,
-						variation: item.variation,
-				  } );
-
-			// The optimistic target quantity a matched existing line is
-			// bumped to. For a keyed update this is the posted absolute
-			// quantity; for a keyless add this is the running total (current
-			// quantity plus the posted delta), never the posted delta itself.
-			let optimisticTarget: number;
-			let itemToSend: OptimisticCartItem;
-			let itemMeta: CartMutationMeta;
-			if ( isUpdate ) {
-				const quantity = item.quantity ?? 1;
-				optimisticTarget = quantity;
-				itemToSend = (
-					existingItem
-						? { ...existingItem, quantity }
-						: { key: item.key, quantity }
-				) as OptimisticCartItem;
-				itemMeta = {
-					quantityChanges: {
-						cartItemsPendingQuantity: existingItem?.key
-							? [ existingItem.key ]
-							: [],
-					},
-					origin: 'add',
-				};
-			} else {
-				const delta = item.quantityToAdd ?? item.quantity ?? 1;
-				optimisticTarget = ( existingItem?.quantity ?? 0 ) + delta;
-				itemToSend = {
-					id: item.id,
-					quantity: delta,
-					...( item.variation && { variation: item.variation } ),
-				} as OptimisticCartItem;
-				itemMeta = {
-					quantityChanges: { productsPendingAdd: [ item.id ] },
-					origin: 'add',
-				};
-
-				// Accumulate the per-product capture for the exactness test.
-				const token = productToken( item.id, item.variation );
-				const existingCapture = batchProductCaptures.get( token );
-				if ( ! existingCapture ) {
-					const preExistingKeys: string[] = [];
-					let preAddTotal = 0;
-					for ( const cartLine of state.cart.items ) {
-						if (
-							lineMatchesProduct(
-								cartLine,
-								item.id,
-								item.variation
-							)
-						) {
-							preAddTotal += cartLine.quantity;
-							if ( cartLine.key ) {
-								preExistingKeys.push( cartLine.key );
-							}
-						}
-					}
-					batchProductCaptures.set( token, {
-						id: item.id,
-						variation: item.variation,
-						preAddTotal,
-						deltaTotal: delta,
-						preExistingKeys,
-					} );
-				} else {
-					existingCapture.deltaTotal += delta;
-				}
-			}
-
-			return sendCartRequest( state, {
-				path: `/wc/store/v1/cart/${ endpoint }`,
-				method: 'POST',
-				body: itemToSend,
-				applyOptimistic: () => {
-					if ( existingItem ) {
-						const isSoldIndividually =
-							isCartItem( existingItem ) &&
-							existingItem.sold_individually;
-						if ( ! isSoldIndividually ) {
-							existingItem.quantity = optimisticTarget;
-						}
-					} else {
-						state.cart.items.push( itemToSend );
-					}
-				},
-				meta: itemMeta,
-			} );
-		} );
-
-		// Capture cart state after optimistic updates for notices.
-		const cartAfterOptimistic = JSON.parse( JSON.stringify( state.cart ) );
-
-		const results = ( yield Promise.allSettled(
-			promises
-		) ) as PromiseSettledResult< MutationResult< Cart > >[];
-
-		// Find the last successful result for notices.
-		const lastSuccess = [ ...results ]
-			.reverse()
-			.find(
-				( r ): r is PromiseFulfilledResult< MutationResult< Cart > > =>
-					r.status === 'fulfilled' && r.value.success
-			);
-
-		if ( lastSuccess ) {
-			const cart = lastSuccess.value.data as Cart;
-
-			if ( showCartUpdatesNotices ) {
-				const suppressKeys = computeKeylessAddSuppressKeys(
-					[ ...batchProductCaptures.values() ],
-					cart
-				);
-				const infoNotices = getInfoNoticesFromCartUpdates(
-					cartAfterOptimistic.items,
-					cart,
-					suppressKeys
-				);
-				const errorNotices = cart.errors.map( generateErrorNotice );
-				yield* updateNotices(
-					[ ...infoNotices, ...errorNotices ],
-					true
-				);
-			}
-		}
-
-		// Show error notices for failed items.
-		const errorNotices = results
-			.filter(
-				( r ): r is PromiseRejectedResult => r.status === 'rejected'
-			)
-			.map( ( r ) =>
-				generateErrorNotice( r.reason as ApiErrorResponse )
-			);
-		if ( errorNotices.length > 0 ) {
-			yield* updateNotices( errorNotices );
-		}
-	} catch ( error ) {
-		void withScope( showNoticeError )(
-			error as Error,
-			state.errorMessages
-		);
-	}
-}
-
 /** The cart plane's initial state, merged into the `woocommerce` store. */
 export const cartActionsState: CartActionsState = {
 	// `cart` carries no initial default: PHP always seeds it
 	// (`BlocksSharedState.php`) before the client runs, and `refreshCart`
 	// assigns it at load time otherwise, exactly as before this module was
 	// split out of `cart.ts`.
-	findItemInCart( { id, key, variation } ) {
-		return state.cart.items.find( ( cartItem ) => {
-			if ( key ) {
-				return key === cartItem.key;
-			}
-			return lineMatchesProduct( cartItem, id, variation );
-		} );
-	},
 } as CartActionsState;
 
 /**
@@ -1167,7 +894,4 @@ export const cartActions = {
 	updateCartItem,
 	removeCartItem,
 	refreshCart,
-	batchAddCartItems,
-	refreshCartItems,
-	waitForIdle,
 };

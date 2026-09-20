@@ -9,9 +9,6 @@
 			"@woocommerce/e2e-utils": [ "./utils/blocks" ],
 			"@woocommerce/stores/woocommerce": [
 				"../../client/blocks/assets/js/base/stores/woocommerce"
-			],
-			"@woocommerce/stores/woocommerce/cart": [
-				"../../client/blocks/assets/js/base/stores/woocommerce/cart"
 			]
 		},
 		"esModuleInterop": true,
