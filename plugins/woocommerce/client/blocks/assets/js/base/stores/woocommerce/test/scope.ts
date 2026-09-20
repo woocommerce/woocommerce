@@ -408,6 +408,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			mockContext = { productId: 9, scopeName: 'readonly-scope' };
 			const scope = scopeState.productScope;
 
+			void scope.scopeName;
 			void scope.productId;
 			void scope.variation;
 			void scope.draftCartItem?.id;
@@ -549,6 +550,69 @@ describe( 'woocommerce store — product scope envelope', () => {
 				// @ts-expect-error -- intentionally invalid write for the test.
 				scope.cartItem = null;
 			} ).toThrow();
+		} );
+
+		it( 'throws when writing to scopeName, and neither reading nor writing it creates a record', () => {
+			mockContext = { productId: 1, scopeName: 'ro-name' };
+			const scope = scopeState.productScope;
+
+			void scope.scopeName;
+			expect( () => {
+				// @ts-expect-error -- intentionally invalid write for the test.
+				scope.scopeName = 'other';
+			} ).toThrow();
+
+			expect( mockState.productScopes[ 'ro-name' ] ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'scopeName', () => {
+		it( 'resolves from the declared context, defaulting to _default when none is declared', () => {
+			mockContext = { productId: 1, scopeName: 's' };
+			expect( scopeState.productScope.scopeName ).toBe( 's' );
+
+			mockContext = { productId: 1 };
+			expect( scopeState.productScope.scopeName ).toBe( '_default' );
+		} );
+
+		it( 'findProductScope resolves scopeName from a named ref whether or not a record exists there', () => {
+			expect(
+				scopeState.findProductScope( { productId: 1, scopeName: 's' } )
+					.scopeName
+			).toBe( 's' );
+
+			mockState.productScopes.s = { draftCartItem: { id: 1 } };
+			expect(
+				scopeState.findProductScope( { productId: 1, scopeName: 's' } )
+					.scopeName
+			).toBe( 's' );
+		} );
+
+		it( 'findProductScope resolves an unnamed ref to the single matching record’s name, or null when none or several match', () => {
+			expect(
+				scopeState.findProductScope( { productId: 5 } ).scopeName
+			).toBeNull();
+
+			mockState.productScopes.only = { draftCartItem: { id: 5 } };
+			expect(
+				scopeState.findProductScope( { productId: 5 } ).scopeName
+			).toBe( 'only' );
+
+			mockState.productScopes.another = { draftCartItem: { id: 5 } };
+			expect(
+				scopeState.findProductScope( { productId: 5 } ).scopeName
+			).toBeNull();
+		} );
+
+		it( 'names the same record draftCartItem is addressed at, for an unnamed ref matching one record', () => {
+			mockState.productScopes.only = {
+				draftCartItem: { id: 7, quantity: 3 },
+			};
+
+			const envelope = scopeState.findProductScope( { productId: 7 } );
+
+			expect( envelope.scopeName ).toBe( 'only' );
+			expect( envelope.draftCartItem?.quantity ).toBe( 3 );
 		} );
 	} );
 

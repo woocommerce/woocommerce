@@ -83,10 +83,18 @@ type CartLine = CartItem | OptimisticCartItem;
 /**
  * The product scope envelope returned by `state.productScope` and
  * `state.findProductScope( ref )`. `productId`, `variation` and
- * `draftCartItem` are writable; `baseProduct`, `productVariation`, `product`
- * and `cartItem` are read-only.
+ * `draftCartItem` are writable; `scopeName`, `baseProduct`,
+ * `productVariation`, `product` and `cartItem` are read-only.
  */
 export type ProductScopeEnvelope = {
+	/**
+	 * The name addressing this scope's record under `state.productScopes`:
+	 * the reading element's declared `scopeName` (or `'_default'`) for
+	 * `productScope`; for an unnamed `findProductScope( ref )`, the single
+	 * record whose draft id matches the ref's product id, or `null` when
+	 * none or several match.
+	 */
+	readonly scopeName: string | null;
 	/** The scope's product id. */
 	productId: number;
 	/** The scope's selected variation attributes. */
@@ -497,7 +505,19 @@ function createEnvelope(
 ): ProductScopeEnvelope {
 	const envelope = {} as ProductScopeEnvelope;
 
+	// Shared by `scopeName` and `draftCartItem`: an unnamed ref falls back
+	// to the single record whose draft id matches the resolved identity.
+	const resolveScopeName = (): string | null =>
+		resolveName() ??
+		findSingleMatchingRecordName( getIdentity().productId );
+
 	Object.defineProperties( envelope, {
+		scopeName: {
+			enumerable: true,
+			get(): string | null {
+				return resolveScopeName();
+			},
+		},
 		productId: {
 			enumerable: true,
 			get(): number {
@@ -531,9 +551,7 @@ function createEnvelope(
 		draftCartItem: {
 			enumerable: true,
 			get(): DraftCartItem | undefined {
-				const name =
-					resolveName() ??
-					findSingleMatchingRecordName( getIdentity().productId );
+				const name = resolveScopeName();
 				return name === null
 					? undefined
 					: createDraftCartItemProxy( name, getLocator );
