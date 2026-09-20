@@ -663,16 +663,27 @@ class AddToCartWithOptions extends AbstractBlock {
 				// (D5). Its own store context moves to a wrapping element,
 				// since an element can declare context for only one
 				// Interactivity API namespace.
+				//
+				// That wrapping element has to be an ancestor of the <form>,
+				// not a descendant: `data-wp-on--submit` and
+				// `data-wp-class--is-invalid` read from the <form> as their
+				// reading element, and `getContext()` only walks ancestors.
+				// It also has to declare its own `data-wp-interactive` for
+				// this block's namespace, so its context resolves there
+				// instead of whatever namespace an enclosing element sets
+				// (the notices region's `woocommerce/store-notices`, or
+				// none at all in legacy mode), and so it is hydrated even
+				// where nothing outside it is.
 				$scope_context_directive = wp_interactivity_data_wp_context(
 					ProductScopes::get_scope_context( $product_id, $variation, $form_name ),
 					'woocommerce'
 				);
 
 				$form_html = sprintf(
-					'<form %1$s %2$s><div %3$s>%4$s</div></form>',
+					'<div data-wp-interactive="woocommerce/add-to-cart-with-options" %1$s><form %2$s %3$s>%4$s</form></div>',
+					$context_directive,
 					$form_wrapper_attributes,
 					$scope_context_directive,
-					$context_directive,
 					$form_inner_html
 				);
 			} else {

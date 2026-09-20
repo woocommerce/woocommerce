@@ -883,6 +883,24 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Parse markup into a DOMXPath, so a test can query ancestor/descendant
+	 * relationships between elements that `WP_HTML_Tag_Processor` — a flat,
+	 * one-tag-at-a-time scanner — cannot answer.
+	 *
+	 * @param string $markup Rendered markup.
+	 * @return \DOMXPath The parsed document, ready to query.
+	 */
+	private function get_xpath( string $markup ): \DOMXPath {
+		$document                = new \DOMDocument();
+		$previous_libxml_setting = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!DOCTYPE html><html><body>' . $markup . '</body></html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_libxml_setting );
+
+		return new \DOMXPath( $document );
+	}
+
+	/**
 	 * Build hand-picked Product Collection markup showing a single product, embedding the given inner block markup
 	 * inside its Product Template.
 	 *
@@ -951,6 +969,115 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$this->assertSame( $product_id, $forms[1]['context']['productId'] );
 			$this->assertIsString( $forms[1]['context']['scopeName'] );
 		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A declaring form's own context wraps the <form> as an ancestor, declaring its own data-wp-interactive; a non-declaring form gets no such wrapping element.
+	 */
+	public function test_declaring_forms_own_context_wraps_the_form_not_nested_inside_it(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$product_id
+				)
+			);
+
+			$xpath = $this->get_xpath( $markup );
+			$forms = $xpath->query( '//form' );
+			$this->assertSame( 2, $forms->length );
+
+			$first_form  = $forms->item( 0 );
+			$second_form = $forms->item( 1 );
+
+			// The first form declares nothing of its own: its own context
+			// stays on the <form> element itself, and no element wraps it.
+			$this->assertSame(
+				0,
+				$xpath->query( 'ancestor::*[@data-wp-interactive="woocommerce/add-to-cart-with-options"]', $first_form )->length,
+				'A form that declares no scope of its own should render no wrapping element around it.'
+			);
+			$first_form_context = json_decode( $first_form->getAttribute( 'data-wp-context' ), true );
+			$this->assertArrayHasKey( 'initialQuantity', $first_form_context, "The first form's own context should stay directly on its <form> element." );
+
+			// The second form declares its own scope directly on the <form>,
+			// unchanged, while its own context (initialQuantity, etc.) moves
+			// to a wrapping element that is an ancestor of the <form>.
+			$this->assertStringStartsWith(
+				'woocommerce::',
+				$second_form->getAttribute( 'data-wp-context' ),
+				"The declaring form's own <form> element should still carry its woocommerce:: scope declaration."
+			);
+
+			$wrapping_elements = $xpath->query( 'ancestor::*[@data-wp-interactive="woocommerce/add-to-cart-with-options"]', $second_form );
+			$this->assertSame(
+				1,
+				$wrapping_elements->length,
+				"The declaring form's own context element should be an ancestor of its <form>, declaring its own data-wp-interactive."
+			);
+
+			$wrapper  = $wrapping_elements->item( 0 );
+			$tag_name = $wrapper->tagName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMElement defines this public property name.
+			$this->assertNotSame( 'form', strtolower( $tag_name ), 'The wrapping element should not itself be the <form>.' );
+
+			$wrapper_context = json_decode( $wrapper->getAttribute( 'data-wp-context' ), true );
+			$this->assertIsArray( $wrapper_context );
+			$this->assertArrayHasKey( 'initialQuantity', $wrapper_context );
+			$this->assertArrayHasKey( 'validationErrors', $wrapper_context );
+			$this->assertArrayHasKey( 'noticeIds', $wrapper_context );
+			$this->assertArrayHasKey( 'outOfStockMessage', $wrapper_context );
+			$this->assertArrayNotHasKey( 'productId', $wrapper_context, "The wrapping element's own context should not itself carry the scope declaration." );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox In legacy mode, where no notices region wraps the form and no interactive ancestor exists, a declaring form still renders the same wrapping element, with the same data-wp-interactive and context.
+	 */
+	public function test_declaring_forms_own_context_wraps_the_form_in_legacy_mode(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+
+		try {
+			update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$product_id
+				)
+			);
+
+			$this->assertStringNotContainsString( 'woocommerce/store-notices', $markup, 'Legacy mode renders no notices region.' );
+
+			$xpath = $this->get_xpath( $markup );
+			$forms = $xpath->query( '//form' );
+			$this->assertSame( 2, $forms->length );
+
+			$second_form = $forms->item( 1 );
+			$this->assertStringStartsWith( 'woocommerce::', $second_form->getAttribute( 'data-wp-context' ) );
+
+			$wrapping_elements = $xpath->query( 'ancestor::*[@data-wp-interactive="woocommerce/add-to-cart-with-options"]', $second_form );
+			$this->assertSame(
+				1,
+				$wrapping_elements->length,
+				'A legacy-mode declaring form should still render its own wrapping element: the Single Product Template framing gives it no interactive ancestor to inherit hydration or namespace from.'
+			);
+
+			$wrapper_context = json_decode( $wrapping_elements->item( 0 )->getAttribute( 'data-wp-context' ), true );
+			$this->assertArrayHasKey( 'initialQuantity', $wrapper_context );
+		} finally {
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
 			$product->delete( true );
 		}
 	}
@@ -1208,6 +1335,70 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			);
 
 			$this->assertSame( $expected_scope_names, $forms[0]['context']['groupedScopeNames'] );
+		} finally {
+			$grouped->delete( true );
+			$child_a->delete( true );
+			$child_b->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A declaring grouped form's own context, now on its wrapping element, still carries groupedProductIds and groupedScopeNames matching each of its own child rows' scopeName.
+	 */
+	public function test_declaring_grouped_form_wrapper_carries_grouped_scope_names_matching_its_own_child_rows(): void {
+		$child_a = new \WC_Product_Simple();
+		$child_a->set_regular_price( 10 );
+		$child_a_id = $child_a->save();
+
+		$child_b = new \WC_Product_Simple();
+		$child_b->set_regular_price( 20 );
+		$child_b_id = $child_b->save();
+
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_children( array( $child_a_id, $child_b_id ) );
+		$grouped_id = $grouped->save();
+
+		try {
+			// Two forms for the grouped product in the same place, so the second declares its own scope.
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$grouped_id
+				)
+			);
+
+			$xpath = $this->get_xpath( $markup );
+			$forms = $xpath->query( '//form' );
+			$this->assertSame( 2, $forms->length );
+			$second_form = $forms->item( 1 );
+
+			$wrapping_elements = $xpath->query( 'ancestor::*[@data-wp-interactive="woocommerce/add-to-cart-with-options"]', $second_form );
+			$this->assertSame( 1, $wrapping_elements->length );
+
+			$wrapper_context = json_decode( $wrapping_elements->item( 0 )->getAttribute( 'data-wp-context' ), true );
+			$this->assertArrayHasKey( 'groupedScopeNames', $wrapper_context );
+			$this->assertArrayNotHasKey( 'selectedAttributes', $wrapper_context );
+
+			// Collect the scopeName each child row inside this second form declares its own.
+			$child_rows             = $xpath->query( './/*[starts-with(@data-wp-context, "woocommerce::")]', $second_form );
+			$scope_name_by_child_id = array();
+			foreach ( $child_rows as $child_row ) {
+				$decoded = json_decode( substr( $child_row->getAttribute( 'data-wp-context' ), strlen( 'woocommerce::' ) ), true );
+				if ( in_array( $decoded['productId'], array( $child_a_id, $child_b_id ), true ) ) {
+					$scope_name_by_child_id[ $decoded['productId'] ] = $decoded['scopeName'];
+				}
+			}
+
+			$this->assertCount( 2, $scope_name_by_child_id, "This form's own two child rows should each declare a scopeName." );
+
+			$expected_scope_names = array_map(
+				function ( $child_id ) use ( $scope_name_by_child_id ) {
+					return $scope_name_by_child_id[ $child_id ];
+				},
+				$wrapper_context['groupedProductIds']
+			);
+
+			$this->assertSame( $expected_scope_names, $wrapper_context['groupedScopeNames'] );
 		} finally {
 			$grouped->delete( true );
 			$child_a->delete( true );
