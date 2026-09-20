@@ -18,7 +18,7 @@ let mockProductScopes: Record<
 >;
 let mockScopeProducts: Record<
 	string,
-	{ add_to_cart: { minimum: number; maximum: number } }
+	{ id: number; add_to_cart: { minimum: number; maximum: number } } | null
 >;
 
 type MockScopeRef = { productId: number; scopeName: string };
@@ -149,8 +149,8 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 4, 12: 1 };
 		mockScopeProducts = {
-			'form:11': { add_to_cart: { minimum: 1, maximum: 3 } },
-			'form:12': { add_to_cart: { minimum: 1, maximum: 1 } },
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 3 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 1 } },
 		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
@@ -167,8 +167,8 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 2, 12: 0 };
 		mockScopeProducts = {
-			'form:11': { add_to_cart: { minimum: 3, maximum: 5 } },
-			'form:12': { add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:11': { id: 11, add_to_cart: { minimum: 3, maximum: 5 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 5 } },
 		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
@@ -185,8 +185,8 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 0, 12: 1 };
 		mockScopeProducts = {
-			'form:11': { add_to_cart: { minimum: 1, maximum: 2 } },
-			'form:12': { add_to_cart: { minimum: 1, maximum: 2 } },
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 2 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 2 } },
 		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
@@ -201,7 +201,7 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		// Child 11's scope carries no catalog entry, so its bounds are
 		// unknown; only child 12's is seeded.
 		mockScopeProducts = {
-			'form:12': { add_to_cart: { minimum: 1, maximum: 2 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 2 } },
 		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
@@ -215,8 +215,8 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.initialQuantity = { 11: 0, 12: 0 };
 		mockProductScopes[ 'form:11' ] = { draftCartItem: { quantity: 2 } };
 		mockScopeProducts = {
-			'form:11': { add_to_cart: { minimum: 1, maximum: 5 } },
-			'form:12': { add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 5 } },
 		};
 
 		getRegisteredStore().actions.validateGroupedProductQuantity();
@@ -228,6 +228,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11, 12, 13 ];
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12', 'form:13' ];
 		mockContext.initialQuantity = { 11: 2, 12: 0, 13: 1 };
+		mockScopeProducts = {
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:13': { id: 13, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		const generator =
 			getRegisteredStore().actions.batchAddToCart() as unknown as Generator;
@@ -259,6 +263,9 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockProductScopes[ 'form:11' ] = {
 			draftCartItem: { id: 11, variation: [], quantity: 4 },
 		};
+		mockScopeProducts = {
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		await runGenerator(
 			getRegisteredStore().actions.batchAddToCart() as unknown as Generator
@@ -274,6 +281,9 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11 ];
 		mockContext.groupedScopeNames = [ 'form:11' ];
 		mockContext.initialQuantity = { 11: 3 };
+		mockScopeProducts = {
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		await runGenerator(
 			getRegisteredStore().actions.batchAddToCart() as unknown as Generator
@@ -281,6 +291,44 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 
 		expect( mockAddCartItem ).toHaveBeenCalledWith(
 			{ id: 11, variation: [], quantity: 3 },
+			{ showCartUpdatesNotices: false }
+		);
+	} );
+
+	it( "posts a child at its envelope's resolved product id, not its raw scope id", async () => {
+		mockContext.groupedProductIds = [ 11 ];
+		mockContext.groupedScopeNames = [ 'form:11' ];
+		mockContext.initialQuantity = { 11: 2 };
+		mockScopeProducts = {
+			'form:11': { id: 99, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
+
+		await runGenerator(
+			getRegisteredStore().actions.batchAddToCart() as unknown as Generator
+		);
+
+		expect( mockAddCartItem ).toHaveBeenCalledWith(
+			{ id: 99, variation: [], quantity: 2 },
+			{ showCartUpdatesNotices: false }
+		);
+	} );
+
+	it( 'skips a child whose envelope resolves no product, but still posts the others', async () => {
+		mockContext.groupedProductIds = [ 11, 12 ];
+		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
+		mockContext.initialQuantity = { 11: 1, 12: 2 };
+		mockScopeProducts = {
+			'form:11': null,
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
+
+		await runGenerator(
+			getRegisteredStore().actions.batchAddToCart() as unknown as Generator
+		);
+
+		expect( mockAddCartItem ).toHaveBeenCalledTimes( 1 );
+		expect( mockAddCartItem ).toHaveBeenCalledWith(
+			{ id: 12, variation: [], quantity: 2 },
 			{ showCartUpdatesNotices: false }
 		);
 	} );
@@ -303,6 +351,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.initialQuantity = { 11: 2 };
 		mockProductScopes[ 'formA:11' ] = { draftCartItem: { quantity: 2 } };
 		mockProductScopes[ 'formB:11' ] = { draftCartItem: { quantity: 5 } };
+		mockScopeProducts = {
+			'formA:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+			'formB:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 
 		mockContext.groupedScopeNames = [ 'formA:11' ];
 		await runGenerator(
@@ -331,6 +383,10 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 		mockContext.groupedProductIds = [ 11, 12 ];
 		mockContext.groupedScopeNames = [ 'form:11', 'form:12' ];
 		mockContext.initialQuantity = { 11: 1, 12: 1 };
+		mockScopeProducts = {
+			'form:11': { id: 11, add_to_cart: { minimum: 1, maximum: 5 } },
+			'form:12': { id: 12, add_to_cart: { minimum: 1, maximum: 5 } },
+		};
 		// `addCartItem` never rejects; a server rejection resolves with
 		// `success: false` instead, which is what lets `Promise.all` here
 		// wait for every child's own outcome without one failure aborting

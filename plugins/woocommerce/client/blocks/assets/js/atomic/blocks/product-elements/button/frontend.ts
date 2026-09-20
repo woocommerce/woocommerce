@@ -137,7 +137,7 @@ const productButtonStore = {
 				getContext< ProductScopeContext >( 'woocommerce' );
 			const scopeName = scopeContext?.scopeName ?? '_default';
 			const record = wooState.productScopes[ scopeName ]?.draftCartItem;
-			const { productId, variation } = wooState.productScope;
+			const { variation } = wooState.productScope;
 
 			// The payload form: it removes no record, so a shopper's typed
 			// quantity in a form sharing this scope survives the click, as
@@ -147,7 +147,7 @@ const productButtonStore = {
 			yield wooActions.addCartItem(
 				{
 					...record,
-					id: productId,
+					id: product.id,
 					variation,
 					quantity: context.quantityToAdd,
 				},

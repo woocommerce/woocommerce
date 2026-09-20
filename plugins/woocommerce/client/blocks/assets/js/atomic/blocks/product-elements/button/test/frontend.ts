@@ -236,7 +236,7 @@ describe( 'Product Button interactivity store', () => {
 		} );
 	} );
 
-	it( "posts the scope's own product id and selected variation", async () => {
+	it( "posts the scope's resolved variation id, not the parent's, beside the selected variation", async () => {
 		mockProductScope.productId = 42;
 		mockProductScope.variation = [
 			{ attribute: 'attribute_pa_color', value: 'Blue' },
@@ -249,7 +249,7 @@ describe( 'Product Button interactivity store', () => {
 
 		expect( mockAddCartItem ).toHaveBeenCalledWith(
 			expect.objectContaining( {
-				id: 42,
+				id: 55,
 				variation: [
 					{ attribute: 'attribute_pa_color', value: 'Blue' },
 				],

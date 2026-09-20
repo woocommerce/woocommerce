@@ -294,12 +294,12 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						?.scopeName ?? '_default';
 				const record =
 					wooState.productScopes[ scopeName ]?.draftCartItem;
-				const { productId, variation } = wooState.productScope;
+				const { variation } = wooState.productScope;
 
 				yield wooActions.addCartItem(
 					{
 						...record,
-						id: productId,
+						id: product.id,
 						variation,
 						quantity: state.effectiveQuantity,
 					},

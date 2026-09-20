@@ -259,22 +259,24 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			title: 'simple product',
 			type: 'simple',
 			variation: [],
+			resolvedId: 42,
 		},
 		{
-			title: 'selected variation',
+			title: 'selected variation, posting the variation’s own id, not the parent’s',
 			type: 'variation',
 			variation: [
 				{ attribute: 'attribute_pa_color', value: 'blue' },
 				{ attribute: 'Logo', value: 'No' },
 			],
+			resolvedId: 55,
 		},
 	] )(
 		'forwards the exact $title cart payload, with quantityToAdd/type dropped',
-		async ( { type, variation } ) => {
+		async ( { type, variation, resolvedId } ) => {
 			mockProductScope.variation = variation;
 			mockProductScope.product = {
 				...mockProductScope.product,
-				id: 42,
+				id: resolvedId,
 				type,
 			};
 			mockWooScopes._default = {
@@ -291,7 +293,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			expect( preventDefault ).toHaveBeenCalledTimes( 1 );
 			expect( mockAddCartItem ).toHaveBeenCalledWith(
 				{
-					id: 42,
+					id: resolvedId,
 					variation,
 					quantity: 2,
 				},

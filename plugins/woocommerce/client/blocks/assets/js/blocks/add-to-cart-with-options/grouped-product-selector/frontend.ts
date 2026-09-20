@@ -151,6 +151,11 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						productId: childProductId,
 						scopeName,
 					} );
+
+					if ( ! envelope.product ) {
+						return;
+					}
+
 					const record =
 						wooState.productScopes[ scopeName ]?.draftCartItem;
 
@@ -158,7 +163,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						wooActions.addCartItem(
 							{
 								...record,
-								id: envelope.productId,
+								id: envelope.product.id,
 								variation: envelope.variation,
 								quantity,
 							},
