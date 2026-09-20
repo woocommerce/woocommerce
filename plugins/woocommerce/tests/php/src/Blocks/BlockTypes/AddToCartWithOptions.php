@@ -66,6 +66,11 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 * between tests, so the `isFormValid` closure and the config this class
 	 * seeds would otherwise remain registered on the singleton
 	 * `WP_Interactivity_API` instance for the rest of the process.
+	 *
+	 * Also resets `Utils`'s "getter already registered" flag, which guards
+	 * the `inputQuantity` closure the same way. Left true, it would skip
+	 * re-registering that closure into the state just cleared above, so the
+	 * next test's markup would resolve no value at all.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
@@ -80,6 +85,11 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			unset( $value['woocommerce/add-to-cart-with-options'], $value['woocommerce/add-to-cart-with-options-quantity-selector'] );
 			$property->setValue( $interactivity, $value );
 		}
+
+		$utils_reflection = new \ReflectionClass( Utils::class );
+		$flag             = $utils_reflection->getProperty( 'input_quantity_getter_registered' );
+		$flag->setAccessible( true );
+		$flag->setValue( null, false );
 	}
 
 	/**
@@ -1499,6 +1509,26 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Get the resolved `value` attribute of the first quantity input (class
+	 * `qty`) found in a fragment, after `wp_interactivity_process_directives()`
+	 * has resolved its `data-wp-bind--value` directive.
+	 *
+	 * @param string $fragment A processed HTML fragment.
+	 * @return string|null The input's `value` attribute, or null when no quantity input is found.
+	 */
+	private function get_quantity_input_value( string $fragment ): ?string {
+		$processor = new \WP_HTML_Tag_Processor( $fragment );
+
+		while ( $processor->next_tag( 'input' ) ) {
+			if ( $processor->has_class( 'qty' ) ) {
+				return $processor->get_attribute( 'value' );
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Split markup into one fragment per top-level `<form>...</form>`, since
 	 * Add to Cart with Options forms never nest one inside another.
 	 *
@@ -1883,13 +1913,150 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$this->assertArrayHasKey( 'invalidQuantities', $config['errorMessages'] ?? array(), 'The other error messages stay in page-wide config.' );
 
 			$quantity_selector_state = wp_interactivity_state( 'woocommerce/add-to-cart-with-options-quantity-selector' );
-			$this->assertArrayNotHasKey( 'inputQuantity', $quantity_selector_state, 'inputQuantity should not be written into page-wide interactivity state.' );
+			$this->assertInstanceOf( \Closure::class, $quantity_selector_state['inputQuantity'] ?? null, 'inputQuantity is a per-element derived getter, not a page-wide value.' );
 
 			$this->assertStringNotContainsString( 'productScopes', $markup, 'No productScopes record should be seeded.' );
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_min', $filter, 10 );
 			$simple_product->delete( true );
 			$variable_product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Each of two forms' quantity inputs carries its own product's minimum purchase quantity as its resolved `value`, before any script runs.
+	 */
+	public function test_quantity_input_value_resolves_to_each_forms_own_minimum_purchase_quantity(): void {
+		$product_a = new \WC_Product_Simple();
+		$product_a->set_regular_price( 10 );
+		$product_a_id = $product_a->save();
+
+		$product_b = new \WC_Product_Simple();
+		$product_b->set_regular_price( 10 );
+		$product_b_id = $product_b->save();
+
+		$min_quantities = array(
+			$product_a_id => 1,
+			$product_b_id => 4,
+		);
+		$filter         = function ( $min, $product ) use ( $min_quantities ) {
+			return $min_quantities[ $product->get_id() ] ?? $min;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $filter, 10, 2 );
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$product_a_id,
+					$product_b_id
+				)
+			);
+
+			$processed = wp_interactivity_process_directives( $markup );
+			$forms     = $this->extract_form_fragments( $processed );
+
+			$this->assertCount( 2, $forms );
+			$this->assertSame( '1', $this->get_quantity_input_value( $forms[0] ), "The first form's quantity input should carry its own product's minimum." );
+			$this->assertSame( '4', $this->get_quantity_input_value( $forms[1] ), "The second form's quantity input should carry its own product's minimum, not the first form's." );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter, 10 );
+			$product_a->delete( true );
+			$product_b->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Rendering the same two-form page twice resolves the same quantity input values both times.
+	 */
+	public function test_quantity_input_value_is_stable_across_repeated_renders(): void {
+		$product_a = new \WC_Product_Simple();
+		$product_a->set_regular_price( 10 );
+		$product_a_id = $product_a->save();
+
+		$product_b = new \WC_Product_Simple();
+		$product_b->set_regular_price( 10 );
+		$product_b_id = $product_b->save();
+
+		$min_quantities = array(
+			$product_a_id => 2,
+			$product_b_id => 5,
+		);
+		$filter         = function ( $min, $product ) use ( $min_quantities ) {
+			return $min_quantities[ $product->get_id() ] ?? $min;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $filter, 10, 2 );
+
+		try {
+			$block = sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+				<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+				$product_a_id,
+				$product_b_id
+			);
+
+			$first_pass_forms = $this->extract_form_fragments( wp_interactivity_process_directives( do_blocks( $block ) ) );
+			ProductScopes::reset();
+			$second_pass_forms = $this->extract_form_fragments( wp_interactivity_process_directives( do_blocks( $block ) ) );
+
+			$this->assertSame(
+				array_map( array( $this, 'get_quantity_input_value' ), $first_pass_forms ),
+				array_map( array( $this, 'get_quantity_input_value' ), $second_pass_forms )
+			);
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter, 10 );
+			$product_a->delete( true );
+			$product_b->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox A grouped child's quantity input resolves the value its own quantity-selector context holds — 0 for a child the shopper has not touched — never the sibling form's own product's minimum.
+	 */
+	public function test_grouped_child_quantity_input_value_resolves_from_its_own_context(): void {
+		$sibling_product = new \WC_Product_Simple();
+		$sibling_product->set_regular_price( 10 );
+		$sibling_product_id = $sibling_product->save();
+
+		add_filter(
+			'woocommerce_quantity_input_min',
+			$sibling_min_filter = function ( $min, $product ) use ( $sibling_product_id ) {
+				return $product->get_id() === $sibling_product_id ? 6 : $min;
+			},
+			10,
+			2
+		);
+
+		$child = new \WC_Product_Simple();
+		$child->set_regular_price( 5 );
+		$child_id = $child->save();
+
+		$grouped_product = new \WC_Product_Grouped();
+		$grouped_product->set_children( array( $child_id ) );
+		$grouped_product_id = $grouped_product->save();
+
+		try {
+			$markup = do_blocks(
+				sprintf(
+					'<!-- wp:woocommerce/single-product {"productId":%1$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->
+					<!-- wp:woocommerce/single-product {"productId":%2$d} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->',
+					$sibling_product_id,
+					$grouped_product_id
+				)
+			);
+
+			$processed = wp_interactivity_process_directives( $markup );
+			$forms     = $this->extract_form_fragments( $processed );
+
+			$this->assertCount( 2, $forms );
+			$this->assertSame( '6', $this->get_quantity_input_value( $forms[0] ), "The sibling form's own quantity input keeps its own minimum." );
+			$this->assertSame( '0', $this->get_quantity_input_value( $forms[1] ), 'The untouched grouped child resolves 0 from its own context, not the sibling form\'s minimum.' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $sibling_min_filter, 10 );
+			$grouped_product->delete( true );
+			$child->delete( true );
+			$sibling_product->delete( true );
 		}
 	}
 
