@@ -34,7 +34,8 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 
 		$filter_items = $block->context['woocommerce/removableItems']['items'] ?? array();
 
-		$style = '';
+		$classes = '';
+		$style   = '';
 
 		$tags = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-removable-chips' ) ) ) {
