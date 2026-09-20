@@ -473,6 +473,14 @@ test.describe( 'First paint with JavaScript disabled', () => {
 				path: 'wc/v3/settings/general/woocommerce_calc_taxes',
 				data: { value: 'yes' },
 			} );
+			// Prices are entered excluding tax on this store; displaying the
+			// cart including tax creates the mismatch that makes the Mini-Cart
+			// render a tax label at all (`MiniCart::get_tax_label()`).
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+				data: { value: 'incl' },
+			} );
 
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( 'First Paint Mini Cart Simple' );
@@ -512,12 +520,65 @@ test.describe( 'First paint with JavaScript disabled', () => {
 					.locator( '.wc-block-mini-cart' )
 					.first();
 
-				await expect( miniCart ).toContainText(
-					'First Paint Mini Cart Simple'
+				// The rows live in the drawer, which
+				// `MiniCart::render_mini_cart_overlay()` prints on
+				// `wp_footer` as a body-level region — a sibling of
+				// `.wc-block-mini-cart`, not a descendant of it — so they
+				// are located through the products table's own class
+				// rather than scoped to the wrapper.
+				const rows = noJsPage.locator(
+					'.wc-block-mini-cart-items .wc-block-cart-items__row'
 				);
-				await expect( miniCart ).toContainText(
-					'First Paint Mini Cart Variable'
-				);
+				await expect( rows ).toHaveCount( 2 );
+
+				const rowHrefs: ( string | null )[] = [];
+				for ( const row of await rows.all() ) {
+					// `cartItem` is registered as PHP derived state
+					// (`MiniCartProductsTableBlock.php:31-49`), so every
+					// binding that reads a path into it resolves on the
+					// server: the row carries no `hidden` attribute, and
+					// the product link's `href` is that cart item's own
+					// permalink.
+					await expect( row ).not.toHaveAttribute( 'hidden' );
+
+					const productLink = row.locator(
+						'a.wc-block-components-product-name'
+					);
+					rowHrefs.push( await productLink.getAttribute( 'href' ) );
+
+					// The row's name, price and line total are bound to
+					// sibling state keys (`cartItemName`, `itemPrice`,
+					// `lineItemTotal`) that exist only as client-side
+					// getters in `mini-cart/frontend.ts`; no PHP state
+					// resolves them, on this branch or on the base branch,
+					// so they render empty there too.
+					await expect( productLink ).toHaveText( '' );
+					await expect(
+						row
+							.locator(
+								'.wc-block-cart-item__prices [data-wp-text="state.itemPrice"]'
+							)
+							.first()
+					).toHaveText( '' );
+					await expect(
+						row.locator(
+							'.wc-block-cart-item__total [data-wp-text="state.lineItemTotal"]'
+						)
+					).toHaveText( '' );
+				}
+
+				expect(
+					rowHrefs.some(
+						( href ) =>
+							href?.includes( 'first-paint-mini-cart-simple' )
+					)
+				).toBe( true );
+				expect(
+					rowHrefs.some(
+						( href ) =>
+							href?.includes( 'first-paint-mini-cart-variable' )
+					)
+				).toBe( true );
 
 				const badge = miniCart.locator( '.wc-block-mini-cart__badge' );
 				await expect( badge ).toBeVisible();
@@ -547,6 +608,10 @@ test.describe( 'First paint with JavaScript disabled', () => {
 				await noJsContext.close();
 			}
 		} finally {
+			// Restore the store-wide baseline (tax calculation on, cart
+			// prices displayed excluding tax, no standard-class rate) for
+			// the specs that run after this one. Nested so a failed option
+			// write still reaches the next cleanup step.
 			try {
 				await requestUtils.rest( {
 					method: 'PUT',
@@ -554,11 +619,19 @@ test.describe( 'First paint with JavaScript disabled', () => {
 					data: { value: 'yes' },
 				} );
 			} finally {
-				await requestUtils.rest( {
-					method: 'DELETE',
-					path: `wc/v3/taxes/${ taxRateId }`,
-					params: { force: true },
-				} );
+				try {
+					await requestUtils.rest( {
+						method: 'PUT',
+						path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+						data: { value: 'excl' },
+					} );
+				} finally {
+					await requestUtils.rest( {
+						method: 'DELETE',
+						path: `wc/v3/taxes/${ taxRateId }`,
+						params: { force: true },
+					} );
+				}
 			}
 		}
 	} );
@@ -630,8 +703,15 @@ test.describe( 'First paint with JavaScript disabled', () => {
 			const noJsPage = await noJsContext.newPage();
 			await noJsPage.goto( '/mini-cart/' );
 
+			// The notice is printed inside the drawer
+			// (`FilledMiniCartContentsBlock.php`, part of the template part
+			// `MiniCart::render_mini_cart_overlay()` prints into
+			// `.wc-block-mini-cart__drawer`), not merely somewhere on the
+			// page.
 			const notice = noJsPage
-				.locator( '.wc-block-components-notice-banner' )
+				.locator(
+					'.wc-block-mini-cart__drawer .wc-block-components-notice-banner'
+				)
 				.first();
 			await expect( notice ).toBeVisible();
 		} finally {
