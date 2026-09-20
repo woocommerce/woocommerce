@@ -349,17 +349,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['initialQuantity'][ $variation_id ] = $default_quantity;
 				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
-				$variation_attributes = $product->get_variation_attributes();
-				$variation            = array_map(
-					function ( $key, $value ) {
-						return [
-							'attribute' => $key,
-							'value'     => $value,
-						];
-					},
-					array_keys( $variation_attributes ),
-					$variation_attributes
-				);
+				$variation = ProductScopes::get_scope_variation( $product->get_id() );
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Load purchasable child products into the shared store with full REST API data.
 				$child_products = wc_interactivity_api_load_purchasable_child_products(

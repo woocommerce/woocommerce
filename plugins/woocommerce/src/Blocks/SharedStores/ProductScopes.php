@@ -208,6 +208,45 @@ class ProductScopes {
 	}
 
 	/**
+	 * The `{ attribute, value }` entries a product contributes to a scope
+	 * element's declared `variation`: its own variation attributes when it
+	 * is a variation, empty for anything else.
+	 *
+	 * Every scope element derives its `variation` through this one method,
+	 * so a product's own declaration and the form's cannot drift. The id
+	 * this is called with is always one the caller is already rendering:
+	 * the two callers that hold only an id have already loaded that same
+	 * product through wc_interactivity_api_load_product() one line
+	 * earlier, so this never issues a lookup of its own.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $product_id The product id.
+	 * @return array The `{ attribute, value }` entries, empty when the
+	 *               product is not a variation.
+	 */
+	public static function get_scope_variation( int $product_id ): array {
+		$product = wc_get_product( $product_id );
+
+		if ( ! $product instanceof \WC_Product_Variation ) {
+			return array();
+		}
+
+		$variation_attributes = $product->get_variation_attributes();
+
+		return array_map(
+			static function ( $attribute, $value ) {
+				return array(
+					'attribute' => $attribute,
+					'value'     => $value,
+				);
+			},
+			array_keys( $variation_attributes ),
+			$variation_attributes
+		);
+	}
+
+	/**
 	 * Set the name of the form currently rendering.
 	 *
 	 * Add to Cart with Options sets this from inside the

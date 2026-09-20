@@ -229,7 +229,7 @@ class SingleProduct extends AbstractBlock {
 			$product_id
 		);
 
-		$interactivity_context = ProductScopes::get_scope_context( $product_id, array(), $scope_name );
+		$interactivity_context = ProductScopes::get_scope_context( $product_id, ProductScopes::get_scope_variation( $product_id ), $scope_name );
 
 		$html = new \WP_HTML_Tag_Processor( $content );
 

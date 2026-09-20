@@ -211,7 +211,7 @@ class ProductQuery extends AbstractBlock {
 			$processor->set_attribute( 'data-wp-interactive', 'woocommerce' );
 			$processor->set_attribute(
 				'data-wp-context',
-				'woocommerce::' . wp_json_encode( ProductScopes::get_scope_context( $product_id, array(), $scope_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+				'woocommerce::' . wp_json_encode( ProductScopes::get_scope_context( $product_id, ProductScopes::get_scope_variation( $product_id ), $scope_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 			);
 			$processor->set_attribute( 'data-wp-key', 'product-item-' . $product_id );
 		}

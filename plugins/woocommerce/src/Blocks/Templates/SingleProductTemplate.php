@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductScopes;
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -73,7 +74,7 @@ class SingleProductTemplate extends AbstractTemplate {
 					array(
 						'template' => array(
 							'productId' => $product->get_id(),
-							'variation' => array(),
+							'variation' => ProductScopes::get_scope_variation( $product->get_id() ),
 						),
 					)
 				);

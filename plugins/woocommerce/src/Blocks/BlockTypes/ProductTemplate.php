@@ -128,7 +128,7 @@ class ProductTemplate extends AbstractBlock {
 				$product_id
 			);
 			$product_context_directive = wp_interactivity_data_wp_context(
-				ProductScopes::get_scope_context( $product_id, array(), $scope_name ),
+				ProductScopes::get_scope_context( $product_id, ProductScopes::get_scope_variation( $product_id ), $scope_name ),
 				'woocommerce'
 			);
 
