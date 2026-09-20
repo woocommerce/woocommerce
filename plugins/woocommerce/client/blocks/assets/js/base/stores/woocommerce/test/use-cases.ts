@@ -54,6 +54,10 @@ jest.mock(
 	() => ( {
 		getConfig: jest.fn(),
 		getContext: jest.fn( () => mockContext ),
+		// `cart-actions.ts` calls this around `showNoticeError`; the caller's
+		// scope isn't this suite's concern (`test/notices.ts` covers it), so
+		// this stand-in just runs the wrapped function as given.
+		withScope: jest.fn( ( fn ) => fn ),
 		// `notices.ts` pulls in `does-cart-item-match-attributes.ts`, which
 		// calls `store()` for its own read of `state.products` /
 		// `state.productVariations`. Neither `scope.ts` nor `cart-actions.ts`
@@ -79,11 +83,13 @@ jest.mock( '@wordpress/a11y', () => ( {
 // `showNoticeError` / `updateNotices` are mocked so a mutation's notice
 // side effect never needs a real store-notices round trip; every other
 // export (the pure diff/matching helpers `addCartItem` relies on) keeps its
-// real implementation via `requireActual`.
+// real implementation via `requireActual`. `updateNotices`'s mock
+// implementation is itself a generator function: the call sites delegate
+// into it with `yield*`, which requires an iterable.
 jest.mock( '../notices', () => ( {
 	...jest.requireActual( '../notices' ),
 	showNoticeError: jest.fn(),
-	updateNotices: jest.fn(),
+	updateNotices: jest.fn( function* () {} ),
 } ) );
 
 /**

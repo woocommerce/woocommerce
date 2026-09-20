@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store } from '@wordpress/interactivity';
+import type { AsyncAction } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartVariationItem,
@@ -304,7 +305,11 @@ export function getInfoNoticesFromCartUpdates(
  * error to the console.
  *
  * Private to the store module (see the module README): no consumer calls
- * this directly, so it is a plain function rather than a store action.
+ * this directly, so it is a plain generator function rather than a store
+ * action. It yields the dynamic import instead of awaiting it, so a caller
+ * that drives it with `withScope` (as `cart-actions.ts` does) keeps its own
+ * live Interactivity scope across the import; a plain `async function` would
+ * lose it, and the `addNotice` call below would then resolve no context.
  *
  * @param error         The error to report, either a thrown `Error` or a
  *                      parsed Store API error response.
@@ -312,13 +317,13 @@ export function getInfoNoticesFromCartUpdates(
  *                      of the server's own message (`state.errorMessages`,
  *                      seeded by PHP).
  */
-export async function showNoticeError(
+export function* showNoticeError(
 	error: Error | ApiErrorResponse,
 	errorMessages?: Record< string, string >
-): Promise< void > {
+): AsyncAction< void > {
 	// Todo: Use the module exports instead of `store()` once the store-notices
 	// store is public.
-	await import( '@woocommerce/stores/store-notices' );
+	yield import( '@woocommerce/stores/store-notices' );
 	const { actions: noticeActions } = store< StoreNotices >(
 		'woocommerce/store-notices',
 		{},
@@ -345,19 +350,24 @@ export async function showNoticeError(
  * removing every other currently-shown notice.
  *
  * Private to the store module (see the module README): no consumer calls
- * this directly, so it is a plain function rather than a store action.
+ * this directly, so it is a plain generator function rather than a store
+ * action. It yields the dynamic import instead of awaiting it, so a caller
+ * that delegates into it with `yield*` (as `cart-actions.ts` does) keeps its
+ * own live Interactivity scope across the import; a plain `async function`
+ * would lose it, and the `addNotice` calls below would then resolve no
+ * context.
  *
  * @param newNotices   The notices to add.
  * @param removeOthers When `true`, removes every currently-shown notice this
  *                     call did not just add.
  */
-export async function updateNotices(
+export function* updateNotices(
 	newNotices: Notice[] = [],
 	removeOthers = false
-): Promise< void > {
+): AsyncAction< void > {
 	// Todo: Use the module exports instead of `store()` once the store-notices
 	// store is public.
-	await import( '@woocommerce/stores/store-notices' );
+	yield import( '@woocommerce/stores/store-notices' );
 	const { state: noticeState, actions: noticeActions } =
 		store< StoreNotices >(
 			'woocommerce/store-notices',

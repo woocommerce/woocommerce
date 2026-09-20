@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getConfig, getContext } from '@wordpress/interactivity';
+import { getConfig, getContext, withScope } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -581,10 +581,13 @@ function* performUpdate(
 				cart
 			);
 			const errorNotices = cart.errors.map( generateErrorNotice );
-			yield updateNotices( [ ...infoNotices, ...errorNotices ], true );
+			yield* updateNotices( [ ...infoNotices, ...errorNotices ], true );
 		}
 	} catch ( error ) {
-		void showNoticeError( error as Error, state.errorMessages );
+		void withScope( showNoticeError )(
+			error as Error,
+			state.errorMessages
+		);
 		outcome ??= buildFailureOutcome( error );
 	}
 
@@ -681,10 +684,13 @@ function* performAdd(
 				suppressKeys
 			);
 			const errorNotices = cart.errors.map( generateErrorNotice );
-			yield updateNotices( [ ...infoNotices, ...errorNotices ], true );
+			yield* updateNotices( [ ...infoNotices, ...errorNotices ], true );
 		}
 	} catch ( error ) {
-		void showNoticeError( error as Error, state.errorMessages );
+		void withScope( showNoticeError )(
+			error as Error,
+			state.errorMessages
+		);
 		// Only record a failure outcome if the request-settlement boundary
 		// above did not already capture a success — a throw after a
 		// successful request must not overwrite it.
@@ -844,10 +850,13 @@ function* removeCartItem( key: string ): AsyncAction< void > {
 				cart
 			);
 			const errorNotices = cart.errors.map( generateErrorNotice );
-			yield updateNotices( [ ...infoNotices, ...errorNotices ], true );
+			yield* updateNotices( [ ...infoNotices, ...errorNotices ], true );
 		}
 	} catch ( error ) {
-		void showNoticeError( error as Error, state.errorMessages );
+		void withScope( showNoticeError )(
+			error as Error,
+			state.errorMessages
+		);
 	}
 }
 
@@ -1103,7 +1112,7 @@ function* batchAddCartItems(
 					suppressKeys
 				);
 				const errorNotices = cart.errors.map( generateErrorNotice );
-				yield updateNotices(
+				yield* updateNotices(
 					[ ...infoNotices, ...errorNotices ],
 					true
 				);
@@ -1119,10 +1128,13 @@ function* batchAddCartItems(
 				generateErrorNotice( r.reason as ApiErrorResponse )
 			);
 		if ( errorNotices.length > 0 ) {
-			yield updateNotices( errorNotices );
+			yield* updateNotices( errorNotices );
 		}
 	} catch ( error ) {
-		void showNoticeError( error as Error, state.errorMessages );
+		void withScope( showNoticeError )(
+			error as Error,
+			state.errorMessages
+		);
 	}
 }
 
