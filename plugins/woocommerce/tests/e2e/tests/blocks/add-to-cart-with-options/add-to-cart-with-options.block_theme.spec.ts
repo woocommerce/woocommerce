@@ -1199,8 +1199,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.getByRole( 'button', { name: 'Add to cart' } )
 			.click();
 
+		// The count is per selected variation, not per cart: the button reads the
+		// quantity of the cart line matching the attributes currently chosen. So
+		// "1 in cart" while Blue/Yes is selected means Blue/Yes is what was added.
 		await expect(
-			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+			addToCartBlock.getByRole( 'button', {
+				name: '1 in cart',
+				exact: true,
+			} )
 		).toBeVisible();
 	} );
 
