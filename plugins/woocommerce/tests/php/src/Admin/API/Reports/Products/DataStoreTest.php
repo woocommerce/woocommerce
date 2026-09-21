@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Products;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -57,16 +59,41 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 * @return int Product ID.
 	 */
 	private function create_synced_custom_status_order() {
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+		global $wpdb;
 
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = wc_create_order();
 		$order->add_product( $product, 2 );
 		$order->calculate_totals();
-		$order->set_status( $this->long_status );
 		$order->save();
+
+		// Saving the long status stores nothing: WordPress refuses to shorten an
+		// overlength value for the posts table, and the orders table only keeps a
+		// truncated one while strict SQL mode is off. Write the truncated status
+		// the reports are meant to read.
+		$truncated_status = mb_substr( 'wc-' . $this->long_status, 0, 20 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				$wpdb->prefix . 'wc_orders',
+				array( 'status' => $truncated_status ),
+				array( 'id' => $order->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => $truncated_status ),
+				array( 'ID' => $order->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			clean_post_cache( $order->get_id() );
+		}
+
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+		}
 
 		OrdersStatsDataStore::sync_order( $order->get_id() );
 		ProductsDataStore::sync_order_products( $order->get_id() );
