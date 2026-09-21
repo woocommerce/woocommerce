@@ -92,9 +92,7 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
 		add_action( 'template_redirect', array( $this, 'destroy_session_if_empty' ), 999 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		// CartLogoutBehavior brackets this priority (5 before, 15 after) to carry the cart across the
-		// teardown. Keep the two in step if this ever moves.
-		add_action( 'wp_logout', array( $this, 'destroy_session' ), 10 );
+		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'maybe_update_nonce_user_logged_out' ), 10, 2 );
@@ -322,24 +320,12 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Verify a hash produced by self::hash().
 	 *
-	 * Hashes produced by the previous `wp_fast_hash()` implementation are still accepted so that guest sessions
-	 * created before this change are not invalidated. That fallback can be removed in 11.1.0 forward after those cookies have expired.
-	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
 	 * @return bool Whether the hash is valid.
 	 */
 	private function verify_hash( string $message, string $hash ) {
-		if ( hash_equals( $this->hash( $message ), $hash ) ) {
-			return true;
-		}
-
-		// `wp_fast_hash()` prefixes its output with `$generic$`, so only those cookies take the legacy path.
-		if ( function_exists( 'wp_verify_fast_hash' ) && str_starts_with( $hash, '$generic$' ) ) {
-			return wp_verify_fast_hash( $message, $hash );
-		}
-
-		return false;
+		return hash_equals( $this->hash( $message ), $hash );
 	}
 
 	/**
