@@ -69,6 +69,46 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Promotion requests respect the marketplace suggestions setting and suppression filter.
+	 * @testWith ["no", false, 0]
+	 *           ["yes", false, 1]
+	 *           [null, false, 1]
+	 *           ["yes", true, 0]
+	 *
+	 * @param string|null $setting          Marketplace suggestions setting, or null for the default.
+	 * @param bool        $suppressed       Whether the suppression filter is enabled.
+	 * @param int         $expected_requests Expected number of promotion requests.
+	 */
+	public function test_update_promotions_respects_preferences( ?string $setting, bool $suppressed, int $expected_requests ): void {
+		delete_option( 'woocommerce_show_marketplace_suggestions' );
+		if ( null !== $setting ) {
+			update_option( 'woocommerce_show_marketplace_suggestions', $setting );
+		}
+
+		add_filter( 'woocommerce_marketplace_suppress_promotions', $suppressed ? '__return_true' : '__return_false' );
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			static function ( $response, $args, $url ) use ( &$requests ) {
+				if ( 0 === strpos( $url, WC_Admin_Marketplace_Promotions::PROMOTIONS_API_URL ) ) {
+					++$requests;
+				}
+
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				);
+			},
+			10,
+			3
+		);
+
+		WC_Admin_Marketplace_Promotions::update_promotions();
+
+		$this->assertSame( $expected_requests, $requests, 'Promotion requests should respect the store preferences.' );
+	}
+
+	/**
 	 * Build the "none of these add-on plugins active" exclusion rule.
 	 *
 	 * @param string[] $extra_slugs Extra directory slugs to add to the exclusion list.

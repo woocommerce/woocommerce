@@ -488,6 +488,10 @@ class WC_Admin_Marketplace_Promotions {
 			return array();
 		}
 
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return array();
+		}
+
 		// Fetch promotions from the API.
 		$fetch_options  = array(
 			'auth'    => true,
