@@ -41,10 +41,11 @@ const FrontendBlock = ( {
 	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
 		null
 	);
+	// The stable content container moves between these hosts without remounting its portal children.
 	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
 		null
 	);
-	const [ actionAreaHost, setActionAreaHost ] =
+	const [ checkoutActionsHost, setCheckoutActionsHost ] =
 		useState< HTMLDivElement | null >( null );
 	const [ actionAreaAnchor, setActionAreaAnchor ] =
 		useState< HTMLDivElement | null >( null );
@@ -110,7 +111,7 @@ const FrontendBlock = ( {
 	// Attach the empty container before mounting portal children. Later moves
 	// preserve the same mounted extension component instances.
 	useLayoutEffect( () => {
-		const destination = showInline ? inlineHost : actionAreaHost;
+		const destination = showInline ? inlineHost : checkoutActionsHost;
 
 		if ( destination ) {
 			destination.appendChild( contentContainer );
@@ -130,7 +131,7 @@ const FrontendBlock = ( {
 		}
 	}, [
 		actionAreaAnchor,
-		actionAreaHost,
+		checkoutActionsHost,
 		contentContainer,
 		inlineHost,
 		showInline,
@@ -196,7 +197,7 @@ const FrontendBlock = ( {
 						<>{ __( 'Order summary', 'woocommerce' ) }</>
 					</FormStepHeading>
 					<div
-						ref={ setActionAreaHost }
+						ref={ setCheckoutActionsHost }
 						className="checkout-order-summary-block-fill"
 					/>
 				</div>
