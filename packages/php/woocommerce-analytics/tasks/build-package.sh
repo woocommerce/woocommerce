@@ -43,6 +43,22 @@ rsync -avhW --quiet \
     "$DIST_DIR/src/" \
     --exclude="client/"
 
+# Stamp the composer.json version into the shipped copy. The constant in the
+# repo is not bumped by the release tooling, so this is what keeps the version
+# a release reports about itself correct.
+echo "Stamping PACKAGE_VERSION..."
+PACKAGE_VERSION="$(node -p "require('$PACKAGE_DIR/composer.json').version")"
+if ! [[ "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    echo "composer.json has no usable version (got '$PACKAGE_VERSION')" >&2
+    exit 1
+fi
+MAIN_CLASS_FILE="$DIST_DIR/src/class-woocommerce-analytics.php"
+perl -pi -e "s/const PACKAGE_VERSION = '[^']*';/const PACKAGE_VERSION = '$PACKAGE_VERSION';/" "$MAIN_CLASS_FILE"
+if ! grep -qF "const PACKAGE_VERSION = '$PACKAGE_VERSION';" "$MAIN_CLASS_FILE"; then
+    echo "Failed to stamp PACKAGE_VERSION $PACKAGE_VERSION into $MAIN_CLASS_FILE" >&2
+    exit 1
+fi
+
 # Copy built JS assets (main bundle, asset manifest, and all chunks)
 echo "Copying built JS assets..."
 mkdir -p "$DIST_DIR/build"

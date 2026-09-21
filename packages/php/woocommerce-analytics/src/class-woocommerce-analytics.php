@@ -20,7 +20,8 @@ use Composer\InstalledVersions;
  */
 class Woocommerce_Analytics {
 	/**
-	 * Package version.
+	 * Package version. Rewritten from composer.json by tasks/build-package.sh when the
+	 * package is published, so the value here only applies to monorepo checkouts.
 	 */
 	const PACKAGE_VERSION = '0.18.0';
 
