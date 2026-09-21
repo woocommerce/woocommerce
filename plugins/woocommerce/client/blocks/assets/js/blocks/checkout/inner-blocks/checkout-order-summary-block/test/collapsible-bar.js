@@ -284,15 +284,15 @@ describe( 'Checkout Order Summary placement', () => {
 		const inlineSummary = container.querySelector(
 			'.wc-block-components-checkout-order-summary__content'
 		);
-		const actionArea = container.querySelector(
+		const checkoutActionsHost = container.querySelector(
 			'.checkout-order-summary-block-fill'
 		);
-		const actionAreaAnchor = container.querySelector(
+		const checkoutActionsAnchor = container.querySelector(
 			'.checkout-order-summary-block-fill-wrapper'
 		);
 		const summaryContent = screen.getByTestId( 'summary-content' );
-		const actionAreaRectSpy = jest
-			.spyOn( actionAreaAnchor, 'getBoundingClientRect' )
+		const checkoutActionsRectSpy = jest
+			.spyOn( checkoutActionsAnchor, 'getBoundingClientRect' )
 			.mockReturnValueOnce( { top: 900 } )
 			.mockReturnValueOnce( { top: 400 } );
 		const scrollBySpy = jest
@@ -305,18 +305,21 @@ describe( 'Checkout Order Summary placement', () => {
 		act( () => {
 			observerCallback( [
 				{ target: title, isIntersecting: false },
-				{ target: actionAreaAnchor, isIntersecting: true },
+				{ target: checkoutActionsAnchor, isIntersecting: true },
 			] );
 		} );
 
 		expect( title ).toHaveAttribute( 'aria-expanded', 'false' );
-		expect( actionArea ).toContainElement( summaryContent );
-		expect( actionAreaAnchor ).toHaveAttribute( 'aria-hidden', 'false' );
+		expect( checkoutActionsHost ).toContainElement( summaryContent );
+		expect( checkoutActionsAnchor ).toHaveAttribute(
+			'aria-hidden',
+			'false'
+		);
 		expect( scrollBySpy ).toHaveBeenCalledWith( 0, -500 );
 
 		unmount();
 		expect( disconnect ).toHaveBeenCalled();
-		actionAreaRectSpy.mockRestore();
+		checkoutActionsRectSpy.mockRestore();
 		scrollBySpy.mockRestore();
 		intersectionObserverSpy.mockRestore();
 	} );
@@ -375,11 +378,11 @@ describe( 'Checkout Order Summary placement', () => {
 		containerClassName = 'is-medium';
 		rerender( tree() );
 
-		const actionArea = container.querySelector(
+		const checkoutActionsHost = container.querySelector(
 			'.checkout-order-summary-block-fill'
 		);
-		expect( actionArea ).toContainElement( discountExtension );
-		expect( actionArea ).toContainElement( orderExtension );
+		expect( checkoutActionsHost ).toContainElement( discountExtension );
+		expect( checkoutActionsHost ).toContainElement( orderExtension );
 
 		fireEvent.click(
 			screen.getByRole( 'button', { name: /Order summary/ } )
@@ -396,8 +399,8 @@ describe( 'Checkout Order Summary placement', () => {
 			screen.getByRole( 'button', { name: /Order summary/ } )
 		);
 
-		expect( actionArea ).toContainElement( discountExtension );
-		expect( actionArea ).toContainElement( orderExtension );
+		expect( checkoutActionsHost ).toContainElement( discountExtension );
+		expect( checkoutActionsHost ).toContainElement( orderExtension );
 		expect( screen.getByTestId( 'discount-extension' ) ).toBe(
 			discountExtension
 		);

@@ -47,10 +47,11 @@ const FrontendBlock = ( {
 	);
 	const [ checkoutActionsHost, setCheckoutActionsHost ] =
 		useState< HTMLDivElement | null >( null );
-	const [ actionAreaAnchor, setActionAreaAnchor ] =
+	// This wrapper is observed to detect proximity and preserve scroll position when the container moves.
+	const [ checkoutActionsAnchor, setCheckoutActionsAnchor ] =
 		useState< HTMLDivElement | null >( null );
 	const [ isContentReady, setIsContentReady ] = useState( false );
-	const actionAreaTopBeforeMove = useRef< number | null >( null );
+	const checkoutActionsTopBeforeMove = useRef< number | null >( null );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
 		container.className =
@@ -68,27 +69,27 @@ const FrontendBlock = ( {
 			isLarge ||
 			! isOpen ||
 			! titleElement ||
-			! actionAreaAnchor ||
+			! checkoutActionsAnchor ||
 			typeof window.IntersectionObserver !== 'function'
 		) {
 			return;
 		}
 
 		let isTitleVisible = true;
-		let isActionAreaNear = false;
+		let areCheckoutActionsNear = false;
 		const observer = new window.IntersectionObserver(
 			( entries ) => {
 				entries.forEach( ( entry ) => {
 					if ( entry.target === titleElement ) {
 						isTitleVisible = entry.isIntersecting;
-					} else if ( entry.target === actionAreaAnchor ) {
-						isActionAreaNear = entry.isIntersecting;
+					} else if ( entry.target === checkoutActionsAnchor ) {
+						areCheckoutActionsNear = entry.isIntersecting;
 					}
 				} );
 
-				if ( ! isTitleVisible && isActionAreaNear ) {
-					actionAreaTopBeforeMove.current =
-						actionAreaAnchor.getBoundingClientRect().top;
+				if ( ! isTitleVisible && areCheckoutActionsNear ) {
+					checkoutActionsTopBeforeMove.current =
+						checkoutActionsAnchor.getBoundingClientRect().top;
 					closeSummary();
 				}
 			},
@@ -96,11 +97,11 @@ const FrontendBlock = ( {
 		);
 
 		observer.observe( titleElement );
-		observer.observe( actionAreaAnchor );
+		observer.observe( checkoutActionsAnchor );
 
 		return () => observer.disconnect();
 	}, [
-		actionAreaAnchor,
+		checkoutActionsAnchor,
 		closeSummary,
 		hasContainerWidth,
 		isLarge,
@@ -119,18 +120,18 @@ const FrontendBlock = ( {
 
 			if (
 				! showInline &&
-				actionAreaAnchor &&
-				actionAreaTopBeforeMove.current !== null
+				checkoutActionsAnchor &&
+				checkoutActionsTopBeforeMove.current !== null
 			) {
 				const offset =
-					actionAreaAnchor.getBoundingClientRect().top -
-					actionAreaTopBeforeMove.current;
-				actionAreaTopBeforeMove.current = null;
+					checkoutActionsAnchor.getBoundingClientRect().top -
+					checkoutActionsTopBeforeMove.current;
+				checkoutActionsTopBeforeMove.current = null;
 				window.scrollBy( 0, offset );
 			}
 		}
 	}, [
-		actionAreaAnchor,
+		checkoutActionsAnchor,
 		checkoutActionsHost,
 		contentContainer,
 		inlineHost,
@@ -183,7 +184,7 @@ const FrontendBlock = ( {
 			</div>
 			<CheckoutOrderSummaryFill>
 				<div
-					ref={ setActionAreaAnchor }
+					ref={ setCheckoutActionsAnchor }
 					aria-hidden={ showInline }
 					className={ clsx(
 						className,
