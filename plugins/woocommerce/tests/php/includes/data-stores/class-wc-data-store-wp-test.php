@@ -125,46 +125,6 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox delete_meta returns true when the meta row is deleted.
-	 */
-	public function test_delete_meta_returns_true_when_meta_is_deleted(): void {
-		$product = new WC_Product();
-		$product->save();
-		$meta_id = add_post_meta( $product->get_id(), 'test', 'value' );
-		$meta    = (object) array(
-			'id' => $meta_id,
-		);
-
-		try {
-			$result = $this->sut->delete_meta( $product, $meta );
-
-			$this->assertTrue( $result );
-			$this->assertSame( '', get_post_meta( $product->get_id(), 'test', true ) );
-		} finally {
-			$product->delete( true );
-		}
-	}
-
-	/**
-	 * @testdox delete_meta returns false when the meta row does not exist.
-	 */
-	public function test_delete_meta_returns_false_when_meta_does_not_exist(): void {
-		$product = new WC_Product();
-		$product->save();
-		$meta = (object) array(
-			'id' => 0,
-		);
-
-		try {
-			$result = $this->sut->delete_meta( $product, $meta );
-
-			$this->assertFalse( $result );
-		} finally {
-			$product->delete( true );
-		}
-	}
-
-	/**
 	 * Day-precision meta date boundaries per operator, for a site in America/New_York.
 	 *
 	 * The bounds are half-open, so a day is matched in full and exactly once. For a range the

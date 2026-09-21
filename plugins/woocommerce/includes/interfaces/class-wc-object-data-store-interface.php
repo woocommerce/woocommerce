@@ -55,7 +55,7 @@ interface WC_Object_Data_Store_Interface {
 	 *
 	 * @param  WC_Data $data Data object.
 	 * @param  object  $meta Meta object (containing at least ->id).
-	 * @return bool
+	 * @return array
 	 */
 	public function delete_meta( &$data, $meta );
 

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Return booleans from product and metadata data-store delete methods to match their interface contract.
+Return a boolean from product data-store deletion to match its interface contract.

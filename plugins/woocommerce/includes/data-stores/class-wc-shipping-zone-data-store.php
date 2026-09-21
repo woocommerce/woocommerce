@@ -425,7 +425,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @since 10.5.0
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param stdClass         $meta Meta object (containing at least ->id).
-	 * @return bool False - no meta was deleted.
+	 * @return array Empty array - no meta was deleted.
 	 */
 	public function delete_meta( &$zone, $meta ) {
 		wc_get_logger()->warning(
@@ -436,7 +436,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 				'backtrace' => true,
 			)
 		);
-		return false;
+		return array();
 	}
 
 	/**
