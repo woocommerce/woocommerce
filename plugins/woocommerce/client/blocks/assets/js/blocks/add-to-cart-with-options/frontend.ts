@@ -28,6 +28,8 @@ export type Context = {
 	groupedProductIds: number[];
 	/** Each grouped child's own scope name, in `groupedProductIds` order. */
 	groupedScopeNames: string[];
+	/** The message shown when this form's product or variation is out of stock. */
+	outOfStockMessage: string;
 };
 
 export type AddToCartError = {

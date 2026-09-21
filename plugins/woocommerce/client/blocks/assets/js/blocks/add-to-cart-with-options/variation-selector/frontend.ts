@@ -433,9 +433,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				if ( ! matchedVariation.is_in_stock ) {
+					const { outOfStockMessage } = getContext< Context >();
 					actions.addError( {
 						code: 'variableProductOutOfStock',
-						message: errorMessages?.variableProductOutOfStock || '',
+						message: outOfStockMessage || '',
 						group: 'variable-product',
 					} );
 				}
