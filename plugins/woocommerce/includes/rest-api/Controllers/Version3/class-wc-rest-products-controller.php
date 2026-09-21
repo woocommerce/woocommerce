@@ -492,7 +492,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || '' !== ( $request['mpn'] ?? '' ) || '' !== ( $request['search_mpn'] ?? '' ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
+		if (
+			! empty( $request['sku'] )
+			|| ! empty( $request['search_sku'] )
+			|| '' !== ( $request['mpn'] ?? '' )
+			|| '' !== ( $request['search_mpn'] ?? '' )
+			|| $this->search_name_or_sku_tokens
+			|| $this->search_fields_tokens
+		) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;

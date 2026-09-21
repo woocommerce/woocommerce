@@ -6073,6 +6073,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-data-inventory.php
 
 		-
+			message: '#^Variable \$product_object might not be defined\.$#'
+			identifier: variable.undefined
+			count: 9
+			path: includes/admin/meta-boxes/views/html-product-data-inventory.php
+
+		-
 			message: '#^Variable \$post might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
@@ -6214,6 +6220,12 @@ parameters:
 			message: '#^Variable \$base_cost might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
+			path: includes/admin/meta-boxes/views/html-variation-admin.php
+
+		-
+			message: '#^Variable \$loop might not be defined\.$#'
+			identifier: variable.undefined
+			count: 52
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-

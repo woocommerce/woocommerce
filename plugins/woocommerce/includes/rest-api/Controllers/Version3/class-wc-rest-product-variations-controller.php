@@ -127,7 +127,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
 			'global_unique_id'      => $object->get_global_unique_id(),
-			'mpn'                   => $object instanceof WC_Product ? $object->get_mpn() : '',
+			'mpn'                   => $object->get_mpn(), // @phpstan-ignore method.notFound (This endpoint receives a variation; the generic WC_Data annotation is broader.)
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),

@@ -158,27 +158,41 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The classic editor saves only its own MPN field and preserves omitted values.
+	 * @testdox The classic editor saves Core's MPN and ignores the unprefixed input.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Core's submitted value, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
 	 */
-	public function test_save_mpn(): void {
+	public function test_save_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
 		$sut = new WC_Product_Simple();
 		$sut->set_mpn( 'ORIGINAL' );
 		$sut->save();
 
-		foreach ( array( null, '0', 'PART / Blue', '' ) as $mpn ) {
-			$_POST = array( '_mpn' => 'EXTENSION-PART' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulate an extension using the unprefixed editor field.
-			if ( null !== $mpn ) {
-				$_POST['_wc_mpn'] = wp_slash( $mpn ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply the classic editor request.
-			}
-			WC_Meta_Box_Product_Data::save( $sut->get_id(), get_post( $sut->get_id() ) );
-			$this->assertSame( $mpn ?? 'ORIGINAL', wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+		$_POST = array( '_mpn' => 'EXTENSION-PART' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulate an extension's form input without loading the extension.
+		if ( null !== $submitted_mpn ) {
+			$_POST['_wc_mpn'] = wp_slash( $submitted_mpn ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
 		}
+
+		WC_Meta_Box_Product_Data::save( $sut->get_id(), get_post( $sut->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
 	}
 
 	/**
-	 * @testdox Variation saves distinguish Core's MPN field from extension fields and omitted values.
+	 * @testdox Variation saves use Core's MPN and ignore the unprefixed input.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Core's submitted value, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
 	 */
-	public function test_save_variation_mpn(): void {
+	public function test_save_variation_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
 		$parent = new WC_Product_Variable();
 		$parent->save();
 		$sut = new WC_Product_Variation();
@@ -186,17 +200,17 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 		$sut->set_mpn( 'ORIGINAL' );
 		$sut->save();
 
-		foreach ( array( null, '0', 'PART / Blue', '' ) as $mpn ) {
-			$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply the variation editor request, including an extension's MPN field.
-				'variable_post_id' => array( $sut->get_id() ),
-				'variable_mpn'     => array( 'EXTENSION-PART' ),
-			);
-			if ( null !== $mpn ) {
-				$_POST['variable_wc_mpn'] = array( wp_slash( $mpn ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's variation editor field.
-			}
-			WC_Meta_Box_Product_Data::save_variations( $parent->get_id(), get_post( $parent->get_id() ) );
-			$this->assertSame( $mpn ?? 'ORIGINAL', wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+		$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulate an extension's form input without loading the extension.
+			'variable_post_id' => array( $sut->get_id() ),
+			'variable_mpn'     => array( 'EXTENSION-PART' ),
+		);
+		if ( null !== $submitted_mpn ) {
+			$_POST['variable_wc_mpn'] = array( wp_slash( $submitted_mpn ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
 		}
+
+		WC_Meta_Box_Product_Data::save_variations( $parent->get_id(), get_post( $parent->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
 	}
 
 	/**
