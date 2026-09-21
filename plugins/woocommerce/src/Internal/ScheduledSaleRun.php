@@ -43,11 +43,11 @@ class ScheduledSaleRun {
 	public const MODE_END = 'end';
 
 	/**
-	 * Data-store rows for this run.
+	 * Unique product IDs in data-store order.
 	 *
-	 * @var mixed[]
+	 * @var int[]
 	 */
-	private array $entries;
+	private array $product_ids;
 
 	/**
 	 * The sale mode.
@@ -89,12 +89,19 @@ class ScheduledSaleRun {
 			throw new \InvalidArgumentException( 'Scheduled sale mode must be either start or end.' );
 		}
 
-		$this->entries = $entries;
-		$this->mode    = $mode;
+		$this->mode        = $mode;
+		$this->product_ids = array();
+
+		foreach ( $entries as $entry ) {
+			$product_id = $this->normalize_entry( $entry );
+			if ( null !== $product_id ) {
+				$this->product_ids[ $product_id ] = $product_id;
+			}
+		}
 	}
 
 	/**
-	 * Process unique product ids in batches without copying the whole input list.
+	 * Process normalized product IDs in batches.
 	 */
 	public function process(): void {
 		$this->product_util  = wc_get_container()->get( ProductUtil::class );
@@ -105,26 +112,9 @@ class ScheduledSaleRun {
 		// Shared groups can only be flushed when the cache belongs to this request.
 		$this->flush_shared_groups = wp_cache_supports( 'flush_group' ) && ! wp_using_ext_object_cache();
 
-		$seen      = array();
-		$batch_ids = array();
-
-		foreach ( $this->entries as $entry ) {
-			$product_id = $this->normalize_entry( $entry );
-			if ( null === $product_id || isset( $seen[ $product_id ] ) ) {
-				continue;
-			}
-
-			$seen[ $product_id ] = true;
-			$batch_ids[]         = $product_id;
-
-			if ( self::BATCH_SIZE === count( $batch_ids ) ) {
-				$this->process_batch( $batch_ids );
-				$batch_ids = array();
-			}
-		}
-
-		if ( $batch_ids ) {
-			$this->process_batch( $batch_ids );
+		$total = count( $this->product_ids );
+		for ( $offset = 0; $offset < $total; $offset += self::BATCH_SIZE ) {
+			$this->process_batch( array_slice( $this->product_ids, $offset, self::BATCH_SIZE ) );
 		}
 	}
 
