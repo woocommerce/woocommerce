@@ -1,4 +1,4 @@
-Significance: major
+Significance: minor
 Type: add
 
-Introduce MPN field (manufacturer part / product number) field to WooCommerce
+Add manufacturer part numbers (MPNs) to products and variations, including CSV import/export, the REST API, and structured data.
