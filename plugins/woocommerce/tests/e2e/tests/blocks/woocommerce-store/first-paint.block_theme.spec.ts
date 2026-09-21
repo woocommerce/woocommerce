@@ -7,25 +7,21 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
-import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
-	productCollectionPageObject: ProductCollectionPage;
 } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		await use( new AddToCartWithOptionsPage( { page, admin, editor } ) );
 	},
-	productCollectionPageObject: async ( { page, admin, editor }, use ) => {
-		await use( new ProductCollectionPage( { page, admin, editor } ) );
-	},
 } );
 
 /**
- * Every value in R4's inventory is already correct in the server HTML on the
- * base branch; this spec proves the migration to the unified `woocommerce`
- * store does not change that. Each flow loads a page in a browser context
- * with JavaScript disabled, so only what the server rendered is observed.
+ * WooCommerce renders every value a shopper sees on first paint — SKU,
+ * price, stock, quantity constraints, variation data, cart rows and
+ * totals — in the server HTML, before any script runs. Each flow loads a
+ * page in a browser context with JavaScript disabled, so only what the
+ * server rendered is observed.
  */
 test.describe( 'First paint with JavaScript disabled', () => {
 	test( "a variable product's page renders its own SKU, price, stock, quantity constraints, hidden variation id and variation description on the server, and a second product on the same template renders its own", async ( {
@@ -114,8 +110,7 @@ test.describe( 'First paint with JavaScript disabled', () => {
 				await expect( quantityInput ).toHaveAttribute( 'step', '1' );
 
 				// No variation is selected on first paint, so the hidden
-				// `variation_id` input's server-resolved value is empty:
-				// the same state the base branch renders.
+				// `variation_id` input's server-resolved value is empty.
 				const variationIdInput = noJsPage.locator(
 					'input[name="variation_id"]'
 				);
@@ -125,8 +120,7 @@ test.describe( 'First paint with JavaScript disabled', () => {
 				).toBeNull();
 
 				// With no variation selected, the Variation Description
-				// block stays hidden and empty, exactly as it does before
-				// any script runs on the base branch.
+				// block stays hidden and empty before any script runs.
 				const variationDescription = noJsPage.locator(
 					'.wp-block-woocommerce-add-to-cart-with-options-variation-description'
 				);
@@ -243,7 +237,7 @@ test.describe( 'First paint with JavaScript disabled', () => {
 		browser,
 		editor,
 		admin,
-		productCollectionPageObject,
+		requestUtils,
 	} ) => {
 		const productA = await wpCLI(
 			`wc product create --user=1 --porcelain --name="First Paint PT Fixture A" --slug="first-paint-pt-fixture-a" --sku="first-paint-pt-a-sku" --regular_price="11.11"`
@@ -261,35 +255,73 @@ test.describe( 'First paint with JavaScript disabled', () => {
 		let productTemplatePostId: number;
 
 		await test.step( 'Product Collection', async () => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'handPicked'
-			);
+			// Publishing the page from serialized block markup puts the
+			// Product SKU block inside the Product Template by
+			// construction, rather than through a step that could finish
+			// without it landing there.
+			const productCollectionContent = `<!-- wp:woocommerce/product-collection ${ JSON.stringify(
+				{
+					queryId: 0,
+					query: {
+						perPage: 2,
+						pages: 1,
+						offset: 0,
+						postType: 'product',
+						order: 'asc',
+						orderBy: 'post__in',
+						search: '',
+						exclude: [],
+						inherit: false,
+						taxQuery: {},
+						isProductCollectionBlock: true,
+						featured: false,
+						woocommerceOnSale: false,
+						woocommerceStockStatus: [ 'instock' ],
+						woocommerceAttributes: [],
+						woocommerceHandPickedProducts: [
+							productAId,
+							productBId,
+						],
+						filterable: false,
+					},
+					collection: 'woocommerce/product-collection/hand-picked',
+				}
+			) } -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+<!-- wp:woocommerce/product-image /-->
+<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:woocommerce/product-sku /-->
+<!-- wp:woocommerce/product-price /-->
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection -->`;
 
-			const productPicker = editor.canvas.locator(
-				'.wc-block-editor-product-collection__product-picker'
-			);
-			await productPicker
-				.getByRole( 'checkbox', {
-					name: 'First Paint PT Fixture A (first-paint-pt-a-sku)',
-				} )
-				.click();
-			await productPicker
-				.getByRole( 'checkbox', {
-					name: 'First Paint PT Fixture B (first-paint-pt-b-sku)',
-				} )
-				.click();
-			await productPicker
-				.locator( '.components-button.is-primary' )
-				.click();
-
-			await productCollectionPageObject.insertBlockInProductCollection( {
-				name: 'woocommerce/product-sku',
-				attributes: {},
+			const productCollectionPost = await requestUtils.rest< {
+				id: number;
+			} >( {
+				method: 'POST',
+				path: '/wp/v2/posts',
+				data: {
+					status: 'publish',
+					title: 'First Paint Product Collection Fixture',
+					content: productCollectionContent,
+				},
 			} );
+			productTemplatePostId = productCollectionPost.id;
 
-			productTemplatePostId = await editor.publishPost();
+			// The flow below reaches its SKU assertions only when the
+			// Product SKU block is inside the Product Template of the
+			// saved content; assert that here, before navigating, so a
+			// missing block fails at the fixture and names the reason.
+			const savedProductCollectionPost = await requestUtils.rest< {
+				content: { raw: string };
+			} >( {
+				method: 'GET',
+				path: `/wp/v2/posts/${ productTemplatePostId }`,
+				params: { context: 'edit' },
+			} );
+			expect( savedProductCollectionPost.content.raw ).toContain(
+				'<!-- wp:woocommerce/product-sku'
+			);
 		} );
 
 		let legacyProductsPostId: number;
@@ -550,8 +582,8 @@ test.describe( 'First paint with JavaScript disabled', () => {
 					// sibling state keys (`cartItemName`, `itemPrice`,
 					// `lineItemTotal`) that exist only as client-side
 					// getters in `mini-cart/frontend.ts`; no PHP state
-					// resolves them, on this branch or on the base branch,
-					// so they render empty there too.
+					// resolves them, so they render empty in the server
+					// HTML.
 					await expect( productLink ).toHaveText( '' );
 					await expect(
 						row
