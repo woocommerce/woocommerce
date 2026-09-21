@@ -75,15 +75,19 @@ class WC_Beta_Tester_Channel {
 	public function version_select_html( $args ) {
 		$settings = WC_Beta_Tester::get_settings();
 		$channels = array(
-			'beta'   => array(
+			'nightly' => array(
+				'name'        => __( 'Nightly Releases', 'woocommerce-beta-tester' ),
+				'description' => __( 'Nightly builds are generated daily from the development trunk and may be unstable. Use for testing the latest changes only.', 'woocommerce-beta-tester' ),
+			),
+			'beta'    => array(
 				'name'        => __( 'Beta Releases', 'woocommerce-beta-tester' ),
 				'description' => __( 'Beta releases contain experimental functionality for testing purposes only. This channel will also include RC and stable releases if more current.', 'woocommerce-beta-tester' ),
 			),
-			'rc'     => array(
+			'rc'      => array(
 				'name'        => __( 'Release Candidates', 'woocommerce-beta-tester' ),
 				'description' => __( 'Release candidates are released to ensure any critical problems have not gone undetected. This channel will also include stable releases if more current.', 'woocommerce-beta-tester' ),
 			),
-			'stable' => array(
+			'stable'  => array(
 				'name'        => __( 'Stable Releases', 'woocommerce-beta-tester' ),
 				'description' => __( 'This is the default behavior in WordPress.', 'woocommerce-beta-tester' ),
 			),
