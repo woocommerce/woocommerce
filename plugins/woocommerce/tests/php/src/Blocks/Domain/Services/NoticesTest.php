@@ -155,26 +155,20 @@ class NoticesTest extends WC_Unit_Test_Case {
 	 * @testdox A classic theme prints a queued success notice as a woocommerce-message element inside the notices wrapper.
 	 */
 	public function test_classic_theme_prints_a_success_notice_inside_the_notices_wrapper(): void {
-		$wrapper_contents = $this->get_notices_wrapper_contents( $this->render_queued_success_notice( false ) );
+		$notices = $this->query_notices_wrapper( $this->render_queued_success_notice( false ), './div[@class="woocommerce-message"]' );
 
-		$this->assertMatchesRegularExpression(
-			'#<div class="woocommerce-message"[^>]*>\s*Coupon code applied successfully\.\s*</div>#s',
-			$wrapper_contents,
-			'A classic theme should render the success notice from the classic template inside the wrapper.'
-		);
+		$this->assertCount( 1, $notices, 'A classic theme should render the success notice from the classic template inside the wrapper.' );
+		$this->assertSame( 'Coupon code applied successfully.', trim( $notices[0]->textContent ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
 
 	/**
 	 * @testdox A classic theme that opts in to block notices prints a queued success notice as a notice banner inside the notices wrapper.
 	 */
 	public function test_a_classic_theme_opting_in_prints_a_success_notice_as_a_banner_inside_the_notices_wrapper(): void {
-		$wrapper_contents = $this->get_notices_wrapper_contents( $this->render_queued_success_notice( true ) );
+		$notices = $this->query_notices_wrapper( $this->render_queued_success_notice( true ), './div[@class="wc-block-components-notice-banner is-success"]' );
 
-		$this->assertMatchesRegularExpression(
-			'#<div class="wc-block-components-notice-banner is-success"[^>]*>.*Coupon code applied successfully\..*</div>#s',
-			$wrapper_contents,
-			'Opting in to block notices should render the success notice as a success banner inside the wrapper.'
-		);
+		$this->assertCount( 1, $notices, 'Opting in to block notices should render the success notice as a success banner inside the wrapper.' );
+		$this->assertStringContainsString( 'Coupon code applied successfully.', $notices[0]->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
 
 	/**
@@ -443,21 +437,27 @@ class NoticesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Extract the markup a rendered notices wrapper contains.
+	 * Query the elements inside a rendered notices wrapper.
 	 *
 	 * @param string $output Printed notices markup.
-	 * @return string Markup inside the notices wrapper.
+	 * @param string $xpath  XPath expression, relative to the notices wrapper.
+	 * @return \DOMElement[] Matching elements.
 	 */
-	private function get_notices_wrapper_contents( string $output ): string {
-		$matches = array();
+	private function query_notices_wrapper( string $output, string $xpath ): array {
+		$document = new \DOMDocument();
 
-		$this->assertSame(
-			1,
-			preg_match( '#<div class="woocommerce-notices-wrapper">(.*)</div>#s', $output, $matches ),
-			'Queued notices should be printed inside the notices wrapper that themes and shoppers rely on.'
-		);
+		// The banner template prints an inline SVG, which libxml reports as invalid HTML.
+		$previous = libxml_use_internal_errors( true );
+		$document->loadHTML( '<?xml encoding="UTF-8">' . $output );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous );
 
-		return $matches[1];
+		$finder   = new \DOMXPath( $document );
+		$wrappers = $finder->query( '//div[@class="woocommerce-notices-wrapper"]' );
+
+		$this->assertSame( 1, $wrappers->length, 'Queued notices should be printed inside the notices wrapper that themes and shoppers rely on.' );
+
+		return iterator_to_array( $finder->query( $xpath, $wrappers->item( 0 ) ) );
 	}
 
 	/**
