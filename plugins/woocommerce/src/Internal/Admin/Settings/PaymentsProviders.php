@@ -181,7 +181,6 @@ class PaymentsProviders {
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
 		ExtensionSuggestions::HELCIM            => Helcim::class,
-		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
