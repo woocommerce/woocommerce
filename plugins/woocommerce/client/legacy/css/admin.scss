@@ -2284,16 +2284,11 @@ ul.wc_coupon_list_block {
 // The order screens are registered as embedded WooCommerce Admin pages, so they
 // get even 20px gutters from `.woocommerce-admin-page` / `.woocommerce-embed-page`.
 // This screen isn't embedded, so it falls back to WordPress' lopsided `.wrap`
-// margins. Match the order screens instead.
+// margins. Drop the 2px start margin so both gutters come from `#wpcontent`.
 body.woocommerce_page_wc-customer-stock-notifications {
 
-	#wpcontent {
-		padding-inline-start: 0;
-	}
-
 	.wrap {
-		margin: 0;
-		padding-inline: 20px;
+		margin-inline-start: 0;
 	}
 }
 
