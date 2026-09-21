@@ -52,8 +52,14 @@ describe( 'TaxesReportTable taxable amount cells', () => {
 			display: '[215]',
 			value: 215,
 		} );
-		expect( cells[ ORDER_GROSS ] ).toEqual( { display: '[210]', value: 210 } );
-		expect( cells[ SHIPPING_GROSS ] ).toEqual( { display: '[5]', value: 5 } );
+		expect( cells[ ORDER_GROSS ] ).toEqual( {
+			display: '[210]',
+			value: 210,
+		} );
+		expect( cells[ SHIPPING_GROSS ] ).toEqual( {
+			display: '[5]',
+			value: 5,
+		} );
 	} );
 
 	it( 'renders a part the report left out as unknown', () => {
@@ -83,7 +89,10 @@ describe( 'TaxesReportTable taxable amount cells', () => {
 			} )
 		);
 
-		expect( cells[ TAXABLE_AMOUNT ] ).toEqual( { display: 'N/A', value: '' } );
+		expect( cells[ TAXABLE_AMOUNT ] ).toEqual( {
+			display: 'N/A',
+			value: '',
+		} );
 		expect( cells[ ORDER_GROSS ] ).toEqual( { display: 'N/A', value: '' } );
 		expect( cells[ SHIPPING_GROSS ] ).toEqual( {
 			display: 'N/A',
@@ -105,6 +114,9 @@ describe( 'TaxesReportTable taxable amount cells', () => {
 		);
 
 		expect( cells[ ORDER_GROSS ] ).toEqual( { display: '[0]', value: 0 } );
-		expect( cells[ SHIPPING_GROSS ] ).toEqual( { display: '[5]', value: 5 } );
+		expect( cells[ SHIPPING_GROSS ] ).toEqual( {
+			display: '[5]',
+			value: 5,
+		} );
 	} );
 } );

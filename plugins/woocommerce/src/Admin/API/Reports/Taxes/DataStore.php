@@ -186,15 +186,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Columns of the lookup table this request has seen, keyed by blog id since the schema is per
-	 * site. Only a column that is there sticks: the schema update can land while a request runs
-	 * (the "Verify base database tables" tool applies it right before the tools list re-renders),
-	 * and a cached miss would outlive it. This is the same rule `$lookup_keyed_by_order_item`
-	 * follows, for the same reason.
+	 * Columns of the lookup table this request has read, keyed by blog id since the schema is per
+	 * site. One read answers for every column, so this is asked once a request however many times
+	 * the columns are checked: imports reach them once per synced order.
 	 *
-	 * @var array<int, array<string, true>>
+	 * @var array<int, string[]>
 	 */
 	private static $lookup_columns = array();
+
+	/**
+	 * Forget the columns this request has read, so the next check asks the schema again.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function flush_lookup_columns_cache() {
+		self::$lookup_columns = array();
+	}
 
 	/**
 	 * Check if the wc_order_tax_lookup table has a column.
@@ -205,17 +215,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private static function lookup_has_column( string $column ): bool {
 		$blog_id = get_current_blog_id();
 
-		if ( isset( self::$lookup_columns[ $blog_id ][ $column ] ) ) {
-			return true;
+		if ( ! isset( self::$lookup_columns[ $blog_id ] ) ) {
+			self::$lookup_columns[ $blog_id ] = self::read_lookup_columns();
 		}
 
-		// One schema read answers for every column, so a store holding them all reads once a
-		// request however many times this is called: imports reach it once per synced order.
-		foreach ( self::read_lookup_columns() as $name ) {
-			self::$lookup_columns[ $blog_id ][ $name ] = true;
-		}
-
-		return isset( self::$lookup_columns[ $blog_id ][ $column ] );
+		return in_array( $column, self::$lookup_columns[ $blog_id ], true );
 	}
 
 	/**

@@ -47,7 +47,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * again and the processor would never reach the end of the table. Such an order is recorded as
 	 * a failed analytics import instead, which is retried from Analytics settings. That is also why
 	 * the option is left behind once the pass is done: clearing it would put those orders back in
-	 * front of the next pass.
+	 * front of the next pass. Delete it by hand to run the pass over the whole table again.
 	 *
 	 * @var string
 	 */
