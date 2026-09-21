@@ -6,9 +6,9 @@
  * suite proves the code matches this file — it cannot prove this file matches
  * the sheet. Only a harness run against a fresh export can do that.
  *
- * Last full sheet audit: 2026-08-05, using the regional CSV exports of that date
- * and a clone-local audit harness. PayPal placements were rechecked against the
- * regional tabs on 2026-09-21.
+ * Last sheet check: 21.09.2026, comparing PayPal placements with the regional tabs.
+ * The last full placement audit was 2026-08-05, using regional CSV exports and a
+ * clone-local audit harness.
  *
  * Sections mirror the sheet's rows. `primary_offline` describes the offline
  * profiler state; the baseline state leaves that slot empty and the test derives
