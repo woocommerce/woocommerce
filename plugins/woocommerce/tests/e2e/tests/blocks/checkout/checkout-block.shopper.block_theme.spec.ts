@@ -102,7 +102,8 @@ test.describe( 'Shopper → Local pickup', () => {
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		// Zone 0 holds the store's only ordinary methods, Flat rate and Free shipping.
+		// Zone 0 holds the store's only ordinary methods, Flat rate and Free shipping,
+		// both seeded by tests/e2e/bin/blocks/scripts/parallel/shipping.sh.
 		await admin.visitAdminPage(
 			'admin.php',
 			'page=wc-settings&tab=shipping&zone_id=0'
