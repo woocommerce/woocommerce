@@ -4012,17 +4012,6 @@ function wc_update_11203_normalize_stock_notification_emails() {
 }
 
 /**
- * Disable the site visibility badge by default for existing stores.
- *
- * @since 11.2.0
- *
- * @return void
- */
-function wc_update_1120_disable_site_visibility_badge(): void {
-	update_option( 'woocommerce_feature_site_visibility_badge_enabled', 'no' );
-}
-
-/**
  * Give HPOS orders migrated without a created or updated date the dates their posts still hold.
  *
  * Earlier migrations copied a zero post_date_gmt verbatim, so the HPOS row ended up with no created date and the next

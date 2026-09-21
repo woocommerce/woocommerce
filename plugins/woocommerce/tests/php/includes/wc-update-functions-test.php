@@ -1024,21 +1024,4 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
 	}
-
-	/**
-	 * @testdox Migration registers and disables the site visibility badge.
-	 */
-	public function test_wc_update_1120_disable_site_visibility_badge(): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.2.0', $db_updates );
-		$this->assertContains( 'wc_update_1120_disable_site_visibility_badge', $db_updates['11.2.0'] );
-
-		update_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' );
-		wc_update_1120_disable_site_visibility_badge();
-
-		$this->assertSame( 'no', get_option( 'woocommerce_feature_site_visibility_badge_enabled' ) );
-		delete_option( 'woocommerce_feature_site_visibility_badge_enabled' );
-	}
 }

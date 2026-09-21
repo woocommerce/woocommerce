@@ -399,7 +399,7 @@ class FeaturesController {
 					'Enable the site visibility badge in the WordPress admin bar',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,

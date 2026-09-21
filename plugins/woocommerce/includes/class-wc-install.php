@@ -359,7 +359,6 @@ class WC_Install {
 			'wc_update_11201_invalidate_analytics_reports_cache',
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
-			'wc_update_1120_disable_site_visibility_badge',
 		),
 		'11.3.0'   => array(
 			'wc_update_1130_repair_hpos_order_dates_from_posts',
