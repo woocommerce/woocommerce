@@ -698,8 +698,9 @@ class WC_Analytics_Tracking {
 			return '';
 		}
 
+		// Not URL-encoded here: http_build_query() in Pixel_Builder encodes the whole URL, so encoding twice stores `%2F` in Tracks.
 		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
-			return rawurlencode( implode( ',', $value ) );
+			return implode( ',', $value );
 		}
 
 		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
