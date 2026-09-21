@@ -445,10 +445,16 @@ class SignupService {
 				continue;
 			}
 
+			// A request can post the value as an array, which the string sanitizers below cannot take.
+			$raw_value = wp_unslash( $source[ $attribute_key ] );
+			if ( ! is_string( $raw_value ) ) {
+				return new \WP_Error( self::ERROR_INVALID_REQUEST );
+			}
+
 			if ( $attribute['is_taxonomy'] ) {
-				$value = sanitize_title( wp_unslash( $source[ $attribute_key ] ) );
+				$value = sanitize_title( $raw_value );
 			} else {
-				$value = html_entity_decode( wc_clean( wp_unslash( $source[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+				$value = html_entity_decode( wc_clean( $raw_value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 			}
 
 			// Don't include if it's empty.
