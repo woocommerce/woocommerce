@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move order confirmation policy from 6 E2E tests to PHPUnit; the Order Confirmation block spec keeps 3 browser titles.
+

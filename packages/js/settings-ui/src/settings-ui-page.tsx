@@ -26,6 +26,7 @@ import { resolveRegionComponent, resolveSaveHandler } from './registry';
 import type {
 	SettingsUIField,
 	SettingsUIShellBadgeIntent,
+	SettingsUIShellNavigationItem,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
 	SettingsFieldContext,
@@ -94,10 +95,6 @@ const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
-const clearLegacyFormPrompt = () => {
-	window.onbeforeunload = null;
-};
-
 const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	let redirectInput = form.querySelector< HTMLInputElement >(
 		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
@@ -113,7 +110,7 @@ const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	redirectInput.value = href;
 };
 
-const shouldPromptForNavigation = ( event: MouseEvent ) => {
+const getNavigationHref = ( event: MouseEvent ) => {
 	if (
 		event.defaultPrevented ||
 		event.button !== 0 ||
@@ -122,29 +119,9 @@ const shouldPromptForNavigation = ( event: MouseEvent ) => {
 		event.shiftKey ||
 		event.altKey
 	) {
-		return false;
+		return undefined;
 	}
 
-	const target = event.target;
-
-	if ( ! ( target instanceof Element ) ) {
-		return false;
-	}
-
-	const link = target.closest( 'a[href]' );
-
-	if ( ! ( link instanceof HTMLAnchorElement ) ) {
-		return false;
-	}
-
-	if ( link.target && link.target !== '_self' ) {
-		return false;
-	}
-
-	return Boolean( link.href ) && link.href !== window.location.href;
-};
-
-const getNavigationHref = ( event: MouseEvent ) => {
 	const target = event.target;
 
 	if ( ! ( target instanceof Element ) ) {
@@ -153,7 +130,20 @@ const getNavigationHref = ( event: MouseEvent ) => {
 
 	const link = target.closest( 'a[href]' );
 
-	return link instanceof HTMLAnchorElement ? link.href : undefined;
+	if ( ! ( link instanceof HTMLAnchorElement ) ) {
+		return undefined;
+	}
+
+	if (
+		link.hasAttribute( 'download' ) ||
+		( link.target && link.target.toLowerCase() !== '_self' )
+	) {
+		return undefined;
+	}
+
+	return link.href && link.href !== window.location.href
+		? link.href
+		: undefined;
 };
 
 const UnsavedChangesModal = ( {
@@ -282,6 +272,32 @@ export class SettingsUIErrorBoundary extends Component<
 	}
 }
 
+const SettingsNavigation = ( {
+	items,
+	label,
+}: {
+	items?: SettingsUIShellNavigationItem[];
+	label: string;
+} ) =>
+	items?.length ? (
+		<nav className="wc-settings-ui-shell__tabs" aria-label={ label }>
+			{ items.map( ( item ) => (
+				<a
+					className={
+						item.active
+							? 'wc-settings-ui-shell__tab is-active'
+							: 'wc-settings-ui-shell__tab'
+					}
+					aria-current={ item.active ? 'page' : undefined }
+					href={ item.href }
+					key={ item.id }
+				>
+					{ item.label }
+				</a>
+			) ) }
+		</nav>
+	) : null;
+
 const ShellHeader = ( {
 	schema,
 	context,
@@ -371,50 +387,14 @@ const ShellHeader = ( {
 			) : null }
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
-					{ shell.navigation && shell.navigation.length > 0 ? (
-						<nav
-							className="wc-settings-ui-shell__tabs"
-							aria-label={ __( 'Settings pages', 'woocommerce' ) }
-						>
-							{ shell.navigation.map( ( item ) => (
-								<a
-									className={
-										item.active
-											? 'wc-settings-ui-shell__tab is-active'
-											: 'wc-settings-ui-shell__tab'
-									}
-									href={ item.href }
-									key={ item.id }
-								>
-									{ item.label }
-								</a>
-							) ) }
-						</nav>
-					) : null }
-					{ shell.sectionNavigation &&
-					shell.sectionNavigation.length > 0 ? (
-						<nav
-							className="wc-settings-ui-shell__tabs"
-							aria-label={ __(
-								'Settings sections',
-								'woocommerce'
-							) }
-						>
-							{ shell.sectionNavigation.map( ( item ) => (
-								<a
-									className={
-										item.active
-											? 'wc-settings-ui-shell__tab is-active'
-											: 'wc-settings-ui-shell__tab'
-									}
-									href={ item.href }
-									key={ item.id }
-								>
-									{ item.label }
-								</a>
-							) ) }
-						</nav>
-					) : null }
+					<SettingsNavigation
+						items={ shell.navigation }
+						label={ __( 'Settings pages', 'woocommerce' ) }
+					/>
+					<SettingsNavigation
+						items={ shell.sectionNavigation }
+						label={ __( 'Settings sections', 'woocommerce' ) }
+					/>
 					{ NavigationComponent ? (
 						<NavigationComponent
 							values={ values }
@@ -480,7 +460,6 @@ export const SettingsUIPage = ( {
 
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
-		clearLegacyFormPrompt();
 	}, [] );
 
 	const submitSettingsForm = useCallback(
@@ -507,25 +486,6 @@ export const SettingsUIPage = ( {
 			form.requestSubmit();
 		},
 		[ allowNavigation ]
-	);
-
-	const setValues = useCallback(
-		( nextValues: Partial< SettingsValues > ) => {
-			setValuesState( ( currentValues ) => {
-				const mergedValues: SettingsValues = { ...currentValues };
-
-				Object.entries( nextValues ).forEach(
-					( [ fieldId, value ] ) => {
-						if ( typeof value !== 'undefined' ) {
-							mergedValues[ fieldId ] = value;
-						}
-					}
-				);
-
-				return mergedValues;
-			} );
-		},
-		[]
 	);
 
 	const handleCustomSave = useCallback( async () => {
@@ -622,8 +582,7 @@ export const SettingsUIPage = ( {
 				// The classic section links render outside the shell on top-level pages.
 				! target.closest(
 					'.wc-settings-ui-shell, #mainform .subsubsub'
-				) ||
-				! shouldPromptForNavigation( event )
+				)
 			) {
 				return;
 			}
@@ -692,23 +651,40 @@ export const SettingsUIPage = ( {
 		() => dataFormAdapter.getForm( values ),
 		[ dataFormAdapter, values ]
 	);
+	const allFields = useMemo( () => getAllFields( schema ), [ schema ] );
+	const fieldsById = useMemo(
+		() => new Map( allFields.map( ( field ) => [ field.id, field ] ) ),
+		[ allFields ]
+	);
 	const handleDataFormChange = useCallback(
 		( nextValues: Record< string, SettingsValue | undefined > ) => {
-			const merged: Partial< SettingsValues > = {};
-
-			// Package controls emit undefined for a cleared value; the settings
-			// vocabulary represents that as an empty string.
-			Object.entries( nextValues ).forEach( ( [ fieldId, value ] ) => {
-				merged[ fieldId ] = typeof value === 'undefined' ? '' : value;
+			setValuesState( ( currentValues ) => {
+				const mergedValues = { ...currentValues };
+				Object.entries( nextValues ).forEach(
+					( [ fieldId, value ] ) => {
+						const field = fieldsById.get( fieldId );
+						if ( ! field ) {
+							return;
+						}
+						const fieldType = field.type;
+						const emptyValue =
+							fieldType === 'number' ||
+							fieldType === 'integer' ||
+							fieldType === 'datetime-local'
+								? null
+								: '';
+						mergedValues[ fieldId ] =
+							value === undefined ? emptyValue : value;
+					}
+				);
+				return mergedValues;
 			} );
-
-			setValues( merged );
 		},
-		[ setValues ]
+		[ fieldsById ]
 	);
 
 	const formPostFields =
-		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
+		saveStrategy.adapter === 'form_post' ? allFields : [];
 
 	const showHeader = schema.shell?.header === 'visible';
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
@@ -779,6 +755,9 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							initialCanonicalValue={ initialValues[ field.id ] }
+							serializeDateTimeAsStoreLocal
+							strict
 							key={ field.id }
 						/>
 					) ) }

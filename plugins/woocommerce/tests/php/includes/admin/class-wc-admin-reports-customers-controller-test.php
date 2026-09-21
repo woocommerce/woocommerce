@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore as CustomersStatsDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
@@ -122,6 +123,17 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 			$order->set_billing_state( $customer->get_billing_state() );
 			$order->set_billing_country( $customer->get_billing_country() );
 			$order->save();
+
+			if ( 0 === $index ) {
+				$refund = wc_create_refund(
+					array(
+						'order_id'   => $order->get_id(),
+						'amount'     => 20,
+						'line_items' => array(),
+					)
+				);
+				self::assertInstanceOf( WC_Order_Refund::class, $refund );
+			}
 		}
 
 		// Create guest orders (no user_id) with different locations.
@@ -223,6 +235,43 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a parented order while preserving a stale non-null refund marker.
+	 *
+	 * @return int Analytics customer ID.
+	 */
+	private function create_parented_order_with_stale_refund_row(): int {
+		global $wpdb;
+
+		$customer     = self::$registered_customers[0];
+		$parent_order = wc_get_customer_last_order( $customer->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $parent_order );
+
+		$refunds = $parent_order->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$refund = reset( $refunds );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+
+		// Older first-order recalculations could overwrite the refund's NULL marker.
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'returning_customer' => 1 ),
+			array( 'order_id' => $refund->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+		$this->assertSame( 1, $updated );
+
+		$child_order = WC_Helper_Order::create_order( $customer->get_id(), self::$product );
+		$child_order->set_parent_id( $parent_order->get_id() );
+		$child_order->set_status( OrderStatus::COMPLETED );
+		$child_order->set_total( 20 );
+		$child_order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		return (int) CustomersDataStore::get_customer_id_by_user_id( $customer->get_id() );
+	}
+
+	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
@@ -240,6 +289,108 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Partially refunded orders count once in numeric filters.
+	 */
+	public function test_partially_refunded_orders_count_once_in_numeric_filters(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'        => array( $customer_id ),
+				'orders_count_min' => 1,
+				'orders_count_max' => 1,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'A refund row should not count as another order.' );
+		$this->assertSame( 1, $reports[0]['orders_count'] );
+	}
+
+	/**
+	 * @testdox Partially refunded orders use the parent order count in average order value filters.
+	 */
+	public function test_partially_refunded_orders_use_parent_count_in_average_order_value_filters(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'           => array( $customer_id ),
+				'avg_order_value_min' => 79,
+				'avg_order_value_max' => 81,
+				'total_spend_min'     => 79,
+				'total_spend_max'     => 81,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'A refund row should not lower the average order value denominator.' );
+		$this->assertEqualsWithDelta( 80.0, $reports[0]['total_spend'], 0.001 );
+		$this->assertEqualsWithDelta( 80.0, $reports[0]['avg_order_value'], 0.001 );
+	}
+
+	/**
+	 * @testdox Parented non-refund orders count while stale refund rows remain excluded from customer aggregates.
+	 */
+	public function test_parented_orders_and_stale_refunds_use_authoritative_types(): void {
+		$customer_id = $this->create_parented_order_with_stale_refund_row();
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'           => array( $customer_id ),
+				'orders_count_min'    => 2,
+				'orders_count_max'    => 2,
+				'total_spend_min'     => 100,
+				'total_spend_max'     => 100,
+				'avg_order_value_min' => 50,
+				'avg_order_value_max' => 50,
+				'force_cache_refresh' => true,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertSame( 2, $reports[0]['orders_count'] );
+		$this->assertEqualsWithDelta( 100.0, $reports[0]['total_spend'], 0.001 );
+		$this->assertEqualsWithDelta( 50.0, $reports[0]['avg_order_value'], 0.001 );
+	}
+
+	/**
+	 * @testdox Customer stats count parented non-refund orders while excluding stale refund rows.
+	 */
+	public function test_customer_stats_use_authoritative_order_types(): void {
+		$customer_id = $this->create_parented_order_with_stale_refund_row();
+		$data_store  = new CustomersStatsDataStore();
+		$data        = $data_store->get_data(
+			array(
+				'customers'           => array( $customer_id ),
+				'orders_count_min'    => 2,
+				'orders_count_max'    => 2,
+				'total_spend_min'     => 100,
+				'total_spend_max'     => 100,
+				'avg_order_value_min' => 50,
+				'avg_order_value_max' => 50,
+				'force_cache_refresh' => true,
+			)
+		);
+
+		$this->assertInstanceOf( stdClass::class, $data );
+		$this->assertSame( 1, $data->customers_count );
+		$this->assertEqualsWithDelta( 2.0, $data->avg_orders_count, 0.001 );
+		$this->assertEqualsWithDelta( 100.0, $data->avg_total_spend, 0.001 );
+		$this->assertEqualsWithDelta( 50.0, $data->avg_avg_order_value, 0.001 );
 	}
 
 	/**

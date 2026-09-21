@@ -232,6 +232,61 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Reduce a Global Unique ID to the form it is stored in.
+	 *
+	 * Keep this in step with the stripping in WC_Product::set_global_unique_id(), so a row is
+	 * matched and judged usable on the same value the product would be saved with.
+	 *
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
+	 * @return string Stored form of the Global Unique ID, or an empty string when nothing is left of it.
+	 *
+	 * @since 11.2.0
+	 */
+	protected function normalize_global_unique_id( $global_unique_id ) {
+		return (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+	}
+
+	/**
+	 * Find the product a row refers to by its Global Unique ID.
+	 *
+	 * A match whose product type disagrees with the row type is refused, because
+	 * get_product_object() would otherwise convert the matched product to that type.
+	 *
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
+	 * @param string $type             Row product type, or an empty string when the row has none.
+	 * @return int|WP_Error Product ID, 0 when nothing matches, or WP_Error for a type mismatch.
+	 *
+	 * @since 11.2.0
+	 */
+	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
+		$global_unique_id = $this->normalize_global_unique_id( $global_unique_id );
+
+		if ( '' === $global_unique_id ) {
+			return 0;
+		}
+
+		$product_id = (int) wc_get_product_id_by_global_unique_id( $global_unique_id );
+
+		if ( ! $product_id || '' === $type ) {
+			return $product_id;
+		}
+
+		if ( WC_Product_Factory::get_product_type( $product_id ) !== $type ) {
+			return new WP_Error(
+				'woocommerce_product_importer_global_unique_id_type_mismatch',
+				esc_html__( 'The Global Unique ID matches a product of a different type.', 'woocommerce' ),
+				array(
+					'id'               => $product_id,
+					'global_unique_id' => esc_attr( $global_unique_id ),
+					'status'           => 401,
+				)
+			);
+		}
+
+		return $product_id;
+	}
+
+	/**
 	 * Process a single item and save.
 	 *
 	 * @throws Exception If item cannot be processed.

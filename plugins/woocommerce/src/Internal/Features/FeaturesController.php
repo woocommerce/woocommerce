@@ -125,6 +125,13 @@ class FeaturesController {
 	private bool $registered_additional_features_via_class_calls = false;
 
 	/**
+	 * Flag indicating if hardcoded feature definitions are currently being initialized.
+	 *
+	 * @var bool
+	 */
+	private bool $initializing_feature_definitions = false;
+
+	/**
 	 * Flag indicating if we are currently delaying plugin normalization.
 	 *
 	 * @var bool
@@ -260,9 +267,7 @@ class FeaturesController {
 	 * @return array[]
 	 */
 	private function get_feature_definitions() {
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		if ( ! $this->registered_additional_features_via_class_calls ) {
 			// This needs to be set to true *before* additional feature definition calls are made,
@@ -280,6 +285,23 @@ class FeaturesController {
 		}
 
 		return $this->features;
+	}
+
+	/**
+	 * Initialize hardcoded feature definitions if they have not been initialized yet.
+	 */
+	private function maybe_init_feature_definitions(): void {
+		if ( ! empty( $this->features ) || $this->initializing_feature_definitions ) {
+			return;
+		}
+
+		$this->initializing_feature_definitions = true;
+
+		try {
+			$this->init_feature_definitions();
+		} finally {
+			$this->initializing_feature_definitions = false;
+		}
 	}
 
 	/**
@@ -610,18 +632,6 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'dual_code_graphql_api'                => array(
-				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
-				'description'                  => __(
-					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
 			PushNotifications::FEATURE_NAME        => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(
@@ -795,9 +805,7 @@ class FeaturesController {
 			return;
 		}
 
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		/**
 		 * The action for registering features.

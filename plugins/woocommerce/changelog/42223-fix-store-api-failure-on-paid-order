@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: report the checkout as successful when a failure happens after the gateway has taken payment, so shoppers are no longer told to retry an order that already succeeded.

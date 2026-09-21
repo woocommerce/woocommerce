@@ -26,6 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function is_woocommerce() {
+	/**
+	 * Filters whether the current request is being handled by a WooCommerce template.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param bool $is_woocommerce True on the shop archive, a product taxonomy archive or a single product.
+	 */
 	return apply_filters( 'is_woocommerce', is_shop() || is_product_taxonomy() || is_product() );
 }
 

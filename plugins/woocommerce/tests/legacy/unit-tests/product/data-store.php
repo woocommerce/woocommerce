@@ -949,6 +949,40 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Looking up a product by global_unique_id returns the lowest ID when several products share it.
+	 *
+	 * @return void
+	 */
+	public function test_get_product_id_by_global_unique_id_prefers_the_lowest_id() {
+		global $wpdb;
+
+		$older_product = new WC_Product();
+		$older_product->set_regular_price( 42 );
+		$older_product->set_name( 'Older product' );
+		$older_product->save();
+
+		$newer_product = new WC_Product();
+		$newer_product->set_regular_price( 42 );
+		$newer_product->set_name( 'Newer product' );
+		$newer_product->set_global_unique_id( '5555555555555' );
+		$newer_product->save();
+
+		// Saving refuses a duplicate, so give the older product the same code behind the validation's back.
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'wc_product_meta_lookup',
+			array( 'global_unique_id' => '5555555555555' ),
+			array( 'product_id' => $older_product->get_id() ),
+			array( '%s' ),
+			array( '%d' )
+		);
+		$this->assertSame( 1, $updated );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertSame( $older_product->get_id(), (int) $data_store->get_product_id_by_global_unique_id( '5555555555555' ) );
+	}
+
+	/**
 	 * @testdox Test searching variations by global_unique_id.
 	 *
 	 * @return void

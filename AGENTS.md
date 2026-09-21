@@ -218,14 +218,16 @@ To rename subdivision codes, use `Automattic\WooCommerce\Database\Migrations\Mig
 
 ## Database Migrations
 
-Database migrations live in `WC_Install::$db_updates`; read that class for the current mechanics before adding one. Two invariants have broken real releases when violated:
+Database migrations live in `WC_Install::$db_updates`. Read that class for the current mechanics before adding one.
 
-- Migration keys are one-shot: sites that updated past a key never re-run it. A migration added after a prerelease of the same version has shipped needs a new suffixed key (see existing examples in `$db_updates`), and a key must never be ahead of the version it ships in.
-- Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites; ship a migration or remove the flag.
+- Each key runs once per site. After a site's database version moves past a key, nothing added to that key later will run there. A key must also never be ahead of the version it ships in.
+- While the version is `X.Y.0-dev`, add new migrations to the plain `X.Y.0` key, even if it already has callbacks. Sequential keys (`X.Y.0-1`, `X.Y.0-2`) are only needed once beta 1 of `X.Y.0` has shipped, because testers on that beta already have their database at `X.Y.0` and would skip anything added to the plain key.
+- To test a migration locally, set the `woocommerce_db_version` and `woocommerce_version` options to the previous release, for example with `wp option update woocommerce_db_version 11.1.0` and the same for `woocommerce_version`. The next page load schedules every callback above that version through Action Scheduler. `wp wc update` runs them immediately instead.
+- Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites. Ship a migration or remove the flag.
 
 ## Comments and Docblocks
 
-Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
 
 When writing a comment or docblock description:
 
@@ -245,6 +247,10 @@ WooCommerce names its enumerated string vocabularies — order statuses, product
 - **Near-duplicate vocabularies are distinct classes on purpose.** `OrderStatus` holds the unprefixed values (`completed`) most WooCommerce APIs expect; `OrderInternalStatus` holds the `wc-`-prefixed variants (`wc-completed`) WordPress stores. Reach for the class that matches what the consuming API expects.
 
 ## Block Development
+
+### Block Styling
+
+Prefer Core Block Supports. For explicit style generation, use `wp_style_engine_get_styles()`. Avoid new `StyleAttributesUtils` usages; migrate existing ones when touched, preserving rendered styles.
 
 ### `block.json` Attribute Defaults
 

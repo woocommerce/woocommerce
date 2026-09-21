@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Strengthen the colour picker swatch E2E test to pin the painted box in both the pre-WP 7.0 and WP 7.0 states, so the box-sizing half of the compatibility rule is covered.
+

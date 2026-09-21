@@ -309,6 +309,30 @@ function activateProductPlugin( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+/**
+ * Turn auto-updates on or off for the plugin or theme backing a subscription.
+ *
+ * Writes the same `auto_update_plugins` / `auto_update_themes` option the
+ * WordPress Plugins and Themes screens write.
+ */
+function setProductAutoUpdate(
+	subscription: Subscription,
+	enabled: boolean
+): Promise< void > {
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	data.append( 'enabled', enabled ? '1' : '0' );
+
+	return apiFetch( {
+		path: '/wc/v3/marketplace/subscriptions/auto-update',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 function disconnectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === false ) {
 		return Promise.resolve();
@@ -476,6 +500,33 @@ function addNotice(
 	}
 }
 
+/**
+ * Pull the human-readable message out of a rejected subscriptions request.
+ *
+ * `/wc/v3/marketplace/refresh` answers failures with `wp_send_json_error()`,
+ * which nests the message under `data`, while transport failures and generic
+ * REST errors put it at the top level. Reading only one shape renders
+ * "undefined" to the merchant.
+ *
+ * Both candidates are typed `unknown` and checked rather than asserted: they
+ * come off the wire, and a `message` that wasn't a string would be handed
+ * straight to sprintf and reach the merchant as "[object Object]".
+ *
+ * @param error The rejection value from apiFetch.
+ * @return The best available message.
+ */
+const getRefreshErrorMessage = ( error: unknown ): string => {
+	const candidate = error as
+		| { data?: { message?: unknown }; message?: unknown }
+		| undefined;
+
+	const message = [ candidate?.data?.message, candidate?.message ].find(
+		( value ): value is string => typeof value === 'string' && value !== ''
+	);
+
+	return message ?? __( 'Unexpected error.', 'woocommerce' );
+};
+
 const removeNotice = ( productKey: string ) => {
 	void dispatch( noticeStore ).removeNotice( productKey );
 };
@@ -575,6 +626,7 @@ export {
 	appendURLParams,
 	connectProduct,
 	activateProductPlugin,
+	setProductAutoUpdate,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
@@ -589,6 +641,7 @@ export {
 	installProduct,
 	updateProduct,
 	addNotice,
+	getRefreshErrorMessage,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

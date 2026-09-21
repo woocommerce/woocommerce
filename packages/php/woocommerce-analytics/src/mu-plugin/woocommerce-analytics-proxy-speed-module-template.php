@@ -53,6 +53,13 @@ class WooCommerceAnalyticsProxySpeed {
 			return;
 		}
 
+		// Unauthorized means "do not accelerate", not "do not serve". Only the REST
+		// route can tell a disabled feature from a module whose authorization was
+		// revoked while the feature stays on, so fall through and let it answer.
+		if ( ! $this->is_authorized() ) {
+			return;
+		}
+
 		// Handle the request completely and exit.
 		$this->handle_proxy_request();
 		exit;
@@ -134,7 +141,28 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
+		// Same skew, other class: process_proxy_request() reads this to decide whether
+		// to serve, and an older package lacking it throws where nothing can fall back.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded Woocommerce_Analytics predates the speed module authorization option.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
 		return true;
+	}
+
+	/**
+	 * Whether this module may serve the request.
+	 *
+	 * Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
+	 * registered that filter this early, so it reads false everywhere. Only an
+	 * explicit yes serves, so a network-wide module file cannot answer for a site
+	 * that never authorized it.
+	 *
+	 * @return bool
+	 */
+	private function is_authorized() {
+		return 'yes' === get_option( \Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
