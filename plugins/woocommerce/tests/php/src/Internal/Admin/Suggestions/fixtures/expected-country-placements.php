@@ -52,6 +52,7 @@ return array(
 			'square',
 			'visa_as',
 			'airwallex',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -78,6 +79,7 @@ return array(
 			'viva_wallet',
 			'kustom_checkout',
 			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -138,6 +140,7 @@ return array(
 			'airwallex',
 			'viva_wallet',
 			'gocardless',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -212,6 +215,7 @@ return array(
 			'gocardless',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -293,6 +297,7 @@ return array(
 			'gocardless',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -358,6 +363,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -459,6 +465,7 @@ return array(
 			'visa_as',
 			'viva_wallet',
 			'kustom_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -479,6 +486,7 @@ return array(
 			'visa_as',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -493,6 +501,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
+			'elavon',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -572,6 +581,7 @@ return array(
 			'monei',
 			'airwallex',
 			'viva_wallet',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -593,6 +603,7 @@ return array(
 			'viva_wallet',
 			'kustom_checkout',
 			'nexi_checkout',
+			'elavon',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
