@@ -868,6 +868,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
 		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
+		// wp_kses() pads the currency entity, so a rendered price reads &#036;59 whatever the record held.
 		$this->assertStringNotContainsString( '&#036;59', $output, 'The price is no longer part of the message.' );
 		$this->assertStringContainsString( 'renew_product=123', $output, 'Renewal should renew the subscription, not buy a new one.' );
 		$this->assertStringContainsString( 'product_key=key', $output, 'The link should name the subscription being renewed.' );
@@ -1214,6 +1215,75 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A record carrying only the guaranteed fields reads no field that is missing.
+	 *
+	 * filter_valid_subscriptions() guarantees product_id and connections and nothing else, and
+	 * phpunit.xml converts warnings into failures, so reading a missing field fails this test.
+	 *
+	 * @dataProvider provider_sparse_subscription_records
+	 *
+	 * @param array  $subscription Subscription record holding only the fields it names.
+	 * @param string $expected     Text both placements must contain, or an empty string when
+	 *                             neither has anything to say.
+	 */
+	public function test_sparse_subscription_record_reads_no_missing_field( array $subscription, string $expected ): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $subscription ) );
+		$response = (object) array( 'id' => 'woocommerce-com-123' );
+
+		$plugin_row = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions( $this->woo_plugin_data(), $response );
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription( $this->woo_plugin_data(), $response );
+		$update_row = ob_get_clean();
+
+		if ( '' === $expected ) {
+			$this->assertSame( '', $plugin_row, 'Nothing about this subscription is known to need attention.' );
+			$this->assertSame( '', $update_row );
+			return;
+		}
+
+		$this->assertStringContainsString( $expected, $plugin_row );
+		$this->assertStringContainsString( $expected, $update_row, 'Both placements read the same record.' );
+	}
+
+	/**
+	 * Records holding only what filter_valid_subscriptions() guarantees, plus the one field that
+	 * drives each message. Everything the message code reads beyond that is absent: lifetime,
+	 * autorenew, expires, product_key and order_id.
+	 *
+	 * @return array[]
+	 */
+	public function provider_sparse_subscription_records(): array {
+		return array(
+			'expired, with no lifetime, product key or order ID' => array(
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+					'expired'     => true,
+				),
+				'Your subscription for this extension has expired.',
+			),
+			'lapsing, with no auto-renew flag or expiry' => array(
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+					'expiring'    => true,
+				),
+				'Your subscription for this extension expires soon.',
+			),
+			'nothing beyond the guaranteed fields'       => array(
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+				),
+				'',
+			),
+		);
+	}
+
+	/**
 	 * A subscription record as the WooCommerce.com API returns it.
 	 *
 	 * @param array $overrides Fields to override on the default record.
@@ -1375,7 +1445,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertStringStartsWith( ' ', $output, 'Core has already printed its own sentence on the row.' );
 		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
 		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
-		$this->assertStringNotContainsString( '&#36;59', $output, 'The price no longer appears in the link text.' );
+		// wp_kses() pads the currency entity, so a rendered price reads &#036;59 whatever the record held.
+		$this->assertStringNotContainsString( '&#036;59', $output, 'The price no longer appears in the link text.' );
 	}
 
 	/**
