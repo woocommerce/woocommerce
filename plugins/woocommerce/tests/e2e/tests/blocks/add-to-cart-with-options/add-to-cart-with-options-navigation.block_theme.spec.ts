@@ -154,7 +154,7 @@ test.describe( 'Add to Cart + Options Block: Navigation', () => {
 
 		// Client-side navigation away and back re-renders the tile under the
 		// same server-derived scope name, so its record is found again and
-		// the selection and typed quantity survive (A3, A8).
+		// the selection and typed quantity survive.
 		await expect(
 			addToCartForm
 				.getByRole( 'radiogroup', { name: 'Color' } )
@@ -177,7 +177,7 @@ test.describe( 'Add to Cart + Options Block: Navigation', () => {
 		).toBeVisible();
 
 		// Submitting posts the typed quantity that survived the round trip,
-		// not the product's minimum purchase quantity (A8).
+		// not the product's minimum purchase quantity.
 		await frontendUtils.goToCart();
 		await expect(
 			page.getByLabel(

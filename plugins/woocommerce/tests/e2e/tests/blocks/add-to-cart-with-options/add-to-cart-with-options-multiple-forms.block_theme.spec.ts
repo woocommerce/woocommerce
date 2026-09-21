@@ -124,8 +124,8 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
 
-			// Each form now declares its own scope on the server (D5, D6), so
-			// submitting the first form posts only its own selection.
+			// Each form declares its own scope on the server, so submitting
+			// the first form posts only its own selection.
 			await expect(
 				firstForm.getByRole( 'button', { name: '1 in cart' } )
 			).toBeVisible();
@@ -201,9 +201,9 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			// own region empty.
 			await expect( secondFormNotice ).toHaveCount( 0 );
 
-			// Each form now owns its own notices context (D11), so the second
-			// form's invalid submit adds its own notice without touching the
-			// first form's, which is still shown (AC9).
+			// Each form owns its own notices context, so the second form's
+			// invalid submit adds its own notice without touching the first
+			// form's, which is still shown.
 			await secondForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
@@ -212,9 +212,9 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 
 			// Correcting and successfully submitting the second form does
 			// not affect the first form's notice either — it is still
-			// shown (AC9). A successful submit is not expected to clear
-			// the submitting form's own notice; only its own invalid
-			// submit removes it, and that is not exercised here.
+			// shown. A successful submit is not expected to clear the
+			// submitting form's own notice; only its own invalid submit
+			// removes it, and that is not exercised here.
 			const secondFormNoticeCountBeforeFirstFormsSecondSubmit =
 				await secondFormNotice.count();
 			await secondForm
@@ -245,11 +245,12 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 	} );
 
 	test.describe( 'Two Single Product blocks for one product', () => {
-		test( "each Single Product block's own form drives that block's own price and gallery", async ( {
+		test( "each Single Product block's own form drives that block's own price and gallery, and submitting the first block's form adds only its own selection", async ( {
 			page,
 			admin,
 			editor,
 			pageObject,
+			frontendUtils,
 		} ) => {
 			const hoodieId = await getPostIdBySlug( 'hoodie' );
 
@@ -292,7 +293,7 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			};
 
 			// The Single Product block's default template puts a Product
-			// Gallery block beside the form (D5); reading the gallery's own
+			// Gallery block beside the form; reading the gallery's own
 			// visible large image, scoped to one block, shows which
 			// variation's image that block's own form selected.
 			const galleryImageIds = ( block: Locator ) =>
@@ -341,6 +342,39 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 			await expect( async () => {
 				expect( await galleryImageIds( firstBlock ) ).toContain( '35' );
 			} ).toPass();
+
+			const batchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+			await firstBlock
+				.getByRole( 'button', { name: 'Add to cart' } )
+				.click();
+			await batchPromise;
+
+			await expect(
+				firstBlock.getByRole( 'button', { name: '1 in cart' } )
+			).toBeVisible();
+
+			// The second block's own form is untouched by the first block's
+			// submit.
+			await expect(
+				secondBlock
+					.getByRole( 'radiogroup', { name: 'Color' } )
+					.getByRole( 'radio', { name: 'Red', exact: true } )
+			).toBeChecked();
+			await expect(
+				secondBlock
+					.getByRole( 'radiogroup', { name: 'Logo' } )
+					.getByRole( 'radio', { name: 'No', exact: true } )
+			).toBeChecked();
+
+			await frontendUtils.goToCart();
+			await expect(
+				page.getByLabel( 'Quantity of Hoodie in your cart.' )
+			).toHaveValue( '1' );
+			await expect( page.getByText( 'Color: Blue' ) ).toBeVisible();
+			await expect( page.getByText( 'Logo: No' ) ).toBeVisible();
+			await expect( page.getByText( 'Color: Red' ) ).toHaveCount( 0 );
 		} );
 	} );
 
@@ -563,9 +597,9 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				( [ , count ] ) => count > 1
 			);
 
-			// Each form's shared child now derives its ids from that form's
-			// own page-unique scope name (D6), so no id repeats across the
-			// two forms.
+			// Each form's shared child derives its ids from that form's own
+			// page-unique scope name, so no id repeats across the two
+			// forms.
 			expect( duplicatedIds ).toEqual( [] );
 
 			const forms = page.locator(
@@ -578,8 +612,8 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				.getByText( sharedChildName, { exact: true } )
 				.click();
 
-			// A page-unique id per form means the label now resolves against
-			// its own form's input.
+			// A page-unique id per form means the label resolves against its
+			// own form's input.
 			await expect( secondForm.locator( ':focus' ) ).toHaveCount( 1 );
 			await expect( firstForm.locator( ':focus' ) ).toHaveCount( 0 );
 		} );
@@ -815,9 +849,9 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 						inputs.map( ( input ) => input.value )
 				);
 
-				// Each form's quantity input is now seeded from its own
-				// server-derived `initialQuantity` (D8): the fixture's own
-				// minimum of 1, and T-Shirt's own minimum of 4.
+				// Each form's quantity input is seeded from its own
+				// server-derived initial quantity: the fixture's own minimum
+				// of 1, and T-Shirt's own minimum of 4.
 				expect( quantityValues ).toEqual( [ '1', '4' ] );
 			} finally {
 				await noJsContext.close();
@@ -858,8 +892,8 @@ test.describe( 'Add to Cart + Options Block: Multiple forms on one page', () => 
 				);
 
 			// The server derives every id from the form's page-unique scope
-			// name (D6), which is identical on every render, so the same
-			// page yields the same ids on both loads.
+			// name, which is identical on every render, so the same page
+			// yields the same ids on both loads.
 			expect( secondLoadIds ).toEqual( firstLoadIds );
 		} );
 	} );
