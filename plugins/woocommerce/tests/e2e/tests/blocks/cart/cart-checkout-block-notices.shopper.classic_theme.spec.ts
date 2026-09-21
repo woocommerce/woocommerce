@@ -24,6 +24,23 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
+const setProductOutOfStock = async ( productName: string ) => {
+	const productIdOutput = await wpCLI(
+		`post list --title="${ productName }" --post_type=product --field=ID`
+	);
+	// npm writes its own banner to stdout, so the ID is the line that holds
+	// nothing but digits.
+	const productId = productIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+	if ( ! productId ) {
+		throw new Error(
+			`Failed to find ${ productName }: ${ productIdOutput.stdout }`
+		);
+	}
+	await wpCLI(
+		`eval '$product = wc_get_product( ${ productId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
+	);
+};
+
 test.describe( 'Shopper → Notice Templates', () => {
 	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
@@ -39,6 +56,31 @@ test.describe( 'Shopper → Notice Templates', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+	} );
+
+	test( 'success and error notices use the classic templates on a classic theme', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-message' )
+		).toContainText( 'Coupon code applied successfully.' );
+
+		await setProductOutOfStock( REGULAR_PRICED_PRODUCT_NAME );
+		await page.reload();
+
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
+		).toContainText(
+			`Sorry, "${ REGULAR_PRICED_PRODUCT_NAME }" is not in stock.`
+		);
+		await expect(
+			page.locator( '.wc-block-components-notice-banner' )
+		).toHaveCount( 0 );
 	} );
 
 	test( 'success and error notices use the block templates when a classic theme opts in', async ( {
@@ -70,20 +112,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		// A non-coupon error: the cart holds a product the store has run out of.
-		const productIdOutput = await wpCLI(
-			`post list --title="${ REGULAR_PRICED_PRODUCT_NAME }" --post_type=product --field=ID`
-		);
-		// npm writes its own banner to stdout, so the ID is the line that holds
-		// nothing but digits.
-		const productId = productIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-		if ( ! productId ) {
-			throw new Error(
-				`Failed to find ${ REGULAR_PRICED_PRODUCT_NAME }: ${ productIdOutput.stdout }`
-			);
-		}
-		await wpCLI(
-			`eval '$product = wc_get_product( ${ productId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
-		);
+		await setProductOutOfStock( REGULAR_PRICED_PRODUCT_NAME );
 		await page.reload();
 
 		const errorBanner = page.locator(
