@@ -137,7 +137,9 @@ async function readUnifiedStoreState(
 	}, lock );
 }
 
-function expectOnlyWooCommerceNamespace( audit: NamespaceAudit ) {
+function expectWooCommerceNamespaceAndNoProductsNamespace(
+	audit: NamespaceAudit
+) {
 	expect( audit.stateNamespaces ).not.toContain( PRODUCTS_NAMESPACE );
 	expect( audit.directiveNamespaces ).not.toContain( PRODUCTS_NAMESPACE );
 	expect( audit.stateNamespaces ).toContain( 'woocommerce' );
@@ -184,7 +186,9 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 
 			await page.goto( '/product/store-registration-simple-fixture/' );
 
-			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
+			expectWooCommerceNamespaceAndNoProductsNamespace(
+				await auditNamespaces( page )
+			);
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);
@@ -234,7 +238,9 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 
 			await page.goto( `/?p=${ productCollectionPostId }` );
 
-			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
+			expectWooCommerceNamespaceAndNoProductsNamespace(
+				await auditNamespaces( page )
+			);
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);
@@ -243,7 +249,9 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 		await test.step( 'the Mini-Cart page', async () => {
 			await page.goto( '/mini-cart/' );
 
-			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
+			expectWooCommerceNamespaceAndNoProductsNamespace(
+				await auditNamespaces( page )
+			);
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);
