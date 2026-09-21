@@ -129,10 +129,11 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result ).toBe( otherSelectors );
 	} );
 
-	it( 'transforms known notice content via getNotices', () => {
+	it( 'transforms known notice content and removes the view-post action', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
+			actions: [ { label: 'View Email', url: '#' } ],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
 
@@ -142,14 +143,16 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const result = selectors.getNotices();
 
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
-	it( 'transforms an editor-save notice with "Post published." content', () => {
+	it( 'transforms an editor-save notice with "Post published." content and removes the action', () => {
 		// Emitted when an integration's save button publishes the post in the
 		// background (lazy post creation) instead of a plain update.
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post published.',
+			actions: [ { label: 'View Email', url: '#' } ],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
 
@@ -159,14 +162,17 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const result = selectors.getNotices();
 
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
-	it( 'leaves an editor-save notice with "Draft saved." content unchanged', () => {
+	it( 'leaves an editor-save notice with "Draft saved." content unchanged but removes the action', () => {
 		// A saved draft is not used for sending; rewriting the notice to
-		// "Email saved." would suggest the opposite.
+		// "Email saved." would suggest the opposite. The view-post action is
+		// still dropped, since it points at a permalink that is not the email.
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Draft saved.',
+			actions: [ { label: 'View Preview', url: '#' } ],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
 
@@ -176,12 +182,16 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const result = selectors.getNotices();
 
 		expect( result[ 0 ].content ).toBe( 'Draft saved.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
 	it( 'leaves an editor-save notice with unrelated content unchanged', () => {
+		// Gutenberg's save-failure notices never set actions, so there is
+		// nothing useful to strip here.
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
-			content: 'Saving failed.',
+			content: 'Updating failed.',
+			actions: [],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
 
@@ -190,7 +200,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		};
 		const result = selectors.getNotices();
 
-		expect( result[ 0 ].content ).toBe( 'Saving failed.' );
+		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
 	it( 'transforms site-editor-save-success notice and removes actions', () => {

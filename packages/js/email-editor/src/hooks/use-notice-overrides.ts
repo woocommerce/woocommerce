@@ -29,7 +29,11 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 		},
 		'editor-save': {
 			content: __( 'Email saved.', __i18n_text_domain__ ),
-			removeActions: false,
+			// Gutenberg attaches an action linking to the post permalink,
+			// labelled with the post type's `view_item` label, which reads
+			// as "View Post"/"View Email" for an email. Drop it: a preview
+			// is already available from the editor header.
+			removeActions: true,
 			// "Draft saved." is intentionally NOT rewritten: a saved draft is
 			// not used for sending, and "Email saved." would suggest it is.
 			contentCheck: ( content: string ) =>
@@ -54,14 +58,18 @@ function transformNotice( notice: Notice ): Notice {
 	if ( ! override ) {
 		return notice;
 	}
+
+	const actions = override.removeActions ? [] : notice.actions;
+
 	if ( override.contentCheck && ! override.contentCheck( notice.content ) ) {
-		return notice;
+		return { ...notice, actions };
 	}
+
 	return {
 		...notice,
 		content: override.content,
 		spokenMessage: override.content,
-		actions: override.removeActions ? [] : notice.actions,
+		actions,
 	};
 }
 
