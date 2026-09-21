@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show PayPal recommendations in 82 additional supported countries.
+Update the countries where the PayPal payments extension suggestion is shown.
