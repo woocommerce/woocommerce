@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+declare( strict_types = 1 );
+
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -1954,7 +1956,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$search_results_filter = OrderUtil::custom_orders_table_usage_is_enabled()
 				? 'woocommerce_cot_shop_order_search_results'
 				: 'woocommerce_shop_order_search_results';
-			$append_search_result = static function ( $search_results ) use ( $order_ids ) {
+			$append_search_result  = static function ( $search_results ) use ( $order_ids ) {
 				$search_results[] = $order_ids[0];
 				return $search_results;
 			};
@@ -1995,13 +1997,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$order_ids = array_map(
+		$order_ids         = array_map(
 			static function ( $order ) {
 				return $order->get_id();
 			},
 			$orders
 		);
-		$posts_per_page     = get_option( 'posts_per_page' );
+		$posts_per_page    = get_option( 'posts_per_page' );
 		$non_order_post_id = 0;
 		try {
 			$inserted_post_id = wp_insert_post(

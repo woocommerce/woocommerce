@@ -587,8 +587,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
 		 * @param string $term  Search term.
 		 */
-		$limit         = (int) apply_filters( 'woocommerce_order_search_limit', $default_limit, $term );
-		$limit         = -1 <= $limit ? $limit : $default_limit;
+		$limit          = (int) apply_filters( 'woocommerce_order_search_limit', $default_limit, $term );
+		$limit          = -1 <= $limit ? $limit : $default_limit;
 		$query_limit    = -1 < $limit ? $limit : PHP_INT_MAX;
 		$order_types    = wc_get_order_types( 'view-orders' );
 		$order_statuses = array_keys( wc_get_order_statuses() );
