@@ -1393,7 +1393,6 @@ class PaymentsProviders {
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
 					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
 					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
 					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
