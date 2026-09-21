@@ -8,6 +8,7 @@ export * from './frontend';
 export * from './local-pickup';
 export * from './mini-cart';
 export * from './performance';
+export * from './product-attributes';
 export * from './request-utils';
 export * from './shipping';
 
