@@ -8,117 +8,87 @@ import { Popover } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import Visa from '../../images/cards/visa';
-import MasterCard from '../../images/cards/mastercard';
-import Amex from '../../images/cards/amex';
-import Discover from '../../images/cards/discover';
-import ApplePay from '../../images/cards/applepay';
-import GooglePay from '../../images/cards/googlepay';
-import JCB from '../../images/cards/jcb';
-import WooPay from '../../images/payment-methods/woopay';
-import AfterPay from '../../images/payment-methods/afterpay';
-import Affirm from '../../images/payment-methods/affirm';
-import Klarna from '../../images/payment-methods/klarna';
-import Cartebancaire from '../../images/cards/cb';
-import UnionPay from '../../images/cards/unionpay';
-import Diners from '../../images/cards/diners';
-import Eftpos from '../../images/cards/eftpos';
-import Ideal from '../../images/payment-methods/ideal';
-import Bancontact from '../../images/payment-methods/bancontact';
-import Eps from '../../images/payment-methods/eps';
-import Becs from '../../images/payment-methods/becs';
-import Przelewy24 from '../../images/payment-methods/przelewy24';
-import GrabPay from '../../images/payment-methods/grabpay';
+import visa from '../../images/cards/visa.svg';
+import mastercard from '../../images/cards/mastercard.svg';
+import amex from '../../images/cards/amex.svg';
+import discover from '../../images/cards/discover.svg';
+import applepay from '../../images/cards/applepay.svg';
+import googlepay from '../../images/cards/googlepay.svg';
+import jcb from '../../images/cards/jcb.svg';
+import cartebancaire from '../../images/cards/cb.svg';
+import unionpay from '../../images/cards/unionpay.svg';
+import diners from '../../images/cards/diners.svg';
+import eftpos from '../../images/cards/eftpos.svg';
+import woopay from '../../images/payment-methods/woopay.svg';
+import afterpay from '../../images/payment-methods/afterpay.svg';
+import affirm from '../../images/payment-methods/affirm.svg';
+import klarna from '../../images/payment-methods/klarna.svg';
+import ideal from '../../images/payment-methods/ideal.svg';
+import bancontact from '../../images/payment-methods/bancontact.svg';
+import eps from '../../images/payment-methods/eps.svg';
+import becs from '../../images/payment-methods/becs.svg';
+import przelewy24 from '../../images/payment-methods/przelewy24.svg';
+import grabpay from '../../images/payment-methods/grabpay.svg';
+
+interface PaymentMethod {
+	name: string;
+	/** URL of the logo asset. */
+	src: string;
+	/**
+	 * CSS background painted on the element behind the logo. Some marks ship
+	 * with a non-transparent backdrop; since the logo is rendered through an
+	 * <img> (and letterboxed to the fixed box), the backdrop has to live on
+	 * the element rather than inside the asset so it fills the whole box.
+	 */
+	background?: string;
+}
 
 /**
  * Payment methods list.
  */
-const PaymentMethods = [
-	{
-		name: 'visa',
-		component: <Visa key="visa" />,
-	},
-	{
-		name: 'mastercard',
-		component: <MasterCard key="mastercard" />,
-	},
-	{
-		name: 'amex',
-		component: <Amex key="amex" />,
-	},
-	{
-		name: 'discover',
-		component: <Discover key="discover" />,
-	},
-	{
-		name: 'woopay',
-		component: <WooPay key="woopay" />,
-	},
-	{
-		name: 'applepay',
-		component: <ApplePay key="applepay" />,
-	},
-	{
-		name: 'googlepay',
-		component: <GooglePay key="googlepay" />,
-	},
-	{
-		name: 'afterpay',
-		component: <AfterPay key="afterpay" />,
-	},
-	{
-		name: 'affirm',
-		component: <Affirm key="affirm" />,
-	},
-	{
-		name: 'klarna',
-		component: <Klarna key="klarna" />,
-	},
+const PaymentMethods: PaymentMethod[] = [
+	{ name: 'visa', src: visa },
+	{ name: 'mastercard', src: mastercard },
+	{ name: 'amex', src: amex, background: '#006FCF' },
+	{ name: 'discover', src: discover },
+	{ name: 'woopay', src: woopay, background: '#873EFF' },
+	{ name: 'applepay', src: applepay },
+	{ name: 'googlepay', src: googlepay },
+	{ name: 'afterpay', src: afterpay, background: '#B2FCE4' },
+	{ name: 'affirm', src: affirm },
+	{ name: 'klarna', src: klarna, background: '#FFB3C7' },
 	{
 		name: 'cartebancaire',
-		component: <Cartebancaire key="cartebancaire" />,
+		src: cartebancaire,
+		background:
+			'linear-gradient(30deg, #2E2E79 0%, #2581C4 25%, #E6D6DB 50%, #E3756A 75%, #C90C0F 100%)',
 	},
-	{
-		name: 'unionpay',
-		component: <UnionPay key="unionpay" />,
-	},
-	{
-		name: 'diners',
-		component: <Diners key="diners" />,
-	},
-	{
-		name: 'eftpos',
-		component: <Eftpos key="eftpos" />,
-	},
-	{
-		name: 'jcb',
-		component: <JCB key="jcb" />,
-	},
-	{
-		name: 'bancontact',
-		component: <Bancontact key="bancontact" />,
-	},
-	{
-		name: 'becs',
-		component: <Becs key="becs" />,
-	},
-	{
-		name: 'eps',
-		component: <Eps key="eps" />,
-	},
-	{
-		name: 'ideal',
-		component: <Ideal key="ideal" />,
-	},
-	{
-		name: 'przelewy24',
-		component: <Przelewy24 key="przelewy24" />,
-	},
-	{
-		name: 'grabpay',
-		component: <GrabPay key="grabpay" />,
-	},
+	{ name: 'unionpay', src: unionpay },
+	{ name: 'diners', src: diners },
+	{ name: 'eftpos', src: eftpos, background: 'rgba(31, 0, 56, 1)' },
+	{ name: 'jcb', src: jcb, background: 'rgba(14, 76, 150, 1)' },
+	{ name: 'bancontact', src: bancontact },
+	{ name: 'becs', src: becs },
+	{ name: 'eps', src: eps },
+	{ name: 'ideal', src: ideal },
+	{ name: 'przelewy24', src: przelewy24 },
+	{ name: 'grabpay', src: grabpay },
 ];
+
+// Logos are decorative: the surrounding copy and the "+N" affordance convey
+// the meaning, so they carry no accessible name (matching the prior inline SVGs).
+const renderLogo = ( pm: PaymentMethod ) => (
+	<img
+		key={ pm.name }
+		src={ pm.src }
+		alt=""
+		width={ pm.background ? 40 : 38 }
+		height={ pm.background ? 26 : 24 }
+		className={ pm.background ? 'has-background' : undefined }
+		style={ pm.background ? { background: pm.background } : undefined }
+		loading="lazy"
+	/>
+);
 
 export const WooPaymentsMethodsLogos = ( {
 	/**
@@ -268,7 +238,7 @@ export const WooPaymentsMethodsLogos = ( {
 
 	return (
 		<div className="woocommerce-woopayments-payment-methods-logos">
-			{ visiblePaymentMethods.map( ( pm ) => pm.component ) }
+			{ visiblePaymentMethods.map( renderLogo ) }
 			{ maxShownElements < maxSupportedPaymentMethods && (
 				<div
 					className="woocommerce-woopayments-payment-methods-logos-count"
@@ -292,9 +262,7 @@ export const WooPaymentsMethodsLogos = ( {
 							onKeyDown={ handleKeyDown }
 						>
 							<div className="woocommerce-woopayments-payment-methods-logos">
-								{ hiddenPaymentMethods.map(
-									( pm ) => pm.component
-								) }
+								{ hiddenPaymentMethods.map( renderLogo ) }
 							</div>
 						</Popover>
 					) }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix tax rate search in Analytics filters by using the correct `search` query parameter instead of `code` when calling the `/wc-analytics/taxes` endpoint.

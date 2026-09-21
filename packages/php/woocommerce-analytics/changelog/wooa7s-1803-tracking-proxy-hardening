@@ -1,0 +1,4 @@
+Significance: minor
+Type: security
+
+Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, and register it only on sites with proxy tracking enabled. Adds `WC_Analytics_Tracking::record_client_event()` and a third `$is_client_supplied` argument to the `jetpack_woocommerce_analytics_event_props` filter.

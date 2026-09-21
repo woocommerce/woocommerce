@@ -246,12 +246,12 @@ class NotificationProcessor {
 	 * @since 10.9.0
 	 */
 	private function cancel_safety_net( Notification $notification ): void {
+		// Must match the shape PendingNotificationStore::schedule_safety_net() used;
+		// both derive the args from Notification::get_safety_net_args() so the
+		// exact-equality match Action Scheduler performs succeeds.
 		as_unschedule_all_actions(
 			self::SAFETY_NET_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $notification->get_resource_id(),
-			),
+			$notification->get_safety_net_args(),
 			self::ACTION_SCHEDULER_GROUP
 		);
 	}

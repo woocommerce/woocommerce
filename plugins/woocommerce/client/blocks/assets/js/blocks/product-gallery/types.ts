@@ -29,8 +29,8 @@ export type ProductGalleryConfig = WooCommerceConfig & {
 };
 
 export type LegacyVariationPayload = {
-	image_id?: number;
-	gallery_image_ids?: number[];
+	variation_id?: number | string;
+	image_id?: number | string;
 };
 
 export type LegacyJQueryInstance = {
@@ -46,13 +46,17 @@ export type LegacyJQueryWindow = Window & {
 };
 
 export type LegacyJQueryFormHandlers = {
-	onVariationFound: ( imageIds: number[], featuredImageId?: number ) => void;
+	onVariationFound: (
+		variationId?: number,
+		featuredImageId?: number
+	) => void;
 	onVariationReset: () => void;
 };
 
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
+	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
 	touchStartX: number;
 	touchCurrentX: number;

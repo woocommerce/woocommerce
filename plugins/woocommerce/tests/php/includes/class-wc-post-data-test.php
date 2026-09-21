@@ -5,10 +5,33 @@
  * @package WooCommerce\Tests\Post_Data.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Class WC_Post_Data_Test
  */
 class WC_Post_Data_Test extends \WC_Unit_Test_Case {
+
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure the HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * @testdox coupon code should be always sanitized.
@@ -34,16 +57,36 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Order items should be deleted before deleting order.
+	 * @testdox Should remove order items when permanently deleting an order.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
-	public function test_before_delete_order() {
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$items = $order->get_items();
-		$this->assertNotEmpty( $items );
+	public function test_deleting_order_removes_items( bool $hpos_enabled ): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
-		WC_Post_Data::before_delete_order( $order->get_id() );
-		$order = wc_get_order( $order->get_id() );
-		$this->assertEmpty( $order->get_items() );
+		try {
+			$this->toggle_cot_authoritative( $hpos_enabled );
+
+			$order    = OrderHelper::create_order();
+			$item_ids = array_keys( $order->get_items() );
+			$this->assertNotEmpty( $item_ids, 'The order should contain an item' );
+
+			$order->delete( true );
+
+			$this->assertFalse( WC_Order_Factory::get_order_item( reset( $item_ids ) ), 'The deleted order item should no longer be available' );
+		} finally {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				$this->toggle_cot_authoritative( $previous_hpos_state );
+			}
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
 	}
 
 	/**
@@ -161,5 +204,95 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_product_published', $callback );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox do_deferred_product_sync should sync each queued product once (even if queued multiple times) and empty the queue.
+	 */
+	public function test_do_deferred_product_sync_syncs_queued_products(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids ) {
+			$synced_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+		wc_deferred_product_sync( $product_2->get_id() );
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each queued product should be synced exactly once' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
+	}
+
+	/**
+	 * @testdox do_deferred_product_sync should also sync products that get deferred while another product is being synced.
+	 */
+	public function test_do_deferred_product_sync_processes_products_deferred_during_sync(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids, $product_1, $product_2 ) {
+			$synced_ids[] = $product_id;
+			if ( $product_1->get_id() === $product_id ) {
+				wc_deferred_product_sync( $product_2->get_id() );
+			}
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Products deferred while syncing another product should be synced too' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
+	}
+
+	/**
+	 * @testdox do_deferred_product_sync should terminate, syncing each product at most once, when synced products keep re-deferring each other.
+	 */
+	public function test_do_deferred_product_sync_terminates_on_mutual_re_deferral(): void {
+		global $wc_deferred_product_sync;
+
+		$wc_deferred_product_sync = array();
+		$product_1                = WC_Helper_Product::create_grouped_product();
+		$product_2                = WC_Helper_Product::create_grouped_product();
+
+		// Each product defers the other one when synced, as e.g. translation plugins do.
+		// With the old array_walk-based implementation this caused an infinite loop,
+		// hence the cap on the number of syncs: it makes the test fail instead of hanging.
+		$synced_ids = array();
+		$callback   = function ( $product_id ) use ( &$synced_ids, $product_1, $product_2 ) {
+			$synced_ids[] = $product_id;
+			if ( count( $synced_ids ) > 100 ) {
+				$this->fail( 'do_deferred_product_sync does not terminate when synced products keep re-deferring each other' );
+			}
+			wc_deferred_product_sync( $product_1->get_id() === $product_id ? $product_2->get_id() : $product_1->get_id() );
+		};
+		add_action( 'woocommerce_update_product', $callback );
+
+		wc_deferred_product_sync( $product_1->get_id() );
+
+		WC_Post_Data::do_deferred_product_sync();
+
+		remove_action( 'woocommerce_update_product', $callback );
+
+		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
+		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
 	}
 }

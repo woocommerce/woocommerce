@@ -1,3 +1,0 @@
-Significance: patch
-Type: update
-Comment: Drop the icon from store_stock and store_order push notifications and append a per-event emoji to the store_stock title.

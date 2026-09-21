@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Polish the floating WC Admin header across Home and Settings: store icon for View store / Preview store, even icon spacing, fix the user-options click race, align title typography / colour / padding to WordPress design tokens, and remove a bunch of one-off overrides that were drifting from the rest of the wp-admin chrome.

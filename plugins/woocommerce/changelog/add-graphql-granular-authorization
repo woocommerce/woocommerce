@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add granular type- and field-level authorization to the dual code+GraphQL API

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove incorrect React peer dependencies; sanitize is a pure string sanitization utility with no React imports or JSX.

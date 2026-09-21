@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Email;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use WC_Abstract_Order;
 use WC_Order_Item;
 
@@ -26,7 +27,7 @@ class OrderPriceFormatter {
 	 * @return string Formatted item subtotal.
 	 */
 	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, WC_Order_Item $item, string $tax_display ): string {
-		$includes_tax  = 'excl' !== $tax_display;
+		$includes_tax  = TaxDisplayMode::EXCLUSIVE !== $tax_display;
 		$item_subtotal = $order->get_item_subtotal( $item, $includes_tax );
 		return self::format_price( $order, $item_subtotal, $includes_tax );
 	}

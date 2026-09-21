@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove the unused settings editor package and related feature flag paths.

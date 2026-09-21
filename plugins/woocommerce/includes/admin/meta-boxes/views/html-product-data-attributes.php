@@ -5,21 +5,10 @@
  * @package WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
-	?>
-	<div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
-		<div id="<?php echo esc_attr( ProductVariationsClassicRedesign::ATTRIBUTES_ROOT_ID ); ?>"></div>
-	</div>
-	<?php
-	return;
 }
 
 global $wc_product_attributes;
@@ -45,8 +34,12 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
 		<div class="actions">
+			<?php
+			/* translators: 'Global' refers to 'global attribute'. */
+			$add_global_attribute_placeholder = __( 'Add global', 'woocommerce' );
+			?>
 			<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Add new', 'woocommerce' ); ?></button>
-			<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing', 'woocommerce' ); ?>" data-minimum-input-length="0">
+			<select class="wc-attribute-search" data-placeholder="<?php echo esc_attr( $add_global_attribute_placeholder ); ?>" data-minimum-input-length="0">
 			</select>
 		</div>
 	</div>

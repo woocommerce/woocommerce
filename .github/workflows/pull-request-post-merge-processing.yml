@@ -9,11 +9,15 @@ on:
 
 permissions: {}
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
     process-pull-request-after-merge:
         name: "Process a pull request after it's merged"
         if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             pull-requests: write
         steps:
@@ -34,7 +38,7 @@ jobs:
               env:
                   GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
             - name: 'Install PHP'
-              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+              uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
               with:
                   php-version: '7.4'
 
@@ -42,6 +46,7 @@ jobs:
         name: Log the merge of a Feature Freeze exception
         if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             pull-requests: write
         steps:
@@ -55,6 +60,7 @@ jobs:
     process-pull-request-after-close:
         name: "Process a pull request after it's been closed"
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - name: 'Cleanup: GitHub caches associated with the merged branch'
               run: |

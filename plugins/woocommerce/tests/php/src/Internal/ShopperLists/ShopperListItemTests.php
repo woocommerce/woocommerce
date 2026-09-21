@@ -86,6 +86,29 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox from_product should return null for a product that isn't publicly live.
+	 */
+	public function test_from_product_returns_null_for_non_published_product(): void {
+		$this->product->set_status( 'private' );
+		$this->product->save();
+
+		$this->assertNull( ShopperListItem::from_product( $this->product->get_id() ) );
+	}
+
+	/**
+	 * @testdox from_product should return null for a non-published variable product, not a variation error.
+	 */
+	public function test_from_product_returns_null_for_non_published_variable_product(): void {
+		$variable = \WC_Helper_Product::create_variation_product();
+		$variable->set_status( 'draft' );
+		$variable->save();
+
+		$this->assertNull( ShopperListItem::from_product( $variable->get_id() ) );
+
+		$variable->delete( true );
+	}
+
+	/**
 	 * @testdox from_product validates the variation array against the variation product, like cart does.
 	 */
 	public function test_from_variation_validates_against_variation_product(): void {

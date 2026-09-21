@@ -79,17 +79,17 @@ const reducer = ( state: State = initialState, action: Action ): State => {
 
 const actions = {
 	setReviewDrawerOpen: ( open: boolean ) =>
-		( { type: 'SET_REVIEW_DRAWER_OPEN', open } as const ),
+		( { type: 'SET_REVIEW_DRAWER_OPEN', open } ) as const,
 	openReviewDrawer: () =>
-		( { type: 'SET_REVIEW_DRAWER_OPEN', open: true } as const ),
+		( { type: 'SET_REVIEW_DRAWER_OPEN', open: true } ) as const,
 	closeReviewDrawer: () =>
-		( { type: 'SET_REVIEW_DRAWER_OPEN', open: false } as const ),
+		( { type: 'SET_REVIEW_DRAWER_OPEN', open: false } ) as const,
 	dismissUpdateBanner: ( postId: number ) =>
-		( { type: 'DISMISS_UPDATE_BANNER', postId } as const ),
+		( { type: 'DISMISS_UPDATE_BANNER', postId } ) as const,
 	clearDismissedForPost: ( postId: number ) =>
-		( { type: 'CLEAR_DISMISSED_FOR_POST', postId } as const ),
+		( { type: 'CLEAR_DISMISSED_FOR_POST', postId } ) as const,
 	markUpdateBannerViewed: ( postId: number, versionTo: string ) =>
-		( { type: 'MARK_UPDATE_BANNER_VIEWED', postId, versionTo } as const ),
+		( { type: 'MARK_UPDATE_BANNER_VIEWED', postId, versionTo } ) as const,
 };
 
 const selectors = {

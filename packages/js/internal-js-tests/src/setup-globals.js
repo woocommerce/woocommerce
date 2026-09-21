@@ -1,9 +1,18 @@
 /**
  * External dependencies
  */
+const { TextDecoder, TextEncoder } = require( 'node:util' );
 const { setLocaleData } = require( '@wordpress/i18n' );
 const { registerStore } = require( '@wordpress/data' );
 require( 'regenerator-runtime/runtime' );
+
+if ( typeof global.TextEncoder === 'undefined' ) {
+	global.TextEncoder = TextEncoder;
+}
+
+if ( typeof global.TextDecoder === 'undefined' ) {
+	global.TextDecoder = TextDecoder;
+}
 
 // Due to the dependency @wordpress/compose which introduces the use of
 // ResizeObserver this global mock is required for some tests to work.

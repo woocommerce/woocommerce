@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * RoutesController class.
@@ -83,12 +82,6 @@ class RoutesController {
 				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,
 				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
-			'agentic'       => [
-				// Agentic Commerce Protocol endpoints.
-				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER         => Routes\V1\Agentic\CheckoutSessions::class,
-				Routes\V1\Agentic\CheckoutSessionsUpdate::IDENTIFIER   => Routes\V1\Agentic\CheckoutSessionsUpdate::class,
-				Routes\V1\Agentic\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Agentic\CheckoutSessionsComplete::class,
-			],
 		];
 	}
 
@@ -102,10 +95,6 @@ class RoutesController {
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled() ) {
 			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
-		}
-
-		if ( FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
-			$this->register_routes( 'agentic', 'wc/agentic/v1' );
 		}
 	}
 

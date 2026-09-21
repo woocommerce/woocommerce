@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP warning for undefined array key fixedWidth in ProductCollection Renderer when using Fixed Width + Carousel

@@ -3,6 +3,7 @@
  * Displays the inventory tab in the product data meta box.
  *
  * @package WooCommerce\Admin
+ * @var WC_Product $product_object
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,18 +44,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		woocommerce_wp_text_input(
 			array(
-				'id'          => '_mpn',
+				'id'          => '_wc_mpn',
 				'value'       => $product_object->get_mpn( 'edit' ),
-				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer Part Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
 				'desc_tip'    => true,
 				'description' => __( 'Enter the manufacturer part number for this product.', 'woocommerce' ),
 			)
 		);
 
 		/**
-		 * Action hook after the MPN (Manufacturer Part Number) product option field.
+		 * Action hook after the MPN (Manufacturer part number) product option field.
 		 *
-		 * @since 10.9.0
+		 * @since 11.3.0
 		 */
 		do_action( 'woocommerce_product_options_mpn' );
 
@@ -107,7 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
-			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
+			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( (float) $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 			$backorder_args = array(
 				'id'      => '_backorders',

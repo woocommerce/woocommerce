@@ -15,7 +15,7 @@ jobs:
     lockdown:
         runs-on: ubuntu-latest
         steps:
-            - uses: dessant/repo-lockdown@v5
+            - uses: dessant/repo-lockdown@17c2cc64a91eff426f242b05dd523c6f098889b6 # v5.0.2
               with:
                   github-token: ${{ github.token }}
                   issue-comment: |

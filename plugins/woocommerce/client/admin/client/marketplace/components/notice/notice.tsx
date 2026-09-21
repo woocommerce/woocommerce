@@ -32,7 +32,7 @@ const iconMap = {
 	percent,
 };
 
-export default function Notice( props: NoticeProps ): JSX.Element | null {
+export default function Notice( props: NoticeProps ): React.JSX.Element | null {
 	const {
 		id,
 		description,

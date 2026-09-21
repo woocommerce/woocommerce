@@ -6,7 +6,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { SelectableItem } from '@woocommerce/types';
 import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 
 // ----------------------------------------
@@ -42,14 +42,22 @@ export type ProductFiltersContext = {
 	item: FilterOptionItem;
 	activeLabelTemplate: string;
 	filterType: string;
+	// Set when Product Filters is a descendant of Product Collection. Null
+	// signals the frontend to fall back to the global interactivity config
+	// (sibling-block layout).
+	forcePageReload?: boolean | null;
 };
 
 // ----------------------------------------
 // Block props
 // ----------------------------------------
+export type OverlayMode = 'off' | 'mobile' | 'always';
+
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
+	overlayMode?: OverlayMode;
+	overlayPosition?: 'left' | 'right';
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

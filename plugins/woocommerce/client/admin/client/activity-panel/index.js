@@ -14,10 +14,7 @@ const excludedPages = [ 'wc-settings' ];
 const ActivityPanelHeaderItem = () => (
 	<WooHeaderItem order={ 20 }>
 		{ ( { isEmbedded, query } ) => {
-			if (
-				! window.wcAdminFeatures[ 'activity-panels' ] ||
-				excludedPages.includes( query.page )
-			) {
+			if ( excludedPages.includes( query.page ) ) {
 				return null;
 			}
 

@@ -47,13 +47,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -246,13 +246,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -526,13 +526,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -710,13 +710,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -975,13 +975,13 @@ exports[`SearchListControl should render a search box and list of options with a
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -1159,13 +1159,13 @@ exports[`SearchListControl should render a search box and list of options with a
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1424,13 +1424,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-9"
               >
                 Search for items
@@ -1506,13 +1506,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-9"
             >
               Search for items
@@ -1669,13 +1669,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-8"
               >
                 Testing search label
@@ -1853,13 +1853,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-8"
             >
               Testing search label
@@ -2118,13 +2118,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2189,13 +2189,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2341,13 +2341,13 @@ exports[`SearchListControl should render a search box with a search term, and no
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-7"
               >
                 Search for items
@@ -2412,13 +2412,13 @@ exports[`SearchListControl should render a search box with a search term, and no
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-7"
             >
               Search for items
@@ -2564,13 +2564,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -2662,13 +2662,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -2841,13 +2841,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -2939,13 +2939,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -3168,13 +3168,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -3403,13 +3403,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -3760,13 +3760,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -4037,13 +4037,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-3"
             >
               Search for items

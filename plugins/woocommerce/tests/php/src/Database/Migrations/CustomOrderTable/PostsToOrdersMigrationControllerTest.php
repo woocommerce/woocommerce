@@ -4,10 +4,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderTableMigrator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use WC_DateTime;
 
@@ -32,23 +34,83 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 	private $executed_transaction_statements;
 
 	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
+	 * Original migration transaction option.
+	 *
+	 * @var mixed
+	 */
+	private $previous_transactions_option;
+
+	/**
+	 * Original migration transaction isolation option.
+	 *
+	 * @var mixed
+	 */
+	private $previous_isolation_option;
+
+	/**
+	 * Original database session SQL mode.
+	 *
+	 * @var string
+	 */
+	private $previous_sql_mode;
+
+	/**
 	 * Setup data_store and sut.
 	 */
 	public function setUp(): void {
+		global $wpdb;
+
 		parent::setUp();
+
+		$this->previous_hpos_state          = OrderUtil::custom_orders_table_usage_is_enabled();
+		$this->previous_transactions_option = get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, null );
+		$this->previous_isolation_option    = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, null );
+		$this->previous_sql_mode            = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		self::enable_direct_product_attribute_lookup_updates();
+		OrderHelper::toggle_cot_feature_and_usage( false );
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( PostsToOrdersMigrationController::class );
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
 	 * Run after each test.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
+
+		$wpdb->suppress_errors( false );
+		$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $this->previous_sql_mode ) );
+		$this->restore_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, $this->previous_transactions_option );
+		$this->restore_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, $this->previous_isolation_option );
+		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		self::disable_direct_product_attribute_lookup_updates();
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		parent::tearDown();
-		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+	}
+
+	/**
+	 * Restore an option to its value before the test, including nonexistence.
+	 *
+	 * @param string $option_name Option name.
+	 * @param mixed  $previous_value Original option value, or null when absent.
+	 */
+	private function restore_option( string $option_name, $previous_value ): void {
+		if ( null === $previous_value ) {
+			delete_option( $option_name );
+		} else {
+			update_option( $option_name, $previous_value );
+		}
 	}
 
 	/**
@@ -61,6 +123,72 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 		$this->assert_order_addresses_are_migrated( $order );
 		$this->assert_order_op_data_is_migrated( $order );
 		$this->assert_metadata_is_migrated( $order );
+	}
+
+	/**
+	 * @testdox Should derive the GMT created and modified dates from the local ones when the post holds the zero date in the GMT columns.
+	 */
+	public function test_migration_for_order_with_zero_gmt_dates(): void {
+		global $wpdb;
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$this->clear_all_orders();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date_gmt'     => '0000-00-00 00:00:00',
+				'post_modified_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+		$post = get_post( $order->get_id() );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$db_order = $this->get_order_from_cot( $order );
+		$this->assertEquals( get_gmt_from_date( $post->post_date ), $db_order->date_created_gmt, 'The created date should be derived from post_date.' );
+		$this->assertEquals( get_gmt_from_date( $post->post_modified ), $db_order->date_updated_gmt, 'The modified date should be derived from post_modified.' );
+		$this->assertNotEquals( $post->post_date, $db_order->date_created_gmt, 'The local date should have been converted to GMT.' );
+
+		$migrator = new PostToOrderTableMigrator();
+		$this->assertEmpty( $migrator->verify_migrated_data( array( $order->get_id() ) ), 'Verification should accept the derived dates.' );
+
+		// A row migrated before the fallback existed still holds the zero date: verification must report it.
+		$wpdb->update( $this->data_store::get_orders_table_name(), array( 'date_created_gmt' => '0000-00-00 00:00:00' ), array( 'id' => $order->get_id() ) );
+		$failures = $migrator->verify_migrated_data( array( $order->get_id() ) );
+		$this->assertSame( 'post_date_gmt', $failures[ $order->get_id() ][0]['column'] ?? null, 'Verification should flag a created date that was not derived.' );
+	}
+
+	/**
+	 * @testdox Should keep the zero date when both the GMT and the local columns hold the zero date.
+	 */
+	public function test_migration_for_order_with_zero_gmt_and_local_dates(): void {
+		global $wpdb;
+
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$this->clear_all_orders();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date'         => '0000-00-00 00:00:00',
+				'post_date_gmt'     => '0000-00-00 00:00:00',
+				'post_modified'     => '0000-00-00 00:00:00',
+				'post_modified_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$db_order = $this->get_order_from_cot( $order );
+		$this->assertSame( '0000-00-00 00:00:00', $db_order->date_created_gmt, 'With no date to derive the created date from, the zero date is stored as before.' );
+		$this->assertSame( '0000-00-00 00:00:00', $db_order->date_updated_gmt, 'With no date to derive the modified date from, the zero date is stored as before.' );
+
+		$migrator = new PostToOrderTableMigrator();
+		$this->assertEmpty( $migrator->verify_migrated_data( array( $order->get_id() ) ), 'Verification should accept the empty dates.' );
 	}
 
 	/**
@@ -369,14 +497,14 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * Helper method to clear checkout and truncate order tables.
+	 * Helper method to clear checkout and order tables.
 	 */
 	private function clear_all_orders() {
 		global $wpdb;
 		$order_tables = $this->data_store->get_all_table_names();
 		foreach ( $order_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "TRUNCATE table $table;" );
+			$wpdb->query( "DELETE FROM $table;" );
 		}
 	}
 
@@ -768,7 +896,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 * @testDox When there are multi meta values for a supposed unique meta key, the first one is picked.
 	 */
 	public function test_first_value_is_picked_when_multi_value() {
 		global $wpdb;
@@ -822,25 +950,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
 
-		// Set SQL mode to strict to disallow 0 dates.
-		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+		try {
+			// Set SQL mode to strict to disallow 0 dates.
+			$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
 
-		// Assert that strict mode was indeed enabled, by trying to insert 0 date.
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$wpdb->suppress_errors();
+			// Assert that strict mode was indeed enabled, by trying to insert 0 date.
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$wpdb->suppress_errors();
 
-		// phpcs:ignore -- Ignoring this error because we are testing for it.
-		$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
-		$this->assertFalse( $result );
-		$wpdb->suppress_errors( false );
+			// phpcs:ignore -- Ignoring this error because we are testing for it.
+			$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
+			$this->assertFalse( $result );
+			$wpdb->suppress_errors( false );
 
-		$this->sut->migrate_order( $order->get_id() );
+			$this->sut->migrate_order( $order->get_id() );
 
-		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
-		$this->assertEmpty( $errors ); // _customer_user_agent
-
-		// phpcs:ignore -- Hardcoded value.
-		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+			$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+			$this->assertEmpty( $errors );
+		} finally {
+			$wpdb->suppress_errors( false );
+			// phpcs:ignore -- Hardcoded value.
+			$wpdb->query( "SET sql_mode = '$sql_mode' " );
+		}
 	}
 
 	/**

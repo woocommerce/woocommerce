@@ -90,7 +90,7 @@ function add_extension_register_script() {
 		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
-			'version'      => filemtime( $script_path ),
+			'version'      => filemtime( __DIR__ . $script_path ),
 		);
 	$script_url        = plugins_url( $script_path, __FILE__ );
 
@@ -130,7 +130,6 @@ add_action(
 	function() {
 		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
 		}
 	}
 );
@@ -181,4 +180,3 @@ if ( $simulate_error ) {
 
 // Initialize the live branches feature.
 require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';
-require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-product-editor-devtools.php';

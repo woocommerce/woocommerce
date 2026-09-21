@@ -68,14 +68,13 @@ final class ReserveStock {
 	 * @throws ReserveStockException If stock cannot be reserved.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
+	 * @param int       $minutes How long to reserve stock in minutes. Defaults to 60.
 	 */
-	public function reserve_stock_for_order( $order, $minutes = 0 ) {
+	public function reserve_stock_for_order( $order, $minutes = 60 ) {
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
 
-		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
 		/**
 		 * Filters the number of minutes an order should reserve stock for.
 		 *
@@ -83,7 +82,7 @@ final class ReserveStock {
 		 *
 		 * @since 8.8.0
 		 *
-		 * @param int       $minutes How long to reserve stock for the order in minutes. Defaults to woocommerce_hold_stock_minutes or 10 if block checkout entry.
+		 * @param int       $minutes How long to reserve stock for the order in minutes.
 		 * @param \WC_Order $order Order object.
 		 */
 		$minutes = (int) apply_filters( 'woocommerce_order_hold_stock_minutes', $minutes, $order );
@@ -219,12 +218,13 @@ final class ReserveStock {
 		$query_for_stock          = \WC_Data_Store::load( 'product' )->get_query_for_stock( $product_id );
 		$query_for_reserved_stock = $this->get_query_for_reserved_stock( $product_id, $order->get_id() );
 
+		// Performance note: this method uses pessimistic locking and requires InnoDB table types to function correctly.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
 			"
 			INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
 			SELECT %d, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
-			WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock FOR UPDATE ) >= %d
+			WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock LOCK IN SHARE MODE ) >= %d
 			ON DUPLICATE KEY UPDATE `expires` = VALUES( `expires` ), `stock_quantity` = VALUES( `stock_quantity` )
 			",
 			$order->get_id(),
@@ -235,9 +235,9 @@ final class ReserveStock {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		// Reliability: high concurrency on the same product reservation can trigger deadlocks (error codes 1213 and 1205).
-		// We currently do not have a reliable method to identify lock errors. The $wpdb interface does not consistently provide
-		// error codes, and error messages can vary by database locale. Previously, we matched messages to 'try restarting transaction'.
+		// Retry operations in high-contention environments if error codes 1213, 1205, or 1020 occur. Since error
+		// messages may be localized and we cannot reliably identify these codes, we use a generalized approach. Do
+		// not remove this loop; it is required for the 'LOCK IN SHARE MODE' locking mode in the SQL above.
 		for ( $attempt = 0; $attempt < 3; ++$attempt ) {
 			$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			if ( false !== $result ) {
@@ -263,18 +263,19 @@ final class ReserveStock {
 	 * Returns query statement for getting reserved stock of a product.
 	 *
 	 * @param int $product_id       Product ID.
-	 * @param int $exclude_order_id Optional order to exclude from the results.
-	 * @return string|void          Query statement.
+	 * @param int $exclude_order_id Order to exclude from the results.
+	 * @return string               Query statement.
 	 */
-	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {
+	private function get_query_for_reserved_stock( $product_id, $exclude_order_id ): string {
 		global $wpdb;
 
+		$pending = OrderInternalStatus::PENDING;
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
-			$where_status = "orders.status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
+			$where_status = "orders.status IN ( 'wc-checkout-draft', '$pending' )";
 		} else {
 			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
-			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '" . OrderInternalStatus::PENDING . "' )";
+			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '$pending' )";
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

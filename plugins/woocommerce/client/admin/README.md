@@ -8,7 +8,7 @@ Please refer to the [WooCommerce Admin Development](https://developer.woocommerc
 
 ## End-to-end tests
 
-Please refer to the [WooCommerce End to End Tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e-pw/README.md).
+Please refer to the [WooCommerce End to End Tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md).
 
 ## Common Issues
 

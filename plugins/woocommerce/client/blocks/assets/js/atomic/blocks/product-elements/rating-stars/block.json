@@ -8,21 +8,9 @@
 			"type": "number",
 			"default": 0
 		},
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
-		},
 		"textAlign": {
 			"type": "string",
 			"default": ""
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfSingleProductTemplate": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
@@ -45,8 +33,10 @@
 		"typography": {
 			"fontSize": true,
 			"__experimentalSkipSerialization": true
-		},
-		"__experimentalSelector": ".wc-block-components-product-rating"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-rating-stars.wc-block-components-product-rating, .wp-block-woocommerce-product-rating-stars .wc-block-components-product-rating"
 	},
 	"ancestor": [ "woocommerce/single-product" ],
 	"textdomain": "woocommerce",

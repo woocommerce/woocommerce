@@ -10,7 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './woocommerce-shipping-item.scss';
-import type { ShippingPartnerTrackingProps } from './experimental-woocommerce-shipping-item';
+import type { ShippingPartnerTrackingProps } from './woocommerce-shipping-item';
 
 const SHIPSTATION_PLUGIN_SLUG = 'woocommerce-shipstation-integration';
 

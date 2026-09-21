@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 /**
  * AssetsController class.
@@ -37,7 +39,6 @@ final class AssetsController {
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'init', array( $this, 'register_script_modules' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
@@ -72,18 +73,22 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
+		if ( BlockEditorUnifiedAssets::is_enabled() ) {
+			$this->register_style( 'wc-block-library-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-block-library-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
+		}
 
 		$this->api->register_script( 'wc-types', $this->api->get_block_asset_build_path( 'wc-types' ), array(), false );
 		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
-		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
 		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', array(), false );
-		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), array( 'wc-blocks-vendors' ), false );
 		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
 		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
+		$this->register_editor_scripts();
 
-		// The price package is shared externally so has no blocks prefix.
+		// Keep price-format as a dedicated shared package: editor and frontend/runtime assets depend on it, and
+		// externalizing it avoids duplicating price formatting helpers across bundles.
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
 		// Vendor scripts for blocks frontends (not including cart and checkout).
@@ -94,7 +99,6 @@ final class AssetsController {
 		$this->api->register_script( 'wc-cart-checkout-base', $this->api->get_block_asset_build_path( 'wc-cart-checkout-base-frontend' ), array(), true );
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js' );
 		$this->api->register_script( 'wc-blocks-checkout-events', 'assets/client/blocks/blocks-checkout-events.js' );
-		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
 
 		// Sanitize.
@@ -102,17 +106,6 @@ final class AssetsController {
 			'wc-sanitize',
 			'assets/client/admin/sanitize/index.js',
 			array()
-		);
-
-		// Customer Effort Score.
-		$this->api->register_script(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/index.js',
-			array( 'wp-data', 'wp-data-controls', 'wc-store-data' )
-		);
-		$this->api->register_style(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/style.css',
 		);
 
 		wp_add_inline_script(
@@ -128,12 +121,95 @@ final class AssetsController {
 	}
 
 	/**
-	 * Register and enqueue assets for exclusive usage within the Site Editor.
+	 * Register scripts for the active block editor asset configuration.
 	 */
-	public function register_and_enqueue_site_editor_assets() {
-		// Customer Effort Score.
-		wp_enqueue_script( 'wc-customer-effort-score' );
-		wp_enqueue_style( 'wc-customer-effort-score' );
+	private function register_editor_scripts(): void {
+		if ( ! BlockEditorUnifiedAssets::is_enabled() ) {
+			$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
+			$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), array( 'wc-blocks-vendors' ), false );
+			return;
+		}
+
+		$this->api->register_script(
+			'wc-block-library',
+			$this->api->get_block_asset_build_path( 'wc-block-library' ),
+			array( 'wc-blocks-middleware', 'wc-entities' ),
+			true
+		);
+
+		$this->register_deprecated_script_handles();
+	}
+
+	/**
+	 * Register deprecated script handles for backward compatibility.
+	 */
+	private function register_deprecated_script_handles(): void {
+		$script_dependencies = array(
+			'wc-blocks-vendors' => array(),
+			'wc-blocks'         => array( 'wc-blocks-vendors', 'wc-block-library' ),
+		);
+
+		if ( is_admin() ) {
+			// Discovering legacy block assets requires expensive filesystem checks, so only run this in admin requests.
+			$build_path  = WC_ABSPATH . 'assets/client/blocks/';
+			$asset_files = glob( $build_path . '*.asset.php' );
+
+			foreach ( false === $asset_files ? array() : $asset_files as $asset_file ) {
+				$script_name = basename( $asset_file, '.asset.php' );
+
+				if (
+					in_array( $script_name, array( 'wc-block-library', 'wc-blocks' ), true ) ||
+					! file_exists( $build_path . $script_name . '.js' )
+				) {
+					continue;
+				}
+
+				// The file comes from WooCommerce's generated assets directory, not user input.
+				// nosemgrep audit.php.lang.security.file.inclusion-arg.
+				$asset_data = require $asset_file;
+
+				if (
+					! is_array( $asset_data ) ||
+					! in_array( 'wp-blocks', (array) ( $asset_data['dependencies'] ?? array() ), true )
+				) {
+					continue;
+				}
+
+				$legacy_handle                         = 'wc-' . $script_name . '-block';
+				$script_dependencies[ $legacy_handle ] = array( 'wc-blocks' );
+			}
+		}
+
+		foreach ( $script_dependencies as $handle => $dependencies ) {
+			wp_register_script( $handle, false, $dependencies, $this->api->wc_version, true );
+		}
+
+		$this->add_deprecated_script_handle_warnings( array_keys( $script_dependencies ) );
+	}
+
+	/**
+	 * Add console warnings for deprecated script handles.
+	 *
+	 * @param array $handles Deprecated script handles.
+	 */
+	private function add_deprecated_script_handle_warnings( array $handles ): void {
+		foreach ( $handles as $handle ) {
+			$message = wp_json_encode(
+				sprintf(
+					'[WooCommerce] The "%s" script handle is a deprecated compatibility placeholder and does not load a script. See the enqueueable packages documentation: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
+					$handle
+				)
+			);
+
+			if ( false === $message ) {
+				continue;
+			}
+
+			$this->api->add_inline_script(
+				$handle,
+				sprintf( 'console.warn( %s );', $message )
+			);
+		}
 	}
 
 	/**
@@ -328,7 +404,12 @@ final class AssetsController {
 
 		$src = array();
 		foreach ( $found_dependencies as $handle => $unused ) {
-			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+			$script_src = $wp_scripts->registered[ $handle ]->src;
+			if ( ! is_string( $script_src ) ) {
+				// Skip srcless dependencies (e.g. meta-packages), which have no URL to hint.
+				continue;
+			}
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, Utils::get_absolute_script_url( $script_src ) ) );
 		}
 		return $src;
 	}
@@ -355,20 +436,6 @@ final class AssetsController {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns an absolute url to relative links for WordPress core scripts.
-	 *
-	 * @param string $src Original src that can be relative.
-	 * @return string Correct full path string.
-	 */
-	private function get_absolute_url( $src ) {
-		$wp_scripts = wp_scripts();
-		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
-			$src = $wp_scripts->base_url . $src;
-		}
-		return $src;
 	}
 
 	/**

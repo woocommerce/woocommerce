@@ -14,7 +14,6 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	type BlockAttributes,
 	type BlockInstance,
@@ -27,7 +26,7 @@ import {
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
 import { unlock } from '../../utils/lock-unlock';
-import { registerProductEntity } from '../../../assets/js/entities/register-entities';
+import { registerProductEntity } from '../../../packages/public-api/entity-registration/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis

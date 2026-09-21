@@ -41,6 +41,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Original timezone before this test started.
 	 * @var string
 	 */
@@ -86,7 +93,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( true );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( false );
 		$container = wc_get_container();
@@ -110,7 +119,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		remove_all_filters( 'woocommerce_load_order_cogs_value' );
 		remove_all_filters( 'woocommerce_save_order_cogs_value' );
-		wc()->cart->empty_cart();
 		parent::tearDown();
 	}
 
@@ -377,7 +385,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order    = $this->create_complex_cot_order();
 		$order_id = $order->get_id();
 
-		$this->assertIsInteger( $order_id );
+		$this->assertIsInt( $order_id );
 		$this->assertLessThan( $order_id, 0 );
 
 		wp_cache_flush();
@@ -562,7 +570,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox Test the trash-untrash cycle with sync enabled.
+	 * @testdox Test the trash-untrash cycle with sync enabled, including order note visibility.
 	 */
 	public function test_cot_datastore_untrash() {
 		global $wpdb;
@@ -575,6 +583,17 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order->save();
 		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+
+		// A non-order-note comment type, so restore can't be relying on the notes-only fallback.
+		$third_party_comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $order_id,
+				'comment_content'  => 'Third-party comment',
+				'comment_type'     => 'wc-messaging',
+				'comment_approved' => 1,
+			)
+		);
 
 		$this->sut->trash_order( $order );
 
@@ -583,6 +602,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
 		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
+		$this->assertSame( 'post-trashed', get_comment( $note_id )->comment_approved, 'Order note should be hidden while the order is in the trash' );
+		$this->assertSame( 'post-trashed', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be hidden while the order is in the trash' );
 
 		$this->sut->read( $order );
 		$this->sut->untrash_order( $order );
@@ -592,7 +613,142 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should be restored when the order is untrashed' );
+		$this->assertSame( '1', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be restored when the order is untrashed' );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox Notes are still restored on untrash even without a comment-status record.
+	 */
+	public function test_cot_datastore_untrash_restores_notes_with_no_trash_meta_record() {
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+
+		$this->sut->trash_order( $order );
+		$this->assertSame( 'post-trashed', get_comment( $note_id )->comment_approved );
+
+		// No comment-status record, as if this order predates the fix.
+		delete_post_meta( $order_id, '_wp_trash_meta_comments_status' );
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should still be restored even with no trash-meta record' );
+	}
+
+	/**
+	 * @testdox A leaked wc_orders_meta row for the trash comment-status is removed on untrash.
+	 */
+	public function test_cot_datastore_untrash_removes_leaked_trash_comments_meta() {
+		global $wpdb;
+
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->sut->trash_order( $order );
+
+		// Simulate a copy that leaked into wc_orders_meta from a prior CPT-to-HPOS sync.
+		$wpdb->insert(
+			$this->sut->get_meta_table_name(),
+			array(
+				'order_id'   => $order_id,
+				'meta_key'   => '_wp_trash_meta_comments_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'leaked', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+		$this->assertEmpty(
+			$wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key = %s", $order_id, '_wp_trash_meta_comments_status' ) ),
+			'A leaked _wp_trash_meta_comments_status row should not survive untrash'
+		);
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox Restoring an HPOS order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_cot_datastore_untrash_suspends_email_dispatch_but_keeps_status_actions() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $order_id ) use ( $order, &$status_notification_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$this->assertTrue( $this->sut->untrash_order( $order ) );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox After untrash, the WC_Emails transactional dispatch listeners are reinstated.
+	 */
+	public function test_cot_datastore_untrash_restores_email_dispatch_after_save() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$dispatch_callbacks_before = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+
+		$dispatch_callbacks_after = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
 	}
 
 	/**
@@ -1225,6 +1381,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		);
 		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
 		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+		$this->assertEquals(
+			30,
+			$query->found_orders,
+			'A limit of -1 combined with an offset still calculates all found orders.'
+		);
+		$this->assertEquals(
+			0,
+			$query->max_num_pages,
+			'A limit of -1 combined with an offset is treated as unpaged.'
+		);
 
 		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
@@ -1313,6 +1479,30 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Backfilling an order that has no created date and no post row should create the post instead of failing.
+	 */
+	public function test_backfill_post_record_for_order_without_created_date_or_post() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+		$order = $this->create_complex_cot_order();
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $order->get_id() ) );
+		$wpdb->update( $this->sut::get_orders_table_name(), array( 'date_created_gmt' => null ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		$this->sut->clear_cached_data( array( $order->get_id() ) );
+
+		$dateless = new WC_Order();
+		$dateless->set_id( $order->get_id() );
+		$this->switch_data_store( $dateless, $this->sut );
+		$this->sut->read( $dateless );
+		$this->assertNull( $dateless->get_date_created(), 'Precondition: the order has no created date.' );
+
+		$this->sut->backfill_post_record( $dateless );
+
+		$this->assertInstanceOf( \WP_Post::class, get_post( $order->get_id() ), 'The backup post should exist after the backfill.' );
+	}
+
+	/**
 	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
@@ -1389,6 +1579,29 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testDox Sync on read should keep the created date when the post's GMT date column holds the zero date.
+	 */
+	public function test_sync_on_read_keeps_created_date_when_post_gmt_date_is_zero() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+		$order   = $this->create_complex_cot_order();
+		$created = $order->get_date_created()->getTimestamp();
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertSame( $created, $refreshed_order->get_date_created()->getTimestamp(), 'The posts reader must agree with HPOS, so nothing is copied back.' );
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', $created ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order->get_id() ) ), 'The HPOS row must keep its date.' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
@@ -2356,6 +2569,112 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
+	 */
+	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertTrue(
+				$r_order->get_prices_include_tax(),
+				'Persistence should use the default captured at construction, not the current store setting.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $r_order->get_changes() );
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
+	 */
+	public function test_create_keeps_explicit_prices_include_tax_value(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_prices_include_tax( false );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+			);
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testdox An HPOS order with a null tax-mode column uses the store default without a pending edit.
+	 */
+	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
+		global $wpdb;
+
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			$operational_data_table = $this->sut::get_operational_data_table_name();
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$order->get_id()
+				)
+			);
+			wp_cache_flush();
+
+			$read_order = new WC_Order();
+			$read_order->set_id( $order->get_id() );
+			$this->switch_data_store( $read_order, $this->sut );
+			$this->sut->read( $read_order );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'A missing stored value should use the constructor default.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
 	 * @testDox Test that inserting with strict SQL mode is also supported.
 	 */
 	public function test_order_create_with_strict_mode_and_null_values() {
@@ -2969,7 +3288,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * Helper function to simulate adding meta within a adding meta callback.
 	 * @param int    $meta_id Meta ID.
 	 * @param int    $post_id Post ID.
 	 * @param string $meta_key Meta key.
@@ -3143,7 +3462,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep( 2 );
+
+		// Backdate the modified date on both records (save() backfills the post while sync is on) so the
+		// upcoming sync-off meta update bumps the order's modified date past the post's, without waiting
+		// on the real clock.
+		$r_order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$r_order->save();
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
@@ -3670,6 +3994,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
 	 */
 	public function test_order_util_get_count_for_type( $datastore_to_use ) {
+		global $wpdb;
+
 		$this->disable_cot_sync();
 
 		if ( 'hpos' === $datastore_to_use ) {
@@ -3681,16 +4007,42 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		// Create a few orders in various states.
 		$order_statuses = array_keys( wc_get_order_statuses() );
 
-		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$expected_counts    = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$order_placeholders = array();
+		$order_values       = array();
+		$next_order_id      = null;
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
+		}
+
 		foreach ( $order_statuses as $i => $status ) {
 			foreach ( range( 0, $i ) as $_ ) {
 				$expected_counts[ $status ] = $i + 1;
 
-				$order = WC_Helper_Order::create_order();
-				$order->set_status( $status );
-				$order->save();
+				if ( null !== $next_order_id ) {
+					$order_placeholders[] = '(%d, %s, %s)';
+					array_push( $order_values, $next_order_id++, 'shop_order', $status );
+				} else {
+					$order_placeholders[] = '(%s, %s)';
+					array_push( $order_values, 'shop_order', $status );
+				}
 			}
 		}
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$table_name = $wpdb->prefix . 'wc_orders';
+			$columns    = 'id, type, status';
+		} else {
+			$table_name = $wpdb->posts;
+			$columns    = 'post_type, post_status';
+		}
+
+		$insert_query = $wpdb->prepare(
+			"INSERT INTO {$table_name} ({$columns}) VALUES " . implode( ', ', $order_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected from constants above; placeholders are generated above.
+			$order_values
+		);
+		$wpdb->query( $insert_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
 
 		$real_counts = OrderUtil::get_count_for_type( 'shop_order' );
 		foreach ( $expected_counts as $status => $count ) {
@@ -4141,5 +4493,39 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$order->delete();
 		$product->delete();
+	}
+
+	/**
+	 * @testDox Order notes (and their commentmeta) are deleted immediately when an order is deleted, regardless of whether sync was enabled when the order was created or when it's deleted.
+	 *
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *
+	 * @param bool $sync_enabled_at_creation Whether sync was enabled when the order (and its backup post) was created.
+	 * @param bool $sync_enabled_at_deletion Whether sync is enabled when the order is deleted.
+	 */
+	public function test_order_notes_deleted_regardless_of_sync_state( bool $sync_enabled_at_creation, bool $sync_enabled_at_deletion ) {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$sync_enabled_at_creation ? $this->enable_cot_sync() : $this->disable_cot_sync();
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+		add_comment_meta( $note_id, 'test_key', 'test_value' );
+
+		$this->assertSame( 'test_value', get_comment_meta( $note_id, 'test_key', true ), 'Commentmeta should exist before the order is deleted' );
+
+		$expected_post_type = $sync_enabled_at_creation ? 'shop_order' : DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE;
+		$this->assertEquals( $expected_post_type, get_post_type( $order_id ) );
+
+		$sync_enabled_at_deletion ? $this->enable_cot_sync() : $this->disable_cot_sync();
+		$order->delete( true );
+
+		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
+		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
 	}
 }

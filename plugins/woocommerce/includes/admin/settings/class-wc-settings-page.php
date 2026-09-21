@@ -8,6 +8,10 @@
 
 declare( strict_types = 1);
 
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -83,6 +87,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_admin_field_add_settings_slot', array( $this, 'add_settings_slot' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_settings_ui_body_class' ) );
 		}
 
 		/**
@@ -103,6 +108,96 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_label() {
 			return $this->label;
+		}
+
+		/**
+		 * Get the settings UI page adapter for this settings page.
+		 *
+		 * Settings pages can override this to opt in to the settings UI renderer
+		 * while retaining the classic WooCommerce settings page route and save flow.
+		 *
+		 * @since 10.9.0
+		 * @return SettingsUIPageInterface|null
+		 */
+		public function get_settings_ui_page(): ?SettingsUIPageInterface {
+			return null;
+		}
+
+		/**
+		 * Add a body class for settings pages rendered through the settings UI.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $classes The existing body classes for the admin area.
+		 * @return string The modified body classes for the admin area.
+		 */
+		public function add_settings_ui_body_class( $classes ) {
+			global $current_section, $current_tab;
+
+			if ( ! is_string( $classes ) || $this->id !== $current_tab ) {
+				return $classes;
+			}
+
+			$section = is_string( $current_section ) ? $current_section : '';
+			$context = $this->get_settings_ui_request_context( $section );
+
+			try {
+				if ( ! $context || ! $context->is_rendering_enabled() ) {
+					return $classes;
+				}
+
+				// Preflight and cache adapter failures before this body class can hide the classic Save button.
+				$context->get_page_id();
+
+				// The legacy fallback renderer needs the classic styling: the settings UI
+				// body class hides the legacy Save button via CSS.
+				if ( $context->has_schema_failed() || $context->has_script_handle_loading_failed() ) {
+					return $classes;
+				}
+
+				$is_rendering_drill_down = $context->is_drill_down();
+			} catch ( \Throwable $e ) {
+				return $classes;
+			}
+
+			$body_classes = explode( ' ', $classes );
+
+			if ( ! in_array( 'woocommerce-settings-ui-page', $body_classes, true ) ) {
+				$classes       .= ' woocommerce-settings-ui-page';
+				$body_classes[] = 'woocommerce-settings-ui-page';
+			}
+
+			if (
+				$is_rendering_drill_down
+				&& ! in_array( 'woocommerce-settings-ui-drill-down', $body_classes, true )
+			) {
+				$classes .= ' woocommerce-settings-ui-drill-down';
+			}
+
+			return $classes;
+		}
+
+		/**
+		 * Log a developer-facing notice when settings UI rendering falls back to the legacy renderer.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $page_id Settings UI page id.
+		 * @param string $section_id Section id.
+		 * @param string $reason Fallback reason.
+		 */
+		private function log_settings_ui_fallback( string $page_id, string $section_id, string $reason ): void {
+			wc_doing_it_wrong(
+				'WC_Settings_Page::output',
+				sprintf(
+					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
+					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
+					$page_id,
+					'' === $section_id ? 'default' : $section_id,
+					$reason
+				),
+				'10.9.0'
+			);
 		}
 
 		/**
@@ -184,6 +279,44 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Settings section registry instance, or null when the modern settings SDK is unavailable.
+		 *
+		 * The class can be missing mid-update: a 10.9 copy of this file may load before the autoloader
+		 * class map can safely resolve the new registry, so a direct call would fatal.
+		 *
+		 * @return SettingsSectionRegistry|null
+		 */
+		protected function get_settings_section_registry() {
+			try {
+				if ( ! class_exists( SettingsSectionRegistry::class ) ) {
+					return null;
+				}
+
+				return SettingsSectionRegistry::get_instance();
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		/**
+		 * Settings UI request context, or null when the modern settings SDK is unavailable.
+		 *
+		 * @param string $section Section id.
+		 * @return SettingsUIRequestContext|null
+		 */
+		protected function get_settings_ui_request_context( $section ) {
+			try {
+				if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+					return null;
+				}
+
+				return SettingsUIRequestContext::for_settings_page( $this, $section );
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		/**
 		 * Get the settings for a given section.
 		 * This method is invoked from 'get_settings_for_section' when no 'get_settings_for_{current_section}_section'
 		 * method exists in the class.
@@ -196,7 +329,10 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
 		protected function get_settings_for_section_core( $section_id ) {
-			return array();
+			$registry           = $this->get_settings_section_registry();
+			$registered_section = $registry ? $registry->get_registered( $this->id, (string) $section_id ) : null;
+
+			return $registered_section ? $registered_section->get_settings( $this ) : array();
 		}
 
 		/**
@@ -205,7 +341,19 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array
 		 */
 		public function get_sections() {
-			$sections = $this->get_own_sections();
+			$sections            = $this->get_own_sections();
+			$registry            = $this->get_settings_section_registry();
+			$registered_sections = $registry ? $registry->get_sections_for_page( $this->id ) : array();
+
+			foreach ( $registered_sections as $section_id => $section_label ) {
+				// Preserve sections declared by the settings page when a registered section uses the same id.
+				if ( array_key_exists( $section_id, $sections ) ) {
+					continue;
+				}
+
+				$sections[ $section_id ] = $section_label;
+			}
+
 			/**
 			 * Filters the sections for this settings page.
 			 *
@@ -265,9 +413,72 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
+			$section                     = is_string( $current_section ) ? $current_section : '';
+			$context                     = $this->get_settings_ui_request_context( $section );
+			$hide_save_button_overridden = false;
+			$hide_save_button_existed    = array_key_exists( 'hide_save_button', $GLOBALS );
+			$previous_hide_save_button   = $hide_save_button_existed ? $GLOBALS['hide_save_button'] : null;
+
+			try {
+				if ( $context && $context->is_rendering_enabled() ) {
+					$page_id = $context->get_page_id();
+
+					if ( $context->has_schema_failed() ) {
+						$schema_failure_reason = method_exists( $context, 'get_schema_failure_reason' )
+							? $context->get_schema_failure_reason()
+							: __( 'Settings UI schema generation failed.', 'woocommerce' );
+
+						$this->log_settings_ui_fallback( $page_id, $section, $schema_failure_reason );
+					} else {
+						$mount_id = 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section );
+
+						$context->enqueue_script_handles();
+
+						if ( $context->has_script_handle_loading_failed() ) {
+							$this->log_settings_ui_fallback( $page_id, $section, $context->get_script_handles_failure_reason() );
+						} else {
+							$GLOBALS['hide_save_button'] = true;
+							$hide_save_button_overridden = true;
+
+							printf(
+								'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+								esc_attr( $mount_id ),
+								esc_attr( $page_id ),
+								esc_attr( $section )
+							);
+							return;
+						}
+					}
+				}
+			} catch ( \Throwable $e ) {
+				// A stale or unavailable Settings UI class must keep the classic renderer usable during updates.
+				if ( $hide_save_button_overridden ) {
+					if ( $hide_save_button_existed ) {
+						$GLOBALS['hide_save_button'] = $previous_hide_save_button;
+					} else {
+						unset( $GLOBALS['hide_save_button'] );
+					}
+				}
+
+				wc_get_logger()->error(
+					sprintf(
+						'Settings UI rendering failed for page "%1$s" section "%2$s": %3$s: %4$s',
+						$this->id,
+						'' === $section ? 'default' : $section,
+						get_class( $e ),
+						$e->getMessage()
+					),
+					array( 'source' => 'settings-ui' )
+				);
+
+				if ( $e instanceof \Exception ) {
+					wc_caught_exception( $e, __METHOD__ );
+				}
+			}
+
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
-			$settings = $this->get_settings( $current_section );
+			$settings = $this->get_settings( $section );
 
 			WC_Admin_Settings::output_fields( $settings );
 		}

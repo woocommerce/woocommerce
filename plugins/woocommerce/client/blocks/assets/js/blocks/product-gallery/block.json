@@ -41,5 +41,6 @@
 	"viewScript": "wc-product-gallery-frontend",
 	"example": {},
 	"viewScriptModule": "woocommerce/product-gallery",
+	"editorStyle": "file:../woocommerce/product-gallery-editor.css",
 	"style": "file:../woocommerce/product-gallery-style.css"
 }

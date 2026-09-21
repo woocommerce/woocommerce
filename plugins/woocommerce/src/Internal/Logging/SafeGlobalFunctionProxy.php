@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Internal\Logging;
  *
  * @since 9.4.0
  * @package Automattic\WooCommerce\Internal\Logging
+ *
+ * @method static \WC_Logger_Interface wc_get_logger()
  */
 class SafeGlobalFunctionProxy {
 

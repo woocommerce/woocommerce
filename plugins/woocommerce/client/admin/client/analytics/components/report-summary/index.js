@@ -22,6 +22,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
+import { hasEmptySearchResults } from '../utils';
 
 /**
  * Component to render summary numbers in reports.
@@ -209,11 +210,7 @@ export default compose(
 		} = props;
 		const limitBy = limitProperties || [ endpoint ];
 
-		const hasLimitByParam = limitBy.some(
-			( item ) => query[ item ] && query[ item ].length
-		);
-
-		if ( query.search && ! hasLimitByParam ) {
+		if ( hasEmptySearchResults( query, limitBy ) ) {
 			return {
 				emptySearchResults: true,
 			};

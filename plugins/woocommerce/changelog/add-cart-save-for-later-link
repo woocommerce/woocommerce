@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a "Save for later" link beneath each cart line item that saves the item to the saved-for-later shopper list and removes it from the cart on success. The link is only shown to logged-in users and is hidden in the mini-cart.

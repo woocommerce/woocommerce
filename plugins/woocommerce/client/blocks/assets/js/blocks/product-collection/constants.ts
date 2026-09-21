@@ -1,6 +1,6 @@
 /**
  * Purpose of this file:
- * This file defines constants for use in `plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx`.
+ * This file defines constants for use in `plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/product-collection/register-product-collection.tsx`.
  * By isolating constants here, we avoid loading unnecessary JS file on the frontend (e.g., the /shop page), enhancing site performance.
  *
  * Context: https://github.com/woocommerce/woocommerce/pull/48141#issuecomment-2208770592.
@@ -23,7 +23,6 @@ import {
 	LayoutOptions,
 	WidthOptions,
 } from './types';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
@@ -131,8 +130,12 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 		[
 			'woocommerce/product-image',
 			{
-				imageSizing: ImageSizing.THUMBNAIL,
 				showSaleBadge: false,
+				style: {
+					dimensions: {
+						aspectRatio: '1/1',
+					},
+				},
 			},
 			[
 				[

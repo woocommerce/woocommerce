@@ -22,6 +22,8 @@ import { isProductResponseItem } from '@woocommerce/entities';
 import type {
 	AttributeTerm,
 	ProductResponseAttributeItem,
+	SelectableItem,
+	SelectableItemsContext,
 } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import {
@@ -35,15 +37,12 @@ import {
 	__experimentalToolsPanel as ToolsPanel,
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
-import type {
-	SelectableItem,
-	SelectableItemsContext,
-} from '../../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
@@ -102,6 +101,10 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			__experimental_visual: true,
 		},
 	} );
+	const visualAttributesEnabled = getSetting(
+		'experimentalVisualAttributes',
+		false
+	);
 	const visualByTermId = useMemo( () => {
 		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(
 			( accumulator, term ) => {
@@ -128,7 +131,10 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		) {
 			items = attribute.terms.map( ( term ) => {
 				const visual =
-					visualByTermId[ term.id ] || EMPTY_TERM_VISUALS[ term.id ];
+					visualByTermId[ term.id ] ||
+					( visualAttributesEnabled
+						? EMPTY_TERM_VISUALS[ term.id ]
+						: undefined );
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
@@ -150,7 +156,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute, visualByTermId ] );
+	}, [ attribute, visualAttributesEnabled, visualByTermId ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
@@ -337,22 +343,21 @@ export default function AttributeItemTemplateEdit(
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				{ productAttributes.map( ( attribute ) => (
+				{ productAttributes.map( ( attribute, index ) => (
+					// Identify rows by position, not by `attribute.id`: the
+					// Store API reports 0 for every non-taxonomy attribute, so
+					// custom attributes would all share the same identity.
 					<CustomDataProvider
-						key={ attribute.id }
+						key={ index }
 						id="attribute"
 						data={ attribute }
 					>
 						<AttributeItem
 							blocks={ blocks }
 							isSelected={
-								( selectedAttributeItem ||
-									productAttributes[ 0 ]?.id ) ===
-								attribute.id
+								( selectedAttributeItem ?? 0 ) === index
 							}
-							onSelect={ () =>
-								setSelectedAttributeItem( attribute.id )
-							}
+							onSelect={ () => setSelectedAttributeItem( index ) }
 						/>
 					</CustomDataProvider>
 				) ) }

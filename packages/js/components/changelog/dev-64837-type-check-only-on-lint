@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking.

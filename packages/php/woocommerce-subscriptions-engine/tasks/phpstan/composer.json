@@ -1,0 +1,20 @@
+{
+	"name": "automattic/woocommerce-subscriptions-engine-phpstan",
+	"description": "PHPStan analysis tasks for the WooCommerce Subscriptions engine.",
+	"type": "project",
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"phpstan/phpstan": "^2.2",
+		"phpstan/phpstan-phpunit": "^2.0",
+		"php-stubs/woocommerce-stubs": "^10.8",
+		"php-stubs/wordpress-tests-stubs": "^7.0",
+		"szepeviktor/phpstan-wordpress": "^2.0"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	}
+}

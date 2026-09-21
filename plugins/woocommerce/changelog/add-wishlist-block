@@ -1,5 +1,0 @@
-Significance: minor
-Type: add
-Comment: Experimental Wishlist block, gated by the `product_wishlist` feature flag.
-
-Add the `woocommerce/wishlist` block: renders the shopper's wishlist via the shared `shopper-lists` Store API and iAPI store, composes the `ShopperListRenderer` shared row markup, and ships an "Add to cart" per-row action that adds the product to the cart and removes the row from the wishlist on confirmed success. The `/my-account/wishlist/` endpoint now renders this block instead of its placeholder.

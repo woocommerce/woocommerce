@@ -53,7 +53,7 @@ Add to `plugins/woocommerce/.wp-env.override.json`:
 ```json
 {
     "lifecycleScripts": {
-        "afterStart": "./tests/e2e-pw/bin/test-env-setup.sh && wp-env run cli wp plugin install wp-mail-smtp --activate"
+        "afterStart": "./tests/e2e/bin/test-env-setup.sh && wp-env run cli wp plugin install wp-mail-smtp --activate"
     },
     "config": {
         "WPMS_ON": true,

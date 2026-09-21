@@ -112,6 +112,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
+		$this->request = $request;
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = array(
 			'id'                    => $object->get_id(),
@@ -124,7 +127,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
 			'global_unique_id'      => $object->get_global_unique_id(),
-			'mpn'                   => $object->get_mpn(),
+			'mpn'                   => $object instanceof WC_Product ? $object->get_mpn() : '',
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),
@@ -223,8 +226,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// MPN.
-		if ( isset( $request['mpn'] ) ) {
-			$variation->set_mpn( wc_clean( $request['mpn'] ) );
+		if ( $variation instanceof WC_Product && isset( $request['mpn'] ) ) {
+			$variation->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
 		// Thumbnail.
@@ -463,13 +466,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return;
 		}
 
-		$attachment_id   = $variation->get_image_id();
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
+		$attachment_id   = (int) $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
 		if ( is_null( $attachment_post ) ) {
 			return;
 		}
 
-		$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+		$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 		if ( ! is_array( $attachment ) ) {
 			return;
 		}
@@ -610,7 +616,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 				),
 				'mpn'                   => array(
-					'description' => __( 'Manufacturer Part Number.', 'woocommerce' ),
+					'description' => __( 'Manufacturer part number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1038,7 +1044,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup truncates SKUs to 100 chars.
 				$args,
 				array(
 					'key'     => '_sku',
@@ -1062,9 +1068,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// Filter by mpn.
-		if ( ! empty( $request['mpn'] ) ) {
+		if ( '' !== ( $request['mpn'] ?? '' ) ) {
 			$mpns               = array_map( 'trim', explode( ',', $request['mpn'] ) );
-			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Match the full MPN; the lookup column only stores its first 100 characters.
 				$args,
 				array(
 					'key'     => '_mpn',
@@ -1076,7 +1082,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -1087,13 +1093,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Price filter.
 		if ( is_bool( $request['has_price'] ) ) {
 			if ( $request['has_price'] ) {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'AND',
@@ -1109,7 +1115,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					)
 				);
 			} else {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'OR',
@@ -1129,7 +1135,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -1315,6 +1321,14 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['image_size'] = array(
+			'description'       => __( 'Use a specific registered image size for the returned variation image src. Falls back to the full size if the requested size is not registered.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

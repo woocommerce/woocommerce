@@ -21,6 +21,274 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() preserves scalar @type grouping.
+	 */
+	public function test_get_structured_data_preserves_scalar_type_grouping(): void {
+		$markup = array(
+			'@type' => 'Product',
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => 'Product',
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Scalar structured data should retain its existing grouping and output.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() accepts a valid list of @type values.
+	 *
+	 * @testWith [["Car", "Product"]]
+	 *           [["A"]]
+	 *           [["ABCDEFGHIJKLMNOPQRST"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_accepts_valid_array_type( array $types ): void {
+		$markup = array(
+			'@type' => $types,
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid array @type should be accepted.'
+		);
+		$this->assertSame(
+			array( $markup ),
+			$this->structured_data->get_data(),
+			'A valid list of @type values should retain its values and order.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() normalizes a non-list @type array before storage.
+	 */
+	public function test_set_data_normalizes_non_list_array_type(): void {
+		$markup = array(
+			'@type' => array(
+				0 => 'Product',
+				2 => 'Book',
+			),
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid non-list @type array should be accepted.'
+		);
+		$this->assertSame(
+			array(
+				array(
+					'@type' => array( 'Product', 'Book' ),
+					'name'  => 'Test product',
+				),
+			),
+			$this->structured_data->get_data(),
+			'A non-list @type array should be reindexed so it encodes as a JSON list.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() rejects an invalid array @type.
+	 *
+	 * @testWith [[]]
+	 *           [["Product", ["Review"]]]
+	 *           [["Product", "Invalid-Type"]]
+	 *           [["Product", "ABCDEFGHIJKLMNOPQRSTU"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_rejects_invalid_array_type( array $types ): void {
+		$this->assertFalse(
+			$this->structured_data->set_data( array( '@type' => $types ) ),
+			'Empty arrays, non-string members, and pattern-invalid members should be rejected.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() emits array @type values for matching or unfiltered requests.
+	 *
+	 * @testWith [["Car", "Product"], ["product"]]
+	 *           [["Thing", "CustomType"], ["customtype"]]
+	 *           [["Car", "Product"], []]
+	 *
+	 * @param string[] $schema_types    Schema types stored in the markup.
+	 * @param string[] $requested_types Lower-case output types requested by the caller.
+	 */
+	public function test_get_structured_data_outputs_array_type( array $schema_types, array $requested_types ): void {
+		$markup = array(
+			'@type' => $schema_types,
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => $schema_types,
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'Array @type markup should survive grouping and page-type filtering.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() groups multi-type nodes by requested type priority.
+	 */
+	public function test_get_structured_data_groups_array_type_by_requested_priority(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => 'Product',
+				'name'  => 'Scalar product',
+			)
+		);
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Review', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@graph'   => array(
+					array(
+						'@type' => 'Product',
+						'name'  => 'Scalar product',
+					),
+					array(
+						'@type' => array( 'Review', 'Product' ),
+						'name'  => 'Multi-type product',
+					),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'product', 'review' ) ),
+			'Multi-type nodes should join the group selected by the requested type order.'
+		);
+	}
+
+	/**
+	 * @testdox woocommerce_structured_data_context receives the string grouping key and complete @type array.
+	 */
+	public function test_structured_data_context_receives_array_type_and_string_grouping_key(): void {
+		$markup           = array(
+			'@type' => array( 'Review', 'Product' ),
+			'name'  => 'Multi-type product',
+		);
+		$filter_arguments = array();
+
+		add_filter(
+			'woocommerce_structured_data_context',
+			static function ( $context, $data, $type, $value ) use ( &$filter_arguments ) {
+				$filter_arguments = array(
+					'type'  => $type,
+					'value' => $value,
+				);
+
+				return $context;
+			},
+			10,
+			4
+		);
+
+		$this->structured_data->set_data( $markup );
+		$this->structured_data->get_structured_data( array( 'product', 'review' ) );
+
+		$this->assertSame(
+			array(
+				'type'  => 'product',
+				'value' => array( $markup ),
+			),
+			$filter_arguments,
+			'The context filter should receive the selected string grouping key and the unmodified multi-type node.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() excludes multi-type nodes without a requested type.
+	 */
+	public function test_get_structured_data_excludes_array_type_without_requested_match(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Thing', 'CreativeWork' ),
+				'name'  => 'Unrequested node',
+			)
+		);
+
+		$this->assertSame(
+			array(),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Multi-type nodes without a requested type should be excluded.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() returns every node when no types are requested.
+	 *
+	 * @testWith [null]
+	 *           [false]
+	 *           [""]
+	 *           [0]
+	 *
+	 * @param mixed $requested_types Falsy value standing in for "no type filtering".
+	 */
+	public function test_get_structured_data_returns_array_type_when_no_types_requested( $requested_types ): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Car', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => array( 'Car', 'Product' ),
+				'name'     => 'Multi-type product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'A falsy $types means "return everything", the same as it does for scalar @type nodes.'
+		);
+	}
+
+	/**
+	 * @testdox Order structured data looks up the product image with an integer attachment ID.
+	 */
+	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product = wc_get_product( $product->save() );
+		$order   = WC_Helper_Order::create_order( 1, $product );
+
+		$received_id = null;
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( &$received_id ) {
+				if ( null === $received_id ) {
+					$received_id = $attachment_id;
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$this->structured_data->generate_order_data( $order );
+
+		$this->assertSame( $image_id, $received_id, 'The attachment ID passed to WordPress should be an integer.' );
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void
@@ -123,5 +391,327 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['price'] );
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is present in product structured data when taxes are enabled.
+	 *
+	 * @return void
+	 */
+	public function test_product_structured_data_includes_vat_when_taxes_enabled(): void {
+		// Enable taxes.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		// Create a simple product with a price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry.
+		$this->assertNotEmpty( $data );
+		$product_data = $data[0];
+
+		// Check that offers exist.
+		$this->assertArrayHasKey( 'offers', $product_data );
+		$this->assertNotEmpty( $product_data['offers'] );
+
+		// Get the first offer.
+		$offer = $product_data['offers'][0];
+
+		// Check that priceSpecification exists and contains valueAddedTaxIncluded.
+		$this->assertArrayHasKey( 'priceSpecification', $offer );
+		$this->assertNotEmpty( $offer['priceSpecification'] );
+
+		$price_spec = $offer['priceSpecification'][0];
+		$this->assertArrayHasKey( 'valueAddedTaxIncluded', $price_spec );
+		$this->assertTrue( $price_spec['valueAddedTaxIncluded'] );
+
+		// Clean up.
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is not present in product structured data when taxes are disabled.
+	 *
+	 * @return void
+	 */
+	public function test_product_structured_data_excludes_vat_when_taxes_disabled(): void {
+		// Disable taxes.
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Create a simple product with a price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry.
+		$this->assertNotEmpty( $data );
+		$product_data = $data[0];
+
+		// Check that offers exist.
+		$this->assertArrayHasKey( 'offers', $product_data );
+		$this->assertNotEmpty( $product_data['offers'] );
+
+		// Get the first offer.
+		$offer = $product_data['offers'][0];
+
+		// Check that priceSpecification exists.
+		$this->assertArrayHasKey( 'priceSpecification', $offer );
+		$this->assertNotEmpty( $offer['priceSpecification'] );
+
+		$price_spec = $offer['priceSpecification'][0];
+
+		// valueAddedTaxIncluded should not be present when taxes are disabled.
+		$this->assertArrayNotHasKey( 'valueAddedTaxIncluded', $price_spec );
+
+		// Clean up.
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is present in order structured data when taxes are enabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_structured_data_includes_vat_when_taxes_enabled(): void {
+		// Enable taxes with prices inclusive of tax.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Create a simple product and order.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_order_data( $order );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry (should be order).
+		$this->assertNotEmpty( $data );
+		$order_data = $data[0];
+
+		// Check that priceSpecification exists and contains valueAddedTaxIncluded as a boolean.
+		$this->assertArrayHasKey( 'priceSpecification', $order_data );
+		$this->assertArrayHasKey( 'valueAddedTaxIncluded', $order_data['priceSpecification'] );
+		$this->assertIsBool( $order_data['priceSpecification']['valueAddedTaxIncluded'] );
+		$this->assertTrue( $order_data['priceSpecification']['valueAddedTaxIncluded'] );
+
+		// Clean up.
+		$order->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox valueAddedTaxIncluded is not present in order structured data when taxes are disabled.
+	 *
+	 * @return void
+	 */
+	public function test_order_structured_data_excludes_vat_when_taxes_disabled(): void {
+		// Disable taxes.
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Create a simple product and order.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->save();
+
+		// Generate structured data.
+		$this->structured_data->generate_order_data( $order );
+		$data = $this->structured_data->get_data();
+
+		// Get the first structured data entry (should be order).
+		$this->assertNotEmpty( $data );
+		$order_data = $data[0];
+
+		// Check that priceSpecification exists.
+		$this->assertArrayHasKey( 'priceSpecification', $order_data );
+
+		// valueAddedTaxIncluded should not be present when taxes are disabled.
+		$this->assertArrayNotHasKey( 'valueAddedTaxIncluded', $order_data['priceSpecification'] );
+
+		// Clean up.
+		$order->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * When a variable product page is requested for a single, fully-specified variation, the offer
+	 * should describe that variation with a single Offer and exact price (no AggregateOffer range),
+	 * and reference the parent product group.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_selected_variation_uses_single_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation priced at 16.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+			$this->assertArrayNotHasKey( 'lowPrice', $offer );
+			$this->assertArrayNotHasKey( 'highPrice', $offer );
+			$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+
+			// The variation is grouped under the parent product (Google `item_group_id`).
+			$this->assertEquals( $product->get_sku(), $data[0]['inProductGroupWithID'] );
+			// The variation's own SKU is used.
+			$this->assertEquals( 'DUMMY SKU VARIABLE HUGE RED 0', $data[0]['sku'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * A GTIN uniquely identifies a single trade item, so a selected variation without its own GTIN
+	 * must not inherit the parent product's GTIN.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_selected_variation_does_not_inherit_parent_gtin(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_global_unique_id( '12345678' );
+		$product->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation, which has no GTIN of its own.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data = $this->structured_data->get_data();
+
+			$this->assertEquals( 'Offer', $data[0]['offers'][0]['@type'] );
+			$this->assertArrayNotHasKey( 'gtin', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * Without a fully-specified variation selection, the variable product keeps the AggregateOffer
+	 * price range (no behavior change).
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_without_full_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Only one of the three variation attributes is provided: ambiguous, so fall back to aggregate.
+		$_GET['attribute_pa_size'] = 'huge';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayHasKey( 'lowPrice', $offer );
+			$this->assertArrayHasKey( 'highPrice', $offer );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'] );
+		}
+	}
+
+	/**
+	 * When a fully-specified selection matches more than one variation (a concrete variation and an
+	 * overlapping "Any" variation), the price is ambiguous, so the parent AggregateOffer is kept.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_ambiguous_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Matches both "huge / blue / 2" and "huge / blue / any number".
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'blue';
+		$_GET['attribute_pa_number'] = '2';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * A private variation matching the same selection must not block the single Offer for the
+	 * published variation, because `find_matching_product_variation()` only resolves published ones.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_ignores_private_variation_when_counting_matches(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Private sibling with the same attributes as the published "huge / red / 0" variation.
+		$private_variation = new WC_Product_Variation();
+		$private_variation->set_parent_id( $product->get_id() );
+		$private_variation->set_attributes(
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'red',
+				'pa_number' => '0',
+			)
+		);
+		$private_variation->set_regular_price( 99 );
+		$private_variation->set_status( 'private' );
+		$private_variation->save();
+
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			// Still a single Offer at the published variation's price, not the private one's.
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
 	}
 }

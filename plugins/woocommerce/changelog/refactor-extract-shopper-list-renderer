@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Shopper lists: extract the shared row markup (image, name, price, remove badge, variation overlay) into a `ShopperListRenderer` helper and a `_shopper-lists/item` SCSS partial. Saved for Later now composes the helper; the same scaffold is what the upcoming Wishlist block will reuse.

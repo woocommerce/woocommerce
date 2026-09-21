@@ -59,7 +59,7 @@ export const SettingsPaymentsOffline = () => {
 			orderMap[ gateway.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update.
 		setSortedOfflinePaymentGateways( sorted );

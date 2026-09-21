@@ -68,31 +68,9 @@ Naming is not strictly tied to the DOM so it **doesn’t matter how many nested 
 
 ## RTL Styles
 
-Blocks uses the internal `@woocommerce/internal-style-build/webpack-rtl-plugin` package to generate styles for Right-to-Left languages. These are generated automatically.
+Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
 
-To make adjustments to the generated RTL styles, for example, excluding certain rules from the RTL stylesheets, you should use the [control directives here](https://rtlcss.com/learn/usage-guide/control-directives/index.html).
-
-For example, you can exclude individual lines:
-
-```css
-.code {
-	/*rtl:ignore*/
-	direction: ltr;
-	/*rtl:ignore*/
-	text-align: left;
-}
-```
-
-Or exclude blocks of CSS:
-
-```css
-.code {
-	/*rtl:begin:ignore*/
-	direction: ltr;
-	text-align: left;
-	/*rtl:end:ignore*/
-}
-```
+Even though Blocks uses the internal `WebpackRTLPlugin` exported from `@woocommerce/internal-build/style-build` to generate specific CSS files for RTL languages, these might not be used if Gutenberg inlines the styles, so it shouldn't be trusted.
 
 ## SCSS File Naming Conventions for Blocks
 

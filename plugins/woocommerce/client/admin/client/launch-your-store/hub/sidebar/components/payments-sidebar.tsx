@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable import/order */
 /**
  * External dependencies
  */
@@ -73,7 +73,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			}
 		};
 
-		fetchPaymentsTask();
+		void fetchPaymentsTask();
 
 		// Cleanup function to prevent state updates after unmount.
 		return () => {

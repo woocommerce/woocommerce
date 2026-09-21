@@ -1,7 +1,7 @@
 ---
 post_title: WooCommerce Payment Token API
 sidebar_label: Payment Token API
-
+sidebar_position: 3
 ---
 
 # WooCommerce Payment Token API
@@ -333,7 +333,7 @@ Supported types/labels:
 
 ```php
 array(
-	'mastercard'       => __( 'MasterCard', 'woocommerce' ),
+	'mastercard'       => __( 'Mastercard', 'woocommerce' ),
 	'visa'             => __( 'Visa', 'woocommerce' ),
 	'discover'         => __( 'Discover', 'woocommerce' ),
 	'american express' => __( 'American Express', 'woocommerce' ),

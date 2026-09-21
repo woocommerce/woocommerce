@@ -19,6 +19,7 @@ import { DisplayIcon } from './icons/display';
 import { SingleColumnIcon } from './icons/single-column';
 import { TwoColumnsIcon } from './icons/two-columns';
 import { isTaskListActive } from '../../hooks/use-tasklists-state';
+import { isFeatureEnabled } from '~/utils/features';
 
 const { Fill, Slot } = createSlotFill( 'DisplayOptions' );
 
@@ -62,7 +63,7 @@ export const DisplayOptions = () => {
 		useUserPreferences();
 
 	const hasTwoColumnContent =
-		! isTaskListActive( 'setup' ) || window.wcAdminFeatures.analytics;
+		! isTaskListActive( 'setup' ) || isFeatureEnabled( 'analytics' );
 
 	return (
 		<Slot>

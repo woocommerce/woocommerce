@@ -27,7 +27,7 @@ Display a call to action button which either adds the product to the cart, or li
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/all-products, woocommerce/single-product, core/post-template, woocommerce/product-template
 - **Supports:** align (full, wide), color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
+- **Attributes:** productId, textAlign, width
 
 ## Product Image - woocommerce/product-image
 
@@ -37,7 +37,7 @@ Display the main product image.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** dimensions (aspectRatio), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~html~~
-- **Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
+- **Attributes:** aspectRatio, height, imageSizing, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
 
 ## Product Price - woocommerce/product-price
 
@@ -47,7 +47,7 @@ Display the price of a product.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+- **Attributes:** productId, textAlign
 
 ## Product Image Gallery - woocommerce/product-image-gallery
 
@@ -73,7 +73,7 @@ Display the average rating of a product.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (text, ~~background~~, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize)
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+- **Attributes:** productId, textAlign
 
 ## Product Rating Counter - woocommerce/product-rating-counter
 
@@ -83,7 +83,7 @@ Display the review count of a product
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product
 - **Supports:** color (link, ~~background~~, ~~text~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~inserter~~
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+- **Attributes:** productId, textAlign
 
 ## Product Rating Stars - woocommerce/product-rating-stars
 
@@ -93,7 +93,7 @@ Display the average rating of a product with stars
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product
 - **Supports:** color (text, ~~background~~, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~inserter~~
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+- **Attributes:** productId, textAlign
 
 ## Related Products - woocommerce/related-products
 
@@ -111,7 +111,7 @@ Displays an on-sale badge if the product is on-sale.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 - **Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId
+- **Attributes:** productId
 
 ## Product SKU - woocommerce/product-sku
 
@@ -141,7 +141,7 @@ Display a short description about a product.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
-- **Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
+- **Attributes:** isDescendantOfAllProducts, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
 
 ## Product Title - woocommerce/product-title
 
@@ -262,7 +262,7 @@ Display an input field customers can use to select the number of products to add
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
-- **Supports:** interactivity
+- **Supports:** color (background, text), interactivity, shadow
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
 
@@ -300,6 +300,15 @@ Display any product variations available to select from and add to cart.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** interactivity
+
+## Add to Wishlist Button - woocommerce/add-to-wishlist-button
+
+Lets shoppers add the current product to their wishlist from the single-product page.
+
+- **Name:** woocommerce/add-to-wishlist-button
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Supports:** color (background, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~, ~~reusable~~
 
 ## Filter by Attribute Controls - woocommerce/attribute-filter
 
@@ -825,7 +834,7 @@ Display options in a dropdown.
 - **Name:** woocommerce/dropdown
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity
+- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
 
 ## Email Content - woocommerce/email-content
 
@@ -878,7 +887,7 @@ Display a button for shoppers to quickly view their cart.
 
 - **Name:** woocommerce/mini-cart
 - **Category:** woocommerce
-- **Supports:** spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
+- **Supports:** interactivity, spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
 - **Attributes:** addToCartBehaviour, cartAndCheckoutRenderStyle, hasHiddenPrice, iconColor, iconColorValue, miniCartIcon, onCartClickBehaviour, priceColor, priceColorValue, productCountColor, productCountColorValue, productCountVisibility
 
 ## Mini-Cart Contents - woocommerce/mini-cart-contents
@@ -1221,21 +1230,21 @@ Display a product's description, attributes, and reviews
 
 - **Name:** woocommerce/product-details
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity (clientNavigation)
+- **Supports:** align (full, wide), color (background, ~~text~~), interactivity (clientNavigation), spacing (margin, padding)
 - **Attributes:** align, hideTabTitle
 
 ## Product Filters - woocommerce/product-filters
 
-Let shoppers filter products displayed on the page.
+Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
-- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), spacing (blockGap), typography (fontSize), ~~multiple~~
-- **Attributes:** isPreview
+- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap), typography (fontSize)
+- **Attributes:** isPreview, overlayMode, overlayPosition
 
 ## Active Filters - woocommerce/product-filter-active
 
-Display the currently active filters.
+Display all active filters.
 
 - **Name:** woocommerce/product-filter-active
 - **Category:** woocommerce
@@ -1244,7 +1253,7 @@ Display the currently active filters.
 
 ## Attribute Filter - woocommerce/product-filter-attribute
 
-Enable customers to filter the product grid by selecting one or more attributes, such as color.
+Let shoppers filter products by attribute.
 
 - **Name:** woocommerce/product-filter-attribute
 - **Category:** woocommerce
@@ -1254,12 +1263,12 @@ Enable customers to filter the product grid by selecting one or more attributes,
 
 ## List - woocommerce/product-filter-checkbox-list
 
-Display a list of filter options.
+Display filter options as a list.
 
 - **Name:** woocommerce/product-filter-checkbox-list
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status, woocommerce/product-filter-taxonomy, woocommerce/product-filter-rating
-- **Supports:** interactivity
+- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
 - **Attributes:** customLabelElement, customOptionElement, customOptionElementBorder, customOptionElementSelected, labelElement, optionElement, optionElementBorder, optionElementSelected
 
 ## Chips - woocommerce/product-filter-chips
@@ -1269,12 +1278,12 @@ Display filter options as chips.
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity
+- **Supports:** interactivity, spacing (padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button
 
-Allows shoppers to clear active filters.
+Let shoppers clear any active filters.
 
 - **Name:** woocommerce/product-filter-clear-button
 - **Category:** woocommerce
@@ -1283,7 +1292,7 @@ Allows shoppers to clear active filters.
 
 ## Price Filter - woocommerce/product-filter-price
 
-Let shoppers filter products by choosing a price range.
+Let shoppers filter products by price.
 
 - **Name:** woocommerce/product-filter-price
 - **Category:** woocommerce
@@ -1292,7 +1301,7 @@ Let shoppers filter products by choosing a price range.
 
 ## Price Slider - woocommerce/product-filter-price-slider
 
-A slider helps shopper choose a price range.
+Let shoppers choose a price range with a slider.
 
 - **Name:** woocommerce/product-filter-price-slider
 - **Category:** woocommerce
@@ -1302,7 +1311,7 @@ A slider helps shopper choose a price range.
 
 ## Rating Filter - woocommerce/product-filter-rating
 
-Enable customers to filter the product collection by rating.
+Let shoppers filter products by rating.
 
 - **Name:** woocommerce/product-filter-rating
 - **Category:** woocommerce
@@ -1312,7 +1321,7 @@ Enable customers to filter the product collection by rating.
 
 ## Chips - woocommerce/product-filter-removable-chips
 
-Display removable active filters as chips.
+Display active filters as removable chips.
 
 - **Name:** woocommerce/product-filter-removable-chips
 - **Category:** woocommerce
@@ -1320,9 +1329,9 @@ Display removable active filters as chips.
 - **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
-## Status Filter - woocommerce/product-filter-status
+## Availability Filter - woocommerce/product-filter-status
 
-Let shoppers filter products by choosing stock status.
+Let shoppers filter products by availability.
 
 - **Name:** woocommerce/product-filter-status
 - **Category:** woocommerce
@@ -1332,7 +1341,7 @@ Let shoppers filter products by choosing stock status.
 
 ## Taxonomy Filter - woocommerce/product-filter-taxonomy
 
-Enable customers to filter the product collection by selecting one or more taxonomy terms, such as categories, brands, or tags.
+Let shoppers filter products by category, brand, or tag.
 
 - **Name:** woocommerce/product-filter-taxonomy
 - **Category:** woocommerce
@@ -1598,6 +1607,15 @@ Display reviews for your products.
 - **Category:** woocommerce
 - **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 
+## Saved for Later - woocommerce/saved-for-later
+
+Display items the shopper has saved from their cart for later.
+
+- **Name:** woocommerce/saved-for-later
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~, ~~reusable~~
+- **Attributes:** columnCount
+
 ## Product - woocommerce/single-product
 
 Display a single product of your choice with full control over its presentation.
@@ -1624,5 +1642,14 @@ Display shopper-facing notifications generated by WooCommerce or extensions.
 - **Category:** woocommerce
 - **Supports:** align (full, wide), interactivity (clientNavigation), ~~multiple~~
 - **Attributes:** align
+
+## Wishlist - woocommerce/wishlist
+
+Display the shopper's wishlist.
+
+- **Name:** woocommerce/wishlist
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Attributes:** columnCount
 
 {/* END Autogenerated - DO NOT EDIT */}

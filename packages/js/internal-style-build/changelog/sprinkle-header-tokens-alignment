@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Rewrite `$header-scroll-shadow` to a 4-layer subtle drop matching Gutenberg's `--wpds-elevation-xs` aesthetic, replacing the previous single heavy rgba shadow.

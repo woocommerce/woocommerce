@@ -12,7 +12,7 @@ The conditional tags of WooCommerce and WordPress can be used in your template f
 
 Because WooCommerce uses custom post types, you can also use many of WordPress' conditional tags. See [codex.wordpress.org/Conditional_Tags](https://codex.wordpress.org/Conditional_Tags) for a list of the tags included with WordPress.
 
-**Note**: You can only use conditional query tags after the `posts_selection` [action hook](https://codex.wordpress.org/Plugin_API/Action_Reference#Actions_Run_During_a_Typical_Request) in WordPress (the `wp` action hook is the first one through which you can use these conditionals). For themes, this means the conditional tag will never work properly if you are using it in the body of functions.php.
+**Note**: You can only use conditional query tags after the `posts_selection` [action hook](https://codex.wordpress.org/Plugin_API/Action_Reference#Actions_Run_During_a_Typical_Request) in WordPress (the `wp` action hook is the first one through which you can use these conditionals). For themes, this means the conditional tag will never work properly if you are using it in the body of functions.php. If a conditional tag is used before it's supposed to, it won't trigger any error or warning: it will simply return `false`, even if the condition it checks for would be met later in the request.
 
 ## Available conditional tags
 

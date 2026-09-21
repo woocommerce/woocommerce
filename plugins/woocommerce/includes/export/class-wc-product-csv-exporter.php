@@ -130,6 +130,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
@@ -225,14 +226,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		$products = wc_get_products( $args );
 
-		$this->total_rows  = $products->total;
-		$this->row_data    = array();
-		$variable_products = array();
+		$this->total_rows   = $products->total;
+		$this->row_data     = array();
+		$variable_products  = array();
+		$include_variations = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
 			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
-			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+			if ( $include_variations &&
+				( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
 				$product->is_type( ProductType::VARIABLE ) &&
 				! in_array( $product->get_id(), $variable_products, true ) ) {
 				$variable_products[] = $product->get_id();
@@ -332,6 +335,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			ProductStatus::DRAFT   => -1,
 			ProductStatus::PRIVATE => 0,
 			ProductStatus::PUBLISH => 1,
+			ProductStatus::PENDING => 2,
 		);
 
 		// Fix display for variations when parent product is a draft.
@@ -711,7 +715,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
+							$terms  = (array) $attribute->get_terms();
 							$values = array();
 
 							foreach ( $terms as $term ) {

@@ -1,20 +1,12 @@
-# Monorepo CI and package managers manifests.
-/.github/ @woocommerce/flux
-**/composer.json @woocommerce/flux
-**/package.json @woocommerce/flux
+# Monorepo CI.
+/.github/ @woocommerce/monorepo
 
 # Monorepo tooling folders.
-/bin/ @woocommerce/flux
-/tools/ @woocommerce/flux
-/packages/js/eslint-plugin/ @woocommerce/flux
-/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
-/packages/js/e2e-utils-playwright/ @woocommerce/flux
+/packages/js/e2e-utils-playwright/ @woocommerce/monorepo
 
 # Files in root of repository
-/.* @woocommerce/flux
-/*.* @woocommerce/flux
-/changelog.txt
-/pnpm-lock.yaml
+/changelog.txt @woocommerce/monorepo
+/pnpm-lock.yaml @woocommerce/monorepo
 
 # Docs resources, which gets published to https://developer.woocommerce.com
 /docs/ @woocommerce/developer-advocacy
@@ -28,9 +20,64 @@
 /plugins/woocommerce/includes/class-wc-checkout*.php @woocommerce/rubik
 /plugins/woocommerce/includes/wc-cart-functions.php @woocommerce/rubik
 /plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
+/plugins/woocommerce/includes/shortcodes/class-wc-shortcode-cart.php @woocommerce/rubik
+/plugins/woocommerce/includes/shortcodes/class-wc-shortcode-checkout.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/settings/class-wc-settings-checkout.php @woocommerce/rubik
+/plugins/woocommerce/includes/legacy/class-wc-legacy-cart.php @woocommerce/rubik
+/plugins/woocommerce/includes/widgets/class-wc-widget-cart.php @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/cart.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/cart-fragments.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/checkout.js @woocommerce/rubik
+/plugins/woocommerce/client/legacy/js/frontend/order-review.js @woocommerce/rubik
+/plugins/woocommerce/src/Internal/Checkout/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutLink.php @woocommerce/rubik
+/plugins/woocommerce/templates/cart/ @woocommerce/rubik
+/plugins/woocommerce/templates/checkout/ @woocommerce/rubik
 
-# Store API related files
+# Checkout Fields (Additional Checkout Fields API)
+/plugins/woocommerce/src/Blocks/Domain/Services/*CheckoutField*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFieldsSchema/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFieldTypes/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/CheckoutFieldsBlock.php @woocommerce/rubik
+
+# Store API and internal REST routes
 /plugins/woocommerce/src/StoreApi/ @woocommerce/rubik
+/plugins/woocommerce/src/Internal/RestApi/ @woocommerce/rubik
+
+# Store API product catalog routes, schemas, and queries
+/plugins/woocommerce/src/StoreApi/Routes/V1/Product*.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Schemas/V1/Product*.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Utilities/ProductQuery.php @woocommerce/kirigami
+/plugins/woocommerce/src/StoreApi/Utilities/ProductQueryFilters.php @woocommerce/kirigami
+
+# Legacy REST API order controllers
+/plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/rest-api/Controllers/Version*/class-wc-rest-network-orders*.php @woocommerce/rubik
+
+# Core order objects, items, and data stores
+/plugins/woocommerce/includes/class-wc-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/abstracts/abstract-wc-order.php @woocommerce/rubik
+/plugins/woocommerce/includes/legacy/abstract-wc-legacy-order.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-item-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-order-step-logger-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/class-wc-order*.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/abstract-wc-order-data-store-cpt.php @woocommerce/rubik
+/plugins/woocommerce/includes/data-stores/abstract-wc-order-item-type-data-store.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-product-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-item-type-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-order-refund-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/includes/interfaces/class-wc-abstract-order-data-store-interface.php @woocommerce/rubik
+/plugins/woocommerce/src/Internal/DataStores/Orders/ @woocommerce/rubik
+
+# Order withdrawal
+/plugins/woocommerce/src/Internal/OrderWithdrawal/ @woocommerce/rubik
+/plugins/woocommerce/templates/myaccount/form-order-withdrawal.php @woocommerce/rubik
+/plugins/woocommerce/templates/emails/*order-withdrawal-requested.php @woocommerce/rubik
+/plugins/woocommerce/templates/emails/plain/*order-withdrawal-requested.php @woocommerce/rubik
+/plugins/woocommerce/includes/emails/class-wc-email-*order-withdrawal-requested.php @woocommerce/rubik
 
 # Cart Checkout Blocks
 /plugins/woocommerce/client/blocks/assets/js/blocks/cart @woocommerce/rubik
@@ -38,7 +85,64 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/checkout @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
-/plugins/woocommerce/client/blocks/packages/checkout @woocommerce/rubik
+/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout @woocommerce/rubik
+
+# Cart Checkout Blocks (PHP block types, templates, utils)
+/plugins/woocommerce/src/Blocks/BlockTypes/Cart*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/Checkout*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/MiniCart*.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/EmptyCartBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/FilledCartBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/ProceedToCheckoutBlock.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CartTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CheckoutHeaderTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/CheckoutTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Templates/MiniCartTemplate.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Utils/CartCheckoutUtils.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/Utils/MiniCartUtils.php @woocommerce/rubik
+/plugins/woocommerce/templates/parts/checkout-header.html @woocommerce/rubik
+/plugins/woocommerce/templates/parts/mini-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/page-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/page-checkout.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/blockified/page-cart.html @woocommerce/rubik
+/plugins/woocommerce/templates/templates/blockified/page-checkout.html @woocommerce/rubik
+
+# Cart and checkout data stores
+/plugins/woocommerce/client/blocks/packages/public-api/block-data/cart @woocommerce/rubik
+/plugins/woocommerce/client/blocks/packages/public-api/block-data/checkout @woocommerce/rubik
+/plugins/woocommerce/client/blocks/packages/public-api/block-data/payment @woocommerce/rubik
+
+# Order admin page (edit screen, list table, order meta boxes)
+/plugins/woocommerce/src/Internal/Admin/Orders/ @woocommerce/rubik
+/plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-order-*.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/meta-boxes/views/html-order-*.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/list-tables/class-wc-admin-list-table-orders.php @woocommerce/rubik
+
+# Customer order display templates
+/plugins/woocommerce/templates/order/order-details.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-details-customer.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-details-item.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-downloads.php @woocommerce/rubik
+/plugins/woocommerce/templates/order/order-again.php @woocommerce/rubik
+
+# Shopper Lists (wishlist, saved for later)
+/plugins/woocommerce/src/Internal/ShopperLists/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/Wishlist.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/AddToWishlistButton.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/SavedForLater.php @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/wishlist @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/add-to-wishlist-button @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/saved-for-later @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/shopper-lists @woocommerce/rubik
+
+# Stock notifications (back-in-stock)
+/plugins/woocommerce/src/Internal/StockNotifications/ @woocommerce/somewherewarm
+/plugins/woocommerce/src/Internal/DataStores/StockNotifications/ @woocommerce/somewherewarm
+
+# Customer email verification
+/plugins/woocommerce/src/Internal/CustomerEmailVerification/ @woocommerce/rubik
 
 # Email Editor packages
 /packages/js/email-editor/ @woocommerce/ballade
@@ -47,3 +151,6 @@
 # Email Editor integrations
 /plugins/woocommerce/src/Internal/EmailEditor/ @woocommerce/ballade
 /plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/ @woocommerce/ballade
+
+# Subscriptions Engine packages
+/packages/php/woocommerce-subscriptions-engine/ @woocommerce/chronos

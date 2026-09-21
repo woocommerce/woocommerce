@@ -11,6 +11,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
+import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { Button } from '@ariakit/react';
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
-import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
@@ -109,11 +109,11 @@ const ShippingSelector = ( {
 		useDispatch( validationStore );
 	useEffect( () => {
 		if ( checked === 'shipping' && ! hasShippingPrices ) {
-			setValidationErrors( {
+			void setValidationErrors( {
 				'shipping-rates-error': SHIPPING_RATE_ERROR,
 			} );
 		} else {
-			clearValidationError( 'shipping-rates-error' );
+			void clearValidationError( 'shipping-rates-error' );
 		}
 		return () => clearValidationError( 'shipping-rates-error' );
 	}, [

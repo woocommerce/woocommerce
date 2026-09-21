@@ -5,25 +5,22 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Unit tests for the CartController class.
  */
-class CartControllerTests extends TestCase {
+class CartControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * tearDown.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
-
 		// Reset DI container to clear any mocks.
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$container->reset_all_replacements();
+
+		parent::tearDown();
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add change-summary REST endpoint and service for surfacing block email template updates.

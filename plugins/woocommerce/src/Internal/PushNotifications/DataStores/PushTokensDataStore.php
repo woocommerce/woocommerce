@@ -32,6 +32,13 @@ class PushTokensDataStore {
 	 */
 	private array $tokens_by_roles_cache = array();
 
+	/**
+	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $has_tokens = null;
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -80,6 +87,8 @@ class PushTokensDataStore {
 		}
 
 		$push_token->set_id( $id );
+
+		$this->has_tokens = null;
 
 		return $push_token;
 	}
@@ -193,6 +202,50 @@ class PushTokensDataStore {
 		}
 
 		return (bool) wp_delete_post( (int) $id, true );
+	}
+
+	/**
+	 * Deletes every push token belonging to a user.
+	 *
+	 * A non-positive ID is refused rather than queried, so a caller that loses
+	 * the user ID cannot match the rows of every author-less token at once.
+	 *
+	 * @since 11.2.0
+	 * @param int $user_id The user whose tokens should be deleted.
+	 * @return int The number of tokens deleted.
+	 */
+	public function delete_for_user( int $user_id ): int {
+		if ( $user_id < 1 ) {
+			return 0;
+		}
+
+		global $wpdb;
+
+		// Direct query so pre_get_posts filters cannot hide a token, and any status is deleted.
+		$post_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d",
+				PushToken::POST_TYPE,
+				$user_id
+			)
+		);
+
+		if ( empty( $post_ids ) ) {
+			return 0;
+		}
+
+		$deleted = 0;
+
+		foreach ( $post_ids as $post_id ) {
+			if ( wp_delete_post( (int) $post_id, true ) ) {
+				++$deleted;
+			}
+		}
+
+		// Anything read earlier in this request now includes deleted tokens.
+		$this->tokens_by_roles_cache = array();
+
+		return $deleted;
 	}
 
 	/**
@@ -312,11 +365,40 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Determines whether any push token exists, ignoring roles and preferences so callers can bail out before the cost of get_tokens_for_roles().
+	 *
+	 * @since 11.2.0
+	 * @return bool True if at least one push token exists.
+	 */
+	public function has_tokens(): bool {
+		if ( null !== $this->has_tokens ) {
+			return $this->has_tokens;
+		}
+
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index.
+		$this->has_tokens = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' LIMIT 1",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->has_tokens;
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
 	 * flat array (cached per-request). When $page and $per_page are
 	 * provided, returns a paginated result with total counts.
+	 *
+	 * The eligible-user lookup is restricted to users that actually own
+	 * push tokens, so the role check runs against a handful of IDs instead
+	 * of scanning every user's capabilities meta, which does not scale on
+	 * sites with very large user tables.
 	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
@@ -345,10 +427,22 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		$user_ids = get_users(
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
+		$users_with_tokens = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
+		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
 			array(
 				'role__in' => $roles,
 				'fields'   => 'ID',
+				'include'  => $users_with_tokens,
 			)
 		);
 
@@ -386,7 +480,7 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		update_meta_cache( 'post', $post_ids );
+		_prime_post_caches( $post_ids, false, true );
 
 		$tokens = array();
 

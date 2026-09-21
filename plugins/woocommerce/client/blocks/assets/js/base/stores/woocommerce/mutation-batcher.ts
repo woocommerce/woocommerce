@@ -13,17 +13,17 @@
  * individual request's success or failure within the batch.
  */
 
-export type MutationRequest< TState = unknown > = {
+export type MutationRequest< TMeta = unknown > = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
 	applyOptimistic?: () => void;
 	/**
-	 * Called synchronously after reconciliation, before isProcessing clears.
-	 * Use for side effects that must complete before external code
-	 * (like refreshCartItems) is allowed to run.
+	 * Opaque, caller-defined data associated with this request. The batcher
+	 * never reads or mutates it; it is carried through unchanged to this
+	 * request's entry in the queue's onCycleSettled callback.
 	 */
-	onSettled?: ( result: MutationResult< TState > ) => void;
+	meta?: TMeta;
 };
 
 export type MutationResult< TState = unknown > = {
@@ -32,30 +32,57 @@ export type MutationResult< TState = unknown > = {
 	error?: Error;
 };
 
+/**
+ * A single request's outcome as reported to a queue's onCycleSettled
+ * callback.
+ */
+export type CycleSettledEntry< TMeta = unknown > = {
+	/**
+	 * Whether this request succeeded within the cycle (the same definition
+	 * used for its own settled promise: no per-item error was recorded).
+	 */
+	success: boolean;
+	/**
+	 * The opaque meta value passed to submit() for this request, if any.
+	 */
+	meta?: TMeta;
+};
+
 type BatchItemResponse = {
 	status: number;
 	body: unknown;
 	headers?: Record< string, string >;
 };
 
-export type MutationQueueConfig< TState = unknown > = {
+export type MutationQueueConfig< TState = unknown, TMeta = unknown > = {
 	endpoint: string;
 	getHeaders: () => Record< string, string >;
 	fetchHandler?: typeof fetch;
 	takeSnapshot: () => TState;
 	rollback: ( snapshot: TState ) => void;
 	commit: ( serverState: TState ) => void;
+	/**
+	 * Called synchronously once per reconciliation cycle, after the cycle's
+	 * commit/rollback and before isProcessing clears. Receives one entry per
+	 * request submitted during the cycle, in submission order — including
+	 * cycles where every request failed. Exceptions thrown by this callback
+	 * are caught and logged; they never interrupt reconciliation or affect
+	 * individual requests' own settlement.
+	 */
+	onCycleSettled?: ( settled: Array< CycleSettledEntry< TMeta > > ) => void;
 };
 
-type TrackedRequest< TState = unknown > = {
+type TrackedRequest< TMeta = unknown > = {
 	id: string;
-	request: MutationRequest< TState >;
+	request: MutationRequest< TMeta >;
 	resolve: ( result: MutationResult ) => void;
 	reject: ( error: Error ) => void;
 };
 
-export function createMutationQueue< TState >(
-	config: MutationQueueConfig< TState >
+const KEEPALIVE_PAYLOAD_LIMIT = 64 * 1024;
+
+export function createMutationQueue< TState, TMeta = unknown >(
+	config: MutationQueueConfig< TState, TMeta >
 ) {
 	const {
 		endpoint,
@@ -70,7 +97,7 @@ export function createMutationQueue< TState >(
 	let snapshot: TState | null = null;
 
 	// All tracked requests for the current cycle.
-	const trackedRequests: Map< string, TrackedRequest< TState > > = new Map();
+	const trackedRequests: Map< string, TrackedRequest< TMeta > > = new Map();
 
 	// Requests collected this tick, waiting to be sent.
 	let pendingIds: string[] = [];
@@ -97,16 +124,25 @@ export function createMutationQueue< TState >(
 			rollback( snapshot );
 		}
 
-		// Run onSettled callbacks while isProcessing is still true.
-		// This prevents refreshCartItems from running during these callbacks.
+		// Build the per-cycle settled list, one entry per tracked request in
+		// submission order, and notify the single per-cycle hook — also
+		// while isProcessing is still true. Exceptions are contained here so
+		// a misbehaving hook can never break reconciliation.
+		const settled: Array< CycleSettledEntry< TMeta > > = [];
 		trackedRequests.forEach( ( tracked ) => {
-			const error = errors.get( tracked.id );
-			tracked.request.onSettled?.( {
-				success: ! error,
-				...( lastServerState !== null && { data: lastServerState } ),
-				...( error && { error } ),
+			settled.push( {
+				success: ! errors.get( tracked.id ),
+				...( tracked.request.meta !== undefined && {
+					meta: tracked.request.meta,
+				} ),
 			} );
 		} );
+		try {
+			config.onCycleSettled?.( settled );
+		} catch ( error ) {
+			// eslint-disable-next-line no-console
+			console.error( error );
+		}
 
 		isProcessing = false;
 
@@ -144,7 +180,7 @@ export function createMutationQueue< TState >(
 		// If new requests arrived while in-flight, send them.
 		if ( pendingIds.length > 0 ) {
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			processRequests();
+			void processRequests();
 			return;
 		}
 
@@ -222,14 +258,18 @@ export function createMutationQueue< TState >(
 					};
 				} )
 				.filter( Boolean );
+			const body = JSON.stringify( { requests } );
 
 			const response = await fetchHandler( endpoint, {
 				method: 'POST',
+				keepalive:
+					new TextEncoder().encode( body ).byteLength <
+					KEEPALIVE_PAYLOAD_LIMIT,
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,
 				},
-				body: JSON.stringify( { requests } ),
+				body,
 			} );
 
 			if ( ! response.ok ) {
@@ -251,7 +291,7 @@ export function createMutationQueue< TState >(
 
 	// submit - Queues a request. First call in a cycle takes a snapshot.
 	function submit(
-		request: MutationRequest< TState >
+		request: MutationRequest< TMeta >
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
 			const id = String( nextId++ );
@@ -309,6 +349,6 @@ export function createMutationQueue< TState >(
 	return { submit, getStatus, waitForIdle };
 }
 
-export type MutationQueue< TState = unknown > = ReturnType<
-	typeof createMutationQueue< TState >
+export type MutationQueue< TState = unknown, TMeta = unknown > = ReturnType<
+	typeof createMutationQueue< TState, TMeta >
 >;

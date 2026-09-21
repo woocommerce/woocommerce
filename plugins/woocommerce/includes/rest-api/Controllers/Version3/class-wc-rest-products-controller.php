@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -28,6 +30,7 @@ defined( 'ABSPATH' ) || exit;
 class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+	use ProductRequestPreparationTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -51,7 +54,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * See prepare_objects_query()
 	 *
 	 * @var string
-	 * @since 10.4
+	 * @since 11.3.0
 	 */
 	private $search_mpn_arg_value = '';
 
@@ -155,7 +158,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product    = $this->prepare_object_for_database( $request );
+		$updated_product = $this->prepare_product_for_duplication( $request );
+
+		if ( is_wp_error( $updated_product ) ) {
+			return $updated_product;
+		}
+
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
@@ -174,6 +182,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -197,7 +208,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 
 			if ( ! is_array( $attachment ) ) {
 				continue;
@@ -213,8 +224,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'src'               => current( $attachment ),
 				'name'              => get_the_title( $attachment_id ),
 				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, $image_size ),
+				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, $image_size ),
 				'thumbnail'         => current( $thumbnail ),
 			);
 		}
@@ -330,9 +341,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) ) {
 			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
+				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 			} else {
-				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+				$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Product taxonomy filters use WordPress's canonical indexed taxonomy tables.
 			}
 		}
 
@@ -368,7 +379,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'tokens' => $tokens,
 			);
 
-			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $args['s'] );
+			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $request['search_mpn'], $args['s'] );
 		}
 
 		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';
@@ -399,7 +410,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$skus[] = $request['sku'];
 				}
 
-				$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Exact _sku match; wc_product_meta_lookup truncates SKUs to 100 chars and is empty while it regenerates, so it is not an equivalent path.
 					$args,
 					array(
 						'key'     => '_sku',
@@ -411,7 +422,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Do a partial match for MPN. Supersedes the 'mpn' argument, that does exact matching.
-		if ( ! empty( $request['search_mpn'] ) ) {
+		if ( '' !== ( $request['search_mpn'] ?? '' ) ) {
 			// Store this for use in the query clause filters.
 			$this->search_mpn_arg_value = $request['search_mpn'];
 
@@ -429,10 +440,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				)
 			);
 		}
-		
-		if ( ! empty( $request['mpn'] ) ) {
+
+		if ( '' !== ( $request['mpn'] ?? '' ) ) {
 			$mpns               = array_map( 'trim', explode( ',', $request['mpn'] ) );
-			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Match the full MPN; the lookup column only stores its first 100 characters.
 				$args,
 				array(
 					'key'     => '_mpn',
@@ -444,7 +455,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- wc_product_meta_lookup.tax_class is unindexed and holds NULL where _tax_class is unset, so it is neither faster nor equivalent.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -455,12 +466,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- _price is stored once per child price; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Postmeta stays correct while wc_product_meta_lookup is stale or regenerating; the _stock_status meta_key index bounds the scan.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -481,7 +492,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || ! empty( $request['mpn'] ) || ! empty( $request['search_mpn'] ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
+		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || '' !== ( $request['mpn'] ?? '' ) || '' !== ( $request['search_mpn'] ?? '' ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
@@ -491,7 +502,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$args['orderby'] = $ordering_args['orderby'];
 		$args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
-			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
+			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Core orderings bypass postmeta; this fallback supports extension-defined meta keys.
 		}
 
 		/*
@@ -518,7 +529,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_mpn_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_search_criteria = $this->search_sku_arg_value || '' !== $this->search_mpn_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
 
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -551,6 +562,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$this->exclude_status = array();
 		}
 
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when get_images() runs during serialization.
+		if ( ! empty( $result['objects'] ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
+		}
+
 		return $result;
 	}
 
@@ -569,7 +586,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Only join if we need meta table search.
 		if ( ! $this->search_fields_tokens &&
 			! $this->search_sku_arg_value &&
-			! $this->search_mpn_arg_value &&
+			'' === $this->search_mpn_arg_value &&
 			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
 			return $join;
 		}
@@ -605,7 +622,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		} elseif ( ! empty( $this->search_sku_arg_value ) ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_arg_value ) . '%';
 			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
-		} elseif ( ! empty( $this->search_mpn_arg_value ) ) {
+		}
+
+		if ( '' !== $this->search_mpn_arg_value ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_mpn_arg_value ) . '%';
 			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.mpn LIKE %s)', $like_search );
 		}
@@ -630,6 +649,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'name'              => "{$wpdb->posts}.post_title",
 			'sku'               => 'wc_product_meta_lookup.sku',
 			'global_unique_id'  => 'wc_product_meta_lookup.global_unique_id',
+			'mpn'               => 'wc_product_meta_lookup.mpn',
 			'description'       => "{$wpdb->posts}.post_content",
 			'short_description' => "{$wpdb->posts}.post_excerpt",
 		);
@@ -765,31 +785,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$product = $this->get_product_for_rest_request( $request );
 
-		// Type is the most important part here because we need to be using the correct class and methods.
-		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			$product = new $classname( $id );
-		} elseif ( isset( $request['id'] ) ) {
-			$product = wc_get_product( $id );
-		} else {
-			$product = new WC_Product_Simple();
-		}
-
-		if ( ProductType::VARIATION === $product->get_type() ) {
-			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
-				array(
-					'status' => 404,
-				)
-			);
+		if ( is_wp_error( $product ) ) {
+			return $product;
 		}
 
 		// Post title.
@@ -877,7 +876,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// MPN.
 		if ( isset( $request['mpn'] ) ) {
-			$product->set_mpn( wc_clean( $request['mpn'] ) );
+			$product->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
 		// Attributes.
@@ -1155,7 +1154,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $request['button_text'] );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 
@@ -1316,7 +1315,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'mpn'                   => array(
-					'description' => __( 'Manufacturer Part Number.', 'woocommerce' ),
+					'description' => __( 'Manufacturer part number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1926,7 +1925,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		);
 
 		$params['search_mpn'] = array(
-			'description'       => __( "Limit results to those with an MPN that partial matches a string. This argument takes precedence over 'mpn'.", 'woocommerce' ),
+			'description'       => __( "Limit results to those with an MPN that partially matches a string. This argument takes precedence over 'mpn'.", 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -1939,13 +1938,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$search_fields_enum = array( 'name', 'global_unique_id', 'description', 'short_description' );
+		$search_fields_enum = array( 'name', 'global_unique_id', 'mpn', 'description', 'short_description' );
 		if ( wc_product_sku_enabled() ) {
 			$search_fields_enum[] = 'sku';
 		}
 
 		$params['search_fields'] = array(
-			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id, description, short_description. This argument takes precedence over all other search parameters.', 'woocommerce' ),
+			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id, mpn, description, short_description. This argument takes precedence over all other search parameters.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
@@ -2040,7 +2039,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params = parent::get_collection_params();
 
 		$params['categories'] = array(
-			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific product category ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',

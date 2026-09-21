@@ -8,6 +8,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 ?>
 
 <table cellpadding="0" cellspacing="0">
@@ -39,7 +41,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					'select' === $attribute_taxonomy->attribute_type ||
 					'wc-visual' === $attribute_taxonomy->attribute_type
 				) {
-					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
+					$is_visual_attribute = 'wc-visual' === $attribute_taxonomy->attribute_type;
+					$attribute_orderby   = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
 					/**
 					* Filter the length (number of terms) rendered in the list.
 					*
@@ -55,11 +58,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 							data-orderby="<?php echo esc_attr( $attribute_orderby ); ?>"
 							class="multiselect attribute_values wc-taxonomy-term-search"
 							name="attribute_values[<?php echo esc_attr( $i ); ?>][]"
-							data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>">
+							data-taxonomy="<?php echo esc_attr( $attribute->get_taxonomy() ); ?>"
+							data-is-visual-attribute="<?php echo esc_attr( wc_bool_to_string( $is_visual_attribute ) ); ?>">
 						<?php
 						$selected_terms = $attribute->get_terms();
+						$term_visuals   = array();
+
+						if ( $selected_terms && $is_visual_attribute ) {
+							$term_visuals = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $selected_terms, 'term_id' ) );
+						}
+
 						if ( $selected_terms ) {
 							foreach ( $selected_terms as $selected_term ) {
+								$option_attributes = array(
+									'value'    => $selected_term->term_id,
+									'selected' => 'selected',
+								);
+
+								if ( $is_visual_attribute ) {
+									$option_attributes['data-visual'] = wp_json_encode(
+										$term_visuals[ $selected_term->term_id ] ?? VisualAttributeTermMeta::get_empty_visual()
+									);
+								}
+
+								$option_attribute_string = '';
+
+								foreach ( $option_attributes as $attribute_name => $attribute_value ) {
+									$option_attribute_string .= sprintf(
+										' %1$s="%2$s"',
+										esc_attr( $attribute_name ),
+										esc_attr( $attribute_value )
+									);
+								}
+
 								/**
 								 * Filter the selected attribute term name.
 								 *
@@ -67,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								 * @param string  $name Name of selected term.
 								 * @param array   $term The selected term object.
 								 */
-								echo '<option value="' . esc_attr( $selected_term->term_id ) . '" selected="selected">' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $selected_term->name, $selected_term ) ) . '</option>';
+								echo '<option' . $option_attribute_string . '>' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $selected_term->name, $selected_term ) ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							}
 						}
 						?>

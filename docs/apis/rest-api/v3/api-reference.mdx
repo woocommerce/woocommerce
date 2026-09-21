@@ -5329,6 +5329,12 @@ woocommerce.get("").parsed_response
 							"required": false,
 							"description": "Limit result set to products based on a maximum price.",
 							"type": "string"
+						},
+						"image_size": {
+							"required": false,
+							"default": "full",
+							"description": "Use a specific registered image size for the returned image src values. Falls back to the full size if the requested size is not registered.",
+							"type": "string"
 						}
 					}
 				},
@@ -5817,6 +5823,12 @@ woocommerce.get("").parsed_response
 							"default": "view",
 							"enum": [ "view", "edit" ],
 							"description": "Scope under which the request is made; determines fields present in response.",
+							"type": "string"
+						},
+						"image_size": {
+							"required": false,
+							"default": "full",
+							"description": "Use a specific registered image size for the returned image src values. Falls back to the full size if the requested size is not registered.",
 							"type": "string"
 						}
 					}
@@ -6947,6 +6959,12 @@ woocommerce.get("").parsed_response
 							"required": false,
 							"description": "Limit result set to products based on a maximum price.",
 							"type": "string"
+						},
+						"image_size": {
+							"required": false,
+							"default": "full",
+							"description": "Use a specific registered image size for the returned variation image src. Falls back to the full size if the requested size is not registered.",
+							"type": "string"
 						}
 					}
 				},
@@ -7201,6 +7219,12 @@ woocommerce.get("").parsed_response
 							"default": "view",
 							"enum": [ "view", "edit" ],
 							"description": "Scope under which the request is made; determines fields present in response.",
+							"type": "string"
+						},
+						"image_size": {
+							"required": false,
+							"default": "full",
+							"description": "Use a specific registered image size for the returned variation image src. Falls back to the full size if the requested size is not registered.",
 							"type": "string"
 						}
 					}

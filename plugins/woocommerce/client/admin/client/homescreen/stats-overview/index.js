@@ -4,14 +4,18 @@
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
-import { TabPanel, Card, CardHeader, CardFooter } from '@wordpress/components';
-import { get, xor } from 'lodash';
 import {
-	EllipsisMenu,
+	TabPanel,
+	Card,
+	CardHeader,
+	CardFooter,
+	DropdownMenu,
+	MenuGroup,
 	MenuItem,
-	MenuTitle,
-	Link,
-} from '@woocommerce/components';
+} from '@wordpress/components';
+import { check, moreVertical } from '@wordpress/icons';
+import { get, xor } from 'lodash';
+import { Link } from '@woocommerce/components';
 import { useUserPreferences, pluginsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -81,16 +85,21 @@ export const StatsOverview = () => {
 		>
 			<CardHeader size="medium">
 				<HeaderText />
-				<EllipsisMenu
+				<DropdownMenu
+					icon={ moreVertical }
 					label={ __(
 						'Choose which values to display',
 						'woocommerce'
 					) }
-					renderContent={ () => (
-						<Fragment>
-							<MenuTitle>
-								{ __( 'Display stats:', 'woocommerce' ) }
-							</MenuTitle>
+					popoverProps={ { placement: 'bottom-end' } }
+					toggleProps={ {
+						className: 'woocommerce-ellipsis-menu__toggle',
+					} }
+				>
+					{ () => (
+						<MenuGroup
+							label={ __( 'Display stats', 'woocommerce' ) }
+						>
 							{ stats.map( ( item ) => {
 								const checked = ! hiddenStats.includes(
 									item.stat
@@ -98,21 +107,23 @@ export const StatsOverview = () => {
 
 								return (
 									<MenuItem
-										checked={ checked }
-										isCheckbox
-										isClickable
+										className="woocommerce-stats-overview__dropdown-item"
+										icon={ check }
+										iconPosition="left"
+										isSelected={ checked }
 										key={ item.stat }
-										onInvoke={ () =>
+										onClick={ () =>
 											toggleStat( item.stat )
 										}
+										role="menuitemcheckbox"
 									>
 										{ item.label }
 									</MenuItem>
 								);
 							} ) }
-						</Fragment>
+						</MenuGroup>
 					) }
-				/>
+				</DropdownMenu>
 			</CardHeader>
 			<TabPanel
 				className="woocommerce-stats-overview__tabs"

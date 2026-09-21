@@ -12,11 +12,13 @@ const baseEmail: EmailType = {
 	enabled: true,
 	manual: false,
 	email_key: 'new_order',
+	email_class_name: 'WC_Email_New_Order',
 	recipients: { to: '', cc: '', bcc: '' },
 	templateStatus: null,
 	templateVersion: null,
 	currentVersion: null,
 	wasBackfilled: false,
+	file_template_preview_url: null,
 };
 
 export const CoreUpdatedCustomized = () => (
