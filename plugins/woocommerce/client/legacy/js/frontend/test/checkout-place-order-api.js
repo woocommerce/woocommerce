@@ -886,6 +886,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		// The key is suffixed with the site's wc_ajax_url from wc_checkout_params.
 		const STALE_FLAG = 'wc_checkout_stale_nonce_reload:/?wc-ajax=%%endpoint%%';
 		const STALE_NOTICE = 'This checkout page is out of date.';
+		const UPDATE_FAILED_NOTICE = 'Your order could not be updated.';
 
 		// This jsdom seals window.location, so reload() can't be stubbed. It reports
 		// each attempt as a "Not implemented: navigation" console error instead, which
@@ -905,6 +906,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			jest.useFakeTimers();
 			window.sessionStorage.clear();
 			global.window.wc_checkout_params.i18n_checkout_stale = STALE_NOTICE;
+			global.window.wc_checkout_params.i18n_update_failed =
+				UPDATE_FAILED_NOTICE;
 		} );
 
 		afterEach( () => {
@@ -1026,54 +1029,68 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 		} );
 
-		test( 'should treat a 403 that is not a rejected nonce like any other failure', () => {
-			// A firewall or CDN block answers 403 with its own page, not "-1".
-			failCheckoutUpdate( {
-				status: 403,
-				responseText: '<html><body>Access denied</body></html>',
-			} );
-
-			expectReloads( 0 );
-			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
-			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
-			expect( $form.prepend ).not.toHaveBeenCalled();
-		} );
-
-		test( 'should unblock without a notice or reload on other failures', () => {
-			failCheckoutUpdate( { status: 500 } );
-
-			expectReloads( 0 );
-			expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
-			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
-			expect( $form.prepend ).not.toHaveBeenCalled();
-		} );
-
+		// The server may have changed the session before failing, so the totals on screen can be
+		// stale. The sections stay blocked, as before this handler existed, and a notice asks for a
+		// reload instead of leaving a silent spinner.
 		test.each( [
-			[ 'a rejected nonce', () => rejectNonce() ],
-			[ 'another failure', () => failCheckoutUpdate( { status: 500 } ) ],
+			[
+				'a 403 that is not a rejected nonce',
+				// A firewall or CDN block answers 403 with its own page, not "-1".
+				{
+					status: 403,
+					responseText: '<html><body>Access denied</body></html>',
+				},
+			],
+			[ 'a server error', { status: 500 } ],
 		] )(
-			'should render the custom place order button again after %s',
-			( _, fail ) => {
-				// update_checkout removes the custom button before the request is sent and
-				// keeps the default one hidden, so without a re-init there is no way to pay.
-				window.sessionStorage.setItem( STALE_FLAG, '1' );
-				// init() already ran init_payment_methods once while loading the script.
-				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit.mockClear();
-				$selectedPaymentMethod.trigger.mockClear();
+			'should keep the sections blocked and ask for a reload on %s',
+			( _, jqXHR ) => {
+				failCheckoutUpdate( jqXHR );
 
-				fail();
-
-				expect(
-					window.wc.customPlaceOrderButton.__cleanup
-				).toHaveBeenCalledTimes( 1 );
-				expect(
-					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit
-				).toHaveBeenCalledWith( 'test-gateway' );
-				expect( $selectedPaymentMethod.trigger ).toHaveBeenCalledWith(
-					'click'
+				expectReloads( 0 );
+				expect( window.sessionStorage.getItem( STALE_FLAG ) ).toBeNull();
+				expect( $blockedSections.unblock ).not.toHaveBeenCalled();
+				expect( $form.prepend ).toHaveBeenCalledWith(
+					expect.stringContaining( UPDATE_FAILED_NOTICE )
+				);
+				expect( $form.prepend ).not.toHaveBeenCalledWith(
+					expect.stringContaining( STALE_NOTICE )
 				);
 			}
 		);
+
+		test( 'should fall back to the status text for the update failure notice too', () => {
+			delete global.window.wc_checkout_params.i18n_update_failed;
+
+			failCheckoutUpdate( { status: 500 }, 'error', 'Internal Server Error' );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'tabindex="-1">Internal Server Error</div>'
+				)
+			);
+		} );
+
+		test( 'should render the custom place order button again after a rejected nonce', () => {
+			// update_checkout removes the custom button before the request is sent and
+			// keeps the default one hidden, so without a re-init there is no way to pay.
+			window.sessionStorage.setItem( STALE_FLAG, '1' );
+			// init() already ran init_payment_methods once while loading the script.
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit.mockClear();
+			$selectedPaymentMethod.trigger.mockClear();
+
+			rejectNonce();
+
+			expect(
+				window.wc.customPlaceOrderButton.__cleanup
+			).toHaveBeenCalledTimes( 1 );
+			expect(
+				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit
+			).toHaveBeenCalledWith( 'test-gateway' );
+			expect( $selectedPaymentMethod.trigger ).toHaveBeenCalledWith(
+				'click'
+			);
+		} );
 
 		test( 'should ignore a request aborted by a newer update', () => {
 			failCheckoutUpdate( { status: 0 }, 'abort' );

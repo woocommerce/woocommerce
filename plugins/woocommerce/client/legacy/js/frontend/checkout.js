@@ -586,6 +586,28 @@ jQuery( function ( $ ) {
 				'-1' === String( jqXHR.responseText || '' ).trim()
 			);
 		},
+		/**
+		 * Build the notice for a failed update_order_review request.
+		 *
+		 * The localized string is expected, but falls back to the response's status text like the
+		 * place order handler does if something removed it.
+		 *
+		 * @param {string} message     The localized message from wc_checkout_params.
+		 * @param {string} errorThrown The response's status text.
+		 * @return {string} The notice markup.
+		 */
+		update_failure_notice: function ( message, errorThrown ) {
+			if ( typeof message !== 'string' || message.trim() === '' ) {
+				message = errorThrown;
+			}
+
+			// role="alert" announces the notice and tabindex="-1" lets submit_error focus it.
+			return (
+				'<div role="alert"><div class="woocommerce-error" tabindex="-1">' +
+				message +
+				'</div></div>'
+			);
+		},
 		reset_update_checkout_timer: function () {
 			clearTimeout( wc_checkout_form.updateTimer );
 		},
@@ -990,6 +1012,20 @@ jQuery( function ( $ ) {
 						return;
 					}
 
+					if ( ! stale_nonce ) {
+						// The server may have changed the session before failing, so the totals on
+						// screen can be out of date. Keep the payment and order review sections
+						// blocked and ask for a reload rather than let an order be placed against them.
+						wc_checkout_form.submit_error(
+							wc_checkout_form.update_failure_notice(
+								wc_checkout_params.i18n_update_failed,
+								errorThrown
+							)
+						);
+						return;
+					}
+
+					// A rejected nonce ran nothing on the server, so the page is safe to use again.
 					$(
 						'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
 					).unblock();
@@ -998,26 +1034,12 @@ jQuery( function ( $ ) {
 					// payment methods to render it again like the success path does.
 					wc_checkout_form.init_payment_methods();
 
-					if ( stale_nonce ) {
-						// The localized string is expected, but fall back to the response's status text
-						// like the place order handler does if something removed it.
-						var errorMessage = errorThrown;
-
-						if (
-							typeof wc_checkout_params.i18n_checkout_stale ===
-								'string' &&
-							wc_checkout_params.i18n_checkout_stale.trim() !== ''
-						) {
-							errorMessage = wc_checkout_params.i18n_checkout_stale;
-						}
-
-						// role="alert" announces the notice and tabindex="-1" lets submit_error focus it.
-						wc_checkout_form.submit_error(
-							'<div role="alert"><div class="woocommerce-error" tabindex="-1">' +
-								errorMessage +
-								'</div></div>'
-						);
-					}
+					wc_checkout_form.submit_error(
+						wc_checkout_form.update_failure_notice(
+							wc_checkout_params.i18n_checkout_stale,
+							errorThrown
+						)
+					);
 				},
 			} );
 		},
