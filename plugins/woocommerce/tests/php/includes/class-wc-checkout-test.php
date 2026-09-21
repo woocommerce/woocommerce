@@ -834,6 +834,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				$this->assertWPError( $result, 'A repeat submit for an order that went through must not build a new order.' );
 				$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
 				$this->assertSame( $first_order_id, $result->get_error_data()['order_id'] );
+				$this->assertSame( wc_get_order( $first_order_id )->get_checkout_order_received_url(), $result->get_error_data()['redirect'], 'Callers should get the received URL without loading the order.' );
 				$this->assertSame(
 					array( $first_order_id ),
 					wc_get_orders(
