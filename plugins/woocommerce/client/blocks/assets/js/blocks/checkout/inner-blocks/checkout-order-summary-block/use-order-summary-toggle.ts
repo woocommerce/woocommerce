@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { useContainerWidthContext } from '@woocommerce/base-context';
-import { useId, useState } from '@wordpress/element';
+import { useCallback, useId, useState } from '@wordpress/element';
 import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 export type OrderSummaryToggle = {
 	isOpen: boolean;
 	hasContainerWidth: boolean;
 	isLarge: boolean;
+	closeSummary: () => void;
 	ariaControlsId: string;
 	toggleProps: HTMLAttributes< HTMLDivElement >;
 };
@@ -30,6 +31,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 	const { hasContainerWidth, isLarge } = useContainerWidthContext();
 	const [ isOpen, setIsOpen ] = useState( false );
 	const ariaControlsId = useId();
+	const closeSummary = useCallback( () => setIsOpen( false ), [] );
 
 	const toggleProps = ! isLarge
 		? {
@@ -54,6 +56,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 		isOpen,
 		hasContainerWidth,
 		isLarge,
+		closeSummary,
 		ariaControlsId,
 		toggleProps,
 	};

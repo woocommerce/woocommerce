@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, createEvent } from '@testing-library/react';
+import {
+	act,
+	render,
+	screen,
+	fireEvent,
+	createEvent,
+} from '@testing-library/react';
 import {
 	ExperimentalDiscountsMeta,
 	ExperimentalOrderMeta,
@@ -218,6 +224,53 @@ describe( 'Checkout Order Summary placement', () => {
 			);
 		}
 	);
+
+	it( 'moves an open summary to the action area as it approaches the viewport', () => {
+		let observerCallback;
+		const disconnect = jest.fn();
+		const intersectionObserverSpy = jest
+			.spyOn( window, 'IntersectionObserver' )
+			.mockImplementation( ( callback ) => {
+				observerCallback = callback;
+				return {
+					observe: jest.fn(),
+					disconnect,
+				};
+			} );
+
+		const { container, unmount } = renderWithSlot( 'is-medium' );
+		const title = screen.getByRole( 'button', {
+			name: /Order summary/,
+		} );
+		const inlineSummary = container.querySelector(
+			'.wc-block-components-checkout-order-summary__content'
+		);
+		const actionArea = container.querySelector(
+			'.checkout-order-summary-block-fill'
+		);
+		const actionAreaAnchor = container.querySelector(
+			'.checkout-order-summary-block-fill-wrapper'
+		);
+		const summaryContent = screen.getByTestId( 'summary-content' );
+
+		fireEvent.click( title );
+		expect( inlineSummary ).toContainElement( summaryContent );
+
+		act( () => {
+			observerCallback( [
+				{ target: title, isIntersecting: false },
+				{ target: actionAreaAnchor, isIntersecting: true },
+			] );
+		} );
+
+		expect( title ).toHaveAttribute( 'aria-expanded', 'false' );
+		expect( actionArea ).toContainElement( summaryContent );
+		expect( actionAreaAnchor ).toHaveAttribute( 'aria-hidden', 'false' );
+
+		unmount();
+		expect( disconnect ).toHaveBeenCalled();
+		intersectionObserverSpy.mockRestore();
+	} );
 
 	it( 'keeps public extension fills mounted once while the summary moves', () => {
 		let containerClassName = '';

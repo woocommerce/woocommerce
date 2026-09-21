@@ -6,7 +6,12 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { createPortal, useLayoutEffect, useState } from '@wordpress/element';
+import {
+	createPortal,
+	useEffect,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
@@ -24,12 +29,23 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isOpen, hasContainerWidth, isLarge, ariaControlsId, toggleProps } =
-		useOrderSummaryToggle();
+	const {
+		isOpen,
+		hasContainerWidth,
+		isLarge,
+		closeSummary,
+		ariaControlsId,
+		toggleProps,
+	} = useOrderSummaryToggle();
+	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
+		null
+	);
 	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
 		null
 	);
 	const [ actionAreaHost, setActionAreaHost ] =
+		useState< HTMLDivElement | null >( null );
+	const [ actionAreaAnchor, setActionAreaAnchor ] =
 		useState< HTMLDivElement | null >( null );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
@@ -41,6 +57,50 @@ const FrontendBlock = ( {
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
 	const showInline = ! hasContainerWidth || isLarge || isOpen;
+
+	useEffect( () => {
+		if (
+			! hasContainerWidth ||
+			isLarge ||
+			! isOpen ||
+			! titleElement ||
+			! actionAreaAnchor ||
+			typeof window.IntersectionObserver !== 'function'
+		) {
+			return;
+		}
+
+		let isTitleVisible = true;
+		let isActionAreaNear = false;
+		const observer = new window.IntersectionObserver(
+			( entries ) => {
+				entries.forEach( ( entry ) => {
+					if ( entry.target === titleElement ) {
+						isTitleVisible = entry.isIntersecting;
+					} else if ( entry.target === actionAreaAnchor ) {
+						isActionAreaNear = entry.isIntersecting;
+					}
+				} );
+
+				if ( ! isTitleVisible && isActionAreaNear ) {
+					closeSummary();
+				}
+			},
+			{ rootMargin: '0px 0px 25% 0px' }
+		);
+
+		observer.observe( titleElement );
+		observer.observe( actionAreaAnchor );
+
+		return () => observer.disconnect();
+	}, [
+		actionAreaAnchor,
+		closeSummary,
+		hasContainerWidth,
+		isLarge,
+		isOpen,
+		titleElement,
+	] );
 
 	// Moving a stable portal container keeps extension components mounted while
 	// placing the summary in the part of the checkout where it is needed.
@@ -60,6 +120,7 @@ const FrontendBlock = ( {
 		<>
 			<div className={ className }>
 				<div
+					ref={ setTitleElement }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
@@ -97,6 +158,8 @@ const FrontendBlock = ( {
 			</div>
 			<CheckoutOrderSummaryFill>
 				<div
+					ref={ setActionAreaAnchor }
+					aria-hidden={ showInline }
 					className={ clsx(
 						className,
 						'checkout-order-summary-block-fill-wrapper',

@@ -98,7 +98,10 @@
 			padding-bottom: $gap-larger;
 
 			&.is-content-inline {
-				display: none;
+				height: 1px;
+				overflow: hidden;
+				padding-bottom: 0;
+				visibility: hidden;
 			}
 		}
 
