@@ -38,8 +38,21 @@ jest.mock( '@wordpress/notices', () => ( {
 	store: { name: 'core/notices' },
 } ) );
 
+jest.mock( '@wordpress/core-data', () => ( {
+	store: { name: 'core' },
+} ) );
+
 jest.mock( '@wordpress/i18n', () => ( {
 	__: ( text: string ) => text,
+} ) );
+
+// The store barrel pulls in `@wordpress/components` through the events module,
+// which Jest cannot transform. Re-export the real constant so the store name
+// stays linked to `src/store/constants.ts`.
+jest.mock( '../../store', () => ( {
+	storeName: jest.requireActual< typeof import('../../store/constants') >(
+		'../../store/constants'
+	).storeName,
 } ) );
 
 interface Notice {
@@ -48,6 +61,19 @@ interface Notice {
 	spokenMessage: string;
 	actions: unknown[];
 }
+
+type Labels = Record< string, string > | undefined;
+
+const EMAIL_EDITOR_STORE_NAME = jest.requireActual<
+	typeof import('../../store/constants')
+>( '../../store/constants' ).storeName;
+
+// `originalSelect` is called with either a store name string (from the
+// plugin's own `select( namespace )`) or a store descriptor object (from
+// the hook's own `originalSelect( coreStore )` / `originalSelect( storeName )`
+// calls) — normalise both to a name for routing in the test doubles below.
+const resolveStoreName = ( ns: string | { name: string } ): string =>
+	typeof ns === 'object' ? ns.name : ns;
 
 const makeNotice = ( partial: Partial< Notice > = {} ): Notice => ( {
 	id: 'test-notice',
@@ -62,21 +88,68 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		jest.clearAllMocks();
 	} );
 
-	function buildSelectOverride( notices: Notice[] ) {
+	/**
+	 * Builds the `originalSelect` stub the plugin wraps, routing
+	 * `core/notices`, `core`, and the email editor store to separate
+	 * selector objects so the hook's cross-store label lookup can be
+	 * exercised.
+	 *
+	 * @param notices  Notices `core/notices`' `getNotices` should return.
+	 * @param labels   Labels `core`'s `getPostType` should return, keyed by
+	 *                 post type. `undefined` means the post type isn't
+	 *                 loaded yet.
+	 * @param postType Post type the email editor store's
+	 *                 `getEmailPostType` should return.
+	 */
+	function buildSelectOverride(
+		notices: Notice[],
+		labels?: Labels,
+		postType = 'email'
+	) {
 		const originalGetNotices = jest.fn().mockReturnValue( notices );
-		const originalSelectors = { getNotices: originalGetNotices };
+		const noticesSelectors = { getNotices: originalGetNotices };
 
-		const originalSelect = jest.fn().mockReturnValue( originalSelectors );
+		const getPostType = jest
+			.fn()
+			.mockReturnValue( labels === undefined ? undefined : { labels } );
+		const coreSelectors = { getPostType };
+
+		const getEmailPostType = jest.fn().mockReturnValue( postType );
+		const emailEditorSelectors = { getEmailPostType };
+
+		const originalSelect = jest
+			.fn()
+			.mockImplementation( ( ns: string | { name: string } ) => {
+				const name = resolveStoreName( ns );
+				if ( name === 'core/notices' ) {
+					return noticesSelectors;
+				}
+				if ( name === 'core' ) {
+					return coreSelectors;
+				}
+				if ( name === EMAIL_EDITOR_STORE_NAME ) {
+					return emailEditorSelectors;
+				}
+				return undefined;
+			} );
 
 		renderHook( () => useNoticeOverrides() );
 
 		const pluginResult = capturedPlugin( { select: originalSelect } );
-		return { pluginResult, originalSelect, originalGetNotices };
+		return {
+			pluginResult,
+			originalSelect,
+			originalGetNotices,
+			getPostType,
+			getEmailPostType,
+		};
 	}
 
-	it( 'getNotices returns the same array reference when notices input is unchanged', () => {
+	it( 'getNotices returns the same array reference when notices and labels are unchanged', () => {
 		const notices = [ makeNotice() ];
-		const { pluginResult } = buildSelectOverride( notices );
+		const { pluginResult } = buildSelectOverride( notices, {
+			item_updated: 'Post updated.',
+		} );
 
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
@@ -90,8 +163,30 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 
 	it( 'getNotices returns a new array reference when notices input changes', () => {
 		const originalGetNotices = jest.fn();
-		const originalSelectors = { getNotices: originalGetNotices };
-		const originalSelect = jest.fn().mockReturnValue( originalSelectors );
+		const noticesSelectors = { getNotices: originalGetNotices };
+		const coreSelectors = {
+			getPostType: jest.fn().mockReturnValue( {
+				labels: { item_updated: 'Post updated.' },
+			} ),
+		};
+		const emailEditorSelectors = {
+			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
+		};
+		const originalSelect = jest
+			.fn()
+			.mockImplementation( ( ns: string | { name: string } ) => {
+				const name = resolveStoreName( ns );
+				if ( name === 'core/notices' ) {
+					return noticesSelectors;
+				}
+				if ( name === 'core' ) {
+					return coreSelectors;
+				}
+				if ( name === EMAIL_EDITOR_STORE_NAME ) {
+					return emailEditorSelectors;
+				}
+				return undefined;
+			} );
 
 		renderHook( () => useNoticeOverrides() );
 		const pluginResult = capturedPlugin( { select: originalSelect } );
@@ -105,6 +200,49 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 
 		const secondNotices = [ makeNotice( { id: 'b' } ) ];
 		originalGetNotices.mockReturnValue( secondNotices );
+		const secondResult = selectors.getNotices();
+
+		expect( firstResult ).not.toBe( secondResult );
+	} );
+
+	it( 'getNotices returns a new array reference when the labels reference changes', () => {
+		const notices = [ makeNotice() ];
+		const originalGetNotices = jest.fn().mockReturnValue( notices );
+		const noticesSelectors = { getNotices: originalGetNotices };
+		const getPostType = jest
+			.fn()
+			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
+		const coreSelectors = { getPostType };
+		const emailEditorSelectors = {
+			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
+		};
+		const originalSelect = jest
+			.fn()
+			.mockImplementation( ( ns: string | { name: string } ) => {
+				const name = resolveStoreName( ns );
+				if ( name === 'core/notices' ) {
+					return noticesSelectors;
+				}
+				if ( name === 'core' ) {
+					return coreSelectors;
+				}
+				if ( name === EMAIL_EDITOR_STORE_NAME ) {
+					return emailEditorSelectors;
+				}
+				return undefined;
+			} );
+
+		renderHook( () => useNoticeOverrides() );
+		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+
+		const firstResult = selectors.getNotices();
+
+		getPostType.mockReturnValue( {
+			labels: { item_updated: 'Příspěvek byl aktualizován.' },
+		} );
 		const secondResult = selectors.getNotices();
 
 		expect( firstResult ).not.toBe( secondResult );
@@ -129,39 +267,107 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result ).toBe( otherSelectors );
 	} );
 
-	it( 'transforms known notice content and removes the view-post action', () => {
+	it( 'transforms an editor-save notice whose content matches the localized item_updated label', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Příspěvek byl aktualizován.',
+			actions: [ { label: 'Zobrazit e-mail', url: '#' } ],
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+			item_updated: 'Příspěvek byl aktualizován.',
+			view_item: 'Zobrazit e-mail',
+		} );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].spokenMessage ).toBe( 'Email saved.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+	} );
+
+	it( 'transforms an editor-save notice matching a custom integration item_updated label', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Email updated.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+			item_updated: 'Email updated.',
+		} );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+	} );
+
+	it.each( [
+		[ 'item_published', 'Příspěvek byl publikován.' ],
+		[ 'item_published_privately', 'Příspěvek byl publikován soukromě.' ],
+		[ 'item_scheduled', 'Příspěvek byl naplánován.' ],
+	] )(
+		'transforms an editor-save notice matching the localized %s label',
+		( labelKey, localizedText ) => {
+			const originalNotice = makeNotice( {
+				id: 'editor-save',
+				content: localizedText,
+				actions: [ { label: 'View', url: '#' } ],
+			} );
+			const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+				[ labelKey ]: localizedText,
+			} );
+
+			const selectors = pluginResult.select( 'core/notices' ) as {
+				getNotices: () => Notice[];
+			};
+			const result = selectors.getNotices();
+
+			expect( result[ 0 ].content ).toBe( 'Email saved.' );
+			expect( result[ 0 ].actions ).toEqual( [] );
+		}
+	);
+
+	it( 'leaves an editor-save notice unchanged when labels are not loaded yet, but still removes the action', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
 			actions: [ { label: 'View Email', url: '#' } ],
 		} );
-		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+		const { pluginResult } = buildSelectOverride(
+			[ originalNotice ],
+			undefined
+		);
 
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
 
-		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].content ).toBe( 'Post updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
-	it( 'transforms an editor-save notice with "Post published." content and removes the action', () => {
-		// Emitted when an integration's save button publishes the post in the
-		// background (lazy post creation) instead of a plain update.
+	it( 'leaves an editor-save notice with content matching no label unchanged', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
-			content: 'Post published.',
-			actions: [ { label: 'View Email', url: '#' } ],
+			content: 'Updating failed.',
+			actions: [],
 		} );
-		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+			item_updated: 'Post updated.',
+		} );
 
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
 
-		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
@@ -174,7 +380,9 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			content: 'Draft saved.',
 			actions: [ { label: 'View Preview', url: '#' } ],
 		} );
-		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+			item_updated: 'Post updated.',
+		} );
 
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
@@ -185,32 +393,16 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
-	it( 'leaves an editor-save notice with unrelated content unchanged', () => {
-		// Gutenberg's save-failure notices never set actions, so there is
-		// nothing useful to strip here.
-		const originalNotice = makeNotice( {
-			id: 'editor-save',
-			content: 'Updating failed.',
-			actions: [],
-		} );
-		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
-
-		const selectors = pluginResult.select( 'core/notices' ) as {
-			getNotices: () => Notice[];
-		};
-		const result = selectors.getNotices();
-
-		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
-		expect( result[ 0 ].actions ).toEqual( [] );
-	} );
-
-	it( 'transforms site-editor-save-success notice and removes actions', () => {
+	it( 'transforms site-editor-save-success notice and removes actions regardless of labels', () => {
 		const originalNotice = makeNotice( {
 			id: 'site-editor-save-success',
 			content: 'Site updated.',
 			actions: [ { label: 'View', url: '#' } ],
 		} );
-		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+		const { pluginResult } = buildSelectOverride(
+			[ originalNotice ],
+			undefined
+		);
 
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];

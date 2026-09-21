@@ -5,6 +5,12 @@ import { useEffect } from '@wordpress/element';
 import { createSelector, use } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import { store as coreStore } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { storeName } from '../store';
 
 /**
  * Wraps the `getNotices` selector on the notices store so that specific
@@ -18,7 +24,7 @@ import { store as noticesStore } from '@wordpress/notices';
 interface NoticeOverride {
 	content: string;
 	removeActions: boolean;
-	contentCheck?: ( content: string ) => boolean;
+	labelKeys?: string[];
 }
 
 function getNoticeOverrides(): Record< string, NoticeOverride > {
@@ -34,12 +40,17 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 			// as "View Post"/"View Email" for an email. Drop it: a preview
 			// is already available from the editor header.
 			removeActions: true,
-			// "Draft saved." is intentionally NOT rewritten: a saved draft is
-			// not used for sending, and "Email saved." would suggest it is.
-			contentCheck: ( content: string ) =>
-				// Intentionally without text domain to match the core translations.
-				content.includes( __( 'Post updated.' ) ) ||
-				content.includes( __( 'Post published.' ) ),
+			// The notice text is rewritten only when it equals one of the
+			// post type's success labels, which WordPress translates on the
+			// server (so this works in any site locale). "Draft saved." is
+			// deliberately left as-is: a saved draft is not used for
+			// sending, and "Email saved." would suggest it is.
+			labelKeys: [
+				'item_updated',
+				'item_published',
+				'item_published_privately',
+				'item_scheduled',
+			],
 		},
 	};
 }
@@ -52,29 +63,35 @@ interface Notice {
 	[ key: string ]: unknown;
 }
 
-function transformNotice( notice: Notice ): Notice {
+type PostTypeLabels = Record< string, string > | undefined;
+
+function transformNotice( notice: Notice, labels: PostTypeLabels ): Notice {
 	const overrides = getNoticeOverrides();
 	const override = overrides[ notice.id ];
 	if ( ! override ) {
 		return notice;
 	}
 
-	const actions = override.removeActions ? [] : notice.actions;
-
-	if ( override.contentCheck && ! override.contentCheck( notice.content ) ) {
-		return { ...notice, actions };
-	}
+	const rewriteText =
+		! override.labelKeys ||
+		override.labelKeys.some(
+			( key ) => labels?.[ key ] && labels[ key ] === notice.content
+		);
 
 	return {
 		...notice,
-		content: override.content,
-		spokenMessage: override.content,
-		actions,
+		...( rewriteText
+			? { content: override.content, spokenMessage: override.content }
+			: {} ),
+		actions: override.removeActions ? [] : notice.actions,
 	};
 }
 
-function applyOverridesToNotices( notices: Notice[] ): Notice[] {
-	return notices.map( ( notice ) => transformNotice( notice ) );
+function applyOverridesToNotices(
+	notices: Notice[],
+	labels: PostTypeLabels
+): Notice[] {
+	return notices.map( ( notice ) => transformNotice( notice, labels ) );
 }
 
 function getStoreName( namespace: string | { name: string } ): string {
@@ -82,8 +99,9 @@ function getStoreName( namespace: string | { name: string } ): string {
 }
 
 const getNoticesWithOverrides = createSelector(
-	( notices: Notice[] ) => applyOverridesToNotices( notices ),
-	( notices: Notice[] ) => [ notices ]
+	( notices: Notice[], labels: PostTypeLabels ) =>
+		applyOverridesToNotices( notices, labels ),
+	( notices: Notice[], labels: PostTypeLabels ) => [ notices, labels ]
 );
 
 /**
@@ -115,10 +133,27 @@ export function useNoticeOverrides(): void {
 
 					return {
 						...selectors,
-						getNotices: ( context?: string ) =>
-							getNoticesWithOverrides(
-								originalGetNotices( context )
-							),
+						getNotices: ( context?: string ) => {
+							const postType = (
+								originalSelect( storeName ) as
+									| { getEmailPostType?: () => string }
+									| undefined
+							 )?.getEmailPostType?.();
+							const labels = postType
+								? (
+										originalSelect( coreStore ) as {
+											getPostType: (
+												postType: string
+											) => { labels?: PostTypeLabels };
+										}
+								   ).getPostType( postType )?.labels
+								: undefined;
+
+							return getNoticesWithOverrides(
+								originalGetNotices( context ),
+								labels
+							);
+						},
 					};
 				},
 			};
