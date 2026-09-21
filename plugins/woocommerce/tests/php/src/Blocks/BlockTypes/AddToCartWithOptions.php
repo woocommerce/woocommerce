@@ -1728,7 +1728,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	/**
 	 * @testdox A simple and a variable product's initialQuantity map holds each item's own minimum purchase quantity, and no rendered form carries a quantity context key.
 	 */
-	public function test_initial_quantity_matches_base_branch_quantity_values_for_simple_and_variable_products(): void {
+	public function test_initial_quantity_holds_each_items_minimum_purchase_quantity_for_simple_and_variable_products(): void {
 		$simple_product = new \WC_Product_Simple();
 		$simple_product->set_regular_price( 10 );
 		$simple_product_id = $simple_product->save();
@@ -1793,7 +1793,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	/**
 	 * @testdox A grouped product's initialQuantity map holds, per child, 0, the resubmitted $_POST value, or 0 when sold individually.
 	 */
-	public function test_initial_quantity_matches_base_branch_quantity_values_for_grouped_product(): void {
+	public function test_initial_quantity_holds_zero_the_resubmitted_value_or_zero_when_sold_individually_per_grouped_child(): void {
 		$child_untouched = new \WC_Product_Simple();
 		$child_untouched->set_regular_price( 5 );
 		$child_untouched_id = $child_untouched->save();
