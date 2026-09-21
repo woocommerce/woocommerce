@@ -224,7 +224,7 @@ The aim is for a merchant to see the same visibility state wherever they look, a
 
 WooCommerce describes two things: whether coming soon mode is on, and whether it covers the whole site or only the store pages. Your system probably describes the first. It may have no equivalent of the second, and it may have a state of its own that WooCommerce cannot store, such as private or members-only.
 
-Where both systems describe the same thing, syncing is straightforward. Where they do not, one system ends up deciding a value the other never gave it, and neither can report a conflict it has no way to represent.
+Where both systems describe the same thing, syncing is straightforward. Where they do not, we recommend erring on the side of privacy, keeping whichever state shows less of the site, and letting the merchant know the two systems disagree so they can resolve it.
 
 **Reading.** `woocommerce_coming_soon` tells you coming soon mode is on, not how much of the site it covers. On a site set to "Apply to store pages only", everything outside the store is still public, so calling that site hidden would be wrong. Read both options:
 
