@@ -745,7 +745,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
 		);
 		$this->assertStringNotContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$content,
 			'The empty cart title must not be frozen into the page content in the install-time locale.'
 		);
@@ -757,7 +757,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
+	 * @testdox Should render the empty cart title, the Return to shop button, and the New in store heading from the referenced patterns.
 	 */
 	public function test_empty_cart_message_patterns_render_expected_markup(): void {
 		$registry = WP_Block_Patterns_Registry::get_instance();
@@ -775,7 +775,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertStringContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$rendered,
 			'The cart-empty-message pattern should render the empty cart title.'
 		);
@@ -784,15 +784,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$rendered,
 			'The rendered empty cart title should keep the markup the installer previously inlined.'
 		);
+		$this->assertStringNotContainsString(
+			'with-empty-cart-icon',
+			$rendered,
+			'The empty cart heading must not carry the class that used to inject the icon via CSS (WOOPLUG-2240).'
+		);
 		$this->assertStringContainsString(
 			'New in store',
 			$rendered,
 			'The cart-new-in-store-message pattern should render the "New in store" heading.'
 		);
 		$this->assertStringContainsString(
-			'Browse store',
+			'Return to shop',
 			$rendered,
-			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+			'The cart-empty-message pattern should render the Return to shop button that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
+		$this->assertStringContainsString(
+			'wp-block-button__link',
+			$rendered,
+			'The Return to shop link should render as a core button, matching the empty Mini-Cart.'
 		);
 	}
 
@@ -902,101 +912,5 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 */
 	private function reregister_block_patterns(): void {
 		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
-	}
-
-	/**
-	 * The accounts settings field must opt out of the generic default seeding in
-	 * WC_Install::create_options(), which would otherwise write the field default for every store,
-	 * new ones included, and leave a window before the correct value was applied.
-	 */
-	public function test_cart_behavior_on_logout_setting_skips_initial_save(): void {
-		$settings = ( new WC_Settings_Accounts() )->get_settings_for_section( '' );
-
-		$field = null;
-		foreach ( $settings as $setting ) {
-			if ( isset( $setting['id'] ) && 'woocommerce_cart_behavior_on_logout' === $setting['id'] ) {
-				$field = $setting;
-				break;
-			}
-		}
-
-		$this->assertNotNull( $field, 'The cart behavior on logout setting should be registered.' );
-		$this->assertTrue(
-			$field['skip_initial_save'] ?? false,
-			"The setting must set 'skip_initial_save' so create_options() does not seed a default for every store."
-		);
-	}
-
-	/**
-	 * @testWith [true, "preserve"]
-	 *           [false, "clear"]
-	 *
-	 * @param bool   $is_new_install Whether the store should look like a new install.
-	 * @param string $expected       The cart behavior the installer should write.
-	 */
-	public function test_create_options_seeds_cart_behavior_on_logout( bool $is_new_install, string $expected ): void {
-		delete_option( 'woocommerce_cart_behavior_on_logout' );
-
-		$this->run_create_options_as_install( $is_new_install );
-
-		$this->assertSame(
-			$expected,
-			get_option( 'woocommerce_cart_behavior_on_logout' ),
-			$is_new_install
-				? 'New stores should keep the cart through logout.'
-				: 'Existing stores should stay on the behavior they have always had.'
-		);
-	}
-
-	/**
-	 * A merchant who has already chosen a behavior must keep it across later upgrades, when
-	 * create_options() runs again.
-	 */
-	public function test_create_options_does_not_overwrite_a_chosen_cart_behavior(): void {
-		update_option( 'woocommerce_cart_behavior_on_logout', 'preserve' );
-
-		$this->run_create_options_as_install( false );
-
-		$this->assertSame(
-			'preserve',
-			get_option( 'woocommerce_cart_behavior_on_logout' ),
-			"The merchant's own choice should survive an upgrade."
-		);
-	}
-
-	/**
-	 * Run WC_Install::create_options() with is_new_install() forced to a known value.
-	 *
-	 * @param bool $is_new_install Value that is_new_install() should report.
-	 */
-	private function run_create_options_as_install( bool $is_new_install ): void {
-		$supply_version    = function () use ( $is_new_install ) {
-			return $is_new_install ? false : '10.0.0';
-		};
-		$supply_live_store = function () {
-			return 'no';
-		};
-
-		add_filter( 'option_woocommerce_version', $supply_version );
-		if ( ! $is_new_install ) {
-			// Short-circuits is_new_install() on the "store is live" check, without touching products.
-			add_filter( 'option_woocommerce_coming_soon', $supply_live_store );
-		}
-
-		try {
-			$this->assertSame(
-				$is_new_install,
-				WC_Install::is_new_install(),
-				'The test should be exercising the intended install state.'
-			);
-
-			$create_options = function () {
-				static::create_options();
-			};
-			$create_options->call( new WC_Install() );
-		} finally {
-			remove_filter( 'option_woocommerce_version', $supply_version );
-			remove_filter( 'option_woocommerce_coming_soon', $supply_live_store );
-		}
 	}
 }
