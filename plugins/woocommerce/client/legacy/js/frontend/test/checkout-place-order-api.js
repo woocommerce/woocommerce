@@ -10,6 +10,7 @@ const BILLING_EMAIL = "o'brien@example.com";
 describe( 'createCheckoutPlaceOrderApi', () => {
 	let $allNotices;
 	let $blockedSections;
+	let $selectedPaymentMethod;
 	let $checkoutFields;
 	let $couponForm;
 	let $form;
@@ -102,6 +103,15 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		$blockedSections = {
 			block: jest.fn( () => $blockedSections ),
 			unblock: jest.fn( () => $blockedSections ),
+		};
+		// The checked payment method radio that init_payment_methods re-clicks, which is what
+		// renders the selected gateway's custom place order button again.
+		$selectedPaymentMethod = {
+			length: 1,
+			hide: jest.fn(),
+			prop: jest.fn( () => 'payment_method_test-gateway' ),
+			trigger: jest.fn(),
+			val: jest.fn( () => 'test-gateway' ),
 		};
 
 		$form = {
@@ -337,6 +347,14 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
 			) {
 				return $blockedSections;
+			}
+			if ( selectorOrCallback === '.woocommerce-checkout' ) {
+				const $paymentMethods = {
+					length: 1,
+					eq: jest.fn( () => $selectedPaymentMethod ),
+					filter: jest.fn( () => $paymentMethods ),
+				};
+				return { find: jest.fn( () => $paymentMethods ) };
 			}
 			if (
 				selectorOrCallback === 'form.checkout_coupon' ||
@@ -1011,6 +1029,33 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $blockedSections.unblock ).toHaveBeenCalledTimes( 1 );
 			expect( $form.prepend ).not.toHaveBeenCalled();
 		} );
+
+		test.each( [
+			[ 'a rejected nonce', () => rejectNonce() ],
+			[ 'another failure', () => failCheckoutUpdate( { status: 500 } ) ],
+		] )(
+			'should render the custom place order button again after %s',
+			( _, fail ) => {
+				// update_checkout removes the custom button before the request is sent and
+				// keeps the default one hidden, so without a re-init there is no way to pay.
+				window.sessionStorage.setItem( STALE_FLAG, '1' );
+				// init() already ran init_payment_methods once while loading the script.
+				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit.mockClear();
+				$selectedPaymentMethod.trigger.mockClear();
+
+				fail();
+
+				expect(
+					window.wc.customPlaceOrderButton.__cleanup
+				).toHaveBeenCalledTimes( 1 );
+				expect(
+					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit
+				).toHaveBeenCalledWith( 'test-gateway' );
+				expect( $selectedPaymentMethod.trigger ).toHaveBeenCalledWith(
+					'click'
+				);
+			}
+		);
 
 		test( 'should ignore a request aborted by a newer update', () => {
 			failCheckoutUpdate( { status: 0 }, 'abort' );

@@ -994,6 +994,10 @@ jQuery( function ( $ ) {
 						'.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table'
 					).unblock();
 
+					// update_checkout removed the custom place order button, so re-init the
+					// payment methods to render it again like the success path does.
+					wc_checkout_form.init_payment_methods();
+
 					if ( stale_nonce ) {
 						// The localized string is expected, but fall back to the response's status text
 						// like the place order handler does if something removed it.
