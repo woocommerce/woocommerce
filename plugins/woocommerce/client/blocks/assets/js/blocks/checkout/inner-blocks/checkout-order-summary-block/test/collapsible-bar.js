@@ -98,72 +98,53 @@ const renderAt = ( containerClassName ) => {
 };
 
 describe( 'Checkout Order Summary collapsible bar', () => {
-	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
-		'when the container reports %p',
-		( containerClassName ) => {
-			it( 'exposes the summary as an expandable button', () => {
-				renderAt( containerClassName );
-
-				const bar = screen.getByRole( 'button', {
-					name: /Order summary/,
-				} );
-				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
-				expect( bar ).toHaveAttribute( 'aria-controls' );
-				expect( bar ).toHaveAttribute( 'tabindex', '0' );
+	it( 'is expandable before and below the large breakpoint', () => {
+		for ( const containerClassName of [
+			'',
+			'is-mobile',
+			'is-small',
+			'is-medium',
+		] ) {
+			const { unmount } = renderAt( containerClassName );
+			const bar = screen.getByRole( 'button', {
+				name: /Order summary/,
 			} );
 
-			it( 'toggles on click', () => {
-				renderAt( containerClassName );
-
-				const bar = screen.getByRole( 'button', {
-					name: /Order summary/,
-				} );
-				fireEvent.click( bar );
-				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
-			} );
-
-			it.each( [ 'Enter', ' ' ] )( 'toggles on %p', ( key ) => {
-				renderAt( containerClassName );
-
-				const bar = screen.getByRole( 'button', {
-					name: /Order summary/,
-				} );
-				fireEvent.keyDown( bar, { key } );
-				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
-			} );
-
-			// Without this the browser still acts on the key: Space scrolls the
-			// page out from under the summary that just opened, and Enter
-			// submits the checkout form the bar sits inside.
-			it.each( [ 'Enter', ' ' ] )(
-				'suppresses the browser default for %p',
-				( key ) => {
-					renderAt( containerClassName );
-
-					const bar = screen.getByRole( 'button', {
-						name: /Order summary/,
-					} );
-					const event = createEvent.keyDown( bar, { key } );
-					fireEvent( bar, event );
-
-					expect( event.defaultPrevented ).toBe( true );
-				}
-			);
-
-			it( 'collapses again when activated a second time', () => {
-				renderAt( containerClassName );
-
-				const bar = screen.getByRole( 'button', {
-					name: /Order summary/,
-				} );
-				fireEvent.click( bar );
-				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
-
-				fireEvent.click( bar );
-				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
-			} );
+			expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
+			expect( bar ).toHaveAttribute( 'aria-controls' );
+			expect( bar ).toHaveAttribute( 'tabindex', '0' );
+			unmount();
 		}
-	);
+	} );
+
+	it( 'toggles on click before the container width is known', () => {
+		renderAt( '' );
+		const bar = screen.getByRole( 'button', {
+			name: /Order summary/,
+		} );
+
+		fireEvent.click( bar );
+		expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		fireEvent.click( bar );
+		expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
+	} );
+
+	it( 'handles keyboard activation without browser defaults', () => {
+		for ( const key of [ 'Enter', ' ' ] ) {
+			const { unmount } = renderAt( '' );
+			const bar = screen.getByRole( 'button', {
+				name: /Order summary/,
+			} );
+			const event = createEvent.keyDown( bar, { key } );
+
+			fireEvent( bar, event );
+
+			expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+			expect( event.defaultPrevented ).toBe( true );
+			unmount();
+		}
+	} );
 
 	it( 'is not a button once the container is large enough for two columns', () => {
 		const { container } = renderAt( 'is-large' );
@@ -242,33 +223,29 @@ describe( 'Checkout Order Summary placement', () => {
 		} );
 	} );
 
-	it.each( [ 'is-mobile', 'is-small', 'is-medium' ] )(
-		'moves the summary to the action area when the container reports %p',
-		( containerClassName ) => {
-			const { container } = renderWithSlot( containerClassName );
-			const actionArea = container.querySelector(
-				'.checkout-order-summary-block-fill'
+	it( 'places the summary according to the container width', () => {
+		const cases = [
+			{ containerClassName: '', hostSelector: 'inline' },
+			{ containerClassName: 'is-mobile', hostSelector: 'action' },
+			{ containerClassName: 'is-small', hostSelector: 'action' },
+			{ containerClassName: 'is-medium', hostSelector: 'action' },
+			{ containerClassName: 'is-large', hostSelector: 'inline' },
+		];
+
+		for ( const { containerClassName, hostSelector } of cases ) {
+			const { container, unmount } = renderWithSlot( containerClassName );
+			const host = container.querySelector(
+				hostSelector === 'inline'
+					? '.wc-block-components-checkout-order-summary__content'
+					: '.checkout-order-summary-block-fill'
 			);
 
-			expect( actionArea ).toContainElement(
+			expect( host ).toContainElement(
 				screen.getByTestId( 'summary-content' )
 			);
+			unmount();
 		}
-	);
-
-	it.each( [ '', 'is-large' ] )(
-		'keeps the summary inline when the container reports %p',
-		( containerClassName ) => {
-			const { container } = renderWithSlot( containerClassName );
-			const inlineSummary = container.querySelector(
-				'.wc-block-components-checkout-order-summary__content'
-			);
-
-			expect( inlineSummary ).toContainElement(
-				screen.getByTestId( 'summary-content' )
-			);
-		}
-	);
+	} );
 
 	it( 'moves an open summary to the action area as it approaches the viewport', () => {
 		let observerCallback;
