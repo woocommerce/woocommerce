@@ -810,7 +810,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.productId falls back to the declared context, without a fatal, when the seeded productScopes value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_product_scope_resolves_without_fatal_when_product_scopes_state_is_not_an_array( $malformed ): void {
@@ -866,7 +866,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope members resolve from the declared context, without a fatal, when the seeded template value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_product_scope_resolves_without_fatal_when_template_state_is_not_an_array( $malformed ): void {
@@ -882,7 +882,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope resolves as though the record carried no draftCartItem, without a fatal, when the seeded draftCartItem value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_product_scope_resolves_without_fatal_when_draft_cart_item_record_is_not_an_array( $malformed ): void {
@@ -920,8 +920,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.productId and .baseProduct fall back to the declared context, without a fatal, when the seeded record's draftCartItem.id is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
 	 */
-	public function test_product_id_resolves_without_fatal_when_record_draft_id_is_not_an_array_key(): void {
+	public function test_product_id_resolves_without_fatal_when_record_draft_id_is_not_an_array_key( $malformed ): void {
 		$product = WC_Helper_Product::create_simple_product();
 
 		TestedProductsStore::load_product( $this->consent, $product->get_id() );
@@ -930,7 +932,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$this->store_namespace,
 			array(
 				'productScopes' => array(
-					'my-scope' => array( 'draftCartItem' => array( 'id' => array( 1, 2, 3 ) ) ),
+					'my-scope' => array( 'draftCartItem' => array( 'id' => $malformed ) ),
 				),
 			)
 		);
@@ -954,7 +956,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.variation falls back to the declared context, without a fatal, when the seeded record's draftCartItem.variation is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_variation_falls_back_to_context_when_record_draft_variation_is_not_an_array( $malformed ): void {
@@ -993,7 +995,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.variation falls back to the seeded template, without a fatal, when the context's declared variation is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_variation_falls_back_to_template_when_context_variation_is_not_an_array( $malformed ): void {
@@ -1018,7 +1020,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.variation resolves to an empty selection, without a fatal, when the seeded template's variation is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_variation_falls_back_to_default_when_template_variation_is_not_an_array( $malformed ): void {
@@ -1036,7 +1038,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.baseProduct resolves to null, without a fatal, when the seeded products value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_base_product_resolves_without_fatal_when_products_state_is_not_an_array( $malformed ): void {
@@ -1051,7 +1053,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.productVariation resolves to null, without a fatal, when the seeded productVariations value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_product_variation_resolves_without_fatal_when_product_variations_state_is_not_an_array( $malformed ): void {
@@ -1090,7 +1092,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox state.productScope.cartItem resolves to null, without a fatal, when the seeded cart items value is not an array.
-	 * @dataProvider provider_non_array_shapes
+	 * @dataProvider provider_shapes_not_an_array
 	 * @param mixed $malformed A shape that is not an array.
 	 */
 	public function test_cart_item_resolves_without_fatal_when_cart_items_state_is_not_an_array( $malformed ): void {
@@ -1110,8 +1112,8 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * state.productScope.scopeName member and helpers deeper below the
-	 * envelope's nine top-level reads.
+	 * Values the envelope's private helpers read below its own top-level
+	 * state and context reads.
 	 *
 	 * Every case below drives the envelope through a hand-built,
 	 * synthetic `products`/`productVariations`/`cart` state rather than a
@@ -2765,18 +2767,2060 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Shapes that are not arrays, for the data providers above: a string, a
-	 * boolean and an integer, standing in for anything a seeded value in
-	 * externally writable state could carry in place of an array.
+	 * Every path a third party can seed in the `woocommerce` state or the
+	 * element's context, crossed with the eight shape classes: one entry
+	 * per row of the envelope's seeded-paths tables, keyed by that row's
+	 * own path text, plus one further entry per extra source for the
+	 * resolved selection's entry, attribute and value, each naming its
+	 * source in its key.
 	 *
-	 * @return array<string, array<mixed>>
+	 * Each entry carries: `seed`, a callable that places a value at the
+	 * entry's path within an otherwise well-formed state and context and
+	 * returns the resulting envelope; `expects`, the shape classes for
+	 * which the path is well formed; `members`, the outcome for a shape
+	 * outside `expects` as `member name => assertion`; `inside`, keyed by
+	 * shape class, the outcome for a shape inside `expects`; and
+	 * `control`, a well-formed value together with the assertion its
+	 * participation makes true.
+	 *
+	 * @return array<string, array<string, mixed>>
 	 */
-	public function provider_non_array_shapes(): array {
-		return array(
-			'a string'   => array( 'not-an-array' ),
-			'a boolean'  => array( true ),
-			'an integer' => array( 42 ),
+	private function sweep_entries(): array {
+		$layered_state   = $this->layered_identity_state();
+		$layered_context = $this->layered_identity_context();
+
+		$template_only_state   = $this->template_only_state();
+		$template_only_context = array();
+
+		$context_only_state   = $this->context_only_state();
+		$context_only_context = $this->context_only_context();
+
+		$matching_state = $this->matching_product_state();
+		$matched        = array(
+			'productId' => 5001,
+			'variation' => array(
+				array(
+					'attribute' => 'colour',
+					'value'     => 'red',
+				),
+			),
 		);
+		$unmatched      = array(
+			'productId' => 5001,
+			'variation' => array(
+				array(
+					'attribute' => 'colour',
+					'value'     => 'green',
+				),
+			),
+		);
+
+		$cart_state   = $this->cart_matching_state();
+		$cart_context = array( 'productId' => 6002 );
+
+		return array_merge(
+			$this->sweep_entries_record_chain( $layered_state, $layered_context ),
+			$this->sweep_entries_template( $template_only_state, $template_only_context ),
+			$this->sweep_entries_context( $context_only_state, $context_only_context ),
+			$this->sweep_entries_base_product( $matching_state, $unmatched ),
+			$this->sweep_entries_variations( $matching_state, $matched ),
+			$this->sweep_entries_product_variations( $matching_state, $matched ),
+			$this->sweep_entries_attributes_and_terms( $matching_state, $matched ),
+			$this->sweep_entries_cart( $cart_state, $cart_context, $matching_state, $matched ),
+			$this->sweep_entries_resolved_selection( $matching_state )
+		);
+	}
+
+	/**
+	 * A `woocommerce` state and context whose record, context and template
+	 * each declare their own draft product id and attribute value, so a
+	 * member that falls back from one source to the next reports which
+	 * source actually supplied it.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function layered_identity_state(): array {
+		return array(
+			'productScopes'     => array(
+				'_default' => array(
+					'draftCartItem' => array(
+						'id'        => 9001,
+						'variation' => array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'crimson',
+							),
+						),
+						'quantity'  => 3,
+						'gift'      => 'wrapped',
+					),
+				),
+				'my-scope' => array(
+					'draftCartItem' => array(
+						'id'        => 9002,
+						'variation' => array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'violet',
+							),
+						),
+						'quantity'  => 4,
+						'gift'      => 'boxed',
+					),
+				),
+			),
+			'template'          => array(
+				'productId' => 7001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'teal',
+					),
+				),
+			),
+			'products'          => array(),
+			'productVariations' => array(),
+			'cart'              => array( 'items' => array() ),
+		);
+	}
+
+	/**
+	 * The context paired with layered_identity_state(): it names the
+	 * 'my-scope' record and its own distinct product id and attribute
+	 * value.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function layered_identity_context(): array {
+		return array(
+			'scopeName' => 'my-scope',
+			'productId' => 5001,
+			'variation' => array(
+				array(
+					'attribute' => 'colour',
+					'value'     => 'azure',
+				),
+			),
+		);
+	}
+
+	/**
+	 * A `woocommerce` state that declares only a well-formed `template`,
+	 * with no record and no products, so a member's resolution reflects
+	 * the template alone.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function template_only_state(): array {
+		return array(
+			'productScopes'     => array(),
+			'template'          => array(
+				'productId' => 7001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'teal',
+					),
+				),
+			),
+			'products'          => array(),
+			'productVariations' => array(),
+			'cart'              => array( 'items' => array() ),
+		);
+	}
+
+	/**
+	 * A `woocommerce` state whose only fallback source is the template, for
+	 * proving that a malformed context value falls through to it.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function context_only_state(): array {
+		return $this->template_only_state();
+	}
+
+	/**
+	 * The well-formed context paired with context_only_state(): its own
+	 * product id and attribute value, distinct from the template's.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function context_only_context(): array {
+		return array(
+			'scopeName' => 'irrelevant',
+			'productId' => 5001,
+			'variation' => array(
+				array(
+					'attribute' => 'colour',
+					'value'     => 'azure',
+				),
+			),
+		);
+	}
+
+	/**
+	 * A `woocommerce` state carrying one real product (5001, with two
+	 * variations, 6002 for colour "red" and 6001 for colour "blue") and a
+	 * cart line matching each, so a resolved selection can be driven all
+	 * the way through variation matching and cart-item attribute matching.
+	 * A cart line's own attribute value is its display label ("Scarlet" /
+	 * "Azure"), distinct from the slug ("red" / "blue") a selection names,
+	 * so a broken label-to-slug lookup is observable rather than
+	 * coinciding by letter case.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function matching_product_state(): array {
+		return array(
+			'productScopes'     => array(),
+			'template'          => array(),
+			'products'          => array(
+				5001 => array(
+					'id'         => 5001,
+					'variations' => array(
+						array(
+							'id'         => 6002,
+							'attributes' => array(
+								array(
+									'name'  => 'colour',
+									'value' => 'red',
+								),
+							),
+						),
+						array(
+							'id'         => 6001,
+							'attributes' => array(
+								array(
+									'name'  => 'colour',
+									'value' => 'blue',
+								),
+							),
+						),
+					),
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'terms' => array(
+								array(
+									'name' => 'Scarlet',
+									'slug' => 'red',
+								),
+								array(
+									'name' => 'Azure',
+									'slug' => 'blue',
+								),
+							),
+						),
+					),
+				),
+			),
+			'productVariations' => array(
+				6002 => array(
+					'id'     => 6002,
+					'parent' => 5001,
+				),
+				6001 => array(
+					'id'     => 6001,
+					'parent' => 5001,
+				),
+				9001 => array(
+					'id'     => 9001,
+					'parent' => 5001,
+				),
+				9002 => array(
+					'id'     => 9002,
+					'parent' => 5001,
+				),
+				9003 => array(
+					'id'     => 9003,
+					'parent' => 5001,
+				),
+				9004 => array(
+					'id'     => 9004,
+					'parent' => 5001,
+				),
+				9005 => array(
+					'id'     => 9005,
+					'parent' => 5001,
+				),
+			),
+			'cart'              => array(
+				'items' => array(
+					array(
+						'key'       => 'line-red',
+						'id'        => 6002,
+						'type'      => 'variation',
+						'variation' => array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'Scarlet',
+							),
+						),
+					),
+					array(
+						'key'       => 'line-blue',
+						'id'        => 6001,
+						'type'      => 'variation',
+						'variation' => array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'Azure',
+							),
+						),
+					),
+					array(
+						'key'  => 'line-simple',
+						'id'   => 5001,
+						'type' => 'simple',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * A minimal `woocommerce` state carrying one real simple product
+	 * (6002) and two cart lines matching it by id alone, for sweep entries
+	 * about the cart itself rather than about attribute matching.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function cart_matching_state(): array {
+		return array(
+			'productScopes'     => array(),
+			'template'          => array(),
+			'products'          => array( 6002 => array( 'id' => 6002 ) ),
+			'productVariations' => array(),
+			'cart'              => array(
+				'items' => array(
+					array(
+						'key'  => 'line-target',
+						'id'   => 6002,
+						'type' => 'simple',
+					),
+					array(
+						'key'  => 'line-fallback',
+						'id'   => 6002,
+						'type' => 'simple',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Place $value at $path inside $root, creating any intermediate array
+	 * the path needs.
+	 *
+	 * @param array $root  The array to modify, by reference.
+	 * @param array $path  The sequence of keys leading to the value.
+	 * @param mixed $value The value to place at $path.
+	 */
+	private static function place( array &$root, array $path, $value ): void {
+		$node = &$root;
+		$last = array_pop( $path );
+		foreach ( $path as $key ) {
+			if ( ! isset( $node[ $key ] ) || ! is_array( $node[ $key ] ) ) {
+				$node[ $key ] = array();
+			}
+			$node = &$node[ $key ];
+		}
+		$node[ $last ] = $value;
+	}
+
+	/**
+	 * Build a sweep entry's `seed` callable: copies the given well-formed
+	 * state and context, places a value at one path within whichever plane
+	 * names it, sets up the state and context through
+	 * push_woocommerce_context() and the reflection registration
+	 * get_product_scope() itself uses, and returns the envelope's own
+	 * closure, not yet invoked, so a caller can resolve it under its own
+	 * error handler.
+	 *
+	 * @param array  $state   The well-formed `woocommerce` state to copy.
+	 * @param array  $context The well-formed context to copy.
+	 * @param string $plane   Either 'state' or 'context'.
+	 * @param array  $path    The path within that plane to place the value at.
+	 * @return \Closure function( mixed $value ): \Closure
+	 */
+	private function seed_at( array $state, array $context, string $plane, array $path ): \Closure {
+		return function ( $value ) use ( $state, $context, $plane, $path ): \Closure {
+			if ( 'context' === $plane ) {
+				self::place( $context, $path, $value );
+			} else {
+				self::place( $state, $path, $value );
+			}
+			wp_interactivity_state( $this->store_namespace, $state );
+			$this->push_woocommerce_context( $context );
+			return $this->product_scope_getter();
+		};
+	}
+
+	/**
+	 * Register the `productScope` getter, exactly as get_product_scope()
+	 * does, and return it unexecuted so its own resolution — the part that
+	 * can raise a diagnostic — happens under a caller's error handler
+	 * rather than under the reflection call this registration needs.
+	 *
+	 * @return \Closure function(): array<string, \Closure> The envelope getter.
+	 */
+	private function product_scope_getter(): \Closure {
+		$reflection = new \ReflectionClass( TestedProductsStore::class );
+		$method     = $reflection->getMethod( 'register_getters' );
+		$method->setAccessible( true );
+		$method->invoke( null );
+
+		$state = wp_interactivity_state( $this->store_namespace );
+
+		return $state['productScope'];
+	}
+
+	/**
+	 * Compare an expected value against an envelope member's resolved
+	 * value, using loose equality for an object (identity is not
+	 * guaranteed once a value has passed through array copies) and strict
+	 * equality otherwise.
+	 *
+	 * @param mixed $expected The value the entry requires.
+	 * @param mixed $actual   The value the envelope resolved.
+	 */
+	private function assert_shape_equal( $expected, $actual ): void {
+		if ( is_object( $expected ) || is_object( $actual ) ) {
+			$this->assertEquals( $expected, $actual );
+			return;
+		}
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
+	 * An assertion requiring a member to resolve to exactly $value,
+	 * regardless of the shape seeded.
+	 *
+	 * @param mixed $value The required value.
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function fixed( $value ): \Closure {
+		return function ( $actual, $seed ) use ( $value ): void {
+			unset( $seed );
+			$this->assert_shape_equal( $value, $actual );
+		};
+	}
+
+	/**
+	 * An assertion requiring a member to resolve to null.
+	 *
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function absent(): \Closure {
+		return function ( $actual, $seed ): void {
+			unset( $seed );
+			$this->assertNull( $actual );
+		};
+	}
+
+	/**
+	 * An assertion requiring a member to resolve to the seeded value
+	 * itself (a pass-through path with no sink).
+	 *
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function passthrough(): \Closure {
+		return function ( $actual, $seed ): void {
+			$this->assert_shape_equal( $seed, $actual );
+		};
+	}
+
+	/**
+	 * An assertion requiring a member to resolve to an array entry
+	 * carrying the given id.
+	 *
+	 * @param int|string $id The required id.
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function entry_with_id( $id ): \Closure {
+		return function ( $actual, $seed ) use ( $id ): void {
+			unset( $seed );
+			$this->assertIsArray( $actual );
+			$this->assertSame( $id, $actual['id'] ?? null );
+		};
+	}
+
+	/**
+	 * An assertion requiring a member to resolve to an array entry
+	 * carrying the given key.
+	 *
+	 * @param string $key The required key.
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function entry_with_key( string $key ): \Closure {
+		return function ( $actual, $seed ) use ( $key ): void {
+			unset( $seed );
+			$this->assertIsArray( $actual );
+			$this->assertSame( $key, $actual['key'] ?? null );
+		};
+	}
+
+	/**
+	 * Resolve which member assertions a shape outside `expects` takes: the
+	 * entry's default, overridden per member for a shape named in
+	 * `override`.
+	 *
+	 * @param array  $outside   The entry's 'default' and optional 'override' members.
+	 * @param string $shape_key The shape class being seeded.
+	 * @return array<string, \Closure>
+	 */
+	private function outside_members( array $outside, string $shape_key ): array {
+		return array_merge( $outside['default'], $outside['override'][ $shape_key ] ?? array() );
+	}
+
+	/**
+	 * The productScopes-chain sweep entries: the map, the record, its
+	 * draftCartItem, and the draftCartItem's own id, variation, quantity
+	 * and an extension key. Each falls back to the context's own values
+	 * when malformed, and to the record's own ('my-scope') values when
+	 * well formed.
+	 *
+	 * @param array $state   The layered-identity state.
+	 * @param array $context The layered-identity context.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_record_chain( array $state, array $context ): array {
+		$entries = array();
+
+		$entries['productScopes'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+				'map'  => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'control' => array(
+				'value'  => array( 'my-scope' => array( 'draftCartItem' => array( 'id' => 4242 ) ) ),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 4242, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['productScopes[<key>] (the record)'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+				'map'  => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'control' => array(
+				'value'  => array( 'draftCartItem' => array( 'id' => 3333 ) ),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 3333, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['…[<key>].draftCartItem'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope', 'draftCartItem' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+				'map'  => array(
+					'productId' => $this->fixed( 5001 ),
+					'variation' => $this->fixed( $context['variation'] ),
+				),
+			),
+			'control' => array(
+				'value'  => array( 'id' => 8001 ),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 8001, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['…draftCartItem.id'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope', 'draftCartItem', 'id' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'productId' => $this->fixed( 5001 ) ) ),
+			'inside'  => array(
+				'int'    => array( 'productId' => $this->fixed( 42 ) ),
+				'string' => array( 'productId' => $this->fixed( 'x' ) ),
+			),
+			'control' => array(
+				'value'  => 8002,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 8002, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['…draftCartItem.variation'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope', 'draftCartItem', 'variation' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'variation' => $this->fixed( $context['variation'] ) ) ),
+			'inside'  => array(
+				'list' => array( 'variation' => $this->fixed( array( 'x' ) ) ),
+				'map'  => array( 'variation' => $this->fixed( array( 'k' => 'v' ) ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'gold',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame(
+						array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'gold',
+							),
+						),
+						$envelope['variation']()
+					);
+				},
+			),
+		);
+
+		$entries['…draftCartItem.quantity'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope', 'draftCartItem', 'quantity' ) ),
+			'expects' => array(),
+			'outside' => array( 'default' => array( 'draftCartItem' => $this->quantity_passthrough() ) ),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 7,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 7, $envelope['draftCartItem']()['quantity'] );
+				},
+			),
+		);
+
+		$entries['…draftCartItem.<any other key>'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'productScopes', 'my-scope', 'draftCartItem', 'giftMessage' ) ),
+			'expects' => array(),
+			'outside' => array( 'default' => array( 'draftCartItem' => $this->gift_message_passthrough() ) ),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'wrap it',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'wrap it', $envelope['draftCartItem']()['giftMessage'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * An assertion requiring draftCartItem's own `quantity` key to equal
+	 * the seeded value, for every shape.
+	 *
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function quantity_passthrough(): \Closure {
+		return function ( $actual, $seed ): void {
+			$this->assertIsArray( $actual );
+			$this->assert_shape_equal( $seed, $actual['quantity'] );
+		};
+	}
+
+	/**
+	 * An assertion requiring draftCartItem's own `giftMessage` key to equal
+	 * the seeded value, for every shape.
+	 *
+	 * @return \Closure function( mixed $actual, mixed $seed ): void
+	 */
+	private function gift_message_passthrough(): \Closure {
+		return function ( $actual, $seed ): void {
+			$this->assertIsArray( $actual );
+			$this->assert_shape_equal( $seed, $actual['giftMessage'] );
+		};
+	}
+
+	/**
+	 * The template sweep entries: the template itself, its productId and
+	 * its variation, with no record and no context to compete with it.
+	 *
+	 * @param array $state   The template-only state.
+	 * @param array $context An empty context.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_template( array $state, array $context ): array {
+		$entries = array();
+
+		$entries['template'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'template' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productId' => $this->absent(),
+					'variation' => $this->fixed( array() ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productId' => $this->absent(),
+					'variation' => $this->fixed( array() ),
+				),
+				'map'  => array(
+					'productId' => $this->absent(),
+					'variation' => $this->fixed( array() ),
+				),
+			),
+			'control' => array(
+				'value'  => array(
+					'productId' => 8003,
+					'variation' => array(),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 8003, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['template.productId'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'template', 'productId' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'productId' => $this->absent() ) ),
+			'inside'  => array(
+				'int'    => array( 'productId' => $this->fixed( 42 ) ),
+				'string' => array( 'productId' => $this->fixed( 'x' ) ),
+			),
+			'control' => array(
+				'value'  => 8004,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 8004, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['template.variation'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'state', array( 'template', 'variation' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'variation' => $this->fixed( array() ) ) ),
+			'inside'  => array(
+				'list' => array( 'variation' => $this->fixed( array( 'x' ) ) ),
+				'map'  => array( 'variation' => $this->fixed( array( 'k' => 'v' ) ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'silver',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame(
+						array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'silver',
+							),
+						),
+						$envelope['variation']()
+					);
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The context-plane sweep entries whose fallback is the template:
+	 * scopeName, productId and variation.
+	 *
+	 * @param array $state   The context-only state (a well-formed template, no record).
+	 * @param array $context The well-formed context.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_context( array $state, array $context ): array {
+		$entries = array();
+
+		$entries['scopeName'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'context', array( 'scopeName' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'scopeName' => $this->fixed( '_default' ) ) ),
+			'inside'  => array(
+				'int'    => array( 'scopeName' => $this->fixed( 42 ) ),
+				'string' => array( 'scopeName' => $this->fixed( 'x' ) ),
+			),
+			'control' => array(
+				'value'  => 'my-scope',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'my-scope', $envelope['scopeName']() );
+				},
+			),
+		);
+
+		$entries['productId'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'context', array( 'productId' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'productId' => $this->fixed( 7001 ) ) ),
+			'inside'  => array(
+				'int'    => array( 'productId' => $this->fixed( 42 ) ),
+				'string' => array( 'productId' => $this->fixed( 'x' ) ),
+			),
+			'control' => array(
+				'value'  => 8005,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 8005, $envelope['productId']() );
+				},
+			),
+		);
+
+		$entries['variation'] = array(
+			'seed'    => $this->seed_at( $state, $context, 'context', array( 'variation' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'variation' => $this->fixed( $state['template']['variation'] ) ) ),
+			'inside'  => array(
+				'list' => array( 'variation' => $this->fixed( array( 'x' ) ) ),
+				'map'  => array( 'variation' => $this->fixed( array( 'k' => 'v' ) ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'bronze',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame(
+						array(
+							array(
+								'attribute' => 'colour',
+								'value'     => 'bronze',
+							),
+						),
+						$envelope['variation']()
+					);
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about the base product itself: the products map
+	 * and one entry, plus the two rows whose reachability requires a
+	 * selection that matches no summary (products[<id>].id) or one
+	 * (productVariations[<id>].id) — the latter is built alongside the
+	 * variation entries below, since it needs a match.
+	 *
+	 * @param array $state     The matching-product state.
+	 * @param array $unmatched A context whose selection matches no variation summary.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_base_product( array $state, array $unmatched ): array {
+		$entries = array();
+
+		$entries['products (the map)'] = array(
+			'seed'    => $this->seed_at( $state, $unmatched, 'state', array( 'products' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'baseProduct'      => $this->absent(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->absent(),
+					'cartItem'         => $this->absent(),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'baseProduct'      => $this->absent(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->absent(),
+					'cartItem'         => $this->absent(),
+				),
+				'map'  => array(
+					'baseProduct'      => $this->absent(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->absent(),
+					'cartItem'         => $this->absent(),
+				),
+			),
+			'control' => array(
+				'value'  => $state['products'],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 5001, $envelope['baseProduct']()['id'] );
+				},
+			),
+		);
+
+		$entries['products[<id>] (the entry)'] = array(
+			'seed'    => $this->seed_at( $state, $unmatched, 'state', array( 'products', 5001 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'baseProduct'      => $this->absent(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->absent(),
+					'cartItem'         => $this->absent(),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'baseProduct'      => $this->passthrough(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->passthrough(),
+					'cartItem'         => $this->absent(),
+				),
+				'map'  => array(
+					'baseProduct'      => $this->passthrough(),
+					'productVariation' => $this->absent(),
+					'product'          => $this->passthrough(),
+					'cartItem'         => $this->absent(),
+				),
+			),
+			'control' => array(
+				'value'  => array(
+					'id'         => 9030,
+					'variations' => array(),
+					'attributes' => array(),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9030, $envelope['baseProduct']()['id'] );
+					$this->assertSame( 9030, $envelope['product']()['id'] );
+				},
+			),
+		);
+
+		$entries['products[<id>].id'] = array(
+			'seed'    => $this->seed_at( $state, $unmatched, 'state', array( 'products', 5001, 'id' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'int'    => array( 'cartItem' => $this->absent() ),
+				'string' => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => 5001,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-simple', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about the base product's variations list and the
+	 * matched summary's own content: the list itself, the summary, its
+	 * attributes container, an attribute entry, an attribute's name and
+	 * value, and the summary's own id (and productVariations[<id>].id,
+	 * which needs the same matching selection).
+	 *
+	 * @param array $state   The matching-product state.
+	 * @param array $matched A context whose selection matches variation 6002.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_variations( array $state, array $matched ): array {
+		$entries = array();
+
+		$entries['products[<id>].variations'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'variations' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+				'map'  => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+			),
+			'control' => array(
+				'value'  => $state['products'][5001]['variations'],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$summary_state = $state;
+		self::place(
+			$summary_state,
+			array( 'products', 5001, 'variations' ),
+			array(
+				null,
+				array(
+					'id'         => 6002,
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'value' => 'red',
+						),
+					),
+				),
+			)
+		);
+		$entries['products[<id>].variations[k] (the summary)'] = array(
+			'seed'    => $this->seed_at( $summary_state, $matched, 'state', array( 'products', 5001, 'variations', 0 ) ),
+			'expects' => array(),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->entry_with_id( 6002 ),
+					'product'          => $this->entry_with_id( 6002 ),
+				),
+			),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => array(
+					'id'         => 9002,
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'value' => 'red',
+						),
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9002, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$attributes_state = $state;
+		self::place(
+			$attributes_state,
+			array( 'products', 5001, 'variations' ),
+			array(
+				array( 'id' => 9001 ),
+				array(
+					'id'         => 6002,
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'value' => 'red',
+						),
+					),
+				),
+			)
+		);
+		$entries['…variations[k].attributes'] = array(
+			'seed'    => $this->seed_at( $attributes_state, $matched, 'state', array( 'products', 5001, 'variations', 0, 'attributes' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->entry_with_id( 6002 ),
+					'product'          => $this->entry_with_id( 6002 ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->entry_with_id( 6002 ),
+					'product'          => $this->entry_with_id( 6002 ),
+				),
+				'map'  => array(
+					'productVariation' => $this->entry_with_id( 6002 ),
+					'product'          => $this->entry_with_id( 6002 ),
+				),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'name'  => 'colour',
+						'value' => 'red',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9001, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$attribute_entry_state = $attributes_state;
+		self::place(
+			$attribute_entry_state,
+			array( 'products', 5001, 'variations', 0 ),
+			array(
+				'id'         => 9003,
+				'attributes' => array( null ),
+			)
+		);
+		$entries['…variations[k].attributes[j] (the entry)'] = array(
+			'seed'    => $this->seed_at( $attribute_entry_state, $matched, 'state', array( 'products', 5001, 'variations', 0, 'attributes', 0 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'productVariation' => $this->entry_with_id( 6002 ) ) ),
+			'inside'  => array(
+				'list' => array( 'productVariation' => $this->entry_with_id( 6002 ) ),
+				'map'  => array( 'productVariation' => $this->entry_with_id( 6002 ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					'name'  => 'colour',
+					'value' => 'red',
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9003, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$attribute_name_state = $attributes_state;
+		self::place(
+			$attribute_name_state,
+			array( 'products', 5001, 'variations', 0 ),
+			array(
+				'id'         => 9004,
+				'attributes' => array(
+					array(
+						'name'  => null,
+						'value' => 'red',
+					),
+				),
+			)
+		);
+		$entries['…attributes[j].name'] = array(
+			'seed'    => $this->seed_at( $attribute_name_state, $matched, 'state', array( 'products', 5001, 'variations', 0, 'attributes', 0, 'name' ) ),
+			'expects' => array( 'string' ),
+			'outside' => array( 'default' => array( 'productVariation' => $this->entry_with_id( 6002 ) ) ),
+			'inside'  => array( 'string' => array( 'productVariation' => $this->entry_with_id( 6002 ) ) ),
+			'control' => array(
+				'value'  => 'colour',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9004, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$attribute_value_state = $attributes_state;
+		self::place(
+			$attribute_value_state,
+			array( 'products', 5001, 'variations', 0 ),
+			array(
+				'id'         => 9005,
+				'attributes' => array(
+					array(
+						'name'  => 'colour',
+						'value' => null,
+					),
+				),
+			)
+		);
+		$entries['…attributes[j].value'] = array(
+			'seed'    => $this->seed_at( $attribute_value_state, $matched, 'state', array( 'products', 5001, 'variations', 0, 'attributes', 0, 'value' ) ),
+			'expects' => array(),
+			'outside' => array(
+				'default'  => array( 'productVariation' => $this->entry_with_id( 6002 ) ),
+				'override' => array( 'null' => array( 'productVariation' => $this->entry_with_id( 9005 ) ) ),
+			),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'red',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 9005, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$id_state = $state;
+		self::place(
+			$id_state,
+			array( 'products', 5001, 'variations' ),
+			array(
+				array(
+					'id'         => null,
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'value' => 'red',
+						),
+					),
+				),
+				array(
+					'id'         => 6001,
+					'attributes' => array(
+						array(
+							'name'  => 'colour',
+							'value' => 'blue',
+						),
+					),
+				),
+			)
+		);
+		$entries['…variations[k].id'] = array(
+			'seed'    => $this->seed_at( $id_state, $matched, 'state', array( 'products', 5001, 'variations', 0, 'id' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+			),
+			'inside'  => array(
+				'int'    => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+				'string' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+			),
+			'control' => array(
+				'value'  => 6002,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$entries['productVariations[<id>].id'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations', 6002, 'id' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'int'    => array( 'cartItem' => $this->absent() ),
+				'string' => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => 6002,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about the productVariations map, one of its
+	 * entries, and that entry's own parent.
+	 *
+	 * @param array $state   The matching-product state.
+	 * @param array $matched A context whose selection matches variation 6002.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_product_variations( array $state, array $matched ): array {
+		$entries = array();
+
+		$entries['productVariations (the map)'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+				'map'  => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'control' => array(
+				'value'  => $state['productVariations'],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+				},
+			),
+		);
+
+		$entries['productVariations[<id>] (the entry)'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations', 6002 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->passthrough(),
+					'product'          => $this->passthrough(),
+				),
+				'map'  => array(
+					'productVariation' => $this->passthrough(),
+					'product'          => $this->passthrough(),
+				),
+			),
+			'control' => array(
+				'value'  => array(
+					'marker' => 'present',
+					'parent' => 5001,
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'present', $envelope['productVariation']()['marker'] );
+				},
+			),
+		);
+
+		$entries['productVariations[<id>].parent'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations', 6002, 'parent' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'int'    => array( 'cartItem' => $this->absent() ),
+				'string' => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => 5001,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about the parent product's attributes and their
+	 * terms, observed through cart-item attribute matching: a cart line's
+	 * own label ("Scarlet") resolves through a matching term to its slug
+	 * ("red"), which is what a selection names, so a broken lookup shows
+	 * up as no cart line matching rather than the label coinciding with
+	 * the slug by letter case.
+	 *
+	 * @param array $state   The matching-product state.
+	 * @param array $matched A context whose selection matches variation 6002.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_attributes_and_terms( array $state, array $matched ): array {
+		$entries = array();
+
+		$entries['products[<parent>].attributes'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->absent() ),
+				'map'  => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => $state['products'][5001]['attributes'],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…attributes[k] (the product attribute)'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0 ) ),
+			'expects' => array( 'list', 'map', 'stdClass' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list'     => array( 'cartItem' => $this->absent() ),
+				'map'      => array( 'cartItem' => $this->absent() ),
+				'stdClass' => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => $state['products'][5001]['attributes'][0],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…attributes[k].name'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0, 'name' ) ),
+			'expects' => array( 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array( 'string' => array( 'cartItem' => $this->absent() ) ),
+			'control' => array(
+				'value'  => 'colour',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…attributes[k].terms'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0, 'terms' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->absent() ),
+				'map'  => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => $state['products'][5001]['attributes'][0]['terms'],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…terms[j]'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0, 'terms', 0 ) ),
+			'expects' => array( 'list', 'map', 'stdClass' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list'     => array( 'cartItem' => $this->absent() ),
+				'map'      => array( 'cartItem' => $this->absent() ),
+				'stdClass' => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => array(
+					'name' => 'Scarlet',
+					'slug' => 'red',
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…terms[j].name'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0, 'terms', 0, 'name' ) ),
+			'expects' => array(),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'Scarlet',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['…terms[j].slug'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5001, 'attributes', 0, 'terms', 0, 'slug' ) ),
+			'expects' => array( 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array( 'string' => array( 'cartItem' => $this->absent() ) ),
+			'control' => array(
+				'value'  => 'red',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about the cart itself: its base, its items list,
+	 * one line, that line's key, type and id, and the resolved product's
+	 * own reachability rows.
+	 *
+	 * @param array $cart_state     A state carrying one simple product (6002) and two cart lines matching it by id.
+	 * @param array $cart_context   A context naming that product.
+	 * @param array $matching_state The matching-product state, for the entries needing attribute matching.
+	 * @param array $matched        A context whose selection matches variation 6002.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_cart( array $cart_state, array $cart_context, array $matching_state, array $matched ): array {
+		$entries = array();
+
+		$entries['cart, as the base of [\'items\']'] = array(
+			'seed'    => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->absent() ),
+				'map'  => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => array(
+					'items' => array(
+						array(
+							'key'  => 'line-target',
+							'id'   => 6002,
+							'type' => 'simple',
+						),
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-target', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['cart.items'] = array(
+			'seed'    => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart', 'items' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->absent() ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->absent() ),
+				'map'  => array( 'cartItem' => $this->absent() ),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'key'  => 'line-target',
+						'id'   => 6002,
+						'type' => 'simple',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-target', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['cart.items[n] (the entry)'] = array(
+			'seed'    => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart', 'items', 0 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+				'map'  => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					'key'  => 'line-target',
+					'id'   => 6002,
+					'type' => 'simple',
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-target', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$key_state = $cart_state;
+		self::place(
+			$key_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'  => null,
+					'id'   => 111,
+					'type' => 'simple',
+				),
+				array(
+					'key'  => 'target-key',
+					'id'   => 222,
+					'type' => 'simple',
+				),
+			)
+		);
+		$entries['cart.items[n].key'] = array(
+			'seed'    => $this->seed_at(
+				$key_state,
+				array(
+					'productId'   => 6002,
+					'cartItemKey' => 'target-key',
+				),
+				'state',
+				array( 'cart', 'items', 0, 'key' )
+			),
+			'expects' => array(),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_id( 222 ) ) ),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'target-key',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 111, $envelope['cartItem']()['id'] );
+				},
+			),
+		);
+
+		$type_state = $cart_state;
+		self::place(
+			$type_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'  => 'line-0',
+					'id'   => 6002,
+					'type' => null,
+				),
+			)
+		);
+		$entries['cart.items[n].type'] = array(
+			'seed'    => $this->seed_at( $type_state, $cart_context, 'state', array( 'cart', 'items', 0, 'type' ) ),
+			'expects' => array(),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-0' ) ) ),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'variation',
+				'assert' => function ( array $envelope ): void {
+					$this->assertNull( $envelope['cartItem']() );
+				},
+			),
+		);
+
+		$entries['cart.items[n].id'] = array(
+			'seed'    => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart', 'items', 0, 'id' ) ),
+			'expects' => array( 'int', 'string' ),
+			'outside' => array(
+				'default'  => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+				'override' => array( 'float' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			),
+			'inside'  => array(
+				'int'    => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+				'string' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+			),
+			'control' => array(
+				'value'  => 6002,
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-target', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$variation_container_state = $matching_state;
+		self::place(
+			$variation_container_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'       => 'line-red',
+					'id'        => 6002,
+					'type'      => 'variation',
+					'variation' => null,
+				),
+				array(
+					'key'  => 'line-fallback',
+					'id'   => 6002,
+					'type' => 'simple',
+				),
+			)
+		);
+		$entries['cart.items[n].variation'] = array(
+			'seed'    => $this->seed_at( $variation_container_state, $matched, 'state', array( 'cart', 'items', 0, 'variation' ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+				'map'  => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'Scarlet',
+					),
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$variation_entry_state = $matching_state;
+		self::place(
+			$variation_entry_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'       => 'line-red',
+					'id'        => 6002,
+					'type'      => 'variation',
+					'variation' => array( null ),
+				),
+				array(
+					'key'  => 'line-fallback',
+					'id'   => 6002,
+					'type' => 'simple',
+				),
+			)
+		);
+		$entries['cart.items[n].variation[k] (the entry)'] = array(
+			'seed'    => $this->seed_at( $variation_entry_state, $matched, 'state', array( 'cart', 'items', 0, 'variation', 0 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'  => array(
+				'list' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+				'map'  => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
+			),
+			'control' => array(
+				'value'  => array(
+					'attribute' => 'colour',
+					'value'     => 'Scarlet',
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$attribute_state = $matching_state;
+		self::place(
+			$attribute_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'       => 'line-red',
+					'id'        => 6002,
+					'type'      => 'variation',
+					'variation' => array(
+						array(
+							'attribute' => null,
+							'value'     => 'Scarlet',
+						),
+					),
+				),
+				array(
+					'key'  => 'line-fallback',
+					'id'   => 6002,
+					'type' => 'simple',
+				),
+			)
+		);
+		$entries['…variation[k].attribute'] = array(
+			'seed'    => $this->seed_at( $attribute_state, $matched, 'state', array( 'cart', 'items', 0, 'variation', 0, 'attribute' ) ),
+			'expects' => array( 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'  => array( 'string' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'control' => array(
+				'value'  => 'colour',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$value_state = $matching_state;
+		self::place(
+			$value_state,
+			array( 'cart', 'items' ),
+			array(
+				array(
+					'key'       => 'line-red',
+					'id'        => 6002,
+					'type'      => 'variation',
+					'variation' => array(
+						array(
+							'attribute' => 'colour',
+							'value'     => null,
+						),
+					),
+				),
+				array(
+					'key'  => 'line-fallback',
+					'id'   => 6002,
+					'type' => 'simple',
+				),
+			)
+		);
+		$entries['…variation[k].value'] = array(
+			'seed'    => $this->seed_at( $value_state, $matched, 'state', array( 'cart', 'items', 0, 'variation', 0, 'value' ) ),
+			'expects' => array( 'string' ),
+			'outside' => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'  => array( 'string' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'control' => array(
+				'value'  => 'Scarlet',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The six sweep entries duplicating the resolved selection's own
+	 * entry, attribute and value across its three sources — the record's
+	 * draftCartItem.variation, the context's variation, and the
+	 * template's — plus the context-sourced base of each, nine in all.
+	 *
+	 * @param array $matching_state The matching-product state.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_resolved_selection( array $matching_state ): array {
+		$sources = array(
+			'context'  => array(
+				'state'   => $matching_state,
+				'context' => array(
+					'productId' => 5001,
+					'variation' => null,
+				),
+				'plane'   => 'context',
+				'path'    => array( 'variation' ),
+			),
+			'record'   => array(
+				'state'   => array_replace_recursive(
+					$matching_state,
+					array(
+						'productScopes' => array(
+							'_default' => array(
+								'draftCartItem' => array(
+									'id'        => 5001,
+									'variation' => null,
+								),
+							),
+						),
+					)
+				),
+				'context' => array(),
+				'plane'   => 'state',
+				'path'    => array( 'productScopes', '_default', 'draftCartItem', 'variation' ),
+			),
+			'template' => array(
+				'state'   => array_replace_recursive(
+					$matching_state,
+					array(
+						'template' => array(
+							'productId' => 5001,
+							'variation' => null,
+						),
+					)
+				),
+				'context' => array(),
+				'plane'   => 'state',
+				'path'    => array( 'template', 'variation' ),
+			),
+		);
+
+		$entries = array();
+
+		foreach ( $sources as $source_name => $source ) {
+			$entry_path     = array_merge( $source['path'], array( 0 ) );
+			$attribute_path = array_merge( $entry_path, array( 'attribute' ) );
+			$value_path     = array_merge( $entry_path, array( 'value' ) );
+			$seeded_state   = $source['state'];
+			$seeded_context = $source['context'];
+			$baseline       = array(
+				array(
+					'attribute' => 'colour',
+					'value'     => 'red',
+				),
+			);
+			if ( 'context' === $source['plane'] ) {
+				self::place( $seeded_context, $source['path'], $baseline );
+			} else {
+				self::place( $seeded_state, $source['path'], $baseline );
+			}
+
+			$entries[ "variation[n] (an entry of the resolved selection, from record, context or template) — {$source_name}" ] = array(
+				'seed'    => $this->seed_at( $seeded_state, $seeded_context, $source['plane'], $entry_path ),
+				'expects' => array( 'list', 'map' ),
+				'outside' => array(
+					'default' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'inside'  => array(
+					'list' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+					'map'  => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'control' => array(
+					'value'  => array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+					'assert' => function ( array $envelope ): void {
+						$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+						$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+					},
+				),
+			);
+
+			$entries[ "variation[n].attribute — {$source_name}" ] = array(
+				'seed'    => $this->seed_at( $seeded_state, $seeded_context, $source['plane'], $attribute_path ),
+				'expects' => array( 'string' ),
+				'outside' => array(
+					'default' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'inside'  => array(
+					'string' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'control' => array(
+					'value'  => 'colour',
+					'assert' => function ( array $envelope ): void {
+						$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+					},
+				),
+			);
+
+			$entries[ "variation[n].value — {$source_name}" ] = array(
+				'seed'    => $this->seed_at( $seeded_state, $seeded_context, $source['plane'], $value_path ),
+				'expects' => array( 'string' ),
+				'outside' => array(
+					'default' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'inside'  => array(
+					'string' => array(
+						'productVariation' => $this->absent(),
+						'product'          => $this->entry_with_id( 5001 ),
+						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+					),
+				),
+				'control' => array(
+					'value'  => 'red',
+					'assert' => function ( array $envelope ): void {
+						$this->assertSame( 6002, $envelope['productVariation']()['id'] );
+						$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+					},
+				),
+			);
+		}
+
+		$cart_only_state        = $this->cart_matching_state();
+		$cart_only_context      = array( 'productId' => 6002 );
+		$entries['cartItemKey'] = array(
+			'seed'    => $this->seed_at( $cart_only_state, $cart_only_context, 'context', array( 'cartItemKey' ) ),
+			'expects' => array(),
+			'outside' => array(
+				'default'  => array( 'cartItem' => $this->absent() ),
+				'override' => array( 'null' => array( 'cartItem' => $this->entry_with_key( 'line-target' ) ) ),
+			),
+			'inside'  => array(),
+			'control' => array(
+				'value'  => 'line-fallback',
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-fallback', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * Register an error handler that turns every diagnostic — including a
+	 * deprecation, which this suite's configuration and bootstrap would
+	 * otherwise both let through — into a thrown exception, for the
+	 * duration of resolving one sweep case. Registered for E_ALL and does
+	 * not consult error_reporting(), so it fires despite the bootstrap's
+	 * mask.
+	 *
+	 * @return \Closure The handler, ready to pass to set_error_handler().
+	 */
+	private static function diagnostics_as_exceptions(): \Closure {
+		return function ( int $errno, string $errstr, string $errfile = '', int $errline = 0 ): bool {
+			throw new \ErrorException( $errstr, 0, $errno, $errfile, $errline ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Carrying the diagnostic's own message into the failure is the assertion.
+		};
+	}
+
+	/**
+	 * Every path a third party can seed, crossed with every shape class:
+	 * one data set per cell of the sweep, named after the path and the
+	 * shape so `--testdox` prints the whole sweep one line per cell.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provider_sweep_cells(): array {
+		$rows = array();
+		foreach ( array_keys( $this->sweep_entries() ) as $path ) {
+			foreach ( array_keys( $this->shape_classes() ) as $shape ) {
+				$rows[ "$path | $shape" ] = array( $path, $shape );
+			}
+		}
+		return $rows;
+	}
+
+	/**
+	 * One data set per sweep entry, for its control case.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_sweep_controls(): array {
+		$rows = array();
+		foreach ( array_keys( $this->sweep_entries() ) as $path ) {
+			$rows[ $path ] = array( $path );
+		}
+		return $rows;
+	}
+
+	/**
+	 * @testdox sweep cell: $path | $shape_key
+	 * @dataProvider provider_sweep_cells
+	 * @param string $path      The sweep entry's path text.
+	 * @param string $shape_key The shape class seeded at that path.
+	 */
+	public function test_sweep_cell_resolves_as_required( string $path, string $shape_key ): void {
+		$entry = $this->sweep_entries()[ $path ];
+		$value = $this->shape_classes()[ $shape_key ];
+
+		$members = in_array( $shape_key, $entry['expects'], true )
+			? $entry['inside'][ $shape_key ]
+			: $this->outside_members( $entry['outside'], $shape_key );
+
+		$scope_getter = $entry['seed']( $value );
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Turning every diagnostic into a failure is the assertion; this suite's configuration and bootstrap would otherwise let a deprecation through uncaught.
+		set_error_handler( self::diagnostics_as_exceptions(), E_ALL );
+		try {
+			$envelope = $scope_getter();
+			foreach ( $members as $member => $assertion ) {
+				$assertion( $envelope[ $member ](), $value );
+			}
+		} finally {
+			restore_error_handler();
+		}
+	}
+
+	/**
+	 * @testdox sweep control: $path
+	 * @dataProvider provider_sweep_controls
+	 * @param string $path The sweep entry's path text.
+	 */
+	public function test_sweep_control_case_reaches_its_read( string $path ): void {
+		$entry = $this->sweep_entries()[ $path ];
+
+		$scope_getter = $entry['seed']( $entry['control']['value'] );
+		$envelope     = $scope_getter();
+
+		( $entry['control']['assert'] )( $envelope );
 	}
 
 	/**
