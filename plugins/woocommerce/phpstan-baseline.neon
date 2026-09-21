@@ -3583,12 +3583,6 @@ parameters:
 			path: includes/admin/helper/class-wc-helper-updater.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/admin/helper/class-wc-helper-updater.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$response\.$#'
 			identifier: property.notFound
 			count: 2
@@ -3711,12 +3705,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @return has invalid value \(void\.\)\: Unexpected token "\.", expected TOKEN_HORIZONTAL_WS at offset 388 on line 9$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: includes/admin/helper/class-wc-helper-updater.php
-
-		-
-			message: '#^Parameter \#1 \$product_id of static method WC_Helper\:\:has_product_subscription\(\) expects int, \(array\<string\>\|string\|null\) given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/admin/helper/class-wc-helper-updater.php
 
@@ -5326,12 +5314,6 @@ parameters:
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
 			identifier: phpDoc.parseError
 			count: 5
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order\.\)\: Unexpected token "@user", expected variable at offset 317 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
 
 		-
@@ -14908,6 +14890,12 @@ parameters:
 		-
 			message: '#^Method WC_Shipping\:\:unregister_shipping_methods\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-shipping.php
+
+		-
+			message: '#^Offset mixed might not exist on array\|null\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: includes/class-wc-shipping.php
 
