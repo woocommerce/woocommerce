@@ -5329,12 +5329,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order\.\)\: Unexpected token "@user", expected variable at offset 317 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
-
-		-
 			message: '#^PHPDoc tag @param has invalid value \(array Billing fields\.\)\: Unexpected token "Billing", expected variable at offset 146 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -16576,13 +16570,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -19376,24 +19370,6 @@ parameters:
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Cannot call method get_instance_id\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Cannot call method get_method_id\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -19456,12 +19432,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method WC_Payment_Gateway\:\:get_return_url\(\) expects WC_Order\|null, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Property WC_Gateway_COD\:\:\$enable_for_methods \(array\) does not accept string\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
@@ -31007,51 +30977,15 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-cart.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_country\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_postcode\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_checkout_payment_url\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:needs_payment\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
@@ -31092,12 +31026,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$nonce of function wp_verify_nonce expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method WC_Shortcode_Checkout\:\:guest_should_verify_email\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
@@ -49997,18 +49925,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedItem.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:update_context\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FeaturedItem.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedItem\:\:\$current_item \(WC_Product\|WP_Term\|null\) does not accept WC_Product\|false\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -50421,12 +50337,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/OrderConfirmation/ShippingAddress.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order\|false \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Status.php
 
 		-
 			message: '#^Parameter \#1 \$date of function wc_format_datetime expects WC_DateTime, WC_DateTime\|null given\.$#'
@@ -51791,12 +51701,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_style\(\) should return null but returns array\<mixed, mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -51827,18 +51731,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductRating.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRatingCounter.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRatingCounter\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51853,12 +51745,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRatingCounter.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRatingCounter\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRatingCounter.php
 
@@ -60215,18 +60101,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot call method get_download_permissions_granted\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -65196,12 +65070,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Settings/PaymentGateways/Schema/AbstractPaymentGatewaySettingsSchema.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_zones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/PaymentGateways/Schema/CodGatewaySettingsSchema.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Products\\Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
