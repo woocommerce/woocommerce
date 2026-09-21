@@ -162,7 +162,7 @@ table.wc-block-cart-items {
 
 			@include cart-checkout-medium-container {
 				grid-template-columns: 80px 132px;
-				column-gap: $gap;
+				column-gap: $gap-large;
 			}
 
 			@include cart-checkout-large-container {
@@ -173,10 +173,6 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__image {
 				grid-column-start: 1;
 				grid-row-start: 1;
-
-				@include cart-checkout-medium-container {
-					padding-right: $gap;
-				}
 
 				@include cart-checkout-large-container {
 					padding-right: $gap;
