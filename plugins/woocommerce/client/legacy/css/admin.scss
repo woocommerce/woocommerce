@@ -2317,17 +2317,20 @@ body.woocommerce_page_wc-customer-stock-notifications {
 				padding: 16px 12px;
 			}
 
-			// Save row: keep the legacy trash link in its usual position while
-			// clearing old button margins that overflow under WP 7.0 sizing.
+			// Save row: pin the submit button to the end so it stays there when the
+			// trash link is absent (the create screen) or hidden (no delete
+			// permission), and let the trash link push itself to the start. Old
+			// button margins that overflow under WP 7.0 sizing are cleared.
 			&.wide:has(.save_order) {
 				display: flex;
 				align-items: center;
-				justify-content: space-between;
+				justify-content: flex-end;
 				gap: 8px;
 
 				#delete-action {
 					line-height: 40px;
 					text-align: left;
+					margin-inline-end: auto;
 					float: none;
 
 					&:not(:has(*)) {
@@ -2337,16 +2340,8 @@ body.woocommerce_page_wc-customer-stock-notifications {
 
 				.save_order {
 					flex-shrink: 0;
-					margin: 0 0 0 auto;
 					float: none;
 				}
-			}
-
-			// Screens without a delete link (the create screen) leave the submit
-			// button as the row's only child, so space-between would park it on
-			// the left.
-			&.wide:has(.save_order):not(:has(#delete-action)) {
-				justify-content: flex-end;
 			}
 
 			// Action row (top): select + Apply button. Replaces the legacy
