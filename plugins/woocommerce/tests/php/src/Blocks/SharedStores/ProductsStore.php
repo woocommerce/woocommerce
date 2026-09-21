@@ -809,6 +809,321 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox state.productScope.productId falls back to the declared context, without a fatal, when the seeded productScopes value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_resolves_without_fatal_when_product_scopes_state_is_not_an_array( $malformed ): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_interactivity_state( $this->store_namespace, array( 'productScopes' => $malformed ) );
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => $product->get_id(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $product->get_id(), $envelope['productId']() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope resolves the _default record, without a fatal, when the context's declared scopeName is not usable as an array key.
+	 */
+	public function test_product_scope_falls_back_to_default_scope_when_scope_name_is_not_an_array_key(): void {
+		$record_product  = WC_Helper_Product::create_simple_product();
+		$context_product = WC_Helper_Product::create_simple_product();
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'_default' => array( 'draftCartItem' => array( 'id' => $record_product->get_id() ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => array( 'not', 'a', 'key' ),
+				'productId' => $context_product->get_id(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $record_product->get_id(), $envelope['productId']() );
+
+		$record_product->delete( true );
+		$context_product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope members resolve from the declared context, without a fatal, when the seeded template value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_resolves_without_fatal_when_template_state_is_not_an_array( $malformed ): void {
+		wp_interactivity_state( $this->store_namespace, array( 'template' => $malformed ) );
+
+		$this->push_woocommerce_context( array() );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productId']() );
+		$this->assertSame( array(), $envelope['variation']() );
+	}
+
+	/**
+	 * @testdox state.productScope resolves as though the record carried no draftCartItem, without a fatal, when the seeded draftCartItem value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_resolves_without_fatal_when_draft_cart_item_record_is_not_an_array( $malformed ): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => $malformed ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => $product->get_id(),
+				'variation' => array(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $product->get_id(), $envelope['productId']() );
+		$this->assertSame( array(), $envelope['variation']() );
+
+		$draft = $envelope['draftCartItem']();
+		$this->assertSame( $product->get_id(), $draft['id'] );
+		$this->assertSame( array(), $draft['variation'] );
+		$this->assertSame( 1, $draft['quantity'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.productId and .baseProduct fall back to the declared context, without a fatal, when the seeded record's draftCartItem.id is not usable as an array key.
+	 */
+	public function test_product_id_resolves_without_fatal_when_record_draft_id_is_not_an_array_key(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => array( 'id' => array( 1, 2, 3 ) ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => $product->get_id(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $product->get_id(), $envelope['productId']() );
+
+		$base_product = $envelope['baseProduct']();
+		$this->assertSame( $product->get_id(), $base_product['id'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.variation falls back to the declared context, without a fatal, when the seeded record's draftCartItem.variation is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_falls_back_to_context_when_record_draft_variation_is_not_an_array( $malformed ): void {
+		$selected = array(
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+		);
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array(
+						'draftCartItem' => array(
+							'id'        => 42,
+							'variation' => $malformed,
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'variation' => $selected,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $selected, $envelope['variation']() );
+	}
+
+	/**
+	 * @testdox state.productScope.variation falls back to the seeded template, without a fatal, when the context's declared variation is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_falls_back_to_template_when_context_variation_is_not_an_array( $malformed ): void {
+		$templated = array(
+			array(
+				'attribute' => 'colour',
+				'value'     => 'blue',
+			),
+		);
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array( 'template' => array( 'variation' => $templated ) )
+		);
+
+		$this->push_woocommerce_context( array( 'variation' => $malformed ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $templated, $envelope['variation']() );
+	}
+
+	/**
+	 * @testdox state.productScope.variation resolves to an empty selection, without a fatal, when the seeded template's variation is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_falls_back_to_default_when_template_variation_is_not_an_array( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array( 'template' => array( 'variation' => $malformed ) )
+		);
+
+		$this->push_woocommerce_context( array() );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( array(), $envelope['variation']() );
+	}
+
+	/**
+	 * @testdox state.productScope.baseProduct resolves to null, without a fatal, when the seeded products value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_base_product_resolves_without_fatal_when_products_state_is_not_an_array( $malformed ): void {
+		wp_interactivity_state( $this->store_namespace, array( 'products' => $malformed ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 42 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['baseProduct']() );
+	}
+
+	/**
+	 * @testdox state.productScope.productVariation resolves to null, without a fatal, when the seeded productVariations value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_variation_resolves_without_fatal_when_product_variations_state_is_not_an_array( $malformed ): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+
+		wp_interactivity_state( $this->store_namespace, array( 'productVariations' => $malformed ) );
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => $product->get_id(),
+				'variation' => array(
+					array(
+						'attribute' => 'size',
+						'value'     => 'huge',
+					),
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+					array(
+						'attribute' => 'number',
+						'value'     => '0',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem resolves to null, without a fatal, when the seeded cart items value is not an array.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_resolves_without_fatal_when_cart_items_state_is_not_an_array( $malformed ): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+
+		wp_interactivity_state( $this->store_namespace, array( 'cart' => array( 'items' => $malformed ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => $product->get_id() ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * Shapes that are not arrays, for the data providers above: a string, a
+	 * boolean and an integer, standing in for anything a seeded value in
+	 * externally writable state could carry in place of an array.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_non_array_shapes(): array {
+		return array(
+			'a string'   => array( 'not-an-array' ),
+			'a boolean'  => array( true ),
+			'an integer' => array( 42 ),
+		);
+	}
+
+	/**
 	 * Build the `productScope` envelope from the current interactivity
 	 * state, registering the closure first when no loader call has done so.
 	 *

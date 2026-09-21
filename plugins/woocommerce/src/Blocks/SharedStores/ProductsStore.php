@@ -126,42 +126,65 @@ class ProductsStore {
 	 * resolves `state.productScope.<member>` and, when the member composes
 	 * another one, invokes it by hand the way the entries below do.
 	 *
+	 * The `woocommerce` state is writable by any plugin, theme or block, so
+	 * every value this method reads out of it or out of the element's
+	 * context is checked to be the shape it needs before being used as an
+	 * array or an array offset. A malformed value is treated as though
+	 * that path were absent: resolution falls through to the next source
+	 * in the usual order (record, then context, then template), the same
+	 * way the client's `scope.ts` already treats a non-object draft.
+	 *
 	 * @return array<string, \Closure> The envelope, keyed by member name.
 	 */
 	private static function build_product_scope_envelope(): array {
-		$context  = wp_interactivity_get_context( self::$store_namespace );
-		$state    = wp_interactivity_state( self::$store_namespace );
-		$record   = ( $state['productScopes'] ?? array() )[ $context['scopeName'] ?? '_default' ] ?? array();
-		$template = $state['template'] ?? array();
+		$context = wp_interactivity_get_context( self::$store_namespace );
+		$state   = wp_interactivity_state( self::$store_namespace );
 
-		$resolve = function ( string $key, $fallback ) use ( $context, $template ) {
-			if ( array_key_exists( $key, $context ) ) {
+		$product_scopes = self::as_array( $state['productScopes'] ?? array() );
+		$scope_key      = $context['scopeName'] ?? '_default';
+		if ( ! self::is_usable_as_array_key( $scope_key ) ) {
+			$scope_key = '_default';
+		}
+		$record   = self::as_array( $product_scopes[ $scope_key ] ?? array() );
+		$template = self::as_array( $state['template'] ?? array() );
+
+		$resolve = function ( string $key, $fallback, callable $is_valid ) use ( $context, $template ) {
+			if ( array_key_exists( $key, $context ) && $is_valid( $context[ $key ] ) ) {
 				return $context[ $key ];
 			}
-			return array_key_exists( $key, $template ) ? $template[ $key ] : $fallback;
+			if ( array_key_exists( $key, $template ) && $is_valid( $template[ $key ] ) ) {
+				return $template[ $key ];
+			}
+			return $fallback;
 		};
 
 		$scope_name = function () use ( $context ) {
 			return $context['scopeName'] ?? '_default';
 		};
 
-		$record_draft = $record['draftCartItem'] ?? array();
+		$record_draft = self::as_array( $record['draftCartItem'] ?? array() );
 
 		$product_id = function () use ( $record_draft, $resolve ) {
-			return array_key_exists( 'id', $record_draft ) ? $record_draft['id'] : $resolve( 'productId', null );
+			if ( array_key_exists( 'id', $record_draft ) && self::is_usable_as_array_key( $record_draft['id'] ) ) {
+				return $record_draft['id'];
+			}
+			return $resolve( 'productId', null, array( self::class, 'is_usable_as_array_key' ) );
 		};
 
 		$variation = function () use ( $record_draft, $resolve ) {
-			return array_key_exists( 'variation', $record_draft ) ? $record_draft['variation'] : $resolve( 'variation', array() );
+			if ( array_key_exists( 'variation', $record_draft ) && is_array( $record_draft['variation'] ) ) {
+				return $record_draft['variation'];
+			}
+			return $resolve( 'variation', array(), 'is_array' );
 		};
 
 		$base_product = function () use ( $state, $product_id ) {
 			$id = $product_id();
-			return $id ? ( $state['products'][ $id ] ?? null ) : null;
+			return $id ? ( self::as_array( $state['products'] ?? array() )[ $id ] ?? null ) : null;
 		};
 
 		$product_variation = function () use ( $state, $base_product, $variation ) {
-			return self::find_matching_variation( $base_product(), $state['productVariations'] ?? array(), $variation() );
+			return self::find_matching_variation( $base_product(), self::as_array( $state['productVariations'] ?? array() ), $variation() );
 		};
 
 		$product = function () use ( $product_variation, $base_product ) {
@@ -169,7 +192,7 @@ class ProductsStore {
 		};
 
 		$cart_item = function () use ( $state, $context, $product, $variation ) {
-			$items = $state['cart']['items'] ?? array();
+			$items = self::as_array( $state['cart']['items'] ?? array() );
 			$key   = $context['cartItemKey'] ?? null;
 
 			if ( $key ) {
@@ -190,10 +213,10 @@ class ProductsStore {
 		$draft_cart_item = function () use ( $record_draft, $product_id, $variation ) {
 			$draft = $record_draft;
 
-			if ( ! array_key_exists( 'id', $draft ) ) {
+			if ( ! array_key_exists( 'id', $draft ) || ! self::is_usable_as_array_key( $draft['id'] ) ) {
 				$draft['id'] = $product_id();
 			}
-			if ( ! array_key_exists( 'variation', $draft ) ) {
+			if ( ! array_key_exists( 'variation', $draft ) || ! is_array( $draft['variation'] ) ) {
 				$draft['variation'] = $variation();
 			}
 			if ( ! array_key_exists( 'quantity', $draft ) ) {
@@ -213,6 +236,36 @@ class ProductsStore {
 			'cartItem'         => $cart_item,
 			'draftCartItem'    => $draft_cart_item,
 		);
+	}
+
+	/**
+	 * Returns $value when it is an array, or $fallback otherwise.
+	 *
+	 * Used to treat a value read out of the externally writable
+	 * `woocommerce` Interactivity API state as absent when its shape does
+	 * not match what the envelope requires, instead of handing it to a
+	 * strictly typed array parameter.
+	 *
+	 * @param mixed $value    The value read from seeded state or context.
+	 * @param array $fallback The value to use when $value is not an array.
+	 * @return array $value when it is an array, otherwise $fallback.
+	 */
+	private static function as_array( $value, array $fallback = array() ): array {
+		return is_array( $value ) ? $value : $fallback;
+	}
+
+	/**
+	 * Whether $value can be used as an array offset (a string or an int).
+	 *
+	 * Guards a resolved product ID, and the resolved scope name, before
+	 * either indexes into state: PHP throws when an array is used as an
+	 * array offset.
+	 *
+	 * @param mixed $value The value to check.
+	 * @return bool Whether $value is a string or an int.
+	 */
+	private static function is_usable_as_array_key( $value ): bool {
+		return is_string( $value ) || is_int( $value );
 	}
 
 	/**
