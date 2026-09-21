@@ -4437,6 +4437,10 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
 					),
 					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://developer.elavon.com/terms',
+					),
+					array(
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/elavon-payments/',
 					),
