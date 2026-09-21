@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add a stricter dispatch check to REST API key authentication.
