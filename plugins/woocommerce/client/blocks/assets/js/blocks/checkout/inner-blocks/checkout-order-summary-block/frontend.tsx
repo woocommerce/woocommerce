@@ -10,6 +10,7 @@ import {
 	createPortal,
 	useEffect,
 	useLayoutEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import clsx from 'clsx';
@@ -48,6 +49,7 @@ const FrontendBlock = ( {
 	const [ actionAreaAnchor, setActionAreaAnchor ] =
 		useState< HTMLDivElement | null >( null );
 	const [ isContentReady, setIsContentReady ] = useState( false );
+	const actionAreaTopBeforeMove = useRef< number | null >( null );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
 		container.className =
@@ -84,6 +86,8 @@ const FrontendBlock = ( {
 				} );
 
 				if ( ! isTitleVisible && isActionAreaNear ) {
+					actionAreaTopBeforeMove.current =
+						actionAreaAnchor.getBoundingClientRect().top;
 					closeSummary();
 				}
 			},
@@ -111,8 +115,26 @@ const FrontendBlock = ( {
 		if ( destination ) {
 			destination.appendChild( contentContainer );
 			setIsContentReady( true );
+
+			if (
+				! showInline &&
+				actionAreaAnchor &&
+				actionAreaTopBeforeMove.current !== null
+			) {
+				const offset =
+					actionAreaAnchor.getBoundingClientRect().top -
+					actionAreaTopBeforeMove.current;
+				actionAreaTopBeforeMove.current = null;
+				window.scrollBy( 0, offset );
+			}
 		}
-	}, [ actionAreaHost, contentContainer, inlineHost, showInline ] );
+	}, [
+		actionAreaAnchor,
+		actionAreaHost,
+		contentContainer,
+		inlineHost,
+		showInline,
+	] );
 
 	useLayoutEffect( () => {
 		return () => contentContainer.remove();

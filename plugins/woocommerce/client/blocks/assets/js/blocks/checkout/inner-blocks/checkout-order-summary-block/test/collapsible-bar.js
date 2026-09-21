@@ -297,6 +297,13 @@ describe( 'Checkout Order Summary placement', () => {
 			'.checkout-order-summary-block-fill-wrapper'
 		);
 		const summaryContent = screen.getByTestId( 'summary-content' );
+		const actionAreaRectSpy = jest
+			.spyOn( actionAreaAnchor, 'getBoundingClientRect' )
+			.mockReturnValueOnce( { top: 900 } )
+			.mockReturnValueOnce( { top: 400 } );
+		const scrollBySpy = jest
+			.spyOn( window, 'scrollBy' )
+			.mockImplementation( () => {} );
 
 		fireEvent.click( title );
 		expect( inlineSummary ).toContainElement( summaryContent );
@@ -311,9 +318,12 @@ describe( 'Checkout Order Summary placement', () => {
 		expect( title ).toHaveAttribute( 'aria-expanded', 'false' );
 		expect( actionArea ).toContainElement( summaryContent );
 		expect( actionAreaAnchor ).toHaveAttribute( 'aria-hidden', 'false' );
+		expect( scrollBySpy ).toHaveBeenCalledWith( 0, -500 );
 
 		unmount();
 		expect( disconnect ).toHaveBeenCalled();
+		actionAreaRectSpy.mockRestore();
+		scrollBySpy.mockRestore();
 		intersectionObserverSpy.mockRestore();
 	} );
 
