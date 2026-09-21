@@ -77,7 +77,12 @@ test.describe( 'Product Collection', () => {
 		const beltIdOutput = await wpCLI(
 			'post list --title="Belt" --post_type=product --field=ID'
 		);
-		const beltId = beltIdOutput.stdout.match( /\d+/g )?.pop();
+		// npm writes its own banner to stdout, so the ID is the line that holds
+		// nothing but digits.
+		const beltId = beltIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+		if ( ! beltId ) {
+			throw new Error( `Failed to find Belt: ${ beltIdOutput.stdout }` );
+		}
 		await wpCLI(
 			`eval '$product = wc_get_product( ${ beltId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
 		);
@@ -131,7 +136,7 @@ test.describe( 'Product Collection', () => {
 			pageObject.products.filter( {
 				has: page
 					.locator( SELECTORS.productTitle )
-					.filter( { hasText: new RegExp( `^${ name }$` ) } ),
+					.getByText( name, { exact: true } ),
 			} );
 
 		const beanie = productCard( 'Beanie' );
@@ -158,6 +163,8 @@ test.describe( 'Product Collection', () => {
 		const hoodie = productCard( 'Hoodie' );
 		await expect( hoodie ).toHaveCount( 1 );
 		await expect(
+			// Matches "Rated 4.5 out of 5" and "Rated 4.50 out of 5": the
+			// trailing zero depends on how the average is formatted.
 			hoodie.getByRole( 'img', { name: /^Rated 4\.50? out of 5$/ } )
 		).toBeVisible();
 

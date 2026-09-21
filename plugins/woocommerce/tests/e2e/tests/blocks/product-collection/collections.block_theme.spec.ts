@@ -101,7 +101,14 @@ test.describe( 'Product Collection: Collections', () => {
 			const albumIdOutput = await wpCLI(
 				'post list --title="Album" --post_type=product --field=ID'
 			);
-			const albumId = albumIdOutput.stdout.match( /\d+/g )?.pop();
+			// npm writes its own banner to stdout, so the ID is the line that
+			// holds nothing but digits.
+			const albumId = albumIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! albumId ) {
+				throw new Error(
+					`Failed to find Album: ${ albumIdOutput.stdout }`
+				);
+			}
 			await wpCLI( `post term add ${ albumId } product_tag Recommended` );
 
 			await pageObject.createNewPostAndInsertBlock( 'bestSellers' );

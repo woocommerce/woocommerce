@@ -73,7 +73,14 @@ test.describe( 'Shopper → Notice Templates', () => {
 		const productIdOutput = await wpCLI(
 			`post list --title="${ REGULAR_PRICED_PRODUCT_NAME }" --post_type=product --field=ID`
 		);
-		const productId = productIdOutput.stdout.match( /\d+/g )?.pop();
+		// npm writes its own banner to stdout, so the ID is the line that holds
+		// nothing but digits.
+		const productId = productIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+		if ( ! productId ) {
+			throw new Error(
+				`Failed to find ${ REGULAR_PRICED_PRODUCT_NAME }: ${ productIdOutput.stdout }`
+			);
+		}
 		await wpCLI(
 			`eval '$product = wc_get_product( ${ productId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
 		);

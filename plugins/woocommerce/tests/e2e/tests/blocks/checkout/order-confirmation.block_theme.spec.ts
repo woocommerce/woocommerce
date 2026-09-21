@@ -234,10 +234,18 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 
 			// The link is the entitlement, not the product page: it carries the
 			// file, the order and the download key.
-			await expect( downloadLink ).toHaveAttribute(
-				'href',
-				/download_file=.*[?&]order=.*[?&]key=/
+			const href = await downloadLink.getAttribute( 'href' );
+			expect( href ).not.toBeNull();
+			const downloadUrl = new URL(
+				href as string,
+				checkoutPageObject.page.url()
 			);
+			for ( const parameter of [ 'download_file', 'order', 'key' ] ) {
+				expect(
+					downloadUrl.searchParams.get( parameter ),
+					`The download link should carry ${ parameter }`
+				).toBeTruthy();
+			}
 		}
 	} );
 } );
