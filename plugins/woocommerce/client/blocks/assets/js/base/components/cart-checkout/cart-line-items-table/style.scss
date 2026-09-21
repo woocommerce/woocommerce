@@ -156,18 +156,23 @@ table.wc-block-cart-items {
 		}
 		.wc-block-cart-items__row {
 			display: grid;
-			grid-template-columns: 60px 132px;
-			column-gap: $gap-small;
+			grid-template-columns: 80px 132px;
+			column-gap: $gap;
 			padding: $gap 0;
 
-			@include cart-checkout-large-container {
-				grid-template-columns: 80px 132px;
-				column-gap: $gap;
+			@include cart-checkout-below-medium-container {
+				grid-template-columns: 60px 132px;
+				column-gap: $gap-small;
 			}
 
 			.wc-block-cart-item__image {
 				grid-column-start: 1;
 				grid-row-start: 1;
+				padding-right: $gap;
+
+				@include cart-checkout-below-medium-container {
+					padding-right: 0;
+				}
 			}
 			.wc-block-cart-item__product {
 				grid-column-start: 2;
