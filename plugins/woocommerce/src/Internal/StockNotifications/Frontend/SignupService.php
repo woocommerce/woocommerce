@@ -207,6 +207,8 @@ class SignupService {
 		$notification->set_user_email( $user_email );
 
 		if ( ! empty( $posted_attributes ) ) {
+			// Sort by key so the stored blob matches what the duplicate lookup serializes.
+			ksort( $posted_attributes );
 			$notification->update_meta_data( 'posted_attributes', $posted_attributes );
 		}
 

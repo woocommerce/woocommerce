@@ -610,7 +610,8 @@ CREATE TABLE $meta_table_name (
 	 * attribute set.
 	 *
 	 * The posted attributes are matched as the serialized string they are stored as, so the
-	 * comparison is exact and case sensitive. An empty set matches any sign-up for the identity.
+	 * comparison is exact and case sensitive, but not sensitive to key order: both sides are
+	 * sorted by key. An empty set matches any sign-up for the identity.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID, or 0 to match on the email instead.
@@ -645,6 +646,9 @@ CREATE TABLE $meta_table_name (
 
 			return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
+
+		// Sort by key so the serialized blob is the same whatever order the caller built the set in.
+		ksort( $posted_attributes );
 
 		$meta_table = $this->get_meta_table_name();
 		$sql        = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
