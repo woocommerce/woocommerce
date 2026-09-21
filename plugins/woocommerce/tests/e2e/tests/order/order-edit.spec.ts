@@ -90,6 +90,22 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		} );
 	} );
 
+	test( 'the edit order screen shows its heading and the order number', async ( {
+		page,
+	} ) => {
+		await page.goto( orderEditUrl( orderId ) );
+
+		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+			'Edit order'
+		);
+		await expect(
+			page.getByRole( 'heading', {
+				name: `Order #${ orderId }`,
+				exact: true,
+			} )
+		).toBeVisible();
+	} );
+
 	test( 'can persist order status and date', async ( { page } ) => {
 		await page.goto( orderEditUrl( orderId ) );
 
