@@ -115,7 +115,6 @@ async function runAction( action: unknown ): Promise< void > {
 	const iterator = action as Iterator< unknown, unknown, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
-		// eslint-disable-next-line no-await-in-loop
 		const resolved = await next.value;
 		next = iterator.next( resolved );
 	}

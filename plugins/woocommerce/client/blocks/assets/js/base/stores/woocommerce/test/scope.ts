@@ -224,7 +224,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 		it( 'resolves productId 0 and an empty variation, without throwing, when the server never seeded template', () => {
 			// Every page other than the single-product template reaches
 			// this store with no `template` seeded at all.
-			mockState.template = undefined;
+			delete mockState.template;
 			mockContext = {};
 
 			expect( () => scopeState.productScope.productId ).not.toThrow();
@@ -233,7 +233,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 
 		it( 'resolves findProductScope to productId 0 and an empty variation when the ref and template are both empty', () => {
-			mockState.template = undefined;
+			delete mockState.template;
 
 			const envelope = scopeState.findProductScope( {} );
 
