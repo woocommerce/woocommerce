@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect the marketplace suggestions setting when fetching promotions and clarify that payment provider offers are excluded.
