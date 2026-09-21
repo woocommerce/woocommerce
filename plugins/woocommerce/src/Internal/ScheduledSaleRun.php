@@ -109,23 +109,8 @@ class ScheduledSaleRun {
 		$batch_ids = array();
 
 		foreach ( $this->entries as $entry ) {
-			if ( $entry instanceof WC_Product ) {
-				$entry = $entry->get_id();
-			} elseif ( is_object( $entry ) ) {
-				$entry = $entry->ID ?? null;
-			}
-
-			if ( is_int( $entry ) ) {
-				$product_id = $entry;
-			} elseif ( is_float( $entry ) && is_finite( $entry ) && floor( $entry ) === $entry ) {
-				$product_id = (int) $entry;
-			} elseif ( is_string( $entry ) && ctype_digit( $entry ) ) {
-				$product_id = (int) $entry;
-			} else {
-				continue;
-			}
-
-			if ( $product_id <= 0 || isset( $seen[ $product_id ] ) ) {
+			$product_id = $this->normalize_entry( $entry );
+			if ( null === $product_id || isset( $seen[ $product_id ] ) ) {
 				continue;
 			}
 
@@ -141,6 +126,32 @@ class ScheduledSaleRun {
 		if ( $batch_ids ) {
 			$this->process_batch( $batch_ids );
 		}
+	}
+
+	/**
+	 * Normalize a data-store row to a positive product ID.
+	 *
+	 * @param mixed $entry Product reference returned by the data store.
+	 * @return int|null Positive product ID, or null for an invalid row.
+	 */
+	private function normalize_entry( $entry ): ?int {
+		if ( $entry instanceof WC_Product ) {
+			$entry = $entry->get_id();
+		} elseif ( is_object( $entry ) ) {
+			$entry = $entry->ID ?? null;
+		}
+
+		if ( is_int( $entry ) ) {
+			$product_id = $entry;
+		} elseif ( is_float( $entry ) && is_finite( $entry ) && floor( $entry ) === $entry ) {
+			$product_id = (int) $entry;
+		} elseif ( is_string( $entry ) && ctype_digit( $entry ) ) {
+			$product_id = (int) $entry;
+		} else {
+			return null;
+		}
+
+		return $product_id > 0 ? $product_id : null;
 	}
 
 	/**
