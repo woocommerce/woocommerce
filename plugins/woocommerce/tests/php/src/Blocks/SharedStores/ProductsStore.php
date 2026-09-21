@@ -88,8 +88,8 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
 
-		$legacy_state = wp_interactivity_state( 'woocommerce/products' );
-		$this->assertArrayNotHasKey( 'products', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
+		$products_namespace_state = wp_interactivity_state( 'woocommerce/products' );
+		$this->assertArrayNotHasKey( 'products', $products_namespace_state, 'Nothing should be seeded into the woocommerce/products namespace.' );
 
 		$product->delete( true );
 	}
@@ -140,8 +140,8 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			);
 		}
 
-		$legacy_state = wp_interactivity_state( 'woocommerce/products' );
-		$this->assertArrayNotHasKey( 'productVariations', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
+		$products_namespace_state = wp_interactivity_state( 'woocommerce/products' );
+		$this->assertArrayNotHasKey( 'productVariations', $products_namespace_state, 'Nothing should be seeded into the woocommerce/products namespace.' );
 
 		$product->delete( true );
 	}
@@ -440,7 +440,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a state.productScopes record wins over the declared context for the same scopeName.
+	 * @testdox a state.productScopes record's draftCartItem.id wins over the declared context for the same scopeName.
 	 */
 	public function test_product_scope_record_wins_over_declared_context(): void {
 		$context_product = WC_Helper_Product::create_simple_product();
@@ -453,7 +453,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$this->store_namespace,
 			array(
 				'productScopes' => array(
-					'my-scope' => array( 'productId' => $record_product->get_id() ),
+					'my-scope' => array( 'draftCartItem' => array( 'id' => $record_product->get_id() ) ),
 				),
 			)
 		);
@@ -471,6 +471,101 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$context_product->delete( true );
 		$record_product->delete( true );
+	}
+
+	/**
+	 * @testdox a state.productScopes record's draftCartItem.variation selects the matching variation on the server.
+	 */
+	public function test_product_scope_record_variation_selects_matching_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$huge_red_zero = wc_get_product( $variation_ids[2] );
+		$selected      = array(
+			array(
+				'attribute' => 'size',
+				'value'     => 'huge',
+			),
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+			array(
+				'attribute' => 'number',
+				'value'     => '0',
+			),
+		);
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array(
+						'draftCartItem' => array(
+							'id'        => $product->get_id(),
+							'variation' => $selected,
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'scopeName' => 'my-scope' ) );
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( $huge_red_zero->get_id(), $resolved_variation['id'] );
+
+		$resolved_product = $envelope['product']();
+		$this->assertSame( $huge_red_zero->get_id(), $resolved_product['id'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox a record carrying only draftCartItem.quantity leaves identity resolving from the declared context.
+	 */
+	public function test_product_scope_record_with_only_quantity_leaves_identity_to_context(): void {
+		$product  = WC_Helper_Product::create_simple_product();
+		$selected = array(
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+		);
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => array( 'quantity' => 4 ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => $product->get_id(),
+				'variation' => $selected,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $product->get_id(), $envelope['productId']() );
+		$this->assertSame( $selected, $envelope['variation']() );
+
+		$draft = $envelope['draftCartItem']();
+		$this->assertSame( 4, $draft['quantity'] );
+		$this->assertSame( $product->get_id(), $draft['id'] );
+		$this->assertSame( $selected, $draft['variation'] );
+
+		$product->delete( true );
 	}
 
 	/**
@@ -517,6 +612,35 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$draft    = $envelope['draftCartItem']();
 
 		$this->assertSame( 3, $draft['quantity'] );
+	}
+
+	/**
+	 * @testdox state.productScope.draftCartItem carries a record's extension props unchanged.
+	 */
+	public function test_draft_cart_item_passes_through_extension_props(): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array(
+						'draftCartItem' => array( 'giftWrap' => true ),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => 42,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$draft    = $envelope['draftCartItem']();
+
+		$this->assertSame( 42, $draft['id'] );
+		$this->assertTrue( $draft['giftWrap'] );
 	}
 
 	/**
