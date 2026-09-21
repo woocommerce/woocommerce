@@ -20,7 +20,7 @@ jest.mock( '../use-form-validation', () => ( {
 } ) );
 
 describe( 'Form hidden fields', () => {
-	it( 'preserves an untouched default until first display without restoring a cleared value', () => {
+	it( 'preserves an untouched default across visibility changes without restoring a cleared value', () => {
 		let hidden = true;
 		useFormFields.mockImplementation( () => [
 			{
@@ -53,6 +53,14 @@ describe( 'Form hidden fields', () => {
 
 		expect( screen.queryByLabelText( 'VAT number (optional)' ) ).toBeNull();
 
+		hidden = false;
+		rerender( <TestForm /> );
+		expect( screen.getByLabelText( 'VAT number (optional)' ) ).toHaveValue(
+			'GB123456789'
+		);
+
+		hidden = true;
+		rerender( <TestForm /> );
 		hidden = false;
 		rerender( <TestForm /> );
 		expect( screen.getByLabelText( 'VAT number (optional)' ) ).toHaveValue(

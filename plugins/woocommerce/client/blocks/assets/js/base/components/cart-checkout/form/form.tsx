@@ -85,6 +85,7 @@ const Form = <
 	const previousFormFields = usePrevious( formFields );
 	const previousIsEditing = usePrevious( isEditing );
 	const previousValues = usePrevious( values );
+	const modifiedFields = useRef( new Set< string >() );
 
 	// Stores refs for rendered inputs so we can access them later.
 	const inputsRef = useRef<
@@ -193,7 +194,7 @@ const Form = <
 		previousIsEditing,
 	] );
 
-	// Clear fields when they become hidden, preserving defaults that started hidden.
+	// Clear modified fields when they become hidden, preserving untouched values.
 	useEffect( () => {
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
@@ -205,6 +206,7 @@ const Form = <
 					.filter(
 						( field ) =>
 							field.hidden &&
+							modifiedFields.current.has( field.key ) &&
 							previousFormFields?.find(
 								( previousField ) =>
 									previousField.key === field.key
@@ -270,6 +272,7 @@ const Form = <
 					const checkboxProps = {
 						checked: Boolean( value ),
 						onChange: ( checked: boolean ) => {
+							modifiedFields.current.add( field.key );
 							onChange( {
 								...values,
 								[ field.key ]: checked,
@@ -322,6 +325,7 @@ const Form = <
 							formId={ id }
 							key={ field.key }
 							onChange={ ( key, value ) => {
+								modifiedFields.current.add( key );
 								onChange( {
 									...values,
 									[ key ]: value,
@@ -347,6 +351,7 @@ const Form = <
 							{ ...fieldProps }
 							value={ values.country }
 							onChange={ ( newCountry ) => {
+								modifiedFields.current.add( field.key );
 								onChange( {
 									...values,
 									country: newCountry,
@@ -373,12 +378,13 @@ const Form = <
 							{ ...fieldProps }
 							country={ values.country }
 							value={ values.state }
-							onChange={ ( newValue ) =>
+							onChange={ ( newValue ) => {
+								modifiedFields.current.add( field.key );
 								onChange( {
 									...values,
 									state: newValue,
-								} )
-							}
+								} );
+							} }
 						/>
 					);
 				}
@@ -408,6 +414,7 @@ const Form = <
 									: ''
 							}
 							onChange={ ( newValue: string ) => {
+								modifiedFields.current.add( field.key );
 								onChange( {
 									...values,
 									[ field.key ]: newValue,
@@ -452,12 +459,13 @@ const Form = <
 								values[ field.key as keyof T ] as string
 							) ?? ''
 						}
-						onChange={ ( newValue: string ) =>
+						onChange={ ( newValue: string ) => {
+							modifiedFields.current.add( field.key );
 							onChange( {
 								...values,
 								[ field.key ]: newValue,
-							} )
-						}
+							} );
+						} }
 						customFormatter={ ( value: string ) => {
 							if ( field.key === 'postcode' ) {
 								return value.trimStart().toUpperCase();
