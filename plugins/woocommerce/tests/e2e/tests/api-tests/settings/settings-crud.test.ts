@@ -1803,7 +1803,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 								'Display suggestions within WooCommerce',
 							type: 'checkbox',
 							default: 'yes',
-							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. Payment provider offers aren&#039;t covered by this setting.',
+							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com.',
 							value: expect.any( String ),
 						} ),
 					] )
