@@ -35,8 +35,8 @@ export interface TotalsCouponProps {
 	 */
 	displayCouponForm?: boolean;
 	/**
-	 * Submit handler. Resolves true when the coupon was applied. Rejects with
-	 * an Error whose message is shown under the input when it was not.
+	 * Submit handler. Resolves when the coupon was applied. Rejects with an
+	 * Error whose message is shown under the input when it was not.
 	 */
 	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
 }
@@ -85,13 +85,9 @@ export const TotalsCoupon = ( {
 		}
 		setErrorMessage( '' );
 		void onSubmit( couponValue )
-			?.then( ( result ) => {
-				if ( result ) {
-					setCouponValue( '' );
-					setIsCouponFormVisible( false );
-				} else {
-					inputRef.current?.focus();
-				}
+			?.then( () => {
+				setCouponValue( '' );
+				setIsCouponFormVisible( false );
 			} )
 			.catch( ( error: Error ) => {
 				setErrorMessage( error.message );

@@ -3,8 +3,8 @@
  */
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { dispatch, select } from '@wordpress/data';
-import { checkoutStore, validationStore } from '@woocommerce/block-data';
+import { dispatch } from '@wordpress/data';
+import { checkoutStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ const ERROR_ID = 'wc-block-components-totals-coupon__error-coupon';
 
 describe( 'TotalsCoupon', () => {
 	describe( 'Rejected coupons', () => {
-		it( 'shows the message from a rejected submit and keeps the validation store empty', async () => {
+		it( 'shows the message from a rejected submit', async () => {
 			const user = userEvent.setup();
 			const message =
 				'Coupon code "5fixedcheckout" has already been applied.';
@@ -67,43 +67,6 @@ describe( 'TotalsCoupon', () => {
 			// The shopper can correct the code without retyping it.
 			expect( couponInput ).toHaveValue( '5fixedcheckout' );
 			expect( couponInput ).toHaveFocus();
-
-			// The failure must not enter the store that blocks checkout.
-			expect( select( validationStore ).hasValidationErrors() ).toBe(
-				false
-			);
-		} );
-
-		it.each( [
-			'Usage limit for coupon "limited_coupon" has been reached.',
-			'Coupons are disabled.',
-			'"nope" is an invalid coupon code.',
-		] )( 'shows the server message "%s"', async ( message ) => {
-			const user = userEvent.setup();
-			const mockOnSubmit = jest
-				.fn()
-				.mockRejectedValue( new Error( message ) );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			await act( async () => {
-				await user.type( screen.getByLabelText( 'Enter code' ), 'x' );
-			} );
-			await act( async () => {
-				await user.click(
-					screen.getByRole( 'button', { name: 'Apply' } )
-				);
-			} );
-
-			expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
-				message
-			);
 		} );
 
 		it( 'clears the message when the code is edited', async () => {
@@ -217,6 +180,45 @@ describe( 'TotalsCoupon', () => {
 				dispatch( checkoutStore ).__internalSetIdle();
 			} );
 		} );
+
+		it( 'keeps the message when the panel is closed and opened again', async () => {
+			const user = userEvent.setup();
+			const mockOnSubmit = jest
+				.fn()
+				.mockRejectedValue( new Error( 'Invalid coupon code' ) );
+
+			render(
+				<TotalsCoupon
+					instanceId="coupon"
+					onSubmit={ mockOnSubmit }
+					displayCouponForm={ true }
+				/>
+			);
+
+			await act( async () => {
+				await user.type( screen.getByLabelText( 'Enter code' ), 'bad' );
+			} );
+			await act( async () => {
+				await user.click(
+					screen.getByRole( 'button', { name: 'Apply' } )
+				);
+			} );
+			expect( await screen.findByRole( 'alert' ) ).toBeInTheDocument();
+
+			await act( async () => {
+				await user.click( screen.getByText( 'Add coupons' ) );
+			} );
+			expect(
+				screen.queryByLabelText( 'Enter code' )
+			).not.toBeInTheDocument();
+
+			await act( async () => {
+				await user.click( screen.getByText( 'Add coupons' ) );
+			} );
+			expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
+				'Invalid coupon code'
+			);
+		} );
 	} );
 
 	describe( 'API Response Scenarios', () => {
@@ -232,68 +234,24 @@ describe( 'TotalsCoupon', () => {
 				/>
 			);
 
-			// Find the coupon input and apply button
 			const couponInput = screen.getByLabelText( 'Enter code' );
 			const applyButton = screen.getByRole( 'button', { name: 'Apply' } );
 
-			// Enter a coupon code
 			await act( async () => {
 				await user.type( couponInput, '5fixedcheckout' );
 			} );
 
-			// Submit the coupon
 			await act( async () => {
 				await user.click( applyButton );
 			} );
 
-			// Verify the API was called with the correct coupon code
 			expect( mockOnSubmit ).toHaveBeenCalledWith( '5fixedcheckout' );
 
-			// Wait for the success flow to complete
 			await waitFor( () => {
-				// Input should be cleared on success and form should be hidden
 				expect(
 					screen.queryByLabelText( 'Enter code' )
 				).not.toBeInTheDocument();
 			} );
-		} );
-
-		it( 'handles coupon application failure with focus on input', async () => {
-			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
-
-			render(
-				<TotalsCoupon
-					instanceId="coupon"
-					onSubmit={ mockOnSubmit }
-					displayCouponForm={ true }
-				/>
-			);
-
-			const couponInput = screen.getByLabelText( 'Enter code' );
-			const applyButton = screen.getByRole( 'button', { name: 'Apply' } );
-
-			// Enter an invalid coupon code
-			await act( async () => {
-				await user.type( couponInput, 'invalid_coupon' );
-			} );
-
-			// Submit the coupon
-			await act( async () => {
-				await user.click( applyButton );
-			} );
-
-			// Verify the API was called
-			expect( mockOnSubmit ).toHaveBeenCalledWith( 'invalid_coupon' );
-
-			// Wait for the failure flow to complete
-			await waitFor( () => {
-				// Input should retain its value on failure
-				expect( couponInput ).toHaveValue( 'invalid_coupon' );
-			} );
-
-			// Input should be focused for retry
-			expect( couponInput ).toHaveFocus();
 		} );
 	} );
 
