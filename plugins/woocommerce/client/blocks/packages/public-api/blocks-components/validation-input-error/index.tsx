@@ -14,7 +14,10 @@ export interface ValidationInputErrorProps {
 	errorMessage?: string;
 	propertyName?: string;
 	elementId?: string;
-	// Id for the message element. Use it when errorMessage does not come from the validation store, so an input can still reference the message.
+	/**
+	 * Id for the message element. Use it when errorMessage does not come from
+	 * the validation store, so an input can still reference the message.
+	 */
 	id?: string;
 }
 
