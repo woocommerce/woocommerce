@@ -132,6 +132,13 @@ class FeaturesController {
 	private bool $initializing_feature_definitions = false;
 
 	/**
+	 * Flag indicating if a notice for reentrant feature definition access has been issued.
+	 *
+	 * @var bool
+	 */
+	private bool $issued_feature_definitions_notice = false;
+
+	/**
 	 * Flag indicating if we are currently delaying plugin normalization.
 	 *
 	 * @var bool
@@ -291,7 +298,21 @@ class FeaturesController {
 	 * Initialize hardcoded feature definitions if they have not been initialized yet.
 	 */
 	private function maybe_init_feature_definitions(): void {
-		if ( ! empty( $this->features ) || $this->initializing_feature_definitions ) {
+		if ( $this->initializing_feature_definitions ) {
+			if ( ! $this->issued_feature_definitions_notice ) {
+				// Set this before issuing the notice because wc_doing_it_wrong() invokes gettext callbacks.
+				$this->issued_feature_definitions_notice = true;
+				wc_doing_it_wrong(
+					__METHOD__,
+					__( 'FeaturesController methods that access feature definitions should not be called while feature definitions are being initialized. Use the woocommerce_init action or later.', 'woocommerce' ),
+					'11.3.0'
+				);
+			}
+
+			return;
+		}
+
+		if ( ! empty( $this->features ) ) {
 			return;
 		}
 
