@@ -67,6 +67,15 @@ class PaymentsExtensionSuggestions {
 	const EVERGREEN         = 'evergreen';
 	const MYPOS             = 'mypos';
 
+	/**
+	 * Helio Pay suggestion ID.
+	 *
+	 * Helio Pay is no longer a recommended partner and has no suggestion details. Retained so existing references do not fatal.
+	 *
+	 * @deprecated 11.3.0 Remove in 12.0.0.
+	 */
+	const HELIOPAY = 'heliopay';
+
 	/*
 	 * The extension types.
 	 *
