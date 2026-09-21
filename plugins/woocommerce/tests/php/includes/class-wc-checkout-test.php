@@ -884,7 +884,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @return int The order ID.
 	 */
 	private function leave_session_order_in_status( string $status ): int {
-		$product = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 		WC()->cart->add_to_cart( $product->get_id() );
 		WC()->cart->calculate_totals();
 
@@ -897,60 +897,296 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox process_checkout() answers a repeat submit with the order-received redirect when the session order already went through the gateway.
+	 * @testdox process_checkout() answers a repeat submit with the order-received redirect when the session order already moved past payment.
 	 */
 	public function test_process_checkout_answers_a_repeat_submit_with_the_order_received_redirect(): void {
 		$this->use_real_session();
-		$this->make_gateway_available( WC_Gateway_BACS::ID );
-		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
-		WC()->cart->add_to_cart( $product->get_id() );
-		$this->post_checkout_form( WC_Gateway_BACS::ID );
-
-		// A plugin dies inside the status transition the gateway triggers, after the order moved on but before the cart was emptied.
-		$die_in_transition = function () {
-			throw new Error( 'Call to a member function push_order() on null' );
-		};
-		add_action( 'woocommerce_order_status_on-hold', $die_in_transition );
-		try {
-			$this->submit_checkout_over_ajax();
-			$this->fail( 'The first submit should have died inside the status transition.' );
-		} catch ( Error $e ) {
-			$this->assertSame( 'Call to a member function push_order() on null', $e->getMessage() );
-		}
-		remove_action( 'woocommerce_order_status_on-hold', $die_in_transition );
-
-		$order_ids = wc_get_orders(
-			array(
-				'return' => 'ids',
-				'limit'  => -1,
-			)
-		);
-		$this->assertCount( 1, $order_ids, 'The first submit should have created the order before dying.' );
-		$order = wc_get_order( $order_ids[0] );
-		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ) );
-		$this->assertFalse( WC()->cart->is_empty(), 'The gateway never got to empty the cart.' );
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		// What a failure the checkout could not recover leaves behind: the session order moved on, the cart was never emptied.
+		$order = wc_get_order( $this->leave_session_order_in_status( OrderStatus::PROCESSING ) );
+		$this->post_checkout_form( WC_Gateway_COD::ID );
 
 		$response = $this->submit_checkout_over_ajax();
 
 		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
 		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
-		$this->assertSame(
-			$order_ids,
-			wc_get_orders(
-				array(
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			),
-			'The retry must not build a second order.'
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build a second order.' );
+		$this->assertStringContainsString( 'No second order was created', $this->latest_note( $order ), 'The merchant should see the repeat submit on the order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers an order the gateway moved on when an Error is raised inside the status transition.
+	 */
+	public function test_process_checkout_recovers_an_order_the_gateway_moved_on_when_the_transition_throws(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_BACS::ID );
+		$logger = $this->use_fake_logger();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( WC_Gateway_BACS::ID );
+		// BACS moves the order on-hold and only then empties the cart; a plugin dying in between is the reported shape.
+		add_action(
+			'woocommerce_order_status_on-hold',
+			function () {
+				throw new Error( 'Call to a member function push_order() on null' );
+			}
 		);
-		$latest_note = wc_get_order_notes(
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ), 'The status the gateway set must stand.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The cart the gateway never got to empty should be emptied.' );
+		$this->assertStringContainsString( 'push_order() on null', $this->latest_note( $order ), 'The merchant should see the failure on the order.' );
+		$this->assertCount( 1, $logger->error_calls );
+		$this->assertStringContainsString( 'push_order() on null', $logger->error_calls[0]['message'] );
+		$this->assertStringContainsString( __FILE__, $logger->error_calls[0]['message'], 'The log should say where the failure was raised.' );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers when a gateway that calls payment_complete() dies inside the resulting status transition.
+	 */
+	public function test_process_checkout_recovers_when_a_payment_complete_gateway_dies_in_the_transition(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'card_like',
+				function ( WC_Order $order ) {
+					$order->payment_complete( 'txn_1' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'card_like' );
+		add_action(
+			'woocommerce_order_status_processing',
+			function () {
+				throw new Error( 'Call to a member function push_order() on null' );
+			}
+		);
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertTrue( $order->has_status( OrderStatus::PROCESSING ) );
+		$this->assertTrue( WC()->cart->is_empty() );
+		$this->assertCount( 1, $this->order_ids(), 'No second order should exist.' );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers when an Exception follows a successful payment result.
+	 */
+	public function test_process_checkout_recovers_when_an_exception_follows_payment(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_BACS::ID );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( WC_Gateway_BACS::ID );
+		add_filter(
+			'woocommerce_payment_successful_result',
+			function () {
+				throw new Exception( 'Analytics integration timed out' );
+			}
+		);
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ) );
+		$this->assertStringContainsString( 'Analytics integration timed out', $this->latest_note( $order ) );
+	}
+
+	/**
+	 * @testdox process_checkout() lets an Error raised before the gateway moved the order on escape unchanged.
+	 */
+	public function test_process_checkout_lets_an_error_raised_before_payment_escape(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'exploding',
+				function () {
+					throw new Error( 'Gateway SDK not loaded' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'exploding' );
+
+		try {
+			$this->submit_checkout_over_ajax();
+			$this->fail( 'An Error raised before payment should still reach the fatal handler.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Gateway SDK not loaded', $e->getMessage() );
+		}
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'Nothing moved the order on, so nothing should be recovered.' );
+		$this->assertFalse( WC()->cart->is_empty() );
+		$this->assertStringNotContainsString( 'after payment', $this->latest_note( $order ) );
+	}
+
+	/**
+	 * @testdox process_checkout() reports an Exception raised before the gateway moved the order on as a failure, as before.
+	 */
+	public function test_process_checkout_reports_an_exception_raised_before_payment_as_a_failure(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'declining',
+				function () {
+					throw new Exception( 'Your card was declined.' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'declining' );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failure', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertStringContainsString( 'Your card was declined.', $response['messages'] ?? '' );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ) );
+		$this->assertFalse( WC()->cart->is_empty(), 'The shopper should be able to try again with the same cart.' );
+	}
+
+	/**
+	 * IDs of every order in the database, oldest first.
+	 *
+	 * @return int[]
+	 */
+	private function order_ids(): array {
+		return wc_get_orders(
+			array(
+				'return'  => 'ids',
+				'limit'   => -1,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+			)
+		);
+	}
+
+	/**
+	 * Content of the most recent note on an order, or an empty string.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 */
+	private function latest_note( WC_Order $order ): string {
+		$notes = wc_get_order_notes(
 			array(
 				'order_id' => $order->get_id(),
 				'limit'    => 1,
 			)
-		)[0] ?? null;
-		$this->assertStringContainsString( 'No second order was created', $latest_note->content ?? '', 'The merchant should see the repeat submit on the order.' );
+		);
+
+		return $notes[0]->content ?? '';
+	}
+
+	/**
+	 * Build a throwaway gateway whose process_payment() runs the given callback with the order, then reports success.
+	 *
+	 * @param string   $id              Gateway ID.
+	 * @param callable $process_payment Called with the WC_Order; throw from it to simulate a gateway failure.
+	 * @return WC_Payment_Gateway
+	 */
+	private function create_gateway( string $id, callable $process_payment ): WC_Payment_Gateway {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class( $id, $process_payment ) extends WC_Payment_Gateway {
+			private $process_payment_callback;
+
+			public function __construct( string $id, callable $process_payment ) {
+				$this->id                       = $id;
+				$this->title                    = $id;
+				$this->enabled                  = 'yes';
+				$this->process_payment_callback = $process_payment;
+			}
+
+			public function process_payment( $order_id ) {
+				$order = wc_get_order( $order_id );
+				( $this->process_payment_callback )( $order );
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $this->get_return_url( $order ),
+				);
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
+	 * Route wc_get_logger() to a fake that records error() calls, so a test can assert what the checkout logged.
+	 *
+	 * @return object The fake logger, with a public $error_calls array of [ 'message' => ..., 'context' => ... ].
+	 */
+	private function use_fake_logger(): object {
+		// phpcs:disable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
+		$logger = new class() implements WC_Logger_Interface {
+			public array $error_calls = array();
+
+			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
+				unset( $handle, $message, $level );
+				return true;
+			}
+
+			public function log( $level, $message, $context = array() ) {
+				unset( $level, $message, $context );
+			}
+
+			public function emergency( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function alert( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function critical( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function error( $message, $context = array() ) {
+				$this->error_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function warning( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function notice( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function info( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+
+			public function debug( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+		};
+		// phpcs:enable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
+
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $logger ) {
+				return $logger;
+			}
+		);
+
+		return $logger;
 	}
 
 	/**
@@ -969,15 +1205,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make a registered gateway available at checkout without touching its stored settings.
+	 * Make a gateway available at checkout without touching stored settings: a registered one by ID, or an instance.
 	 *
-	 * @param string $gateway_id Gateway ID.
+	 * @param string|WC_Payment_Gateway $gateway Gateway ID or gateway object.
 	 */
-	private function make_gateway_available( string $gateway_id ): void {
+	private function make_gateway_available( $gateway ): void {
+		$gateway = $gateway instanceof WC_Payment_Gateway ? $gateway : WC()->payment_gateways()->payment_gateways()[ $gateway ];
+
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function ( $gateways ) use ( $gateway_id ) {
-				$gateways[ $gateway_id ] = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
+			function ( $gateways ) use ( $gateway ) {
+				$gateways[ $gateway->id ] = $gateway;
 
 				return $gateways;
 			}
