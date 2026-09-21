@@ -13,6 +13,7 @@ import {
 	ExperimentalOrderMeta,
 	SlotFillProvider,
 } from '@woocommerce/blocks-checkout';
+import { useLayoutEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -196,6 +197,50 @@ describe( 'Checkout Order Summary placement', () => {
 			</SlotFillProvider>
 		);
 	};
+
+	it( 'connects extension content before its first layout effect', () => {
+		const firstLayout = jest.fn();
+		const ExtensionContent = () => {
+			const element = useRef( null );
+
+			useLayoutEffect( () => {
+				firstLayout( {
+					isConnected: element.current.isConnected,
+					isInline: Boolean(
+						element.current.closest(
+							'.wc-block-components-checkout-order-summary__content'
+						)
+					),
+				} );
+			}, [] );
+
+			return (
+				<div ref={ element } data-testid="layout-effect-extension" />
+			);
+		};
+
+		baseContext.useContainerWidthContext.mockReturnValue(
+			containerWidthOf( '' )
+		);
+		render(
+			<SlotFillProvider>
+				<ExperimentalOrderMeta>
+					<ExtensionContent />
+				</ExperimentalOrderMeta>
+				<SummaryBlock>
+					<div />
+				</SummaryBlock>
+				<CheckoutOrderSummarySlot />
+			</SlotFillProvider>
+		);
+
+		expect( screen.getByTestId( 'layout-effect-extension' ) ).toBeVisible();
+		expect( firstLayout ).toHaveBeenCalledTimes( 1 );
+		expect( firstLayout ).toHaveBeenCalledWith( {
+			isConnected: true,
+			isInline: true,
+		} );
+	} );
 
 	it.each( [ 'is-mobile', 'is-small', 'is-medium' ] )(
 		'moves the summary to the action area when the container reports %p',

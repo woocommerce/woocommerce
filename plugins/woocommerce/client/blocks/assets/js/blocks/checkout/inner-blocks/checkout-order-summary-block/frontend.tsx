@@ -47,6 +47,7 @@ const FrontendBlock = ( {
 		useState< HTMLDivElement | null >( null );
 	const [ actionAreaAnchor, setActionAreaAnchor ] =
 		useState< HTMLDivElement | null >( null );
+	const [ isContentReady, setIsContentReady ] = useState( false );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
 		container.className =
@@ -102,13 +103,14 @@ const FrontendBlock = ( {
 		titleElement,
 	] );
 
-	// Moving a stable portal container keeps extension components mounted while
-	// placing the summary in the part of the checkout where it is needed.
+	// Attach the empty container before mounting portal children. Later moves
+	// preserve the same mounted extension component instances.
 	useLayoutEffect( () => {
 		const destination = showInline ? inlineHost : actionAreaHost;
 
 		if ( destination ) {
 			destination.appendChild( contentContainer );
+			setIsContentReady( true );
 		}
 	}, [ actionAreaHost, contentContainer, inlineHost, showInline ] );
 
@@ -177,19 +179,20 @@ const FrontendBlock = ( {
 					/>
 				</div>
 			</CheckoutOrderSummaryFill>
-			{ createPortal(
-				<>
-					{ children }
-					<div className="wc-block-components-totals-wrapper">
-						<TotalsFooterItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
-						/>
-					</div>
-					<OrderMetaSlotFill />
-				</>,
-				contentContainer
-			) }
+			{ isContentReady &&
+				createPortal(
+					<>
+						{ children }
+						<div className="wc-block-components-totals-wrapper">
+							<TotalsFooterItem
+								currency={ totalsCurrency }
+								values={ cartTotals }
+							/>
+						</div>
+						<OrderMetaSlotFill />
+					</>,
+					contentContainer
+				) }
 		</>
 	);
 };
