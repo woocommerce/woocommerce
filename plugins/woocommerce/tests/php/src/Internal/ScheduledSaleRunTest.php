@@ -1,6 +1,6 @@
 <?php
 /**
- * ScheduledSaleBatchProcessorTest class file.
+ * ScheduledSaleRunTest class file.
  */
 
 declare( strict_types = 1 );
@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\ScheduledSaleBatchProcessor;
+use Automattic\WooCommerce\Internal\ScheduledSaleRun;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Helper_Product;
 use WC_Product_Variable;
@@ -19,23 +19,18 @@ use WC_Unit_Test_Case;
 use WP_Object_Cache;
 
 /**
- * Tests for the ScheduledSaleBatchProcessor class.
+ * Tests for the ScheduledSaleRun class.
  */
-class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
+class ScheduledSaleRunTest extends WC_Unit_Test_Case {
 
 	/**
-	 * The System Under Test.
+	 * Process a complete scheduled-sale run.
 	 *
-	 * @var ScheduledSaleBatchProcessor
+	 * @param array  $rows Data-store rows.
+	 * @param string $mode Sale mode.
 	 */
-	private $sut;
-
-	/**
-	 * Set up test fixtures.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-		$this->sut = wc_get_container()->get( ScheduledSaleBatchProcessor::class );
+	private function process_run( array $rows, string $mode ): void {
+		( new ScheduledSaleRun( $rows, $mode ) )->process();
 	}
 
 	/**
@@ -50,7 +45,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$product->save();
 		update_post_meta( $product->get_id(), '_price', 100 );
 
-		$this->sut->process( array( $product->get_id() ), 'start' );
+		$this->process_run( array( $product->get_id() ), 'start' );
 
 		$this->assertEquals( 50, get_post_meta( $product->get_id(), '_price', true ), 'The sale price should be the active price once the sale starts.' );
 	}
@@ -66,7 +61,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Scheduled sale mode must be either start or end.' );
 
-		$this->sut->process( $product_ids, 'invalid' );
+		$this->process_run( $product_ids, 'invalid' );
 	}
 
 	/**
@@ -120,7 +115,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 
 		try {
 			$GLOBALS['wp_object_cache'] = $spy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Swapped back in finally.
-			$this->sut->process( array( $product->get_id() ), 'end' );
+			$this->process_run( array( $product->get_id() ), 'end' );
 		} finally {
 			$GLOBALS['wp_object_cache'] = $real_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			wp_using_ext_object_cache( $was_external );
@@ -147,7 +142,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		wp_cache_set( 'sentinel', 'release me', 'products' );
 		wp_cache_set( 'sentinel', 'release me', 'term-queries' );
 
-		$this->sut->process( array( $product->get_id() ), 'end' );
+		$this->process_run( array( $product->get_id() ), 'end' );
 
 		$this->assertFalse( wp_cache_get( 'sentinel', 'products' ), 'The products group must be flushed when the cache is request-local.' );
 		$this->assertFalse( wp_cache_get( 'sentinel', 'term-queries' ), 'The term-queries group must be flushed when the cache is request-local.' );
@@ -171,7 +166,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 			$product_cache->set( $unrelated_product );
 			$this->assertTrue( $product_cache->is_cached( $product->get_id() ), 'Fixture precondition: the product must be cached before the run.' );
 
-			$this->sut->process( array( $product->get_id() ), 'end' );
+			$this->process_run( array( $product->get_id() ), 'end' );
 
 			$this->assertFalse( $product_cache->is_cached( $product->get_id() ), 'The processed product must be released from product_objects.' );
 			$this->assertTrue( $product_cache->is_cached( $unrelated_product->get_id() ), 'Per-ID cleanup must leave unrelated product_objects entries intact.' );
@@ -232,7 +227,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 			2
 		);
 
-		$this->sut->process( $ids, 'end' );
+		$this->process_run( $ids, 'end' );
 
 		$this->assertFalse( $fired_with_wrong_type, 'clean_object_term_cache must not fire with a post type that does not match the ids it was given.' );
 
@@ -256,7 +251,7 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 
 		$product = WC_Helper_Product::create_missed_sale_end_product();
 
-		$this->sut->process( array( $product->get_id() ), 'end' );
+		$this->process_run( array( $product->get_id() ), 'end' );
 
 		// Assert before get_post_meta() can repopulate the released cache.
 		$this->assertFalse( wp_cache_get( $product->get_id(), 'posts' ), 'The batch did not release its own post cache entry.' );
@@ -265,6 +260,70 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'Fixture precondition: the product should have been processed.' );
 		$this->assertNotFalse( wp_cache_get( $page_id, 'posts' ), 'The run released an unrelated post from the shared posts cache.' );
 		$this->assertNotFalse( wp_cache_get( $page_id, 'post_meta' ), 'The run released unrelated meta from the shared post_meta cache.' );
+	}
+
+	/**
+	 * @testdox Supported data-store result shapes still settle.
+	 */
+	public function test_settles_supported_data_store_result_shapes(): void {
+		$ids = array();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$ids[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
+		}
+
+		$rows = array(
+			(string) $ids[0],
+			wc_get_product( $ids[1] ),
+			get_post( $ids[2] ),
+		);
+
+		$this->process_run( $rows, 'end' );
+
+		foreach ( $ids as $index => $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id}, supplied as " . wp_json_encode( $rows[ $index ] ) . ', should have settled.'
+			);
+		}
+	}
+
+	/**
+	 * Malformed data-store rows that could cast onto an unrelated post.
+	 *
+	 * @return array
+	 */
+	public function provider_malformed_rows(): array {
+		return array(
+			'string with trailing junk' => array( fn( int $id ) => $id . 'abc' ),
+			'fractional float'          => array( fn( int $id ) => $id + 0.9 ),
+			'fractional string'         => array( fn( int $id ) => $id . '.9' ),
+			'object with junk ID'       => array( fn( int $id ) => (object) array( 'ID' => $id . 'abc' ) ),
+			'object with fractional ID' => array( fn( int $id ) => (object) array( 'ID' => $id + 0.9 ) ),
+			'object without ID'         => array( fn( int $id ) => (object) array( 'id' => $id ) ),
+			'negative int'              => array( fn( int $id ) => -$id ),
+			'exponent string'           => array( fn( int $id ) => $id . 'e0' ),
+		);
+	}
+
+	/**
+	 * @testdox A malformed row does not stop the run or evict an unrelated post.
+	 * @dataProvider provider_malformed_rows
+	 *
+	 * @param callable $make_row Builds the malformed row from the decoy post id.
+	 */
+	public function test_drops_malformed_rows( callable $make_row ): void {
+		$product  = WC_Helper_Product::create_missed_sale_end_product();
+		$decoy_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$row      = $make_row( $decoy_id );
+		get_post( $decoy_id );
+		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'Fixture precondition: the decoy page should be primed before the run.' );
+
+		$this->process_run( array( $product->get_id(), $row ), 'end' );
+
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'A malformed row stopped the run before the real product settled.' );
+		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'The release cast ' . wp_json_encode( $row ) . " onto post {$decoy_id} and evicted an unrelated page." );
 	}
 
 	/**
@@ -284,9 +343,36 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$this->sut->process( array( $product->get_id(), (string) $product->get_id() ), 'end' );
+		$this->process_run( array( $product->get_id(), (string) $product->get_id() ), 'end' );
 
 		$this->assertSame( 1, $saves, 'A duplicated id must settle with a single save, not one per row.' );
 		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'Fixture precondition: the product should have been processed.' );
+	}
+
+	/**
+	 * @testdox An id repeated across batch boundaries is saved once.
+	 */
+	public function test_processes_a_duplicated_id_across_batches_once(): void {
+		$product = WC_Helper_Product::create_missed_sale_end_product();
+		$rows    = array( $product->get_id() );
+		for ( $i = 1; $i < ScheduledSaleRun::BATCH_SIZE; $i++ ) {
+			$rows[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
+		}
+		$rows[] = (string) $product->get_id();
+
+		$saves = 0;
+		add_action(
+			'woocommerce_update_product',
+			static function ( $updated_id ) use ( $product, &$saves ) {
+				if ( (int) $updated_id === $product->get_id() ) {
+					++$saves;
+				}
+			}
+		);
+
+		$this->process_run( $rows, 'end' );
+
+		$this->assertSame( 1, $saves, 'An id repeated after a batch boundary must not be saved twice.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'The product should still settle.' );
 	}
 }

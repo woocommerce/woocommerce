@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
-use Automattic\WooCommerce\Internal\ScheduledSaleBatchProcessor;
+use Automattic\WooCommerce\Internal\ScheduledSaleRun;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -847,7 +847,7 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
- * Products are processed in batches by ScheduledSaleBatchProcessor. Before hooks run
+ * Products are processed in batches by ScheduledSaleRun. Before hooks run
  * before any batch is primed; after hooks run after the last batch's caches are cleared.
  *
  * @since 3.0.0
@@ -855,7 +855,6 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
-	$processor              = wc_get_container()->get( ScheduledSaleBatchProcessor::class );
 	$must_refresh_transient = false;
 
 	// Sales which are due to start.
@@ -864,7 +863,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		$processor->process( $product_ids, 'start' );
+		( new ScheduledSaleRun( $product_ids, 'start' ) )->process();
 
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
@@ -876,7 +875,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		$processor->process( $product_ids, 'end' );
+		( new ScheduledSaleRun( $product_ids, 'end' ) )->process();
 
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
