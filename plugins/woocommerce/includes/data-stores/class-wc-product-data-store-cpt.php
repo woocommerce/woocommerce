@@ -621,7 +621,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 					$id       = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
 					$options  = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
-					$ordering = array_filter( array_map( 'absint', explode( '|', (string) $meta_value['value'] ) ) );
+					$ordering = array_filter( array_map( 'absint', wc_get_text_attributes( $meta_value['value'] ) ) );
 					if ( ! empty( $ordering ) ) {
 						$options = array_merge(
 							array_values( array_intersect( $ordering, $options ) ),
@@ -1101,8 +1101,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					} elseif ( $attribute->is_taxonomy() ) {
 						$term_ids = wp_list_pluck( (array) $attribute->get_terms(), 'term_id' );
 						wp_set_object_terms( $product->get_id(), $term_ids, $attribute->get_name() );
-						$value = implode( '|', $term_ids );
-						// Store ordered term IDs.
+						// Store ordered term IDs as the attribute value.
+						$value = wc_implode_text_attributes( $term_ids );
 					} else {
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
