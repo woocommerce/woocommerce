@@ -627,4 +627,27 @@ CREATE TABLE $meta_table_name (
 
 		return $results;
 	}
+
+	/**
+	 * Count the notifications of each status.
+	 *
+	 * @return array<string, int> Map of status to the number of notifications in it.
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		$results = $wpdb->get_results(
+			"SELECT status, COUNT(id) AS total FROM $table GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		$counts = array();
+		foreach ( (array) $results as $result ) {
+			$counts[ (string) $result['status'] ] = (int) $result['total'];
+		}
+
+		return $counts;
+	}
 }
