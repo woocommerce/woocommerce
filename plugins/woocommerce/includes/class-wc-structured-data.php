@@ -290,6 +290,13 @@ class WC_Structured_Data {
 				} else {
 					unset( $markup['gtin'] );
 				}
+
+				$variation_mpn = $selected_variation->get_mpn();
+				if ( '' !== $variation_mpn ) {
+					$markup['mpn'] = $variation_mpn;
+				} else {
+					unset( $markup['mpn'] );
+				}
 			}
 
 			if ( $product->is_type( ProductType::VARIABLE ) && ! $selected_variation ) {

@@ -379,7 +379,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'tokens' => $tokens,
 			);
 
-			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $request['search_mpn'], $args['s'] );
+			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $request['search_mpn'], $request['mpn'], $args['s'] );
 		}
 
 		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';

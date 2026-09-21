@@ -151,52 +151,68 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 	 */
 	public static function mpn_search_provider(): array {
 		return array(
-			'exact MPN'                => array( array( 'mpn' => 'PART_%_42' ), array( 'target' ) ),
-			'literal wildcard symbols' => array( array( 'search_mpn' => '_%' ), array( 'target' ) ),
-			'partial MPN and name'     => array(
+			'exact MPN'                         => array( array( 'mpn' => 'PART_%_42' ), array( 'target' ) ),
+			'literal wildcard symbols'          => array( array( 'search_mpn' => '_%' ), array( 'target' ) ),
+			'partial MPN and name'              => array(
 				array(
 					'search_mpn' => '_%',
 					'search'     => 'target',
 				),
 				array( 'target' ),
 			),
-			'partial MPN and SKU'      => array(
+			'partial MPN and SKU'               => array(
 				array(
 					'search_mpn' => '_%',
 					'search_sku' => 'mpn-target',
 				),
 				array( 'target' ),
 			),
-			'MPN must also match SKU'  => array(
+			'MPN must also match SKU'           => array(
 				array(
 					'search_mpn' => 'missing',
 					'search_sku' => 'mpn-target',
 				),
 				array(),
 			),
-			'MPN must match name/SKU'  => array(
+			'MPN must match name/SKU'           => array(
 				array(
 					'search_mpn'         => 'missing',
 					'search_name_or_sku' => 'target',
 				),
 				array(),
 			),
-			'partial supersedes exact' => array(
+			'partial supersedes exact'          => array(
 				array(
 					'search_mpn' => '_%',
 					'mpn'        => 'missing',
 				),
 				array( 'target' ),
 			),
-			'partial zero MPN'         => array( array( 'search_mpn' => '0' ), array( 'variation' ) ),
-			'exact zero MPN'           => array( array( 'mpn' => '0' ), array( 'variation' ) ),
-			'explicit search fields'   => array(
+			'partial zero MPN'                  => array( array( 'search_mpn' => '0' ), array( 'variation' ) ),
+			'exact zero MPN'                    => array( array( 'mpn' => '0' ), array( 'variation' ) ),
+			'explicit search fields'            => array(
 				array(
 					'search'        => '_%',
 					'search_fields' => array( 'mpn' ),
 					'search_mpn'    => 'missing',
 				),
 				array( 'target' ),
+			),
+			'search fields supersede exact MPN' => array(
+				array(
+					'search'        => '_%',
+					'search_fields' => array( 'mpn' ),
+					'mpn'           => 'missing',
+				),
+				array( 'target' ),
+			),
+			'name search supersedes exact MPN'  => array(
+				array(
+					'search'        => 'other',
+					'search_fields' => array( 'name' ),
+					'mpn'           => 'PART_%_42',
+				),
+				array( 'other' ),
 			),
 		);
 	}
@@ -265,6 +281,43 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 		$sut = new WC_Structured_Data();
 		$sut->generate_product_data( $product );
 		$this->assertSame( 'EXTENSION-MPN', $sut->get_data()[0]['mpn'] );
+	}
+
+	/**
+	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
+	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
+	 *           ["0", true, "0"]
+	 *           ["", true, null]
+	 *           ["CHILD-PART", false, "PARENT-PART"]
+	 *
+	 * @param string      $variation_mpn Variation MPN.
+	 * @param bool        $selected Whether the request selects the variation.
+	 * @param string|null $expected_mpn Expected MPN, or null when it should be omitted.
+	 */
+	public function test_mpn_structured_data_for_selected_variation( string $variation_mpn, bool $selected, ?string $expected_mpn ): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_mpn( 'PARENT-PART' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_mpn( $variation_mpn );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+
+		if ( $selected ) {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+		}
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+		$data = $sut->get_data()[0];
+
+		$this->assertSame( $selected ? 'Offer' : 'AggregateOffer', $data['offers'][0]['@type'] );
+		if ( null === $expected_mpn ) {
+			$this->assertArrayNotHasKey( 'mpn', $data );
+		} else {
+			$this->assertSame( $expected_mpn, $data['mpn'] );
+		}
 	}
 
 	/**
