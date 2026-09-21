@@ -28,12 +28,12 @@ const test = base.extend< {
 const storeConsent =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-// The namespace the migration retired. A directive names a namespace either
-// as `data-wp-interactive`'s own value, or as an explicit `<namespace>::`
-// prefix on any other `data-wp-*` directive's value (the Interactivity API's
-// own `nsPathRegExp`); a bare substring search would also flag the unrelated
+// A directive names a namespace either as `data-wp-interactive`'s own value,
+// or as an explicit `<namespace>::` prefix on any other `data-wp-*`
+// directive's value (the Interactivity API's own `nsPathRegExp`); a bare
+// substring search would also flag the unrelated
 // `woocommerce/products-by-attribute` block name.
-const RETIRED_NAMESPACE = 'woocommerce/products';
+const PRODUCTS_NAMESPACE = 'woocommerce/products';
 
 type NamespaceAudit = {
 	stateNamespaces: string[];
@@ -137,9 +137,9 @@ async function readUnifiedStoreState(
 	}, lock );
 }
 
-function expectNoRetiredNamespace( audit: NamespaceAudit ) {
-	expect( audit.stateNamespaces ).not.toContain( RETIRED_NAMESPACE );
-	expect( audit.directiveNamespaces ).not.toContain( RETIRED_NAMESPACE );
+function expectOnlyWooCommerceNamespace( audit: NamespaceAudit ) {
+	expect( audit.stateNamespaces ).not.toContain( PRODUCTS_NAMESPACE );
+	expect( audit.directiveNamespaces ).not.toContain( PRODUCTS_NAMESPACE );
 	expect( audit.stateNamespaces ).toContain( 'woocommerce' );
 }
 
@@ -150,17 +150,16 @@ function expectUnifiedStoreReachable( storeState: UnifiedStoreShape ) {
 }
 
 /**
- * The migration in T3 to T18 folded `woocommerce/products` and
- * `woocommerce/cart` into the one `woocommerce` Interactivity API store. This
- * spec proves the retired namespace is gone from the fixture set's serialized
- * state and directives, that `state.products`, `state.cart` and
+ * WooCommerce resolves product, cart and draft data through the single
+ * `woocommerce` Interactivity API store. This spec proves no page in the
+ * fixture set serializes a `woocommerce/products` namespace in its state or
+ * its directives, that `state.products`, `state.cart` and
  * `state.productScopes` all resolve under `woocommerce` on those pages, and
  * that a script holding WooCommerce's own acknowledgement string can still
- * reach the store. A hit here is a defect in T3, T4, T5 or T18, not in this
- * spec.
+ * reach the store.
  */
 test.describe( 'Unified `woocommerce` store registration', () => {
-	test( 'no page serializes the retired woocommerce/products namespace, and a script with the acknowledgement string reaches state.products, state.cart and state.productScopes', async ( {
+	test( 'no page serializes a woocommerce/products namespace, and a script with the acknowledgement string reaches state.products, state.cart and state.productScopes', async ( {
 		page,
 		editor,
 		pageObject,
@@ -185,7 +184,7 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 
 			await page.goto( '/product/store-registration-simple-fixture/' );
 
-			expectNoRetiredNamespace( await auditNamespaces( page ) );
+			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);
@@ -235,7 +234,7 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 
 			await page.goto( `/?p=${ productCollectionPostId }` );
 
-			expectNoRetiredNamespace( await auditNamespaces( page ) );
+			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);
@@ -244,7 +243,7 @@ test.describe( 'Unified `woocommerce` store registration', () => {
 		await test.step( 'the Mini-Cart page', async () => {
 			await page.goto( '/mini-cart/' );
 
-			expectNoRetiredNamespace( await auditNamespaces( page ) );
+			expectOnlyWooCommerceNamespace( await auditNamespaces( page ) );
 			expectUnifiedStoreReachable(
 				await readUnifiedStoreState( page, storeConsent )
 			);

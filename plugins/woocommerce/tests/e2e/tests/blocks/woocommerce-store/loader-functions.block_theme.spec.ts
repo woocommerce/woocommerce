@@ -8,8 +8,8 @@ import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
  * `wc_interactivity_api_load_purchasable_child_products` and
  * `wc_interactivity_api_load_variations` are global functions third-party
  * code can call directly, outside of any WooCommerce block. This spec
- * proves each one still has the name and the signature it has on the base
- * branch, by calling all three from a fixture plugin
+ * proves each one keeps the name and the signature third-party code depends
+ * on, by calling all three from a fixture plugin
  * (`woocommerce-blocks-test-loader-functions`) the same way the blocks that
  * ship in this codebase do — same argument list, same consent statement —
  * and checking the data they return lands where the unified `woocommerce`
