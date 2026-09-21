@@ -1765,21 +1765,40 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_date_type', 'date_paid' );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		// `HONG KONG` and `NEW TERRITORIES` are state codes in `i18n/states.php`, and the filter
-		// input offers them, so dropping the space would answer with an empty report.
+		// `HONG KONG` and `NEW TERRITORIES` are state codes in `i18n/states.php` and the filter
+		// input offers them as they are written there, but `WC_Tax` drops the space on its way
+		// into the rate. The rates go in through `WC_Tax` so the codes read as the store writes
+		// them rather than as this test imagines them.
+		$rate_ids = array();
+		foreach ( array( 'HONG KONG', 'KOWLOON' ) as $state ) {
+			$rate_ids[ $state ] = (int) WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'HK',
+					'tax_rate_state'    => $state,
+					'tax_rate'          => '5',
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => 1,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 1,
+					'tax_rate_order'    => 0,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
 		$this->seed_order_with_tax_lines(
 			array(
 				array(
-					'code'         => 'HK-HONG KONG-VAT-1',
+					'code'         => WC_Tax::get_rate_code( $rate_ids['HONG KONG'] ),
 					'label'        => 'VAT',
-					'rate_id'      => 401,
+					'rate_id'      => $rate_ids['HONG KONG'],
 					'rate_percent' => 5.0,
 					'tax_total'    => 5.0,
 				),
 				array(
-					'code'         => 'HK-KOWLOON-VAT-1',
+					'code'         => WC_Tax::get_rate_code( $rate_ids['KOWLOON'] ),
 					'label'        => 'VAT',
-					'rate_id'      => 402,
+					'rate_id'      => $rate_ids['KOWLOON'],
 					'rate_percent' => 5.0,
 					'tax_total'    => 3.0,
 				),
@@ -1803,11 +1822,31 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
 
-		foreach ( array( 'US:C@A', 'U$S', 'US%', 'US:C_' ) as $location ) {
+		// `WC_Tax` leaves a country as it is, so an unreadable one has to match nothing rather
+		// than be rewritten into a country that exists. `%` and `_` are `LIKE` wildcards and have
+		// to stay literal, or a filter would answer with every location.
+		foreach ( array( 'U$S', 'US%', 'US:C_' ) as $location ) {
 			$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => $location ) );
 
-			$this->assertCount( 0, $rows, "Dropping the unexpected character of {$location} would answer with another location's tax." );
+			$this->assertCount( 0, $rows, "Reading {$location} loosely would answer with another location's tax." );
 		}
+	}
+
+	/**
+	 * @testdox Taxes report reads a state the way the rate that carries it was written.
+	 */
+	public function test_taxes_report_normalizes_a_state_the_way_a_rate_is_written(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// `WC_Tax` would have written a rate for this state as `US-CA-`, so the filter reads it
+		// the same way instead of matching a code no rate can carry.
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:C@A' ) );
+
+		$this->assertCount( 1, $rows, 'A state should be read through the same pass that wrote the rate.' );
+		$this->assertSame( 7.25, $rows[0]['total_tax'], 'The reported row should be the Californian one.' );
 	}
 
 	/**

@@ -152,13 +152,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		foreach ( explode( ',', $locations ) as $location ) {
 			$parts   = explode( ':', $location, 2 );
-			$country = self::normalize_location_code( $parts[0] );
+			$country = self::normalize_country_code( $parts[0] );
 
 			if ( '' === $country ) {
 				continue;
 			}
 
-			$state = isset( $parts[1] ) ? self::normalize_location_code( $parts[1] ) : '';
+			$state = isset( $parts[1] ) ? self::normalize_state_code( $parts[1] ) : '';
 
 			// A location naming an empty state (`US:`) is not the country it names. Falling back
 			// to the country prefix would answer an include with every row of that country
@@ -186,18 +186,31 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Normalize a country or state code the way `WC_Tax` does before it writes a rate.
+	 * Normalize a country code the way `WC_Tax` does before it writes a rate.
 	 *
-	 * `WC_Tax` only uppercases the code, so this does the same. Dropping the characters it keeps
-	 * would hide the state codes that hold one, `HK-HONG KONG` among them, and rewriting a code
-	 * that holds an unexpected character would answer with a different location instead of with
-	 * nothing. A code the store never wrote is left as it is and matches no row.
+	 * `WC_Tax::format_tax_rate_country()` only uppercases it, so this does the same. A code the
+	 * store never wrote is left as it is and matches no row.
 	 *
-	 * @param string $code Country or state code.
+	 * @param string $code Country code.
 	 * @return string
 	 */
-	private static function normalize_location_code( string $code ): string {
+	private static function normalize_country_code( string $code ): string {
 		return strtoupper( trim( $code ) );
+	}
+
+	/**
+	 * Normalize a state code the way `WC_Tax` does before it writes a rate.
+	 *
+	 * `WC_Tax::prepare_tax_rate()` runs a state through `sanitize_key()` first, which drops every
+	 * character outside `a-z0-9_-`. The filter input offers the `HONG KONG` and `NEW TERRITORIES`
+	 * codes of `i18n/states.php` as they are written there, so without the same pass they would
+	 * be matched against a code the store never wrote and select no row.
+	 *
+	 * @param string $code State code.
+	 * @return string
+	 */
+	private static function normalize_state_code( string $code ): string {
+		return strtoupper( sanitize_key( $code ) );
 	}
 
 	/**
