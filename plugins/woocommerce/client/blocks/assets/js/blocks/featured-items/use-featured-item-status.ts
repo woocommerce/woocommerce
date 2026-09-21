@@ -25,8 +25,6 @@ export const useFeaturedItemStatus = ( {
 	itemId,
 	itemType,
 }: UseFeaturedItemProps ): UseFeaturedItemReturnType => {
-	// Only featured products should resolve a product entity. Passing a category
-	// ID into useProduct would request `/wc/v3/products/<categoryId>`.
 	const { product, isResolutionFinished } = useProduct(
 		itemType === BLOCK_NAMES.featuredProduct ? itemId : undefined
 	);
