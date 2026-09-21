@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Remove Helio Pay from payment method recommendations and stop showing it as an official extension. Helio Pay is no longer available on the WooCommerce Marketplace.
+Remove Helio Pay as official and suggested payments extension.
