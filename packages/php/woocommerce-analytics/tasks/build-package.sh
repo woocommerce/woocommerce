@@ -48,7 +48,7 @@ rsync -avhW --quiet \
 # a release reports about itself correct.
 echo "Stamping PACKAGE_VERSION..."
 PACKAGE_VERSION="$(node -p "require('$PACKAGE_DIR/composer.json').version")"
-if ! [[ "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+if ! [[ "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "composer.json has no usable version (got '$PACKAGE_VERSION')" >&2
     exit 1
 fi
