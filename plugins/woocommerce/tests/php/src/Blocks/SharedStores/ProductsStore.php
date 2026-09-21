@@ -858,6 +858,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$envelope = $this->get_product_scope();
 
 		$this->assertSame( $record_product->get_id(), $envelope['productId']() );
+		$this->assertSame( '_default', $envelope['scopeName'](), 'scopeName should report the scope the record was actually resolved from.' );
 
 		$record_product->delete( true );
 		$context_product->delete( true );
@@ -1106,6 +1107,1661 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertNull( $envelope['cartItem']() );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * state.productScope.scopeName member and helpers deeper below the
+	 * envelope's nine top-level reads.
+	 *
+	 * Every case below drives the envelope through a hand-built,
+	 * synthetic `products`/`productVariations`/`cart` state rather than a
+	 * real loaded product, so the malformed value under test can be placed
+	 * at one exact path while everything else stays well formed. Product
+	 * id 5001 and variation ids 6001/6002 are reused throughout and name no
+	 * real database record.
+	 */
+
+	/**
+	 * @testdox state.productScope.scopeName reports the scope the record was actually resolved from, not the raw declared value, when the context's scopeName is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_scope_name_reports_the_resolved_scope_key( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'productScopes' => array(
+					'_default' => array( 'draftCartItem' => array( 'id' => 5001 ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'scopeName' => $malformed ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( '_default', $envelope['scopeName']() );
+		$this->assertSame( 5001, $envelope['productId']() );
+	}
+
+	/**
+	 * @testdox state.productScope.baseProduct, .productVariation, .product and .cartItem all resolve as though the product were never loaded when its products[id] entry is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_base_product_resolves_to_null_when_the_entry_is_not_an_array( $malformed ): void {
+		wp_interactivity_state( $this->store_namespace, array( 'products' => array( 5001 => $malformed ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['baseProduct']() );
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertNull( $envelope['product']() );
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox no base product, variation, product or cart line resolves, without a fatal, when the seeded products state itself is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_everything_resolves_to_null_when_the_products_map_itself_is_not_an_array( $malformed ): void {
+		wp_interactivity_state( $this->store_namespace, array( 'products' => $malformed ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['baseProduct']() );
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertNull( $envelope['product']() );
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox state.productScope.productVariation resolves to null, and .product falls back to the base product, when the matched variation's own entry is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_variation_resolves_to_null_when_the_matched_entry_is_not_an_array( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => $malformed ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertSame( 5001, $envelope['product']()['id'] );
+	}
+
+	/**
+	 * @testdox state.productScope.productVariation resolves to null, and .product falls back to the base product, when the base product's variations list is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_variation_resolves_to_null_when_the_variations_list_is_not_an_array( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => $malformed,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertSame( 5001, $envelope['product']()['id'] );
+	}
+
+	/**
+	 * @testdox a variation summary that is not an array or object is cast without a fatal, and, carrying no attributes, does not match — resolution continues with the next summary.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_non_array_variation_summary_does_not_match( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							$malformed,
+							array(
+								'id'         => 6002,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6002 => array( 'id' => 6002 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$resolved = $envelope['productVariation']();
+
+		$this->assertIsArray( $resolved );
+		$this->assertSame( 6002, $resolved['id'] );
+	}
+
+	/**
+	 * @testdox a variation summary whose attributes is not an array does not match, and resolution continues with the next summary.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_variation_summary_without_an_attributes_array_does_not_match( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => $malformed,
+							),
+							array(
+								'id'         => 6002,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array( 'id' => 6001 ),
+					6002 => array( 'id' => 6002 ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$resolved = $envelope['productVariation']();
+
+		$this->assertIsArray( $resolved );
+		$this->assertSame( 6002, $resolved['id'], 'The first, malformed summary must not vacuously match every selection.' );
+	}
+
+	/**
+	 * @testdox a variation attribute entry that is not an array is treated as carrying no name and no value, so it is not satisfied and the summary does not match.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_variation_attribute_entry_that_is_not_an_array_does_not_satisfy_the_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array( $malformed ),
+							),
+							array(
+								'id'         => 6002,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array( 'id' => 6001 ),
+					6002 => array( 'id' => 6002 ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$resolved = $envelope['productVariation']();
+
+		$this->assertIsArray( $resolved );
+		$this->assertSame( 6002, $resolved['id'] );
+	}
+
+	/**
+	 * @testdox a variation attribute whose name is not a string is treated as having no name, so it is not satisfied by the selection and the summary does not match.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_variation_attribute_with_a_non_string_name_does_not_satisfy_the_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => $malformed,
+										'value' => 'red',
+									),
+								),
+							),
+							array(
+								'id'         => 6002,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array( 'id' => 6001 ),
+					6002 => array( 'id' => 6002 ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+		$resolved = $envelope['productVariation']();
+
+		$this->assertIsArray( $resolved );
+		$this->assertSame( 6002, $resolved['id'] );
+	}
+
+	/**
+	 * @testdox a matched variation summary whose id is not usable as an array key resolves to no variation, and the search does not continue to a later, otherwise matching summary.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_a_matched_summary_with_an_unusable_id_stops_the_search( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => $malformed,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+							array(
+								'id'         => 6002,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6002 => array( 'id' => 6002 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertSame( 5001, $envelope['product']()['id'], 'product should fall back to the base product rather than the later matching summary.' );
+	}
+
+	/**
+	 * @testdox matching a cart line by attributes does not fatal, and resolves the line's variation parent as absent, when the seeded productVariations map itself is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_attribute_matching_survives_a_malformed_product_variations_map( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array( 5001 => array( 'id' => 5001 ) ),
+				'productVariations' => $malformed,
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 5001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line's attributes resolve against an empty attribute list, without a fatal, when its matched variation's parent is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_cart_item_attribute_matching_treats_an_unusable_parent_as_no_parent( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => $malformed,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line's attributes resolve against an empty attribute list, without a fatal, when the parent product's attributes is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_attribute_matching_treats_non_array_parent_attributes_as_empty( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'attributes' => $malformed,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a product attribute whose name is not a string is treated as having no name, so no term resolves under it and the cart line's label is used as its own slug.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_product_attribute_with_a_non_string_name_is_skipped( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'attributes' => array(
+							array(
+								'name'  => $malformed,
+								'terms' => array(
+									array(
+										'name' => 'Red',
+										'slug' => 'red',
+									),
+								),
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'Red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a product attribute whose terms is not an array resolves no term, without a fatal, so the cart line's label is used as its own slug.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_product_attribute_with_non_array_terms_resolves_no_term( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'attributes' => array(
+							array(
+								'name'  => 'colour',
+								'terms' => $malformed,
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a matching term whose slug is not a string resolves to the term's own label unchanged, as when no term matches.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_term_with_a_non_string_slug_resolves_to_the_label( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'attributes' => array(
+							array(
+								'name'  => 'colour',
+								'terms' => array(
+									array(
+										'name' => 'Red',
+										'slug' => $malformed,
+									),
+								),
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'Red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem resolves to null, without a fatal, when the seeded cart itself is not an array.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_resolves_without_fatal_when_cart_itself_is_not_an_array( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => 5001 ) ),
+				'cart'     => $malformed,
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a cart line that is not an array never matches by product id, and the remaining lines are still searched.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_non_array_cart_line_never_matches_and_the_search_continues( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => 5001 ) ),
+				'cart'     => array(
+					'items' => array(
+						$malformed,
+						array(
+							'key'  => 'line-2',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line that is not an array never matches by cartItemKey either, and the search continues to the line with the declared key.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_non_array_cart_line_never_matches_by_key_and_the_search_continues( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						$malformed,
+						array(
+							'key'  => 'line-2',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId'   => 5001,
+				'cartItemKey' => 'line-2',
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line whose own id is not usable as an array key never matches a simple product, and the search continues with the next line.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_a_cart_line_with_an_unusable_id_never_matches_a_simple_product( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => 5001 ) ),
+				'cart'     => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => $malformed,
+							'type' => 'simple',
+						),
+						array(
+							'key'  => 'line-2',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a variation cart line whose own id is not usable as an array key never matches, and the search continues with the next line.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_a_cart_line_with_an_unusable_id_never_matches_a_variation( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => 6001 ) ),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => $malformed,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+						array(
+							'key'       => 'line-2',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line whose own id is a non-integral float that would match by truncation never matches, and no implicit float-to-int array-key deprecation is produced.
+	 */
+	public function test_a_cart_line_with_a_non_integral_float_id_close_to_a_match_never_matches(): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => 5001 ) ),
+				'cart'     => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => 5001.5,
+							'type' => 'simple',
+						),
+						array(
+							'key'  => 'line-2',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem resolves to null, without a warning, when the resolved base product's own id is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_cart_item_is_null_when_the_resolved_products_id_is_not_usable_as_an_array_key( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => $malformed ) ),
+				'cart'     => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5001 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox state.productScope.cartItem resolves to null, without a warning, when the resolved variation's own id is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_an_array_key
+	 * @param mixed $malformed A shape not usable as an array key.
+	 */
+	public function test_cart_item_is_null_when_the_resolved_variations_id_is_not_usable_as_an_array_key( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => $malformed ) ),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => 6001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a variation cart line whose own variation is not an array never matches, and cartItem resolves from the remaining lines.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_variation_cart_line_with_a_non_array_variation_never_matches( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array( 5001 => array( 'id' => 5001 ) ),
+				'cart'     => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 5001,
+							'type'      => 'variation',
+							'variation' => $malformed,
+						),
+						array(
+							'key'  => 'line-2',
+							'id'   => 5001,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line's variation entry that is not an array is treated as carrying no attribute and no value, so the line does not match.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_cart_line_variation_entry_that_is_not_an_array_does_not_match( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array( $malformed ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a cart line's variation entry whose attribute is not a string is treated as having no attribute, so the line does not match.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_cart_line_variation_entry_with_a_non_string_attribute_does_not_match( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => $malformed,
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a cart line's variation entry whose value is not a string is treated as having no value, so the line does not match.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_cart_line_variation_entry_with_a_non_string_value_does_not_match( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					6001 => array(
+						'id'     => 6001,
+						'parent' => 5001,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 6001,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => $malformed,
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a selection entry (from the record, the context or the template) that is not an array satisfies no candidate attribute.
+	 * @dataProvider provider_shapes_not_an_array
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_a_non_array_selection_entry_satisfies_no_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => 6001 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array( $malformed ),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+	}
+
+	/**
+	 * @testdox a selection entry whose attribute is not a string is treated as having no attribute, so it satisfies no candidate attribute.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_selection_entry_with_a_non_string_attribute_satisfies_no_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => 6001 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => $malformed,
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+	}
+
+	/**
+	 * @testdox a selection entry whose value is not a string never satisfies a string-valued candidate attribute.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_selection_entry_with_a_non_string_value_does_not_satisfy_a_string_valued_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => 6001 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => $malformed,
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+	}
+
+	/**
+	 * @testdox a selection entry whose value is not a string does not satisfy an "Any" candidate attribute — one whose own value is null — the same as an explicit null value would.
+	 * @dataProvider provider_shapes_not_a_string
+	 * @param mixed $malformed A shape that is not a string.
+	 */
+	public function test_a_selection_entry_with_a_non_string_value_does_not_satisfy_an_any_attribute( $malformed ): void {
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products'          => array(
+					5001 => array(
+						'id'         => 5001,
+						'variations' => array(
+							array(
+								'id'         => 6001,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => null,
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 6001 => array( 'id' => 6001 ) ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5001,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => $malformed,
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation'](), 'A non-string, non-null selected value must not satisfy an "Any" attribute.' );
+	}
+
+	/**
+	 * The eight shape classes a value in externally writable state or
+	 * context can carry in place of the shape a path expects, each a
+	 * representative of its class.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function shape_classes(): array {
+		return array(
+			'null'     => null,
+			'bool'     => true,
+			'int'      => 42,
+			'float'    => 1.5,
+			'string'   => 'x',
+			'list'     => array( 'x' ),
+			'map'      => array( 'k' => 'v' ),
+			'stdClass' => (object) array( 'k' => 'v' ),
+		);
+	}
+
+	/**
+	 * The shape classes above, minus the ones named in $expects — the
+	 * shapes for which a path is well formed and so outside its
+	 * "any other shape" sweep. Used to build a data provider per guarded
+	 * read from the closed set of shape classes, rather than by listing
+	 * cases by hand.
+	 *
+	 * @param string[] $expects The shape class keys the path accepts.
+	 * @return array<string, array<mixed>> Provider-ready rows, one per remaining shape.
+	 */
+	private function shapes_other_than( array $expects ): array {
+		$rows = array();
+
+		foreach ( $this->shape_classes() as $name => $value ) {
+			if ( in_array( $name, $expects, true ) ) {
+				continue;
+			}
+			$rows[ $name ] = array( $value );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Every shape class except the two PHP array shapes (list and map),
+	 * for a path whose well-formed shape is an array.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_shapes_not_an_array(): array {
+		return $this->shapes_other_than( array( 'list', 'map' ) );
+	}
+
+	/**
+	 * Every shape class except int and string, for a path whose
+	 * well-formed shape is a value usable as an array key.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_shapes_not_usable_as_an_array_key(): array {
+		return $this->shapes_other_than( array( 'int', 'string' ) );
+	}
+
+	/**
+	 * Every shape class except string, for a path whose well-formed shape
+	 * is a string.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_shapes_not_a_string(): array {
+		return $this->shapes_other_than( array( 'string' ) );
 	}
 
 	/**
