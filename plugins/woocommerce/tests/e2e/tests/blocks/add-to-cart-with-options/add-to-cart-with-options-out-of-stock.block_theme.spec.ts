@@ -54,18 +54,38 @@ test.describe( 'Add to Cart + Options Block: Out-of-stock notice', () => {
 		);
 	} );
 
-	test( 'submitting with an out-of-stock variation selected names the product', async ( {
+	test( 'submitting from the attribute select with an out-of-stock variation selected names the product', async ( {
 		page,
 		pageObject,
+		editor,
 		frontendUtils,
 	} ) => {
-		await pageObject.createPostWithProductBlock( PRODUCT_SLUG );
-		const productPageUrl = page.url();
+		await pageObject.updateSingleProductTemplate();
+		await pageObject.setVariationSelectorAttributes( {
+			optionStyle: 'dropdown',
+		} );
+		await editor.saveSiteEditorEntities();
+
+		await page.goto( `/product/${ PRODUCT_SLUG }/` );
+
+		let unavailableOption = page.getByRole( 'option', {
+			name: 'Unavailable',
+			exact: true,
+		} );
+
+		// Workaround for the template not being updated on the first load.
+		if ( ! ( await unavailableOption.isVisible() ) ) {
+			await page.reload();
+			unavailableOption = page.getByRole( 'option', {
+				name: 'Unavailable',
+				exact: true,
+			} );
+		}
 
 		await pageObject.selectVariationSelectorOptions(
 			'Style',
 			'Unavailable',
-			'chips'
+			'dropdown'
 		);
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -76,16 +96,18 @@ test.describe( 'Add to Cart + Options Block: Out-of-stock notice', () => {
 		// The out-of-stock variation carries `hidden` on the Add to cart
 		// button (ProductButton.php:246, bound to
 		// `!state.allowsAddingToCart`), taking it out of the accessibility
-		// tree so a shopper cannot click it. A12 holds that the form can
-		// still be submitted from the keyboard: focusing another control
-		// inside the form and pressing Enter should trigger the form's
-		// implicit submission, which activates the same (still present,
-		// merely hidden) default button.
+		// tree so a shopper cannot click it. On the Dropdown display style
+		// the attribute row is a native `<select>` (Dropdown.php:83-142)
+		// with only a `change` handler (blocks/dropdown/frontend.ts:52),
+		// so it stays focusable and carries no key handling of its own:
+		// pressing Enter on it triggers the browser's implicit form
+		// submission, which activates the same (still present, merely
+		// hidden) default button.
 		await expect( addToCartButton ).toBeHidden();
 
-		const quantityInput = page.getByLabel( 'Product quantity' );
-		await quantityInput.focus();
-		await quantityInput.press( 'Enter' );
+		const styleSelect = page.getByLabel( 'Style', { exact: true } );
+		await styleSelect.focus();
+		await styleSelect.press( 'Enter' );
 
 		const notices = page.getByRole( 'alert' );
 		await expect( notices ).toHaveCount( 1 );
@@ -105,11 +127,11 @@ test.describe( 'Add to Cart + Options Block: Out-of-stock notice', () => {
 
 		// The invalid state is not sticky: switching to the purchasable
 		// variation and submitting again adds the product.
-		await page.goto( productPageUrl );
+		await page.goto( `/product/${ PRODUCT_SLUG }/` );
 		await pageObject.selectVariationSelectorOptions(
 			'Style',
 			'Available',
-			'chips'
+			'dropdown'
 		);
 		await expect( addToCartButton ).toBeVisible();
 		await addToCartButton.click();
