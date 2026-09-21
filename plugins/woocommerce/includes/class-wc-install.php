@@ -360,6 +360,9 @@ class WC_Install {
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
 		),
+		'11.3.0'   => array(
+			'wc_update_1130_repair_hpos_order_dates_from_posts',
+		),
 	);
 
 	/**
@@ -3232,9 +3235,9 @@ EOT;
 <!-- wp:woocommerce/empty-cart-block -->
 <div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
-<!-- wp:separator {"className":"is-style-dots"} -->
-<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
-<!-- /wp:separator -->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 

@@ -4010,3 +4010,164 @@ function wc_update_11203_normalize_stock_notification_emails() {
 
 	return false;
 }
+
+/**
+ * Give HPOS orders migrated without a created or updated date the dates their posts still hold.
+ *
+ * Earlier migrations copied a zero post_date_gmt verbatim, so the HPOS row ended up with no created date and the next
+ * save stamped it with the current time. Only rows whose date is NULL or the zero date are touched, and only when the
+ * order's post has a usable date. Placeholder posts count too: legacy cleanup keeps the date columns when it converts a
+ * post, and placeholders created for new HPOS orders carry the order's own date. Repaired orders are dropped from the
+ * order caches and queued for the Analytics import, which skipped them while they had no date. Batched, returns true
+ * while rows remain.
+ *
+ * @return bool True to run again.
+ */
+function wc_update_1130_repair_hpos_order_dates_from_posts() {
+	global $wpdb;
+
+	$orders_table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
+	if ( $orders_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_repaired_order_id';
+	$batch_size     = 500;
+	$zero           = '0000-00-00 00:00:00';
+	$type_list      = array();
+	$post_types     = array_merge( wc_get_order_types( 'cot-migration' ), array( \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) );
+	foreach ( $post_types as $post_type ) {
+		$escaped = esc_sql( $post_type );
+		if ( is_string( $escaped ) ) {
+			$type_list[] = "'" . $escaped . "'";
+		}
+	}
+	$type_list = implode( ',', $type_list );
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and the escaped type list cannot be prepared.
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT o.id, o.date_created_gmt, o.date_updated_gmt, p.post_date, p.post_date_gmt, p.post_modified, p.post_modified_gmt
+			FROM {$orders_table} o
+			INNER JOIN {$wpdb->posts} p ON p.ID = o.id AND p.post_type IN ({$type_list})
+			WHERE o.id > %d
+			AND ( o.date_created_gmt IS NULL OR o.date_created_gmt = %s OR o.date_updated_gmt IS NULL OR o.date_updated_gmt = %s )
+			ORDER BY o.id ASC
+			LIMIT %d",
+			(int) get_option( $last_id_option, 0 ),
+			$zero,
+			$zero,
+			$batch_size
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates: %s', $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	// The rule WordPress applies to its own posts: the GMT column, or the local one when the GMT one is the zero date.
+	$gmt_from_post = function ( $gmt_date, $local_date ) use ( $zero ) {
+		if ( $gmt_date && $zero !== $gmt_date ) {
+			return $gmt_date;
+		}
+		if ( ! $local_date || $zero === $local_date ) {
+			return null;
+		}
+		$datetime = date_create( $local_date, wp_timezone() );
+		return $datetime ? $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ) : null;
+	};
+
+	// Repaired orders leave the caches (a cached object still has no date and would stamp the current time on its next save)
+	// and get queued for the Analytics import, which skipped them while they had no date.
+	$forget_and_import = function ( array $order_ids ) {
+		if ( ! $order_ids ) {
+			return;
+		}
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $order_ids );
+		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
+		// With Analytics disabled nothing handles the import action, and queueing it would only leave failed actions behind.
+		$import_hook    = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_action( 'import' );
+		$import_handled = is_string( $import_hook ) && has_action( $import_hook );
+		/**
+		 * Filters whether Analytics runs its imports inline instead of queueing them.
+		 *
+		 * @since 4.0.0
+		 * @param bool $disable Whether Action Scheduler is bypassed.
+		 */
+		$import_inline = ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false );
+		foreach ( $order_ids as $order_id ) {
+			$order_cache->remove( $order_id );
+			if ( ! $import_handled ) {
+				continue;
+			}
+			if ( $import_inline ) {
+				\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::import( $order_id );
+				continue;
+			}
+			// Queued directly: OrdersScheduler::schedule_action() first searches every pending action for a duplicate, which gets
+			// slower with each order queued here. A duplicate import only rewrites the same stats row.
+			WC()->queue()->schedule_single( time() + 5, $import_hook, array( $order_id ), (string) \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::$group );
+		}
+	};
+
+	$repaired_ids = array();
+	foreach ( $rows as $row ) {
+		$columns = array();
+		if ( ! $row->date_created_gmt || $zero === $row->date_created_gmt ) {
+			$columns['date_created_gmt'] = $gmt_from_post( $row->post_date_gmt, $row->post_date );
+		}
+		if ( ! $row->date_updated_gmt || $zero === $row->date_updated_gmt ) {
+			$columns['date_updated_gmt'] = $gmt_from_post( $row->post_modified_gmt, $row->post_modified );
+		}
+		$columns = array_filter( $columns );
+		if ( empty( $columns ) ) {
+			continue;
+		}
+		// Each column is written only while it is still empty, so a save that lands between the read and the write wins.
+		$assignments = array();
+		$values      = array();
+		foreach ( $columns as $column => $value ) {
+			$assignments[] = "{$column} = IF( {$column} IS NULL OR {$column} = %s, %s, {$column} )";
+			$values[]      = $zero;
+			$values[]      = $value;
+		}
+		$values[] = (int) $row->id;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are code-defined, values go through prepare().
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$orders_table} SET " . implode( ', ', $assignments ) . ' WHERE id = %d', $values ) );
+		if ( false === $updated ) {
+			wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates at order #%d: %s', (int) $row->id, $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+			$forget_and_import( $repaired_ids );
+			delete_option( $last_id_option );
+			return false;
+		}
+		// Zero rows means a save or another run filled the dates first, and that writer already took care of the rest.
+		if ( $updated > 0 ) {
+			$repaired_ids[] = (int) $row->id;
+		}
+	}
+
+	$forget_and_import( $repaired_ids );
+
+	if ( count( $rows ) === $batch_size ) {
+		// The cursor only ever moves forward: a concurrent run (the queue plus `wp wc update`) may already have saved this id or a
+		// later one, and update_option() reports that as false just like a failed write. Without a saved cursor the next run would
+		// pick the same rows again, and rows whose post has no date never leave the selection.
+		$cursor = (int) end( $rows )->id;
+		if ( (int) get_option( $last_id_option, 0 ) < $cursor && ! update_option( $last_id_option, $cursor, false ) ) {
+			wp_cache_delete( $last_id_option, 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) < $cursor ) {
+				wc_get_logger()->error( 'Stopped repairing HPOS order dates: the progress cursor could not be saved.', array( 'source' => 'wc-updater' ) );
+				delete_option( $last_id_option );
+				return false;
+			}
+		}
+		return true;
+	}
+
+	delete_option( $last_id_option );
+
+	return false;
+}
