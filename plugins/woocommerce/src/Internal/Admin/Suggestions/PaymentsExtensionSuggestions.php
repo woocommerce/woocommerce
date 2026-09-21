@@ -225,6 +225,7 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -264,6 +265,7 @@ class PaymentsExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
 			self::GOCARDLESS,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM => array(
@@ -397,6 +399,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA     => array(
@@ -523,6 +526,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA     => array(
@@ -693,6 +697,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA     => array(
@@ -815,6 +820,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -954,6 +960,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -986,6 +993,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -1010,6 +1018,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::KLARNA => array(
 				'_merge_on_type' => array(
@@ -1155,6 +1164,7 @@ class PaymentsExtensionSuggestions {
 			self::MONEI,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -1188,6 +1198,7 @@ class PaymentsExtensionSuggestions {
 			self::VIVA_WALLET,
 			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
+			self::ELAVON,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -4412,11 +4423,31 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::ELAVON            => array(
-				'_type'  => self::TYPE_PSP,
-				'icon'   => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
-				'plugin' => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Elavon', 'woocommerce' ),
+				'description' => esc_html__( 'Grow your online business with Elavon — a fast, secure and seamless way to accept payments in your WooCommerce store.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'woocommerce-gateway-converge',
+					'slug'  => 'elavon-payment-gateway-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://developer.elavon.com/terms',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/elavon-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=elavon-payment-gateway',
+					),
 				),
 			),
 			self::FORTISPAY         => array(
