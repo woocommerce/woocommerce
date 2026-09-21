@@ -266,6 +266,41 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox An optional field the shopper left empty is left out of the order's fields, and shows once it holds a value.
+	 */
+	public function test_order_fields_with_values_leave_out_an_empty_optional_field(): void {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/gift-wrap',
+				'label'    => 'Gift wrap',
+				'location' => 'order',
+				'type'     => 'select',
+				'options'  => array(
+					array(
+						'label' => 'Paper',
+						'value' => 'paper',
+					),
+				),
+			)
+		);
+		$order = new \WC_Order();
+		$order->set_created_via( 'store-api' );
+		$this->controller->persist_field_for_order( 'plugin-namespace/gift-wrap', '', $order );
+
+		$this->assertArrayNotHasKey(
+			'plugin-namespace/gift-wrap',
+			$this->controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
+			'A field reset to its placeholder stores an empty string, which should not reach the order confirmation or emails.'
+		);
+
+		$this->controller->persist_field_for_order( 'plugin-namespace/gift-wrap', 'paper', $order );
+		$fields = $this->controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' );
+
+		$this->assertArrayHasKey( 'plugin-namespace/gift-wrap', $fields, 'A field that holds a value should be among the order\'s fields.' );
+		$this->assertSame( 'Paper', $fields['plugin-namespace/gift-wrap']['value'], 'A chosen option should show with its label.' );
+	}
+
+	/**
 	 * @testdox Invalid dates still reach custom validation and both validation hooks.
 	 */
 	public function test_invalid_date_runs_custom_validation_and_hooks(): void {
