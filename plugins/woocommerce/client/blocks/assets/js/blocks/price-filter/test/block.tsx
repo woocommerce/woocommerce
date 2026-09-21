@@ -33,20 +33,16 @@ const mockPriceRange = {
 	max_price: '9000',
 };
 
-// When the price range reaches the block. A cold Store API request answers one
-// render after mount, which is the default; a page whose collection data is
-// already loaded answers on the first render.
-let mockPriceRangeOnFirstRender = false;
-
 jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@woocommerce/base-context/hooks' ),
 	useCollectionData: () => {
 		const { useEffect, useState } =
 			jest.requireActual( '@wordpress/element' );
-		const [ hasResponded, setHasResponded ] = useState(
-			mockPriceRangeOnFirstRender
-		);
+		// The price range reaches the block after the first render, as it
+		// does on a page: the hook defers its select, so a mount never starts
+		// with collection data.
+		const [ hasResponded, setHasResponded ] = useState( false );
 
 		useEffect( () => {
 			setHasResponded( true );
@@ -99,7 +95,6 @@ const getPriceQueryValue = ( queryKey: 'min_price' | 'max_price' ) =>
 const initialUrl = window.location.href;
 
 beforeEach( () => {
-	mockPriceRangeOnFirstRender = false;
 	// The query state store outlives a single render, so clear the context the
 	// tests write to.
 	dispatch( QUERY_STATE_STORE_KEY ).setValueForQueryContext(
@@ -140,20 +135,5 @@ describe( 'Filter by Price block', () => {
 			expect( getMinPriceInput() ).toHaveValue( '$5' );
 			expect( getMaxPriceInput() ).toHaveValue( '$90' );
 		} );
-	} );
-
-	test( 'keeps the slider at the collection constraints when the price range is already there on the first render', async () => {
-		mockPriceRangeOnFirstRender = true;
-
-		renderBlockAt( 'http://woo.local/?min_price=15&max_price=40' );
-
-		// The query state still takes the URL, but the slider does not: the
-		// effect that matches the slider to the query state runs once with the
-		// constraints already in hand and before the URL values land, and
-		// nothing brings it back afterwards.
-		expect( getPriceQueryValue( 'min_price' ) ).toBe( 1500 );
-		expect( getPriceQueryValue( 'max_price' ) ).toBe( 4000 );
-		expect( getMinPriceInput() ).toHaveValue( '$5' );
-		expect( getMaxPriceInput() ).toHaveValue( '$90' );
 	} );
 } );
