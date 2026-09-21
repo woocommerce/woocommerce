@@ -863,7 +863,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		( new ScheduledSaleRun( $product_ids, 'start' ) )->process();
+		( new ScheduledSaleRun( $product_ids, ScheduledSaleRun::MODE_START ) )->process();
 
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
@@ -875,7 +875,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		( new ScheduledSaleRun( $product_ids, 'end' ) )->process();
+		( new ScheduledSaleRun( $product_ids, ScheduledSaleRun::MODE_END ) )->process();
 
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );

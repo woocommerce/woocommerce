@@ -29,6 +29,20 @@ class ScheduledSaleRun {
 	public const BATCH_SIZE = 50;
 
 	/**
+	 * Mode for a sale that is starting.
+	 *
+	 * @var string
+	 */
+	public const MODE_START = 'start';
+
+	/**
+	 * Mode for a sale that is ending.
+	 *
+	 * @var string
+	 */
+	public const MODE_END = 'end';
+
+	/**
 	 * Data-store rows for this run.
 	 *
 	 * @var mixed[]
@@ -67,11 +81,11 @@ class ScheduledSaleRun {
 	 * Initialize a scheduled sale run.
 	 *
 	 * @param mixed[] $entries Product references returned by the data store.
-	 * @param string  $mode    'start' or 'end'.
+	 * @param string  $mode    One of MODE_START or MODE_END.
 	 * @throws \InvalidArgumentException When the sale mode is unsupported.
 	 */
 	public function __construct( array $entries, string $mode ) {
-		if ( ! in_array( $mode, array( 'start', 'end' ), true ) ) {
+		if ( ! in_array( $mode, array( self::MODE_START, self::MODE_END ), true ) ) {
 			throw new \InvalidArgumentException( 'Scheduled sale mode must be either start or end.' );
 		}
 
