@@ -415,7 +415,8 @@ class WC_Checkout {
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
-			// The gateway moved this order on but something died before the cart was emptied, so this submit is a repeat: a new order would charge the shopper twice.
+			// The gateway moved this order on but something died before the cart was
+			// emptied, so this submit is a repeat: a new order would charge the shopper twice.
 			if ( $order instanceof WC_Order && $order->has_cart_hash( $cart_hash ) && $this->order_moved_past_payment( $order ) ) {
 				return new WP_Error(
 					'checkout-order-already-placed',
@@ -552,9 +553,8 @@ class WC_Checkout {
 	 *
 	 * An order reaches a gateway awaiting payment, so any other status means something moved
 	 * it on, on-hold included. The order total plays no part, which is why this is not
-	 * needs_payment(): that would call a free order that failed paid.
+	 * needs_payment(): that would treat a free order that failed as paid.
 	 *
-	 * @since 11.3.0
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
@@ -1304,8 +1304,9 @@ class WC_Checkout {
 	 * Record a failure raised after the gateway moved the order on and send the shopper to the order received page.
 	 *
 	 * Reporting a failure would send them back to place the order again, and every retry
-	 * pays for another order. The gateway never reached the point where it empties the cart,
-	 * so that happens here when the cart still belongs to the order.
+	 * pays for another order. The cart is emptied here rather than left to the received
+	 * page: after payment_complete() nothing in the session points at the order, so if the
+	 * shopper never lands there, a submit from the still-open form would build a new one.
 	 *
 	 * @since 11.3.0
 	 * @param WC_Order  $order The order, re-read after the failure.
@@ -1495,7 +1496,7 @@ class WC_Checkout {
 	 * Process the checkout after the confirm order button is pressed.
 	 *
 	 * @throws Exception When validation fails.
-	 * @throws Throwable When the gateway fails before it moved the order on; an Error keeps reaching the fatal handler as before.
+	 * @throws Throwable When a gateway fails before it moved the order on; only an Error escapes, as before, since an Exception is caught below.
 	 */
 	public function process_checkout() {
 		try {
@@ -1564,10 +1565,10 @@ class WC_Checkout {
 				$order    = wc_get_order( $order_id );
 
 				if ( is_wp_error( $order_id ) && 'checkout-order-already-placed' === $order_id->get_error_code() ) {
-					$placed_order = wc_get_order( $order_id->get_error_data()['order_id'] ?? 0 );
+					$session_order = wc_get_order( $order_id->get_error_data()['order_id'] ?? 0 );
 
-					if ( $placed_order instanceof WC_Order ) {
-						$this->send_repeat_submit_response( $placed_order );
+					if ( $session_order instanceof WC_Order ) {
+						$this->send_repeat_submit_response( $session_order );
 					}
 				}
 
@@ -1617,14 +1618,16 @@ class WC_Checkout {
 					try {
 						$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 					} catch ( Throwable $e ) {
-						// The gateway may already have moved the order on, say when a post-payment integration throws inside the status transition. Reporting a failure would send the shopper back to place it again, and every retry pays for another order. Re-read first: the gateway advanced its own instance.
-						$paid_order = wc_get_order( $order_id );
+						// The gateway may have moved the order on already, say when a post-payment
+						// integration throws inside the status transition. Re-read it: the gateway
+						// changed the status on its own instance, so $order is stale.
+						$refreshed_order = wc_get_order( $order_id );
 
-						if ( ! $paid_order instanceof WC_Order || ! $this->order_moved_past_payment( $paid_order ) ) {
+						if ( ! $refreshed_order instanceof WC_Order || ! $this->order_moved_past_payment( $refreshed_order ) ) {
 							throw $e;
 						}
 
-						$this->recover_order_that_moved_past_payment( $paid_order, $e );
+						$this->recover_order_that_moved_past_payment( $refreshed_order, $e );
 					}
 				} else {
 					$this->process_order_without_payment( $order_id );
