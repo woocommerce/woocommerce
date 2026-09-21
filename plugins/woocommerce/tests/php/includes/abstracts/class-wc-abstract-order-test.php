@@ -497,6 +497,29 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox remove_coupon() gives the coupon use back: the usage count drops and the customer leaves the used-by list.
+	 */
+	public function test_remove_coupon_decreases_the_coupon_usage_count(): void {
+		$coupon_code = 'remove_usage_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$order->apply_coupon( $coupon_code );
+
+		$used_coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( 1, $used_coupon->get_usage_count(), 'Applying the coupon to a processing order should count one use.' );
+		$this->assertSame( array( (string) $order->get_user_id() ), $used_coupon->get_used_by(), 'The order customer should be recorded as having used the coupon.' );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$released_coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( 0, $released_coupon->get_usage_count(), 'Removing the coupon from the order should give the use back.' );
+		$this->assertSame( array(), $released_coupon->get_used_by(), 'Removing the coupon should take the customer off the used-by list.' );
+	}
+
+	/**
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order

@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Render the My Account shipping address, the onboarding currency position, the order items Paid row and the settings form values in PHPUnit
+Render the My Account shipping address, the onboarding currency position, the order items Paid row, the settings form values and the coupon use given back on order coupon removal in PHPUnit
