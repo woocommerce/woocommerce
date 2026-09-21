@@ -363,6 +363,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $this->lookup_rows( $order->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that cannot be loaded should not hold the pass up.' );
 		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'Nothing should be left pending once the pass is through.' );
+		$this->assertSame( array(), OrdersScheduler::get_failed_order_imports()['ids'], 'An order whose rows were dropped has nothing left to retry, so it should not be recorded as a failed import.' );
 
 		$tools = $this->sut->handle_woocommerce_debug_tools( array() );
 		$this->assertTrue( $tools['rebuild_analytics_tax_data']['disabled'], 'The tool should not go on offering a run that cannot change anything.' );
@@ -392,6 +393,10 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->lookup_rows( $order->get_id() ), 'An order the reports still read should keep its rows.' );
 		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the order.' );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array( $order->get_id() ), $failed['ids'], 'The cursor steps past an order that could not be read, so it should be left where Analytics settings offers a retry over it. A row left behind reports no taxable amount split for its whole rate.' );
 	}
 
 	/**
@@ -518,6 +523,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 			'An order with no creation date should be stepped past. A batch that raises never reaches the cursor write, and is handed out again forever.'
 		);
 		$this->assertNotEmpty( $this->lookup_rows( $order->get_id() ), 'An order that was stepped past should keep its rows.' );
+		$this->assertSame( array( $order->get_id() ), OrdersScheduler::get_failed_order_imports()['ids'], 'An order the rebuild kept but could not rewrite should be left where Analytics settings offers a retry over it.' );
 	}
 
 	/**

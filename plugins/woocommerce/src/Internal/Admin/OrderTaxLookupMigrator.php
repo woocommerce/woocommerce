@@ -264,13 +264,19 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				continue;
 			}
 
-			// A write that did not land leaves the order holding the rows it came in with, which
-			// report the way they did before. The cursor steps past it either way, so record it as
-			// a failed analytics import: that is the list Analytics settings offers a retry over,
-			// and the retry re-imports the order, which is the same work this pass could not do.
-			if ( false === $synced ) {
+			// An order that could not be read while its analytics data is still there, and a write
+			// that did not land, both leave the order holding the rows it came in with. The cursor
+			// steps past it either way, so record it as a failed analytics import: that is the list
+			// Analytics settings offers a retry over, and the retry re-imports the order, which is
+			// the same work this pass could not do. One row left behind costs more than its own
+			// order, since a rate holding it reports no taxable amount split at all.
+			if ( true !== $synced ) {
+				$reason = -1 === $synced
+					? 'The order could not be read (which is what a deactivated order type plugin looks like) or has no creation date to report it by.'
+					: 'The write did not land.';
+
 				wc_get_logger()->error(
-					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and reports the way it did before. It is recorded as a failed analytics import, so it can be retried from Analytics settings.",
+					"Could not rebuild the analytics tax lookup rows of order {$order_id}. {$reason} The order keeps the rows it had and reports the way it did before. It is recorded as a failed analytics import, so it can be retried from Analytics settings.",
 					array( 'source' => 'wc-order-tax-lookup-migration' )
 				);
 
