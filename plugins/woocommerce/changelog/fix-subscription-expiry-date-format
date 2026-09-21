@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show subscription expiry dates in the store's own date format and time zone, rather than an English-only ordinal on the UTC date.
