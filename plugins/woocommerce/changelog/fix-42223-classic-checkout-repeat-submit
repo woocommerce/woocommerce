@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent the classic checkout from placing a second order when the form is submitted again after an error that happened once the order had already gone through.
+Send customers to the order received page when an error happens after their classic checkout order has already gone through, instead of showing an error and creating a second order when they submit again.
