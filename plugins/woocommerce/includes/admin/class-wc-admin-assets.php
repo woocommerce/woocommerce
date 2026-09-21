@@ -593,6 +593,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 					'i18n_scheduled_sale_end_before_start' => esc_js( __( 'The sale end date cannot be earlier than the sale start date.', 'woocommerce' ) ),
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
+					'i18n_generate_variations'            => esc_js( __( 'Generate variations', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
 					'i18n_variation_cost_remove_warning'  => esc_js( __( 'The custom cost of goods sold values will revert back to their defaults for all the variations. Would you like to continue?', 'woocommerce' ) ),
@@ -666,6 +667,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
+					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),
 					'remove_item_meta'                                => __( 'Remove this item meta?', 'woocommerce' ),
 					'name_label'                                      => __( 'Name', 'woocommerce' ),
 					'remove_label'                                    => __( 'Remove', 'woocommerce' ),
@@ -919,24 +921,24 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( ! $admin_features_disabled ) {
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
-					$formatted_analytics_reports = array_map( function( $report ) {
+					// Append so the reports stay a sequential list; wp_localize_script() encodes a gapped array as a JSON object the command palette ignores.
+					$formatted_analytics_reports = array();
+					foreach ( $analytics_reports as $report ) {
 						if ( ! is_array( $report ) ) {
-							return null;
+							continue;
 						}
-						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
-						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
-						if (
-							is_string( $title ) && $title !== "" &&
-							is_string( $path ) && $path !== ""
-						) {
-							return array(
-								'title' => wp_strip_all_tags( $title ),
-								'path' => $path,
-							);
+
+						$title = $report['title'] ?? '';
+						$path  = $report['path'] ?? '';
+						if ( ! is_string( $title ) || '' === $title || ! is_string( $path ) || '' === $path ) {
+							continue;
 						}
-						return null;
-					}, $analytics_reports );
-					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+
+						$formatted_analytics_reports[] = array(
+							'title' => wp_strip_all_tags( $title ),
+							'path'  => $path,
+						);
+					}
 
 					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(

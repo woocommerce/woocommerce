@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep product responses, admin variation screens and CSV exports working after one of a product's global attributes is deleted.

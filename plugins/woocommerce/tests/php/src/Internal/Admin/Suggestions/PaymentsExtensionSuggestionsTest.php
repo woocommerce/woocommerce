@@ -59,6 +59,96 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the payment extension suggestions list is memoized per country and context.
+	 */
+	public function test_get_country_extensions_memoizes_per_country_and_context() {
+		// Arrange.
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+
+		// Act.
+		$first       = $this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
+		$second      = $this->sut->get_country_extensions( 'US' );
+
+		// Assert.
+		$this->assertGreaterThan( 0, $build_calls, 'Building the list should query incentives for each extension.' );
+		$this->assertSame( $build_calls, $incentives_calls, 'A repeated call should be served from the memo, without rebuilding the list.' );
+		$this->assertSame( $first, $second );
+
+		// Act.
+		$this->sut->get_country_extensions( 'US', 'another_context' );
+
+		// Assert.
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different context should build its own list.' );
+
+		// Act.
+		$calls_before_country_change = $incentives_calls;
+		$this->sut->get_country_extensions( 'GB' );
+
+		// Assert.
+		$this->assertGreaterThan( $calls_before_country_change, $incentives_calls, 'A different country should build its own list.' );
+	}
+
+	/**
+	 * Test that the payment extension suggestions list is memoized per user, since incentive visibility and dismissals are user-specific.
+	 */
+	public function test_get_country_extensions_memoizes_per_user() {
+		// Arrange.
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
+
+		// Act.
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
+
+		// Assert.
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different user should build its own list.' );
+	}
+
+	/**
+	 * Test that clear_cache forces the payment extension suggestions list to be rebuilt.
+	 */
+	public function test_clear_cache_forces_country_extensions_rebuild() {
+		// Arrange.
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+		$this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
+
+		// Act.
+		$this->sut->clear_cache();
+		$this->sut->get_country_extensions( 'US' );
+
+		// Assert.
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'After clear_cache the list should be rebuilt.' );
+	}
+
+	/**
 	 * @testdox Should tag Square as preferred (and preferred for offline) only when the merchant self-identified as selling offline.
 	 *
 	 * @dataProvider data_provider_square_offline_preferred_tags
@@ -410,6 +500,51 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				array(
 					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
+	}
+
+	/**
+	 * @testdox Elavon has complete base suggestion details.
+	 */
+	public function test_elavon_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'elavon' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'elavon-payment-gateway-for-woocommerce',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://developer.elavon.com/terms',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/elavon-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=elavon-payment-gateway',
 				),
 			),
 			$extension['links']

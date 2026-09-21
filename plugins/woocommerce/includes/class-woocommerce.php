@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\TermCount;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Internal\Caches\ProductTermCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
@@ -42,6 +43,7 @@ use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
@@ -59,7 +61,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.2.0-dev';
+	public $version = '11.3.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -385,6 +387,7 @@ final class WooCommerce {
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
 		$container->get( ProductCacheController::class );
+		$container->get( ProductTermCacheInvalidator::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
@@ -401,6 +404,7 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
+		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
@@ -433,6 +437,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -445,9 +450,6 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
-
-		// Code+GraphQL API.
-		Automattic\WooCommerce\Api\Infrastructure\Main::register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
@@ -1805,6 +1807,7 @@ final class WooCommerce {
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
 			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+			delete_option( 'woocommerce_tracker_send_failures' );
 		} else {
 			$this->schedule_tracking_action();
 		}

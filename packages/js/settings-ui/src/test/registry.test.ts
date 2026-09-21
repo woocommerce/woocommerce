@@ -5,15 +5,14 @@ import {
 	__resetRegistry,
 	registerSettingsExtension,
 	resolveFieldComponent,
-	resolveFieldComponentForRendering,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
 	resolveSaveHandler,
 } from '../registry';
+import type { SettingsEditControl } from '../index';
 import type {
 	SettingsExtensionRegistration,
-	SettingsFieldComponent,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
@@ -26,7 +25,7 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'resolves named field components within the matching scope', () => {
-		const component: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-test', section: 'advanced' },
@@ -49,9 +48,9 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'resolves field components by documented precedence before registration recency', () => {
-		const component: SettingsFieldComponent = () => null;
-		const fieldOverride: SettingsFieldComponent = () => null;
-		const typeRenderer: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
+		const fieldOverride: SettingsEditControl = () => null;
+		const typeRenderer: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-precedence' },
@@ -92,59 +91,146 @@ describe( 'settings extension registry', () => {
 		).toBe( fieldOverride );
 	} );
 
-	it( 'preserves resolver fallbacks when an explicit component is missing', () => {
-		const fieldOverride: SettingsFieldComponent = () => null;
-		const typeRenderer: SettingsFieldComponent = () => null;
+	it( 'replaces overlapping entries without dropping unrelated registrations', () => {
+		const original = () => null;
+		const replacement = () => null;
+		const unrelated = () => null;
+		const visibility = () => false;
+		const saveHandler = () => undefined;
+		const scope = { page: 'products', section: 'inventory' };
+		const warnSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( () => undefined );
+		registerSettingsExtension( {
+			scope,
+			components: { shared: original, unrelated },
+			saveHandlers: { persist: saveHandler },
+		} );
+		registerSettingsExtension( {
+			scope,
+			fieldVisibility: { stock: visibility },
+		} );
+		expect( warnSpy ).not.toHaveBeenCalled();
+		registerSettingsExtension( {
+			scope,
+			components: { shared: replacement },
+		} );
+		expect( warnSpy ).toHaveBeenCalledTimes( 1 );
+		expect( warnSpy ).toHaveBeenCalledWith(
+			expect.stringContaining( 'Replacing the conflicting entries.' ),
+			expect.any( Object )
+		);
+
+		const field = { id: 'field', label: 'Field', type: 'text' };
+		expect(
+			resolveFieldComponent( { ...field, component: 'shared' }, scope )
+		).toBe( replacement );
+		expect(
+			resolveFieldComponent( { ...field, component: 'unrelated' }, scope )
+		).toBe( unrelated );
+		expect( resolveSaveHandler( 'persist', scope ) ).toBe( saveHandler );
+		expect( resolveFieldVisibilityPredicate( 'stock', scope ) ).toBe(
+			visibility
+		);
+	} );
+
+	it( 'preserves unrelated entry precedence when replacing a page-wide control', () => {
+		const original = () => null;
+		const sectionControl = () => null;
+		const replacement = () => null;
+		const components = Object.freeze( {
+			shared: original,
+			other: original,
+		} );
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension(
+			Object.freeze( {
+				scope: { page: 'products' },
+				components,
+			} )
+		);
+		registerSettingsExtension( {
+			scope: { page: 'products', section: 'inventory' },
+			components: { shared: sectionControl, other: sectionControl },
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'products' },
+			components: { shared: replacement },
+		} );
+
+		const field = { id: 'field', label: 'Field', type: 'text' };
+		const context = { page: 'products', section: 'inventory' };
+		expect(
+			resolveFieldComponent( { ...field, component: 'shared' }, context )
+		).toBe( replacement );
+		expect(
+			resolveFieldComponent( { ...field, component: 'other' }, context )
+		).toBe( sectionControl );
+		expect(
+			resolveFieldComponent(
+				{ ...field, component: 'other' },
+				{ page: 'products', section: 'shipping' }
+			)
+		).toBe( original );
+		expect( components.shared ).toBe( original );
+	} );
+
+	it( 'stops scanning fully superseded registrations', () => {
+		const scope = {
+			get page() {
+				return 'products';
+			},
+		};
+		const pageSpy = jest.spyOn( scope, 'page', 'get' );
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension( {
+			scope,
+			fieldVisibility: { stock: () => false },
+		} );
+		for ( let i = 0; i < 10; i++ ) {
+			registerSettingsExtension( {
+				scope: { page: 'products' },
+				fieldVisibility: { stock: () => true },
+			} );
+		}
+		pageSpy.mockClear();
+		expect(
+			resolveFieldVisibilityPredicate( 'missing', { page: 'products' } )
+		).toBeUndefined();
+		expect( pageSpy ).not.toHaveBeenCalled();
+	} );
+
+	it( 'falls back to number type renderers for promoted integer fields', () => {
+		const numberRenderer: SettingsEditControl = () => null;
+		const integerRenderer: SettingsEditControl = () => null;
+		const field = {
+			id: 'legacy_number',
+			label: 'Legacy number',
+			type: 'integer',
+		};
+		const context = { page: 'registry-integer-fallback' };
 
 		registerSettingsExtension( {
-			scope: { page: 'registry-missing-component' },
-			fieldOverrides: {
-				field: fieldOverride,
-			},
+			scope: context,
 			typeRenderers: {
-				text: typeRenderer,
+				number: numberRenderer,
 			},
 		} );
 
-		expect(
-			resolveFieldComponentForRendering(
-				{
-					id: 'field',
-					label: 'Field',
-					type: 'text',
-					component: 'test/missing-component',
-				},
-				{ page: 'registry-missing-component' }
-			)
-		).toBe( fieldOverride );
+		expect( resolveFieldComponent( field, context ) ).toBe(
+			numberRenderer
+		);
 
-		expect(
-			resolveFieldComponentForRendering(
-				{
-					id: 'field_without_override',
-					label: 'Field',
-					type: 'text',
-					component: 'test/missing-component',
-				},
-				{ page: 'registry-missing-component' }
-			)
-		).toBe( typeRenderer );
-	} );
+		registerSettingsExtension( {
+			scope: context,
+			typeRenderers: {
+				integer: integerRenderer,
+			},
+		} );
 
-	it( 'fails closed when an explicit component has no registry fallback even for a native field type', () => {
-		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
-
-		expect( () =>
-			resolveFieldComponentForRendering(
-				{
-					id: 'field',
-					label: 'Field',
-					type: 'text',
-					component: 'test/missing-component',
-				},
-				{ page: 'registry-missing-component' }
-			)
-		).toThrow( 'Component "test/missing-component" is not registered.' );
+		expect( resolveFieldComponent( field, context ) ).toBe(
+			integerRenderer
+		);
 	} );
 
 	it( 'ignores malformed registration payloads', () => {
@@ -180,7 +266,7 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'ignores registrations outside the current page scope', () => {
-		const component: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-test-other' },
@@ -202,9 +288,9 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'distinguishes page-wide, default-section, and named-section scopes', () => {
-		const pageWideComponent: SettingsFieldComponent = () => null;
-		const defaultSectionComponent: SettingsFieldComponent = () => null;
-		const namedSectionComponent: SettingsFieldComponent = () => null;
+		const pageWideComponent: SettingsEditControl = () => null;
+		const defaultSectionComponent: SettingsEditControl = () => null;
+		const namedSectionComponent: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-section-scope' },

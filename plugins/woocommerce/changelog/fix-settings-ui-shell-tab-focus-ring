@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore WordPress focus and modal styling, identify current navigation links, and preserve other plugins' navigation warnings in the experimental Settings UI.

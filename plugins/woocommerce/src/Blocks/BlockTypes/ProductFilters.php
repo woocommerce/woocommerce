@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use WP_Block;
 
@@ -40,8 +41,12 @@ class ProductFilters extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
+		$inline_style_handle = BlockEditorUnifiedAssets::is_enabled() && is_admin()
+			? 'wc-block-library-style'
+			: generate_block_asset_handle( $this->get_full_block_name(), 'style' );
+
 		wp_add_inline_style(
-			generate_block_asset_handle( $this->get_full_block_name(), 'style' ),
+			$inline_style_handle,
 			$this->get_responsive_styles()
 		);
 

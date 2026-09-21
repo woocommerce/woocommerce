@@ -181,10 +181,18 @@ class Checkout extends AbstractCartRoute {
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
 
-			// If we encountered an exception, free up stock and release held coupons.
-			if ( $this->order ) {
-				wc_release_stock_for_order( $this->order );
-				wc_release_coupons_for_order( $this->order );
+			// If we encountered an exception, free up stock and release held coupons. Only an order
+			// that moved past awaiting payment keeps both: its stock is committed and its coupons
+			// are spent. Everything else still needs the cleanup, a fully discounted order and one
+			// that never left checkout-draft included.
+			// Re-read the order first, since a gateway that advanced it may have done so on its own
+			// instance, leaving the one held here reporting a stale status.
+			$order = $this->order ? wc_get_order( $this->order->get_id() ) : null;
+			$order = $order instanceof \WC_Order ? $order : $this->order;
+
+			if ( $order && ! $this->order_moved_past_payment( $order ) ) {
+				wc_release_stock_for_order( $order );
+				wc_release_coupons_for_order( $order );
 			}
 
 			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {
@@ -272,10 +280,11 @@ class Checkout extends AbstractCartRoute {
 		$invalid_details = [];
 		$is_partial      = in_array( $request->get_method(), [ 'PUT', 'PATCH' ], true );
 
+		$document_object = $this->get_document_object_from_rest_request( $request );
+
 		foreach ( $validate_contexts as $context => $context_data ) {
 			$errors = new \WP_Error();
 
-			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
@@ -676,9 +685,12 @@ class Checkout extends AbstractCartRoute {
 		// Order save-point: 2.
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway. Do not use this action for payment-completion logic or to
+		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+		 * woocommerce_order_status_completed instead.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -688,7 +700,7 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @example docs/examples/checkout-order-processed.md
-
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -914,9 +926,10 @@ class Checkout extends AbstractCartRoute {
 			],
 		];
 
+		$document_object = $this->get_document_object_from_rest_request( $request );
+
 		foreach ( $additional_field_contexts as $context => $context_data ) {
 
-			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 

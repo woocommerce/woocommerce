@@ -481,25 +481,48 @@ class WC_AJAX {
 		// Get messages if reload checkout is not true.
 		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
-			$messages = wc_print_notices( true );
+			// Capture the error count before printing, because wc_print_notices() clears the queue.
+			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
+			// flag only reports errors that were rendered.
+			$error_notice_count = wc_notice_count( 'error' );
+			$messages           = wc_print_notices( true );
+			$has_error_notices  = 0 < $error_notice_count && '' !== $messages;
 		} else {
-			$messages = '';
+			$has_error_notices = false;
+			$messages          = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
 
+		/**
+		 * Filter the HTML fragments returned with a checkout update, keyed by the selector each one replaces.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param array $fragments Checkout fragments keyed by selector.
+		 */
+		$fragments = apply_filters(
+			'woocommerce_update_order_review_fragments',
+			array(
+				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
+			)
+		);
+
+		/*
+		 * `result` is the legacy signal and only reports whether the response carries any rendered
+		 * notice, so a success or info notice still reads as `failure`. Third-party checkout scripts
+		 * and `updated_checkout` listeners have consumed it that way since 2014, so it keeps that
+		 * meaning. Use `has_errors` to tell a real failure apart from a notice that merely has
+		 * something to show.
+		 */
 		wp_send_json(
 			array(
-				'result'    => empty( $messages ) ? 'success' : 'failure',
-				'messages'  => $messages,
-				'reload'    => $reload_checkout,
-				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments',
-					array(
-						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
-						'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
-					)
-				),
+				'result'     => empty( $messages ) ? 'success' : 'failure',
+				'has_errors' => $has_error_notices,
+				'messages'   => $messages,
+				'reload'     => $reload_checkout,
+				'fragments'  => $fragments,
 			)
 		);
 	}
@@ -2137,7 +2160,7 @@ class WC_AJAX {
 				}
 			}//end if
 
-			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $formatted_name ) );
+			$products[ $product_object->get_id() ] = wp_strip_all_tags( rawurldecode( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
@@ -2181,14 +2204,14 @@ class WC_AJAX {
 
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
+		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit, $include_ids, $exclude_ids );
 
 		_prime_post_caches( $ids );
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $product_object->get_formatted_name() ) );
+			$products[ $product_object->get_id() ] = wp_strip_all_tags( rawurldecode( $product_object->get_formatted_name() ) );
 		}
 
 		wp_send_json( $products );
@@ -2437,16 +2460,126 @@ class WC_AJAX {
 		 * @since 3.4.0
 		 * @param array $args The search arguments.
 		 */
-		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
+		$args  = apply_filters( 'woocommerce_product_attribute_terms', $args );
+		$terms = get_terms( $args );
+		$terms = self::maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy );
 
 		/**
 		 * Filter the product attribute terms search results.
 		 *
 		 * @since 7.0.0
-		 * @param array  $terms    The list of matched terms.
-		 * @param string $taxonomy The terms taxonomy.
+		 * @param array|WP_Error $terms    The list of matched terms, or a term query error.
+		 * @param string         $taxonomy The terms taxonomy.
 		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
+	}
+
+	/**
+	 * Include an exact taxonomy term match omitted by a full broad result set.
+	 *
+	 * @param mixed $terms       The broad search results.
+	 * @param mixed $args        The filtered broad search arguments.
+	 * @param mixed $search_text The requested search text.
+	 * @param mixed $taxonomy    The requested taxonomy.
+	 * @return mixed
+	 */
+	private static function maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy ) {
+		// Public filters may change argument and result shapes, so compose only the expected representations.
+		if ( ! is_array( $args ) || ! is_array( $terms ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
+			return $terms;
+		}
+
+		// An empty request or broad response cannot hide an exact term beyond a positive cap.
+		if ( '' === $search_text || empty( $terms ) ) {
+			return $terms;
+		}
+
+		$filtered_offset = $args['offset'] ?? 0;
+
+		// Recovery applies only to the first result window. WP_Term_Query defaults the offset to an empty string.
+		if ( ! in_array( $filtered_offset, array( 0, '0', '' ), true ) ) {
+			return $terms;
+		}
+
+		$filtered_number = $args['number'] ?? null;
+
+		// Public filters may replace the cap with an unsupported type, which should fail closed without coercion.
+		if ( ! is_int( $filtered_number ) && ! is_string( $filtered_number ) ) {
+			return $terms;
+		}
+
+		$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+
+		// Recovery applies only when a positive finite cap is completely filled.
+		if ( false === $number || count( $terms ) !== $number ) {
+			return $terms;
+		}
+
+		// Replacing the broad selector is safe only for the standard query shape.
+		if (
+			'all' !== ( $args['fields'] ?? null ) ||
+			( $args['taxonomy'] ?? null ) !== $taxonomy ||
+			( $args['name__like'] ?? null ) !== $search_text ||
+			array_key_exists( 'name', $args ) ||
+			array_key_exists( 'search', $args )
+		) {
+			return $terms;
+		}
+
+		// Exact recovery is limited to nonhierarchical global attributes.
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) || is_taxonomy_hierarchical( $taxonomy ) ) {
+			return $terms;
+		}
+
+		$term_ids = array();
+		foreach ( $terms as $term ) {
+			// A non-term result cannot be safely combined with an exact term object.
+			if ( ! $term instanceof WP_Term ) {
+				return $terms;
+			}
+
+			// Keep an already-visible exact term in its configured position.
+			if ( $search_text === $term->name ) {
+				return $terms;
+			}
+
+			$term_ids[] = (int) $term->term_id;
+		}
+
+		// Preserve filtered eligibility constraints while replacing only the broad selector and bounding the lookup.
+		$exact_args = $args;
+		unset( $exact_args['name__like'] );
+		$exact_args['name']    = $search_text;
+		$exact_args['fields']  = 'all';
+		$exact_args['number']  = 1;
+		$exact_args['offset']  = 0;
+		$exact_args['orderby'] = 'none';
+
+		$exact_terms = get_terms( $exact_args );
+		// Query hooks may return an error or alter the exact-query result shape.
+		if ( ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
+			return $terms;
+		}
+
+		$exact_term = reset( $exact_terms );
+		// A non-term exact result cannot be safely combined with the broad term objects.
+		if ( ! $exact_term instanceof WP_Term ) {
+			return $terms;
+		}
+
+		// Query hooks may change the taxonomy after the exact-query arguments are validated.
+		if ( $taxonomy !== $exact_term->taxonomy ) {
+			return $terms;
+		}
+
+		// Database collation may resolve to an already-visible case- or accent-equivalent term.
+		if ( in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
+			return $terms;
+		}
+
+		array_unshift( $terms, $exact_term );
+
+		return array_slice( $terms, 0, $number );
 	}
 
 	/**
@@ -3111,6 +3244,49 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Sale Prices from Regular Prices.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 *
+	 * @return void
+	 */
+	private static function variation_bulk_action_variable_sale_price_from_regular_price( $variations, $data ) {
+		$value = $data['value'] ?? null;
+		if ( ! is_scalar( $value ) ) {
+			return;
+		}
+
+		$value         = (string) $value;
+		$is_percentage = '%' === substr( $value, -1 );
+		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
+		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
+			return;
+		}
+		$adjustment = (float) $adjustment;
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$regular_price = $variation->get_regular_price( 'edit' );
+
+			if ( '' === $regular_price || null === $regular_price ) {
+				continue;
+			}
+
+			$reduction = $is_percentage ? ( (float) $regular_price / 100 ) * $adjustment : $adjustment;
+
+			$variation->set_sale_price( (string) NumberUtil::round( max( 0, (float) $regular_price - $reduction ), wc_get_price_decimals() ) );
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Stock Status as In Stock.
 	 *
 	 * @param array $variations List of variations.
@@ -3499,6 +3675,7 @@ class WC_AJAX {
 	 *
 	 * @uses WC_AJAX::variation_bulk_set()
 	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_from_regular_price()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
 	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()

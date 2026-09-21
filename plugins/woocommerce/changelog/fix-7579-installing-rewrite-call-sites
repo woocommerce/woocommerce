@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent endpoint rewrite flushes from persisting incomplete rules during WordPress installation requests.
