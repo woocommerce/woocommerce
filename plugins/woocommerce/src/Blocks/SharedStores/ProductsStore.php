@@ -134,10 +134,7 @@ class ProductsStore {
 		$record   = ( $state['productScopes'] ?? array() )[ $context['scopeName'] ?? '_default' ] ?? array();
 		$template = $state['template'] ?? array();
 
-		$resolve = function ( string $key, $fallback ) use ( $record, $context, $template ) {
-			if ( array_key_exists( $key, $record ) ) {
-				return $record[ $key ];
-			}
+		$resolve = function ( string $key, $fallback ) use ( $context, $template ) {
 			if ( array_key_exists( $key, $context ) ) {
 				return $context[ $key ];
 			}
@@ -148,12 +145,14 @@ class ProductsStore {
 			return $context['scopeName'] ?? '_default';
 		};
 
-		$product_id = function () use ( $resolve ) {
-			return $resolve( 'productId', null );
+		$record_draft = $record['draftCartItem'] ?? array();
+
+		$product_id = function () use ( $record_draft, $resolve ) {
+			return array_key_exists( 'id', $record_draft ) ? $record_draft['id'] : $resolve( 'productId', null );
 		};
 
-		$variation = function () use ( $resolve ) {
-			return $resolve( 'variation', array() );
+		$variation = function () use ( $record_draft, $resolve ) {
+			return array_key_exists( 'variation', $record_draft ) ? $record_draft['variation'] : $resolve( 'variation', array() );
 		};
 
 		$base_product = function () use ( $state, $product_id ) {
@@ -188,16 +187,20 @@ class ProductsStore {
 			return null === $id ? null : self::find_matching_cart_item( $items, $state, $id, $variation() );
 		};
 
-		$draft_cart_item = function () use ( $record, $product_id, $variation ) {
-			if ( array_key_exists( 'draftCartItem', $record ) ) {
-				return $record['draftCartItem'];
+		$draft_cart_item = function () use ( $record_draft, $product_id, $variation ) {
+			$draft = $record_draft;
+
+			if ( ! array_key_exists( 'id', $draft ) ) {
+				$draft['id'] = $product_id();
+			}
+			if ( ! array_key_exists( 'variation', $draft ) ) {
+				$draft['variation'] = $variation();
+			}
+			if ( ! array_key_exists( 'quantity', $draft ) ) {
+				$draft['quantity'] = 1;
 			}
 
-			return array(
-				'id'        => $product_id(),
-				'variation' => $variation(),
-				'quantity'  => 1,
-			);
+			return $draft;
 		};
 
 		return array(
