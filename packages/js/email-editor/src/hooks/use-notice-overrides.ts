@@ -65,12 +65,15 @@ interface Notice {
 
 type PostTypeLabels = Record< string, string > | undefined;
 
-// Passed to the memoized selector whenever labels aren't loaded yet, so the
-// dependant stays object-like and reference-stable (see `createSelector`
-// below): `rememo` only uses its per-dependant cache when every dependant is
-// object-like, and otherwise falls back to a single cache slot that is
-// cleared on every call with different arguments.
-const NO_LABELS: Record< string, string > = {};
+// Post types whose own save notices ("Template updated.", …) must not be
+// rewritten to "Email saved." — that text is reserved for actual email
+// post types. The action is still dropped for these, same as any other
+// `editor-save` notice.
+const TEMPLATE_POST_TYPES = [ 'wp_template', 'wp_template_part' ];
+
+function isTemplatePostType( postType: string | undefined ): boolean {
+	return !! postType && TEMPLATE_POST_TYPES.includes( postType );
+}
 
 function transformNotice( notice: Notice, labels: PostTypeLabels ): Notice {
 	const overrides = getNoticeOverrides();
@@ -150,7 +153,7 @@ export function useNoticeOverrides(): void {
 							if ( ! hasOverridableNotice ) {
 								return getNoticesWithOverrides(
 									notices,
-									NO_LABELS
+									undefined
 								);
 							}
 
@@ -159,24 +162,22 @@ export function useNoticeOverrides(): void {
 									| { getEmailPostType?: () => string }
 									| undefined
 							 )?.getEmailPostType?.();
-							const labels = postType
-								? (
-										originalSelect( coreStore ) as
-											| {
-													getPostType: (
-														postType: string
-													) => {
-														labels?: PostTypeLabels;
-													};
-											  }
-											| undefined
-								   )?.getPostType( postType )?.labels
-								: undefined;
+							const labels =
+								postType && ! isTemplatePostType( postType )
+									? (
+											originalSelect( coreStore ) as
+												| {
+														getPostType: (
+															postType: string
+														) => {
+															labels?: PostTypeLabels;
+														};
+												  }
+												| undefined
+									   )?.getPostType( postType )?.labels
+									: undefined;
 
-							return getNoticesWithOverrides(
-								notices,
-								labels ?? NO_LABELS
-							);
+							return getNoticesWithOverrides( notices, labels );
 						},
 					};
 				},

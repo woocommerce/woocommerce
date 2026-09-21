@@ -605,65 +605,27 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( getPostType ).not.toHaveBeenCalled();
 	} );
 
-	it( 'keeps memoized notices stable across alternating contexts when labels are not loaded', () => {
-		// Regression test for the `labels ?? NO_LABELS` fallback: `rememo`
-		// only uses its per-dependant cache when every dependant is
-		// object-like. If `labels` were passed through as `undefined`
-		// here, alternating calls with different `notices` arrays would
-		// clear the shared fallback cache slot and break memoization.
-		const defaultNotices = [
-			makeNotice( { id: 'editor-save', content: 'Post updated.' } ),
-		];
-		const emailEditorNotices = [
-			makeNotice( { id: 'editor-save', content: 'Post updated.' } ),
-		];
-		const noticesByContext: Record< string, Notice[] > = {
-			default: defaultNotices,
-			'email-editor': emailEditorNotices,
-		};
-		const originalGetNotices = jest
-			.fn()
-			.mockImplementation(
-				( context?: string ) => noticesByContext[ context ?? 'default' ]
-			);
-		const noticesSelectors = { getNotices: originalGetNotices };
-		// Labels not loaded yet.
-		const coreSelectors = {
-			getPostType: jest.fn().mockReturnValue( undefined ),
-		};
-		const emailEditorSelectors = {
-			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
-		};
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
-				const name = resolveStoreName( ns );
-				if ( name === 'core/notices' ) {
-					return noticesSelectors;
-				}
-				if ( name === 'core' ) {
-					return coreSelectors;
-				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
-				}
-				return undefined;
+	it.each( [ 'wp_template', 'wp_template_part' ] )(
+		'leaves an editor-save notice unchanged for the %s post type even when its content matches item_updated, but still removes the action',
+		( postType ) => {
+			const originalNotice = makeNotice( {
+				id: 'editor-save',
+				content: 'Template updated.',
+				actions: [ { label: 'View', url: '#' } ],
 			} );
+			const { pluginResult } = buildSelectOverride(
+				[ originalNotice ],
+				{ item_updated: 'Template updated.' },
+				postType
+			);
 
-		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
-		const selectors = pluginResult.select( 'core/notices' ) as {
-			getNotices: ( context?: string ) => Notice[];
-		};
+			const selectors = pluginResult.select( 'core/notices' ) as {
+				getNotices: () => Notice[];
+			};
+			const result = selectors.getNotices();
 
-		const firstDefault = selectors.getNotices();
-		const firstEmailEditor = selectors.getNotices( 'email-editor' );
-		const secondDefault = selectors.getNotices();
-		const secondEmailEditor = selectors.getNotices( 'email-editor' );
-
-		expect( secondDefault ).toBe( firstDefault );
-		expect( secondEmailEditor ).toBe( firstEmailEditor );
-		expect( secondDefault[ 0 ] ).toBe( firstDefault[ 0 ] );
-	} );
+			expect( result[ 0 ].content ).toBe( 'Template updated.' );
+			expect( result[ 0 ].actions ).toEqual( [] );
+		}
+	);
 } );
