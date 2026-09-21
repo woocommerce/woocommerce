@@ -98,12 +98,7 @@ class ScheduledSaleRun {
 				$this->product_ids[ $product_id ] = $product_id;
 			}
 		}
-	}
 
-	/**
-	 * Process normalized product IDs in batches.
-	 */
-	public function process(): void {
 		$this->product_util  = wc_get_container()->get( ProductUtil::class );
 		$this->product_cache = FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME )
 			? wc_get_container()->get( ProductCache::class )
@@ -111,7 +106,12 @@ class ScheduledSaleRun {
 
 		// Shared groups can only be flushed when the cache belongs to this request.
 		$this->flush_shared_groups = wp_cache_supports( 'flush_group' ) && ! wp_using_ext_object_cache();
+	}
 
+	/**
+	 * Process normalized product IDs in batches.
+	 */
+	public function process(): void {
 		$total = count( $this->product_ids );
 		for ( $offset = 0; $offset < $total; $offset += self::BATCH_SIZE ) {
 			$this->process_batch( array_slice( $this->product_ids, $offset, self::BATCH_SIZE ) );
