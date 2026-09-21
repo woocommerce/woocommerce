@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -69,7 +69,7 @@ describe( 'UpdateBannerPlugin', () => {
 
 		render( <UpdateBannerPlugin /> );
 
-		expect( target.querySelector( '.wc-update-banner' ) ).not.toBeNull();
+		expect( within( target ).getByRole( 'status' ) ).toBeInTheDocument();
 	} );
 
 	it( 'falls back to document.body when no canvas target is present', () => {
@@ -80,9 +80,9 @@ describe( 'UpdateBannerPlugin', () => {
 
 		render( <UpdateBannerPlugin /> );
 
-		expect(
-			document.body.querySelector( '.wc-update-banner' )
-		).not.toBeNull();
+		expect( screen.getByRole( 'status' ).parentElement ).toBe(
+			document.body
+		);
 	} );
 
 	it( 'wires the banner dismiss control to dismiss, not autoDismiss', async () => {
@@ -96,10 +96,6 @@ describe( 'UpdateBannerPlugin', () => {
 		} );
 
 		render( <UpdateBannerPlugin /> );
-
-		expect(
-			document.body.querySelector( '.wc-update-banner' )
-		).not.toBeNull();
 
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Dismiss for this session' } )
