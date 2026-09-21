@@ -1,3 +1,4 @@
-Significance: patch
-Type: dev
-Comment: Remove the temporary `@woocommerce/stores/woocommerce/cart` and `@woocommerce/stores/woocommerce/products` compatibility modules and the unified store's remaining compatibility members, now that every consumer uses `@woocommerce/stores/woocommerce` directly.
+Significance: minor
+Type: update
+
+Consolidate the Interactivity API stores behind WooCommerce's product and cart blocks into a single `@woocommerce/stores/woocommerce` store. The `woocommerce/products` Interactivity API namespace and the `@woocommerce/stores/woocommerce/cart` and `@woocommerce/stores/woocommerce/products` script module ids are removed with no aliases, so code that imports either id or reads that namespace stops working.
