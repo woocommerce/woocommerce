@@ -4281,7 +4281,7 @@ function wc_display_product_attributes( $product ) {
 			foreach ( $attribute_values as $attribute_value ) {
 				$value_name = esc_html( $attribute_value->name );
 
-				if ( $attribute_taxonomy->attribute_public ) {
+				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
 					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
@@ -4466,7 +4466,7 @@ function wc_empty_cart_message() {
 
 	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
+	echo '<div class="woocommerce-notices-wrapper wc-empty-cart-message">' . $notice . '</div>';
 }
 
 /**
