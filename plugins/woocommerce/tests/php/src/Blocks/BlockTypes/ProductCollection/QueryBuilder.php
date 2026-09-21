@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use WC_Helper_Product;
 use WP_Query;
 
@@ -248,101 +249,59 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter by max price queries.
+	 * @testdox Should pass the maximum price filter to shared query clauses.
 	 */
-	public function test_merging_filter_by_max_price_queries() {
+	public function test_merging_filter_by_max_price_queries(): void {
 		set_query_var( 'max_price', 100 );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertTrue( $merged_query['isProductCollection'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 		set_query_var( 'max_price', '' );
 	}
 
 	/**
-	 * Test merging filter by min price queries.
+	 * @testdox Should pass the minimum price filter to shared query clauses.
 	 */
-	public function test_merging_filter_by_min_price_queries() {
+	public function test_merging_filter_by_min_price_queries(): void {
 		set_query_var( 'min_price', 20 );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 		set_query_var( 'min_price', '' );
 	}
 
 	/**
-	 * Test merging filter by min and max price queries.
+	 * @testdox Should pass both price filters to shared query clauses.
 	 */
-	public function test_merging_filter_by_min_and_max_price_queries() {
+	public function test_merging_filter_by_min_and_max_price_queries(): void {
 		set_query_var( 'max_price', 100 );
 		set_query_var( 'min_price', 20 );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'max_price', '' );
 		set_query_var( 'min_price', '' );
 	}
 
 	/**
-	 * Test merging filter by stock status queries.
+	 * @testdox Should pass stock filters to shared query clauses.
 	 */
-	public function test_merging_filter_by_stock_status_queries() {
+	public function test_merging_filter_by_stock_status_queries(): void {
 		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				'operator' => 'IN',
-				'key'      => '_stock_status',
-				'value'    => array( ProductStockStatus::IN_STOCK ),
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( ProductStockStatus::IN_STOCK, $merged_query['filter_stock_status'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'filter_stock_status', '' );
 	}
@@ -415,6 +374,51 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Decimal price filters are preserved by shared query clauses.
+	 */
+	public function test_filter_by_decimal_price_returns_exact_products(): void {
+		$fixtures = new FixtureData();
+
+		$matching_product     = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Decimal price target',
+				'regular_price' => '10.25',
+				'status'        => 'publish',
+			)
+		);
+		$non_matching_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Decimal price distractor',
+				'regular_price' => '10.75',
+				'status'        => 'publish',
+			)
+		);
+
+		set_query_var( 'max_price', '10.50' );
+
+		$merged_query      = Utils::initialize_merged_query( $this->block_instance );
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The product below the decimal maximum should be returned.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The product above the decimal maximum should be excluded.' );
+		set_query_var( 'max_price', '' );
+	}
+
+	/**
+	 * @testdox Invalid stock filters return no products through shared query clauses.
+	 */
+	public function test_invalid_stock_filter_returns_no_products(): void {
+		set_query_var( 'filter_stock_status', 'invalid' );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+		$query        = new WP_Query( $merged_query );
+
+		$this->assertEmpty( $query->posts );
+		set_query_var( 'filter_stock_status', '' );
+	}
+
+	/**
 	 * Test merging time range queries.
 	 */
 	public function test_merging_time_frame_before_queries() {
@@ -463,10 +467,9 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter by stock status queries.
+	 * @testdox Should normalize attribute filters for shared query clauses and default to OR.
 	 */
-	public function test_merging_filter_by_attribute_queries() {
-		// Mock the attribute data.
+	public function test_merging_filter_by_attribute_queries(): void {
 		$this->block_instance->set_attributes_filter_query_args(
 			array(
 				array(
@@ -481,97 +484,134 @@ class QueryBuilder extends \WP_UnitTestCase {
 		);
 
 		set_query_var( 'filter_color', 'blue' );
-		set_query_var( 'query_type_color', 'or' );
 		set_query_var( 'filter_size', 'xl,xxl' );
 		set_query_var( 'query_type_size', 'and' );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries  = $merged_query['tax_query'];
 
-		$and_query = array();
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-			}
-		}
-
-		// Check if the AND query is an array.
-		$this->assertIsArray( $and_query );
-
-		$attribute_queries = array();
-		foreach ( $and_query as $and_query_item ) {
-			if ( is_array( $and_query_item ) ) {
-				$attribute_queries = $and_query_item;
-			}
-		}
-
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'pa_color',
-				'field'    => 'slug',
-				'terms'    => array( 'blue' ),
-				'operator' => 'IN',
-			),
-			$attribute_queries
-		);
-
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'pa_size',
-				'field'    => 'slug',
-				'terms'    => array( 'xl', 'xxl' ),
-				'operator' => 'AND',
-			),
-			$attribute_queries
-		);
+		$this->assertSame( 'blue', $merged_query['filter_color'] );
+		$this->assertSame( 'or', $merged_query['query_type_color'] );
+		$this->assertSame( 'xl,xxl', $merged_query['filter_size'] );
+		$this->assertSame( 'and', $merged_query['query_type_size'] );
 
 		set_query_var( 'filter_color', '' );
-		set_query_var( 'query_type_color', '' );
 		set_query_var( 'filter_size', '' );
 		set_query_var( 'query_type_size', '' );
 	}
 
 	/**
-	 * Test merging multiple filter queries.
+	 * @testdox Should normalize custom attribute parameter names for shared query clauses.
 	 */
-	public function test_merging_multiple_filter_queries() {
+	public function test_custom_attribute_query_vars_are_normalized(): void {
+		$this->block_instance->set_attributes_filter_query_args(
+			array(
+				'color' => array(
+					'filter'     => 'pa_color',
+					'query_type' => 'custom_color_mode',
+				),
+			)
+		);
+
+		set_query_var( 'pa_color', 'blue' );
+		set_query_var( 'custom_color_mode', 'and' );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+
+		$this->assertSame( 'blue', $merged_query['filter_color'] );
+		$this->assertSame( 'and', $merged_query['query_type_color'] );
+		$this->assertArrayNotHasKey( 'pa_color', $merged_query );
+
+		set_query_var( 'pa_color', '' );
+		set_query_var( 'custom_color_mode', '' );
+	}
+
+	/**
+	 * @testdox Should pass multiple shopper filters without building local SQL queries.
+	 */
+	public function test_merging_multiple_filter_queries(): void {
 		set_query_var( 'max_price', 100 );
 		set_query_var( 'min_price', 20 );
 		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				'operator' => 'IN',
-				'key'      => '_stock_status',
-				'value'    => array( ProductStockStatus::IN_STOCK ),
-			),
-			$merged_query['meta_query']
-		);
-
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertSame( ProductStockStatus::IN_STOCK, $merged_query['filter_stock_status'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'max_price', '' );
 		set_query_var( 'min_price', '' );
 		set_query_var( 'filter_stock_status', '' );
+	}
+
+	/**
+	 * @testdox Filter count queries omit shopper filters but keep collection constraints.
+	 */
+	public function test_filter_count_query_excludes_applied_filters(): void {
+		$query_builder = new \Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\QueryBuilder();
+		$query_builder->set_attributes_filter_query_args(
+			array(
+				'color' => array(
+					'filter'     => 'filter_color',
+					'query_type' => 'query_type_color',
+				),
+			)
+		);
+
+		set_query_var( 'max_price', '100' );
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
+		set_query_var( 'filter_color', 'blue' );
+		set_query_var( 'categories', 'accessories' );
+
+		$final_query = $query_builder->get_final_query_args(
+			array( 'name' => '' ),
+			array(
+				'meta_query' => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'post__in'   => array(),
+				'tax_query'  => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			),
+			array(
+				'handpicked_products' => false,
+				'on_sale'             => false,
+				'orderby'             => '',
+				'product_attributes'  => array(),
+				'queryId'             => null,
+				'stock_status'        => array( ProductStockStatus::OUT_OF_STOCK ),
+			),
+			true
+		);
+
+		$this->assertTrue( $final_query['isProductCollection'] );
+		$this->assertNotEmpty( $final_query['meta_query'], 'Saved collection stock constraints should remain.' );
+		$this->assertArrayNotHasKey( 'max_price', $final_query );
+		$this->assertArrayNotHasKey( 'filter_stock_status', $final_query );
+		$this->assertArrayNotHasKey( 'filter_color', $final_query );
+		$this->assertArrayNotHasKey( 'categories', $final_query );
+
+		set_query_var( 'max_price', '' );
+		set_query_var( 'filter_stock_status', '' );
+		set_query_var( 'filter_color', '' );
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * @testdox Product Filter count queries apply shared clauses only once.
+	 */
+	public function test_filter_count_query_applies_shared_clauses_once(): void {
+		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
+		$query_args    = Utils::initialize_merged_query( $this->block_instance );
+		$query_clauses = wc_get_container()->get( QueryClauses::class );
+
+		add_filter( 'posts_clauses', array( $query_clauses, 'add_query_clauses' ), 10, 2 );
+		try {
+			$query = new WP_Query( $query_args );
+		} finally {
+			remove_filter( 'posts_clauses', array( $query_clauses, 'add_query_clauses' ), 10 );
+			set_query_var( 'filter_stock_status', '' );
+		}
+
+		$this->assertSame( 1, substr_count( $query->request, 'wc_product_meta_lookup.stock_status IN' ) );
 	}
 
 	/**
@@ -1193,175 +1233,58 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
+	 * @testdox Should pass category filters to shared query clauses.
 	 */
-	public function test_merging_filter_by_category_slug() {
-		// Set the URL query variables.
+	public function test_merging_filter_by_category_slug(): void {
 		set_query_var( 'categories', 'accessories' );
 
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertions.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'accessories' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_cat tax query using slug.'
-		);
-
-		// Clean up.
+		$this->assertSame( 'accessories', $merged_query['categories'] );
 		set_query_var( 'categories', '' );
 	}
 
 	/**
-	 * Test merging filter queries specifically for Tags.
-	 * Scenario: ?tags=tag-new (Slug)
+	 * @testdox Should pass tag filters to shared query clauses.
 	 */
-	public function test_merging_filter_by_tags() {
-		// Set the URL query variables.
+	public function test_merging_filter_by_tags(): void {
 		set_query_var( 'tags', 'tag-new' );
 
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertions.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_tag',
-				'field'    => 'slug',
-				'terms'    => array( 'tag-new' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_tag tax query with IN operator.'
-		);
-
-		// Clean up.
+		$this->assertSame( 'tag-new', $merged_query['tags'] );
 		set_query_var( 'tags', '' );
 	}
 
 	/**
-	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
-	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
+	 * @testdox Should pass category, tag, and brand filters to shared query clauses.
 	 */
-	public function test_merging_filter_by_all_taxonomies_together() {
-		// Set the URL query variables.
+	public function test_merging_filter_by_all_taxonomies_together(): void {
 		set_query_var( 'categories', 'accessories' );
 		set_query_var( 'tags', 'tag-new' );
 		set_query_var( 'brands', 'nike' );
 
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertions.
-		// Verify Category.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'accessories' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_cat tax query.'
-		);
+		$this->assertSame( 'accessories', $merged_query['categories'] );
+		$this->assertSame( 'tag-new', $merged_query['tags'] );
+		$this->assertSame( 'nike', $merged_query['brands'] );
 
-		// Verify Tag.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_tag',
-				'field'    => 'slug',
-				'terms'    => array( 'tag-new' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_tag tax query.'
-		);
-
-		// Verify Brand.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_brand',
-				'field'    => 'slug',
-				'terms'    => array( 'nike' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_brand tax query.'
-		);
-
-		// Clean up global state.
 		set_query_var( 'categories', '' );
 		set_query_var( 'tags', '' );
 		set_query_var( 'brands', '' );
 	}
 
 	/**
-	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
-	 * Matches logic: if ( ! is_string($param_value) ) continue;
+	 * @testdox Should ignore non-scalar taxonomy filter values.
 	 */
-	public function test_filter_strict_string_handling() {
-		// Scenario: Array Input (Should be IGNORED).
-		// ?categories[]=hats.
+	public function test_filter_strict_string_handling(): void {
 		set_query_var( 'categories', array( 'hats' ) );
 
-		// Execute.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries    = $merged_query['tax_query'] ?? array();
-		$filter_clauses = $this->extract_filter_clauses( $tax_queries );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertion: The array input should have been ignored.
-		$this->assertNotContainsEquals(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'hats' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should not contain product_cat tax query because array input should be ignored.'
-		);
-
-		// Clean up.
+		$this->assertArrayNotHasKey( 'categories', $merged_query );
 		set_query_var( 'categories', '' );
-	}
-
-	/**
-	 * Helper to extract filter clauses from the tax_query array.
-	 *
-	 * @param array $tax_queries The tax_query array from the merged query.
-	 * @return array The extracted filter clauses.
-	 */
-	private function extract_filter_clauses( array $tax_queries ) {
-
-		$and_query = array();
-
-		// Find the 'AND' relation group where filters are stored.
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-				break;
-			}
-		}
-
-		$clauses = array();
-		if ( ! empty( $and_query ) ) {
-			foreach ( $and_query as $item ) {
-				if ( is_array( $item ) ) {
-					$clauses[] = $item;
-				}
-			}
-		}
-
-		return $clauses;
 	}
 
 	/**

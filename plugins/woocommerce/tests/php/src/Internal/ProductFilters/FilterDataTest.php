@@ -218,10 +218,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 	/**
 	 * @testdox Test attribute count with query_type set to `and`.
-	 * @todo Remove this test once the issue with `and` query type is fixed in https://github.com/woocommerce/woocommerce/pull/44825.
 	 */
 	public function test_get_attribute_counts_with_query_type_and() {
-		$this->markTestSkipped( 'Skipping tests with query_type `and` because there is an issue with Filterer::filter_by_attribute_post_clauses that generate wrong clauses for `and`. We can fix the same issue in FilterClausesGenerator::add_attribute_clauses but doing so will make the attribute counts data doesnt match with current query. A fix for both methods is pending. See https://github.com/woocommerce/woocommerce/pull/44825.' );
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'filter_color', 'blue-slug,green-slug' );
 		$wp_query->set( 'query_type_color', 'and' );
