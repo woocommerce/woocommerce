@@ -1,3 +1,7 @@
+.wc-block-components-checkout-order-summary__content-container {
+	display: contents;
+}
+
 .wp-block-woocommerce-checkout-order-summary-block {
 	border: 1px solid $universal-border-light;
 	border-radius: 5px;
@@ -92,6 +96,10 @@
 
 		&.checkout-order-summary-block-fill-wrapper {
 			padding-bottom: $gap-larger;
+
+			&.is-content-inline {
+				display: none;
+			}
 		}
 
 		.wc-block-components-checkout-order-summary__title {

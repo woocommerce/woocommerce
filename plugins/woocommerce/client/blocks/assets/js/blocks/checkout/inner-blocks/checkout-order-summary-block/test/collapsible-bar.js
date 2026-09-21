@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { render, screen, fireEvent, createEvent } from '@testing-library/react';
-import { SlotFillProvider } from '@woocommerce/blocks-checkout';
+import {
+	ExperimentalDiscountsMeta,
+	ExperimentalOrderMeta,
+	SlotFillProvider,
+} from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -166,10 +170,9 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 	} );
 } );
 
-describe( 'Checkout Order Summary fill', () => {
+describe( 'Checkout Order Summary placement', () => {
 	/**
-	 * Renders the block together with the slot the fill targets, so the second
-	 * summary instance actually appears in the tree.
+	 * Renders the block together with the action-area slot.
 	 *
 	 * @param {string} containerClassName Class name for the measured width.
 	 * @return {import('@testing-library/react').RenderResult} The render result.
@@ -181,36 +184,123 @@ describe( 'Checkout Order Summary fill', () => {
 		return render(
 			<SlotFillProvider>
 				<SummaryBlock>
-					<div />
+					<div data-testid="summary-content" />
 				</SummaryBlock>
 				<CheckoutOrderSummarySlot />
 			</SlotFillProvider>
 		);
 	};
 
-	/**
-	 * @param {HTMLElement} container Render container.
-	 * @return {NodeList} The rendered fill wrappers.
-	 */
-	const fillsIn = ( container ) =>
-		container.querySelectorAll(
-			'.checkout-order-summary-block-fill-wrapper'
-		);
-
-	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
-		'when the container reports %p',
+	it.each( [ 'is-mobile', 'is-small', 'is-medium' ] )(
+		'moves the summary to the action area when the container reports %p',
 		( containerClassName ) => {
-			it( 'renders the second summary into the slot', () => {
-				const { container } = renderWithSlot( containerClassName );
+			const { container } = renderWithSlot( containerClassName );
+			const actionArea = container.querySelector(
+				'.checkout-order-summary-block-fill'
+			);
 
-				expect( fillsIn( container ) ).toHaveLength( 1 );
-			} );
+			expect( actionArea ).toContainElement(
+				screen.getByTestId( 'summary-content' )
+			);
 		}
 	);
 
-	it( 'renders no fill once the container is large enough for two columns', () => {
-		const { container } = renderWithSlot( 'is-large' );
+	it.each( [ '', 'is-large' ] )(
+		'keeps the summary inline when the container reports %p',
+		( containerClassName ) => {
+			const { container } = renderWithSlot( containerClassName );
+			const inlineSummary = container.querySelector(
+				'.wc-block-components-checkout-order-summary__content'
+			);
 
-		expect( fillsIn( container ) ).toHaveLength( 0 );
+			expect( inlineSummary ).toContainElement(
+				screen.getByTestId( 'summary-content' )
+			);
+		}
+	);
+
+	it( 'keeps public extension fills mounted once while the summary moves', () => {
+		let containerClassName = '';
+		baseContext.useContainerWidthContext.mockImplementation( () =>
+			containerWidthOf( containerClassName )
+		);
+
+		const ExtensionContent = ( { testId } ) => (
+			<div data-testid={ testId } />
+		);
+		const tree = () => (
+			<SlotFillProvider>
+				<ExperimentalDiscountsMeta>
+					<ExtensionContent testId="discount-extension" />
+				</ExperimentalDiscountsMeta>
+				<ExperimentalOrderMeta>
+					<ExtensionContent testId="order-extension" />
+				</ExperimentalOrderMeta>
+				<SummaryBlock>
+					<ExperimentalDiscountsMeta.Slot
+						extensions={ {} }
+						cart={ {} }
+						context="woocommerce/checkout"
+					/>
+				</SummaryBlock>
+				<CheckoutOrderSummarySlot />
+			</SlotFillProvider>
+		);
+		const { container, rerender } = render( tree() );
+		const discountExtension = screen.getByTestId( 'discount-extension' );
+		const orderExtension = screen.getByTestId( 'order-extension' );
+		const inlineSummary = container.querySelector(
+			'.wc-block-components-checkout-order-summary__content'
+		);
+
+		expect( inlineSummary ).toContainElement( discountExtension );
+		expect( inlineSummary ).toContainElement( orderExtension );
+
+		containerClassName = 'is-large';
+		rerender( tree() );
+
+		expect( screen.getAllByTestId( 'discount-extension' ) ).toHaveLength(
+			1
+		);
+		expect( screen.getAllByTestId( 'order-extension' ) ).toHaveLength( 1 );
+		expect( screen.getByTestId( 'discount-extension' ) ).toBe(
+			discountExtension
+		);
+		expect( screen.getByTestId( 'order-extension' ) ).toBe(
+			orderExtension
+		);
+
+		containerClassName = 'is-medium';
+		rerender( tree() );
+
+		const actionArea = container.querySelector(
+			'.checkout-order-summary-block-fill'
+		);
+		expect( actionArea ).toContainElement( discountExtension );
+		expect( actionArea ).toContainElement( orderExtension );
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /Order summary/ } )
+		);
+
+		expect( inlineSummary ).toContainElement( discountExtension );
+		expect( inlineSummary ).toContainElement( orderExtension );
+		expect( screen.getAllByTestId( 'discount-extension' ) ).toHaveLength(
+			1
+		);
+		expect( screen.getAllByTestId( 'order-extension' ) ).toHaveLength( 1 );
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /Order summary/ } )
+		);
+
+		expect( actionArea ).toContainElement( discountExtension );
+		expect( actionArea ).toContainElement( orderExtension );
+		expect( screen.getByTestId( 'discount-extension' ) ).toBe(
+			discountExtension
+		);
+		expect( screen.getByTestId( 'order-extension' ) ).toBe(
+			orderExtension
+		);
 	} );
 } );

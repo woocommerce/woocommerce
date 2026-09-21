@@ -7,6 +7,7 @@ import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 export type OrderSummaryToggle = {
 	isOpen: boolean;
+	hasContainerWidth: boolean;
 	isLarge: boolean;
 	ariaControlsId: string;
 	toggleProps: HTMLAttributes< HTMLDivElement >;
@@ -26,7 +27,7 @@ export type OrderSummaryToggle = {
  *                              controls, and the props to spread on the bar.
  */
 export const useOrderSummaryToggle = (): OrderSummaryToggle => {
-	const { isLarge } = useContainerWidthContext();
+	const { hasContainerWidth, isLarge } = useContainerWidthContext();
 	const [ isOpen, setIsOpen ] = useState( false );
 	const ariaControlsId = useId();
 
@@ -49,5 +50,11 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 		  }
 		: {};
 
-	return { isOpen, isLarge, ariaControlsId, toggleProps };
+	return {
+		isOpen,
+		hasContainerWidth,
+		isLarge,
+		ariaControlsId,
+		toggleProps,
+	};
 };

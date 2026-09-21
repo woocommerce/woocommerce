@@ -6,6 +6,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
+import { createPortal, useLayoutEffect, useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
@@ -23,15 +24,38 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isOpen, isLarge, ariaControlsId, toggleProps } =
+	const { isOpen, hasContainerWidth, isLarge, ariaControlsId, toggleProps } =
 		useOrderSummaryToggle();
+	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
+		null
+	);
+	const [ actionAreaHost, setActionAreaHost ] =
+		useState< HTMLDivElement | null >( null );
+	const [ contentContainer ] = useState( () => {
+		const container = document.createElement( 'div' );
+		container.className =
+			'wc-block-components-checkout-order-summary__content-container';
+		return container;
+	} );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	const showInline = ! hasContainerWidth || isLarge || isOpen;
 
-	// Render the summary once here in the block and once in the fill, so the
-	// fill can be slotted elsewhere. Below the large breakpoint both render and
-	// the CSS decides which one is visible.
+	// Moving a stable portal container keeps extension components mounted while
+	// placing the summary in the part of the checkout where it is needed.
+	useLayoutEffect( () => {
+		const destination = showInline ? inlineHost : actionAreaHost;
+
+		if ( destination ) {
+			destination.appendChild( contentContainer );
+		}
+	}, [ actionAreaHost, contentContainer, inlineHost, showInline ] );
+
+	useLayoutEffect( () => {
+		return () => contentContainer.remove();
+	}, [ contentContainer ] );
+
 	return (
 		<>
 			<div className={ className }>
@@ -61,6 +85,7 @@ const FrontendBlock = ( {
 					</span>
 				</div>
 				<div
+					ref={ setInlineHost }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
@@ -68,7 +93,29 @@ const FrontendBlock = ( {
 						}
 					) }
 					id={ ariaControlsId }
+				/>
+			</div>
+			<CheckoutOrderSummaryFill>
+				<div
+					className={ clsx(
+						className,
+						'checkout-order-summary-block-fill-wrapper',
+						{
+							'is-content-inline': showInline,
+						}
+					) }
 				>
+					<FormStepHeading>
+						<>{ __( 'Order summary', 'woocommerce' ) }</>
+					</FormStepHeading>
+					<div
+						ref={ setActionAreaHost }
+						className="checkout-order-summary-block-fill"
+					/>
+				</div>
+			</CheckoutOrderSummaryFill>
+			{ createPortal(
+				<>
 					{ children }
 					<div className="wc-block-components-totals-wrapper">
 						<TotalsFooterItem
@@ -77,31 +124,8 @@ const FrontendBlock = ( {
 						/>
 					</div>
 					<OrderMetaSlotFill />
-				</div>
-			</div>
-			{ /* Render a second instance of the order summary in a different location for smaller screens.
-			On large containers the CSS hides this fill, so rendering it while the
-			width is still unknown is safe. */ }
-			{ ! isLarge && (
-				<CheckoutOrderSummaryFill>
-					<div
-						className={ `${ className } checkout-order-summary-block-fill-wrapper` }
-					>
-						<FormStepHeading>
-							<>{ __( 'Order summary', 'woocommerce' ) }</>
-						</FormStepHeading>
-						<div className="checkout-order-summary-block-fill">
-							{ children }
-							<div className="wc-block-components-totals-wrapper">
-								<TotalsFooterItem
-									currency={ totalsCurrency }
-									values={ cartTotals }
-								/>
-							</div>
-							<OrderMetaSlotFill />
-						</div>
-					</div>
-				</CheckoutOrderSummaryFill>
+				</>,
+				contentContainer
 			) }
 		</>
 	);
