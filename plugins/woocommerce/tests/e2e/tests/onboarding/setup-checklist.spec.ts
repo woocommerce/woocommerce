@@ -191,6 +191,7 @@ test(
 				.toContain( '/oauth/authorize' );
 
 			const params = new URL( authorizeUrl ?? '' ).searchParams;
+			const storeOrigin = new URL( baseURL ?? '' ).origin;
 
 			// `secret` is minted by WooCommerce.com in reply to the server-side
 			// `oauth/request_token` call, so a non-empty value is proof that the
@@ -199,10 +200,11 @@ test(
 
 			// The store identifies itself, and says where to come back to afterwards.
 			expect( new URL( params.get( 'home_url' ) ?? '' ).origin ).toBe(
-				new URL( baseURL ?? '' ).origin
+				storeOrigin
 			);
 
 			const redirectUri = new URL( params.get( 'redirect_uri' ) ?? '' );
+			expect( redirectUri.origin ).toBe( storeOrigin );
 			expect( redirectUri.pathname ).toContain( 'admin.php' );
 			expect( redirectUri.searchParams.get( 'wc-helper-return' ) ).toBe(
 				'1'
@@ -212,8 +214,12 @@ test(
 			).toBeTruthy();
 
 			// Where the merchant lands in wp-admin once the connection completes.
-			expect( params.get( 'redirect_admin_url' ) ).toContain(
-				'page=wc-admin'
+			const redirectAdminUrl = new URL(
+				params.get( 'redirect_admin_url' ) ?? ''
+			);
+			expect( redirectAdminUrl.origin ).toBe( storeOrigin );
+			expect( redirectAdminUrl.searchParams.get( 'page' ) ).toBe(
+				'wc-admin'
 			);
 
 			expect( [ '0', '1' ] ).toContain( params.get( 'wum-installed' ) );
