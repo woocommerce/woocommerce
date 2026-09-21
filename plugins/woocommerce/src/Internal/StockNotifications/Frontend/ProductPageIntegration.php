@@ -178,7 +178,7 @@ class ProductPageIntegration {
 		}
 
 		$text = __( 'Please {login_link} to sign up for stock notifications.', 'woocommerce' );
-		$text = str_replace( '{login_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( 'my-account' ) ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{login_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( 'dashboard' ) ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 
@@ -244,7 +244,8 @@ class ProductPageIntegration {
 			'single-product/back-in-stock-form.php',
 			array(
 				'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
-				'show_checkbox'    => ! is_user_logged_in() && Config::creates_account_on_signup() && ! Config::requires_account(),
+				// Kept so template overrides that still read it don't raise an undefined-variable warning.
+				'show_checkbox'    => false,
 				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
 				'button_class'     => $button_class,
 				'is_visible'       => $is_visible,

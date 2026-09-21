@@ -1516,7 +1516,158 @@ describe( 'getDateDifferenceInDays', () => {
 	} );
 } );
 
+describe( 'secondary range shift', () => {
+	afterEach( () => {
+		jest.useRealTimers();
+	} );
+
+	it( 'is a year shift for previous year and for the year presets, an offset otherwise', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
+
+		expect( getLastPeriod( 'month', 'previous_year' ).secondaryShift ).toBe(
+			'year'
+		);
+		expect(
+			getCurrentPeriod( 'week', 'previous_year' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getCurrentPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'month', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+		expect(
+			getCurrentPeriod( 'quarter', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+	} );
+
+	it( 'ends a year shifted current period on the same calendar day a year earlier', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-06-15T12:00:00' ) );
+		const { secondaryStart, secondaryEnd } = getCurrentPeriod(
+			'year',
+			'previous_year'
+		);
+		expect( secondaryStart.format( isoDateFormat ) ).toBe( '2024-01-01' );
+		expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+			'2024-06-15 23:59:59'
+		);
+	} );
+
+	it( 'keeps the previous period of the last year on the store clock around New Year', () => {
+		// 09:30 UTC on 1st January: every browser zone east of -09:30 is
+		// already in 2027 while a Honolulu store is still on 31st December.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2027-01-01T09:30:00Z' )
+		);
+		const previousWcSettings = global.window.wcSettings;
+		global.window.wcSettings = {
+			...previousWcSettings,
+			timeZone: 'Pacific/Honolulu',
+		};
+
+		try {
+			const { primaryStart, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
+			expect( primaryStart.format( isoDateFormat ) ).toBe( '2025-01-01' );
+			expect( secondaryStart.format( isoDateFormat ) ).toBe(
+				'2024-01-01'
+			);
+			expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+				'2024-12-31 23:59:59'
+			);
+		} finally {
+			global.window.wcSettings = previousWcSettings;
+		}
+	} );
+
+	it( 'is exposed on the secondary date picker options', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		expect(
+			getCurrentDates( {
+				period: 'last_year',
+				compare: 'previous_period',
+			} ).secondary.shift
+		).toBe( 'year' );
+
+		const custom = {
+			period: 'custom',
+			after: '2024-12-01',
+			before: '2025-12-01',
+		};
+
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_year' } ).secondary
+				.shift
+		).toBe( 'year' );
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_period' } )
+				.secondary.shift
+		).toBe( 'offset' );
+	} );
+} );
+
 describe( 'getPreviousDate', () => {
+	it( 'should use the shift over the compare value when given', () => {
+		const yearShifted = getPreviousDate(
+			'2024-03-01',
+			'2024-01-01',
+			'2023-01-01',
+			'previous_period',
+			'day',
+			'year'
+		);
+		expect( yearShifted.format( isoDateFormat ) ).toBe( '2023-03-01' );
+
+		const offset = getPreviousDate(
+			'2025-03-01',
+			'2024-12-01',
+			'2023-12-01',
+			'previous_year',
+			'day',
+			'offset'
+		);
+		expect( offset.format( isoDateFormat ) ).toBe( '2024-02-29' );
+	} );
+	it( 'should shift by calendar dates when the range starts sit on different sides of a DST change', () => {
+		// Last quarter (Q2) against the previous period on a New York store:
+		// April starts in EDT, the last day of December in EST.
+		const primaryStart = moment.parseZone( '2026-04-01T00:00:00-04:00' );
+		const secondaryStart = moment.parseZone( '2025-12-31T00:00:00-05:00' );
+
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'day',
+				'offset'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'week'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+
+		// Quarter to date against the previous period: April against January.
+		expect(
+			getPreviousDate(
+				'2026-05-01 00:00:00',
+				primaryStart,
+				moment.parseZone( '2026-01-01T00:00:00-05:00' ),
+				'previous_period',
+				'month'
+			).format( isoDateFormat )
+		).toBe( '2026-02-01' );
+	} );
 	it( 'should return valid date for previous period by days', () => {
 		const date = '2018-08-21';
 		const primaryStart = '2018-08-25';

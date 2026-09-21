@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Harden the Back in Stock Notifications feature gate: honor the WOOCOMMERCE_BIS_ALPHA_ENABLED constant until the option migration runs, fail soft in NotificationQuery when the feature is off, make SignupRateLimiter static so SignupService::init() keeps its three-argument signature, and deprecate StockNotifications::init_hooks() in favor of maybe_init_services().
