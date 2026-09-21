@@ -190,8 +190,14 @@ test(
 				.poll( () => authorizeUrl ?? '', { timeout: 30000 } )
 				.toContain( '/oauth/authorize' );
 
-			const params = new URL( authorizeUrl ?? '' ).searchParams;
+			const authorize = new URL( authorizeUrl ?? '' );
+			const params = authorize.searchParams;
 			const storeOrigin = new URL( baseURL ?? '' ).origin;
+
+			// The hand-off goes to WooCommerce.com itself. A store can repoint the Helper API
+			// with the `woocommerce_helper_api_base` filter; the E2E environment leaves it at
+			// the default.
+			expect( authorize.origin ).toBe( 'https://woocommerce.com' );
 
 			// `secret` is minted by WooCommerce.com in reply to the server-side
 			// `oauth/request_token` call, so a non-empty value is proof that the
