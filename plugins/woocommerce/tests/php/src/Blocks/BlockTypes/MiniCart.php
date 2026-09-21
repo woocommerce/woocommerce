@@ -543,6 +543,6 @@ class MiniCart extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCart"', $output, 'The added-to-cart document event should call the unified refreshCart action.' );
 		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCart"', $output, 'The removed-from-cart document event should call the unified refreshCart action.' );
-		$this->assertStringNotContainsString( 'refreshCartItems', $output, 'The old refreshCartItems action should not be referenced.' );
+		$this->assertStringNotContainsString( 'refreshCartItems', $output, 'The output should not reference the refreshCartItems action.' );
 	}
 }

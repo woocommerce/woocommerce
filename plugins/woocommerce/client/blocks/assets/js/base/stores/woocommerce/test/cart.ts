@@ -174,7 +174,7 @@ async function loadCartStore(): Promise< RawCartActions > {
 		// no-ops against these raw, undriven generator functions); the
 		// test drives `refreshCart` itself, below. `bindCartState`'s own
 		// state type additionally reads `restUrl` / `nonce` /
-		// `errorMessages`, no longer part of the published `WooCommerceStore`
+		// `errorMessages`, not part of the published `WooCommerceStore`
 		// state type `MockState` merges — hence the cast, as `index.ts`
 		// itself does for the same reason.
 		cartActionsModule.bindCartState(
@@ -1217,7 +1217,7 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 			cleanup();
 		} );
 
-		it( 'A5 — dispatches one batch request and one set of page-sync effects for a same-tick burst of addCartItem calls', async () => {
+		it( 'dispatches one batch request and one set of page-sync effects for a same-tick burst of addCartItem calls', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {
 				messages: { addedToCartText: 'Added to your cart.' },
 			} );
@@ -1252,15 +1252,15 @@ describe( 'WooCommerce cart plane (cart-actions.ts)', () => {
 			cleanup();
 		} );
 
-		it( 'A7 — N same-tick adds of a product at quantity 1 each post N deltas of 1, and the cart line lands at quantity N once the server’s merged response commits', async () => {
+		it( 'N same-tick adds of a product at quantity 1 each post N deltas of 1, and the cart line lands at quantity N once the server’s merged response commits', async () => {
 			// A real Store API batch runs each `add-item` sub-request
 			// sequentially against one `WC_Cart` session, so N same-tick
 			// deltas of 1 land the server on quantity N. Reproduce that
 			// merged response directly, since the optimistic layer alone
 			// cannot know the other same-tick calls will land on the same
-			// line before the server confirms it (D8's "N rapid clicks add
-			// N" claim is about the posted deltas and the settled result,
-			// not the transient optimistic render).
+			// line before the server confirms it: "N rapid clicks add N"
+			// is about the posted deltas and the settled result, not the
+			// transient optimistic render.
 			const N = 3;
 			const captured: CapturedRequest[] = [];
 			global.fetch = jest.fn(

@@ -75,9 +75,9 @@ const { state, actions } = store< WooCommerceStore >(
 // after the one registration above.
 bindState( state );
 // `cart-actions.ts`'s own state type additionally reads `restUrl` / `nonce`
-// / `errorMessages`, seeded by PHP (`BlocksSharedState.php`) but no longer
-// part of `WooCommerceStore`'s published state type — hence the cast,
-// widening today's assembled type to the fuller shape it reads at runtime.
+// / `errorMessages`, seeded by PHP (`BlocksSharedState.php`) but not part of
+// `WooCommerceStore`'s published state type — hence the cast, widening the
+// assembled type to the fuller shape it reads at runtime.
 bindCartState(
 	state as unknown as Parameters< typeof bindCartState >[ 0 ],
 	actions

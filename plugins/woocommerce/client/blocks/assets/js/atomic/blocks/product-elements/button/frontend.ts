@@ -139,11 +139,11 @@ const productButtonStore = {
 			const record = wooState.productScopes[ scopeName ]?.draftCartItem;
 			const { variation } = wooState.productScope;
 
-			// The payload form: it removes no record, so a shopper's typed
-			// quantity in a form sharing this scope survives the click, as
-			// today. The button has no quantity input of its own, so it
-			// always posts its own filtered `quantityToAdd`, never the
-			// scope's draft quantity.
+			// The payload form removes no record, so a shopper's typed
+			// quantity in a form sharing this scope survives the click.
+			// The button has no quantity input of its own, so it always
+			// posts its own filtered `quantityToAdd`, never the scope's
+			// draft quantity.
 			yield wooActions.addCartItem(
 				{
 					...record,

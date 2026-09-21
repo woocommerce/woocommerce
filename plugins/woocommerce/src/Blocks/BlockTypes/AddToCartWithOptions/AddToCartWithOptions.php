@@ -659,10 +659,10 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( $declares_scope ) {
 				// This form is not the first for its product in this place, so it
-				// declares its own product scope directly on the <form> element
-				// (D5). Its own store context moves to a wrapping element,
-				// since an element can declare context for only one
-				// Interactivity API namespace.
+				// declares its own product scope directly on the <form> element.
+				// Its own store context moves to a wrapping element, since an
+				// element can declare context for only one Interactivity API
+				// namespace.
 				//
 				// That wrapping element has to be an ancestor of the <form>,
 				// not a descendant: `data-wp-on--submit` and

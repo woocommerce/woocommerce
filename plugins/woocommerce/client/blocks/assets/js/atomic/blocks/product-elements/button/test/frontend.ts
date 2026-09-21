@@ -154,7 +154,7 @@ describe( 'Product Button interactivity store', () => {
 		{ title: 'simple product', type: 'simple', cartQuantity: 4 },
 		{ title: 'variable product', type: 'variation', cartQuantity: 2 },
 	] )(
-		'shows the same "in cart" count as the base branch for a $title',
+		'shows the cart line\'s own quantity as the "in cart" count for a $title',
 		( { type, cartQuantity } ) => {
 			mockProductScope.product = { id: 42, type };
 			mockProductScope.cartItem = { quantity: cartQuantity };

@@ -367,7 +367,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			} );
 		} );
 
-		it( 'matches a simple product by its own id, unchanged', () => {
+		it( 'matches a simple product by its own id', () => {
 			mockState.products[ 7 ] = mockProduct( { id: 7 } );
 			const line = { id: 7, key: 'l7' } as FakeCartLine;
 			( findCartLine as jest.Mock ).mockImplementation(
@@ -378,7 +378,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			expect( scopeState.productScope.cartItem ).toEqual( line );
 		} );
 
-		it( 'matches directly when productId is itself a variation id, unchanged', () => {
+		it( 'matches directly when productId is itself a variation id', () => {
 			mockState.productVariations[ 501 ] = mockProduct( { id: 501 } );
 			const line = { id: 501, key: 'l501' } as FakeCartLine;
 			( findCartLine as jest.Mock ).mockImplementation(
@@ -389,7 +389,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			expect( scopeState.productScope.cartItem ).toEqual( line );
 		} );
 
-		it( 'falls back to the raw productId when no product resolves, unchanged', () => {
+		it( 'falls back to the raw productId when no product resolves', () => {
 			const line = { id: 404, key: 'l404' } as FakeCartLine;
 			( findCartLine as jest.Mock ).mockImplementation(
 				fakeFindCartLine( [ line ] )
@@ -399,7 +399,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			expect( scopeState.productScope.cartItem ).toEqual( line );
 		} );
 
-		it( 'findProductScope resolves a grouped child’s cart line by the ref’s productId, unchanged', () => {
+		it( 'findProductScope resolves a grouped child’s cart line by the ref’s productId', () => {
 			mockState.products[ 55 ] = mockProduct( { id: 55 } );
 			const line = { id: 55, key: 'child' } as FakeCartLine;
 			( findCartLine as jest.Mock ).mockImplementation(
@@ -637,7 +637,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 	} );
 
-	describe( 'A6 evidence — productScope reads nothing reactive', () => {
+	describe( 'productScope reads nothing reactive', () => {
 		it( 'does not call getContext while building the envelope, only once a member is accessed', () => {
 			mockContext = { productId: 1, scopeName: 'a6' };
 			( getContext as jest.Mock ).mockClear();
@@ -662,21 +662,15 @@ describe( 'woocommerce store — product scope envelope', () => {
 		} );
 	} );
 
-	// Carried over from the deleted `test/products.test.ts`: every assertion
-	// it made about the old `findProduct` matcher and its derived-getter
-	// trio (the old main-product getter, the old selected-variation getter,
-	// and the old resolved-product getter), expressed against
-	// `findProductScope` and `productScope`'s `baseProduct` / `productVariation`
-	// / `product`. One deliberate divergence: old `findProduct` returned `null`
-	// outright when selected attributes matched a candidate that was not yet
-	// populated in `productVariations`; the new `product` accessor instead
-	// falls back to `baseProduct` in that case (matching the old resolved-product
-	// getter, and this task's own `product is productVariation when one
-	// resolved, otherwise baseProduct` rule) — so that specific truth is
-	// carried onto `productVariation` (which stays `null` either way) rather
-	// than `product`.
-	describe( 'carried over from products.test.ts', () => {
-		describe( 'baseProduct (was the old main-product getter)', () => {
+	// Exercises `findProductScope`'s `baseProduct`, `productVariation` and
+	// `product` resolution against a matching candidate. One case worth
+	// calling out: when selected attributes match a candidate that is not
+	// yet populated in `productVariations`, `product` falls back to
+	// `baseProduct` (following the rule that `product` is `productVariation`
+	// when one resolved, otherwise `baseProduct`), while `productVariation`
+	// stays `null` either way.
+	describe( 'resolving baseProduct, productVariation and product', () => {
+		describe( 'baseProduct', () => {
 			it( 'returns the product regardless of a selected variation', () => {
 				mockState.products[ 42 ] = mockProduct( { id: 42 } );
 				mockContext = {
@@ -711,7 +705,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			} );
 		} );
 
-		describe( 'productVariation (was the old selected-variation getter)', () => {
+		describe( 'productVariation', () => {
 			it( 'returns null when nothing is selected on a simple product', () => {
 				mockState.products[ 42 ] = mockProduct( { id: 42 } );
 				mockContext = { productId: 42 };
@@ -771,7 +765,7 @@ describe( 'woocommerce store — product scope envelope', () => {
 			} );
 		} );
 
-		describe( 'product (was the old resolved-product getter / findProduct)', () => {
+		describe( 'product', () => {
 			it( 'returns null when the product is not in the store (findProduct)', () => {
 				const envelope = scopeState.findProductScope( {
 					productId: 999,
@@ -1094,8 +1088,9 @@ describe( 'woocommerce store — product scope envelope', () => {
 	// first write land on the wrong one. `makeReactive` reproduces the one
 	// real-proxy behaviour this defect depends on — reading a key that does
 	// not exist yet fixes what every later read of that key returns, even
-	// after a raw write past the proxy — so these tests fail against
-	// `ensureRecord`/`writeIdentity` as they read before this task.
+	// after a raw write past the proxy — so these tests fail if
+	// `ensureRecord`/`writeIdentity` create the record before resolving its
+	// identity snapshot, rather than resolving it first.
 	describe( 'a scope record reaching a reactive state (first-write coverage)', () => {
 		let reactiveScopeState: ScopeState;
 		let productScopes: ProductScopesState;

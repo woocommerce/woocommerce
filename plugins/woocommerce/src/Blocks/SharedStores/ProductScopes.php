@@ -210,14 +210,8 @@ class ProductScopes {
 	/**
 	 * The `{ attribute, value }` entries a product contributes to a scope
 	 * element's declared `variation`: its own variation attributes when it
-	 * is a variation, empty for anything else.
-	 *
-	 * Every scope element derives its `variation` through this one method,
-	 * so a product's own declaration and the form's cannot drift. The id
-	 * this is called with is always one the caller is already rendering:
-	 * the two callers that hold only an id have already loaded that same
-	 * product through wc_interactivity_api_load_product() one line
-	 * earlier, so this never issues a lookup of its own.
+	 * is a variation, empty for anything else. Callers pass an id they are
+	 * already rendering, so this issues no lookup of its own.
 	 *
 	 * @since 11.3.0
 	 *

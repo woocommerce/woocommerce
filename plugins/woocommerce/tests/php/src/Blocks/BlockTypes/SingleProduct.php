@@ -268,7 +268,7 @@ class SingleProduct extends \WP_UnitTestCase {
 			$this->assertSame( array(), $scope['context']['variation'] );
 			$this->assertIsString( $scope['context']['scopeName'] );
 			$this->assertNotSame( '', $scope['context']['scopeName'] );
-			$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'No context should be declared in the retired woocommerce/products namespace.' );
+			$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'No context should be declared in the woocommerce/products namespace.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

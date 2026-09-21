@@ -1,11 +1,11 @@
 /**
- * Store-level proof for the six proposal use cases no core block produces
- * (5 Sticky bar, 6 Bundle, 9 Gift message, 10 Product selector, 11 Navigation
- * sync, 12 Product switcher — proposal-68885.md). Each suite drives the real
- * `scope.ts` + `cart-actions.ts` modules exactly as `index.ts` binds them,
- * simulating the extension or page script the proposal shows for that
- * scenario, using only the members R1 lists. No source file is exercised
- * through a private helper or a block namespace.
+ * Store-level proof for six use cases no core block produces: sticky
+ * add-to-cart bar, bundle, gift message, product selector, navigation sync,
+ * and product switcher. Each suite drives the real `scope.ts` +
+ * `cart-actions.ts` modules exactly as `index.ts` binds them, simulating the
+ * extension or page script for that scenario, using only the store's own
+ * public members. No source file is exercised through a private helper or a
+ * block namespace.
  */
 
 /**

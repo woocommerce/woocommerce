@@ -176,8 +176,8 @@ type ScopeAccess = {
  * The slice of the shared `woocommerce` state this module reads and writes:
  * its own `cart`, the scope layer's records (to build and clear an
  * `addCartItem()` draft), and `restUrl` / `nonce` / `errorMessages`, seeded
- * by PHP (`BlocksSharedState.php`) but no longer part of the module's
- * designed, published state type.
+ * by PHP (`BlocksSharedState.php`) but not part of the module's own
+ * published state type.
  */
 type SharedState = CartActionsState &
 	ScopeAccess & {
@@ -204,8 +204,7 @@ let registeredActions: RegisteredRefreshCart;
  * action this module reads and calls. Called once, by `index.ts`,
  * immediately after its own `store()` call returns; also triggers the
  * initial cart load and subscribes the `wc/store/cart` data-store sync
- * listener, exactly where the module used to do both as a side effect of its
- * own `store()` call.
+ * listener.
  *
  * @param sharedState The store's own returned state reference.
  * @param actions     The store's own returned, registered actions reference
@@ -246,7 +245,7 @@ export function bindCartState(
  * `cartItemsPendingDelete`) is unioned independently across `list`, with
  * duplicates collapsed via `Set`. A key that no entry in `list` contributes
  * is left absent from the result rather than emitted as an empty array, so
- * the sync event's shape matches today's single-mutation payloads.
+ * the sync event keeps the shape of a single-mutation payload.
  *
  * @param list The `quantityChanges` records of every successful mutation in
  *             the cycle, one per mutation.
@@ -403,8 +402,8 @@ async function sendCartRequest(
 					( entry ) => entry.meta.origin === 'add'
 				);
 
-				// Preserve today's relative order: the legacy event fires
-				// before the sync event.
+				// The legacy event fires before the sync event, keeping
+				// their relative order.
 				if ( anyAdd ) {
 					triggerAddedToCartEvent( { preserveCartData: true } );
 				}
@@ -877,8 +876,7 @@ function* refreshCart(): AsyncAction< void > {
 export const cartActionsState: CartActionsState = {
 	// `cart` carries no initial default: PHP always seeds it
 	// (`BlocksSharedState.php`) before the client runs, and `refreshCart`
-	// assigns it at load time otherwise, exactly as before this module was
-	// split out of `cart.ts`.
+	// assigns it at load time otherwise.
 } as CartActionsState;
 
 /**

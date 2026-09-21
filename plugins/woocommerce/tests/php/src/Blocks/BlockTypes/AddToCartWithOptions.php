@@ -742,8 +742,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'data-wp-bind--min="woocommerce::state.productScope.product.add_to_cart.minimum"', $markup, 'The min attribute should bind to the unified productScope.' );
 		$this->assertStringContainsString( 'data-wp-bind--max="woocommerce::state.productScope.product.add_to_cart.maximum"', $markup, 'The max attribute should bind to the unified productScope.' );
 		$this->assertStringContainsString( 'data-wp-bind--step="woocommerce::state.productScope.product.add_to_cart.multiple_of"', $markup, 'The step attribute should bind to the unified productScope.' );
-		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
-		$this->assertStringNotContainsString( 'productInContext', $markup, 'The old productInContext getter should not be referenced.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The markup should not reference the woocommerce/products namespace.' );
+		$this->assertStringNotContainsString( 'productInContext', $markup, 'The markup should not reference the productInContext getter.' );
 	}
 
 	/**
@@ -761,8 +761,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product = $previous_product;
 
 		$this->assertStringContainsString( 'data-wp-bind--hidden="woocommerce::!state.productScope.productVariation.description"', $markup, 'The hidden attribute should bind to the unified productScope.' );
-		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
-		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The old productVariationInContext getter should not be referenced.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The markup should not reference the woocommerce/products namespace.' );
+		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The markup should not reference the productVariationInContext getter.' );
 	}
 
 	/**
@@ -780,8 +780,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product = $previous_product;
 
 		$this->assertStringContainsString( 'data-wp-bind--value="woocommerce::state.productScope.productVariation.id"', $markup, 'The hidden variation_id input should bind to the resolved variation through the unified productScope.' );
-		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
-		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The old productVariationInContext getter should not be referenced.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The markup should not reference the woocommerce/products namespace.' );
+		$this->assertStringNotContainsString( 'productVariationInContext', $markup, 'The markup should not reference the productVariationInContext getter.' );
 	}
 
 	/**
@@ -1017,8 +1017,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$this->assertArrayHasKey( 'initialQuantity', $first_form_context, "The first form's own context should stay directly on its <form> element." );
 
 			// The second form declares its own scope directly on the <form>,
-			// unchanged, while its own context (initialQuantity, etc.) moves
-			// to a wrapping element that is an ancestor of the <form>.
+			// while its own context (initialQuantity, etc.) moves to a
+			// wrapping element that is an ancestor of the <form>.
 			$this->assertStringStartsWith(
 				'woocommerce::',
 				$second_form->getAttribute( 'data-wp-context' ),
@@ -1353,7 +1353,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A declaring grouped form's own context, now on its wrapping element, still carries groupedProductIds and groupedScopeNames matching each of its own child rows' scopeName.
+	 * @testdox A declaring grouped form's own context, on its wrapping element, still carries groupedProductIds and groupedScopeNames matching each of its own child rows' scopeName.
 	 */
 	public function test_declaring_grouped_form_wrapper_carries_grouped_scope_names_matching_its_own_child_rows(): void {
 		$child_a = new \WC_Product_Simple();
@@ -1726,7 +1726,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A simple and a variable product's initialQuantity map holds exactly what their quantity map held on the base branch, and no rendered form carries a quantity context key.
+	 * @testdox A simple and a variable product's initialQuantity map holds each item's own minimum purchase quantity, and no rendered form carries a quantity context key.
 	 */
 	public function test_initial_quantity_matches_base_branch_quantity_values_for_simple_and_variable_products(): void {
 		$simple_product = new \WC_Product_Simple();
@@ -1791,7 +1791,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A grouped product's initialQuantity map holds, per child, 0, the resubmitted $_POST value, or 0 when sold individually, exactly as its quantity map held on the base branch.
+	 * @testdox A grouped product's initialQuantity map holds, per child, 0, the resubmitted $_POST value, or 0 when sold individually.
 	 */
 	public function test_initial_quantity_matches_base_branch_quantity_values_for_grouped_product(): void {
 		$child_untouched = new \WC_Product_Simple();

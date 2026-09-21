@@ -1,20 +1,19 @@
 /**
- * Store-level proof for the proposal's three draft lifecycle primitives
- * (proposal-68885.md, "Draft lifecycle"): removing a scope's draft, resetting
- * it to what the server seeded, and adding while keeping the draft — the
- * payload form of `addCartItem`. Everything else in the proposal's eight
- * lifecycle cases composes from these three.
+ * Store-level proof for the three draft lifecycle primitives: removing a
+ * scope's draft, resetting it to what the server seeded, and adding while
+ * keeping the draft — the payload form of `addCartItem`. Every other
+ * lifecycle case composes from these three.
  *
  * Each primitive is addressed at the reading element's declared scope name,
  * read via `getContext( 'woocommerce' ).scopeName`, defaulting to `_default`
  * exactly as `scope.ts` itself resolves a record's name — `state.productScope`
  * has no `scopeName` member of its own to read this from; `scopeName` is a
- * declared context prop (R1), not an envelope member.
+ * declared context prop, not an envelope member.
  *
  * The "server seed" a reset restores is modelled as a value the test itself
- * holds, standing in for `getServerState( 'woocommerce' )` — outside R1's
- * member list — the same way PHP's `wp_interactivity_state()` seed is a
- * value fixed before the client ever runs.
+ * holds, standing in for `getServerState( 'woocommerce' )`, the same way
+ * PHP's `wp_interactivity_state()` seed is a value fixed before the client
+ * ever runs.
  */
 
 /**
@@ -232,7 +231,7 @@ const mockProduct = ( overrides: Partial< ProductResponseItem > = {} ) =>
  * Resolves the scope name the three lifecycle primitives address: the
  * reading element's declared `scopeName`, defaulting to `_default` — the
  * same resolution `scope.ts` itself applies internally, expressed here
- * through the one context prop R1 lists rather than a private helper.
+ * through the declared context prop rather than a private helper.
  *
  * @return The scope name to address.
  */

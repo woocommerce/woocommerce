@@ -593,8 +593,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$this->assertArrayNotHasKey( 'productId', $state );
 			$this->assertArrayNotHasKey( 'variationId', $state );
 
-			$legacy_state = wp_interactivity_state( 'woocommerce/products' );
-			$this->assertArrayNotHasKey( 'productId', $legacy_state, 'Nothing should be seeded into the retired woocommerce/products namespace.' );
+			$products_namespace_state = wp_interactivity_state( 'woocommerce/products' );
+			$this->assertArrayNotHasKey( 'productId', $products_namespace_state, 'Nothing should be seeded into the woocommerce/products namespace.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

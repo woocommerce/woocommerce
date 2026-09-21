@@ -28,7 +28,7 @@ class ProductStockIndicatorTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'data-wp-interactive="woocommerce"', $markup, 'The stock indicator should declare the unified woocommerce namespace.' );
 		$this->assertStringContainsString( 'data-wp-text="state.productScope.product.stock_availability.text"', $markup, 'The stock availability text should read from the unified productScope.' );
-		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The old woocommerce/products namespace should not be referenced.' );
-		$this->assertStringNotContainsString( 'productInContext', $markup, 'The old productInContext getter should not be referenced.' );
+		$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'The markup should not reference the woocommerce/products namespace.' );
+		$this->assertStringNotContainsString( 'productInContext', $markup, 'The markup should not reference the productInContext getter.' );
 	}
 }

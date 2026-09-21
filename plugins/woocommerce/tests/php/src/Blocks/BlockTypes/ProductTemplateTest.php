@@ -161,7 +161,7 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			$this->assertSame( array(), $items[0]['context']['variation'] );
 			$this->assertIsString( $items[0]['context']['scopeName'] );
 			$this->assertNotSame( '', $items[0]['context']['scopeName'] );
-			$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'No context should be declared in the retired woocommerce/products namespace.' );
+			$this->assertStringNotContainsString( 'woocommerce/products', $markup, 'No context should be declared in the woocommerce/products namespace.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
