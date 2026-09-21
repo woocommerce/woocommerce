@@ -6,8 +6,9 @@
  * suite proves the code matches this file — it cannot prove this file matches
  * the sheet. Only a harness run against a fresh export can do that.
  *
- * Last verified against the sheet: 2026-08-05, using the regional CSV exports of
- * that date and a clone-local audit harness.
+ * Last full sheet audit: 2026-08-05, using the regional CSV exports of that date
+ * and a clone-local audit harness. PayPal placements were rechecked against the
+ * regional tabs on 2026-09-21.
  *
  * Sections mirror the sheet's rows. `primary_offline` describes the offline
  * profiler state; the baseline state leaves that slot empty and the test derives
@@ -42,6 +43,7 @@ return array(
 	),
 	'PM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'US' => array(
 		'primary_psp'            => 'woopayments',
@@ -106,6 +108,7 @@ return array(
 	),
 	'AM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'AT' => array(
 		'primary_psp'            => 'woopayments',
@@ -129,6 +132,7 @@ return array(
 	),
 	'BY' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BE' => array(
 		'primary_psp'            => 'woopayments',
@@ -329,6 +333,7 @@ return array(
 	),
 	'VA' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'HU' => array(
 		'primary_psp'            => 'woopayments',
@@ -462,6 +467,7 @@ return array(
 	),
 	'ME' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NL' => array(
 		'primary_psp'            => 'woopayments',
@@ -485,6 +491,7 @@ return array(
 	),
 	'MK' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NO' => array(
 		'primary_psp' => 'woopayments',
@@ -606,6 +613,7 @@ return array(
 	),
 	'SJ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SE' => array(
 		'primary_psp'            => 'woopayments',
@@ -644,6 +652,7 @@ return array(
 	),
 	'UA' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'AG' => array(
 		'primary_psp' => 'tilopay',
@@ -654,6 +663,7 @@ return array(
 	),
 	'AI' => array(
 		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -667,6 +677,7 @@ return array(
 	),
 	'AW' => array(
 		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -701,6 +712,7 @@ return array(
 	),
 	'BO' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BQ' => array(
 		'primary_psp' => 'tilopay',
@@ -718,6 +730,7 @@ return array(
 	),
 	'VG' => array(
 		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -786,6 +799,7 @@ return array(
 	),
 	'FK' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GF' => array(
 		'primary_psp' => 'visa_as',
@@ -850,6 +864,7 @@ return array(
 	),
 	'MS' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NI' => array(
 		'primary_psp' => 'tilopay',
@@ -867,6 +882,7 @@ return array(
 	),
 	'PY' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'PE' => array(
 		'primary_psp' => 'mercado_pago',
@@ -900,6 +916,7 @@ return array(
 	),
 	'VC' => array(
 		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -915,6 +932,7 @@ return array(
 	),
 	'SR' => array(
 		'primary_psp' => 'tilopay',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -984,9 +1002,11 @@ return array(
 	),
 	'BN' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'KH' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CN' => array(
 		'primary_psp' => 'paypal_full_stack',
@@ -1005,6 +1025,7 @@ return array(
 	),
 	'CK' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'FJ' => array(
 		'primary_psp' => 'visa_as',
@@ -1061,9 +1082,11 @@ return array(
 	),
 	'KI' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'LA' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MO' => array(
 		'primary_psp' => 'visa_as',
@@ -1079,24 +1102,30 @@ return array(
 	),
 	'MV' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MH' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'FM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MN' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MM' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'NR' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NP' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NC' => array(
 		'primary_psp' => 'visa_as',
@@ -1119,9 +1148,11 @@ return array(
 	),
 	'NU' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NF' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MP' => array(
 		'primary_psp' => 'visa_as',
@@ -1132,6 +1163,7 @@ return array(
 	),
 	'PG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'PH' => array(
 		'primary_psp' => 'payoneer',
@@ -1142,9 +1174,11 @@ return array(
 	),
 	'PN' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'WS' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SG' => array(
 		'primary_psp' => 'woopayments',
@@ -1158,9 +1192,11 @@ return array(
 	),
 	'SB' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'LK' => array(
 		'primary_psp' => 'payoneer',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -1189,12 +1225,15 @@ return array(
 	),
 	'TO' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'TV' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'VU' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'VN' => array(
 		'primary_psp' => 'payoneer',
@@ -1205,6 +1244,7 @@ return array(
 	),
 	'WF' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'DZ' => array(
 		'primary_psp' => 'visa_as',
@@ -1212,9 +1252,11 @@ return array(
 	),
 	'AO' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BJ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BW' => array(
 		'primary_psp' => 'visa_as',
@@ -1222,30 +1264,38 @@ return array(
 	),
 	'BF' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BI' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CV' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CF' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'TD' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'KM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'CI' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'EG' => array(
 		'primary_psp' => 'mastercard',
@@ -1257,15 +1307,18 @@ return array(
 	),
 	'CD' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'DJ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GQ' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'ER' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SZ' => array(
 		'primary_psp' => 'visa_as',
@@ -1273,12 +1326,14 @@ return array(
 	),
 	'ET' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'TF' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'GA' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GH' => array(
 		'primary_psp' => 'paystack',
@@ -1288,12 +1343,15 @@ return array(
 	),
 	'GM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GN' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GW' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'KE' => array(
 		'primary_psp' => 'visa_as',
@@ -1311,6 +1369,7 @@ return array(
 	),
 	'MG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MW' => array(
 		'primary_psp' => 'visa_as',
@@ -1318,9 +1377,11 @@ return array(
 	),
 	'ML' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MR' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MU' => array(
 		'primary_psp' => 'visa_as',
@@ -1328,6 +1389,7 @@ return array(
 	),
 	'YT' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MA' => array(
 		'primary_psp' => 'payoneer',
@@ -1342,12 +1404,15 @@ return array(
 	),
 	'NA' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NE' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'NG' => array(
 		'primary_psp' => 'mastercard',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'paystack',
 			'visa_as',
@@ -1359,12 +1424,15 @@ return array(
 	),
 	'RW' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SH' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'ST' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SN' => array(
 		'primary_psp' => 'visa_as',
@@ -1376,9 +1444,11 @@ return array(
 	),
 	'SL' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'SO' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'ZA' => array(
 		'primary_psp' => 'mastercard',
@@ -1394,30 +1464,37 @@ return array(
 	),
 	'TZ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'TG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'TN' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'UG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'EH' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'ZM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'ZW' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'AF' => array(
 		'primary_psp' => 'visa_as',
 	),
 	'AZ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'BH' => array(
 		'primary_psp' => 'mastercard',
@@ -1428,6 +1505,7 @@ return array(
 	),
 	'BT' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'GE' => array(
 		'primary_psp' => 'visa_as',
@@ -1439,6 +1517,7 @@ return array(
 	),
 	'IL' => array(
 		'primary_psp' => 'airwallex',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -1464,6 +1543,7 @@ return array(
 	),
 	'KG' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'LB' => array(
 		'primary_psp' => 'visa_as',
@@ -1507,9 +1587,11 @@ return array(
 	),
 	'TJ' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'TM' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'AE' => array(
 		'primary_psp' => 'woopayments',
@@ -1528,5 +1610,6 @@ return array(
 	),
 	'YE' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 );

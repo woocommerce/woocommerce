@@ -221,6 +221,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'US' => array(
 			self::WOOPAYMENTS => array(
@@ -344,6 +346,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'AT' => array(
 			self::WOOPAYMENTS,
@@ -388,6 +392,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BE' => array(
 			self::WOOPAYMENTS,
@@ -769,6 +775,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'HU' => array(
 			self::WOOPAYMENTS,
@@ -966,6 +974,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NL' => array(
 			self::WOOPAYMENTS,
@@ -1001,6 +1011,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NO' => array(
 			self::WOOPAYMENTS,
@@ -1210,6 +1222,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SE' => array(
 			self::WOOPAYMENTS,
@@ -1261,6 +1275,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 
 		// LATAM & Caribbeans.
@@ -1272,7 +1288,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'AI' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'AR' => array(
 			self::MERCADO_PAGO => array(
@@ -1299,7 +1317,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'AW' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'BS' => array(
 			self::TILOPAY,
@@ -1331,6 +1351,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BQ' => array(
 			self::TILOPAY,
@@ -1363,7 +1385,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'VG' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'KY' => array(
 			self::TILOPAY,
@@ -1467,6 +1491,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GF' => array(
 			self::VISA => array(
@@ -1577,6 +1603,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NI' => array(
 			self::TILOPAY,
@@ -1596,6 +1624,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'PE' => array(
 			self::MERCADO_PAGO => array(
@@ -1655,7 +1685,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'VC' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'SX' => array(
 			self::TILOPAY,
@@ -1670,7 +1702,9 @@ class PaymentsExtensionSuggestions {
 		),
 		'SR' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'TT' => array(
 			self::TILOPAY,
@@ -1803,6 +1837,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'KH' => array(
 			self::VISA => array(
@@ -1810,6 +1846,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CN' => array(
 			self::PAYPAL_FULL_STACK => array(
@@ -1843,6 +1881,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'FJ' => array(
 			self::VISA => array(
@@ -1930,6 +1970,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'LA' => array(
 			self::VISA => array(
@@ -1937,6 +1979,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MO' => array(
 			self::VISA => array(
@@ -1963,6 +2007,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MH' => array(
 			self::VISA => array(
@@ -1970,6 +2016,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'FM' => array(
 			self::VISA => array(
@@ -1977,6 +2025,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MN' => array(
 			self::VISA => array(
@@ -1984,6 +2034,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MM' => array(
 			self::VISA => array(
@@ -1998,6 +2050,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NP' => array(
 			self::VISA => array(
@@ -2005,6 +2059,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NC' => array(
 			self::VISA => array(
@@ -2059,6 +2115,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NF' => array(
 			self::VISA => array(
@@ -2066,6 +2124,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MP' => array(
 			self::VISA => array(
@@ -2089,6 +2149,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'PH' => array(
 			self::PAYONEER => array(
@@ -2106,6 +2168,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'WS' => array(
 			self::VISA => array(
@@ -2113,6 +2177,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SG' => array(
 			self::WOOPAYMENTS,
@@ -2129,6 +2195,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'LK' => array(
 			self::PAYONEER => array(
@@ -2136,7 +2204,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'KR' => array(
 			self::VISA => array(
@@ -2190,6 +2260,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'TV' => array(
 			self::VISA => array(
@@ -2197,6 +2269,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'VU' => array(
 			self::VISA => array(
@@ -2204,6 +2278,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'VN' => array(
 			self::PAYONEER => array(
@@ -2221,6 +2297,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 
 		// Africa.
@@ -2239,6 +2317,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BJ' => array(
 			self::VISA => array(
@@ -2246,6 +2326,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BW' => array(
 			self::VISA => array(
@@ -2262,6 +2344,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BI' => array(
 			self::VISA => array(
@@ -2269,6 +2353,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CV' => array(
 			self::VISA => array(
@@ -2276,6 +2362,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CM' => array(
 			self::VISA => array(
@@ -2283,6 +2371,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CF' => array(
 			self::VISA => array(
@@ -2297,6 +2387,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'KM' => array(
 			self::VISA => array(
@@ -2304,6 +2396,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CG' => array(
 			self::VISA => array(
@@ -2311,6 +2405,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'CI' => array(
 			self::VISA => array(
@@ -2318,6 +2414,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'EG' => array(
 			self::MASTERCARD,
@@ -2332,6 +2430,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'DJ' => array(
 			self::VISA => array(
@@ -2339,6 +2439,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GQ' => array(
 			self::VISA => array(
@@ -2353,6 +2455,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SZ' => array(
 			self::VISA => array(
@@ -2369,6 +2473,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'TF' => array(
 			self::VISA => array(
@@ -2383,6 +2489,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GH' => array(
 			self::PAYSTACK => array(
@@ -2398,6 +2506,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GN' => array(
 			self::VISA => array(
@@ -2405,6 +2515,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GW' => array(
 			self::VISA => array(
@@ -2412,6 +2524,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'KE' => array(
 			self::VISA => array(
@@ -2451,6 +2565,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MW' => array(
 			self::VISA => array(
@@ -2467,6 +2583,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MR' => array(
 			self::VISA => array(
@@ -2474,6 +2592,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MU' => array(
 			self::VISA => array(
@@ -2490,6 +2610,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MA' => array(
 			self::PAYONEER => array(
@@ -2516,6 +2638,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NE' => array(
 			self::VISA => array(
@@ -2523,11 +2647,15 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'NG' => array(
 			self::MASTERCARD,
+			self::PAYPAL_FULL_STACK,
 			self::PAYSTACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'RE' => array(
 			self::VISA => array(
@@ -2544,6 +2672,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SH' => array(
 			self::VISA => array(
@@ -2551,6 +2681,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'ST' => array(
 			self::VISA => array(
@@ -2558,6 +2690,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SN' => array(
 			self::VISA => array(
@@ -2583,6 +2717,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'SO' => array(
 			self::VISA => array(
@@ -2590,6 +2726,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'ZA' => array(
 			self::MASTERCARD,
@@ -2612,6 +2750,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'TG' => array(
 			self::VISA => array(
@@ -2619,6 +2759,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'TN' => array(
 			self::VISA => array(
@@ -2626,6 +2768,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'UG' => array(
 			self::VISA => array(
@@ -2633,6 +2777,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'EH' => array(
 			self::VISA => array(
@@ -2647,6 +2793,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'ZW' => array(
 			self::VISA => array(
@@ -2654,6 +2802,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 
 		// Middle East.
@@ -2670,6 +2820,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'BH' => array(
 			self::MASTERCARD,
@@ -2683,6 +2835,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'GE' => array(
 			self::VISA => array(
@@ -2706,7 +2860,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'JO' => array(
 			self::MASTERCARD,
@@ -2735,6 +2891,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'LB' => array(
 			self::VISA => array(
@@ -2793,6 +2951,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'TM' => array(
 			self::VISA => array(
@@ -2800,6 +2960,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'AE' => array(
 			self::WOOPAYMENTS,
@@ -2829,6 +2991,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 	);
 
