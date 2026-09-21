@@ -224,7 +224,7 @@ Neither system has a single visibility switch, so start with what each one can s
 
 WooCommerce says two things: whether coming soon mode is on, and whether it covers the whole site or only the store pages. Your system probably says the first. It probably has nothing for the second. It may also have a state of its own that WooCommerce cannot store, such as private or members-only.
 
-**Sync what both systems can say, and do not invent the rest.** This goes wrong in both directions, and both are the same mistake: filling in a value the other system never gave you. It fails quietly too. Nothing errors, neither settings screen says the two disagree, and you find out when a customer sees a page that was meant to be hidden.
+**Sync what both systems can say, and do not invent the rest.** Nothing warns you when this goes wrong. Both settings screens look correct on their own, and you hear about it when a customer sees a page that was meant to be hidden.
 
 **Reading.** `woocommerce_coming_soon` tells you coming soon mode is on, not how much of the site it covers. On a site set to "Apply to store pages only", everything outside the store is still public, so calling that site hidden would be wrong. Read both options:
 
