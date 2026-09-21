@@ -127,6 +127,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			noticeIds: [],
 			groupedProductIds: [],
 			groupedScopeNames: [],
+			outOfStockMessage: '',
 		};
 		mockScopeContext = {};
 		mockQuantitySelectorContext = {};

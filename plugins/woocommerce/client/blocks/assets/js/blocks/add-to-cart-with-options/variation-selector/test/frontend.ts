@@ -20,6 +20,7 @@ type VariationContext = {
 	} >;
 	autoselect: boolean;
 	disabledAttributesAction?: 'disable' | 'hide';
+	outOfStockMessage: string;
 };
 
 const mockClearErrors = jest.fn();
@@ -115,6 +116,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			variationAttributeOptions: [],
 			autoselect: false,
 			disabledAttributesAction: 'disable',
+			outOfStockMessage: '',
 		};
 		mockVariation = [];
 		mockBaseProduct = null;
@@ -132,7 +134,6 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		mockGetConfig.mockReturnValue( {
 			errorMessages: {
 				variableProductMissingAttributes: 'Choose options.',
-				variableProductOutOfStock: 'Variation unavailable.',
 			},
 		} );
 
@@ -349,12 +350,15 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			id: 101,
 			is_in_stock: false,
 		};
+		mockContext.outOfStockMessage =
+			'You cannot add "Sample product" to the cart because the product is out of stock.';
 
 		getRegisteredStore().callbacks.validateVariation();
 
 		expect( mockAddError ).toHaveBeenCalledWith( {
 			code: 'variableProductOutOfStock',
-			message: 'Variation unavailable.',
+			message:
+				'You cannot add "Sample product" to the cart because the product is out of stock.',
 			group: 'variable-product',
 		} );
 

@@ -104,6 +104,7 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 			noticeIds: [],
 			groupedProductIds: [],
 			groupedScopeNames: [],
+			outOfStockMessage: '',
 		};
 		mockProductScopes = {};
 		mockScopeProducts = {};
