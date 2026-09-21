@@ -430,7 +430,7 @@ class SignupService {
 		}
 
 		// Empty values are the 'any' attributes, so what is left is the set the variation fixes.
-		$fixed_attributes = array_filter( $variation->get_variation_attributes() );
+		$fixed_attributes = array_filter( $variation->get_variation_attributes(), 'wc_array_filter_default_attributes' );
 
 		$posted_attributes = array();
 		foreach ( $product->get_attributes() as $attribute ) {
