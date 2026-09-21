@@ -1667,7 +1667,7 @@ class WC_Helper {
 	/**
 	 * Get subscription state of a given product ID.
 	 *
-	 * @since TBD
+	 * @since 9.2.0
 	 *
 	 * @param int $product_id The product id.
 	 *
