@@ -270,7 +270,7 @@ If yours is a pre-launch state, the same kind WooCommerce has, a change in WooCo
 
 If yours is an access-control state, such as private or members-only, WooCommerce has no equivalent for it, and a change in WooCommerce says nothing about it. A handler that applies every WooCommerce change would take such a site out of private and into coming soon, which the merchant did not ask for. We recommend leaving that state as they set it, and showing them which system is in charge of visibility while it is, so WooCommerce's settings screen does not look like the whole story.
 
-**Reporting visibility.** A single status is easy to misread when more than one setting is in force. We recommend deriving it from all of them, showing the most restrictive one, and naming what is still public. A site reported as "Coming soon" while its blog is readable is easy to mistake for a bug.
+**Reporting visibility.** A single status is easy to misread when more than one setting is in force. We recommend deriving it from all of them and naming what is still public, since a site reported as "Coming soon" while its blog is readable is easy to mistake for a bug.
 
 ### Custom exclusions filter
 
