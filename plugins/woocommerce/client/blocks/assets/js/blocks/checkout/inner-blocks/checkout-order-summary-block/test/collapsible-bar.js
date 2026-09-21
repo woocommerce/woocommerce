@@ -98,50 +98,72 @@ const renderAt = ( containerClassName ) => {
 };
 
 describe( 'Checkout Order Summary collapsible bar', () => {
-	it.each( [
-		[ 'before measurement', '' ],
-		[ 'at mobile width', 'is-mobile' ],
-		[ 'at small width', 'is-small' ],
-		[ 'at medium width', 'is-medium' ],
-	] )( 'is expandable %s', ( description, containerClassName ) => {
-		renderAt( containerClassName );
-		const bar = screen.getByRole( 'button', {
-			name: /Order summary/,
-		} );
+	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
+		'when the container reports %p',
+		( containerClassName ) => {
+			it( 'exposes the summary as an expandable button', () => {
+				renderAt( containerClassName );
 
-		expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
-		expect( bar ).toHaveAttribute( 'aria-controls' );
-		expect( bar ).toHaveAttribute( 'tabindex', '0' );
-	} );
+				const bar = screen.getByRole( 'button', {
+					name: /Order summary/,
+				} );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
+				expect( bar ).toHaveAttribute( 'aria-controls' );
+				expect( bar ).toHaveAttribute( 'tabindex', '0' );
+			} );
 
-	it( 'toggles on click before the container width is known', () => {
-		renderAt( '' );
-		const bar = screen.getByRole( 'button', {
-			name: /Order summary/,
-		} );
+			it( 'toggles on click', () => {
+				renderAt( containerClassName );
 
-		fireEvent.click( bar );
-		expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+				const bar = screen.getByRole( 'button', {
+					name: /Order summary/,
+				} );
+				fireEvent.click( bar );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+			} );
 
-		fireEvent.click( bar );
-		expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
-	} );
+			it.each( [ 'Enter', ' ' ] )( 'toggles on %p', ( key ) => {
+				renderAt( containerClassName );
 
-	it.each( [
-		[ 'Enter', 'Enter' ],
-		[ 'Space', ' ' ],
-	] )( 'toggles with %s and prevents its default action', ( label, key ) => {
-		renderAt( '' );
-		const bar = screen.getByRole( 'button', {
-			name: /Order summary/,
-		} );
-		const event = createEvent.keyDown( bar, { key } );
+				const bar = screen.getByRole( 'button', {
+					name: /Order summary/,
+				} );
+				fireEvent.keyDown( bar, { key } );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+			} );
 
-		fireEvent( bar, event );
+			// Without this the browser still acts on the key: Space scrolls the
+			// page out from under the summary that just opened, and Enter
+			// submits the checkout form the bar sits inside.
+			it.each( [ 'Enter', ' ' ] )(
+				'suppresses the browser default for %p',
+				( key ) => {
+					renderAt( containerClassName );
 
-		expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
-		expect( event.defaultPrevented ).toBe( true );
-	} );
+					const bar = screen.getByRole( 'button', {
+						name: /Order summary/,
+					} );
+					const event = createEvent.keyDown( bar, { key } );
+					fireEvent( bar, event );
+
+					expect( event.defaultPrevented ).toBe( true );
+				}
+			);
+
+			it( 'collapses again when activated a second time', () => {
+				renderAt( containerClassName );
+
+				const bar = screen.getByRole( 'button', {
+					name: /Order summary/,
+				} );
+				fireEvent.click( bar );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+
+				fireEvent.click( bar );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
+			} );
+		}
+	);
 
 	it( 'is not a button once the container is large enough for two columns', () => {
 		const { container } = renderAt( 'is-large' );
