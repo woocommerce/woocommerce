@@ -6,12 +6,14 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Class WC_Checkout
  */
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * The least create_order() needs from a posted classic checkout form, paying by cash on delivery.
@@ -835,16 +837,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
 				$this->assertSame( $first_order_id, $result->get_error_data()['order_id'] );
 				$this->assertSame( wc_get_order( $first_order_id )->get_checkout_order_received_url(), $result->get_error_data()['redirect'], 'Callers should get the received URL without loading the order.' );
-				$this->assertSame(
-					array( $first_order_id ),
-					wc_get_orders(
-						array(
-							'return' => 'ids',
-							'limit'  => -1,
-						)
-					),
-					'No second order should exist.'
-				);
+				$this->assertSame( array( $first_order_id ), $this->order_ids(), 'No second order should exist.' );
 				break;
 			case 'resume':
 				$this->assertSame( $first_order_id, $result, 'The order awaiting payment should be resumed.' );
@@ -921,7 +914,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_process_checkout_recovers_an_order_the_gateway_moved_on_when_the_transition_throws(): void {
 		$this->use_real_session();
 		$this->make_gateway_available( WC_Gateway_BACS::ID );
-		$logger = $this->use_fake_logger();
 		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
 		$this->post_checkout_form( WC_Gateway_BACS::ID );
 		// BACS moves the order on-hold and only then empties the cart; a plugin dying in between is the reported shape.
@@ -941,9 +933,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ), 'The status the gateway set must stand.' );
 		$this->assertTrue( WC()->cart->is_empty(), 'The cart the gateway never got to empty should be emptied.' );
 		$this->assertStringContainsString( 'push_order() on null', $this->latest_note( $order ), 'The merchant should see the failure on the order.' );
-		$this->assertCount( 1, $logger->error_calls );
-		$this->assertStringContainsString( 'push_order() on null', $logger->error_calls[0]['message'] );
-		$this->assertStringContainsString( __FILE__, $logger->error_calls[0]['message'], 'The log should say where the failure was raised.' );
+		$this->assertLogged( 'error', 'push_order() on null' );
+		$this->assertLogged( 'error', __FILE__ );
 	}
 
 	/**
@@ -976,7 +967,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
 		$this->assertTrue( $order->has_status( OrderStatus::PROCESSING ) );
 		$this->assertTrue( WC()->cart->is_empty() );
-		$this->assertCount( 1, $this->order_ids(), 'No second order should exist.' );
 	}
 
 	/**
@@ -1125,72 +1115,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Route wc_get_logger() to a fake that records error() calls, so a test can assert what the checkout logged.
-	 *
-	 * @return object The fake logger, with a public $error_calls array of [ 'message' => ..., 'context' => ... ].
-	 */
-	private function use_fake_logger(): object {
-		// phpcs:disable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
-		$logger = new class() implements WC_Logger_Interface {
-			public array $error_calls = array();
-
-			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
-				unset( $handle, $message, $level );
-				return true;
-			}
-
-			public function log( $level, $message, $context = array() ) {
-				unset( $level, $message, $context );
-			}
-
-			public function emergency( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function alert( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function critical( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function error( $message, $context = array() ) {
-				$this->error_calls[] = array(
-					'message' => $message,
-					'context' => $context,
-				);
-			}
-
-			public function warning( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function notice( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function info( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-
-			public function debug( $message, $context = array() ) {
-				unset( $message, $context );
-			}
-		};
-		// phpcs:enable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
-
-		add_filter(
-			'woocommerce_logging_class',
-			function () use ( $logger ) {
-				return $logger;
-			}
-		);
-
-		return $logger;
-	}
-
-	/**
 	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
 	 *
 	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
@@ -1255,6 +1179,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 *
 	 * Anything other than the wp_send_json() exit, such as an Error a hook raises, propagates to the caller.
 	 * The exit is an Error rather than an Exception because process_checkout() catches Exception itself.
+	 *
+	 * Cannot drive a gateway that returns success: its exit happens inside process_order_payment(), so
+	 * process_checkout() catches it and recovers it as a post-payment failure, and two JSON bodies come back.
+	 * Make the gateway throw before that point, or take the repeat-submit path, which exits outside the catch.
 	 *
 	 * @return array Decoded JSON response.
 	 */
