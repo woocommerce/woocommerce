@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix Add to Cart with Options forms on pages with more than one form for the same product: a quantity or option typed into a form now survives paging a Product Collection away and back, each form keeps its own selection and adds only its own quantity to the cart, and forms no longer interfere with each other through duplicate element ids, a shared list of notices, or a quantity shown on first load that leaked from another form.
