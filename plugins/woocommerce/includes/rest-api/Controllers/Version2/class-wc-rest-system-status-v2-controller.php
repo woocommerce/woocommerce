@@ -1587,7 +1587,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'tax_display_shop'               => get_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE ),
 			'tax_display_cart'               => get_option( 'woocommerce_tax_display_cart', TaxDisplayMode::EXCLUSIVE ),
 			'price_display_suffix'           => get_option( 'woocommerce_price_display_suffix', '' ),
-			'tax_total_display'              => get_option( 'woocommerce_tax_total_display', 'itemized' ),
+			'tax_total_display'              => get_option( 'woocommerce_tax_total_display', 'single' ),
 			'tax_rate_count'                 => absint( $tax_rate_count ),
 			'store_base_country'             => WC()->countries->get_base_country(),
 			'store_base_state'               => WC()->countries->get_base_state(),
