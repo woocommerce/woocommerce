@@ -53,14 +53,13 @@ class QueryBuilder {
 	public function __construct() {
 		$this->valid_query_vars = $this->get_valid_query_vars();
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
-		add_filter(
-			'posts_clauses',
-			function ( $clauses, $query ) {
-				return $this->apply_product_filter_query_clauses( $clauses, $query );
-			},
-			10,
-			2
-		);
+		static $product_filter_query_clauses_callback;
+		if ( null === $product_filter_query_clauses_callback ) {
+			$product_filter_query_clauses_callback = static function ( $clauses, $query ) {
+				return self::apply_product_filter_query_clauses( $clauses, $query );
+			};
+		}
+		add_filter( 'posts_clauses', $product_filter_query_clauses_callback, 10, 2 );
 	}
 
 	/**
@@ -758,7 +757,7 @@ class QueryBuilder {
 	 * @param WP_Query $query   The WP_Query instance.
 	 * @return array
 	 */
-	private function apply_product_filter_query_clauses( $clauses, $query ) {
+	private static function apply_product_filter_query_clauses( $clauses, $query ) {
 		if ( ! ( $query->query_vars['isProductCollection'] ?? false ) ) {
 			return $clauses;
 		}

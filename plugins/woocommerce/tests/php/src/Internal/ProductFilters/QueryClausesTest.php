@@ -122,19 +122,51 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * @testdox Rating query variables filter products through shared clauses.
 	 */
 	public function test_rating_query_var_applies_rating_clauses(): void {
-		$matching_product = $this->fixture_data->get_simple_product(
+		$fractional_rating_product = $this->fixture_data->get_simple_product(
 			array(
-				'name' => 'One-star shared-clause target',
+				'name' => 'Fractional shared-clause target',
 			)
 		);
-		$this->fixture_data->add_product_review( $matching_product->get_id(), 1 );
+		$this->fixture_data->add_product_review( $fractional_rating_product->get_id(), 1 );
+		$this->fixture_data->add_product_review( $fractional_rating_product->get_id(), 2 );
+
+		$five_star_product = $this->fixture_data->get_simple_product(
+			array(
+				'name' => 'Five-star shared-clause target',
+			)
+		);
+		$this->fixture_data->add_product_review( $five_star_product->get_id(), 5 );
 
 		$non_matching_product = $this->fixture_data->get_simple_product(
 			array(
-				'name' => 'Five-star shared-clause distractor',
+				'name' => 'Three-star shared-clause distractor',
 			)
 		);
-		$this->fixture_data->add_product_review( $non_matching_product->get_id(), 5 );
+		$this->fixture_data->add_product_review( $non_matching_product->get_id(), 3 );
+
+		add_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10, 2 );
+		$query = new \WP_Query(
+			array(
+				'fields'        => 'ids',
+				'post_status'   => 'publish',
+				'post_type'     => 'product',
+				'rating_filter' => '2,5',
+			)
+		);
+		remove_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10 );
+
+		$this->assertContains( $fractional_rating_product->get_id(), $query->posts, 'The 1.5-rating product should match the two-star bucket.' );
+		$this->assertContains( $five_star_product->get_id(), $query->posts, 'The second selected rating should match.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $query->posts, 'Unselected ratings should be excluded.' );
+	}
+
+	/**
+	 * @testdox Rating clauses are not duplicated when a taxonomy query already applies them.
+	 */
+	public function test_rating_query_var_does_not_duplicate_existing_tax_query(): void {
+		global $wpdb;
+
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
 
 		add_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10, 2 );
 		$query = new \WP_Query(
@@ -143,29 +175,22 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 				'post_status'   => 'publish',
 				'post_type'     => 'product',
 				'rating_filter' => '1',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query'     => array(
+					array(
+						'field'         => 'term_taxonomy_id',
+						'operator'      => 'IN',
+						'rating_filter' => true,
+						'taxonomy'      => 'product_visibility',
+						'terms'         => array( $product_visibility_terms['rated-1'] ),
+					),
+				),
 			)
 		);
 		remove_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10 );
 
-		$this->assertContains( $matching_product->get_id(), $query->posts, 'The selected rating should match.' );
-		$this->assertNotContains( $non_matching_product->get_id(), $query->posts, 'Other ratings should be excluded.' );
-	}
-
-	/**
-	 * @testdox Rating clauses are not duplicated when a taxonomy query already applies them.
-	 */
-	public function test_rating_query_var_does_not_duplicate_existing_tax_query(): void {
-		$query                              = new \WP_Query();
-		$query->query_vars['rating_filter'] = '1';
-		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-		$query->query_vars['tax_query'] = array(
-			array(
-				'rating_filter' => true,
-			),
-		);
-		$clauses                        = array( 'where' => 'original' );
-
-		$this->assertSame( $clauses, $this->sut->add_query_clauses( $clauses, $query ) );
+		$this->assertStringContainsString( $wpdb->term_relationships, $query->request, 'WP_Tax_Query should apply the existing rating clause.' );
+		$this->assertStringNotContainsString( 'tr.term_taxonomy_id IN', $query->request, 'Shared clauses should not duplicate the existing rating clause.' );
 	}
 
 	/**

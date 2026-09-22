@@ -135,6 +135,21 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Rating filters constrain sibling stock counts.
+	 */
+	public function test_get_stock_status_counts_with_rating_filter(): void {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'rating_filter', '5' );
+
+		$this->test_get_stock_status_counts_with(
+			$wp_query,
+			function ( $product_data ) {
+				return in_array( $product_data['name'], array( 'Product 1', 'Product 4' ), true );
+			}
+		);
+	}
+
+	/**
 	 * @testdox Test rating counts without filter.
 	 */
 	public function test_get_rating_counts_with_default_query() {
