@@ -10,6 +10,8 @@ use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Helper_Product;
 use WC_Helper_Shipping;
+use WC_Order;
+use WC_Order_Item_Shipping;
 use WC_Payment_Gateway;
 use WC_Shipping_Zone;
 use WC_Unit_Test_Case;
@@ -70,6 +72,7 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			$this->set_order_pay_query_var( null );
 			WC()->session->set( 'chosen_shipping_methods', null );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 			WC()->shipping()->enabled = $this->shipping_was_enabled;
@@ -183,6 +186,76 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->fill_cart( null );
+
+		$this->assertSame( $expected, $gateway->is_available() );
+	}
+
+	/**
+	 * @testdox Should keep enforcing the cart's shipping method restriction when the order-pay query var does not resolve to an order.
+	 * @testWith ["0", "flat_rate_a", true]
+	 *           ["0", "flat_rate_b", false]
+	 *           ["999999999", "flat_rate_b", false]
+	 *
+	 * @param string $order_pay   An order-pay query var value that does not resolve to an order.
+	 * @param string $chosen_rate Symbolic name of the shipping rate selected in the cart.
+	 * @param bool   $expected    Expected availability.
+	 */
+	public function test_is_available_uses_the_cart_when_order_pay_does_not_resolve( string $order_pay, string $chosen_rate, bool $expected ): void {
+		$gateway = $this->create_gateway(
+			WC_Gateway_COD::class,
+			array(
+				'enabled'            => 'yes',
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
+				'enable_for_virtual' => 'yes',
+			)
+		);
+		$this->fill_cart( $chosen_rate );
+		$this->set_order_pay_query_var( $order_pay );
+
+		$this->assertSame( $expected, $gateway->is_available() );
+	}
+
+	/**
+	 * @testdox Should not treat a cart that needs shipping as virtual when the order-pay query var does not resolve to an order.
+	 */
+	public function test_is_available_does_not_treat_the_cart_as_virtual_when_order_pay_does_not_resolve(): void {
+		$gateway = $this->create_gateway(
+			WC_Gateway_BACS::class,
+			array(
+				'enabled'            => 'yes',
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
+				'enable_for_virtual' => 'no',
+			)
+		);
+		$this->fill_cart( 'flat_rate_a' );
+		$this->set_order_pay_query_var( '0' );
+
+		$this->assertTrue( $gateway->is_available() );
+	}
+
+	/**
+	 * @testdox Should evaluate the order's shipping methods instead of the cart's on the order-pay page.
+	 * @testWith ["flat_rate_a", "yes", true]
+	 *           ["flat_rate_b", "yes", false]
+	 *           [null, "yes", true]
+	 *           [null, "no", false]
+	 *
+	 * @param string|null $order_rate         Symbolic name of the order's shipping rate, or null for an order without shipping.
+	 * @param string      $enable_for_virtual Saved setting value.
+	 * @param bool        $expected           Expected availability.
+	 */
+	public function test_is_available_uses_order_shipping_methods_on_order_pay_page( ?string $order_rate, string $enable_for_virtual, bool $expected ): void {
+		$gateway = $this->create_gateway(
+			WC_Gateway_Cheque::class,
+			array(
+				'enabled'            => 'yes',
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
+				'enable_for_virtual' => $enable_for_virtual,
+			)
+		);
+		// The cart would allow the gateway on its own, so a pass here proves the order context was used.
+		$this->fill_cart( 'flat_rate_a' );
+		$this->set_order_pay_query_var( (string) $this->create_order_with_shipping( $order_rate )->get_id() );
 
 		$this->assertSame( $expected, $gateway->is_available() );
 	}
@@ -313,6 +386,47 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	 */
 	private function resolve_rate_id( string $name ): string {
 		return $this->rate_ids[ $name ] ?? $name;
+	}
+
+	/**
+	 * Simulate the order-pay endpoint the way WC_Query::parse_request() populates it from the request.
+	 *
+	 * @param string|null $value Query var value, or null to leave the endpoint context.
+	 */
+	private function set_order_pay_query_var( ?string $value ): void {
+		global $wp;
+
+		if ( null === $value ) {
+			unset( $wp->query_vars['order-pay'] );
+			unset( $GLOBALS['wp_query']->query_vars['order-pay'] );
+			return;
+		}
+
+		$wp->query_vars['order-pay'] = $value;
+		set_query_var( 'order-pay', $value );
+	}
+
+	/**
+	 * Create an order with a shipping line for the given rate, or without shipping.
+	 *
+	 * @param string|null $rate Symbolic name of the rate, or null for no shipping line.
+	 * @return WC_Order
+	 */
+	private function create_order_with_shipping( ?string $rate ): WC_Order {
+		$order = new WC_Order();
+
+		if ( null !== $rate ) {
+			list( $method_id, $instance_id ) = explode( ':', $this->rate_ids[ $rate ] );
+
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_method_id( $method_id );
+			$shipping_item->set_instance_id( $instance_id );
+			$order->add_item( $shipping_item );
+		}
+
+		$order->save();
+
+		return $order;
 	}
 
 	/**
