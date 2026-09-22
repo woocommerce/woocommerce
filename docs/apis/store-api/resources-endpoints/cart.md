@@ -166,6 +166,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 		{
 			"code": "test",
 			"discount_type": "percent",
+			"is_removable": true,
 			"totals": {
 				"total_discount": "1095",
 				"total_discount_tax": "109",

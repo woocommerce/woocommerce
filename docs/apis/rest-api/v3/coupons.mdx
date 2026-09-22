@@ -39,6 +39,7 @@ The coupons API allows you to create, view, update, and delete individual, or a 
 | `minimum_amount`              | string    | Minimum order amount that needs to be in the cart before coupon applies.                                                             |
 | `maximum_amount`              | string    | Maximum order amount allowed when using the coupon.                                                                                  |
 | `email_restrictions`          | array     | List of email addresses that can use this coupon.                                                                                    |
+| `auto_apply`                  | boolean   | If true, this coupon is applied to the cart automatically when its conditions are met, and cannot be removed manually. Default is `false`. |
 | `used_by`                     | array     | List of user IDs (or guest email addresses) that have used the coupon. `READ-ONLY`                     |
 | `meta_data`                   | array     | Meta data. See [Coupon - Meta data properties](#coupon---meta-data-properties)                                                         |
 
@@ -177,6 +178,7 @@ woocommerce.post("coupons", data).parsed_response
 	"minimum_amount": "100.00",
 	"maximum_amount": "0.00",
 	"email_restrictions": [],
+	"auto_apply": false,
 	"used_by": [],
 	"meta_data": [],
 	"_links": {
@@ -277,6 +279,7 @@ woocommerce.get("coupons/719").parsed_response
 	"minimum_amount": "100.00",
 	"maximum_amount": "0.00",
 	"email_restrictions": [],
+	"auto_apply": false,
 	"used_by": [],
 	"meta_data": [],
 	"_links": {
@@ -378,6 +381,7 @@ woocommerce.get("coupons").parsed_response
 		"minimum_amount": "0.00",
 		"maximum_amount": "0.00",
 		"email_restrictions": [],
+		"auto_apply": false,
 		"used_by": [],
 		"meta_data": [],
 		"_links": {
@@ -419,6 +423,7 @@ woocommerce.get("coupons").parsed_response
 		"minimum_amount": "100.00",
 		"maximum_amount": "0.00",
 		"email_restrictions": [],
+		"auto_apply": false,
 		"used_by": [],
 		"meta_data": [],
 		"_links": {
@@ -562,6 +567,7 @@ woocommerce.put("coupons/719", data).parsed_response
 	"minimum_amount": "100.00",
 	"maximum_amount": "0.00",
 	"email_restrictions": [],
+	"auto_apply": false,
 	"used_by": [],
 	"meta_data": [],
 	"_links": {
@@ -664,6 +670,7 @@ woocommerce.delete("coupons/719", force: true).parsed_response
 	"minimum_amount": "100.00",
 	"maximum_amount": "0.00",
 	"email_restrictions": [],
+	"auto_apply": false,
 	"used_by": [],
 	"meta_data": [],
 	"_links": {
@@ -927,6 +934,7 @@ woocommerce.post("coupons/batch", data).parsed_response
 			"minimum_amount": "100.00",
 			"maximum_amount": "0.00",
 			"email_restrictions": [],
+			"auto_apply": false,
 			"used_by": [],
 			"meta_data": [],
 			"_links": {
@@ -968,6 +976,7 @@ woocommerce.post("coupons/batch", data).parsed_response
 			"minimum_amount": "100.00",
 			"maximum_amount": "0.00",
 			"email_restrictions": [],
+			"auto_apply": false,
 			"used_by": [],
 			"meta_data": [],
 			"_links": {
@@ -1011,6 +1020,7 @@ woocommerce.post("coupons/batch", data).parsed_response
 			"minimum_amount": "50.00",
 			"maximum_amount": "0.00",
 			"email_restrictions": [],
+			"auto_apply": false,
 			"used_by": [],
 			"meta_data": [],
 			"_links": {
@@ -1054,6 +1064,7 @@ woocommerce.post("coupons/batch", data).parsed_response
 			"minimum_amount": "0.00",
 			"maximum_amount": "0.00",
 			"email_restrictions": [],
+			"auto_apply": false,
 			"used_by": [],
 			"meta_data": [],
 			"_links": {
