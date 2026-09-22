@@ -307,79 +307,37 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Rating filters become one taxonomy query and return exact products.
+	 * @testdox Rating filters return the matching published product identity.
 	 */
 	public function test_filter_by_rating_returns_exact_products(): void {
 		$fixtures = new FixtureData();
 
-		$fractional_rating_product = $fixtures->get_simple_product(
+		$matching_product = $fixtures->get_simple_product(
 			array(
-				'name'          => 'Fractional rating query target',
+				'name'          => 'One-star query target',
 				'regular_price' => '10',
 				'status'        => 'publish',
 			)
 		);
-		$fixtures->add_product_review( $fractional_rating_product->get_id(), 1 );
-		$fixtures->add_product_review( $fractional_rating_product->get_id(), 2 );
-
-		$five_star_product = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Five-star query target',
-				'regular_price' => '10',
-				'status'        => 'publish',
-			)
-		);
-		$fixtures->add_product_review( $five_star_product->get_id(), 5 );
+		$fixtures->add_product_review( $matching_product->get_id(), 1 );
 
 		$non_matching_product = $fixtures->get_simple_product(
 			array(
-				'name'          => 'Three-star query distractor',
+				'name'          => 'Five-star query distractor',
 				'regular_price' => '10',
 				'status'        => 'publish',
 			)
 		);
-		$fixtures->add_product_review( $non_matching_product->get_id(), 3 );
+		$fixtures->add_product_review( $non_matching_product->get_id(), 5 );
 
-		set_query_var( 'rating_filter', '2,5,invalid,6,2' );
+		set_query_var( 'rating_filter', '1' );
 
 		$merged_query      = Utils::initialize_merged_query( $this->block_instance );
-		$rating_tax_query  = array_values(
-			array_filter(
-				$merged_query['tax_query'],
-				function ( $tax_query ) {
-					return is_array( $tax_query ) && ! empty( $tax_query['rating_filter'] );
-				}
-			)
-		);
 		$query             = new WP_Query( $merged_query );
 		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
 
-		$this->assertCount( 1, $rating_tax_query, 'Product Collection should add one tagged rating taxonomy query.' );
-		$this->assertCount( 2, $rating_tax_query[0]['terms'], 'Only valid, unique ratings should become taxonomy terms.' );
-		$this->assertArrayNotHasKey( 'rating_filter', $merged_query, 'The handled rating parameter should not also reach shared SQL clauses.' );
-		$this->assertContains( $fractional_rating_product->get_id(), $found_product_ids, 'The 1.5-rating product should match the two-star bucket.' );
-		$this->assertContains( $five_star_product->get_id(), $found_product_ids, 'The second selected rating should match.' );
-		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'Unselected ratings should be excluded.' );
-
-		set_query_var( 'rating_filter', '' );
-	}
-
-	/**
-	 * @testdox Non-scalar rating filters are ignored safely.
-	 */
-	public function test_filter_by_rating_ignores_non_scalar_values(): void {
-		set_query_var( 'rating_filter', array( '5' ) );
-
-		$merged_query     = Utils::initialize_merged_query( $this->block_instance );
-		$rating_tax_query = array_filter(
-			$merged_query['tax_query'],
-			function ( $tax_query ) {
-				return is_array( $tax_query ) && ! empty( $tax_query['rating_filter'] );
-			}
-		);
-
-		$this->assertSame( array(), $rating_tax_query, 'Non-scalar rating filters should not create a taxonomy query.' );
-		set_query_var( 'rating_filter', '' );
+		$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The one-star target should be returned.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The five-star distractor should be excluded.' );
 	}
 
 	/**

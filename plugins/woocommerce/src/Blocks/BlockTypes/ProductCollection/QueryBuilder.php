@@ -516,23 +516,23 @@ class QueryBuilder {
 	 */
 	private function get_filter_by_rating_query() {
 		$filter_rating_values = get_query_var( RatingFilter::RATING_QUERY_VAR );
-		if ( ! is_string( $filter_rating_values ) && ! is_numeric( $filter_rating_values ) ) {
+		if ( empty( $filter_rating_values ) ) {
 			return array();
 		}
 
-		$product_visibility_terms = wc_get_product_visibility_term_ids();
-		$rating_terms             = array();
+		$parsed_filter_rating_values = explode( ',', $filter_rating_values );
+		$product_visibility_terms    = wc_get_product_visibility_term_ids();
 
-		foreach ( array_unique( array_map( 'absint', explode( ',', (string) $filter_rating_values ) ) ) as $rating ) {
-			$term_id = $product_visibility_terms[ 'rated-' . $rating ] ?? null;
-			if ( $term_id ) {
-				$rating_terms[] = absint( $term_id );
-			}
-		}
-
-		if ( empty( $rating_terms ) ) {
+		if ( empty( $parsed_filter_rating_values ) || empty( $product_visibility_terms ) ) {
 			return array();
 		}
+
+		$rating_terms = array_map(
+			function ( $rating ) use ( $product_visibility_terms ) {
+				return $product_visibility_terms[ 'rated-' . $rating ];
+			},
+			$parsed_filter_rating_values
+		);
 
 		return array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery
