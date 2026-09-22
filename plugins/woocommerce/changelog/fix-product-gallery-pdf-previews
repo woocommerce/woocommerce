@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore adding PDFs with image previews to product galleries and preserve them when gallery videos are enabled.
