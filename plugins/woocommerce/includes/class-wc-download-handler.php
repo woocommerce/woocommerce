@@ -349,7 +349,7 @@ class WC_Download_Handler {
 
 		$wp_content_dirname = FilesystemUtil::get_content_directory_relative_path();
 
-		// A mapped local URL may encode spaces as "%20". Check the literal filename before trying the decoded filename.
+		// See if path needs an abspath prepended to work.
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
@@ -358,6 +358,7 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_dirname ) ) );
 
+			// A mapped local URL may encode spaces as "%20"; prefer a literal "%20" filename when it exists.
 		} elseif ( ! $remote_file && $decoded_file_path !== $file_path && ! file_exists( $file_path ) && file_exists( $decoded_file_path ) ) {
 			$file_path = $decoded_file_path;
 
