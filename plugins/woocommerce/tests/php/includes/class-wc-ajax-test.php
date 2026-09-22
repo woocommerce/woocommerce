@@ -3168,6 +3168,34 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox An expired checkout session should return its notice inside the shared notices wrapper.
+	 */
+	public function test_update_order_review_expired_wraps_notice(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The expired checkout update should return a JSON array.' );
+			$this->assertArrayHasKey( 'form.woocommerce-checkout', $response['fragments'] );
+			$this->assertMatchesRegularExpression(
+				'#^<div class="woocommerce-notices-wrapper">\s*<(ul|div) class="[^"]*(woocommerce-error|is-error)[^"]*"[^>]*>.*Sorry, your session has expired\..*</div>$#s',
+				$response['fragments']['form.woocommerce-checkout'],
+				'The replacement fragment should be the expired notice inside the notices wrapper.'
+			);
+		} finally {
+			$_POST = $original_post;
+		}
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
