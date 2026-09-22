@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix orders losing their created date when migrating to HPOS from posts with an empty GMT date.

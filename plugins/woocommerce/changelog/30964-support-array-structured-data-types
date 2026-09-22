@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow structured data filters to return multiple schema types without causing a fatal error or dropping valid product markup.
