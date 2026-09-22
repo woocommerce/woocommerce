@@ -2816,6 +2816,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$this->sweep_entries_variations( $matching_state, $matched ),
 			$this->sweep_entries_product_variations( $matching_state, $matched ),
 			$this->sweep_entries_attributes_and_terms( $matching_state, $matched ),
+			$this->sweep_entries_cart_item_variation_lookup( $this->cart_item_variation_lookup_state(), $matched ),
 			$this->sweep_entries_cart( $cart_state, $cart_context, $matching_state, $matched ),
 			$this->sweep_entries_resolved_selection( $this->resolved_selection_state() )
 		);
@@ -3122,6 +3123,64 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$state['productVariations'][6003]        = array(
 			'id'     => 6003,
 			'parent' => 5001,
+		);
+
+		array_splice(
+			$state['cart']['items'],
+			2,
+			0,
+			array(
+				array(
+					'key'       => 'line-base-as-variation',
+					'id'        => 5001,
+					'type'      => 'variation',
+					'variation' => array(
+						array(
+							'attribute' => 'colour',
+							'value'     => 'Scarlet',
+						),
+					),
+				),
+			)
+		);
+
+		return $state;
+	}
+
+	/**
+	 * matching_product_state(), with the base product's own variation
+	 * summaries emptied and a variation-typed cart line carrying the base
+	 * product's own id spliced ahead of the simple line, so a cart line's
+	 * own `productVariations` entry and that entry's parent product are
+	 * each reached without a summary ever matching.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function cart_item_variation_lookup_state(): array {
+		$state = $this->matching_product_state();
+
+		$state['products'][5001]['variations'] = array();
+		$state['products'][5002]               = array(
+			'id'         => 5002,
+			'attributes' => array(
+				array(
+					'name'  => 'colour',
+					'terms' => array(
+						array(
+							'name' => 'Scarlet',
+							'slug' => 'red',
+						),
+						array(
+							'name' => 'Azure',
+							'slug' => 'blue',
+						),
+					),
+				),
+			),
+		);
+		$state['productVariations'][5001]      = array(
+			'id'     => 5001,
+			'parent' => 5002,
 		);
 
 		array_splice(
@@ -4292,6 +4351,85 @@ class ProductsStore extends \WC_Unit_Test_Case {
 				'value'  => 'red',
 				'assert' => function ( array $envelope ): void {
 					$this->assertSame( 'line-red', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		return $entries;
+	}
+
+	/**
+	 * The sweep entries about a cart line's own `productVariations` entry
+	 * and that entry's parent product — two reads `does_cart_item_match_attributes()`
+	 * makes by keys out of state rather than by the id the envelope already
+	 * resolved, so neither is the entry an earlier read validates.
+	 *
+	 * @param array $state   The cart-item-variation-lookup state.
+	 * @param array $matched A context whose selection matches the base product's colour attribute.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function sweep_entries_cart_item_variation_lookup( array $state, array $matched ): array {
+		$entries = array();
+
+		$entries['productVariations[<cart item id>] (the entry)'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations', 5001 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+				'map'  => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'control' => array(
+				'value'  => array(
+					'id'     => 5001,
+					'parent' => 5002,
+				),
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-base-as-variation', $envelope['cartItem']()['key'] );
+				},
+			),
+		);
+
+		$entries['products[<parent>] (the entry)'] = array(
+			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'products', 5002 ) ),
+			'expects' => array( 'list', 'map' ),
+			'outside' => array(
+				'default' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'inside'  => array(
+				'list' => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+				'map'  => array(
+					'productVariation' => $this->absent(),
+					'product'          => $this->entry_with_id( 5001 ),
+					'cartItem'         => $this->entry_with_key( 'line-simple' ),
+				),
+			),
+			'control' => array(
+				'value'  => $state['products'][5002],
+				'assert' => function ( array $envelope ): void {
+					$this->assertSame( 'line-base-as-variation', $envelope['cartItem']()['key'] );
 				},
 			),
 		);
