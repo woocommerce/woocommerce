@@ -19,7 +19,8 @@
 	"sideEffects": [
 		"*.css",
 		"*.scss",
-		"./assets/js/product-element-blocks/**",
+		"./assets/js/product-element-blocks/*.{js,ts,tsx}",
+		"./assets/js/product-element-blocks/{average-rating,button,image,price,product-image-gallery,product-meta,rating,rating-counter,rating-stars,related-products,sale-badge,shared,sku,stock-indicator,summary,title}/**",
 		"./assets/js/filters/**",
 		"./assets/js/middleware/**",
 		"./packages/public-api/types/**",
