@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Limit email editor font sizes to px, so the sizes you pick show correctly in email clients.
