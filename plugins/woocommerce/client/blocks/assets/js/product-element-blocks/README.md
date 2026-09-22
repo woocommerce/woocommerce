@@ -1,6 +1,6 @@
 # Product element blocks
 
-Product element blocks display individual pieces of product content, such as the image, title, price, rating, and add to cart button. Product layouts, including All Products and Single Product, use these blocks to compose their product displays.
+Product element blocks show parts of a product, such as its image, title, price, rating, and add to cart button. They can be used as inner blocks in Product Collection, Single Product, and Product Gallery to build product displays.
 
 ## Structure
 
