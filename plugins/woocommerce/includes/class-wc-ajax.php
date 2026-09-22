@@ -318,7 +318,12 @@ class WC_AJAX {
 
 		$coupon = isset( $_POST['coupon'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		if ( StringUtil::is_null_or_whitespace( $coupon ) || ! WC()->cart->remove_coupon( $coupon ) ) {
+		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
+			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
+		} elseif ( WC()->cart->is_auto_applied_coupon( (string) $coupon ) ) {
+			// Refused rather than failed, so say why instead of reporting a generic problem.
+			wc_add_notice( __( 'This coupon is applied automatically and cannot be removed.', 'woocommerce' ), 'error' );
+		} elseif ( ! WC()->cart->remove_coupon( $coupon ) ) {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );

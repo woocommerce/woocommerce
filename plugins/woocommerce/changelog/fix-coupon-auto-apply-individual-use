@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Let an auto-applied coupon yield to the coupon a customer applies themselves, so an individual-use auto-apply coupon can no longer block a customer's own coupon with no way to remove it.

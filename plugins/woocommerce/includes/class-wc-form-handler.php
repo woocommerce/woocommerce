@@ -776,8 +776,15 @@ class WC_Form_Handler {
 			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$coupon_to_remove = wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+			// The remove link is hidden for auto-apply coupons, but the URL can still be reached
+			// directly, so explain the refusal rather than appearing to do nothing.
+			if ( WC()->cart->is_auto_applied_coupon( $coupon_to_remove ) ) {
+				wc_add_notice( __( 'This coupon is applied automatically and cannot be removed.', 'woocommerce' ), 'error' );
+			} else {
+				WC()->cart->remove_coupon( $coupon_to_remove );
+			}
 		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['remove_item'] ) );
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );

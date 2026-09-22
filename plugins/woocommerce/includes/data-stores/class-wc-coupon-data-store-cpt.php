@@ -5,6 +5,7 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Caches\AutoApplyCouponCache;
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -106,7 +107,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			delete_transient( 'rest_api_coupons_type_count' );
-			delete_transient( 'wc_auto_apply_coupon_codes' );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 			do_action( 'woocommerce_new_coupon', $coupon_id, $coupon );
 		}
 	}
@@ -221,7 +222,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
-		delete_transient( 'wc_auto_apply_coupon_codes' );
+		delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 
 		/*
 		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
@@ -280,14 +281,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
 			 */
 			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
-			delete_transient( 'wc_auto_apply_coupon_codes' );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
 			wp_trash_post( $id );
 			$coupon->set_status( 'trash' );
-			delete_transient( 'wc_auto_apply_coupon_codes' );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 			do_action( 'woocommerce_trash_coupon', $id );
 		}
 	}

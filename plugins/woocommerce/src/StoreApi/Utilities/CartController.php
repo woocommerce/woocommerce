@@ -1009,6 +1009,22 @@ class CartController {
 			 * @return boolean
 			 */
 			if ( false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $coupon, $individual_use_coupon, $applied_coupons ) ) {
+				/*
+				 * A coupon the store applied automatically carries no remove control, so blocking
+				 * the customer here would leave them with no way to use their own coupon and no
+				 * way to clear the one in its way. It yields instead, and auto_apply_coupons()
+				 * leaves it off while the customer's coupon stays on the cart.
+				 */
+				if ( $individual_use_coupon->get_auto_apply() ) {
+					$cart->remove_auto_applied_coupon( $code );
+
+					// $applied_coupons is a snapshot taken before the removal, and it is what
+					// gets written back to the cart below, so the yielded coupon has to go from
+					// it too or it would simply be put back.
+					$applied_coupons = array_diff( $applied_coupons, array( $code ) );
+					continue;
+				}
+
 				throw new RouteException(
 					'woocommerce_rest_cart_coupon_error',
 					sprintf(
@@ -1037,7 +1053,11 @@ class CartController {
 			$coupons_to_remove = array_diff( $applied_coupons, apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $coupon, $applied_coupons ) );
 
 			foreach ( $coupons_to_remove as $code ) {
-				$cart->remove_coupon( $code );
+				// An auto-apply coupon yields to the individual-use coupon the customer is
+				// applying, rather than refusing removal and silently stacking with it.
+				if ( ! $cart->remove_auto_applied_coupon( $code ) ) {
+					$cart->remove_coupon( $code );
+				}
 			}
 
 			$applied_coupons = array_diff( $applied_coupons, $coupons_to_remove );

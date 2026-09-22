@@ -2288,6 +2288,176 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An individual-use auto-apply coupon yields to the coupon a customer applies themselves.
+	 */
+	public function test_individual_use_auto_apply_coupon_yields_to_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-indiv',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '7',
+				'auto_apply'     => 'yes',
+				'individual_use' => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'customer-choice',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'auto-indiv' ), 'precondition: the auto-apply coupon is applied' );
+
+		// Without the yield the customer would be told the auto-apply coupon "cannot be used in
+		// conjunction with other coupons", with no way to remove it and no way to use their own.
+		WC()->cart->apply_coupon( 'customer-choice' );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'customer-choice' ), "the customer's own coupon should apply" );
+		$this->assertFalse( WC()->cart->has_discount( 'auto-indiv' ), 'the individual-use auto-apply coupon should have yielded' );
+		$this->assertEqualsWithDelta( 30.0, WC()->cart->get_discount_total(), 0.001, 'only the customer coupon should discount the cart' );
+
+		// It must not come back while the customer's coupon is on the cart.
+		WC()->cart->calculate_totals();
+		$this->assertFalse( WC()->cart->has_discount( 'auto-indiv' ), 'the auto-apply coupon should stay off across recalculations' );
+
+		// ...and must return once the customer removes theirs.
+		WC()->cart->remove_coupon( 'customer-choice' );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-indiv' ), 'the auto-apply coupon should return once the cart is free again' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
+	 * @testdox An auto-apply coupon yields to an individual-use coupon the customer applies.
+	 */
+	public function test_auto_apply_coupon_yields_to_individual_use_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-plain',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$indiv   = WC_Helper_Coupon::create_coupon(
+			'customer-indiv',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '25',
+				'individual_use' => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'customer-indiv' );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'customer-indiv' ), 'the individual-use coupon should apply' );
+		$this->assertFalse( WC()->cart->has_discount( 'auto-plain' ), 'individual use must exclude the auto-apply coupon' );
+		$this->assertEqualsWithDelta( 25.0, WC()->cart->get_discount_total(), 0.001, 'the discounts must not stack' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$indiv->delete( true );
+	}
+
+	/**
+	 * @testdox An auto-apply coupon still stacks with an ordinary coupon the customer applies.
+	 */
+	public function test_auto_apply_coupon_stacks_with_ordinary_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-stacks',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'customer-stacks',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'customer-stacks' );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( 40.0, WC()->cart->get_discount_total(), 0.001, 'both coupons should discount the cart' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
+	 * @testdox is_auto_applied_coupon() reports only coupons the store applied and that are on the cart.
+	 */
+	public function test_is_auto_applied_coupon_distinguishes_refusal_from_absence() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-reported',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'manual-reported',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->is_auto_applied_coupon( 'auto-reported' ), 'an applied auto-apply coupon is refused' );
+		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'manual-reported' ), 'an ordinary coupon is not refused' );
+
+		// Not on the cart, so there is nothing to refuse: callers can tell this apart from a refusal.
+		WC()->cart->empty_cart();
+		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'auto-reported' ), 'a coupon that is not applied is not refused' );
+
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
 	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
 	 */
 	public function test_mini_cart_template_renders_selected_any_values_once(): void {

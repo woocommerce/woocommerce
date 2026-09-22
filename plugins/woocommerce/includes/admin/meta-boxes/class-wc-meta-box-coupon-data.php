@@ -110,16 +110,6 @@ class WC_Meta_Box_Coupon_Data {
 					);
 				}
 
-				// Auto apply.
-				woocommerce_wp_checkbox(
-					array(
-						'id'          => 'auto_apply',
-						'label'       => __( 'Apply coupon automatically', 'woocommerce' ),
-						'description' => __( 'Check this box to automatically apply this coupon to the cart when conditions are met. The coupon will be silently added or removed based on cart validation.', 'woocommerce' ),
-						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
-					)
-				);
-
 				// Expiry date.
 				$expiry_date = $coupon->get_date_expires( 'edit' ) ? $coupon->get_date_expires( 'edit' )->date( 'Y-m-d' ) : '';
 				woocommerce_wp_text_input(
@@ -169,6 +159,17 @@ class WC_Meta_Box_Coupon_Data {
 						'data_type'   => 'price',
 						'desc_tip'    => true,
 						'value'       => $coupon->get_maximum_amount( 'edit' ),
+					)
+				);
+
+				// Auto apply. Sits with the restrictions because they are what decides which carts
+				// it lands on: with none set, it applies to every cart in the store.
+				woocommerce_wp_checkbox(
+					array(
+						'id'          => 'auto_apply',
+						'label'       => __( 'Apply coupon automatically', 'woocommerce' ),
+						'description' => __( 'Check this box to apply this coupon to every cart that meets the restrictions below, without the customer entering a code. Customers cannot remove it themselves. With no restrictions set, it applies to every cart in the store.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
 					)
 				);
 
