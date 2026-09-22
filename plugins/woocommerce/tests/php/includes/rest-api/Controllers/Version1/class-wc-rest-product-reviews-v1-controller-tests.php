@@ -170,4 +170,100 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
+	/**
+	 * @testdox Creating a review as a shop manager strips markup that user role cannot post.
+	 */
+	public function test_create_item_strips_disallowed_markup_for_shop_manager() {
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$review_content = '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>';
+		$response       = $this->create_review( $product_id, $review_content, 5 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$comment = get_comment( $response->get_data()['id'] );
+
+		$this->assertStringContainsString( '<strong>Good</strong>', $comment->comment_content );
+		$this->assertStringContainsString( 'href="https://example.test"', $comment->comment_content );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+		$this->assertStringNotContainsString( '<script', $comment->comment_content );
+	}
+
+	/**
+	 * @testdox Creating a review keeps a literal backslash in the content.
+	 */
+	public function test_create_item_keeps_backslash_in_content() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$response = $this->create_review( $product_id, 'Rated 5\5', 5 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$comment = get_comment( $response->get_data()['id'] );
+		$this->assertStringContainsString( '5\5', $comment->comment_content );
+	}
+
+	/**
+	 * @testdox A rest_pre_insert_product_review filter returning a WP_Error short-circuits creation.
+	 */
+	public function test_create_item_returns_filtered_wp_error_without_creating_a_comment() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$filtered_error = new WP_Error( 'filtered_product_review_error', 'The filter rejected this review.' );
+		$return_error   = static function () use ( $filtered_error ) {
+			return $filtered_error;
+		};
+
+		$comments_before = get_comments(
+			array(
+				'post_id' => $product_id,
+				'count'   => true,
+			)
+		);
+
+		add_filter( 'rest_pre_insert_product_review', $return_error );
+		try {
+			$response = $this->create_review( $product_id, 'Should not be stored.', 5 );
+		} finally {
+			remove_filter( 'rest_pre_insert_product_review', $return_error );
+		}
+
+		$this->assertSame( $filtered_error, $response );
+		$this->assertSame(
+			$comments_before,
+			get_comments(
+				array(
+					'post_id' => $product_id,
+					'count'   => true,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Creates a product review through the controller.
+	 *
+	 * @param int      $product_id ID of the product being reviewed.
+	 * @param string   $content    Review content.
+	 * @param int|null $rating     Rating to submit, or null to omit the rating field.
+	 * @return WP_REST_Response
+	 */
+	private function create_review( int $product_id, string $content, ?int $rating ) {
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product_id . '/reviews' );
+		$request->set_param( 'product_id', $product_id );
+		$request->set_param( 'review', $content );
+		$request->set_param( 'name', 'Jane Smith' );
+		$request->set_param( 'email', 'jane.smith@example.org' );
+
+		if ( null !== $rating ) {
+			$request->set_param( 'rating', $rating );
+		}
+
+		return $this->sut->create_item( $request );
+	}
 }
