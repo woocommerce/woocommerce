@@ -188,18 +188,16 @@ final class ProductFilterStatus extends AbstractBlock {
 			$query_vars['filter_stock_status'],
 		);
 
-		if ( empty( $query_vars['isProductCollection'] ) ) {
-			if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
-				unset(
-					$query_vars['taxonomy'],
-					$query_vars['term']
-				);
-			}
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
 
-			if ( ! empty( $query_vars['meta_query'] ) ) {
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				$query_vars['meta_query'] = ProductCollectionUtils::remove_query_array( $query_vars['meta_query'], 'key', '_stock_status' );
-			}
+		if ( ! empty( $query_vars['meta_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_vars['meta_query'] = ProductCollectionUtils::remove_query_array( $query_vars['meta_query'], 'key', '_stock_status' );
 		}
 
 		$container = wc_get_container();
