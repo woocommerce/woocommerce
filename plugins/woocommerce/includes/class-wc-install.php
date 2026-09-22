@@ -362,6 +362,7 @@ class WC_Install {
 		),
 		'11.3.0'   => array(
 			'wc_update_1130_repair_hpos_order_dates_from_posts',
+			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
 		),
 	);
@@ -405,6 +406,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'disable_legacy_variation_price_hash_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -1375,6 +1377,17 @@ class WC_Install {
 	public static function enable_product_instance_caching_for_newly_installed(): void {
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		$feature_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
+	}
+
+	/**
+	 * Disable the legacy variations price hash algorithm for new stores.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function disable_legacy_variation_price_hash_for_newly_installed(): void {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no', '', true );
 	}
 
 	/**

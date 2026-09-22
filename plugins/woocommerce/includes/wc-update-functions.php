@@ -4173,6 +4173,17 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 }
 
 /**
+ * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
+ *
+ * @return void
+ */
+function wc_update_1130_set_legacy_variation_price_hash_option() {
+	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
+	}
+}
+
+/**
  * Backfill the payment method on Analytics order stats rows written before the column existed.
  *
  * Works through the table in batches, oldest order first, and returns true while there is more
