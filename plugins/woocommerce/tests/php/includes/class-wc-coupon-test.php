@@ -587,4 +587,25 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 		$coupon->set_maximum_discount( '-5' );
 	}
+
+	/**
+	 * @testdox from_order_item reads the maximum discount stored on the coupon line item and ignores invalid values.
+	 *
+	 * @testWith ["30", "30"]
+	 *           ["", "0"]
+	 *           ["-5", "0"]
+	 *           ["abc", "0"]
+	 *
+	 * @param string $stored   Stored maximum_discount meta value.
+	 * @param string $expected Expected maximum discount on the coupon.
+	 */
+	public function test_from_order_item_reads_maximum_discount( string $stored, string $expected ): void {
+		$order_item = new WC_Order_Item_Coupon();
+		$order_item->add_meta_data( 'coupon_info', wp_json_encode( array( 0, 'CAPPED', 'percent', 10.0 ) ) );
+		$order_item->add_meta_data( 'maximum_discount', $stored );
+
+		$coupon = WC_Coupon::from_order_item( $order_item );
+
+		$this->assertSame( $expected, $coupon->get_maximum_discount() );
+	}
 }
