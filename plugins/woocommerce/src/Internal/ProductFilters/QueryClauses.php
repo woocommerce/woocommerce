@@ -44,6 +44,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
 	 *
+	 * There isn't a clause for rating filter because we use tax_query for it
+	 * (product_visibility).
+	 *
 	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
@@ -63,11 +66,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			);
 			$price_range = array_filter( $price_range );
 			$args        = $this->add_price_clauses( $args, $price_range );
-		}
-
-		$rating_filter = $wp_query->get( 'rating_filter' );
-		if ( ( is_string( $rating_filter ) || is_numeric( $rating_filter ) ) && ! $this->has_rating_filter_tax_query( $wp_query->get( 'tax_query' ) ) ) {
-			$args = $this->add_rating_clauses( $args, explode( ',', (string) $rating_filter ) );
 		}
 
 		$args = $this->add_attribute_clauses(
@@ -188,43 +186,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price_filter );
 			}
 		}
-
-		return $args;
-	}
-
-	/**
-	 * Add query clauses for rating filter.
-	 *
-	 * @param array $args    Query args.
-	 * @param array $ratings Product ratings.
-	 * @return array
-	 */
-	public function add_rating_clauses( array $args, array $ratings ): array {
-		$product_visibility_terms = wc_get_product_visibility_term_ids();
-		$rating_term_ids          = array();
-
-		foreach ( array_unique( array_map( 'absint', $ratings ) ) as $rating ) {
-			$term_id = $product_visibility_terms[ 'rated-' . $rating ] ?? null;
-			if ( $term_id ) {
-				$rating_term_ids[] = absint( $term_id );
-			}
-		}
-
-		if ( empty( $rating_term_ids ) ) {
-			return $args;
-		}
-
-		global $wpdb;
-
-		$rating_term_ids_list = implode( ',', $rating_term_ids );
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		$args['where'] .= " AND EXISTS (
-			SELECT 1 FROM {$wpdb->term_relationships} tr
-			WHERE tr.object_id = {$wpdb->posts}.ID
-			AND tr.term_taxonomy_id IN ({$rating_term_ids_list})
-		)";
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		return $args;
 	}
@@ -660,30 +621,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
 
 		return $price_filter + array_sum( $taxes );
-	}
-
-	/**
-	 * Check whether a taxonomy query already applies the rating filter.
-	 *
-	 * @param mixed $tax_query Taxonomy query.
-	 * @return bool
-	 */
-	private function has_rating_filter_tax_query( $tax_query ): bool {
-		if ( ! is_array( $tax_query ) ) {
-			return false;
-		}
-
-		if ( ! empty( $tax_query['rating_filter'] ) ) {
-			return true;
-		}
-
-		foreach ( $tax_query as $clause ) {
-			if ( $this->has_rating_filter_tax_query( $clause ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

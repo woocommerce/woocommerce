@@ -135,11 +135,24 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Rating filters constrain sibling stock counts.
+	 * @testdox Rating taxonomy queries constrain sibling stock counts.
 	 */
-	public function test_get_stock_status_counts_with_rating_filter(): void {
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
-		$wp_query->set( 'rating_filter', '5' );
+	public function test_get_stock_status_counts_with_rating_tax_query(): void {
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
+		$wp_query                 = new \WP_Query(
+			array(
+				'post_type' => 'product',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'field'         => 'term_taxonomy_id',
+						'taxonomy'      => 'product_visibility',
+						'terms'         => array( $product_visibility_terms['rated-5'] ),
+						'rating_filter' => true,
+					),
+				),
+			)
+		);
 
 		$this->test_get_stock_status_counts_with(
 			$wp_query,

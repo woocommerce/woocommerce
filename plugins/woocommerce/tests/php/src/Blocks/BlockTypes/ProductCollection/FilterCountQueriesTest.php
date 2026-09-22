@@ -20,9 +20,20 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 		global $wp_query;
 
 		$previous_query_vars = $wp_query->query_vars;
+		$saved_tax_query     = array(
+			array(
+				'taxonomy' => 'pa_color',
+				'field'    => 'term_id',
+				'terms'    => array( 1 ),
+			),
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => array( 2 ),
+			),
+		);
 		$query_vars          = array(
 			'isProductCollection' => true,
-			'rating_filter'       => '4',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'          => array(
 				array(
@@ -31,17 +42,16 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 				),
 			),
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			'tax_query'           => array(
+			'tax_query'           => array_merge(
+				$saved_tax_query,
 				array(
-					'taxonomy' => 'pa_color',
-					'field'    => 'term_id',
-					'terms'    => array( 1 ),
-				),
-				array(
-					'taxonomy' => 'product_cat',
-					'field'    => 'term_id',
-					'terms'    => array( 2 ),
-				),
+					array(
+						'taxonomy'      => 'product_visibility',
+						'field'         => 'term_taxonomy_id',
+						'terms'         => array( 3 ),
+						'rating_filter' => true,
+					),
+				)
 			),
 		);
 		$wp_query->query_vars = $query_vars;
@@ -71,10 +81,10 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( $query_vars['meta_query'], $captured_query_vars['stock']['meta_query'] );
+		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['stock']['tax_query'] );
 		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['attribute']['tax_query'] );
 		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['taxonomy']['tax_query'] );
-		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['rating']['tax_query'] );
-		$this->assertArrayNotHasKey( 'rating_filter', $captured_query_vars['rating'] );
+		$this->assertSame( $saved_tax_query, $captured_query_vars['rating']['tax_query'] );
 	}
 
 	/**
