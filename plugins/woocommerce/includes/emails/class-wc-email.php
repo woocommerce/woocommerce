@@ -692,7 +692,7 @@ class WC_Email extends WC_Settings_API {
 				$reply_to_name  = EmailHeaders::sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
 				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
 
-				if ( '' !== $reply_to_name && '' !== $reply_to_email ) {
+				if ( '' !== $reply_to_name && is_email( $reply_to_email ) ) {
 					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
 				}
 			}
@@ -703,12 +703,20 @@ class WC_Email extends WC_Settings_API {
 			$reply_to_name    = $this->get_reply_to_name();
 
 			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
-				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
-				// Keep the name on a single line so it can't add extra headers.
-				$header .= 'Reply-to: ' . str_replace( array( "\r", "\n", ',' ), array( ' ', ' ', '' ), $reply_to_name ) . ' <' . $reply_to_address . ">\r\n";
-			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-				// Keep the name on a single line so it can't add extra headers.
-				$header .= 'Reply-to: ' . str_replace( array( "\r", "\n", ',' ), array( ' ', ' ', '' ), $this->get_from_name() ) . ' <' . $this->get_from_address() . ">\r\n";
+				$reply_to_name = EmailHeaders::sanitize_reply_to_name( $reply_to_name );
+
+				if ( '' === $reply_to_name ) {
+					$reply_to_name = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+				}
+
+				$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} else {
+				$from_address = $this->get_from_address();
+				$from_name    = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+
+				if ( $from_address && '' !== $from_name ) {
+					$header .= 'Reply-to: ' . $from_name . ' <' . $from_address . ">\r\n";
+				}
 			}
 		}
 

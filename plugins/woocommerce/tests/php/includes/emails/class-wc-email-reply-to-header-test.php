@@ -146,6 +146,32 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox No Reply-to line is added when a "sanitize_email" filter hands back a value that fails is_email().
+	 */
+	public function test_admin_order_email_sanitize_email_filter_returning_invalid_address_produces_no_reply_to(): void {
+		// sanitize_email() ends with an apply_filters( 'sanitize_email', ... ) call, so a callback can
+		// hand back a non-empty value that does not pass is_email().
+		$filter = static fn() => 'not-an-email';
+		add_filter( 'sanitize_email', $filter );
+
+		$order = $this->createMock( WC_Order::class );
+		$order->method( 'get_billing_first_name' )->willReturn( 'Foo' );
+		$order->method( 'get_billing_last_name' )->willReturn( 'Bar' );
+		$order->method( 'get_billing_email' )->willReturn( 'guest@example.com' );
+
+		$email         = new WC_Email_New_Order();
+		$email->object = $order;
+
+		try {
+			$headers = $email->get_headers();
+		} finally {
+			remove_filter( 'sanitize_email', $filter );
+		}
+
+		$this->assertStringNotContainsString( 'Reply-to:', $headers );
+	}
+
+	/**
 	 * @testdox No Reply-to line is added when the billing name has no visible characters.
 	 * @testWith ["\r\n"]
 	 *           [" "]
@@ -213,9 +239,28 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
-		$reply_to_line = "Reply-to: Shop  Bcc: x@evil.test <reply@example.com>\r\n";
+		$reply_to_line = "Reply-to: Shop Bcc: x@evil.test <reply@example.com>\r\n";
 		$this->assertStringContainsString( $reply_to_line, $headers );
 		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $reply_to_line, '', $headers ) );
+	}
+
+	/**
+	 * @testdox A configured reply-to name left empty by the cleanup falls back to the from-name.
+	 */
+	public function test_custom_reply_to_name_that_cleans_to_nothing_falls_back_to_from_name(): void {
+		update_option( 'woocommerce_email_reply_to_enabled', 'yes' );
+		update_option( 'woocommerce_email_reply_to_address', 'reply@example.com' );
+		update_option( 'woocommerce_email_reply_to_name', ',' );
+
+		$filter = static fn() => 'Shop';
+		add_filter( 'woocommerce_email_from_name', $filter );
+
+		$email   = new WC_Email_Customer_Processing_Order();
+		$headers = $email->get_headers();
+
+		remove_filter( 'woocommerce_email_from_name', $filter );
+
+		$this->assertStringContainsString( "Reply-to: Shop <reply@example.com>\r\n", $headers );
 	}
 
 	/**
@@ -234,7 +279,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
-		$reply_to_line = "Reply-to: Shop  Bcc: x@evil.test <from@address.com>\r\n";
+		$reply_to_line = "Reply-to: Shop Bcc: x@evil.test <from@address.com>\r\n";
 		$this->assertStringContainsString( $reply_to_line, $headers );
 		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $reply_to_line, '', $headers ) );
 	}
@@ -255,5 +300,24 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
 		$this->assertStringContainsString( "Reply-to: Shop Inc. <from@address.com>\r\n", $headers );
+	}
+
+	/**
+	 * @testdox An address in angle brackets inside a filtered from-name does not reach the Reply-to header.
+	 */
+	public function test_from_name_fallback_reply_to_strips_embedded_address(): void {
+		update_option( 'woocommerce_email_reply_to_enabled', 'no' );
+		update_option( 'woocommerce_email_from_address', 'from@address.com' );
+
+		$filter = static fn() => 'Support <help@attacker.test>';
+		add_filter( 'woocommerce_email_from_name', $filter );
+
+		$email   = new WC_Email_Customer_Processing_Order();
+		$headers = $email->get_headers();
+
+		remove_filter( 'woocommerce_email_from_name', $filter );
+
+		$this->assertStringContainsString( 'Reply-to: Support <from@address.com>' . "\r\n", $headers );
+		$this->assertStringNotContainsString( 'help@attacker.test', $headers );
 	}
 }

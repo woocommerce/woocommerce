@@ -40,7 +40,6 @@ class EmailHeadersTest extends WC_Unit_Test_Case {
 			remove_filter( 'sanitize_text_field', $filter );
 		}
 
-		$this->assertStringNotContainsString( "\r", $result );
-		$this->assertStringNotContainsString( "\n", $result );
+		$this->assertSame( 'Shop  X-Test: 1', $result );
 	}
 }
