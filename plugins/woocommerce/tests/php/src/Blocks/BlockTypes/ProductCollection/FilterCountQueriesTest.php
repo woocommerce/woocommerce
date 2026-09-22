@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterAttribute;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterRating;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterStatus;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterTaxonomy;
 use WC_Unit_Test_Case;
@@ -21,6 +22,7 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 		$previous_query_vars = $wp_query->query_vars;
 		$query_vars          = array(
 			'isProductCollection' => true,
+			'rating_filter'       => '4',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'          => array(
 				array(
@@ -62,6 +64,7 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 			$this->invoke_private_method( ProductFilterStatus::class, 'get_stock_status_counts', array( $block ) );
 			$this->invoke_private_method( ProductFilterAttribute::class, 'get_attribute_counts', array( $block, 'pa_color', 'or' ) );
 			$this->invoke_private_method( ProductFilterTaxonomy::class, 'get_taxonomy_term_counts', array( $block, 'product_cat' ) );
+			$this->invoke_private_method( ProductFilterRating::class, 'get_rating_counts', array( $block ) );
 		} finally {
 			remove_filter( 'woocommerce_pre_product_filter_data', $capture_query_vars, 10 );
 			$wp_query->query_vars = $previous_query_vars;
@@ -70,6 +73,8 @@ class FilterCountQueriesTest extends WC_Unit_Test_Case {
 		$this->assertSame( $query_vars['meta_query'], $captured_query_vars['stock']['meta_query'] );
 		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['attribute']['tax_query'] );
 		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['taxonomy']['tax_query'] );
+		$this->assertSame( $query_vars['tax_query'], $captured_query_vars['rating']['tax_query'] );
+		$this->assertArrayNotHasKey( 'rating_filter', $captured_query_vars['rating'] );
 	}
 
 	/**

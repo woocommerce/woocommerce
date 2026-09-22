@@ -332,12 +332,22 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		set_query_var( 'rating_filter', '1' );
 
-		$merged_query      = Utils::initialize_merged_query( $this->block_instance );
-		$query             = new WP_Query( $merged_query );
-		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+		$merged_query       = Utils::initialize_merged_query( $this->block_instance );
+		$local_rating_query = array_filter(
+			$merged_query['tax_query'],
+			function ( $tax_query ) {
+				return is_array( $tax_query ) && ! empty( $tax_query['rating_filter'] );
+			}
+		);
+		$query              = new WP_Query( $merged_query );
+		$found_product_ids  = wp_list_pluck( $query->posts, 'ID' );
 
+		$this->assertSame( '1', $merged_query['rating_filter'], 'Product Collection should forward the canonical rating variable.' );
+		$this->assertSame( array(), $local_rating_query, 'Product Collection should not build rating clauses locally.' );
 		$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The one-star target should be returned.' );
 		$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The five-star distractor should be excluded.' );
+
+		set_query_var( 'rating_filter', '' );
 	}
 
 	/**

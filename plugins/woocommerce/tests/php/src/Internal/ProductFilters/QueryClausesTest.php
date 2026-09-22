@@ -119,6 +119,56 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Rating query variables filter products through shared clauses.
+	 */
+	public function test_rating_query_var_applies_rating_clauses(): void {
+		$matching_product = $this->fixture_data->get_simple_product(
+			array(
+				'name' => 'One-star shared-clause target',
+			)
+		);
+		$this->fixture_data->add_product_review( $matching_product->get_id(), 1 );
+
+		$non_matching_product = $this->fixture_data->get_simple_product(
+			array(
+				'name' => 'Five-star shared-clause distractor',
+			)
+		);
+		$this->fixture_data->add_product_review( $non_matching_product->get_id(), 5 );
+
+		add_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10, 2 );
+		$query = new \WP_Query(
+			array(
+				'fields'        => 'ids',
+				'post_status'   => 'publish',
+				'post_type'     => 'product',
+				'rating_filter' => '1',
+			)
+		);
+		remove_filter( 'posts_clauses', array( $this->sut, 'add_query_clauses' ), 10 );
+
+		$this->assertContains( $matching_product->get_id(), $query->posts, 'The selected rating should match.' );
+		$this->assertNotContains( $non_matching_product->get_id(), $query->posts, 'Other ratings should be excluded.' );
+	}
+
+	/**
+	 * @testdox Rating clauses are not duplicated when a taxonomy query already applies them.
+	 */
+	public function test_rating_query_var_does_not_duplicate_existing_tax_query(): void {
+		$query                              = new \WP_Query();
+		$query->query_vars['rating_filter'] = '1';
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		$query->query_vars['tax_query'] = array(
+			array(
+				'rating_filter' => true,
+			),
+		);
+		$clauses                        = array( 'where' => 'original' );
+
+		$this->assertSame( $clauses, $this->sut->add_query_clauses( $clauses, $query ) );
+	}
+
+	/**
 	 * @testdox Test the product query with post clauses containing stock clauses.
 	 *
 	 * @testWith [["instock"]]
