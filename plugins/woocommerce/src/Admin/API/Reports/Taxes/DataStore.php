@@ -125,16 +125,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * SQL condition matching the tax codes of a list of locations.
 	 *
-	 * A location is a country code (`GB`) or a country and state pair (`US:CA`), the form the
-	 * Customers report already takes. A tax code starts with its country, then its state when the
-	 * rate has one (`US-CA-STATE TAX-1`), so a location matches as a prefix of the code. Matching
-	 * the prefix rather than splitting the code on `-` keeps the state codes that hold a hyphen
-	 * (`DE-BW`) and the rate names that hold one working.
-	 *
-	 * Codes are normalized the way `WC_Tax` normalizes them before writing a rate, so a filter
-	 * value always reads as the stored code does. A code the store never wrote simply matches no
-	 * row, and a location naming no code at all is left out, so a filter never matches wider than
-	 * the locations it names.
+	 * A location is a country code (`GB`) or a country and state pair (`US:CA`). A tax code is
+	 * `COUNTRY-STATE-NAME-PRIORITY`, so a location matches as a prefix of it.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
@@ -160,9 +152,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$state = isset( $parts[1] ) ? self::normalize_state_code( $parts[1] ) : '';
 
-			// A location naming an empty state (`US:`) is not the country it names. Falling back
-			// to the country prefix would answer an include with every row of that country
-			// instead of narrowing it, and say nothing about having ignored the state.
+			// `US:` is not `US`. Falling back to the country prefix would widen an include to
+			// every row of that country instead of narrowing it.
 			if ( isset( $parts[1] ) && '' === $state ) {
 				continue;
 			}
@@ -186,10 +177,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Normalize a country code the way `WC_Tax` does before it writes a rate.
+	 * Normalize a country code the way `WC_Tax` writes it.
 	 *
-	 * `WC_Tax::format_tax_rate_country()` only uppercases it, so this does the same. A code the
-	 * store never wrote is left as it is and matches no row.
+	 * `WC_Tax::format_tax_rate_country()` only uppercases it.
 	 *
 	 * @param string $code Country code.
 	 * @return string
@@ -199,12 +189,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Normalize a state code the way `WC_Tax` does before it writes a rate.
+	 * Normalize a state code the way `WC_Tax` writes it.
 	 *
-	 * `WC_Tax::prepare_tax_rate()` runs a state through `sanitize_key()` first, which drops every
-	 * character outside `a-z0-9_-`. The filter input offers the `HONG KONG` and `NEW TERRITORIES`
-	 * codes of `i18n/states.php` as they are written there, so without the same pass they would
-	 * be matched against a code the store never wrote and select no row.
+	 * `WC_Tax::prepare_tax_rate()` runs a state through `sanitize_key()`, which drops the space of
+	 * a code such as `HONG KONG`. Without the same pass the filter looks for a code the store
+	 * never wrote.
 	 *
 	 * @param string $code State code.
 	 * @return string
@@ -248,15 +237,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * The location filter of a report query, as a condition on the lookup table alone.
 	 *
-	 * The tax code a row's country and state are read from lives on the tax order item, which
-	 * the stats queries do not join. They sum their rows, so joining the tax order items there
-	 * would repeat a row for every line of the order sharing its rate; an EXISTS check reads
-	 * the same names without bringing rows back.
-	 *
-	 * A row written per tax line names its line, so it reads that one item by its primary key.
-	 * Only a row recorded before the lookup held one row per line has no line to read, and it
-	 * falls back to searching the order for the tax items sharing its rate. Keeping the two
-	 * apart is what stops the search reading every rate_id in the store for the common case.
+	 * The tax code lives on the tax order item, which the stats queries do not join: joining it
+	 * would repeat a summed row for every line of the order sharing its rate, so an EXISTS check
+	 * reads the code instead. A row keyed by its tax line reads that one item by its primary key.
+	 * Only a legacy row at the zero default has to search the order's tax items for its rate.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
@@ -409,8 +393,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
 		}
 
-		// The tax order items are already joined here, so the location matches read their names
-		// directly rather than through the EXISTS check the stats queries need.
+		// The tax order items are already joined here, so this reads their names directly rather
+		// than through the EXISTS check the stats queries need.
 		$location_filter = self::get_location_filter_condition( $query_args );
 
 		if ( '' !== $location_filter ) {
