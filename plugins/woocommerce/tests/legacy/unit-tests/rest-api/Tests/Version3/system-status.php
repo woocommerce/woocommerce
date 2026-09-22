@@ -354,7 +354,6 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$tools_by_id = array_column( $data, null, 'id' );
 		foreach ( array( 'clear_transients', 'recount_terms' ) as $tool_id ) {
 			$this->assertArrayHasKey( $tool_id, $tools_by_id );
-			$this->assertSame( $tool_id, $tools_by_id[ $tool_id ]['id'] );
 			$this->assertIsString( $tools_by_id[ $tool_id ]['name'] );
 			$this->assertIsString( $tools_by_id[ $tool_id ]['action'] );
 			$this->assertIsString( $tools_by_id[ $tool_id ]['description'] );
@@ -375,7 +374,6 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$tools_by_id = array_column( $data, null, 'id' );
 		$this->assertArrayHasKey( 'clear_transients', $tools_by_id );
-		$this->assertSame( 'clear_transients', $tools_by_id['clear_transients']['id'] );
 		$this->assertIsString( $tools_by_id['clear_transients']['name'] );
 		foreach ( $data as $item ) {
 			// Fields that are not requested are not returned in response.
