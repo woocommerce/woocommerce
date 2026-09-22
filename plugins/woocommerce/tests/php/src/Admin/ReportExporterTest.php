@@ -762,10 +762,20 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		// Page 1 finishes last: it used to truncate the file and pull progress back to its own position.
 		$replayed = array_merge( array_slice( $batches, 1 ), array( $batches[0] ) );
+		$last     = array_pop( $replayed );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-outoforder' );
 
 		foreach ( $replayed as $batch ) {
 			ReportExporter::export_report( ...$batch );
 		}
+
+		// The report's last page has run, which is what the parent exporter reads as the whole export
+		// being finished. Page 1 has not.
+		$this->assertFalse( $exporter->export_file_exists(), 'An export with a batch still to finish must not be downloadable.' );
+
+		ReportExporter::export_report( ...$last );
 
 		$this->assertCount( 7, $this->export_rows( 'outoforder' ), 'Every batch\'s rows must survive, whatever order the batches finish in.' );
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'outoforder' ), 'An export whose batches have all finished is complete.' );
@@ -774,9 +784,6 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			$this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ),
 			'The batch that finished the export still sends the download link when it was not the last page.'
 		);
-
-		$exporter = new ReportCSVExporter();
-		$exporter->set_filename( 'wc-stock-report-export-outoforder' );
 
 		$this->assertTrue( $exporter->export_file_exists(), 'The finished export must be downloadable, which needs its headers row file.' );
 	}
@@ -857,10 +864,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 * @testdox An export queued before batches were counted still reports the page that ran last.
 	 */
 	public function test_export_queued_before_batches_were_counted(): void {
-		$exporter = new ReportCSVExporter( 'stock' );
-		$exporter->set_filename( 'wc-stock-report-export-preupgrade' );
-		$exporter->create_export_file();
-
+		// Nothing created the file: an export queued before 11.3.0 left that to its first batch.
 		$this->paths[] = $this->export_path( 'preupgrade' );
 		$this->paths[] = $this->export_path( 'preupgrade' ) . '.headers';
 
@@ -870,9 +874,41 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		ReportExporter::export_report( 1, 'preupgrade', 'stock', array() );
 
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'preupgrade' ) );
+		$this->assertCount( 1, $this->export_rows( 'preupgrade' ), 'A batch must write its page to a file no one created for it.' );
 		$this->assertNull(
 			get_option( ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:preupgrade' ), null ),
 			'A batch must not start counting an export that was queued without a count.'
+		);
+	}
+
+	/**
+	 * @testdox An export that never finished is not emailed, and says so in the log.
+	 */
+	public function test_unfinished_export_is_not_emailed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		reset_phpmailer_instance();
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$logged = array();
+		add_filter(
+			'woocommerce_logger_log_message',
+			function ( $message, $level ) use ( &$logged ) {
+				$logged[] = $level . ': ' . $message;
+
+				return $message;
+			},
+			10,
+			2
+		);
+
+		ReportExporter::update_export_percentage_complete( 'stock', 'unfinished', 40 );
+
+		ReportExporter::email_report_download_link( $user_id, 'unfinished', 'stock', array() );
+
+		$this->assertEmpty( $mailer->mock_sent, 'An export that never finished must not be emailed.' );
+		$this->assertNotEmpty(
+			preg_grep( '/^warning: Not emailing the stock report export unfinished/', $logged ),
+			'The skipped email must be logged, since the scheduler records the action as complete.'
 		);
 	}
 }

@@ -219,7 +219,7 @@ class ReportExporter {
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0 ) {
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-		$exporter->generate_file();
+		$exporter->write_export_page();
 
 		$remaining = self::record_finished_batch( $report_type, $export_id );
 
@@ -291,7 +291,19 @@ class ReportExporter {
 		// The direct write leaves the option cache stale.
 		wp_cache_delete( $option_name, 'options' );
 
-		$remaining = get_option( $option_name, null );
+		return self::get_pending_batches( $report_type, $export_id );
+	}
+
+	/**
+	 * Get how many of an export's batches have still to finish.
+	 *
+	 * @since 11.3.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return int|null Batches still to finish, or null for an export queued before 11.3.0, which has no count.
+	 */
+	private static function get_pending_batches( $report_type, $export_id ) {
+		$remaining = get_option( self::get_pending_batches_option_name( $report_type, $export_id ), null );
 
 		return null === $remaining ? null : (int) $remaining;
 	}
@@ -354,10 +366,10 @@ class ReportExporter {
 	 * @return bool
 	 */
 	private static function export_is_complete( $report_type, $export_id ) {
-		$remaining = get_option( self::get_pending_batches_option_name( $report_type, $export_id ), null );
+		$remaining = self::get_pending_batches( $report_type, $export_id );
 
 		if ( null !== $remaining ) {
-			return (int) $remaining < 1;
+			return $remaining < 1;
 		}
 
 		// An export queued before 11.3.0, or one whose count has already been cleaned up, only has the
@@ -417,17 +429,37 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
+		global $wpdb;
+
 		$option_name = self::get_status_option_name( $report_type, $export_id );
-		$stored      = self::get_export_percentage_complete( $report_type, $export_id );
 		$percentage  = min( 100, max( 0, (int) $percentage ) );
 
-		if ( false !== $stored ) {
-			$percentage = max( (int) $stored, $percentage );
+		// One UPDATE, because batches run at the same time on more than one runner and a
+		// read-modify-write would let one write back a percentage it read before another moved it up.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$moved_forwards = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = %s AND option_value < %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$percentage,
+				$option_name,
+				$percentage
+			)
+		);
+
+		// The direct write leaves the option cache stale.
+		wp_cache_delete( $option_name, 'options' );
+
+		if ( $moved_forwards ) {
+			return;
 		}
+
+		// No row to move: the export is either already this far along or has no row of its own, which
+		// is the case for one queued before 11.3.0.
+		$stored = self::get_export_percentage_complete( $report_type, $export_id );
 
 		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
 		// request, which left the email action reading an old percentage and never sending the download link.
-		update_option( $option_name, $percentage, false );
+		update_option( $option_name, false === $stored ? $percentage : max( (int) $stored, $percentage ), false );
 	}
 
 	/**
@@ -653,6 +685,13 @@ class ReportExporter {
 	 */
 	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
 		if ( ! self::export_is_complete( $report_type, $export_id ) ) {
+			// Say so rather than finishing quietly: the scheduler records this action as complete
+			// either way, which is what made the missing email hard to account for.
+			wc_get_logger()->warning(
+				sprintf( 'Not emailing the %1$s report export %2$s: it never reported itself complete.', $report_type, $export_id ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+
 			return;
 		}
 

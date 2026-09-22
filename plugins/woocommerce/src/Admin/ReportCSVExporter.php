@@ -51,6 +51,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $download_suffix = '';
 
 	/**
+	 * Whether a batch is writing its page of the report right now.
+	 *
+	 * @var bool
+	 */
+	private $writing_page = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -351,6 +358,12 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return int Percent complete.
 	 */
 	public function get_percent_complete() {
+		// Held back while a batch writes, so the parent does not take the page reaching the end of the
+		// report for the export being finished and write the headers row file early.
+		if ( $this->writing_page ) {
+			return 99;
+		}
+
 		return intval( parent::get_percent_complete() );
 	}
 
@@ -391,15 +404,27 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Write one page of the report to the export file.
 	 *
-	 * Unlike the parent, this never recreates the file on page 1. Action Scheduler runs the pages in
-	 * any order, so page 1 running late would throw away what the pages before it wrote.
+	 * Unlike generate_file(), this never recreates the file on page 1. Action Scheduler runs the
+	 * pages in any order, so page 1 running late would throw away what the pages before it wrote.
+	 * ReportExporter creates the file when it queues the export, and this creates one if it is gone.
 	 *
 	 * @since 11.3.0
 	 * @return void
 	 */
-	public function generate_file() {
+	public function write_export_page() {
+		if ( ! file_exists( $this->get_file_path() ) ) {
+			$this->get_file();
+		}
+
 		$this->prepare_data_to_export();
-		$this->write_csv_data( $this->get_csv_data() );
+
+		$this->writing_page = true;
+
+		try {
+			$this->write_csv_data( $this->get_csv_data() );
+		} finally {
+			$this->writing_page = false;
+		}
 	}
 
 	/**
