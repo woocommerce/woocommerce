@@ -31,7 +31,7 @@ test.describe( 'Shopper → Cart block', () => {
 
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
+				name: 'Your cart is empty',
 			} )
 		).toBeVisible();
 
