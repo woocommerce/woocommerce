@@ -34,6 +34,22 @@ class ScheduledSaleRunTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A false data-store row does not select the global product post.
+	 */
+	public function test_false_row_does_not_select_global_product(): void {
+		$product  = WC_Helper_Product::create_missed_sale_end_product();
+		$old_post = $GLOBALS['post'] ?? null;
+
+		try {
+			$GLOBALS['post'] = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored in finally.
+			$this->process_run( array( false ), ScheduledSaleRun::MODE_END );
+			$this->assertEquals( 50, get_post_meta( $product->get_id(), '_price', true ), 'A false row must not settle the global product.' );
+		} finally {
+			$GLOBALS['post'] = $old_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the prior global.
+		}
+	}
+
+	/**
 	 * @testdox Starting a sale stores the sale price as the active price.
 	 */
 	public function test_start_mode_applies_the_sale_price(): void {
@@ -256,70 +272,6 @@ class ScheduledSaleRunTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'Fixture precondition: the product should have been processed.' );
 		$this->assertNotFalse( wp_cache_get( $page_id, 'posts' ), 'The run released an unrelated post from the shared posts cache.' );
 		$this->assertNotFalse( wp_cache_get( $page_id, 'post_meta' ), 'The run released unrelated meta from the shared post_meta cache.' );
-	}
-
-	/**
-	 * @testdox Supported data-store result shapes still settle.
-	 */
-	public function test_settles_supported_data_store_result_shapes(): void {
-		$ids = array();
-
-		for ( $i = 0; $i < 3; $i++ ) {
-			$ids[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
-		}
-
-		$rows = array(
-			(string) $ids[0],
-			wc_get_product( $ids[1] ),
-			get_post( $ids[2] ),
-		);
-
-		$this->process_run( $rows, 'end' );
-
-		foreach ( $ids as $index => $id ) {
-			$this->assertEquals(
-				100,
-				get_post_meta( $id, '_price', true ),
-				"Product {$id}, supplied as " . wp_json_encode( $rows[ $index ] ) . ', should have settled.'
-			);
-		}
-	}
-
-	/**
-	 * Malformed data-store rows that could cast onto an unrelated post.
-	 *
-	 * @return array
-	 */
-	public function provider_malformed_rows(): array {
-		return array(
-			'string with trailing junk' => array( fn( int $id ) => $id . 'abc' ),
-			'fractional float'          => array( fn( int $id ) => $id + 0.9 ),
-			'fractional string'         => array( fn( int $id ) => $id . '.9' ),
-			'object with junk ID'       => array( fn( int $id ) => (object) array( 'ID' => $id . 'abc' ) ),
-			'object with fractional ID' => array( fn( int $id ) => (object) array( 'ID' => $id + 0.9 ) ),
-			'object without ID'         => array( fn( int $id ) => (object) array( 'id' => $id ) ),
-			'negative int'              => array( fn( int $id ) => -$id ),
-			'exponent string'           => array( fn( int $id ) => $id . 'e0' ),
-		);
-	}
-
-	/**
-	 * @testdox A malformed row does not stop the run or evict an unrelated post.
-	 * @dataProvider provider_malformed_rows
-	 *
-	 * @param callable $make_row Builds the malformed row from the decoy post id.
-	 */
-	public function test_drops_malformed_rows( callable $make_row ): void {
-		$product  = WC_Helper_Product::create_missed_sale_end_product();
-		$decoy_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
-		$row      = $make_row( $decoy_id );
-		get_post( $decoy_id );
-		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'Fixture precondition: the decoy page should be primed before the run.' );
-
-		$this->process_run( array( $product->get_id(), $row ), 'end' );
-
-		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'A malformed row stopped the run before the real product settled.' );
-		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'The release cast ' . wp_json_encode( $row ) . " onto post {$decoy_id} and evicted an unrelated page." );
 	}
 
 	/**

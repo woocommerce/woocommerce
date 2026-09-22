@@ -17,6 +17,34 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox get_product_id extracts IDs from the product references accepted by the factory.
+	 */
+	public function test_get_product_id_extracts_product_references(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$sut     = wc_get_container()->get( ProductUtil::class );
+
+		$this->assertSame( $product->get_id(), $sut->get_product_id( $product ) );
+		$this->assertSame( $product->get_id(), $sut->get_product_id( get_post( $product->get_id() ) ) );
+		$this->assertSame( (string) $product->get_id(), $sut->get_product_id( (string) $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox get_product_id uses the current product post when passed false.
+	 */
+	public function test_get_product_id_uses_global_product_for_false(): void {
+		$product  = \WC_Helper_Product::create_simple_product();
+		$sut      = wc_get_container()->get( ProductUtil::class );
+		$old_post = $GLOBALS['post'] ?? null;
+
+		try {
+			$GLOBALS['post'] = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored in finally.
+			$this->assertSame( $product->get_id(), $sut->get_product_id( false ) );
+		} finally {
+			$GLOBALS['post'] = $old_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the prior global.
+		}
+	}
+
+	/**
 	 * @testdox `get_counts_for_type` returns per-status counts for the given post type.
 	 */
 	public function test_get_counts_for_type_returns_per_status_counts(): void {

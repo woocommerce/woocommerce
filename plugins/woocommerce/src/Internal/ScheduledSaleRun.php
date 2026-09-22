@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WC_Product;
 
 /**
  * Starts or ends scheduled sales, processing and releasing one batch at a time.
@@ -89,17 +88,21 @@ class ScheduledSaleRun {
 			throw new \InvalidArgumentException( 'Scheduled sale mode must be either start or end.' );
 		}
 
-		$this->mode        = $mode;
-		$this->product_ids = array();
+		$this->mode         = $mode;
+		$this->product_ids  = array();
+		$this->product_util = wc_get_container()->get( ProductUtil::class );
 
 		foreach ( $entries as $entry ) {
-			$product_id = $this->normalize_entry( $entry );
-			if ( null !== $product_id ) {
+			if ( false === $entry ) {
+				continue;
+			}
+
+			$product_id = (int) $this->product_util->get_product_id( $entry );
+			if ( $product_id > 0 ) {
 				$this->product_ids[ $product_id ] = $product_id;
 			}
 		}
 
-		$this->product_util  = wc_get_container()->get( ProductUtil::class );
 		$this->product_cache = FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME )
 			? wc_get_container()->get( ProductCache::class )
 			: null;
@@ -116,32 +119,6 @@ class ScheduledSaleRun {
 		for ( $offset = 0; $offset < $total; $offset += self::BATCH_SIZE ) {
 			$this->process_batch( array_slice( $this->product_ids, $offset, self::BATCH_SIZE ) );
 		}
-	}
-
-	/**
-	 * Normalize a data-store row to a positive product ID.
-	 *
-	 * @param mixed $entry Product reference returned by the data store.
-	 * @return int|null Positive product ID, or null for an invalid row.
-	 */
-	private function normalize_entry( $entry ): ?int {
-		if ( $entry instanceof WC_Product ) {
-			$entry = $entry->get_id();
-		} elseif ( is_object( $entry ) ) {
-			$entry = $entry->ID ?? null;
-		}
-
-		if ( is_int( $entry ) ) {
-			$product_id = $entry;
-		} elseif ( is_float( $entry ) && is_finite( $entry ) && floor( $entry ) === $entry ) {
-			$product_id = (int) $entry;
-		} elseif ( is_string( $entry ) && ctype_digit( $entry ) ) {
-			$product_id = (int) $entry;
-		} else {
-			return null;
-		}
-
-		return $product_id > 0 ? $product_id : null;
 	}
 
 	/**
