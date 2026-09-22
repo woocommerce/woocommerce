@@ -46,7 +46,7 @@
 			"blockGap": true,
 			"__experimentalSkipSerialization": [ "padding" ],
 			"__experimentalDefaultControls": {
-				"childLayout": false
+				"blockGap": true
 			}
 		},
 		"__experimentalStyle": {
