@@ -100,7 +100,7 @@ Display the product title as a label or paragraph.
 - **Name:** woocommerce/add-to-cart-with-options-grouped-product-item-label
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-item
-- **Supports:** color (background, gradients, text), layout (selfStretch), spacing (blockGap, margin, padding), typography (fontSize, lineHeight, textAlign), ~~html~~
+- **Supports:** color (background, gradients, text), layout (selfStretch), spacing (margin, padding), typography (fontSize, lineHeight, textAlign), ~~html~~
 
 ## Grouped Product: Item Selector (Beta) - woocommerce/add-to-cart-with-options-grouped-product-item-selector
 
@@ -1078,7 +1078,7 @@ Displays the description of the product.
 - **Name:** woocommerce/product-description
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
-- **Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradients, heading, link, text), dimensions (minHeight), interactivity (clientNavigation), layout, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradients, heading, link, text), dimensions (minHeight), interactivity (clientNavigation), layout, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 
 ## Product Details - woocommerce/product-details
 
