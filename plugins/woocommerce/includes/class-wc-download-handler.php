@@ -912,7 +912,7 @@ class WC_Download_Handler {
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
 				$output_sent = $output_sent || '' !== $chunk;
-				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
 				if ( ob_get_length() ) {
 					ob_flush();
