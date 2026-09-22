@@ -337,6 +337,70 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Products can be ordered by stock quantity with unmanaged products last.
+	 */
+	public function test_products_can_be_ordered_by_stock_quantity(): void {
+		$low_stock_product       = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$high_stock_product      = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 8,
+			)
+		);
+		$unmanaged_stock_product = WC_Helper_Product::create_simple_product();
+		$product_ids             = array(
+			$low_stock_product->get_id(),
+			$high_stock_product->get_id(),
+			$unmanaged_stock_product->get_id(),
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'include'  => $product_ids,
+				'orderby'  => 'stock_quantity',
+				'order'    => 'asc',
+				'per_page' => count( $product_ids ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The ascending request should be accepted.' );
+		$this->assertSame(
+			array(
+				$low_stock_product->get_id(),
+				$high_stock_product->get_id(),
+				$unmanaged_stock_product->get_id(),
+			),
+			wp_list_pluck( $response->get_data(), 'id' ),
+			'Products should be ordered by ascending stock quantity with unmanaged stock last.'
+		);
+
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The descending request should be accepted.' );
+		$this->assertSame(
+			array(
+				$high_stock_product->get_id(),
+				$low_stock_product->get_id(),
+				$unmanaged_stock_product->get_id(),
+			),
+			wp_list_pluck( $response->get_data(), 'id' ),
+			'Products should be ordered by descending stock quantity with unmanaged stock last.'
+		);
+		$this->assertFalse( has_filter( 'posts_clauses', array( WC()->query, 'order_by_stock_quantity_asc_post_clauses' ) ), 'The ascending ordering filter should be removed after the request.' );
+		$this->assertFalse( has_filter( 'posts_clauses', array( WC()->query, 'order_by_stock_quantity_desc_post_clauses' ) ), 'The descending ordering filter should be removed after the request.' );
+	}
+
+	/**
 	 * Test that the `search_sku` parameter does partial matching in the product SKU, but not the name.
 	 *
 	 * @return void
