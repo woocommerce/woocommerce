@@ -11,6 +11,7 @@
 		"@wordpress/dataviews": "19.0.0",
 		"@wordpress/theme": "2.1.0",
 		"@wordpress/editor": "catalog:wp-min",
+		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/route": "0.21.0",
