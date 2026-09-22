@@ -348,9 +348,9 @@ Nothing here is persisted across requests.
 
 `AddToCartWithOptions::render()` names its form with `ProductScopes::name_form( [ current_place(), $product_id ] )`. The first form rendered for a given product in a given place shares that place's own scope — it declares no `woocommerce` context of its own, and directives inside it resolve `state.productScope` against the place's context. Every later form for the same product in the same place declares its own `{ productId, variation, scopeName }` context directly on its `<form>` element instead, because a repeated product cannot keep sharing the place's single scope. An element can declare context for only one Interactivity API namespace, so when the form declares its own `woocommerce` context this way, the block's own (non-`woocommerce`) context moves to a wrapping `<div>` around the form.
 
-A grouped product's child rows each get their own scope name, derived from their form's name via `get_grouped_child_scope_name()`.
+A grouped product's child rows each get their own scope name, `get_grouped_child_scope_name( $form_name, $child_product_id )` — the form's own name with the child's product id appended.
 
-Every DOM id inside an Add to Cart with Options form — a quantity input and its label, a variation attribute group and its options — derives from the form's own name, the value `name_form()` returned for it (the same string it declares as its own `scopeName` when it does declare one): `quantity_{form name}`, `wc_product_attribute_{form name}_{attribute slug}`, and so on. That is what keeps every id unique on a page carrying more than one form, while staying identical across re-renders of the same form.
+Every DOM id inside an Add to Cart with Options form traces back to the same name: the form's own quantity input and its variation attribute groups (and their options) key off the form's own name directly — `quantity_{form name}`, `wc_product_attribute_{form name}_{attribute slug}`, and so on — while a grouped child row's quantity input and label key off that child row's own scope name instead, `quantity_{form name}:{child product id}`. Either way, the id is unique on a page carrying more than one form and identical across re-renders of the same form.
 
 ## Patterns and pitfalls
 
