@@ -71,7 +71,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Evaluate a cost from a sum/string.
 	 *
 	 * @param  string $sum Sum of shipping.
-	 * @param  array  $args Args, must contain `cost` and `qty` keys, and may contain a numeric `weight` key (since 11.2.0), which defaults to 0. Having `array()` as default is for back compat reasons.
+	 * @param  array  $args Args, must contain `cost` and `qty` keys, and may contain a numeric `weight` key (since 11.3.0), which defaults to 0. Having `array()` as default is for back compat reasons.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {

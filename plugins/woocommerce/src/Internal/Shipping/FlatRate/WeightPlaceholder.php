@@ -29,7 +29,7 @@ class WeightPlaceholder {
 	 * @param array $package Package of items from the cart.
 	 * @return float
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public function get_for_package( array $package ): float {
 		$items = $package['contents'] ?? array();
@@ -46,7 +46,7 @@ class WeightPlaceholder {
 	 * @param array $items Cart items, in the shape of a package's `contents`.
 	 * @return float
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public function get_for_items( array $items ): float {
 		$total_weight = 0.0;
@@ -70,7 +70,7 @@ class WeightPlaceholder {
 	/**
 	 * Validate weight limits before saving a cost formula.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param string $sum Cost formula.
 	 * @return void
@@ -115,7 +115,7 @@ class WeightPlaceholder {
 	 * @param mixed  $weight Package weight. Anything non-numeric counts as zero.
 	 * @return string
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public function expand( string $sum, $weight ): string {
 		$weight = $this->normalize( $weight );
