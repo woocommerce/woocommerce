@@ -2521,6 +2521,42 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart validation removes an auto-apply coupon that is no longer valid.
+	 */
+	public function test_cart_validation_removes_invalid_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-goes-invalid',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-goes-invalid' ), 'precondition: the coupon is applied' );
+
+		// Expire it while it is on the cart, so check_cart_coupons() finds it invalid.
+		$coupon->set_date_expires( time() - DAY_IN_SECONDS );
+		$coupon->save();
+
+		WC()->cart->check_cart_coupons();
+
+		// Without the fix the guard refuses this removal, so the coupon is reported as removed
+		// while it stays on the cart.
+		$this->assertFalse( WC()->cart->has_discount( 'auto-goes-invalid' ), 'the invalid coupon should have been removed' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
 	 * @testdox Checkout validation removes an auto-apply coupon the customer is not entitled to.
 	 */
 	public function test_checkout_validation_removes_ineligible_auto_apply_coupon() {

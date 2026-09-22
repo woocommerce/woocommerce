@@ -829,7 +829,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			if ( ! $coupon->is_valid() ) {
 				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
-				$this->remove_coupon( $code );
+				$this->remove_coupon_for_validation( $code );
 			}
 		}
 	}
@@ -2013,18 +2013,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 
-					/*
-					 * Dropping a coupon the customer turns out not to be entitled to is validation,
-					 * not a removal they asked for, so it goes around the auto-apply guard -- which
-					 * would otherwise leave the coupon applied while the customer is told it was
-					 * removed. Auto-apply is held off for the removal so nothing re-applies it
-					 * before the rest of the check runs.
-					 */
-					$this->with_auto_apply_suspended(
-						function () use ( $code ) {
-							$this->remove_coupon_unconditionally( $code );
-						}
-					);
+					$this->remove_coupon_for_validation( $code );
 				}
 
 				$coupon_usage_limit = $coupon->get_usage_limit_per_user();
@@ -2367,6 +2356,26 @@ class WC_Cart extends WC_Legacy_Cart {
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
 
 		return true;
+	}
+
+	/**
+	 * Remove a coupon the cart has decided the customer cannot keep.
+	 *
+	 * Validation dropping a coupon is not a removal the customer asked for, so it goes around
+	 * the auto-apply guard. Without this the customer is told the coupon was removed while it
+	 * stays applied and keeps discounting the order. Auto-apply is held off for the removal so
+	 * nothing re-applies the coupon before the surrounding check finishes.
+	 *
+	 * @since 11.3.0
+	 * @param  string $coupon_code Code of the coupon to remove.
+	 * @return void
+	 */
+	private function remove_coupon_for_validation( $coupon_code ): void {
+		$this->with_auto_apply_suspended(
+			function () use ( $coupon_code ) {
+				$this->remove_coupon_unconditionally( $coupon_code );
+			}
+		);
 	}
 
 	/**

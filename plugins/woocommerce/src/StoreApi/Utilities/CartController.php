@@ -1088,7 +1088,13 @@ class CartController {
 	protected function validate_cart_coupon( \WC_Coupon $coupon ) {
 		if ( ! $coupon->is_valid() ) {
 			$cart = $this->get_cart_instance();
-			$cart->remove_coupon( $coupon->get_code() );
+
+			// Validation dropping a coupon is not a removal the customer asked for, so an
+			// auto-applied one has to go too rather than being left on a cart the response
+			// reports it as removed from.
+			if ( ! $cart->remove_auto_applied_coupon( $coupon->get_code() ) ) {
+				$cart->remove_coupon( $coupon->get_code() );
+			}
 			$cart->calculate_totals();
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
