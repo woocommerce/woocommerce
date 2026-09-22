@@ -287,6 +287,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			unset( $query_vars[ 'filter_' . str_replace( 'pa_', '', $slug ) ] );
 		}
 
+		// Product Collection tax queries contain saved block constraints; its active attribute filter is carried separately in filter_* query vars.
 		if ( empty( $query_vars['isProductCollection'] ) ) {
 			if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
 				unset(
