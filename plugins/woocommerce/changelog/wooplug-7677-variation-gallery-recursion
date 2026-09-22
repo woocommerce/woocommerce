@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent variation gallery rendering from recursively requesting variation data.
