@@ -188,6 +188,11 @@ class NonShippingCartTaxLocation {
 		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
 		 */
 		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+		if ( ! is_array( $local_pickup_methods ) ) {
+			return false;
+		}
+
+		$local_pickup_methods = array_filter( $local_pickup_methods, 'is_string' );
 
 		/**
 		 * Filters whether tax is based on the store address for local pickup.
