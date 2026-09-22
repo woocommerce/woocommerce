@@ -16,7 +16,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
+import { useProductTypeSelector } from '../../shared/stores/product-type-template-state';
 import type { BlockAttributes } from './types';
 import './style.scss';
 

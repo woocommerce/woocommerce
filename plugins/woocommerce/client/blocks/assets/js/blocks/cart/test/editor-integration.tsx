@@ -21,11 +21,11 @@ import '../index';
 import '../inner-blocks/index';
 import '../inner-blocks/cart-order-summary-coupon-form/index';
 import '../../product-new/index';
-import '../../../atomic/blocks/product-elements/sale-badge/index';
-import '../../../atomic/blocks/product-elements/image/index';
-import '../../../atomic/blocks/product-elements/price/index';
-import '../../../atomic/blocks/product-elements/button/index';
-import '../../../atomic/blocks/product-elements/title/index';
+import '../../../product-element-blocks/sale-badge/index';
+import '../../../product-element-blocks/image/index';
+import '../../../product-element-blocks/price/index';
+import '../../../product-element-blocks/button/index';
+import '../../../product-element-blocks/title/index';
 import '../../product-template/index.tsx';
 import '../../product-collection/index.tsx';
 

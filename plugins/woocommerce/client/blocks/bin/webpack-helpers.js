@@ -51,13 +51,13 @@ const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
-		'@woocommerce/atomic-blocks': path.resolve(
+		'@woocommerce/product-element-blocks': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }atomic/blocks`
+			`../assets/js/${ pathPart }product-element-blocks`
 		),
-		'@woocommerce/atomic-utils': path.resolve(
+		'@woocommerce/product-element-utils': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }atomic/utils`
+			`../assets/js/${ pathPart }product-element-blocks/utils`
 		),
 		'@woocommerce/base-components': path.resolve(
 			__dirname,

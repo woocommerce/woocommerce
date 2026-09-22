@@ -88,7 +88,7 @@ describe( 'registerProductBlockType', () => {
 		};
 		jest.doMock( '@wordpress/blocks', getBlocksMock );
 		jest.doMock( '@wordpress/data', getDataMock );
-		jest.dontMock( '@woocommerce/atomic-utils' );
+		jest.dontMock( '@woocommerce/product-element-utils' );
 	} );
 
 	it( 'registers only post-editor-enabled blocks with the Single Product ancestor', () => {
@@ -254,16 +254,16 @@ describe( 'product block registration call sites', () => {
 		jest.clearAllMocks();
 		jest.dontMock( '@wordpress/blocks' );
 		jest.dontMock( '@wordpress/data' );
-		jest.doMock( '@woocommerce/atomic-utils', () => ( {
+		jest.doMock( '@woocommerce/product-element-utils', () => ( {
 			registerProductBlockType: mockRegisterProductBlockTypeCallSite,
 		} ) );
 	} );
 
 	it( 'declares the post-editor availability of Product Price and Product Image Gallery', () => {
 		jest.isolateModules( () => {
-			jest.requireActual( '../../blocks/product-elements/price' );
+			jest.requireActual( '../../price' );
 			jest.requireActual(
-				'../../blocks/product-elements/product-image-gallery'
+				'../../product-image-gallery'
 			);
 		} );
 
@@ -286,17 +286,17 @@ describe( 'product block registration call sites', () => {
 		// The editor components load the block editor and the Product Query
 		// variations, which log to the console and aren't part of registration.
 		jest.doMock(
-			'../../blocks/product-elements/related-products/edit',
+			'../../related-products/edit',
 			() => () => null
 		);
 		jest.doMock(
-			'../../blocks/product-elements/related-products/save',
+			'../../related-products/save',
 			() => () => null
 		);
 
 		jest.isolateModules( () => {
 			jest.requireActual(
-				'../../blocks/product-elements/related-products'
+				'../../related-products'
 			);
 		} );
 

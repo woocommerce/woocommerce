@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/product-element-utils';
 import { Suspense } from '@wordpress/element';
 import { ProductResponseItem } from '@woocommerce/types';
 
@@ -11,10 +11,10 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { LayoutConfig } from '../types';
 
 /**
- * Maps a layout config into atomic components.
+ * Maps a layout config into product element components.
  *
  * @param {string}   blockName    Name of the parent block. Used to get extension children.
- * @param {Object}   product      Product object to pass to atomic components.
+ * @param {Object}   product      Product object to pass to product element components.
  * @param {Object[]} layoutConfig Object with component data.
  * @param {number}   componentId  Parent component ID needed for key generation.
  */

@@ -45,7 +45,7 @@ pnpm --filter=@woocommerce/block-library analyze-bundles              # Webpack 
 client/blocks/
 ├── assets/js/
 │   ├── blocks/              # ~56 block implementations (cart, checkout, product-*, filter-*)
-│   ├── atomic/              # Atomic/primitive blocks (product elements)
+│   ├── product-element-blocks/ # Reusable product element blocks and utilities
 │   ├── base/                # Shared components, context, hooks, stores
 │   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components

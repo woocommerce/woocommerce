@@ -34,14 +34,14 @@
 			"jquery"
 		],
 		"paths": {
-			"@woocommerce/atomic-blocks": [
-				"assets/js/base/atomic/blocks"
+			"@woocommerce/product-element-blocks": [
+				"assets/js/product-element-blocks"
 			],
-			"@woocommerce/atomic-blocks/*": [
-				"assets/js/base/atomic/blocks/*"
+			"@woocommerce/product-element-blocks/*": [
+				"assets/js/product-element-blocks/*"
 			],
-			"@woocommerce/atomic-utils": [
-				"assets/js/atomic/utils"
+			"@woocommerce/product-element-utils": [
+				"assets/js/product-element-blocks/utils"
 			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"

@@ -17,8 +17,8 @@ import '../inner-blocks/product-gallery-large-image';
 import '../inner-blocks/product-gallery-thumbnails';
 import '../../next-previous-buttons';
 import '../../single-product';
-import '../../../atomic/blocks/product-elements/image';
-import '../../../atomic/blocks/product-elements/sale-badge';
+import '../../../product-element-blocks/image';
+import '../../../product-element-blocks/sale-badge';
 
 // Setup MSW
 const handlers = [

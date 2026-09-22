@@ -5,7 +5,7 @@ import { Icon } from '@wordpress/components';
 import {
 	title,
 	description,
-} from '@woocommerce/atomic-blocks/product-elements/title/block.json';
+} from '@woocommerce/product-element-blocks/title/block.json';
 import { heading } from '@wordpress/icons';
 
 /**

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { registerProductBlockType } from '@woocommerce/atomic-utils';
+import { registerProductBlockType } from '@woocommerce/product-element-utils';
 import { isEmptyObject } from '@woocommerce/types';
 
 /**

@@ -85,9 +85,9 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/_
 │ The React components of the WooCommerce Blocks plugin.
 │
-├── assets/js/atomic
-│ The atomic components such as product title, product rating, product
-│ image, etc. These atomic components are used by the product blocks.
+├── assets/js/product-element-blocks
+│ Reusable blocks for individual product elements such as title, rating,
+│ and image, plus utilities shared by product layouts.
 │
 ├── assets/js/base
 │ Base contains components specific to the frontend of the store.

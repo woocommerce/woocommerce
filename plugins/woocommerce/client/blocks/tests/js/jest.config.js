@@ -56,8 +56,8 @@ module.exports = {
 		'@wordpress/core-data/build/(.*)$':
 			'<rootDir>/node_modules/@wordpress/core-data/build/$1',
 
-		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
-		'@woocommerce/atomic-utils': 'assets/js/atomic/utils',
+		'@woocommerce/product-element-blocks': 'assets/js/product-element-blocks',
+		'@woocommerce/product-element-utils': 'assets/js/product-element-blocks/utils',
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
 		'^@woocommerce/settings$': 'packages/public-api/settings',

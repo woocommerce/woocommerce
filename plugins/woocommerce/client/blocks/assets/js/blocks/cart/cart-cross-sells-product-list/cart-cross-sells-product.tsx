@@ -10,12 +10,12 @@ import { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { Block as ProductImage } from '../../../atomic/blocks/product-elements/image/block';
-import { Block as ProductName } from '../../../atomic/blocks/product-elements/title/block';
-import { Block as ProductRating } from '../../../atomic/blocks/product-elements/rating-stars/block';
-import { Block as ProductPrice } from '../../../atomic/blocks/product-elements/price/block';
-import { Block as ProductButton } from '../../../atomic/blocks/product-elements/button/block';
-import { ImageSizing } from '../../../atomic/blocks/product-elements/image/types';
+import { Block as ProductImage } from '../../../product-element-blocks/image/block';
+import { Block as ProductName } from '../../../product-element-blocks/title/block';
+import { Block as ProductRating } from '../../../product-element-blocks/rating-stars/block';
+import { Block as ProductPrice } from '../../../product-element-blocks/price/block';
+import { Block as ProductButton } from '../../../product-element-blocks/button/block';
+import { ImageSizing } from '../../../product-element-blocks/image/types';
 
 interface CrossSellsProductProps {
 	product: ProductResponseItem;

@@ -41,7 +41,7 @@ const entries = {
 	...editorStyleEntries,
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
-		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+		'./assets/js/product-element-blocks/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':

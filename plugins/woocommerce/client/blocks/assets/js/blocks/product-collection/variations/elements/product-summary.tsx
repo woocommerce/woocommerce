@@ -11,7 +11,7 @@ import { registerElementVariation } from './utils';
 import {
 	BLOCK_DESCRIPTION,
 	BLOCK_TITLE,
-} from '../../../../atomic/blocks/product-elements/summary/constants';
+} from '../../../../product-element-blocks/summary/constants';
 import blockJson from '../../block.json';
 
 export const CORE_NAME = 'core/post-excerpt';

@@ -33,7 +33,7 @@ As a rule of thumb, this is the relation between location in the source tree and
 
 | Location in the tree        | Class names used               | Can be styled by themes? |
 | --------------------------- | ------------------------------ | :----------------------: |
-| assets/js/atomic/blocks     | `.wc-block-components-`        |            ✓             |
+| assets/js/product-element-blocks | `.wc-block-components-`        |            ✓             |
 | assets/js/base/components   | `.wc-block-components-`        |            ✓             |
 | assets/js/blocks            | Frontend: `.wc-block-`         |            ✓             |
 | assets/js/blocks            | Editor: `.wc-block-editor-`    |            ✘             |
@@ -160,4 +160,3 @@ Notice in the worst case scenario we would have increased selector specificity b
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/coding-guidelines.md)
 
 <!-- /FEEDBACK -->
-

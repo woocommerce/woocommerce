@@ -1,12 +1,15 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * AtomicBlock class.
+ * Product element block without separate script or style assets.
  *
  * @internal
+ * @since 11.3.0
  */
-class AtomicBlock extends AbstractBlock {
+class ProductElementBlock extends AbstractBlock {
 	/**
 	 * Get the editor script data for this block type.
 	 *

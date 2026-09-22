@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, mediaAndText } from '@wordpress/icons';
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/product-element-utils';
 import { getSetting } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
