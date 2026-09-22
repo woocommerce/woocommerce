@@ -25,5 +25,3 @@ test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.
 		} );
 	}
 } );
-
-// Temporary: forces the core e2e jobs to run so CI exercises the CTRF upload. Revert before merge.
