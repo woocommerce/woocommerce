@@ -928,6 +928,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				case 'individual_use':
 				case 'free_shipping':
 				case 'exclude_sale_items':
+				case 'auto_apply':
 					if ( ! is_bool( $coupon[ $key ] ) ) {
 						wc_doing_it_wrong( $key, $key . ' should be true or false instead of yes or no.', '3.0' );
 						$coupon[ $key ] = wc_string_to_bool( $value );

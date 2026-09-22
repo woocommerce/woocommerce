@@ -2436,7 +2436,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return void
 	 */
 	public function auto_apply_coupons(): void {
-		if ( $this->is_auto_applying_coupons || $this->is_empty() ) {
+		if ( $this->is_auto_applying_coupons || $this->is_empty() || ! wc_coupons_enabled() ) {
 			return;
 		}
 

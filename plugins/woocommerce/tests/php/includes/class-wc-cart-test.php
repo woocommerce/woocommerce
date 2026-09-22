@@ -2458,6 +2458,66 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A virtual coupon declaring auto_apply as a yes/no string is read as a boolean.
+	 */
+	public function test_virtual_coupon_auto_apply_string_is_converted_to_boolean() {
+		// The conversion deliberately warns, the same way it does for the other boolean props.
+		$this->setExpectedIncorrectUsage( 'auto_apply' );
+
+		$filter = function () {
+			return array(
+				'discount_type' => 'fixed_cart',
+				'amount'        => '5',
+				// The legacy yes/no form third parties use. Without conversion, (bool) 'no' is
+				// true and the coupon is treated as auto-applied: no remove link, and removal
+				// refused on the cart and over the Store API.
+				'auto_apply'    => 'no',
+			);
+		};
+		add_filter( 'woocommerce_get_shop_coupon_data', $filter );
+
+		try {
+			$coupon = new WC_Coupon( 'virtual-not-auto' );
+			$this->assertFalse( $coupon->get_auto_apply(), "'no' should read as false" );
+		} finally {
+			remove_filter( 'woocommerce_get_shop_coupon_data', $filter, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Auto-apply does nothing while coupons are switched off store-wide.
+	 */
+	public function test_auto_apply_is_skipped_when_coupons_are_disabled() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$default = get_option( 'woocommerce_enable_coupons', 'yes' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-while-disabled',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+
+		try {
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->cart->calculate_totals();
+
+			$this->assertFalse( WC()->cart->has_discount( 'auto-while-disabled' ), 'nothing should auto-apply while coupons are disabled' );
+		} finally {
+			update_option( 'woocommerce_enable_coupons', $default );
+			WC()->cart->empty_cart();
+			$product->delete( true );
+			$coupon->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
 	 */
 	public function test_mini_cart_template_renders_selected_any_values_once(): void {
