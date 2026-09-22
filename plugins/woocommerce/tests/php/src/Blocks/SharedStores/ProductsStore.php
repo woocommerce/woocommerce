@@ -2767,21 +2767,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Every path a third party can seed in the `woocommerce` state or the
-	 * element's context, crossed with the eight shape classes: one entry
-	 * per row of the envelope's seeded-paths tables, keyed by that row's
-	 * own path text, plus one further entry per extra source for the
-	 * resolved selection's entry, attribute and value, each naming its
-	 * source in its key.
-	 *
-	 * Each entry carries: `seed`, a callable that places a value at the
-	 * entry's path within an otherwise well-formed state and context and
-	 * returns the resulting envelope; `expects`, the shape classes for
-	 * which the path is well formed; `members`, the outcome for a shape
-	 * outside `expects` as `member name => assertion`; `inside`, keyed by
-	 * shape class, the outcome for a shape inside `expects`; and
-	 * `control`, a well-formed value together with the assertion its
-	 * participation makes true.
+	 * Every path a third party can seed in the `woocommerce` state or
+	 * context, crossed with the eight shape classes, keyed by each row's
+	 * path text from the envelope's seeded-paths tables. Each entry
+	 * carries `seed`, `expects`, `outside`, `inside`, `control` and an
+	 * optional per-shape `seed_values` override.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -2827,7 +2817,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$this->sweep_entries_product_variations( $matching_state, $matched ),
 			$this->sweep_entries_attributes_and_terms( $matching_state, $matched ),
 			$this->sweep_entries_cart( $cart_state, $cart_context, $matching_state, $matched ),
-			$this->sweep_entries_resolved_selection( $matching_state )
+			$this->sweep_entries_resolved_selection( $this->resolved_selection_state() )
 		);
 	}
 
@@ -3109,6 +3099,54 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * matching_product_state(), with a third variation summary whose
+	 * `colour` attribute accepts any value, and a variation-typed cart
+	 * line carrying the base product's own id and one `colour` entry —
+	 * so a resolved selection reaches both the summary match and the
+	 * cart line's own attribute match.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function resolved_selection_state(): array {
+		$state = $this->matching_product_state();
+
+		$state['products'][5001]['variations'][] = array(
+			'id'         => 6003,
+			'attributes' => array(
+				array(
+					'name'  => 'colour',
+					'value' => null,
+				),
+			),
+		);
+		$state['productVariations'][6003]        = array(
+			'id'     => 6003,
+			'parent' => 5001,
+		);
+
+		array_splice(
+			$state['cart']['items'],
+			2,
+			0,
+			array(
+				array(
+					'key'       => 'line-base-as-variation',
+					'id'        => 5001,
+					'type'      => 'variation',
+					'variation' => array(
+						array(
+							'attribute' => 'colour',
+							'value'     => 'Scarlet',
+						),
+					),
+				),
+			)
+		);
+
+		return $state;
+	}
+
+	/**
 	 * Place $value at $path inside $root, creating any intermediate array
 	 * the path needs.
 	 *
@@ -3129,13 +3167,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a sweep entry's `seed` callable: copies the given well-formed
-	 * state and context, places a value at one path within whichever plane
-	 * names it, sets up the state and context through
-	 * push_woocommerce_context() and the reflection registration
-	 * get_product_scope() itself uses, and returns the envelope's own
-	 * closure, not yet invoked, so a caller can resolve it under its own
-	 * error handler.
+	 * Build a sweep entry's `seed` callable: given a value, it places that
+	 * value at one path within an otherwise well-formed state and context
+	 * and returns the envelope getter, unresolved, so a caller can resolve
+	 * it under its own error handler.
 	 *
 	 * @param array  $state   The well-formed `woocommerce` state to copy.
 	 * @param array  $context The well-formed context to copy.
@@ -4036,8 +4071,31 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	private function sweep_entries_product_variations( array $state, array $matched ): array {
 		$entries = array();
 
+		// A line that resolution falls back to only once productVariation
+		// itself fails to resolve, so a malformed map or entry still sends
+		// a cart line through the attribute-matching reads below.
+		$state_with_fallback_line = $state;
+		array_splice(
+			$state_with_fallback_line['cart']['items'],
+			2,
+			0,
+			array(
+				array(
+					'key'       => 'line-base-as-variation',
+					'id'        => 5001,
+					'type'      => 'variation',
+					'variation' => array(
+						array(
+							'attribute' => 'colour',
+							'value'     => 'Scarlet',
+						),
+					),
+				),
+			)
+		);
+
 		$entries['productVariations (the map)'] = array(
-			'seed'    => $this->seed_at( $state, $matched, 'state', array( 'productVariations' ) ),
+			'seed'    => $this->seed_at( $state_with_fallback_line, $matched, 'state', array( 'productVariations' ) ),
 			'expects' => array( 'list', 'map' ),
 			'outside' => array(
 				'default' => array(
@@ -4385,17 +4443,17 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		);
 
 		$entries['cart.items[n].id'] = array(
-			'seed'    => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart', 'items', 0, 'id' ) ),
-			'expects' => array( 'int', 'string' ),
-			'outside' => array(
-				'default'  => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
-				'override' => array( 'float' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
-			),
-			'inside'  => array(
+			'seed'        => $this->seed_at( $cart_state, $cart_context, 'state', array( 'cart', 'items', 0, 'id' ) ),
+			'expects'     => array( 'int', 'string' ),
+			'outside'     => array( 'default' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ) ),
+			'inside'      => array(
 				'int'    => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
 				'string' => array( 'cartItem' => $this->entry_with_key( 'line-fallback' ) ),
 			),
-			'control' => array(
+			// line-target's own id plus 0.5: the only float that reaches the
+			// line's id comparison at all: shape_classes()'s 1.5 never does.
+			'seed_values' => array( 'float' => 6002.5 ),
+			'control'     => array(
 				'value'  => 6002,
 				'assert' => function ( array $envelope ): void {
 					$this->assertSame( 'line-target', $envelope['cartItem']()['key'] );
@@ -4555,18 +4613,18 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The six sweep entries duplicating the resolved selection's own
-	 * entry, attribute and value across its three sources — the record's
-	 * draftCartItem.variation, the context's variation, and the
-	 * template's — plus the context-sourced base of each, nine in all.
+	 * The resolved-selection sweep entries: the entry, its attribute and
+	 * its value, once per source — the record's draftCartItem.variation,
+	 * the context's variation and the template's — plus
+	 * context.cartItemKey. Ten entries in all.
 	 *
-	 * @param array $matching_state The matching-product state.
+	 * @param array $state The resolved-selection state.
 	 * @return array<string, array<string, mixed>>
 	 */
-	private function sweep_entries_resolved_selection( array $matching_state ): array {
+	private function sweep_entries_resolved_selection( array $state ): array {
 		$sources = array(
 			'context'  => array(
-				'state'   => $matching_state,
+				'state'   => $state,
 				'context' => array(
 					'productId' => 5001,
 					'variation' => null,
@@ -4576,7 +4634,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			),
 			'record'   => array(
 				'state'   => array_replace_recursive(
-					$matching_state,
+					$state,
 					array(
 						'productScopes' => array(
 							'_default' => array(
@@ -4594,7 +4652,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			),
 			'template' => array(
 				'state'   => array_replace_recursive(
-					$matching_state,
+					$state,
 					array(
 						'template' => array(
 							'productId' => 5001,
@@ -4697,11 +4755,13 @@ class ProductsStore extends \WC_Unit_Test_Case {
 						'cartItem'         => $this->entry_with_key( 'line-simple' ),
 					),
 				),
+				// A string value satisfies the "Any" colour attribute the third
+				// summary (6003) carries, which no other shape does.
 				'inside'  => array(
 					'string' => array(
-						'productVariation' => $this->absent(),
-						'product'          => $this->entry_with_id( 5001 ),
-						'cartItem'         => $this->entry_with_key( 'line-simple' ),
+						'productVariation' => $this->entry_with_id( 6003 ),
+						'product'          => $this->entry_with_id( 6003 ),
+						'cartItem'         => $this->absent(),
 					),
 				),
 				'control' => array(
@@ -4714,7 +4774,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			);
 		}
 
-		$cart_only_state        = $this->cart_matching_state();
+		$cart_only_state = $this->cart_matching_state();
+		// A cart line ahead of the well-formed ones, so the by-key search
+		// has to pass over it regardless of which shape cartItemKey carries.
+		array_unshift( $cart_only_state['cart']['items'], (object) array( 'not' => 'an array' ) );
 		$cart_only_context      = array( 'productId' => 6002 );
 		$entries['cartItemKey'] = array(
 			'seed'    => $this->seed_at( $cart_only_state, $cart_only_context, 'context', array( 'cartItemKey' ) ),
@@ -4789,7 +4852,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	 */
 	public function test_sweep_cell_resolves_as_required( string $path, string $shape_key ): void {
 		$entry = $this->sweep_entries()[ $path ];
-		$value = $this->shape_classes()[ $shape_key ];
+		$value = $entry['seed_values'][ $shape_key ] ?? $this->shape_classes()[ $shape_key ];
 
 		$members = in_array( $shape_key, $entry['expects'], true )
 			? $entry['inside'][ $shape_key ]
