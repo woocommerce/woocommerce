@@ -214,6 +214,17 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $this->add_attribute_taxonomy_clauses( $args, $chosen_attributes );
 		}
 
+		return $this->add_attribute_lookup_table_clauses( $args, $chosen_attributes );
+	}
+
+	/**
+	 * Add attribute clauses using the product attributes lookup table.
+	 *
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes Chosen attributes.
+	 * @return array
+	 */
+	private function add_attribute_lookup_table_clauses( array $args, array $chosen_attributes ): array {
 		global $wpdb;
 
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
