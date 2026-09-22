@@ -91,6 +91,46 @@ class NonShippingCartTaxLocation {
 	}
 
 	/**
+	 * Identify Store API cart and checkout requests before their callbacks run.
+	 *
+	 * @since 11.2.0
+	 * @deprecated Use handle_rest_request_before_callbacks instead.
+	 *
+	 * @param mixed            $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
+	 * @param \WP_REST_Server  $server  Server instance.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed The response to dispatch.
+	 */
+	public function handle_rest_pre_dispatch( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+		$dispatch_id         = spl_object_id( $request );
+		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
+
+		$this->dispatch_contexts[ $dispatch_id ] = $is_cart_or_checkout;
+		$this->dispatch_stack[]                  = $dispatch_id;
+
+		return $result;
+	}
+
+	/**
+	 * Clear the Store API request state after its response is dispatched.
+	 *
+	 * @since 11.2.0
+	 * @deprecated Use handle_rest_request_after_callbacks instead.
+	 *
+	 * @param mixed            $response Response generated for the request.
+	 * @param \WP_REST_Server  $server  Server instance.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed The dispatched response.
+	 */
+	public function handle_rest_post_dispatch( $response, \WP_REST_Server $server, \WP_REST_Request $request ) {
+		$this->clear_dispatch_context( $request );
+
+		return $response;
+	}
+
+	/**
 	 * Remove a dispatch's cart/checkout context from the stack.
 	 *
 	 * @since 11.2.0
