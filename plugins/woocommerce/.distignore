@@ -52,4 +52,3 @@ webpack.config.js
 phpstan.neon
 phpstan-baseline.neon
 /php-stubs/
-/bin/api-builder/

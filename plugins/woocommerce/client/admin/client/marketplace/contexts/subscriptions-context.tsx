@@ -7,11 +7,16 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SubscriptionsContextType, NoticeStatus } from './types';
+import {
+	SubscriptionsContextType,
+	NoticeStatus,
+	REFRESH_SUBSCRIPTIONS_NOTICE_ID,
+} from './types';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
 	addNotice,
 	fetchSubscriptions,
+	getRefreshErrorMessage,
 	refreshSubscriptions as fetchSubscriptionsFromWooCom,
 } from '../utils/functions';
 
@@ -81,14 +86,14 @@ export function SubscriptionsContextProvider( props: {
 		if ( installKey ) {
 			refreshSubscriptions( true ).catch( ( error ) => {
 				addNotice(
-					'woocommerce-marketplace-refresh-subscriptions',
+					REFRESH_SUBSCRIPTIONS_NOTICE_ID,
 					sprintf(
 						// translators: %s is the error message.
 						__(
 							'Error refreshing subscriptions: %s',
 							'woocommerce'
 						),
-						error.message
+						getRefreshErrorMessage( error )
 					),
 					NoticeStatus.Error
 				);

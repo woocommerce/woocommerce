@@ -23,5 +23,5 @@
 		},
 		"typography": true
 	},
-	"usesContext": [ "termId", "termTaxonomy" ]
+	"usesContext": [ "termId", "termTaxonomy", "taxonomy" ]
 }

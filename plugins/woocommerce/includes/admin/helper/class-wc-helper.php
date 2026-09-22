@@ -28,7 +28,36 @@ class WC_Helper {
 	 */
 	public static $log;
 
+	/**
+	 * Per-request cache of get_local_woo_plugins(), keyed by plugin file.
+	 *
+	 * @var array|null
+	 */
+	private static $local_woo_plugins_cache = null;
+
+	/**
+	 * Per-request cache of get_local_woo_themes(), keyed by stylesheet path.
+	 *
+	 * @var array|null
+	 */
+	private static $local_woo_themes_cache = null;
+
 	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
+
+	/**
+	 * Transient holding the last failed Helper API subscriptions response, so the
+	 * failure can be surfaced to the merchant instead of rendering as an empty
+	 * subscription list.
+	 */
+	private const CACHE_KEY_API_ERROR = '_woocommerce_helper_subscriptions_api_error';
+
+	/**
+	 * Status codes that get_message_for_response_code() has purpose-written copy
+	 * for. Only these are worth re-deriving on read; for anything else the
+	 * message recorded at failure time is more specific than the generic
+	 * "HTTP status code %d" fallback. Keep in sync with that method.
+	 */
+	private const RESPONSE_CODES_WITH_SPECIFIC_MESSAGES = array( 403, 429 );
 
 	/**
 	 * Get an absolute path to the requested helper view.
@@ -79,6 +108,125 @@ class WC_Helper {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Record the last failed Helper API subscriptions response.
+	 *
+	 * The message is stored alongside the code because it is often more specific
+	 * than anything we can rebuild from the status alone — a 401 carries
+	 * reconnect guidance, a 422 explains an unparseable body. Where we do have
+	 * purpose-written copy for a status, get_api_error() rebuilds it on read so
+	 * it lands in the viewer's locale instead of the recording request's.
+	 *
+	 * A 429 is held for the whole backoff window, otherwise the notice would
+	 * disappear while requests are still being suppressed and the screen would
+	 * silently revert to looking like an empty account.
+	 *
+	 * @param int    $code    HTTP status code, or 0 for a transport-level failure.
+	 * @param string $message Fallback message for failures with no HTTP status.
+	 * @return void
+	 */
+	private static function record_api_error( int $code, string $message ): void {
+		if ( $code < 100 ) {
+			// get_api_error() replaces this with merchant-facing guidance, and the
+			// catch in get_subscriptions() only logs failures from 404 up, so
+			// without this the transport detail would be lost entirely.
+			self::log( 'Could not reach the WooCommerce.com API: ' . $message, 'error' );
+		}
+
+		$ttl = 15 * MINUTE_IN_SECONDS;
+
+		if ( 429 === $code ) {
+			$retry_after = WC_Helper_API_Backoff::get_retry_after( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+
+			if ( null !== $retry_after ) {
+				$ttl = $retry_after;
+			}
+		}
+
+		set_transient(
+			self::CACHE_KEY_API_ERROR,
+			array(
+				'code'    => $code,
+				'message' => $message,
+			),
+			$ttl
+		);
+	}
+
+	/**
+	 * The last failed Helper API subscriptions response, if one is still current.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array{code:int, message:string, retry_after:int|null}|null Null when the last fetch succeeded.
+	 */
+	public static function get_api_error(): ?array {
+		$error = get_transient( self::CACHE_KEY_API_ERROR );
+
+		if ( ! is_array( $error ) || ! isset( $error['code'] ) ) {
+			return null;
+		}
+
+		$code           = (int) $error['code'];
+		$stored_message = (string) ( $error['message'] ?? '' );
+
+		// A rate limit is the one failure with a known end, and the generic copy
+		// ("a few minutes") understates a window that can run to hours. Read the
+		// backoff live so the figure counts down across page loads.
+		$retry_after = 429 === $code
+			? WC_Helper_API_Backoff::get_retry_after( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS )
+			: null;
+
+		if ( null !== $retry_after ) {
+			$now = time();
+
+			$message = sprintf(
+				/* translators: %s: localized duration until the request limit resets, e.g. "5 minutes" or "3 hours". */
+				__( 'You have exceeded the request limit. Please try again in %s.', 'woocommerce' ),
+				human_time_diff( $now, $now + $retry_after )
+			);
+		} elseif ( in_array( $code, self::RESPONSE_CODES_WITH_SPECIFIC_MESSAGES, true ) ) {
+			// We have copy written for this status, so rebuilding it costs nothing
+			// and gains the viewer's locale.
+			$message = self::get_message_for_response_code( $code );
+		} elseif ( $code < 100 ) {
+			// No HTTP status means the request never completed, so the recorded
+			// message is raw transport text ("cURL error 28: Operation timed
+			// out...") — untranslated developer detail that tells a merchant
+			// nothing. record_api_error() logs the specifics instead. The copy
+			// points at the store's own connectivity because that is the
+			// overwhelmingly likelier cause of a failed connection.
+			$message = __( 'Your store could not connect to WooCommerce.com. Please try again after a few minutes. If the issue persists, check whether your server can make outgoing requests.', 'woocommerce' );
+		} elseif ( '' !== $stored_message ) {
+			// Otherwise the recorded message wins. Rebuilding from the status
+			// would replace real guidance — the reconnect instructions on a 401,
+			// the invalid-response explanation on a 422 — with a bare
+			// "HTTP status code %d".
+			$message = $stored_message;
+		} else {
+			$message = self::get_message_for_response_code( $code );
+		}
+
+		if ( '' === $message ) {
+			return null;
+		}
+
+		return array(
+			'code'        => $code,
+			'message'     => $message,
+			'retry_after' => $retry_after,
+		);
+	}
+
+	/**
+	 * Clear the recorded Helper API subscriptions failure.
+	 *
+	 * @return void
+	 */
+	private static function clear_api_error(): void {
+		delete_transient( self::CACHE_KEY_API_ERROR );
 	}
 
 	/**
@@ -946,6 +1094,7 @@ class WC_Helper {
 
 		// Ignore all previously dismissed connected notices.
 		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECT_NOTICE, '', true );
+		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, '', true );
 
 		$connect_url = add_query_arg(
 			array(
@@ -1532,7 +1681,7 @@ class WC_Helper {
 	/**
 	 * Get subscription state of a given product ID.
 	 *
-	 * @since TBD
+	 * @since 9.2.0
 	 *
 	 * @param int $product_id The product id.
 	 *
@@ -1632,9 +1781,20 @@ class WC_Helper {
 	/**
 	 * Obtain a list of data about locally installed Woo extensions.
 	 *
+	 * Scanning every installed plugin is expensive, so the result is cached for the rest of the
+	 * request. Pass false after installing or removing a plugin to rescan and refresh the cache.
+	 *
+	 * @since 11.2.0 Added the `$use_cache` parameter.
+	 *
+	 * @param bool $use_cache Whether to return the cached list when one exists.
+	 *
 	 * @return array
 	 */
-	public static function get_local_woo_plugins() {
+	public static function get_local_woo_plugins( bool $use_cache = true ) {
+		if ( $use_cache && null !== self::$local_woo_plugins_cache ) {
+			return self::$local_woo_plugins_cache;
+		}
+
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -1691,15 +1851,28 @@ class WC_Helper {
 			$woo_plugins[ $filename ] = $data;
 		}
 
+		self::$local_woo_plugins_cache = $woo_plugins;
+
 		return $woo_plugins;
 	}
 
 	/**
 	 * Get locally installed Woo themes.
 	 *
+	 * Scanning every installed theme is expensive, so the result is cached for the rest of the
+	 * request. Pass false after installing or removing a theme to rescan and refresh the cache.
+	 *
+	 * @since 11.2.0 Added the `$use_cache` parameter.
+	 *
+	 * @param bool $use_cache Whether to return the cached list when one exists.
+	 *
 	 * @return array
 	 */
-	public static function get_local_woo_themes() {
+	public static function get_local_woo_themes( bool $use_cache = true ) {
+		if ( $use_cache && null !== self::$local_woo_themes_cache ) {
+			return self::$local_woo_themes_cache;
+		}
+
 		$themes     = wp_get_themes();
 		$woo_themes = array();
 
@@ -1742,6 +1915,8 @@ class WC_Helper {
 
 			$woo_themes[ $data['_filename'] ] = $data;
 		}
+
+		self::$local_woo_themes_cache = $woo_themes;
 
 		return $woo_themes;
 	}
@@ -2022,8 +2197,14 @@ class WC_Helper {
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
+			self::clear_api_error();
 			return $data;
 		} catch ( Exception $e ) {
+			// Record every failure, including those below 404, so the screen can
+			// explain itself instead of rendering an empty subscription list. This
+			// deliberately does not rethrow: callers rely on an empty array.
+			self::record_api_error( (int) $e->getCode(), $e->getMessage() );
+
 			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {
@@ -2281,22 +2462,30 @@ class WC_Helper {
 
 		if ( empty( $installed_product ) ) {
 			return array(
-				'installed' => false,
-				'active'    => false,
-				'version'   => null,
-				'type'      => null,
-				'slug'      => null,
-				'path'      => null,
+				'installed'              => false,
+				'active'                 => false,
+				'version'                => null,
+				'type'                   => null,
+				'slug'                   => null,
+				'path'                   => null,
+				'auto_update'            => false,
+				'auto_update_manageable' => false,
+				'updates_from_wccom'     => false,
 			);
 		}
 
 		$local_data = array(
-			'installed' => true,
-			'active'    => false,
-			'version'   => $installed_product['Version'],
-			'type'      => $installed_product['_type'],
-			'slug'      => null,
-			'path'      => $installed_product['_filename'],
+			'installed'              => true,
+			'active'                 => false,
+			'version'                => $installed_product['Version'],
+			'type'                   => $installed_product['_type'],
+			'slug'                   => null,
+			'path'                   => $installed_product['_filename'],
+			'auto_update'            => false,
+			'auto_update_manageable' => false,
+			// The updater only handles products carrying a Woo header. Without one, this copy
+			// updates from WordPress.org, and nothing WooCommerce.com-related can hold it back.
+			'updates_from_wccom'     => self::has_woo_header( $installed_product['_type'], $installed_product['_filename'] ),
 		);
 
 		if ( 'plugin' === $installed_product['_type'] ) {
@@ -2306,14 +2495,247 @@ class WC_Helper {
 			} elseif ( is_multisite() && is_plugin_active_for_network( $installed_product['_filename'] ) ) {
 				$local_data['active'] = true;
 			}
+
+			$local_data = array_merge( $local_data, self::get_plugin_auto_update_data( $installed_product['_filename'] ) );
 		} elseif ( 'theme' === $installed_product['_type'] ) {
 			$local_data['slug'] = $installed_product['_stylesheet'];
 			if ( in_array( $installed_product['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
 				$local_data['active'] = true;
 			}
+
+			$local_data = array_merge( $local_data, self::get_theme_auto_update_data( $installed_product['_stylesheet'] ) );
 		}
 
 		return $local_data;
+	}
+
+	/**
+	 * Whether an installed plugin or theme carries a Woo header, so the updater handles it.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $type     'plugin' or 'theme'.
+	 * @param string $filename Plugin file, or a theme's stylesheet followed by /style.css.
+	 *
+	 * @return bool
+	 */
+	private static function has_woo_header( string $type, string $filename ): bool {
+		$woo_products = 'theme' === $type ? self::get_local_woo_themes() : self::get_local_woo_plugins();
+
+		return isset( $woo_products[ $filename ] );
+	}
+
+	/**
+	 * Turn auto-updates on or off for the plugin or theme backing a subscription.
+	 *
+	 * Writes the same auto_update_plugins / auto_update_themes site options WordPress core's
+	 * Plugins and Themes screens write, so the change is identical to making it there.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $product_key Subscription product key.
+	 * @param bool   $enabled     Whether auto-updates should be on.
+	 *
+	 * @throws Exception If the subscription, or the product backing it, can't be acted on.
+	 *
+	 * @return void
+	 */
+	public static function set_subscription_auto_update( string $product_key, bool $enabled ): void {
+		$subscription = self::get_subscription( $product_key );
+		if ( ! is_array( $subscription ) ) {
+			throw new Exception( esc_html__( 'There is no subscription for this product.', 'woocommerce' ) );
+		}
+
+		// Resolved the same way the row itself is, by zip_slug against every installed product.
+		// _get_local_from_product_id() only sees products carrying a Woo header, which misses the
+		// WooCommerce.com products distributed through WordPress.org.
+		$local = self::get_subscription_local_data( $subscription );
+		if ( empty( $local['installed'] ) ) {
+			throw new Exception( esc_html__( 'This subscription has no installed product to update.', 'woocommerce' ) );
+		}
+
+		$is_theme = 'theme' === $local['type'];
+
+		// auto_update_themes is keyed by stylesheet, auto_update_plugins by plugin file.
+		$item_key = $is_theme ? (string) $local['slug'] : (string) $local['path'];
+		if ( '' === $item_key ) {
+			throw new Exception( esc_html__( 'This subscription has no installed product to update.', 'woocommerce' ) );
+		}
+
+		$auto_update = $is_theme
+			? self::get_theme_auto_update_data( $item_key )
+			: self::get_plugin_auto_update_data( $item_key );
+
+		if ( ! $auto_update['auto_update_manageable'] ) {
+			throw new Exception( esc_html__( "Auto-updates for this product can't be changed from here.", 'woocommerce' ) );
+		}
+
+		$all_items = $is_theme ? self::get_all_theme_keys() : self::get_all_plugin_keys();
+		if ( ! in_array( $item_key, $all_items, true ) ) {
+			throw new Exception( esc_html__( 'The product for this subscription is no longer installed.', 'woocommerce' ) );
+		}
+
+		$option       = $is_theme ? 'auto_update_themes' : 'auto_update_plugins';
+		$auto_updates = (array) get_site_option( $option, array() );
+
+		if ( $enabled ) {
+			$auto_updates[] = $item_key;
+			$auto_updates   = array_unique( $auto_updates );
+		} else {
+			$auto_updates = array_diff( $auto_updates, array( $item_key ) );
+		}
+
+		// Drop entries for products deleted since the option was last written, as core does.
+		$auto_updates = array_intersect( $auto_updates, $all_items );
+
+		update_site_option( $option, array_values( $auto_updates ) );
+	}
+
+	/**
+	 * Keys of every installed plugin, as auto_update_plugins stores them.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return string[]
+	 */
+	private static function get_all_plugin_keys(): array {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		// Core's own filter, documented in wp-admin/includes/class-wp-plugins-list-table.php; applied here so this
+		// path sees the same plugin list core's auto-update toggle does.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Not a WooCommerce hook.
+		return array_keys( (array) apply_filters( 'all_plugins', get_plugins() ) );
+	}
+
+	/**
+	 * Stylesheets of every installed theme, as auto_update_themes stores them.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return string[]
+	 */
+	private static function get_all_theme_keys(): array {
+		return array_keys( wp_get_themes() );
+	}
+
+	/**
+	 * Auto-update state of an installed plugin, following the same rules as WordPress core's
+	 * Plugins screen so the two screens never describe the same plugin differently.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 *
+	 * @return array{auto_update: bool, auto_update_manageable: bool}
+	 */
+	public static function get_plugin_auto_update_data( string $plugin_file ): array {
+		return self::get_auto_update_data( 'plugin', $plugin_file );
+	}
+
+	/**
+	 * Auto-update state of an installed theme, following the same rules as WordPress core's
+	 * Themes screen.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $stylesheet Directory name of the theme.
+	 *
+	 * @return array{auto_update: bool, auto_update_manageable: bool}
+	 */
+	public static function get_theme_auto_update_data( string $stylesheet ): array {
+		return self::get_auto_update_data( 'theme', $stylesheet );
+	}
+
+	/**
+	 * Shared auto-update state for a plugin or a theme.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param 'plugin'|'theme' $type      The product type.
+	 * @param string           $item_key Plugin file, or theme stylesheet.
+	 *
+	 * @return array{auto_update: bool, auto_update_manageable: bool}
+	 */
+	private static function get_auto_update_data( string $type, string $item_key ): array {
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+
+		$forced = wp_is_auto_update_forced_for_item( $type, null, self::get_auto_update_filter_payload( $type, $item_key ) );
+		if ( ! is_null( $forced ) ) {
+			return array(
+				'auto_update'            => (bool) $forced,
+				'auto_update_manageable' => false,
+			);
+		}
+
+		$option     = 'theme' === $type ? 'auto_update_themes' : 'auto_update_plugins';
+		$capability = 'theme' === $type ? 'update_themes' : 'update_plugins';
+
+		return array(
+			// The product's own setting. AUTOMATIC_UPDATER_DISABLED and the auto-update-enabled
+			// filters switch the feature off for the whole site without changing it, which the
+			// screen deliberately does not report per row.
+			'auto_update'            => in_array( $item_key, (array) get_site_option( $option, array() ), true ),
+			// These options are network options, and core only offers the toggle from network admin
+			// on multisite. My Subscriptions is a site-level screen, so it reads only there.
+			'auto_update_manageable' => wp_is_auto_update_enabled_for_type( $type )
+				&& ! is_multisite()
+				&& current_user_can( $capability ),
+		);
+	}
+
+	/**
+	 * Payload for the auto_update_plugin / auto_update_theme filters, matching what core's list
+	 * tables pass so third-party callbacks see the same shape on both screens.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param 'plugin'|'theme' $type      The product type.
+	 * @param string           $item_key Plugin file, or theme stylesheet.
+	 *
+	 * @return object
+	 */
+	private static function get_auto_update_filter_payload( string $type, string $item_key ) {
+		if ( 'theme' === $type ) {
+			// Core stores theme entries as arrays; extensions that add their own sometimes use objects.
+			$updates     = get_site_transient( 'update_themes' );
+			$update_item = $updates->response[ $item_key ] ?? $updates->no_update[ $item_key ] ?? null;
+			if ( ! empty( $update_item ) ) {
+				return (object) $update_item;
+			}
+
+			// Same fallback as wp_prepare_themes_for_js() when the theme is not in the transient.
+			$theme = wp_get_theme( $item_key );
+
+			return (object) array(
+				'theme'        => $item_key,
+				'new_version'  => $theme->get( 'Version' ),
+				'url'          => '',
+				'package'      => '',
+				'requires'     => $theme->get( 'RequiresWP' ),
+				'requires_php' => $theme->get( 'RequiresPHP' ),
+			);
+		}
+
+		$defaults = array(
+			'id'            => $item_key,
+			'slug'          => '',
+			'plugin'        => $item_key,
+			'new_version'   => '',
+			'url'           => '',
+			'package'       => '',
+			'icons'         => array(),
+			'banners'       => array(),
+			'banners_rtl'   => array(),
+			'tested'        => '',
+			'requires_php'  => '',
+			'compatibility' => new stdClass(),
+		);
+
+		$updates     = get_site_transient( 'update_plugins' );
+		$update_item = $updates->response[ $item_key ] ?? $updates->no_update[ $item_key ] ?? null;
+		$plugin_data = is_object( $update_item ) ? (array) $update_item : array();
+
+		return (object) wp_parse_args( $plugin_data, $defaults );
 	}
 
 	/**
@@ -2328,7 +2750,8 @@ class WC_Helper {
 	 * @return void
 	 */
 	public static function activated_plugin( $filename ) {
-		$plugins = self::get_local_woo_plugins();
+		// The plugin may have been installed earlier in this request, after the list was cached.
+		$plugins = self::get_local_woo_plugins( false );
 
 		// Not a local woo plugin.
 		if ( empty( $plugins[ $filename ] ) ) {
@@ -2401,7 +2824,7 @@ class WC_Helper {
 		}
 
 		wp_clean_themes_cache( false );
-		$themes = self::get_local_woo_themes();
+		$themes = self::get_local_woo_themes( false );
 
 		$themes = array_filter(
 			$themes,
@@ -2631,6 +3054,19 @@ class WC_Helper {
 	 */
 	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+	}
+
+	/**
+	 * Drop the per-request caches of get_local_woo_plugins() and get_local_woo_themes(),
+	 * so the next call rescans the installed products.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public static function flush_local_woo_products_cache(): void {
+		self::$local_woo_plugins_cache = null;
+		self::$local_woo_themes_cache  = null;
 	}
 
 	/**

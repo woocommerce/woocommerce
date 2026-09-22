@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -15,7 +16,8 @@ use ReflectionClass;
  *
  * Mocks the Jetpack connection state and resets the memoized enablement flag on
  * the container's `PushNotifications` instance — the two things every
- * push-notifications-related controller test needs in setUp.
+ * push-notifications-related controller test needs in setUp. Also builds the
+ * push tokens data store mock that PendingNotificationStore tests need.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
@@ -62,5 +64,18 @@ trait PushNotificationsTestTrait {
 
 		$property->setAccessible( true );
 		$property->setValue( $push_notifications, null );
+	}
+
+	/**
+	 * Creates a push tokens data store whose has_tokens() returns $has_tokens.
+	 *
+	 * @param bool $has_tokens What has_tokens() should report.
+	 * @return PushTokensDataStore|MockObject
+	 */
+	protected function create_data_store_with_tokens( bool $has_tokens ) {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'has_tokens' )->willReturn( $has_tokens );
+
+		return $data_store;
 	}
 }

@@ -2347,12 +2347,17 @@ FROM $order_meta_table
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
 		$data = array(
-			'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-			'post_status'   => 'draft',
-			'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
-			'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+			'post_status' => 'draft',
+			'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
 		);
+
+		// An order with no created date leaves the post dates to WordPress rather than failing the whole sync batch.
+		$date_created = $order->get_date_created( 'edit' );
+		if ( ! is_null( $date_created ) ) {
+			$data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
+			$data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
+		}
 
 		if ( 'backfill' === $context ) {
 			if ( ! $order->get_id() ) {
@@ -2931,6 +2936,31 @@ FROM $order_meta_table
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
 		if ( 'wc-' . $order->get_status() === $previous_status ) {
+			wp_untrash_post_comments( $id );
+
+			// Order notes are always restored. Other comment types are left alone.
+			global $wpdb;
+			$order_note_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = %s AND comment_type = %s",
+					$id,
+					'post-trashed',
+					'order_note'
+				)
+			);
+			if ( $order_note_ids ) {
+				$wpdb->update(
+					$wpdb->comments,
+					array( 'comment_approved' => '1' ),
+					array(
+						'comment_post_ID'  => $id,
+						'comment_approved' => 'post-trashed',
+						'comment_type'     => 'order_note',
+					)
+				);
+				clean_comment_cache( $order_note_ids );
+			}
+
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix coupons applied in the order editor ignoring manually edited line item totals.

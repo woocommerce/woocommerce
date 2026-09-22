@@ -22,7 +22,8 @@ export const BLOCK_NAMES = {
 } as const;
 
 export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
-	category: WP_REST_API_Category
+	category: WP_REST_API_Category,
+	inheritCategory = false
 ): InnerBlockTemplate[] => [
 	[ 'woocommerce/category-title', { level: 2, textAlign: 'center' } ],
 	[ 'woocommerce/category-description', { textAlign: 'center' } ],
@@ -40,6 +41,16 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 				{
 					text: __( 'Shop now', 'woocommerce' ),
 					url: category.permalink,
+					...( inheritCategory && {
+						metadata: {
+							bindings: {
+								url: {
+									source: 'core/term-data',
+									args: { field: 'link' },
+								},
+							},
+						},
+					} ),
 				},
 			],
 		],

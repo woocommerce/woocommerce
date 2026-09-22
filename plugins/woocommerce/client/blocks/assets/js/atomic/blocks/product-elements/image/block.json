@@ -9,11 +9,6 @@
 		"saleBadgeAlign": { "type": "string", "default": "right" },
 		"imageSizing": { "type": "string", "default": "single" },
 		"productId": { "type": "number", "default": 0 },
-		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		},
 		"width": { "type": "string" },
 		"height": { "type": "string" },
 		"scale": { "type": "string", "default": "cover" },
@@ -25,6 +20,9 @@
 		},
 		"html": false,
 		"__experimentalBorder": {
+			"color": true,
+			"width": true,
+			"style": true,
 			"radius": true,
 			"__experimentalSkipSerialization": true
 		},

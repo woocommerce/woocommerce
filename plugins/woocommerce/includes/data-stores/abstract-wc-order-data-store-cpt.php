@@ -153,8 +153,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$order,
 			array(
 				'parent_id'     => $post_object->post_parent,
-				'date_created'  => $this->string_to_timestamp( $post_object->post_date_gmt ),
-				'date_modified' => $this->string_to_timestamp( $post_object->post_modified_gmt ),
+				'date_created'  => $this->post_date_to_timestamp( $post_object->post_date_gmt, $post_object->post_date ),
+				'date_modified' => $this->post_date_to_timestamp( $post_object->post_modified_gmt, $post_object->post_modified ),
 				'status'        => $post_object->post_status,
 			)
 		);
@@ -424,6 +424,26 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	protected function get_order_key( $order ) {
 		return wc_generate_order_key();
+	}
+
+	/**
+	 * Convert a post's GMT datetime to a timestamp, using the local one when the GMT column holds the zero date.
+	 *
+	 * WordPress leaves the GMT columns at the zero date for some posts (drafts, imports) and treats the local
+	 * column as the truth. The HPOS migrator applies the same rule, so both stores read the same date.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $gmt_date   Datetime in GMT, possibly the zero date.
+	 * @param string $local_date The same datetime in the site timezone.
+	 * @return int|null
+	 */
+	protected function post_date_to_timestamp( $gmt_date, $local_date ) {
+		$timestamp = $this->string_to_timestamp( $gmt_date );
+		if ( null === $timestamp && '' !== $local_date && '0000-00-00 00:00:00' !== $local_date ) {
+			$timestamp = $this->string_to_timestamp( get_gmt_from_date( $local_date ) );
+		}
+		return $timestamp;
 	}
 
 	/**
@@ -832,6 +852,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Delete selected order items by ID.
 	 *
+	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
+	 *
 	 * @since 11.1.0
 	 *
 	 * @param WC_Order $order Order object.
@@ -979,8 +1001,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		add_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ), 10, 2 );
 		$post_data = array(
 			'ID'                 => $order->get_id(),
-			'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			'post_status'        => $this->get_post_status( $order ),
 			'post_parent'        => $order->get_parent_id(),
 			'edit_date'          => true,
@@ -989,7 +1009,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
 			'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 		);
-		$updated   = wp_update_post( $post_data );
+		// An order with no created date leaves the post's date columns to WordPress, which keeps them unless they are zero too.
+		$date_created = $order->get_date_created( 'edit' );
+		if ( ! is_null( $date_created ) ) {
+			$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
+			$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
+		}
+		$updated = wp_update_post( $post_data );
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
 		return $updated;
 	}
@@ -1074,7 +1100,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$keys_to_delete = array_diff(
 			array_keys( $existing_meta_data ),
 			$this->internal_meta_keys,
-			array_keys( $this->get_internal_data_store_key_getters() )
+			array_keys( $this->get_internal_data_store_key_getters() ),
+			array(
+				// WordPress writes and manages this directly on the post while trashing.
+				'_wp_trash_meta_comments_status',
+			)
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {

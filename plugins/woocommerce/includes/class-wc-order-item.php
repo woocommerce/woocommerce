@@ -339,6 +339,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 		$order_item_name   = $this->get_name();
 
+		// Compare entity-decoded copies below: wp_kses_post() normalizes special characters
+		// in display values (e.g. "&" to "&amp;") while the item name stores them raw.
+		$decoded_item_name = ! $include_all && $product && $product->is_type( ProductType::VARIATION ) ? wp_specialchars_decode( $order_item_name, ENT_QUOTES ) : null;
+
 		foreach ( $meta_data as $meta ) {
 			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
@@ -358,7 +362,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( null !== $decoded_item_name && wc_is_attribute_in_product_name( wp_specialchars_decode( $display_value, ENT_QUOTES ), $decoded_item_name ) ) {
 				continue;
 			}
 

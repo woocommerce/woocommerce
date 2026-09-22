@@ -5,7 +5,10 @@
  * @package WooCommerce\Tests\WC_AJAX.
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -107,8 +110,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
-		$this->skip_on_php_8_1();
-
 		$this->_setRole( 'administrator' );
 
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
@@ -141,12 +142,80 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Skip the current test on PHP 8.1 and higher.
-	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
 	 */
-	protected function skip_on_php_8_1() {
-		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
-			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+	public function test_shipping_classes_save_changes_generates_slug(): void {
+		$had_current_tab          = array_key_exists( 'current_tab', $GLOBALS );
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_tab     = $GLOBALS['current_tab'] ?? null;
+		$original_current_section = $GLOBALS['current_section'] ?? null;
+		$name                     = 'Poster Pack ' . wp_unique_id();
+		$expected_slug            = sanitize_title( $name );
+		$description              = 'Posters, stickers, and other flat items.';
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_POST    = array(
+				'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+				'changes'                   => array(
+					'new-row' => array(
+						'newRow'      => true,
+						'name'        => $name,
+						'slug'        => '',
+						'description' => $description,
+					),
+				),
+			);
+			$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+			// WC_Shipping::get_shipping_classes() memoizes into a public property that nothing
+			// resets, so a warm cache would omit the new term from the response.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			$response = $this->do_ajax( 'woocommerce_shipping_classes_save_changes' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+
+			$term = get_term_by( 'slug', $expected_slug, 'product_shipping_class' );
+			$this->assertInstanceOf( WP_Term::class, $term, 'The blank-slug request should create a shipping-class term.' );
+			if ( ! $term instanceof WP_Term ) {
+				throw new RuntimeException( 'The shipping-class term could not be reloaded.' );
+			}
+			$term_id = $term->term_id;
+
+			$this->assertSame( $name, $term->name );
+			$this->assertSame( $description, $term->description );
+
+			$response_rows = $response['data']['shipping_classes'] ?? array();
+			$matching_rows = array_values(
+				array_filter(
+					$response_rows,
+					static fn ( array $row ): bool => (int) ( $row['term_id'] ?? 0 ) === $term_id
+				)
+			);
+			$this->assertCount( 1, $matching_rows, 'The AJAX response should contain the new shipping class exactly once.' );
+			$this->assertSame( $expected_slug, $matching_rows[0]['slug'] );
+			$this->assertSame( $name, $matching_rows[0]['name'] );
+			$this->assertSame( $description, $matching_rows[0]['description'] );
+		} finally {
+			// Only state the base lifecycle does not own is restored here.
+			// `WP_Ajax_UnitTestCase::tear_down()` clears `$_POST` and the current
+			// user, `clean_up_global_scope()` clears `$_REQUEST` before the next
+			// test, and the transaction rollback removes the term. What survives
+			// is the shipping class list, which `WC_Shipping` memoizes on a public
+			// property, and the two settings globals the handler assigns before it
+			// fires `woocommerce_update_options`.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			if ( $had_current_tab ) {
+				$GLOBALS['current_tab'] = $original_current_tab;
+			} else {
+				unset( $GLOBALS['current_tab'] );
+			}
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
 		}
 	}
 
@@ -304,6 +373,564 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should include an exact taxonomy term match beyond the result limit.
+	 */
+	public function test_json_search_taxonomy_terms_includes_exact_name_beyond_limit(): void {
+		$fixture = null;
+
+		try {
+			$term_names = array();
+			for ( $index = 0; $index < 50; ++$index ) {
+				$term_names[] = sprintf( 'Candidate 6 %02d', $index );
+			}
+			$term_names[] = '6';
+
+			$fixture       = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+			$exact_term_id = $fixture['term_ids']['6'];
+
+			$filter_call_count = 0;
+			$filter_taxonomy   = null;
+			$filter_saw_exact  = false;
+			$filter_callback   = function ( $terms, $taxonomy ) use ( &$filter_call_count, &$filter_taxonomy, &$filter_saw_exact, $exact_term_id ) {
+				++$filter_call_count;
+				$filter_taxonomy  = $taxonomy;
+				$filter_saw_exact = in_array( $exact_term_id, wp_list_pluck( $terms, 'term_id' ), true );
+
+				return $terms;
+			};
+
+			add_filter( 'woocommerce_json_search_found_product_attribute_terms', $filter_callback, 20, 2 );
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 50, 'menu_order' );
+
+			$this->assertCount( 50, $response, 'The response should respect the requested result limit.' );
+			$this->assertCount( 50, array_unique( wp_list_pluck( $response, 'term_id' ) ), 'The response should not contain duplicate terms.' );
+			$this->assertSame( $exact_term_id, $response[0]['term_id'], 'The exact term match should be the first response item.' );
+			$this->assertSame( 1, $filter_call_count, 'The final results filter should run once.' );
+			$this->assertTrue( $filter_saw_exact, 'The final results filter should receive the exact term match.' );
+			$this->assertSame( $fixture['taxonomy'], $filter_taxonomy, 'The final results filter should receive the requested taxonomy unchanged.' );
+			$this->assertSame( 1, $exact_query_count, 'The omitted exact match should trigger one bounded exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should include an exact taxonomy term match when a filter supplies the default empty offset.
+	 */
+	public function test_json_search_taxonomy_terms_includes_exact_name_with_empty_offset(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 6 00',
+					'Candidate 6 01',
+					'Candidate 6 02',
+					'6',
+				)
+			);
+
+			// WP_Term_Query documents an empty string as its own "no offset" default.
+			add_filter(
+				'woocommerce_product_attribute_terms',
+				static function ( $args ) {
+					$args['offset'] = '';
+
+					return $args;
+				}
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( '6', 'Candidate 6 00', 'Candidate 6 01' ),
+				wp_list_pluck( $response, 'name' ),
+				'An empty filtered offset should still recover the omitted exact match.'
+			);
+			$this->assertSame( 1, $exact_query_count, 'An empty filtered offset should trigger one bounded exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should preserve the ordering of a visible exact taxonomy term match.
+	 */
+	public function test_json_search_taxonomy_terms_does_not_promote_visible_exact_name(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Alpha candidate first',
+					'Alpha',
+					'Alpha candidate third',
+					'Alpha candidate fourth',
+				)
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], 'Alpha', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], 'Alpha', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( 'Alpha candidate first', 'Alpha', 'Alpha candidate third' ),
+				wp_list_pluck( $response, 'name' ),
+				'The visible exact match should retain its menu order position.'
+			);
+			$this->assertCount(
+				3,
+				array_unique( wp_list_pluck( $response, 'term_id' ) ),
+				'The response should contain three unique term IDs.'
+			);
+			$this->assertSame( 0, $exact_query_count, 'A byte-identical visible exact match should not trigger a fallback term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should preserve the ordering of a visible database-equivalent exact taxonomy term match.
+	 */
+	public function test_json_search_taxonomy_terms_deduplicates_visible_collation_equivalent_name(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Alpha candidate first',
+					'Álpha',
+					'Alpha candidate third',
+					'Alpha candidate fourth',
+				)
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], 'alpha', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], 'alpha', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( 'Alpha candidate first', 'Álpha', 'Alpha candidate third' ),
+				wp_list_pluck( $response, 'name' ),
+				'The database-equivalent visible exact match should retain its menu order position.'
+			);
+			$this->assertCount( 3, array_unique( wp_list_pluck( $response, 'term_id' ) ), 'The response should contain three unique term IDs.' );
+			$this->assertSame( 1, $exact_query_count, 'The database-authoritative comparison should use one bounded exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should respect exclusion of an exact taxonomy term match through the query arguments filter.
+	 */
+	public function test_json_search_taxonomy_terms_respects_filtered_exact_term_exclusion(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 6 first',
+					'Candidate 6 second',
+					'Candidate 6 third',
+					'6',
+				)
+			);
+
+			$exact_term_id     = $fixture['term_ids']['6'];
+			$filter_call_count = 0;
+			$filter_callback   = function ( $args ) use ( &$filter_call_count, $exact_term_id ) {
+				++$filter_call_count;
+				$args['exclude'] = array( $exact_term_id );
+
+				return $args;
+			};
+
+			add_filter( 'woocommerce_product_attribute_terms', $filter_callback );
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response     = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+			$response_ids = wp_list_pluck( $response, 'term_id' );
+
+			$this->assertCount( 3, $response, 'The response should contain the requested number of terms.' );
+			$this->assertNotContains( $exact_term_id, $response_ids, 'The excluded exact term should not appear in the response.' );
+			$this->assertSame( 1, $filter_call_count, 'The product attribute term query arguments filter should run exactly once.' );
+			$this->assertSame( 1, $exact_query_count, 'The full supported response should perform at most one exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should preserve a full broad response when no exact taxonomy term exists.
+	 */
+	public function test_json_search_taxonomy_terms_preserves_full_response_without_exact_name(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 6 first',
+					'Candidate 6 second',
+					'Candidate 6 third',
+				)
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( 'Candidate 6 first', 'Candidate 6 second', 'Candidate 6 third' ),
+				wp_list_pluck( $response, 'name' ),
+				'The broad result should remain unchanged when no exact term exists.'
+			);
+			$this->assertSame( 1, $exact_query_count, 'A full supported response should perform only one bounded exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should reject an exact taxonomy term returned from another taxonomy.
+	 */
+	public function test_json_search_taxonomy_terms_rejects_exact_name_from_other_taxonomy(): void {
+		$requested_fixture = null;
+		$foreign_fixture   = null;
+
+		try {
+			$term_names = array(
+				'Candidate 6 first',
+				'Candidate 6 second',
+				'Candidate 6 third',
+			);
+
+			$requested_fixture = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+			$foreign_fixture   = $this->create_attribute_taxonomy_fixture_for_test( array( '6' ) );
+
+			add_action(
+				'pre_get_terms',
+				static function ( $query ) use ( $requested_fixture, $foreign_fixture ) {
+					$query_taxonomies = (array) ( $query->query_vars['taxonomy'] ?? array() );
+					$query_names      = (array) ( $query->query_vars['name'] ?? array() );
+
+					if ( in_array( $requested_fixture['taxonomy'], $query_taxonomies, true ) && in_array( '6', $query_names, true ) ) {
+						$query->query_vars['taxonomy'] = array( $foreign_fixture['taxonomy'] );
+					}
+				}
+			);
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $requested_fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame( $term_names, wp_list_pluck( $response, 'name' ), 'A foreign exact term should not displace the requested taxonomy results.' );
+			$this->assertNotContains( $foreign_fixture['term_ids']['6'], wp_list_pluck( $response, 'term_id' ), 'The response should not contain a term from another taxonomy.' );
+		} finally {
+			if ( null !== $foreign_fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $foreign_fixture );
+			}
+
+			if ( null !== $requested_fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $requested_fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should treat the search string zero as a valid exact taxonomy term name.
+	 */
+	public function test_json_search_taxonomy_terms_includes_exact_zero_name(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 0 first',
+					'Candidate 0 second',
+					'Candidate 0 third',
+					'0',
+				)
+			);
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '0', 3, 'menu_order' );
+
+			$this->assertCount( 3, $response, 'The response should retain its configured cap.' );
+			$this->assertSame( $fixture['term_ids']['0'], $response[0]['term_id'], 'The exact zero-named term should be the first result.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should leave unsupported filtered taxonomy search argument shapes unchanged.
+	 *
+	 * @dataProvider unsupported_taxonomy_term_search_argument_provider
+	 *
+	 * @param Closure $filter_callback         Applies the unsupported filtered argument shape.
+	 * @param Closure $project_response        Projects the AJAX response into the value under assertion.
+	 * @param Closure $resolve_expected        Resolves the expected value from the runtime fixture.
+	 * @param string  $response_assertion_text Explains the expected pass-through behavior.
+	 */
+	public function test_json_search_taxonomy_terms_leaves_unsupported_filtered_shapes_unchanged( Closure $filter_callback, Closure $project_response, Closure $resolve_expected, string $response_assertion_text ): void {
+		$fixture = null;
+
+		try {
+			$term_names = array(
+				'Candidate 6 00',
+				'Candidate 6 01',
+				'Candidate 6 02',
+				'Candidate 6 03',
+				'Candidate 6 04',
+				'6',
+			);
+			$fixture    = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+
+			add_filter(
+				'woocommerce_product_attribute_terms',
+				$filter_callback
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame( 0, $exact_query_count, 'Unsupported filtered argument shapes should not trigger the exact-name term query.' );
+			$this->assertSame(
+				$resolve_expected(
+					array(
+						'fixture'    => $fixture,
+						'term_names' => $term_names,
+					)
+				),
+				$project_response( $response ),
+				$response_assertion_text
+			);
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * Unsupported filtered taxonomy search argument shapes.
+	 *
+	 * @return array<string, array{Closure, Closure, Closure, string}>
+	 */
+	public function unsupported_taxonomy_term_search_argument_provider(): array {
+		$pluck_names = static fn( $response ) => wp_list_pluck( $response, 'name' );
+		$unchanged   = static fn( $response ) => $response;
+
+		$first_three_names = static fn( $context ) => array_slice( $context['term_names'], 0, 3 );
+		$offset_names      = static fn( $context ) => array_slice( $context['term_names'], 1, 3 );
+		$all_names         = static fn( $context ) => $context['term_names'];
+		$first_three_ids   = static fn( $context ) => array_slice( array_values( $context['fixture']['term_ids'] ), 0, 3 );
+
+		return array(
+			'string arguments' => array(
+				static fn( $args ) => http_build_query( $args ),
+				$pluck_names,
+				$first_three_names,
+				'A string argument shape should retain the broad response.',
+			),
+			'alternate fields' => array(
+				static function ( $args ) {
+					$args['fields'] = 'ids';
+
+					return $args;
+				},
+				$unchanged,
+				$first_three_ids,
+				'Alternate field shapes should pass through unchanged.',
+			),
+			'taxonomy array'   => array(
+				static function ( $args ) {
+					$args['taxonomy'] = array( $args['taxonomy'] );
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A taxonomy array should retain the broad response.',
+			),
+			'nonzero offset'   => array(
+				static function ( $args ) {
+					$args['offset'] = 1;
+
+					return $args;
+				},
+				$pluck_names,
+				$offset_names,
+				'A nonzero offset should retain the requested broad window.',
+			),
+			'absent limit'     => array(
+				static function ( $args ) {
+					unset( $args['number'] );
+
+					return $args;
+				},
+				$pluck_names,
+				$all_names,
+				'An absent limit should retain the unbounded broad response.',
+			),
+			'non-finite limit' => array(
+				static function ( $args ) {
+					$args['number'] = 'INF';
+
+					return $args;
+				},
+				$pluck_names,
+				$all_names,
+				'A non-finite limit should retain the unbounded broad response.',
+			),
+			'decimal limit'    => array(
+				static function ( $args ) {
+					$args['number'] = '3.5';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A decimal limit should retain the broad response.',
+			),
+			'decimal offset'   => array(
+				static function ( $args ) {
+					$args['offset'] = '0.0';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A decimal offset should retain the broad response.',
+			),
+			'term query error' => array(
+				static function ( $args ) {
+					$args['taxonomy'] = 'not_a_registered_taxonomy';
+
+					return $args;
+				},
+				static fn( $response ) => isset( $response['errors']['invalid_taxonomy'] ),
+				static fn() => true,
+				'A term-query error should pass through unchanged.',
+			),
+			'competing search' => array(
+				static function ( $args ) {
+					$args['search'] = 'Candidate';
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A competing filtered search selector should retain the broad response.',
+			),
+			'competing name'   => array(
+				static function ( $args ) {
+					$args['name'] = array(
+						'Candidate 6 00',
+						'Candidate 6 01',
+						'Candidate 6 02',
+					);
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A competing filtered name selector should retain the broad response.',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should leave an empty taxonomy search and hierarchical attribute taxonomy unchanged.
+	 */
+	public function test_json_search_taxonomy_terms_skips_empty_and_hierarchical_searches(): void {
+		$fixture = null;
+
+		try {
+			$term_names = array( 'Alpha first', 'Alpha second', 'Alpha third', 'Alpha' );
+			$fixture    = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+
+			$empty_response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '', 3, 'menu_order' );
+			$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $empty_response, 'name' ), 'An empty search should retain the broad response.' );
+
+			unregister_taxonomy( $fixture['taxonomy'] );
+			register_taxonomy(
+				$fixture['taxonomy'],
+				array( 'product' ),
+				array(
+					'hierarchical' => true,
+					'capabilities' => array(
+						'manage_terms' => 'manage_product_terms',
+						'edit_terms'   => 'edit_product_terms',
+						'delete_terms' => 'delete_product_terms',
+						'assign_terms' => 'assign_product_terms',
+					),
+				)
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], 'Alpha', $exact_query_count );
+			$hierarchical_response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], 'Alpha', 3, 'menu_order' );
+
+			$this->assertSame( array_slice( $term_names, 0, 3 ), wp_list_pluck( $hierarchical_response, 'name' ), 'A hierarchical attribute taxonomy should retain the broad response.' );
+			$this->assertSame( 0, $exact_query_count, 'A hierarchical attribute taxonomy should not trigger an exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * Count exact-name term queries for a taxonomy during a test.
+	 *
+	 * The parent test fixture restores ordinary hooks after each test.
+	 *
+	 * @param string $taxonomy         Taxonomy to observe.
+	 * @param string $name             Exact name to observe.
+	 * @param int    $exact_query_count Exact-query counter, passed by reference.
+	 */
+	private function track_exact_taxonomy_term_queries_for_test( string $taxonomy, string $name, int &$exact_query_count ): void {
+		add_action(
+			'pre_get_terms',
+			function ( $query ) use ( $taxonomy, $name, &$exact_query_count ) {
+				$query_taxonomies = (array) ( $query->query_vars['taxonomy'] ?? array() );
+				$query_names      = (array) ( $query->query_vars['name'] ?? array() );
+
+				if ( in_array( $taxonomy, $query_taxonomies, true ) && in_array( $name, $query_names, true ) ) {
+					++$exact_query_count;
+				}
+			}
+		);
+	}
+
+	/**
 	 * Register a product attribute taxonomy created inside a test.
 	 *
 	 * @param int $attribute_id Attribute ID.
@@ -331,6 +958,111 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		);
 
 		return $taxonomy;
+	}
+
+	/**
+	 * Create a global product attribute and ordered terms for a test.
+	 *
+	 * @param string[] $term_names Term names in menu order.
+	 * @return array{taxonomy: string, term_ids: array<array-key, int>}
+	 */
+	private function create_attribute_taxonomy_fixture_for_test( array $term_names ): array {
+		$fixture = array(
+			'taxonomy' => '',
+			'term_ids' => array(),
+		);
+
+		try {
+			$suffix       = wp_unique_id();
+			$attribute_id = wc_create_attribute(
+				array(
+					'name'     => 'AJAX search fixture ' . $suffix,
+					'slug'     => 'ajax_search_' . $suffix,
+					'type'     => 'select',
+					'order_by' => 'menu_order',
+				)
+			);
+
+			if ( ! is_int( $attribute_id ) ) {
+				throw new RuntimeException( 'The product attribute fixture could not be created.' );
+			}
+
+			$fixture['taxonomy'] = $this->register_attribute_taxonomy_for_test( $attribute_id );
+
+			foreach ( $term_names as $menu_order => $term_name ) {
+				$term = wp_insert_term( $term_name, $fixture['taxonomy'] );
+
+				if ( is_wp_error( $term ) ) {
+					throw new RuntimeException( 'A product attribute term fixture could not be created.' );
+				}
+
+				$term_id                           = (int) $term['term_id'];
+				$fixture['term_ids'][ $term_name ] = $term_id;
+				wc_set_term_order( $term_id, $menu_order, $fixture['taxonomy'] );
+			}
+		} catch ( Throwable $throwable ) {
+			$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			throw $throwable;
+		}
+
+		return $fixture;
+	}
+
+	/**
+	 * Unregister the process state for a global product attribute fixture.
+	 *
+	 * Database writes are rolled back by the parent test case transaction.
+	 *
+	 * @param array{taxonomy: string, term_ids: array<array-key, int>} $fixture Fixture data.
+	 */
+	private function unregister_attribute_taxonomy_fixture_for_test( array $fixture ): void {
+		global $wc_product_attributes;
+
+		if ( taxonomy_exists( $fixture['taxonomy'] ) ) {
+			unregister_taxonomy( $fixture['taxonomy'] );
+		}
+
+		unset( $wc_product_attributes[ $fixture['taxonomy'] ] );
+	}
+
+	/**
+	 * Run an authenticated taxonomy term AJAX search for a test.
+	 *
+	 * @param string $taxonomy Taxonomy to search.
+	 * @param string $term     Search term.
+	 * @param int    $limit    Maximum result count.
+	 * @param string $orderby  Result ordering.
+	 * @return array
+	 */
+	private function search_taxonomy_terms_via_ajax_for_test( string $taxonomy, string $term, int $limit, string $orderby ): array {
+		$original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test globals before building the authenticated request.
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the authenticated request.
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test globals before building the authenticated request.
+		$original_user_id = get_current_user_id();
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_GET = array(
+				'security' => wp_create_nonce( 'search-taxonomy-terms' ),
+				'taxonomy' => $taxonomy,
+				'term'     => $term,
+				'limit'    => $limit,
+				'orderby'  => $orderby,
+			);
+
+			$response = $this->do_ajax( 'woocommerce_json_search_taxonomy_terms' );
+
+			if ( ! is_array( $response ) ) {
+				throw new RuntimeException( 'The taxonomy term AJAX response should be an array.' );
+			}
+
+			return $response;
+		} finally {
+			$_GET     = $original_get;
+			$_POST    = $original_post;
+			$_REQUEST = $original_request;
+			wp_set_current_user( $original_user_id );
+		}
 	}
 
 	/**
@@ -399,6 +1131,327 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should paginate tax rate search results and find rates by location code.
+	 */
+	public function test_json_search_tax_rates_supports_pagination_and_location_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Pagination fixture California rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Pagination fixture New York rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001' );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = 'Pagination fixture';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 1;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 2, $response['pagination']['total'] );
+			$this->assertSame( 2, $response['pagination']['total_pages'] );
+			$this->assertFalse( $response['pagination']['has_prev'] );
+			$this->assertTrue( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $first_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 2;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertTrue( $response['pagination']['has_prev'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 99;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = '10001';
+			$_GET['page'] = 1;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'Pagination fixture New York rate', $response['results'][0]['label'] );
+			$this->assertSame( 'US-NY-PAGINATION FIXTURE NEW YORK RATE-1', $response['results'][0]['rate_code'] );
+			$this->assertSame( '8.875%', $response['results'][0]['rate_percent'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by their visible tax class labels.
+	 */
+	public function test_json_search_tax_rates_supports_tax_class_label_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$tax_class              = WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
+		$created_tax_class_slug = is_wp_error( $tax_class ) ? null : $tax_class['slug'];
+
+		$standard_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'California base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$reduced_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '4.0000',
+				'tax_rate_name'     => 'Reduced class rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => 'reduced-rate',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$_GET['term'] = 'Standard';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $standard_rate_id, $rate_ids );
+			$standard_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $standard_rate_id ) {
+					return $standard_rate_id === $result['id'];
+				}
+			);
+			$standard_result  = current( $standard_results );
+			$this->assertIsArray( $standard_result );
+			$this->assertSame( 'Standard', $standard_result['tax_class'] );
+
+			$_GET['term'] = 'Reduced rate';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $reduced_rate_id, $rate_ids );
+			$reduced_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $reduced_rate_id ) {
+					return $reduced_rate_id === $result['id'];
+				}
+			);
+			$reduced_result  = current( $reduced_results );
+			$this->assertIsArray( $reduced_result );
+			$this->assertSame( 'Reduced rate', $reduced_result['tax_class'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $standard_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $reduced_rate_id ) );
+			if ( $created_tax_class_slug ) {
+				WC_Tax::delete_tax_class_by( 'slug', $created_tax_class_slug );
+			}
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by displayed percentages, rate codes, and fallback labels.
+	 */
+	public function test_json_search_tax_rates_supports_displayed_value_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$named_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Displayed value fixture rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$unnamed_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'ZZ',
+				'tax_rate_state'    => 'ZZ',
+				'tax_rate'          => '3.5000',
+				'tax_rate_name'     => '',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			// The results table shows "8.875%", so that string has to find the rate.
+			$_GET['term'] = '8.875%';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// The full rate code is derived from several columns and must be searchable as shown.
+			$_GET['term'] = 'US-NY-DISPLAYED VALUE FIXTURE RATE-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $named_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = 'us-ny-displayed value';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// Rates without a name are shown under the store's tax or VAT label.
+			$_GET['term'] = WC()->countries->tax_or_vat();
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $unnamed_rate_id, array_column( $response['results'], 'id' ) );
+
+			$_GET['term'] = 'ZZ-ZZ-TAX-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $unnamed_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'ZZ-ZZ-TAX-1', $response['results'][0]['rate_code'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $named_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $unnamed_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should return each tax rate once when listing results without a search term.
+	 */
+	public function test_json_search_tax_rates_without_a_term_lists_all_rates(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Unfiltered listing fixture one',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Unfiltered listing fixture two',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001,10002,10003' );
+
+		$expected_total = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" ) );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = '';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids = array_column( $response['results'], 'id' );
+
+			// A rate with several postcodes must still be counted once.
+			$this->assertSame( $expected_total, $response['pagination']['total'] );
+			$this->assertContains( $first_rate_id, $rate_ids );
+			$this->assertContains( $second_rate_id, $rate_ids );
+			$this->assertSame( count( $rate_ids ), count( array_unique( $rate_ids ) ) );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
 	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
 	 */
 	public function test_add_coupon_discount_uses_manually_edited_line_total() {
@@ -434,6 +1487,179 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertEquals( 50, $item->get_subtotal(), 'The edited line total should become the new pre-discount price' );
 		$this->assertEquals( 45, $item->get_total(), 'The discount should be taken off the edited price' );
 		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox Calculating line taxes persists the tax class, rate, and totals for each supported product type.
+	 */
+	public function test_calc_line_taxes_persists_multiple_tax_classes(): void {
+		$suffix            = strtolower( wp_generate_password( 8, false, false ) );
+		$class_definitions = array(
+			array( "Ajax order ten {$suffix}", "ajax-order-ten-{$suffix}", '10', "Ajax order Ten {$suffix}" ),
+			array( "Ajax order twenty {$suffix}", "ajax-order-twenty-{$suffix}", '20', "Ajax order Twenty {$suffix}" ),
+			array( "Ajax order thirty {$suffix}", "ajax-order-thirty-{$suffix}", '30', "Ajax order Thirty {$suffix}" ),
+		);
+		$tax_classes       = array();
+		$tax_rate_ids      = array();
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+
+		foreach ( $class_definitions as $definition ) {
+			$tax_class = WC_Tax::create_tax_class( $definition[0], $definition[1] );
+			if ( is_wp_error( $tax_class ) ) {
+				throw new RuntimeException( esc_html( $tax_class->get_error_message() ) );
+			}
+			$tax_classes[] = $tax_class['slug'];
+			$tax_rate_id   = WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'US',
+					'tax_rate_state'    => 'CA',
+					'tax_rate'          => $definition[2],
+					'tax_rate_name'     => $definition[3],
+					'tax_rate_priority' => 1,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 0,
+					'tax_rate_order'    => 1,
+					'tax_rate_class'    => $tax_class['slug'],
+				)
+			);
+			if ( ! $tax_rate_id ) {
+				throw new RuntimeException( 'Could not create the tax-rate fixture.' );
+			}
+			$tax_rate_ids[] = $tax_rate_id;
+		}
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$simple_product->set_regular_price( '100' );
+		$simple_product->set_tax_class( $tax_classes[0] );
+		$simple_product->save();
+
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Ajax order taxed variable parent' );
+		$variable_product->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_regular_price( '100' );
+		$variation->set_tax_class( $tax_classes[1] );
+		$variation->save();
+
+		$external_product = WC_Helper_Product::create_external_product();
+		$external_product->set_regular_price( '100' );
+		$external_product->set_tax_class( $tax_classes[2] );
+		$external_product->save();
+
+		$order = wc_create_order();
+		if ( is_wp_error( $order ) ) {
+			throw new RuntimeException( 'Could not create the empty taxed order fixture.' );
+		}
+		$order->set_shipping_country( 'GB' );
+		$order->add_product( $simple_product, 1 );
+		$order->add_product( $variation, 1 );
+		$order->add_product( $external_product, 1 );
+		$order->save();
+
+		$serialized_items = array(
+			'order_item_id'        => array(),
+			'order_item_name'      => array(),
+			'order_item_qty'       => array(),
+			'order_item_tax_class' => array(),
+			'line_subtotal'        => array(),
+			'line_total'           => array(),
+		);
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			$serialized_items['order_item_id'][]                  = $item_id;
+			$serialized_items['order_item_name'][ $item_id ]      = $item->get_name();
+			$serialized_items['order_item_qty'][ $item_id ]       = 1;
+			$serialized_items['order_item_tax_class'][ $item_id ] = $item->get_tax_class();
+			$serialized_items['line_subtotal'][ $item_id ]        = '100';
+			$serialized_items['line_total'][ $item_id ]           = '100';
+		}
+
+		$taxes_controller = wc_get_container()->get( TaxesController::class );
+		$taxes_controller->calc_line_taxes(
+			array(
+				'order_id' => $order->get_id(),
+				'items'    => http_build_query( $serialized_items ),
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '90210',
+				'city'     => 'Beverly Hills',
+			)
+		);
+
+		$fresh_order = wc_get_order( $order->get_id() );
+		if ( ! $fresh_order instanceof WC_Order ) {
+			throw new RuntimeException( 'Could not reload the taxed order fixture.' );
+		}
+		$fresh_items  = array_values( $fresh_order->get_items( 'line_item' ) );
+		$expected_tax = array( 10.0, 20.0, 30.0 );
+		$this->assertCount( 3, $fresh_items );
+
+		foreach ( $fresh_items as $index => $item ) {
+			$taxes = $item->get_taxes();
+			$this->assertSame( $tax_classes[ $index ], $item->get_tax_class() );
+			$this->assertSame( array( $tax_rate_ids[ $index ] ), array_map( 'intval', array_keys( $taxes['total'] ) ) );
+			$this->assertSame( $expected_tax[ $index ], (float) current( $taxes['total'] ) );
+		}
+
+		$tax_items = array_values( $fresh_order->get_items( 'tax' ) );
+		$this->assertCount( 3, $tax_items );
+		foreach ( $tax_items as $index => $tax_item ) {
+			$this->assertSame( $tax_rate_ids[ $index ], $tax_item->get_rate_id() );
+			$this->assertSame( $class_definitions[ $index ][3], $tax_item->get_label() );
+			$this->assertSame( $expected_tax[ $index ], (float) $tax_item->get_tax_total() );
+		}
+		$this->assertSame( 60.0, (float) $fresh_order->get_total_tax() );
+		$this->assertSame( 360.0, (float) $fresh_order->get_total() );
+	}
+
+	/**
+	 * @testdox Product search decodes URL-encoded characters before returning plain text names.
+	 * @dataProvider product_search_name_provider
+	 *
+	 * @param string $search_term          Product search term.
+	 * @param string $product_name         Product name.
+	 * @param string $expected_result_name Expected product name in the response.
+	 */
+	public function test_json_search_products_returns_plain_text_names( string $search_term, string $product_name, string $expected_result_name ): void {
+		$this->_setRole( 'administrator' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$_GET['term']     = $search_term;
+		$_GET['include']  = array( $product->get_id() );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+
+		try {
+			$response = $this->do_ajax( 'woocommerce_json_search_products' );
+		} finally {
+			unset( $_GET['term'], $_GET['include'], $_GET['security'] );
+		}
+
+		$this->assertSame(
+			sprintf( '%s (%s)', $expected_result_name, $product->get_sku() ),
+			$response[ $product->get_id() ],
+			'Product search should return a stripped, plain text product name.'
+		);
+	}
+
+	/**
+	 * Product names used to verify AJAX search response formatting.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_search_name_provider(): array {
+		return array(
+			'plain punctuation'    => array( 'Ben', "Ben & Jerry's", "Ben & Jerry's" ),
+			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee Mug' ),
+			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text inside' ),
+			'HTML tag'             => array( 'Text', 'Text <span>inside</span>', 'Text inside' ),
+		);
 	}
 
 	/**
@@ -506,18 +1732,54 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
 	 */
-	public function test_get_customer_details(): void {
+	public function test_get_customer_details_returns_exact_billing_and_shipping_payload(): void {
 		// This class does not inherit from WC_Unit_Test_Case, so we're handling the legacy proxy mechanics ourselves.
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 		$legacy_proxy->reset();
 
-		$customer_id       = 0;
-		$is_member_of_blog = true;
-		$is_multisite      = true;
+		$customer_id        = 0;
+		$is_member_of_blog  = true;
+		$is_multisite       = false;
+		$customer           = WC_Helper_Customer::create_customer( 'ajaxordercustomer', 'pass2', 'ajaxorder@example.com' );
+		$customer_id        = $customer->get_id();
+		$administrator_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$expected_billing   = array(
+			'first_name' => 'Sideshow',
+			'last_name'  => 'Bob',
+			'company'    => 'Die Bart Die',
+			'address_1'  => '123 Fake St',
+			'address_2'  => 'Suite 4',
+			'city'       => 'Springfield',
+			'postcode'   => '12345',
+			'country'    => 'US',
+			'state'      => 'FL',
+			'email'      => 'billing-ajaxorder@example.com',
+			'phone'      => '555-555-5556',
+		);
+		$expected_shipping  = array(
+			'first_name' => 'Robert',
+			'last_name'  => 'Terwilliger',
+			'company'    => 'Springfield Penitentiary',
+			'address_1'  => '321 Fake St',
+			'address_2'  => 'Cell 8',
+			'city'       => 'Springfield',
+			'postcode'   => '54321',
+			'country'    => 'US',
+			'state'      => 'FL',
+			'phone'      => '555-555-5557',
+		);
+
+		foreach ( $expected_billing as $field => $value ) {
+			$customer->{"set_billing_{$field}"}( $value );
+		}
+		foreach ( $expected_shipping as $field => $value ) {
+			$customer->{"set_shipping_{$field}"}( $value );
+		}
+		$customer->update_meta_data( 'ajaxorder_unrelated_meta', 'must-not-leak' );
+		$customer->save();
 
 		$legacy_proxy->register_function_mocks(
 			array(
-				'check_ajax_referer'     => fn () => true,
 				'is_multisite'           => function () use ( &$is_multisite ) {
 					return $is_multisite;
 				},
@@ -531,28 +1793,196 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 					return filter_input( $method, $key, $filter, $options );
 				},
-				'wp_die'                 => fn () => '',
 			)
 		);
 
-		$customer_id = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' )->get_id();
-		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		try {
+			wp_set_current_user( $administrator_user );
+			$nonce                = wp_create_nonce( 'get-customer-details' );
+			$_POST['user_id']     = $customer_id;
+			$_POST['security']    = $nonce;
+			$_REQUEST['user_id']  = $customer_id;
+			$_REQUEST['security'] = $nonce;
 
-		wp_set_current_user( $admin_id );
-		$_POST['user_id'] = $customer_id;
+			$response = $this->do_ajax( 'woocommerce_get_customer_details' );
 
-		$response = $this->do_ajax( 'woocommerce_get_customer_details' );
-		$this->assertIsArray(
-			$response,
-			'If the customer is part of the blog, an array of information is supplied.'
+			$this->assertIsArray( $response, 'The registered customer-details action should return JSON data.' );
+			$this->assertSame( $customer_id, $response['id'] );
+			$this->assertSame( $expected_billing, $response['billing'] );
+			$this->assertSame( $expected_shipping, $response['shipping'] );
+			$this->assertArrayNotHasKey( 'meta_data', $response, 'Unrelated customer metadata must not be exposed.' );
+
+			$is_multisite         = true;
+			$is_member_of_blog    = false;
+			$this->_last_response = '';
+			$response             = $this->do_ajax( 'woocommerce_get_customer_details' );
+			$this->assertNull( $response, 'Customers outside the current multisite blog must remain inaccessible.' );
+		} finally {
+			// The container keeps the mocked functions; nothing else here outlives
+			// the transaction rollback and the hook restore in tear_down().
+			$legacy_proxy->reset();
+		}
+	}
+
+	/**
+	 * @testdox Registered Add Order Item AJAX persists every supported product type and its quantities.
+	 */
+	public function test_add_order_item_via_ajax_persists_supported_product_types(): void {
+		$order = wc_create_order();
+		if ( is_wp_error( $order ) ) {
+			throw new RuntimeException( 'Could not create the empty order fixture.' );
+		}
+		$simple_product   = WC_Helper_Product::create_simple_product();
+		$variable_product = new WC_Product_Variable();
+		$grouped_product  = new WC_Product_Grouped();
+		$external_product = WC_Helper_Product::create_external_product();
+
+		$variable_product->set_name( 'Ajax order variable parent' );
+		$variable_product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_regular_price( '25' );
+		$variation->save();
+
+		$grouped_product->set_name( 'Ajax order grouped' );
+		$grouped_product->save();
+
+		$products = array(
+			array( $simple_product, 2, ProductType::SIMPLE ),
+			array( $variation, 3, ProductType::VARIATION ),
+			array( $grouped_product, 4, ProductType::GROUPED ),
+			array( $external_product, 5, ProductType::EXTERNAL ),
 		);
 
-		$is_member_of_blog = false;
-		$response          = $this->do_ajax( 'woocommerce_get_customer_details' );
-		$this->assertNull(
-			$response,
-			'If the customer is not part of the blog, we do not get back any customer information (in reality, the request was ended with wp_die).'
+		$this->_setRole( 'administrator' );
+		$request_data = array(
+			'security' => wp_create_nonce( 'order-item' ),
+			'order_id' => $order->get_id(),
+			'items'    => '',
+			'data'     => array_map(
+				static fn ( array $row ): array => array(
+					'id'  => $row[0]->get_id(),
+					'qty' => $row[1],
+				),
+				$products
+			),
 		);
+		$_POST        = $request_data;
+		$_REQUEST     = $request_data;
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+		$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+
+		$fresh_order = wc_get_order( $order->get_id() );
+		if ( ! $fresh_order instanceof WC_Order ) {
+			throw new RuntimeException( 'Could not reload the order-item fixture.' );
+		}
+		$items = array_values( $fresh_order->get_items( 'line_item' ) );
+		$this->assertCount( 4, $items );
+
+		foreach ( $products as $index => $expected ) {
+			list( $product, $quantity, $product_type ) = $expected;
+			$item                                      = $items[ $index ];
+
+			$this->assertSame( $quantity, $item->get_quantity() );
+			$this->assertSame( $product_type, $item->get_product()->get_type() );
+			if ( ProductType::VARIATION === $product_type ) {
+				$this->assertSame( $variable_product->get_id(), $item->get_product_id() );
+				$this->assertSame( $variation->get_id(), $item->get_variation_id() );
+			} else {
+				$this->assertSame( $product->get_id(), $item->get_product_id() );
+				$this->assertSame( 0, $item->get_variation_id() );
+			}
+		}
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertNotEmpty( $notes, 'Adding line items should create an order update note.' );
+		$this->assertStringContainsString( 'Added line items:', $notes[0]->content );
+		foreach ( $products as $expected ) {
+			$this->assertStringContainsString( $expected[0]->get_name(), $notes[0]->content );
+		}
+	}
+
+	/**
+	 * @testdox Registered Remove Order Coupon AJAX removes the coupon, recalculates totals, and records its internal note.
+	 */
+	public function test_remove_order_coupon(): void {
+		$output_buffering_level    = ob_get_level();
+		$coupon_code               = 'remove-coupon-' . wp_rand( 1000, 9999 );
+		$product_name              = 'Coupon Removal Product';
+		$expected_removal_note     = sprintf( 'Coupon removed: "%s".', $coupon_code );
+		$expected_product_total    = '10.00';
+		$expected_discounted_total = '5.00';
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( $product_name );
+			$product->set_regular_price( $expected_product_total );
+			$product->save();
+
+			$coupon = WC_Helper_Coupon::create_coupon(
+				$coupon_code,
+				array(
+					'discount_type' => 'fixed_product',
+					'coupon_amount' => $expected_discounted_total,
+					'product_ids'   => array( $product->get_id() ),
+				)
+			);
+			$order  = wc_create_order();
+			if ( is_wp_error( $order ) ) {
+				throw new RuntimeException( 'Could not create the coupon-removal order fixture.' );
+			}
+			$order->add_product( $product, 1 );
+			$order->calculate_totals();
+			$this->assertTrue( $order->apply_coupon( $coupon_code ), 'The fixture order should accept its fixed-product coupon.' );
+			$order->calculate_totals();
+			$order->save();
+			$this->assertSame( $expected_discounted_total, $order->get_total(), 'The fixture order should start with its coupon discount applied.' );
+
+			$this->_setRole( 'administrator' );
+			$request_data = array(
+				'security' => wp_create_nonce( 'order-item' ),
+				'order_id' => $order->get_id(),
+				'coupon'   => $coupon_code,
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94105',
+				'city'     => 'San Francisco',
+			);
+			$_POST        = $request_data;
+			$_REQUEST     = $request_data;
+
+			$response = $this->do_ajax( 'woocommerce_remove_order_coupon' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+			$this->assertStringContainsString( $product_name, $response['data']['html'] ?? '', 'The AJAX response should render the order items.' );
+			$this->assertStringContainsString( esc_html( $expected_removal_note ), $response['data']['notes_html'] ?? '', 'The AJAX response should render the coupon-removal note.' );
+
+			$fresh_order = wc_get_order( $order->get_id() );
+			if ( ! $fresh_order instanceof WC_Order ) {
+				throw new RuntimeException( 'Could not reload the coupon-removal order fixture.' );
+			}
+			$this->assertNotContains( $coupon_code, $fresh_order->get_coupon_codes(), 'The fresh order should no longer have the removed coupon.' );
+			$this->assertSame( $expected_product_total, $fresh_order->get_total(), 'Removing the coupon should restore the product total.' );
+
+			$removal_notes = array_values(
+				array_filter(
+					wc_get_order_notes( array( 'order_id' => $fresh_order->get_id() ) ),
+					static fn ( $note ): bool => esc_html( $expected_removal_note ) === $note->content
+				)
+			);
+			$this->assertCount( 1, $removal_notes, 'Removing the coupon should create one exact removal note.' );
+			$this->assertSame( 0, (int) $removal_notes[0]->customer_note, 'The coupon-removal note should remain internal.' );
+		} finally {
+			// Output buffering is process state, so a die handler that unwinds mid-render
+			// would otherwise leave the level where the next test inherits it.
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+			while ( ob_get_level() < $output_buffering_level ) {
+				ob_start();
+			}
+		}
 	}
 
 	/**
@@ -697,6 +2127,41 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should set variation sale prices from their regular prices.
+	 * @testWith ["100", "10", "", "90"]
+	 *           ["100", "10%", "", "90"]
+	 *           ["100.55", "10.25", "", "90.3"]
+	 *           ["100.55", "10.5%", "", "89.99"]
+	 *           ["45", "23.5%", "", "34.43"]
+	 *           ["5", "10", "", "0"]
+	 *           ["", "10%", "", ""]
+	 *           ["100", "0", "25", ""]
+	 *           ["100", "0%", "25", ""]
+	 *           ["100", "", "25", "25"]
+	 *           ["100", "invalid", "25", "25"]
+	 *           ["100", "-10", "25", "25"]
+	 *
+	 * @param string $regular_price Regular price.
+	 * @param string $adjustment Price adjustment.
+	 * @param string $sale_price Existing sale price.
+	 * @param string $expected_sale_price Expected sale price.
+	 */
+	public function test_bulk_sale_price_from_regular_price( string $regular_price, string $adjustment, string $sale_price, string $expected_sale_price ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_price_from_regular_price' );
+		$method->setAccessible( true );
+		$method->invokeArgs( null, array( array( $variation->get_id() ), array( 'value' => $adjustment ) ) );
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $expected_sale_price, $variation->get_sale_price( 'edit' ), 'The sale price should be calculated from the regular price.' );
+	}
+
+	/**
 	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
 	 */
 	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
@@ -727,6 +2192,195 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'::_ajax_nonce=',
 			(string) $this->_last_response,
 			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
+	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
+	 * @dataProvider update_order_review_notice_cases_provider
+	 *
+	 * @param array[] $notices                Notices to add during the checkout update.
+	 * @param string  $expected_result        Expected legacy AJAX result, which only reports whether a notice was rendered.
+	 * @param bool    $expected_has_errors    Expected error flag.
+	 * @param bool    $reload_checkout        Whether the callback requests a checkout reload.
+	 * @param bool    $suppress_notice_output Whether a filter empties `woocommerce_notice_types`, the way Funnel Builder does on AJAX requests.
+	 */
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, bool $suppress_notice_output = false ): void {
+		$product            = null;
+		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer  = clone WC()->customer;
+		$session_keys       = array( 'chosen_shipping_methods', 'chosen_payment_method', 'reload_checkout', 'refresh_totals', 'customer' );
+		$original_session   = array();
+		$captured_post_data = null;
+		$post_data          = 'payment_method=test-gateway';
+
+		foreach ( $session_keys as $session_key ) {
+			$original_session[ $session_key ] = array(
+				'exists' => isset( WC()->session->{$session_key} ),
+				'value'  => WC()->session->get( $session_key ),
+			);
+		}
+
+		try {
+			wc_clear_notices();
+			unset( WC()->session->reload_checkout, WC()->session->refresh_totals );
+			WC()->cart->empty_cart();
+
+			$product       = WC_Helper_Product::create_simple_product();
+			$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+			$this->assertNotFalse( $cart_item_key, 'The checkout update fixture product should be added to the cart.' );
+
+			$callback = static function ( $received_post_data ) use ( $notices, $reload_checkout, &$captured_post_data ) {
+				$captured_post_data = $received_post_data;
+				foreach ( $notices as $notice ) {
+					wc_add_notice( $notice['message'], $notice['type'] );
+				}
+				if ( $reload_checkout ) {
+					WC()->session->set( 'reload_checkout', true );
+				}
+			};
+			add_action( 'woocommerce_checkout_update_order_review', $callback, 10, 1 );
+
+			if ( $suppress_notice_output ) {
+				add_filter( 'woocommerce_notice_types', '__return_empty_array' );
+			}
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => $post_data,
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The checkout update should return a JSON array.' );
+			$this->assertSame( $post_data, $captured_post_data, 'The public update hook should receive the exact posted checkout data.' );
+			$this->assertSame( $expected_result, $response['result'], 'The legacy result should keep reporting whether any notice was rendered.' );
+			$this->assertSame( $expected_has_errors, $response['has_errors'], 'Only a response containing an error notice should report errors.' );
+			$this->assertSame( $reload_checkout, $response['reload'], 'The response should preserve the requested reload state.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
+
+			if ( $reload_checkout || $suppress_notice_output || empty( $notices ) ) {
+				$this->assertSame( '', $response['messages'], 'The response should carry no rendered notices.' );
+			} else {
+				foreach ( $notices as $notice ) {
+					$this->assertStringContainsString( $notice['message'], $response['messages'], 'The response should retain each rendered notice message.' );
+					$this->assertStringContainsString( $notice['class'], $response['messages'], 'The response should retain each rendered notice type.' );
+				}
+			}
+		} finally {
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			foreach ( $original_session as $session_key => $session_state ) {
+				if ( $session_state['exists'] ) {
+					WC()->session->set( $session_key, $session_state['value'] );
+				} else {
+					unset( WC()->session->{$session_key} );
+				}
+			}
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * Data provider for update order review notice classification.
+	 *
+	 * The legacy result stays `failure` whenever a notice was rendered, whatever its type, so only
+	 * the error flag tells a real failure apart from a success or info notice. Both report what
+	 * rendered, so a queued error that a filter keeps off the page counts for neither.
+	 *
+	 * @return array[]
+	 */
+	public static function update_order_review_notice_cases_provider(): array {
+		return array(
+			'no notices'                     => array(
+				array(),
+				'success',
+				false,
+				false,
+			),
+			'success notice'                 => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+				),
+				'failure',
+				false,
+				false,
+			),
+			'neutral notice'                 => array(
+				array(
+					array(
+						'type'    => 'notice',
+						'message' => 'Address details updated.',
+						'class'   => 'woocommerce-info',
+					),
+				),
+				'failure',
+				false,
+				false,
+			),
+			'error notice'                   => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+			),
+			'mixed notices with an error'    => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+			),
+			'error notice with reload'       => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'Payment method configuration changed.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'success',
+				false,
+				true,
+			),
+			'error notice kept off the page' => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'success',
+				false,
+				false,
+				true,
+			),
 		);
 	}
 
@@ -1206,6 +2860,223 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox add_order_item rejects a negative quantity with a JSON error and adds nothing to the order.
+	 */
+	public function test_add_order_item_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '-2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count, $order->get_items() );
+	}
+
+	/**
+	 * @testdox add_order_item still accepts a positive quantity.
+	 */
+	public function test_add_order_item_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count + 1, $order->get_items() );
+	}
+
+	/**
+	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
+	 */
+	public function test_save_order_items_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox save_order_items accepts a valid positive quantity change.
+	 */
+	public function test_save_order_items_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order   = \WC_Helper_Order::create_order();
+		$items   = array_values( $order->get_items() );
+		$item    = $items[0];
+		$item_id = $item->get_id();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '3' ),
+				'line_total'     => array( $item_id => '30' ),
+				'line_subtotal'  => array( $item_id => '30' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertTrue( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( 3, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox remove_order_item rejects a negative quantity passed through the pre-delete save and deletes nothing.
+	 */
+	public function test_remove_order_item_rejects_negative_quantity_in_passthrough() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id']       = $order->get_id();
+		$_POST['security']       = wp_create_nonce( 'order-item' );
+		$_POST['order_item_ids'] = array( $item_id );
+		$_POST['items']          = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_remove_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * The Grant access product search must honor the include/exclude parameters so
+	 * already-granted products do not reappear in the results.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68101
+	 */
+	public function test_json_search_downloadable_products_honors_include_and_exclude(): void {
+		$product_one = WC_Helper_Product::create_simple_product();
+		$product_one->set_name( 'Exclusit Download One' );
+		$product_one->set_downloadable( true );
+		$product_one->save();
+
+		$product_two = WC_Helper_Product::create_simple_product();
+		$product_two->set_name( 'Exclusit Download Two' );
+		$product_two->set_downloadable( true );
+		$product_two->save();
+
+		$this->_setRole( 'administrator' );
+
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['term']     = 'Exclusit Download';
+		$_GET['exclude']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The search should return a result set.' );
+		$this->assertArrayHasKey( $product_two->get_id(), $response, 'The non-excluded product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_one->get_id(), $response, 'An excluded (already granted) product must not reappear in the results.' );
+
+		// The include allowlist must be honored as well.
+		unset( $_GET['exclude'] );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['include']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The include search should return a result set.' );
+		$this->assertArrayHasKey( $product_one->get_id(), $response, 'The included product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_two->get_id(), $response, 'A product outside the include allowlist must not be part of the results.' );
+	}
+
+	/**
+	 * @testdox An expired checkout session should return its notice inside the shared notices wrapper.
+	 */
+	public function test_update_order_review_expired_wraps_notice(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The expired checkout update should return a JSON array.' );
+			$this->assertArrayHasKey( 'form.woocommerce-checkout', $response['fragments'] );
+			$this->assertMatchesRegularExpression(
+				'#^<div class="woocommerce-notices-wrapper">\s*<(ul|div) class="[^"]*(woocommerce-error|is-error)[^"]*"[^>]*>.*Sorry, your session has expired\..*</div>$#s',
+				$response['fragments']['form.woocommerce-checkout'],
+				'The replacement fragment should be the expired notice inside the notices wrapper.'
+			);
+		} finally {
+			$_POST = $original_post;
+		}
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
@@ -1226,9 +3097,22 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			while ( ob_get_level() > $output_buffering_level ) {
 				ob_end_clean();
 			}
+			while ( ob_get_level() < $output_buffering_level ) {
+				ob_start();
+			}
 		}
 
-		$result               = json_decode( $this->_last_response, true );
+		$raw_response = (string) $this->_last_response;
+		$result       = json_decode( $raw_response, true );
+		// A handler can send two payloads under the test die handler: wp_send_json_*() throws
+		// to stop the request, and the handler's own catch block catches that and sends an
+		// error payload after it. Decode the first one, which is all a real request receives.
+		if ( null === $result ) {
+			$second_response_offset = strpos( $raw_response, '}{"success":false' );
+			if ( false !== $second_response_offset ) {
+				$result = json_decode( substr( $raw_response, 0, $second_response_offset + 1 ), true );
+			}
+		}
 		$this->_last_response = false;
 
 		return $result;
