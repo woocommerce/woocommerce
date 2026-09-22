@@ -38,11 +38,7 @@ class NonShippingCartTaxLocation {
 		$this->dispatch_contexts = array();
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 		// Register the cart/checkout context only after a route matches, and clear it right
-		// after the callback. Both hooks fire inside WP_REST_Server::respond_to_request(), which
-		// dispatch() only reaches on a successful route match — a 404 or a rest_pre_dispatch
-		// short-circuit returns before that point, so no context is ever pushed for those
-		// requests. This keeps the stack balanced for both external and internal (rest_do_request)
-		// dispatches, which never run rest_post_dispatch.
+		// after the callback.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
 	}
