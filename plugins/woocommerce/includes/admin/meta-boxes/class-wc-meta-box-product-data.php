@@ -193,21 +193,38 @@ class WC_Meta_Box_Product_Data {
 	 * @param array $file_names File names.
 	 * @param array $file_urls File urls.
 	 * @param array $file_hashes File hashes.
+	 * @param array $rendered_file_urls File URLs rendered in the editor.
+	 * @param int   $product_id Product ID.
 	 *
 	 * @return array
 	 */
-	private static function prepare_downloads( $file_names, $file_urls, $file_hashes ) {
-		$downloads = array();
+	private static function prepare_downloads( $file_names, $file_urls, $file_hashes, $rendered_file_urls, $product_id ) {
+		$downloads        = array();
+		$stored_downloads = $product_id && $rendered_file_urls ? (array) get_post_meta( $product_id, '_downloadable_files', true ) : array();
 
 		if ( ! empty( $file_urls ) ) {
 			$file_url_size = count( $file_urls );
 
 			for ( $i = 0; $i < $file_url_size; $i++ ) {
-				if ( ! empty( $file_urls[ $i ] ) ) {
+				$download_id = wc_clean( $file_hashes[ $i ] );
+				if ( ! is_string( $download_id ) ) {
+					continue;
+				}
+
+				$file_url          = wp_unslash( trim( $file_urls[ $i ] ) );
+				$rendered_file_url = isset( $rendered_file_urls[ $i ] ) ? wp_unslash( trim( $rendered_file_urls[ $i ] ) ) : null;
+				$stored_file_url   = $stored_downloads[ $download_id ]['file'] ?? null;
+				$file_url_edited   = null === $rendered_file_url || $rendered_file_url !== $file_url;
+
+				if ( is_string( $stored_file_url ) && ! $file_url_edited ) {
+					$file_url = $stored_file_url;
+				}
+
+				if ( ! empty( $file_url ) ) {
 					$downloads[] = array(
 						'name'        => wc_clean( $file_names[ $i ] ),
-						'file'        => wp_unslash( trim( $file_urls[ $i ] ) ),
-						'download_id' => wc_clean( $file_hashes[ $i ] ),
+						'file'        => $file_url,
+						'download_id' => $download_id,
 					);
 				}
 			}
@@ -405,7 +422,9 @@ class WC_Meta_Box_Product_Data {
 				'downloads'          => self::prepare_downloads(
 					isset( $_POST['_wc_file_names'] ) ? wp_unslash( $_POST['_wc_file_names'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					isset( $_POST['_wc_file_urls'] ) ? wp_unslash( $_POST['_wc_file_urls'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					isset( $_POST['_wc_file_hashes'] ) ? wp_unslash( $_POST['_wc_file_hashes'] ) : array() // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					isset( $_POST['_wc_file_hashes'] ) ? wp_unslash( $_POST['_wc_file_hashes'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					isset( $_POST['_wc_file_rendered_urls'] ) ? wp_unslash( $_POST['_wc_file_rendered_urls'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					$post_id
 				),
 				'product_url'        => isset( $_POST['_product_url'] ) ? esc_url_raw( wp_unslash( $_POST['_product_url'] ) ) : '',
 				'button_text'        => isset( $_POST['_button_text'] ) ? wc_clean( wp_unslash( $_POST['_button_text'] ) ) : '',
@@ -587,7 +606,9 @@ class WC_Meta_Box_Product_Data {
 						'downloads'         => self::prepare_downloads(
 							isset( $_POST['_wc_variation_file_names'][ $variation_id ] ) ? wp_unslash( $_POST['_wc_variation_file_names'][ $variation_id ] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 							isset( $_POST['_wc_variation_file_urls'][ $variation_id ] ) ? wp_unslash( $_POST['_wc_variation_file_urls'][ $variation_id ] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-							isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? wp_unslash( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) : array() // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+							isset( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) ? wp_unslash( $_POST['_wc_variation_file_hashes'][ $variation_id ] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+							isset( $_POST['_wc_variation_file_rendered_urls'][ $variation_id ] ) ? wp_unslash( $_POST['_wc_variation_file_rendered_urls'][ $variation_id ] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+							$variation_id
 						),
 						'manage_stock'      => isset( $_POST['variable_manage_stock'][ $i ] ),
 						'stock_quantity'    => $stock,
