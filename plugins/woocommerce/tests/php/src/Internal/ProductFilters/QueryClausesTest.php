@@ -160,7 +160,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 *           ["pa_color",["red-slug","green-slug"],"or"]
 	 *           ["pa_color",["red-slug","green-slug"],"and"]
 	 *           ["pa_color",["red-slug","blue-slug"],"and"]
-	 *           ["pa_color",["red-slug","not-exist-slug"],"and"]
 	 *           ["pa_color",["red-slug"],"or",false]
 	 *           ["pa_color",["red-slug","green-slug"],"and",false]
 	 *
@@ -219,6 +218,27 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox Attribute lookup filtering ignores unknown terms in an AND query.
+	 */
+	public function test_attribute_lookup_clauses_ignore_unknown_and_terms(): void {
+		$chosen_attributes = array(
+			'pa_color' => array(
+				'terms'      => array( 'red-slug', 'not-exist-slug' ),
+				'query_type' => 'and',
+			),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
+			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertSame( array( 'Product 5' ), $received_products );
 	}
 
 	/**
