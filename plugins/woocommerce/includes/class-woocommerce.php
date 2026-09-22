@@ -1600,7 +1600,7 @@ final class WooCommerce {
 	 *
 	 * @param string $old_value The old value for the woocommerce_allow_tracking option.
 	 * @param string $value The current value for the woocommerce_allow_tracking option.
-	 * @since x.x.x
+	 * @since 9.5.2
 	 *
 	 * @return void
 	 */
