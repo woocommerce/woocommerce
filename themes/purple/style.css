@@ -314,10 +314,6 @@ body {
 	align-items: flex-start;
 }
 
-:where(.wc-block-product-filter-chips__items) {
-	gap: var(--wp--preset--spacing--10);
-}
-
 /* Closed accordion panels are server-rendered without [hidden] (the
  * Interactivity API only applies it after hydration), so they flash open
  * on load. Collapse them from first paint via the server-rendered

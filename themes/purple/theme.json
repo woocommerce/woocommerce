@@ -540,7 +540,8 @@
 						"left": "1.25rem",
 						"right": "1.25rem",
 						"top": "0.625rem"
-					}
+					},
+					"blockGap": "var(--wp--preset--spacing--10)"
 				}
 			},
 			"woocommerce/product-filters": {
