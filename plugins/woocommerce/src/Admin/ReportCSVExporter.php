@@ -355,6 +355,54 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Create the export's file, empty, replacing anything an export with the same ID left behind.
+	 *
+	 * ReportExporter calls this when it queues the export, so that every batch only ever appends.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public function create_export_file() {
+		foreach ( array( $this->get_file_path(), $this->get_headers_row_file_path() ) as $path ) {
+			if ( file_exists( $path ) ) {
+				wp_delete_file( $path );
+			}
+		}
+
+		// The parent has no other way to create the file, and it is empty at this point.
+		$this->get_file();
+	}
+
+	/**
+	 * Write the headers row file, which is what marks an export complete and downloadable.
+	 *
+	 * The parent writes it from whichever batch reports 100%, which is that page's own position in
+	 * the report rather than whether every other page has finished.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public function write_headers_row_file() {
+		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	}
+
+	/**
+	 * Write one page of the report to the export file.
+	 *
+	 * Unlike the parent, this never recreates the file on page 1. Action Scheduler runs the pages in
+	 * any order, so page 1 running late would throw away what the pages before it wrote.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public function generate_file() {
+		$this->prepare_data_to_export();
+		$this->write_csv_data( $this->get_csv_data() );
+	}
+
+	/**
 	 * Get total number of rows in export.
 	 *
 	 * @return int Number of rows to export.

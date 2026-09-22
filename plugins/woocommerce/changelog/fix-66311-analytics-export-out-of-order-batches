@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics report exports no longer lose rows or skip the download email when their batches finish out of order.
