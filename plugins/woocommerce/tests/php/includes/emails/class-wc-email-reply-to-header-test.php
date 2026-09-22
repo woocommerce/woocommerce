@@ -81,9 +81,9 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		$headers = $email->get_headers();
 
-		$this->assertSame(
+		$this->assertStringContainsString(
 			"Reply-to: Foo Bcc: attacker@example.test X-Injected: Bar <guest@example.com>\r\n",
-			$this->extract_reply_to_line( $headers )
+			$headers
 		);
 
 		$lines              = $this->split_headers( $headers );
@@ -94,26 +94,6 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		foreach ( $non_reply_to_lines as $line ) {
 			$this->assertStringNotContainsString( 'attacker@example.test', $line, 'No header other than Reply-to should reference the injected address' );
 		}
-	}
-
-	/**
-	 * Extract the raw "Reply-to: ...\r\n" line, if any, from a header string.
-	 *
-	 * @param string $headers Raw header string.
-	 * @return string
-	 */
-	private function extract_reply_to_line( string $headers ): string {
-		$start = strpos( $headers, 'Reply-to:' );
-		if ( false === $start ) {
-			return '';
-		}
-
-		$end = strpos( $headers, "\r\n", $start );
-		if ( false === $end ) {
-			return '';
-		}
-
-		return substr( $headers, $start, $end - $start + strlen( "\r\n" ) );
 	}
 
 	/**
@@ -129,7 +109,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( "Reply-to: Smith Jr. <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringContainsString( "Reply-to: Smith Jr. <guest@example.com>\r\n", $email->get_headers() );
 	}
 
 	/**
@@ -145,7 +125,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( "Reply-to: María O'Brien <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringContainsString( "Reply-to: María O'Brien <guest@example.com>\r\n", $email->get_headers() );
 	}
 
 	/**
@@ -162,7 +142,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringNotContainsString( 'Reply-to:', $email->get_headers() );
 	}
 
 	/**
@@ -181,7 +161,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringNotContainsString( 'Reply-to:', $email->get_headers() );
 	}
 
 	/**
@@ -196,7 +176,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( "Reply-to: 0 <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringContainsString( "Reply-to: 0 <guest@example.com>\r\n", $email->get_headers() );
 	}
 
 	/**
@@ -213,7 +193,7 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 		$email         = new WC_Email_New_Order();
 		$email->object = $order;
 
-		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringNotContainsString( 'Reply-to:', $email->get_headers() );
 	}
 
 	/**
@@ -233,8 +213,9 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
-		$this->assertSame( "Reply-to: Shop  Bcc: x@evil.test <reply@example.com>\r\n", $this->extract_reply_to_line( $headers ) );
-		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $this->extract_reply_to_line( $headers ), '', $headers ) );
+		$reply_to_line = "Reply-to: Shop  Bcc: x@evil.test <reply@example.com>\r\n";
+		$this->assertStringContainsString( $reply_to_line, $headers );
+		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $reply_to_line, '', $headers ) );
 	}
 
 	/**
@@ -253,8 +234,9 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
-		$this->assertSame( "Reply-to: Shop  Bcc: x@evil.test <from@address.com>\r\n", $this->extract_reply_to_line( $headers ) );
-		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $this->extract_reply_to_line( $headers ), '', $headers ) );
+		$reply_to_line = "Reply-to: Shop  Bcc: x@evil.test <from@address.com>\r\n";
+		$this->assertStringContainsString( $reply_to_line, $headers );
+		$this->assertStringNotContainsString( 'x@evil.test', str_replace( $reply_to_line, '', $headers ) );
 	}
 
 	/**
@@ -272,6 +254,6 @@ class WC_Email_Reply_To_Header_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_email_from_name', $filter );
 
-		$this->assertSame( "Reply-to: Shop Inc. <from@address.com>\r\n", $this->extract_reply_to_line( $headers ) );
+		$this->assertStringContainsString( "Reply-to: Shop Inc. <from@address.com>\r\n", $headers );
 	}
 }

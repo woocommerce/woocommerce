@@ -22,26 +22,6 @@ class WC_Email_Order_Withdrawal_Requested_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Extract the raw "Reply-to: ...\r\n" line, if any, from a header string.
-	 *
-	 * @param string $headers Raw header string.
-	 * @return string
-	 */
-	private function extract_reply_to_line( string $headers ): string {
-		$start = strpos( $headers, 'Reply-to:' );
-		if ( false === $start ) {
-			return '';
-		}
-
-		$end = strpos( $headers, "\r\n", $start );
-		if ( false === $end ) {
-			return '';
-		}
-
-		return substr( $headers, $start, $end - $start + strlen( "\r\n" ) );
-	}
-
-	/**
 	 * Build a withdrawal email instance with the given submitter name and email.
 	 *
 	 * @param string $first_name Submitter first name.
@@ -61,25 +41,18 @@ class WC_Email_Order_Withdrawal_Requested_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A comma in the submitted name is removed since wp_mail splits Reply-to on commas.
+	 * @testWith ["Smith,", "Jr.", "Reply-to: Smith Jr. <guest@example.com>\r\n"]
+	 *           ["x@evil.test,", "Bob", "Reply-to: x@evil.test Bob <guest@example.com>\r\n"]
+	 *           ["Jane", "Doe", "Reply-to: Jane Doe <guest@example.com>\r\n"]
+	 *
+	 * @param string $first_name     Submitter first name.
+	 * @param string $last_name      Submitter last name.
+	 * @param string $reply_to_line  Expected Reply-to header line.
 	 */
-	public function test_comma_in_submitter_name_is_removed(): void {
-		$email = $this->make_email( 'Smith,', 'Jr.', 'guest@example.com' );
+	public function test_submitter_name_reply_to_line( string $first_name, string $last_name, string $reply_to_line ): void {
+		$email = $this->make_email( $first_name, $last_name, 'guest@example.com' );
 
-		$this->assertSame( "Reply-to: Smith Jr. <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
-	}
-
-	/**
-	 * @testdox A comma used to try to smuggle an extra Reply-to address is removed.
-	 */
-	public function test_comma_separated_address_in_submitter_name_is_removed(): void {
-		$email = $this->make_email( 'x@evil.test,', 'Bob', 'guest@example.com' );
-
-		$headers       = $email->get_headers();
-		$reply_to_line = $this->extract_reply_to_line( $headers );
-
-		$this->assertStringNotContainsString( ',', $reply_to_line );
-		$this->assertSame( "Reply-to: x@evil.test Bob <guest@example.com>\r\n", $reply_to_line );
+		$this->assertStringContainsString( $reply_to_line, $email->get_headers() );
 	}
 
 	/**
@@ -88,15 +61,6 @@ class WC_Email_Order_Withdrawal_Requested_Test extends \WC_Unit_Test_Case {
 	public function test_comma_only_submitter_name_produces_no_reply_to(): void {
 		$email = $this->make_email( ',', '', 'guest@example.com' );
 
-		$this->assertSame( '', $this->extract_reply_to_line( $email->get_headers() ) );
-	}
-
-	/**
-	 * @testdox A normal name is left unchanged.
-	 */
-	public function test_normal_submitter_name_is_unchanged(): void {
-		$email = $this->make_email( 'Jane', 'Doe', 'guest@example.com' );
-
-		$this->assertSame( "Reply-to: Jane Doe <guest@example.com>\r\n", $this->extract_reply_to_line( $email->get_headers() ) );
+		$this->assertStringNotContainsString( 'Reply-to:', $email->get_headers() );
 	}
 }
