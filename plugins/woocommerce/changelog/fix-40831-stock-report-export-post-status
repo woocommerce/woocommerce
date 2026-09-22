@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Analytics: pin the Stock report to published and private products so its CSV export always completes and its download email is sent.
