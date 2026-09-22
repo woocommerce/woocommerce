@@ -1,4 +1,4 @@
-Significance: major
+Significance: minor
 Type: dev
 
 Rename Atomic blocks internals to Product Element blocks and replace the AtomicBlock PHP class with ProductElementBlock.
