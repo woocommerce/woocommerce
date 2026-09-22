@@ -104,6 +104,7 @@ class WC_Unit_Tests_Bootstrap {
 		$this->initialize_dependency_injection();
 
 		$this->maybe_initialize_hpos();
+		$this->register_ddl_guard();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -185,6 +186,23 @@ class WC_Unit_Tests_Bootstrap {
 		CodeHacker::add_hack( new BypassFinalsHack() );
 
 		CodeHacker::enable();
+	}
+
+	/**
+	 * Fail tests that run DDL inside their transaction. WC_DDL_GUARD=report lists
+	 * offenders instead, for seeding and triage, and is ignored when CI is set so
+	 * the guard always enforces there. There is no off switch: the allowlist is
+	 * the escape hatch.
+	 */
+	private function register_ddl_guard() {
+		$mode = WC_DDL_In_Transaction_Guard::MODE_ENFORCE;
+		if ( WC_DDL_In_Transaction_Guard::MODE_REPORT === getenv( 'WC_DDL_GUARD' ) && ! getenv( 'CI' ) ) {
+			$mode = WC_DDL_In_Transaction_Guard::MODE_REPORT;
+		}
+		WC_DDL_In_Transaction_Guard::register(
+			include $this->tests_dir . '/framework/ddl-in-transaction-allowlist.php',
+			$mode
+		);
 	}
 
 	/**
@@ -313,6 +331,7 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
+		require_once $this->tests_dir . '/framework/class-wc-ddl-in-transaction-guard.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.
