@@ -58,7 +58,9 @@ const getSharedPlugins = ( {
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					// This plugin calls exclude.test() directly, so it must be a
+					// single RegExp, not the array webpack's module rules accept.
+					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )

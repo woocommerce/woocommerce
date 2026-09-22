@@ -40,6 +40,13 @@ class SubmissionHandler {
 	public const COMPLETED_META_KEY = '_wc_review_request_completed_at';
 
 	/**
+	 * Comment meta flag set on reviews the comment pipeline auto-rejected (spam or
+	 * trash, e.g. a disallowed-keys hit), so a later resubmission is not treated as a
+	 * moderator's final verdict by has_rejected_review().
+	 */
+	private const AUTO_REJECTED_META_KEY = '_wc_auto_rejected';
+
+	/**
 	 * Wire the AJAX endpoints.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -49,6 +56,29 @@ class SubmissionHandler {
 	final public function init(): void {
 		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'wp_ajax_nopriv_' . self::ACTION, array( $this, 'handle' ) );
+		add_action( 'transition_comment_status', array( $this, 'clear_auto_rejected_flag' ), 10, 3 );
+	}
+
+	/**
+	 * Drop the automatic-rejection tag when a tagged review's status later changes.
+	 *
+	 * A moderator confirming the rejection (or our own re-moderation approving a
+	 * resubmission) is the final word, so the row should no longer be skipped by
+	 * has_rejected_review(). Our own auto-rejection sets the tag after the status
+	 * transition, so it is not affected.
+	 *
+	 * @param int|string  $new_status New comment status.
+	 * @param int|string  $old_status Old comment status.
+	 * @param \WP_Comment $comment    The comment whose status changed.
+	 */
+	public function clear_auto_rejected_flag( $new_status, $old_status, $comment ): void {
+		unset( $new_status, $old_status );
+		if ( ! $comment instanceof \WP_Comment || 'review' !== $comment->comment_type ) {
+			return;
+		}
+		if ( get_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY, true ) ) {
+			delete_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY );
+		}
 	}
 
 	/**
@@ -136,6 +166,11 @@ class SubmissionHandler {
 		ItemEligibility::reset_cache();
 		ItemEligibility::preload_for_items( $item_index, $order );
 
+		// Comment id created or updated in THIS request, keyed by product|variation
+		// slot. The eligibility cache only reflects pre-request state, so this lets
+		// the loop reject later rows for a slot already handled in the same request.
+		$request_slot_comments = array();
+
 		foreach ( $rows_in as $row_index => $row ) {
 			$row_index = (int) $row_index;
 			$row       = is_array( $row ) ? $row : array();
@@ -149,7 +184,7 @@ class SubmissionHandler {
 			$product_id    = isset( $row['product_id'] ) ? absint( $row['product_id'] ) : 0;
 			$order_item_id = isset( $row['order_item_id'] ) ? absint( $row['order_item_id'] ) : 0;
 			// $rows_in was already unslashed in handle(); avoid double-unslashing.
-			$text = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses_post( $row['text'] ) ) : '';
+			$text = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses( $row['text'], 'pre_comment_content' ) ) : '';
 
 			// Per-row result always carries `product_id` (parent product, where
 			// the review lives) and `variation_id` (0 for simple products) so
@@ -198,6 +233,17 @@ class SubmissionHandler {
 			// product page regardless of which variation was bought.
 			$review_post_id = $line_product_id;
 
+			// Reviews are stored and resolved per product/variation slot. If this
+			// slot was already handled in this request (the stock page collapses to
+			// one row per slot, but a theme override or a tampered POST can send
+			// several), reuse that outcome instead of storing a second review, so
+			// extra rows can't stack duplicates yet still report success.
+			$slot_key = $line_product_id . '|' . $line_variation_id;
+			if ( isset( $request_slot_comments[ $slot_key ] ) ) {
+				$results[ $row_index ] = $request_slot_comments[ $slot_key ];
+				continue;
+			}
+
 			// Reject submissions for products whose review form was never
 			// rendered (comments disabled on the product).
 			$decision = ItemEligibility::decide( $item, $order );
@@ -221,103 +267,244 @@ class SubmissionHandler {
 			$existing = $decision['comment'] instanceof \WP_Comment ? $decision['comment'] : null;
 
 			if ( $existing instanceof \WP_Comment ) {
-				// A moderator's spam/trash decision is final.
+				// decide() only returns approved or held reviews, so a spam/trash row
+				// here would be a moderator's final verdict; never edit it.
 				if ( in_array( wp_get_comment_status( $existing ), array( 'spam', 'trash' ), true ) ) {
 					$result['error']       = 'update_failed';
 					$results[ $row_index ] = $result;
 					continue;
 				}
 
-				$approved  = self::comment_approval_status( $author_name, $author_email, $text, $author_ip, $author_agent );
-				$update_ok = wp_update_comment(
-					wp_slash(
-						array(
-							'comment_ID'       => (int) $existing->comment_ID,
-							'comment_content'  => $text,
-							'comment_approved' => $approved,
-						)
-					)
-				);
-				if ( false === $update_ok || is_wp_error( $update_ok ) ) {
-					$result['error']       = 'update_failed';
-					$results[ $row_index ] = $result;
-					continue;
+				$result = array_merge( $result, self::update_review_in_place( $existing, $text, $rating, $author_ip, $author_agent ) );
+				if ( ! isset( $result['error'] ) ) {
+					$request_slot_comments[ $slot_key ] = $result;
 				}
-
-				update_comment_meta( (int) $existing->comment_ID, 'rating', $rating );
-
-				$result['comment_id']  = (int) $existing->comment_ID;
-				$result['status']      = 1 === $approved ? 'ok' : 'pending_moderation';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
+			// A moderator's spam/trash verdict for this slot is final.
 			if ( self::has_rejected_review( $order, $line_product_id, $line_variation_id ) ) {
 				$result['error']       = 'update_failed';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
-			$approved = self::comment_approval_status( $author_name, $author_email, $text, $author_ip, $author_agent );
+			// A row the pipeline auto-rejected earlier is invisible to decide()
+			// (it only looks at approved/held rows). Reuse it instead of storing a
+			// fresh row on every retry, so a disallowed resubmission can't grow the
+			// table without bound.
+			$auto_rejected = self::find_auto_rejected_review( $order, $line_product_id, $line_variation_id );
+			if ( $auto_rejected instanceof \WP_Comment ) {
+				$result = array_merge( $result, self::update_review_in_place( $auto_rejected, $text, $rating, $author_ip, $author_agent ) );
+				if ( ! isset( $result['error'] ) ) {
+					$request_slot_comments[ $slot_key ] = $result;
+				}
+				$results[ $row_index ] = $result;
+				continue;
+			}
 
-			$comment_data = array(
-				'comment_post_ID'      => $review_post_id,
-				'comment_author'       => '' !== $author_name ? $author_name : __( 'Anonymous', 'woocommerce' ),
-				'comment_author_email' => $author_email,
-				'comment_author_IP'    => $author_ip,
-				'comment_agent'        => $author_agent,
-				'comment_content'      => $text,
-				'comment_type'         => 'review',
-				'comment_approved'     => $approved,
-				'user_id'              => $comment_user_id,
+			$comment_meta = array(
+				'rating'                            => $rating,
+				'verified'                          => 1,
+				ItemEligibility::ORDER_META_KEY     => (int) $order->get_id(),
+				ItemEligibility::VARIATION_META_KEY => $line_variation_id,
 			);
 
-			$comment_id = wp_insert_comment( wp_slash( $comment_data ) );
-			if ( ! $comment_id ) {
+			$variation_summary = ItemEligibility::format_variation_summary( $item );
+			if ( '' !== $variation_summary ) {
+				$comment_meta[ ItemEligibility::VARIATION_SUMMARY_META_KEY ] = $variation_summary;
+			}
+
+			$comment_id = self::insert_review(
+				array(
+					'comment_post_ID'      => $review_post_id,
+					// Core strips markup from the name; fall back when nothing would be left.
+					'comment_author'       => '' !== sanitize_text_field( $author_name ) ? $author_name : __( 'Anonymous', 'woocommerce' ),
+					'comment_author_email' => $author_email,
+					'comment_author_url'   => '',
+					'comment_author_IP'    => $author_ip,
+					'comment_agent'        => $author_agent,
+					'comment_content'      => $text,
+					'comment_type'         => 'review',
+					'user_id'              => $comment_user_id,
+					'comment_meta'         => $comment_meta,
+				)
+			);
+			if ( ! $comment_id || is_wp_error( $comment_id ) ) {
 				$result['error']       = 'insert_failed';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
-			add_comment_meta( $comment_id, 'rating', $rating, true );
-			add_comment_meta( $comment_id, 'verified', 1, true );
-			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
-			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, $line_variation_id, true );
-
-			$variation_summary = ItemEligibility::format_variation_summary( $item );
-			if ( '' !== $variation_summary ) {
-				add_comment_meta( $comment_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, $variation_summary, true );
+			// Tag a row the checks rejected (spam/trash) as an automatic rejection,
+			// so a later valid resubmission is treated as a fresh attempt rather
+			// than a moderator's final verdict by has_rejected_review().
+			if ( in_array( wp_get_comment_status( $comment_id ), array( 'spam', 'trash' ), true ) ) {
+				update_comment_meta( (int) $comment_id, self::AUTO_REJECTED_META_KEY, 1 );
 			}
 
-			$result['comment_id']  = (int) $comment_id;
-			$result['status']      = 1 === $approved ? 'ok' : 'pending_moderation';
-			$results[ $row_index ] = $result;
+			$result['comment_id'] = (int) $comment_id;
+			$result['status']     = 'approved' === wp_get_comment_status( $comment_id ) ? 'ok' : 'pending_moderation';
+
+			$request_slot_comments[ $slot_key ] = $result;
+			$results[ $row_index ]              = $result;
 		}//end foreach
 
 		return $results;
 	}
 
 	/**
-	 * Decide whether a review should be auto-approved, via WordPress's own `check_comment()`.
+	 * Update a review row in place: re-moderate changed content, write the rating,
+	 * and move the row to the resulting status. Shared by the normal edit path and
+	 * by resubmitting after an automatic rejection, so a rejected row is corrected
+	 * rather than a new one stored.
 	 *
-	 * @param string $author  Comment author name.
-	 * @param string $email   Comment author email.
-	 * @param string $content Comment content.
-	 * @param string $ip      Comment author IP.
-	 * @param string $agent   Comment author user agent.
-	 * @return int 1 to auto-approve, 0 to hold for moderation.
+	 * @param \WP_Comment $existing The review being updated.
+	 * @param string      $content  The new content (already run through comment kses).
+	 * @param int         $rating   Rating value 1-5.
+	 * @param string      $ip       Comment author IP.
+	 * @param string      $agent    Comment author user agent.
+	 * @return array{comment_id?:int, status?:string, error?:string}
 	 */
-	private static function comment_approval_status( string $author, string $email, string $content, string $ip, string $agent ): int {
-		add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
-		$approved = check_comment( $author, $email, '', $content, $ip, $agent, 'review' );
-		remove_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+	private static function update_review_in_place( \WP_Comment $existing, string $content, int $rating, string $ip, string $agent ): array {
+		$existing_id = (int) $existing->comment_ID;
 
-		return $approved ? 1 : 0;
+		// Compare against the stored content run back through comment kses so that
+		// filters core adds on save (e.g. rel="nofollow ugc" on links) don't read
+		// as a content change. Only re-moderate when the text actually changed; a
+		// rating-only edit keeps the row's current moderation state.
+		$stored_content = trim( wp_kses( (string) $existing->comment_content, 'pre_comment_content' ) );
+		$approved       = $content === $stored_content
+			? $existing->comment_approved
+			: self::moderate_edited_review( $existing, $content, $ip, $agent );
+
+		$update_ok = wp_update_comment(
+			wp_slash(
+				array(
+					'comment_ID'      => $existing_id,
+					'comment_content' => $content,
+				)
+			)
+		);
+		if ( false === $update_ok || is_wp_error( $update_ok ) ) {
+			return array( 'error' => 'update_failed' );
+		}
+
+		update_comment_meta( $existing_id, 'rating', $rating );
+
+		// Drive the status explicitly so a previously auto-rejected row is untrashed
+		// when it now approves or holds. Only when it actually changes, so an
+		// unchanged status doesn't fire a redundant transition (or approval notice).
+		// clear_auto_rejected_flag() drops the tag on a real transition; re-tag only
+		// when the row stays rejected.
+		$target = in_array( $approved, array( 'spam', 'trash' ), true )
+			? (string) $approved
+			: ( 1 === (int) $approved ? 'approve' : 'hold' );
+
+		$status_vocab   = array(
+			'approved'   => 'approve',
+			'unapproved' => 'hold',
+			'spam'       => 'spam',
+			'trash'      => 'trash',
+		);
+		$current_status = $status_vocab[ wp_get_comment_status( $existing_id ) ] ?? '';
+		if ( $target !== $current_status ) {
+			wp_set_comment_status( $existing_id, $target );
+		}
+
+		if ( in_array( $approved, array( 'spam', 'trash' ), true ) ) {
+			update_comment_meta( $existing_id, self::AUTO_REJECTED_META_KEY, 1 );
+		}
+
+		return array(
+			'comment_id' => $existing_id,
+			'status'     => 'approved' === wp_get_comment_status( $existing_id ) ? 'ok' : 'pending_moderation',
+		);
+	}
+
+	/**
+	 * Approval status for an edited review, run through the same moderation an insert
+	 * gets: the disallowed-keys list, moderation keywords and link limit, and the
+	 * `pre_comment_approved` filter. `wp_update_comment()` never runs these itself.
+	 *
+	 * @param \WP_Comment $existing The review being edited.
+	 * @param string      $content  The new content.
+	 * @param string      $ip       Comment author IP.
+	 * @param string      $agent    Comment author user agent.
+	 * @return int|string 1 or 0 to approve/hold, or 'spam'/'trash' to reject.
+	 */
+	private static function moderate_edited_review( \WP_Comment $existing, string $content, string $ip, string $agent ) {
+		$comment_data = array(
+			'comment_ID'           => (int) $existing->comment_ID,
+			'comment_post_ID'      => (int) $existing->comment_post_ID,
+			'comment_author'       => $existing->comment_author,
+			'comment_author_email' => $existing->comment_author_email,
+			'comment_author_url'   => $existing->comment_author_url,
+			'comment_content'      => $content,
+			'comment_author_IP'    => $ip,
+			'comment_agent'        => $agent,
+			'comment_type'         => 'review',
+			// A deleted author would make wp_check_comment_data() call has_cap() on
+			// a false user and fatal, so fall back to an unattributed 0.
+			'user_id'              => get_userdata( (int) $existing->user_id ) ? (int) $existing->user_id : 0,
+		);
+
+		// Verified-purchase reviews are not held behind the "commenter must already
+		// have an approved comment" gate, matching the insert path.
+		add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+		try {
+			$approved = wp_check_comment_data( $comment_data );
+		} finally {
+			remove_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+		}
+
+		// A filter may return WP_Error; fall back to holding for moderation.
+		return is_wp_error( $approved ) ? 0 : $approved;
+	}
+
+	/**
+	 * Insert a review through `wp_new_comment()`, so it gets the same filters,
+	 * spam checks and notifications as a comment posted on the product page.
+	 *
+	 * @param array $comment_data Unslashed comment data.
+	 * @return int|false|\WP_Error Comment ID, false on failure, or the error from the comment checks.
+	 */
+	private static function insert_review( array $comment_data ) {
+		// Sanitize the address as core's pre_comment_author_email chain would, but
+		// keep it un-encoded (sanitize_email preserves `&`) so the eligibility
+		// lookups still match the order's billing email.
+		$raw_email      = wp_slash( sanitize_email( (string) $comment_data['comment_author_email'] ) );
+		$keep_raw_email = function () use ( $raw_email ) {
+			return $raw_email;
+		};
+
+		// These reviews are tied to a real purchased line item, so don't hold them
+		// behind the "commenter must already have an approved comment" gate that
+		// core applies to anonymous blog commenters.
+		add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+		// Variations share the parent product, so identical text on two of them is not a duplicate.
+		add_filter( 'duplicate_comment_id', '__return_zero' );
+		// Keep the sanitized address as-is; core's chain would otherwise encode `&`.
+		add_filter( 'pre_comment_author_email', $keep_raw_email, PHP_INT_MAX );
+		// Rows are capped at one review per purchased item, and core's flood query matches order notes by IP.
+		add_filter( 'wp_is_comment_flood', '__return_false', PHP_INT_MAX );
+
+		try {
+			return wp_new_comment( wp_slash( $comment_data ), true );
+		} finally {
+			remove_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+			remove_filter( 'duplicate_comment_id', '__return_zero' );
+			remove_filter( 'pre_comment_author_email', $keep_raw_email, PHP_INT_MAX );
+			remove_filter( 'wp_is_comment_flood', '__return_false', PHP_INT_MAX );
+		}
 	}
 
 	/**
 	 * Whether a moderator already marked this exact order/product/variation
-	 * review as spam or trash.
+	 * review as spam or trash. Reviews the comment pipeline auto-rejected (tagged
+	 * with AUTO_REJECTED_META_KEY) are excluded, so an automatic verdict does not
+	 * lock the customer out of resubmitting a clean review.
 	 *
 	 * @param WC_Order $order        Order being reviewed.
 	 * @param int      $product_id   Parent product id.
@@ -344,6 +531,11 @@ class SubmissionHandler {
 						'value' => (string) $order->get_id(),
 					),
 					array(
+						// Only a moderator's verdict is final; skip pipeline auto-rejections.
+						'key'     => self::AUTO_REJECTED_META_KEY,
+						'compare' => 'NOT EXISTS',
+					),
+					array(
 						'relation' => 'OR',
 						array(
 							'key'   => ItemEligibility::VARIATION_META_KEY,
@@ -360,6 +552,64 @@ class SubmissionHandler {
 		);
 
 		return is_array( $comments ) && ! empty( $comments );
+	}
+
+	/**
+	 * The customer's own auto-rejected (spam/trash, tagged) review for this
+	 * order/product/variation, if any, so a resubmission reuses that row instead
+	 * of stacking a new one. Moderator verdicts (untagged) are not returned.
+	 *
+	 * @param WC_Order $order        Order being reviewed.
+	 * @param int      $product_id   Parent product id.
+	 * @param int      $variation_id Variation id (0 for simple products).
+	 * @return \WP_Comment|null
+	 */
+	private static function find_auto_rejected_review( WC_Order $order, int $product_id, int $variation_id ): ?\WP_Comment {
+		$email = $order->get_billing_email();
+		if ( '' === $email ) {
+			return null;
+		}
+
+		$comments = get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $email,
+				'type'         => 'review',
+				'status'       => array( 'spam', 'trash' ),
+				'number'       => 1,
+				'orderby'      => 'comment_date_gmt',
+				'order'        => 'DESC',
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+					'relation' => 'AND',
+					array(
+						'key'   => ItemEligibility::ORDER_META_KEY,
+						'value' => (string) $order->get_id(),
+					),
+					array(
+						'key'     => self::AUTO_REJECTED_META_KEY,
+						'compare' => 'EXISTS',
+					),
+					array(
+						'relation' => 'OR',
+						array(
+							'key'   => ItemEligibility::VARIATION_META_KEY,
+							'value' => (string) $variation_id,
+						),
+						array(
+							'key'     => ItemEligibility::VARIATION_META_KEY,
+							'compare' => 'NOT EXISTS',
+						),
+					),
+				),
+			)
+		);
+
+		if ( ! is_array( $comments ) || empty( $comments ) ) {
+			return null;
+		}
+
+		$first = reset( $comments );
+		return $first instanceof \WP_Comment ? $first : null;
 	}
 
 	/**
