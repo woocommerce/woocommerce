@@ -457,11 +457,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			$term_ids_by_taxonomy[ $term->taxonomy ][] = $term->term_id;
 		}
 
-		foreach ( array_keys( $chosen_taxonomies ) as $taxonomy ) {
-			$term_ids = $term_ids_by_taxonomy[ $taxonomy ] ?? array();
+		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
 			if ( empty( $term_ids ) ) {
-				$args['where'] .= ' AND 1=0';
-				return $args;
+				continue;
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
@@ -510,7 +508,11 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			);
 		}
 
-		$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
+		if ( ! empty( $tax_queries ) ) {
+			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
+		} else {
+			$args['where'] .= ' AND 1=0';
+		}
 
 		return $args;
 	}

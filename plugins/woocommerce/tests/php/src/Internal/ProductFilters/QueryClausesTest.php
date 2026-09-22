@@ -292,9 +292,9 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy filters return no products when one selected taxonomy has no matching term.
+	 * @testdox Taxonomy filtering ignores selected taxonomies with no matching term.
 	 */
-	public function test_taxonomy_clauses_require_a_match_for_each_taxonomy(): void {
+	public function test_taxonomy_clauses_ignore_taxonomies_without_matching_terms(): void {
 		$chosen_taxonomies = array(
 			'product_cat' => array( 'cat-1' ),
 			'product_tag' => array( 'not-exist-slug' ),
@@ -304,10 +304,10 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		};
 
 		add_filter( 'posts_clauses', $filter_callback );
-		$received_products = wc_get_products( array() );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
 		remove_filter( 'posts_clauses', $filter_callback );
 
-		$this->assertSame( array(), $received_products );
+		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4', 'Product 5', 'Product 6' ), $received_products );
 	}
 
 	/**
