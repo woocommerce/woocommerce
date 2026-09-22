@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -111,6 +112,7 @@ class Analytics {
 		}
 
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_payment_gateway_settings' ) );
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
@@ -186,6 +188,32 @@ class Analytics {
 		}
 
 		return $endpoints;
+	}
+
+	/**
+	 * Pass the installed payment gateways to the client, for the Orders report payment method
+	 * filter and column.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	public function add_payment_gateway_settings( $settings ) {
+		// Instantiating every gateway is not cheap, and only the Analytics pages read this.
+		if ( ! PageController::is_admin_page() || ! WC()->payment_gateways() ) {
+			return $settings;
+		}
+
+		$gateways = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$gateways[ $gateway->id ] = $gateway->get_method_title();
+		}
+
+		$settings['paymentGateways'] = $gateways;
+
+		return $settings;
 	}
 
 	/**

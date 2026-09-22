@@ -264,6 +264,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$where_filters[] = $this->get_customer_subquery( $query_args );
+		$where_filters[] = $this->get_payment_method_subquery( $query_args, $operator );
 		$refund_subquery = $this->get_refund_subquery( $query_args );
 		$from_clause    .= $refund_subquery['from_clause'];
 		if ( $refund_subquery['where_clause'] ) {
@@ -303,20 +304,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'interval'          => 'week',
-				'segmentby'         => '',
+				'interval'              => 'week',
+				'segmentby'             => '',
 
-				'match'             => 'all',
-				'status_is'         => array(),
-				'status_is_not'     => array(),
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => '',
-				'category_includes' => array(),
+				'match'                 => 'all',
+				'status_is'             => array(),
+				'status_is_not'         => array(),
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => '',
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'category_includes'     => array(),
 			)
 		);
 
@@ -560,6 +563,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%s',
 			'%d',
 			'%d',
+			'%s',
 		);
 
 		$data = array(
@@ -577,6 +581,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'status'             => self::normalize_order_status( $order->get_status() ),
 			'customer_id'        => $order->get_report_customer_id(),
 			'returning_customer' => $order->is_returning_customer(),
+			// A refund carries no payment method of its own; the refund branch below takes the parent's.
+			'payment_method'     => $order instanceof WC_Order ? $order->get_payment_method() : null,
 		);
 
 		$order_fulfillment_status = '';
@@ -602,6 +608,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
+
+				if ( $parent_order instanceof WC_Order ) {
+					$data['payment_method'] = $parent_order->get_payment_method();
+				}
 
 				$refund_type               = $order->get_meta( '_refund_type' );
 				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();

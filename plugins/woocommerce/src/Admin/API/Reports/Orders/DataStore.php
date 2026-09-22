@@ -81,6 +81,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'total_sales'      => 'floatval',
 		'num_items_sold'   => 'intval',
 		'customer_type'    => 'strval',
+		'payment_method'   => 'strval',
 	);
 
 	/**
@@ -124,6 +125,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
 			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'payment_method'   => "{$table_name}.payment_method",
 		);
 	}
 
@@ -168,6 +170,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
+		}
+
+		$payment_method_subquery = $this->get_payment_method_subquery( $query_args );
+		if ( $payment_method_subquery ) {
+			$where_subquery[] = $payment_method_subquery;
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
@@ -259,19 +266,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'orderby'           => $this->date_column_name,
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => null,
-				'status_is'         => array(),
-				'extended_info'     => false,
-				'refunds'           => null,
-				'order_includes'    => array(),
-				'order_excludes'    => array(),
+				'orderby'               => $this->date_column_name,
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => null,
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'status_is'             => array(),
+				'extended_info'         => false,
+				'refunds'               => null,
+				'order_includes'        => array(),
+				'order_excludes'        => array(),
 			)
 		);
 
