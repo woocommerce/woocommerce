@@ -15,7 +15,11 @@ use WC_Unit_Test_Case;
 class EmailHeadersTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @dataProvider provider_sanitize_reply_to_name
+	 * @testWith ["Foo\r\nBcc: a@b.test", "Foo Bcc: a@b.test"]
+	 *           ["Smith, Jr.", "Smith Jr."]
+	 *           ["María O'Brien", "María O'Brien"]
+	 *           ["   ", ""]
+	 *
 	 * @param string $name     Name to clean.
 	 * @param string $expected Expected cleaned name.
 	 */
@@ -24,14 +28,19 @@ class EmailHeadersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @return array<string, array<string>>
+	 * @testdox A "sanitize_text_field" filter callback reintroducing line breaks does not leak them into the result.
 	 */
-	public function provider_sanitize_reply_to_name(): array {
-		return array(
-			'CRLF collapsed to spaces' => array( "Foo\r\nBcc: a@b.test", 'Foo Bcc: a@b.test' ),
-			'commas removed'           => array( 'Smith, Jr.', 'Smith Jr.' ),
-			'unicode name unchanged'   => array( "María O'Brien", "María O'Brien" ),
-			'whitespace only'          => array( '   ', '' ),
-		);
+	public function test_sanitize_reply_to_name_removes_line_breaks_reintroduced_by_filter(): void {
+		$filter = static fn() => "Shop\r\nX-Test: 1";
+		add_filter( 'sanitize_text_field', $filter );
+
+		try {
+			$result = EmailHeaders::sanitize_reply_to_name( 'Shop' );
+		} finally {
+			remove_filter( 'sanitize_text_field', $filter );
+		}
+
+		$this->assertStringNotContainsString( "\r", $result );
+		$this->assertStringNotContainsString( "\n", $result );
 	}
 }
