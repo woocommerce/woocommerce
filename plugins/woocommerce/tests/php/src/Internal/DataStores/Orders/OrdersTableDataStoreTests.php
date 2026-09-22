@@ -385,7 +385,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order    = $this->create_complex_cot_order();
 		$order_id = $order->get_id();
 
-		$this->assertIsInteger( $order_id );
+		$this->assertIsInt( $order_id );
 		$this->assertLessThan( $order_id, 0 );
 
 		wp_cache_flush();
@@ -1479,6 +1479,30 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Backfilling an order that has no created date and no post row should create the post instead of failing.
+	 */
+	public function test_backfill_post_record_for_order_without_created_date_or_post() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+		$order = $this->create_complex_cot_order();
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $order->get_id() ) );
+		$wpdb->update( $this->sut::get_orders_table_name(), array( 'date_created_gmt' => null ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		$this->sut->clear_cached_data( array( $order->get_id() ) );
+
+		$dateless = new WC_Order();
+		$dateless->set_id( $order->get_id() );
+		$this->switch_data_store( $dateless, $this->sut );
+		$this->sut->read( $dateless );
+		$this->assertNull( $dateless->get_date_created(), 'Precondition: the order has no created date.' );
+
+		$this->sut->backfill_post_record( $dateless );
+
+		$this->assertInstanceOf( \WP_Post::class, get_post( $order->get_id() ), 'The backup post should exist after the backfill.' );
+	}
+
+	/**
 	 * @testDox Test `get_unpaid_orders()`.
 	 */
 	public function test_get_unpaid_orders(): void {
@@ -1555,6 +1579,29 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testDox Sync on read should keep the created date when the post's GMT date column holds the zero date.
+	 */
+	public function test_sync_on_read_keeps_created_date_when_post_gmt_date_is_zero() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+		$order   = $this->create_complex_cot_order();
+		$created = $order->get_date_created()->getTimestamp();
+		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertSame( $created, $refreshed_order->get_date_created()->getTimestamp(), 'The posts reader must agree with HPOS, so nothing is copied back.' );
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', $created ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order->get_id() ) ), 'The HPOS row must keep its date.' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
@@ -2519,6 +2566,112 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$modified_date = $order->get_date_modified();
 		$modified_date->setTimezone( new DateTimeZone( 'GMT' ) );
 		$this->assertEquals( $modified_date->format( 'Y-m-d H:i:s' ), $post->post_modified_gmt );
+	}
+
+	/**
+	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
+	 */
+	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertTrue(
+				$r_order->get_prices_include_tax(),
+				'Persistence should use the default captured at construction, not the current store setting.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $r_order->get_changes() );
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
+	 */
+	public function test_create_keeps_explicit_prices_include_tax_value(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_prices_include_tax( false );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+			);
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testdox An HPOS order with a null tax-mode column uses the store default without a pending edit.
+	 */
+	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
+		global $wpdb;
+
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			$operational_data_table = $this->sut::get_operational_data_table_name();
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$order->get_id()
+				)
+			);
+			wp_cache_flush();
+
+			$read_order = new WC_Order();
+			$read_order->set_id( $order->get_id() );
+			$this->switch_data_store( $read_order, $this->sut );
+			$this->sut->read( $read_order );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'A missing stored value should use the constructor default.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**

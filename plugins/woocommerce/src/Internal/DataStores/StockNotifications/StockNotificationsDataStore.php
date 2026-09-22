@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -440,12 +441,17 @@ CREATE TABLE $meta_table_name (
 		$where        = array();
 		$where_values = array();
 
-		if ( ! empty( $args['status'] ) ) {
-			$statuses = array_values( array_filter( array_map( 'strval', (array) $args['status'] ) ) );
-			if ( ! empty( $statuses ) ) {
-				$where[]      = 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
-				$where_values = array_merge( $where_values, $statuses );
+		$statuses = array_filter(
+			array_map( 'strval', (array) $args['status'] ),
+			static function ( string $status ): bool {
+				return '' !== $status;
 			}
+		);
+		if ( ! empty( $statuses ) ) {
+			$where[]      = 1 === count( $statuses )
+				? 'status = %s'
+				: 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$where_values = array_merge( $where_values, array_values( $statuses ) );
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
@@ -461,7 +467,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
-			$where_values[] = esc_sql( $args['user_email'] );
+			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {
@@ -561,6 +567,7 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function notification_exists_by_email( int $product_id, string $email ): bool {
 
+		$email = EmailNormalizer::normalize( $email );
 		if ( ! is_email( $email ) ) {
 			return false;
 		}
@@ -619,5 +626,28 @@ CREATE TABLE $meta_table_name (
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Count the notifications of each status.
+	 *
+	 * @return array<string, int> Map of status to the number of notifications in it.
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		$results = $wpdb->get_results(
+			"SELECT status, COUNT(id) AS total FROM $table GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		$counts = array();
+		foreach ( (array) $results as $result ) {
+			$counts[ (string) $result['status'] ] = (int) $result['total'];
+		}
+
+		return $counts;
 	}
 }
