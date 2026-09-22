@@ -27,6 +27,13 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	private $customer;
 
 	/**
+	 * The customer in place before the test replaced WC()->customer, to be restored in tearDown().
+	 *
+	 * @var \WC_Customer
+	 */
+	private $original_customer;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -37,8 +44,8 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
 		$this->customer->set_shipping_location( 'US', 'CA', '90210', 'Beverly Hills' );
-		WC()->customer = $this->customer;
-		WC()->cart     = new \WC_Cart();
+		$this->original_customer = WC()->customer;
+		WC()->customer           = $this->customer;
 
 		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
 	}
@@ -48,6 +55,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			WC()->customer = $this->original_customer;
 			remove_filter( 'woocommerce_is_checkout', '__return_true' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
