@@ -2582,17 +2582,24 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// case is a customer whose own email is allowed typing a different one at checkout.
 		$coupon->set_email_restrictions( array( 'allowed@example.com' ) );
 		$coupon->save();
+
+		$original_billing_email = WC()->cart->get_customer()->get_billing_email();
 		WC()->cart->get_customer()->set_billing_email( 'allowed@example.com' );
 
-		WC()->cart->check_customer_coupons( array( 'billing_email' => 'someone-else@example.com' ) );
+		try {
+			WC()->cart->check_customer_coupons( array( 'billing_email' => 'someone-else@example.com' ) );
 
-		// Without the fix the guard refuses this removal, so the customer is told the coupon was
-		// removed while it is still discounting their order.
-		$this->assertFalse( WC()->cart->has_discount( 'auto-email-restricted' ), 'the coupon should have been removed' );
-
-		WC()->cart->empty_cart();
-		$product->delete( true );
-		$coupon->delete( true );
+			// Without the fix the guard refuses this removal, so the customer is told the coupon
+			// was removed while it is still discounting their order.
+			$this->assertFalse( WC()->cart->has_discount( 'auto-email-restricted' ), 'the coupon should have been removed' );
+		} finally {
+			// The customer object outlives the test, and an address left on it decides whether
+			// email-restricted coupons validate in whatever runs next.
+			WC()->cart->get_customer()->set_billing_email( $original_billing_email );
+			WC()->cart->empty_cart();
+			$product->delete( true );
+			$coupon->delete( true );
+		}
 	}
 
 	/**
