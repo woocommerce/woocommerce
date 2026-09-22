@@ -1467,7 +1467,7 @@ jQuery( function ( $ ) {
 	function createProductGalleryMediaItem( attachment, $el, allowVideos ) {
 		const mediaType = attachment.type;
 
-		if ( 'image' === mediaType ) {
+		if ( 'video' !== mediaType ) {
 			return createProductGalleryImageItem( attachment, $el );
 		}
 
@@ -1541,9 +1541,6 @@ jQuery( function ( $ ) {
 			states: [
 				new wp.media.controller.Library( {
 					title: $el.data( 'choose' ),
-					library: wp.media.query( {
-						type: allowVideos ? [ 'image', 'video' ] : 'image',
-					} ),
 					filterable: 'all',
 					multiple: true,
 				} ),
