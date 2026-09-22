@@ -318,11 +318,11 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                                                   => $wp_uploads_dir,
-			network_site_url( '/', 'https' )                                  => ABSPATH,
+			$wp_uploads_url                  => $wp_uploads_dir,
+			network_site_url( '/', 'https' ) => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )                                          => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
+			site_url( '/', 'https' )         => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
 		);
 
 		$count             = 0;
@@ -358,7 +358,7 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_dirname ) ) );
 
-			// A mapped local URL may encode spaces as "%20"; prefer a literal "%20" filename when it exists.
+			// A mapped local URL may encode spaces as "%20". Use the decoded path only when the literal path does not exist.
 		} elseif ( ! $remote_file && $decoded_file_path !== $file_path && ! file_exists( $file_path ) && file_exists( $decoded_file_path ) ) {
 			$file_path = $decoded_file_path;
 
@@ -825,7 +825,7 @@ class WC_Download_Handler {
 	 *
 	 * @return string Content disposition value.
 	 */
-	private static function get_content_disposition() : string {
+	private static function get_content_disposition(): string {
 		$disposition = 'attachment';
 		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
 			$disposition = 'inline';
@@ -912,7 +912,7 @@ class WC_Download_Handler {
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
 				$output_sent = $output_sent || '' !== $chunk;
-				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
 				if ( ob_get_length() ) {
 					ob_flush();
