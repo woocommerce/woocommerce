@@ -238,7 +238,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$extensions = $this->sut->get_country_extensions( 'MX' );
 
 		// Assert.
-		$this->assertCount( 7, $extensions );
+		$this->assertCount( 6, $extensions );
 		$this->assertSame(
 			array(
 				PaymentsExtensionSuggestions::STRIPE,
@@ -247,7 +247,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
 				PaymentsExtensionSuggestions::KLARNA,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
@@ -337,7 +336,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' ),
 			"Mercado Pago should be the first suggestion in {$country_code}, with Visa demoted."
@@ -418,7 +416,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
@@ -500,6 +497,51 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				array(
 					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
+	}
+
+	/**
+	 * @testdox Elavon has complete base suggestion details.
+	 */
+	public function test_elavon_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'elavon' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'elavon-payment-gateway-for-woocommerce',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://developer.elavon.com/terms',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/elavon-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=elavon-payment-gateway',
 				),
 			),
 			$extension['links']
