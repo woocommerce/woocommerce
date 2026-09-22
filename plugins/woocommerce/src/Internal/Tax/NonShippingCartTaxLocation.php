@@ -37,50 +37,34 @@ class NonShippingCartTaxLocation {
 		$this->dispatch_stack    = array();
 		$this->dispatch_contexts = array();
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
-		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
-		// rest_post_dispatch fires for external requests (WP_REST_Server::serve_request) but not
-		// for internal rest_do_request() calls, which only run dispatch(). rest_request_after_callbacks
-		// fires inside dispatch() for both, so nested internal contexts are always cleared.
-		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ), 10, 3 );
+		// Register the cart/checkout context only after a route matches, and clear it right
+		// after the callback. Both hooks fire inside WP_REST_Server::respond_to_request(), which
+		// dispatch() only reaches on a successful route match — a 404 or a rest_pre_dispatch
+		// short-circuit returns before that point, so no context is ever pushed for those
+		// requests. This keeps the stack balanced for both external and internal (rest_do_request)
+		// dispatches, which never run rest_post_dispatch.
+		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
 	}
 
 	/**
-	 * Identify Store API cart and checkout requests before their callbacks run.
+	 * Register Store API cart and checkout context after a route matches, before its callback runs.
 	 *
 	 * @since 11.2.0
 	 * @internal
 	 *
-	 * @param mixed            $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
-	 * @param \WP_REST_Server  $server  Server instance.
-	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @param mixed            $response Result to send to the client.
+	 * @param mixed            $handler  Route handler for the request.
+	 * @param \WP_REST_Request $request  Request used to generate the response.
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return mixed The response to dispatch.
+	 * @return mixed The response.
 	 */
-	public function handle_rest_pre_dispatch( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+	public function handle_rest_request_before_callbacks( $response, $handler, \WP_REST_Request $request ) {
 		$dispatch_id         = spl_object_id( $request );
 		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
 
 		$this->dispatch_contexts[ $dispatch_id ] = $is_cart_or_checkout;
 		$this->dispatch_stack[]                  = $dispatch_id;
-
-		return $result;
-	}
-
-	/**
-	 * Clear the Store API request state after its response is dispatched.
-	 *
-	 * @since 11.2.0
-	 * @internal
-	 *
-	 * @param mixed            $response Response generated for the request.
-	 * @param \WP_REST_Server  $server  Server instance.
-	 * @param \WP_REST_Request $request Request used to generate the response.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return mixed The dispatched response.
-	 */
-	public function handle_rest_post_dispatch( $response, \WP_REST_Server $server, \WP_REST_Request $request ) {
-		$this->clear_dispatch_context( $request );
 
 		return $response;
 	}
@@ -88,10 +72,8 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Clear the Store API request context after the route callback runs.
 	 *
-	 * This fires inside WP_REST_Server::dispatch() (via respond_to_request()),
-	 * so it also runs for internal rest_do_request() calls that never reach
-	 * rest_post_dispatch. The pop is idempotent, so the overlap with
-	 * rest_post_dispatch on external requests is harmless.
+	 * Paired with rest_request_before_callbacks inside WP_REST_Server::respond_to_request(),
+	 * so the stack stays balanced for both external and internal (rest_do_request) dispatches.
 	 *
 	 * @since 11.2.0
 	 * @internal

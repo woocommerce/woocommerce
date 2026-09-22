@@ -184,9 +184,9 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 *
 	 * Registers real routes and drives them through rest_do_request() so the
 	 * full dispatch lifecycle runs: the outer cart route nests an internal
-	 * rest_do_request() to a non-cart route. rest_do_request() runs
-	 * rest_pre_dispatch but not rest_post_dispatch, so this only passes when
-	 * the nested context is cleared inside dispatch().
+	 * rest_do_request() to a non-cart route. Both dispatches push and pop
+	 * their context inside respond_to_request(), so the outer cart context is
+	 * restored after the nested non-cart request completes.
 	 */
 	public function test_restores_store_api_cart_request_context_after_nested_request(): void {
 		$this->add_product_to_cart( true );
@@ -389,7 +389,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	/**
 	 * Create an isolated REST server with a single test route, then dispatch a
 	 * GET request to it through rest_do_request() so the full dispatch lifecycle
-	 * (rest_pre_dispatch, callback, rest_request_after_callbacks) runs.
+	 * (rest_request_before_callbacks, callback, rest_request_after_callbacks) runs.
 	 *
 	 * @param string   $route    Full route path to register and dispatch.
 	 * @param callable $callback  Route callback.
@@ -407,13 +407,28 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Assert the dispatch stack and context map are both empty.
+	 *
+	 * @param string $message Assertion failure message.
+	 */
+	private function assert_dispatch_stack_empty( string $message ): void {
+		$reflection     = new \ReflectionClass( $this->sut );
+		$stack_property = $reflection->getProperty( 'dispatch_stack' );
+		$stack_property->setAccessible( true );
+		$contexts_property = $reflection->getProperty( 'dispatch_contexts' );
+		$contexts_property->setAccessible( true );
+
+		$this->assertSame( array(), $stack_property->getValue( $this->sut ), "Dispatch stack should be empty. {$message}" );
+		$this->assertSame( array(), $contexts_property->getValue( $this->sut ), "Dispatch contexts should be empty. {$message}" );
+	}
+
+	/**
 	 * @testdox Clears a nested cart context so the outer non-cart request keeps its own address.
 	 *
 	 * The outer route is non-cart; it nests an internal rest_do_request() to a
-	 * cart route. rest_do_request() runs rest_pre_dispatch but not
-	 * rest_post_dispatch, so without cleanup inside dispatch() the stale nested
-	 * cart context would make the outer request calculate tax from the billing
-	 * address instead of the shipping address.
+	 * cart route. Both dispatches push and pop their context inside
+	 * respond_to_request(), so the nested cart context is cleared before the
+	 * outer request calculates its own taxable address from the shipping address.
 	 */
 	public function test_preserves_rest_context_during_nested_rest_do_request_calls(): void {
 		$this->add_product_to_cart( true );
@@ -449,5 +464,72 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $inner_recorded, 'A nested cart request should use the billing address.' );
 		$this->assertSame( $taxable_address, $outer_recorded, 'The outer non-cart context should be restored after a nested cart request.' );
+	}
+
+	/**
+	 * @testdox Does not leave a cart context on the stack when rest_pre_dispatch short-circuits.
+	 *
+	 * A rest_pre_dispatch filter can hijack a request by returning a non-empty
+	 * result, causing dispatch() to return before respond_to_request() — so
+	 * neither rest_request_before_callbacks nor rest_request_after_callbacks
+	 * fires. Registering the context from rest_request_before_callbacks (not
+	 * rest_pre_dispatch) ensures no cart context is pushed for the hijacked
+	 * request, so a later taxable-address lookup is not left with a stale
+	 * billing-address context.
+	 */
+	public function test_does_not_register_context_when_pre_dispatch_short_circuits_cart_route(): void {
+		$this->add_product_to_cart( true );
+
+		$this->create_rest_server_with_routes(
+			array(
+				function (): void {
+					$this->register_test_route(
+						'/wc/store/v1/cart/test-hijack',
+						function ( $request ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+				},
+			)
+		);
+
+		$hijack = function ( $result, $server, $request ) {
+			unset( $server ); // Avoid parameter not used PHPCS errors.
+			if ( '/wc/store/v1/cart/test-hijack' === $request->get_route() ) {
+				return rest_ensure_response( array( 'hijacked' => true ) );
+			}
+			return $result;
+		};
+		add_filter( 'rest_pre_dispatch', $hijack, 10, 3 );
+
+		try {
+			$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-hijack' ) );
+			$this->assertSame( 200, $response->get_status(), 'The hijack filter should short-circuit the cart route.' );
+		} finally {
+			remove_filter( 'rest_pre_dispatch', $hijack, 10 );
+		}
+
+		$this->assert_dispatch_stack_empty( 'A short-circuited cart request should not leave a context on the stack.' );
+	}
+
+	/**
+	 * @testdox Does not leave a cart context on the stack for an unmatched Store API cart route.
+	 *
+	 * When no route matches, dispatch() returns a 404 before reaching
+	 * respond_to_request(), so rest_request_before_callbacks never fires and no
+	 * cart context is pushed. A leaked context here would make a later
+	 * taxable-address lookup return the billing address for a virtual-only cart.
+	 */
+	public function test_does_not_register_context_for_unmatched_store_api_cart_route(): void {
+		$this->add_product_to_cart( true );
+
+		$this->create_rest_server_with_routes( array() );
+
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/this-route-does-not-exist' ) );
+
+		$this->assertSame( 404, $response->get_status(), 'An unmatched Store API cart route should return 404.' );
+
+		$this->assert_dispatch_stack_empty( 'An unmatched cart request should not leave a context on the stack.' );
 	}
 }
