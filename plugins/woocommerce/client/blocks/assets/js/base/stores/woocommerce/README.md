@@ -32,7 +32,7 @@ Client (`client/blocks/assets/js/base/stores/woocommerce/`):
 -   `scope.ts` — the product scope envelope: `productScopes`, `productScope`, `findProductScope`.
 -   `cart-actions.ts` — the cart plane: `cart` and the four actions (`addCartItem`, `updateCartItem`, `removeCartItem`, `refreshCart`).
 -   `notices.ts` — cart-line matching helpers and the info/error notices the cart actions raise from a mutation's server response.
--   `mutation-batcher.ts` — the microtask-based queue that coalesces concurrent cart requests into one `wc/store/v1/batch` request per cycle and reconciles the result.
+-   `mutation-batcher.ts` — the microtask-based queue that coalesces concurrent cart requests into `wc/store/v1/batch` requests, sending a further batch within the same cycle when more requests arrive while one is already in flight, and reconciles the result once per cycle.
 -   `legacy-events.ts` — the `wc-blocks_added_to_cart` DOM event dispatcher, consumed outside this store.
 -   `types.ts` — the store's exported TypeScript surface (`WooCommerceStore` and the types re-exported from the files above).
 -   `test/` — behavioral tests for the above.
@@ -74,10 +74,10 @@ All three loaders require a consent statement, since they are experimental APIs:
 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce'
 ```
 
-They are idempotent: calling one again for the same id (or the same variation parent) is cheap and does not issue a second REST lookup.
+Calling one of these again for the same id (or the same variation parent) costs differently per loader:
 
--   `wc_interactivity_api_load_product( $consent_statement, $product_id )` loads one product's Store API representation into `state.products`, keyed by its id.
--   `wc_interactivity_api_load_purchasable_child_products( $consent_statement, $parent_id )` loads every purchasable child of a grouped product into `state.products`, keyed by id. It uses the Store API `include[]` filter rather than `parent[]`, because a grouped product's children are standalone products, not variations; a child whose `is_purchasable` is `false` is left out.
+-   `wc_interactivity_api_load_product( $consent_statement, $product_id )` loads one product's Store API representation into `state.products`, keyed by its id. It skips the lookup when the product is already in `state.products`, so a repeat call for the same id issues no second REST request.
+-   `wc_interactivity_api_load_purchasable_child_products( $consent_statement, $parent_id )` loads every purchasable child of a grouped product into `state.products`, keyed by id. It uses the Store API `include[]` filter rather than `parent[]`, because a grouped product's children are standalone products, not variations; a child whose `is_purchasable` is `false` is left out. Unlike the other two loaders, it has no guard against repeating the same parent: every call dispatches a fresh Store API request. Call it once per parent per request — a call site reachable more than once, such as a row inside a grouped-product loop or a block on a page holding several grouped products, should reuse the result rather than calling it again.
 -   `wc_interactivity_api_load_variations( $consent_statement, $parent_id )` loads every variation of a variable product into `state.productVariations`, keyed by variation id. Variations for a given parent are fetched once per request.
 
 ## Product scopes
@@ -181,7 +181,7 @@ const cartItem = woocommerceState.findProductScope( {
 
 `findProductScope` differs from `productScope` in two ways:
 
--   `baseProduct`, `productVariation`, `product` and `cartItem` always resolve from the ref's own `productId` / `variation` — never from a `state.productScopes` record, even when the ref also carries a `scopeName`.
+-   `baseProduct`, `productVariation`, `product` and `cartItem` always resolve from the ref's own `productId` / `variation` — never from a `state.productScopes` record, even when the ref also carries a `scopeName`. A ref carrying neither falls back to `state.template`, then to product id `0` and an empty variation when even that is absent — the same fallback `productScope` uses.
 -   `scopeName`: a ref carrying `scopeName` addresses that name whether or not a record with that name exists yet. A ref with no `scopeName` falls back to the single record under `state.productScopes` whose draft id matches the ref's product id, and only when exactly one record matches — zero or several matches resolve to `scopeName: null` and `draftCartItem: undefined`.
 
 ## The cart plane
@@ -221,7 +221,7 @@ type OptimisticCartItem = {
 };
 ```
 
-It carries **no `key`** until the server confirms it and the confirmed `CartItem` replaces it — a consumer cannot key off `item.key` on a line it has just added. A line that was *bumped in place* rather than freshly pushed — by `addCartItem` finding a match, or by `updateCartItem` — is a different case: it is already an existing `CartItem` being mutated, so it keeps its `key` throughout.
+It carries **no `key`** until the server confirms it and the confirmed `CartItem` replaces it — a consumer cannot key off `item.key` on a line it has just added. A line that was *bumped in place* rather than freshly pushed is a different case, and the two actions that can bump one differ in what they can match: `updateCartItem` matches strictly by `key`, so it only ever bumps an existing `CartItem` that already has one; `addCartItem` matches by product and variation instead, so its bump can land on an optimistic line pushed earlier in the same tick — one that still carries no key to keep.
 
 Reconciliation happens once per mutation batch cycle, not once per request: if **any** request in the cycle succeeded, the queue commits the last successful server cart it saw; only when **every** request in the cycle failed does it roll the whole cart back to the snapshot taken before the cycle's first optimistic write.
 
@@ -324,7 +324,7 @@ PHP registers a `productScope` closure (`ProductsStore::register_getters()`) tha
 
 *Places* are the scope elements whose inner blocks establish where a form renders — a Single Product block, or a Product Collection loop item. `ProductScopes` tracks them as a stack, so "the current place" is always the innermost one still open. Its public entry points, the ones a contributor adding a new kind of scope element reaches for:
 
--   `enter_place()`, called before a place's inner blocks render, and `leave_place()`, called after — bracketing the render the way `SingleProduct` and `ProductTemplate` already do (`enter_place()` runs from the `render_block_context` filter callback that fires before the inner blocks; `leave_place()` runs once they have rendered).
+-   `enter_place()`, called before a place's inner blocks render, and `leave_place()`, called after — bracketing the render the way `SingleProduct` and `ProductTemplate` already do. The two wire the pair differently: `SingleProduct` splits it across a `render_block_context` filter callback (`enter_place()`) and its own `render()` (`leave_place()`); `ProductTemplate` calls both inline in its own render loop, around its inner blocks' `WP_Block::render()`, outside any callback.
 -   `current_place()` reads the innermost open place, for naming something relative to it.
 -   `name_scope_element()` names a scope element that is not a place and not a form (e.g. a legacy Products block loop item).
 -   `name_form()` names a form and reports whether that form declares its own scope (see below).
