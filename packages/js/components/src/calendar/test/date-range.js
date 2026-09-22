@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
+import { resetLocaleData, setLocaleData } from '@wordpress/i18n';
 import moment from 'moment';
 
 /**
@@ -51,6 +52,7 @@ describe( 'DateRange', () => {
 
 	afterEach( () => {
 		seedLongDateFormat( originalLongDateFormat );
+		resetLocaleData();
 	} );
 
 	it.each( phpDateFormats )(
@@ -84,4 +86,16 @@ describe( 'DateRange', () => {
 			} );
 		}
 	);
+
+	it( 'labels calendar days with the translated format', () => {
+		setLocaleData(
+			{ 'dddd, MMMM D, YYYY': [ 'dddd, D. MMMM YYYY' ] },
+			'woocommerce'
+		);
+
+		const { container } = renderDateRange();
+		const labels = getDayLabels( container );
+
+		expect( labels ).toContain( 'Selected. Saturday, 1. August 2026' );
+	} );
 } );
