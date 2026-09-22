@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Route order review submissions through WordPress's comment pipeline so they receive the same filtering and moderation as other comments.
