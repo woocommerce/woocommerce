@@ -275,21 +275,18 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 			$count = count( $term_ids_to_filter_by );
 
-			if ( 0 === $count || ( $is_and_query && count( array_unique( $data['terms'] ) ) !== $count ) ) {
-				$args['where'] .= ' AND 1=0';
-				return $args;
-			}
-
-			if ( $is_and_query && $count > 1 ) {
-				$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
-			} else {
-				$clauses[] = "
-						{$clause_root}
-						SELECT product_or_parent_id
-						FROM {$this->get_lookup_table_name()} lt
-						WHERE term_id in {$term_ids_to_filter_by_list}
-						{$in_stock_clause}
-					)";
+			if ( 0 !== $count ) {
+				if ( $is_and_query && $count > 1 ) {
+					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
+				} else {
+					$clauses[] = "
+							{$clause_root}
+							SELECT product_or_parent_id
+							FROM {$this->get_lookup_table_name()} lt
+							WHERE term_id in {$term_ids_to_filter_by_list}
+							{$in_stock_clause}
+						)";
+				}
 			}
 		}
 
@@ -303,8 +300,8 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				WHERE is_variation_attribute=0
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_or_parent_id
-				HAVING COUNT(DISTINCT term_id)={$count}
+				GROUP BY product_id
+				HAVING COUNT(product_id)={$count}
 				UNION
 				SELECT product_or_parent_id
 				FROM {$this->get_lookup_table_name()} lt
