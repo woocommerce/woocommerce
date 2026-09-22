@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a variation attribute in the classic cart, checkout, and order item details when its value also appears in the parent product name.
