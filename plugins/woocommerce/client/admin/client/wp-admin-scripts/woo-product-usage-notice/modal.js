@@ -14,7 +14,6 @@ import {
 	FlexItem,
 	Icon,
 	Modal,
-	ResponsiveWrapper,
 } from '@wordpress/components';
 import { commentContent, people, reusableBlock } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
@@ -224,12 +223,11 @@ export default function ProductUsageNoticeModal( {
 		return (
 			<Card className="secondary">
 				<CardMedia>
-					<ResponsiveWrapper
-						naturalWidth={ 240 }
-						naturalHeight={ 240 }
-					>
-						<img src={ extensionsSvg } alt="" />
-					</ResponsiveWrapper>
+					<div className="woocommerce-product-usage-notice__illustration">
+						<div>
+							<img src={ extensionsSvg } alt="" />
+						</div>
+					</div>
 				</CardMedia>
 			</Card>
 		);
