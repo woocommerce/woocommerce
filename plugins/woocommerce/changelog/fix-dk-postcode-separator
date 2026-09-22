@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Accept Danish postcodes that carry the DK prefix with no separator or with a space, matching the separator handling introduced for Latvian postcodes.
