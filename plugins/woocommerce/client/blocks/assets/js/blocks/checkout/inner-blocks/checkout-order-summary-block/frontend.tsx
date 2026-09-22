@@ -115,7 +115,9 @@ const FrontendBlock = ( {
 		const destination = showInline ? inlineHost : checkoutActionsHost;
 
 		if ( destination ) {
-			destination.appendChild( contentContainer );
+			if ( contentContainer.parentElement !== destination ) {
+				destination.appendChild( contentContainer );
+			}
 			setIsContentReady( true );
 
 			if (
