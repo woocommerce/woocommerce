@@ -38,7 +38,11 @@ class NonShippingCartTaxLocation {
 		$this->dispatch_contexts = array();
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
+		// rest_post_dispatch fires for external requests (WP_REST_Server::serve_request) but not
+		// for internal rest_do_request() calls, which only run dispatch(). rest_request_after_callbacks
+		// fires inside dispatch() for both, so nested internal contexts are always cleared.
 		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ), 10, 3 );
+		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
 	}
 
 	/**
@@ -76,6 +80,44 @@ class NonShippingCartTaxLocation {
 	 * @return mixed The dispatched response.
 	 */
 	public function handle_rest_post_dispatch( $response, \WP_REST_Server $server, \WP_REST_Request $request ) {
+		$this->clear_dispatch_context( $request );
+
+		return $response;
+	}
+
+	/**
+	 * Clear the Store API request context after the route callback runs.
+	 *
+	 * This fires inside WP_REST_Server::dispatch() (via respond_to_request()),
+	 * so it also runs for internal rest_do_request() calls that never reach
+	 * rest_post_dispatch. The pop is idempotent, so the overlap with
+	 * rest_post_dispatch on external requests is harmless.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param mixed            $response Result to send to the client.
+	 * @param mixed            $handler  Route handler for the request.
+	 * @param \WP_REST_Request $request  Request used to generate the response.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed The response.
+	 */
+	public function handle_rest_request_after_callbacks( $response, $handler, \WP_REST_Request $request ) {
+		$this->clear_dispatch_context( $request );
+
+		return $response;
+	}
+
+	/**
+	 * Remove a dispatch's cart/checkout context from the stack.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param \WP_REST_Request $request Request whose context should be cleared.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function clear_dispatch_context( \WP_REST_Request $request ): void {
 		$dispatch_id = spl_object_id( $request );
 
 		// Remove the context for this specific dispatch.
@@ -86,12 +128,8 @@ class NonShippingCartTaxLocation {
 		// Remove the dispatch ID from the stack, preserving the order of outer contexts.
 		$stack_key = array_search( $dispatch_id, $this->dispatch_stack, true );
 		if ( false !== $stack_key ) {
-			// array_search returns int|string|false, but array_splice expects int offset.
-			// Since we're using sequential integer keys (from array_push), this should be an int.
 			array_splice( $this->dispatch_stack, (int) $stack_key, 1 );
 		}
-
-		return $response;
 	}
 
 	/**

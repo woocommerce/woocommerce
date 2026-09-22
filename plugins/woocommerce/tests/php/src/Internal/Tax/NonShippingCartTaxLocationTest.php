@@ -51,6 +51,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_is_checkout', '__return_true' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
+			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
 		}
@@ -118,17 +119,18 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_uses_billing_address_for_store_api_cart_and_checkout_requests( string $route ): void {
 		$this->add_product_to_cart( true );
-		$request = new \WP_REST_Request( 'GET', $route );
-		$server  = new \WP_REST_Server();
-		$this->sut->handle_rest_pre_dispatch( null, $server, $request );
+		$recorded = null;
 
-		try {
-			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
+		$this->dispatch_test_route(
+			$route,
+			function ( $request ) use ( &$recorded ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				$recorded = $this->customer->get_taxable_address();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
 
-			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A Store API cart request should use the billing address.' );
-		} finally {
-			$this->sut->handle_rest_post_dispatch( null, $server, $request );
-		}
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $recorded, 'A Store API cart request should use the billing address.' );
 	}
 
 	/**
@@ -163,43 +165,63 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_leaves_address_unchanged_for_other_store_api_requests(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$server  = new \WP_REST_Server();
-		$this->sut->handle_rest_pre_dispatch( null, $server, $request );
+		$recorded = null;
 
-		try {
-			$result = $this->sut->use_billing_address_for_cart_without_shipping( array( 'US', 'CA', '90210', 'Beverly Hills' ), $this->customer );
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$recorded ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				$recorded = $this->customer->get_taxable_address();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
 
-			$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'Other Store API requests should not use the billing address.' );
-		} finally {
-			$this->sut->handle_rest_post_dispatch( null, $server, $request );
-		}
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $recorded, 'Other Store API requests should not use the billing address.' );
 	}
 
 	/**
 	 * @testdox Restores the Store API cart request context after nested requests.
+	 *
+	 * Registers real routes and drives them through rest_do_request() so the
+	 * full dispatch lifecycle runs: the outer cart route nests an internal
+	 * rest_do_request() to a non-cart route. rest_do_request() runs
+	 * rest_pre_dispatch but not rest_post_dispatch, so this only passes when
+	 * the nested context is cleared inside dispatch().
 	 */
 	public function test_restores_store_api_cart_request_context_after_nested_request(): void {
 		$this->add_product_to_cart( true );
-		$cart_request    = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
-		$product_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$inner_recorded  = null;
+		$outer_recorded  = null;
 		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
-		$server         = new \WP_REST_Server();
 
-		$this->sut->handle_rest_pre_dispatch( null, $server, $cart_request );
-		$this->sut->handle_rest_pre_dispatch( null, $server, $product_request );
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( &$inner_recorded, &$outer_recorded ): void {
+					$this->register_test_route(
+						'/wc/v3/test-inner',
+						function ( $request ) use ( &$inner_recorded ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							$inner_recorded = $this->customer->get_taxable_address();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+					$this->register_test_route(
+						'/wc/store/v1/cart/test-outer',
+						function ( $request ) use ( &$outer_recorded ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-inner' ) );
+							$outer_recorded = $this->customer->get_taxable_address();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+				},
+			)
+		);
 
-		try {
-			$result_during_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
-			$this->sut->handle_rest_post_dispatch( null, $server, $product_request );
-			$result_after_nested_request = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
+		rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-outer' ) );
 
-			$this->assertSame( $taxable_address, $result_during_nested_request, 'Nested non-cart Store API requests should not use the billing address.' );
-			$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result_after_nested_request, 'The cart request context should be restored after a nested request.' );
-		} finally {
-			$this->sut->handle_rest_post_dispatch( null, $server, $cart_request );
-		}
+		$this->assertSame( $taxable_address, $inner_recorded, 'Nested non-cart Store API requests should not use the billing address.' );
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $outer_recorded, 'The cart request context should be restored after a nested request.' );
 	}
 
 	/**
@@ -332,73 +354,100 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preserves the REST context during nested rest_do_request() calls through WP_REST_Server::dispatch().
+	 * Register a test REST route on the global server, splitting the path into a
+	 * namespace and route so it can be dispatched by rest_do_request().
 	 *
-	 * This test simulates what happens when rest_do_request() is called nested through
-	 * WP_REST_Server::dispatch(), verifying that each dispatch removes only its own context.
+	 * Store API cart/checkout routes keep everything up to /cart or /checkout as
+	 * the namespace; other routes use the leading segments as the namespace.
+	 *
+	 * @param string   $full_route Full route path, e.g. /wc/store/v1/cart.
+	 * @param callable $callback   Route callback.
+	 */
+	private function register_test_route( string $full_route, callable $callback ): void {
+		$path = ltrim( $full_route, '/' );
+
+		if ( preg_match( '#^(.*?)/(cart|checkout)(?:/|$)#', $path, $m ) ) {
+			$namespace = $m[1];
+			$route     = '/' . substr( $path, strlen( $m[1] ) + 1 );
+		} else {
+			$offset    = (int) strrpos( $path, '/' );
+			$namespace = substr( $path, 0, $offset );
+			$route     = '/' . substr( $path, $offset + 1 );
+		}
+
+		register_rest_route(
+			$namespace,
+			$route,
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => '__return_true',
+				'callback'            => $callback,
+			)
+		);
+	}
+
+	/**
+	 * Create an isolated REST server with a single test route, then dispatch a
+	 * GET request to it through rest_do_request() so the full dispatch lifecycle
+	 * (rest_pre_dispatch, callback, rest_request_after_callbacks) runs.
+	 *
+	 * @param string   $route    Full route path to register and dispatch.
+	 * @param callable $callback  Route callback.
+	 */
+	private function dispatch_test_route( string $route, callable $callback ): void {
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( $route, $callback ): void {
+					$this->register_test_route( $route, $callback );
+				},
+			)
+		);
+
+		rest_do_request( new \WP_REST_Request( 'GET', $route ) );
+	}
+
+	/**
+	 * @testdox Clears a nested cart context so the outer non-cart request keeps its own address.
+	 *
+	 * The outer route is non-cart; it nests an internal rest_do_request() to a
+	 * cart route. rest_do_request() runs rest_pre_dispatch but not
+	 * rest_post_dispatch, so without cleanup inside dispatch() the stale nested
+	 * cart context would make the outer request calculate tax from the billing
+	 * address instead of the shipping address.
 	 */
 	public function test_preserves_rest_context_during_nested_rest_do_request_calls(): void {
-		// The key thing we're testing is that nested calls to handle_rest_pre_dispatch
-		// and handle_rest_post_dispatch properly clean up their context without affecting outer contexts.
-		// We'll simulate this by manually calling the methods as they would be called during nested dispatches.
+		$this->add_product_to_cart( true );
+		$inner_recorded  = null;
+		$outer_recorded  = null;
+		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
 
-		$server = new \WP_REST_Server();
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( &$inner_recorded, &$outer_recorded ): void {
+					$this->register_test_route(
+						'/wc/store/v1/cart/test-inner',
+						function ( $request ) use ( &$inner_recorded ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							$inner_recorded = $this->customer->get_taxable_address();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+					$this->register_test_route(
+						'/wc/v3/test-outer',
+						function ( $request ) use ( &$outer_recorded ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-inner' ) );
+							$outer_recorded = $this->customer->get_taxable_address();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+				},
+			)
+		);
 
-		// Simulate an outer dispatch: pre_dispatch for a non-cart route.
-		$outer_request = new \WP_REST_Request( 'GET', '/wc/v3/some-route' );
-		$this->sut->handle_rest_pre_dispatch( null, $server, $outer_request );
+		rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-outer' ) );
 
-		try {
-			// Verify stack has 1 entry now.
-			$reflection = new \ReflectionClass( $this->sut );
-			$stack_property = $reflection->getProperty( 'dispatch_stack' );
-			$stack_property->setAccessible( true );
-			$context_property = $reflection->getProperty( 'dispatch_contexts' );
-			$context_property->setAccessible( true );
-
-			$stack_after_outer_pre = $stack_property->getValue( $this->sut );
-			$this->assertCount( 1, $stack_after_outer_pre, 'Stack should have 1 entry after outer pre_dispatch.' );
-
-			// Simulate a nested dispatch: pre_dispatch for another non-cart route.
-			$inner_request = new \WP_REST_Request( 'GET', '/wc/v3/another-route' );
-			$this->sut->handle_rest_pre_dispatch( null, $server, $inner_request );
-
-			$stack_after_inner_pre = $stack_property->getValue( $this->sut );
-			$this->assertCount( 2, $stack_after_inner_pre, 'Stack should have 2 entries after inner pre_dispatch.' );
-
-			// Simulate nested dispatch completing: post_dispatch for the inner request.
-			// This should remove ONLY the inner request's context.
-			$this->sut->handle_rest_post_dispatch( null, $server, $inner_request );
-
-			$stack_after_inner_post = $stack_property->getValue( $this->sut );
-			$contexts_after_inner_post = $context_property->getValue( $this->sut );
-
-			// The stack should still have 1 entry (the outer request).
-			$this->assertCount( 1, $stack_after_inner_post, 'Stack should still have 1 entry after inner post_dispatch (outer context preserved).' );
-
-			// The specific context for the inner request should be removed.
-			$inner_request_id = spl_object_id( $inner_request );
-			$this->assertArrayNotHasKey( $inner_request_id, $contexts_after_inner_post, 'Inner request context should be removed.' );
-
-			// But the outer request context should still be there.
-			$outer_request_id = spl_object_id( $outer_request );
-			$this->assertArrayHasKey( $outer_request_id, $contexts_after_inner_post, 'Outer request context should still exist.' );
-
-			// Simulate outer dispatch completing: post_dispatch for the outer request.
-			$this->sut->handle_rest_post_dispatch( null, $server, $outer_request );
-
-			$stack_after_outer_post = $stack_property->getValue( $this->sut );
-			$contexts_after_outer_post = $context_property->getValue( $this->sut );
-
-			// Now the stack should be empty.
-			$this->assertCount( 0, $stack_after_outer_post, 'Stack should be empty after outer post_dispatch.' );
-
-			// And all contexts should be removed.
-			$this->assertCount( 0, $contexts_after_outer_post, 'All contexts should be removed after outer post_dispatch.' );
-		} finally {
-			// Ensure cleanup.
-			global $wp_rest_server;
-			$wp_rest_server = null;
-		}
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $inner_recorded, 'A nested cart request should use the billing address.' );
+		$this->assertSame( $taxable_address, $outer_recorded, 'The outer non-cart context should be restored after a nested cart request.' );
 	}
 }
