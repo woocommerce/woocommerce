@@ -46,7 +46,7 @@ client/blocks/
 │   ├── blocks/              # ~56 block implementations (cart, checkout, product-*, filter-*)
 │   ├── atomic/              # Atomic/primitive blocks (product elements)
 │   ├── base/                # Shared components, context, hooks, stores
-│   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
+│   │   └── stores/woocommerce/  # Interactivity API stores (private)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
 │   └── utils/               # Utility functions
@@ -141,8 +141,8 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
-- Cart store uses mutation batching for performance
+- `assets/js/base/stores/woocommerce/` holds the unified `woocommerce` store (script module id `@woocommerce/stores/woocommerce`), covering the catalog, the cart, and the product scopes that hold a shopper's in-progress form input, plus the separate `woocommerce/shopper-lists` store
+- See `assets/js/base/stores/woocommerce/README.md` for the store's actual surface
 
 ### IntegrationRegistry (Extension API)
 
