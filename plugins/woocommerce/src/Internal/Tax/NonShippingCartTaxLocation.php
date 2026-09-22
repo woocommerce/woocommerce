@@ -151,6 +151,10 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
+		if ( $cart->needs_shipping() ) {
+			return $taxable_address;
+		}
+
 		$cart_contents = $cart->get_cart();
 
 		if ( empty( $cart_contents ) ) {

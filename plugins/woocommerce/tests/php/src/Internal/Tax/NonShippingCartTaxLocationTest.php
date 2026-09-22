@@ -51,6 +51,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_is_checkout', '__return_true' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
+			remove_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
 			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
@@ -261,6 +262,31 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A virtual product requiring shipping should use the configured shipping address.' );
+	}
+
+	/**
+	 * @testdox Leaves the taxable address unchanged when the woocommerce_cart_needs_shipping filter forces shipping.
+	 */
+	public function test_leaves_address_unchanged_when_cart_needs_shipping_filter_forces_shipping(): void {
+		$this->add_product_to_cart( true );
+
+		// A shipping method must exist for WC_Cart::needs_shipping() to apply the filter below.
+		$zone = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'Test Zone' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		delete_transient( 'wc_shipping_method_count' );
+
+		add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
+		$this->set_checkout_context();
+
+		try {
+			$result = $this->customer->get_taxable_address();
+
+			$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A cart forced to need shipping by the woocommerce_cart_needs_shipping filter should use the configured shipping address.' );
+		} finally {
+			$zone->delete( true );
+		}
 	}
 
 	/**
