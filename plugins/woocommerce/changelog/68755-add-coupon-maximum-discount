@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a "Maximum discount" setting to percentage coupons, so a coupon like "10% off, up to $30" stays valid on larger orders.
