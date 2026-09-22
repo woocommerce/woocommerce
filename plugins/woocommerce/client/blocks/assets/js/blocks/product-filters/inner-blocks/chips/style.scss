@@ -1,8 +1,5 @@
 :where(.wp-block-woocommerce-product-filter-chips) {
 	font-size: 0.8em;
-	display: flex;
-	flex-wrap: wrap;
-	gap: $gap-smallest;
 
 	> .components-disabled {
 		display: contents;
