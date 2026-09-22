@@ -12,28 +12,11 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
 class MenusControllerTests extends \WC_Unit_Test_Case {
 
 	/**
-	 * The controller registered with the global screen option filter.
-	 *
-	 * @var MenusController
-	 */
-	private $controller;
-
-	/**
 	 * Register the controller's hooks.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->controller = new MenusController();
-	}
-
-	/**
-	 * Remove the controller's hooks.
-	 */
-	public function tearDown(): void {
-		remove_action( 'admin_menu', array( $this->controller, 'add_menu' ) );
-		remove_filter( 'woocommerce_screen_ids', array( $this->controller, 'add_screen_ids' ) );
-		remove_filter( 'set-screen-option', array( $this->controller, 'set_screen_option' ) );
-		parent::tearDown();
+		new MenusController();
 	}
 
 	/**
