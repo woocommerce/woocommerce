@@ -3,8 +3,13 @@
  */
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch, resolveSelect } from '@wordpress/data';
+import { doAction } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
 import { notFound } from '@wordpress/route';
-import { registerProductFields } from '@woocommerce-settings-ui-experimental/settings-ui';
+import {
+	registerProductFields,
+	unlock,
+} from '@woocommerce-settings-ui-experimental/settings-ui';
 
 /**
  * Internal dependencies
@@ -27,15 +32,22 @@ export const route = {
 			pages.map( getSettingsEntity )
 		);
 		await dispatch( coreStore ).addEntities(
-			pages.map( getLegacySettingsEntity )
+			pages
+				.filter( ( item ) => ! item.entity )
+				.map( getLegacySettingsEntity )
 		);
 		const page = getSettingsPage( pages, options );
 		if ( ! page ) {
 			throw notFound();
 		}
-		if ( hasSettingsForm( page ) ) {
+		if ( page.id === 'products' && ! page.entity ) {
 			registerProductFields( getSettingsEntity( page ) );
 		}
+		doAction(
+			'woocommerce.settingsDataform.registerFields',
+			getSettingsEntity( page ),
+			unlock( dispatch( editorStore ) ).registerEntityField
+		);
 	},
 	loader: async ( options: SettingsRouteOptions ) => {
 		const pages = await loadSettingsPages();
@@ -49,8 +61,18 @@ export const route = {
 
 		// Let the stage handle request errors and missing form configuration.
 		await Promise.allSettled( [
-			getEntityRecord( legacyEntity.kind, legacyEntity.name, undefined ),
-			...( hasSettingsForm( page ) ? [ getEntityRecord( entity.kind, entity.name, undefined ) ] : [] ),
+			...( page.entity
+				? []
+				: [
+						getEntityRecord(
+							legacyEntity.kind,
+							legacyEntity.name,
+							undefined
+						),
+				  ] ),
+			...( hasSettingsForm( page )
+				? [ getEntityRecord( entity.kind, entity.name, undefined ) ]
+				: [] ),
 		] );
 		return { page };
 	},
