@@ -552,4 +552,39 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
 		$this->assertSame( '100.00', $coupon->get_maximum_amount() );
 	}
+
+	/**
+	 * @testdox Maximum discount is saved as coupon meta and reads back as 0 when empty.
+	 *
+	 * @testWith ["30", "30", "30"]
+	 *           ["", "", "0"]
+	 *
+	 * @param string $value         Value to set.
+	 * @param string $expected_meta Expected stored meta value.
+	 * @param string $expected_view Expected value in the view context.
+	 */
+	public function test_maximum_discount_persists( string $value, string $expected_meta, string $expected_view ): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'max-discount-persist' );
+		$coupon->set_maximum_discount( $value );
+		$coupon->save();
+
+		$reloaded = new WC_Coupon( $coupon->get_id() );
+
+		$this->assertSame( $expected_meta, get_post_meta( $coupon->get_id(), 'maximum_discount', true ), 'Unexpected stored meta value.' );
+		$this->assertSame( $expected_view, $reloaded->get_maximum_discount(), 'Unexpected maximum discount after reload.' );
+		$this->assertSame( $expected_view, $reloaded->get_data()['maximum_discount'], 'get_data() should match the view context.' );
+	}
+
+	/**
+	 * @testdox A negative maximum discount is rejected.
+	 */
+	public function test_set_maximum_discount_rejects_negative_value(): void {
+		$coupon = new WC_Coupon();
+
+		$this->expectException( \WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Invalid maximum discount value.' );
+
+		$coupon->set_maximum_discount( '-5' );
+	}
 }

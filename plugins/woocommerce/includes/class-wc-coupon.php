@@ -49,6 +49,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'exclude_sale_items'          => false,
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
+		'maximum_discount'            => '',
 		'email_restrictions'          => array(),
 		'used_by'                     => null,
 		'virtual'                     => false,
@@ -161,6 +162,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 		if ( '' === $data['maximum_amount'] ) {
 			$data['maximum_amount'] = '0';
+		}
+		if ( '' === $data['maximum_discount'] ) {
+			$data['maximum_discount'] = '0';
 		}
 		return $data;
 	}
@@ -442,6 +446,20 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			return wc_format_decimal( 0 );
 		}
 		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
+	}
+
+	/**
+	 * Get the maximum discount a percentage coupon can give. 0 means no cap.
+	 *
+	 * @since  11.3.0
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_maximum_discount( $context = 'view' ) {
+		if ( 'edit' !== $context && $this->get_prop( 'maximum_discount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'maximum_discount', $context ) );
 	}
 
 	/**
@@ -824,6 +842,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		$this->set_prop( 'maximum_amount', $amount );
+	}
+
+	/**
+	 * Set the maximum discount a percentage coupon can give. Empty or 0 means no cap.
+	 *
+	 * @since 11.3.0
+	 * @param float|string $amount Maximum discount.
+	 * @return void
+	 */
+	public function set_maximum_discount( $amount ) {
+		$amount = wc_format_decimal( $amount );
+		if ( (float) $amount < 0 ) {
+			$this->error( 'coupon_invalid_maximum_discount', __( 'Invalid maximum discount value.', 'woocommerce' ) );
+		}
+		$this->set_prop( 'maximum_discount', $amount );
 	}
 
 	/**

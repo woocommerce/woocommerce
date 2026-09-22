@@ -221,4 +221,39 @@ class WC_REST_Coupons_V2_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'coupon_invalid_maximum_amount', $result->get_error_code() );
 	}
+
+	/**
+	 * @testdox Maximum discount can be set via REST and is returned as a decimal.
+	 */
+	public function test_rest_sets_maximum_discount(): void {
+		$coupon = $this->make_coupon( 'MAX-DISCOUNT' );
+
+		$result = $this->sut->update_item(
+			$this->patch_request(
+				$coupon->get_id(),
+				array( 'maximum_discount' => '30' )
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '30.00', $result->get_data()['maximum_discount'] );
+		$this->assertSame( '30', ( new WC_Coupon( $coupon->get_id() ) )->get_maximum_discount(), 'The value should be saved on the coupon.' );
+	}
+
+	/**
+	 * @testdox A negative maximum discount is rejected via REST.
+	 */
+	public function test_rest_rejects_negative_maximum_discount(): void {
+		$coupon = $this->make_coupon( 'MAX-DISCOUNT-NEG' );
+
+		$result = $this->sut->update_item(
+			$this->patch_request(
+				$coupon->get_id(),
+				array( 'maximum_discount' => '-5' )
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'coupon_invalid_maximum_discount', $result->get_error_code() );
+	}
 }

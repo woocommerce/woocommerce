@@ -536,4 +536,223 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched categories the generic message is used.' );
 		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_product_categories', '__return_false' );
 	}
+
+	/**
+	 * Fill the cart with simple products and apply a coupon to it.
+	 *
+	 * @param array $lines        List of [ price, quantity ] pairs.
+	 * @param array $coupon_props Coupon props.
+	 * @return float[] Discount per cart line, in the order the lines were given.
+	 */
+	private function get_line_discounts( array $lines, array $coupon_props ): array {
+		WC()->cart->empty_cart();
+		$cart_keys = array();
+		foreach ( $lines as $line ) {
+			$product     = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $line[0] ) );
+			$cart_keys[] = WC()->cart->add_to_cart( $product->get_id(), $line[1] );
+		}
+
+		$coupon = new WC_Coupon();
+		$coupon->set_props( array_merge( array( 'code' => 'capped-' . wp_generate_password( 6, false, false ) ), $coupon_props ) );
+		$coupon->save();
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $coupon );
+		$by_item = $discounts->get_discounts_by_item();
+
+		return array_map(
+			static function ( $key ) use ( $by_item ) {
+				return (float) $by_item[ $key ];
+			},
+			$cart_keys
+		);
+	}
+
+	/**
+	 * @testdox Should cap a percentage coupon at its maximum discount and split the cap by line price.
+	 *
+	 * @testWith [[[200, 1]], "10", "30", [20]]
+	 *           [[[300, 1]], "10", "30", [30]]
+	 *           [[[500, 1]], "10", "30", [30]]
+	 *           [[[400, 1], [100, 1]], "10", "30", [24, 6]]
+	 *           [[[25, 4]], "10", "5", [5]]
+	 *           [[[50, 1]], "100", "20", [20]]
+	 *           [[[500, 1]], "10", "", [50]]
+	 *           [[[500, 1]], "10", "0", [50]]
+	 *
+	 * @param array  $lines            List of [ price, quantity ] pairs.
+	 * @param string $percent          Coupon percentage.
+	 * @param string $maximum_discount Coupon maximum discount.
+	 * @param array  $expected         Expected discount per line.
+	 */
+	public function test_percent_coupon_maximum_discount( array $lines, string $percent, string $maximum_discount, array $expected ): void {
+		$actual = $this->get_line_discounts(
+			$lines,
+			array(
+				'discount_type'    => 'percent',
+				'amount'           => $percent,
+				'maximum_discount' => $maximum_discount,
+			)
+		);
+
+		$this->assertEquals( $expected, $actual, 'Unexpected discount per line.' );
+	}
+
+	/**
+	 * @testdox Should give leftover cents from the maximum discount split to the cart lines so the total matches the cap.
+	 *
+	 * @testWith ["2", [3.34, 3.33, 3.33]]
+	 *           ["0", [4, 3, 3]]
+	 *
+	 * @param string $decimals Store price decimals.
+	 * @param array  $expected Expected discount per line, highest first.
+	 */
+	public function test_percent_coupon_maximum_discount_spreads_remainder( string $decimals, array $expected ): void {
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+
+		$actual = $this->get_line_discounts(
+			array( array( 10, 1 ), array( 10, 1 ), array( 10, 1 ) ),
+			array(
+				'discount_type'    => 'percent',
+				'amount'           => '50',
+				'maximum_discount' => '10',
+			)
+		);
+		rsort( $actual );
+
+		$this->assertEquals( $expected, $actual, 'Leftover from the cap split should go to lines one unit at a time.' );
+		$this->assertEqualsWithDelta( 10, array_sum( $actual ), 0.0001, 'Total discount should equal the cap.' );
+	}
+
+	/**
+	 * @testdox Should apply the maximum discount after "Limit usage to X items".
+	 */
+	public function test_percent_coupon_maximum_discount_with_limit_usage_to_x_items(): void {
+		$actual = $this->get_line_discounts(
+			array( array( 100, 5 ) ),
+			array(
+				'discount_type'          => 'percent',
+				'amount'                 => '10',
+				'limit_usage_to_x_items' => 2,
+				'maximum_discount'       => '15',
+			)
+		);
+
+		$this->assertEquals( array( 15 ), $actual, '10% of two $100 items is $20, capped to $15.' );
+	}
+
+	/**
+	 * @testdox Should cap the percentage coupon based on the price left by earlier coupons when discounts are sequential.
+	 *
+	 * @testWith ["yes", 25]
+	 *           ["no", 30]
+	 *
+	 * @param string $sequential Value of the sequential discounts option.
+	 * @param float  $expected   Expected discount from the capped coupon.
+	 */
+	public function test_percent_coupon_maximum_discount_with_sequential_discounts( string $sequential, float $expected ): void {
+		update_option( 'woocommerce_calc_discounts_sequentially', $sequential );
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 500 ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$first = new WC_Coupon();
+		$first->set_props(
+			array(
+				'code'          => 'half-off',
+				'discount_type' => 'percent',
+				'amount'        => '50',
+			)
+		);
+		$first->save();
+		$capped = new WC_Coupon();
+		$capped->set_props(
+			array(
+				'code'             => 'capped',
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => '30',
+			)
+		);
+		$capped->save();
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $first );
+		$discounts->apply_coupon( $capped );
+		$by_coupon = $discounts->get_discounts_by_coupon();
+
+		$this->assertEquals( 250, $by_coupon['half-off'], 'The uncapped coupon should not change.' );
+		$this->assertEquals( $expected, $by_coupon['capped'], 'Unexpected discount from the capped coupon.' );
+	}
+
+	/**
+	 * @testdox Should not apply the maximum discount when a filter overrides the per-item discount amount.
+	 */
+	public function test_percent_coupon_maximum_discount_skipped_when_discount_amount_filtered(): void {
+		add_filter(
+			'woocommerce_coupon_get_discount_amount',
+			static function () {
+				return 40;
+			}
+		);
+
+		$actual = $this->get_line_discounts(
+			array( array( 500, 1 ) ),
+			array(
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => '30',
+			)
+		);
+
+		$this->assertEquals( array( 40 ), $actual, 'A filtered discount amount should be left as the filter set it.' );
+	}
+
+	/**
+	 * @testdox Should ignore the maximum discount on coupon types other than percentage.
+	 *
+	 * @testWith ["fixed_cart"]
+	 *           ["fixed_product"]
+	 *
+	 * @param string $discount_type Coupon discount type.
+	 */
+	public function test_maximum_discount_ignored_for_other_coupon_types( string $discount_type ): void {
+		$actual = $this->get_line_discounts(
+			array( array( 500, 1 ) ),
+			array(
+				'discount_type'    => $discount_type,
+				'amount'           => '50',
+				'maximum_discount' => '30',
+			)
+		);
+
+		$this->assertEquals( array( 50 ), $actual, 'Only percentage coupons use the maximum discount.' );
+	}
+
+	/**
+	 * @testdox Should cap the cart discount total when a capped percentage coupon is applied to the cart.
+	 */
+	public function test_cart_totals_use_maximum_discount(): void {
+		WC()->cart->empty_cart();
+		foreach ( array( 400, 100 ) as $price ) {
+			$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+		}
+		$coupon = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'code'             => 'ten-up-to-thirty',
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => '30',
+			)
+		);
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'ten-up-to-thirty' );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( 30, WC()->cart->get_discount_total(), 'The cart discount should stop at the cap.' );
+		$this->assertEquals( 470, WC()->cart->get_total( 'edit' ), 'The cart total should be $500 less the $30 cap.' );
+	}
 }

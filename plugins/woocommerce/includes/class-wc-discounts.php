@@ -370,7 +370,8 @@ class WC_Discounts {
 			$limit_usage_qty = $coupon->get_limit_usage_to_x_items();
 		}
 
-		$coupon_amount = $coupon->get_amount();
+		$coupon_amount    = $coupon->get_amount();
+		$discounts_before = $this->discounts[ $coupon->get_code() ];
 
 		foreach ( $items_to_apply as $item ) {
 			// Find out how much price is available to discount for the item.
@@ -411,6 +412,27 @@ class WC_Discounts {
 
 		if ( $total_discount < $cart_total_discount && $adjust_final_discount ) {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
+		}
+
+		// Scale each item's discount down so the coupon total matches its maximum discount. Skipped when a filter set the amounts.
+		$maximum_discount = wc_add_number_precision( (float) $coupon->get_maximum_discount() );
+
+		if ( $maximum_discount > 0 && $total_discount > $maximum_discount && $adjust_final_discount ) {
+			$capped_total = 0;
+
+			foreach ( $items_to_apply as $item ) {
+				$item_discount = $this->discounts[ $coupon->get_code() ][ $item->key ] - $discounts_before[ $item->key ];
+				$capped        = floor( $item_discount * $maximum_discount / $total_discount );
+				$capped_total += $capped;
+
+				$this->discounts[ $coupon->get_code() ][ $item->key ] = $discounts_before[ $item->key ] + $capped;
+			}
+
+			$total_discount = $capped_total;
+
+			if ( $total_discount < $maximum_discount ) {
+				$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, (int) ( $maximum_discount - $total_discount ) );
+			}
 		}
 
 		return $total_discount;
