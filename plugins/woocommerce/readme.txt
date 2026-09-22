@@ -170,6 +170,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.1.2 2026-XX-XX =
+= 11.1.2 2026-09-22 =
+
+**WooCommerce**
+
+* Fix - Prevent variation gallery rendering from recursively requesting variation data. [#68965](https://github.com/woocommerce/woocommerce/pull/68965)
+* Fix - Route order review submissions through WordPress's comment pipeline so they receive the same filtering and moderation as other comments. [#68961](https://github.com/woocommerce/woocommerce/pull/68961)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
