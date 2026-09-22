@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Validate minimum spend amount does not exceed maximum spend amount in WC_Coupon::set_minimum_amount().

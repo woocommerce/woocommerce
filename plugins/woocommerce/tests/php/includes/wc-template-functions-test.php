@@ -387,4 +387,20 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( '>Black White<', $html, 'The option label must be decoded to match the cart and order.' );
 		$this->assertStringNotContainsString( '>Black%20White<', $html, 'The percent-escaped label must not be displayed.' );
 	}
+
+	/**
+	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
+	 */
+	public function test_empty_cart_message_uses_notices_wrapper(): void {
+		ob_start();
+		wc_empty_cart_message();
+		$markup = (string) ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<div class="woocommerce-notices-wrapper wc-empty-cart-message">',
+			$markup,
+			'The empty cart message should keep its own class and gain the notices wrapper class.'
+		);
+		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
+	}
 }
