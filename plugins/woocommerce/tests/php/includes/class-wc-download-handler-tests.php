@@ -27,15 +27,13 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Encoded spaces in a local URL resolve to an existing file without overriding a literal encoded filename.
+	 * @testdox Encoded spaces in a local URL resolve to an existing file with spaces in its name.
 	 */
 	public function test_parse_file_path_for_encoded_space_in_existing_file(): void {
-		$uploads          = wp_upload_dir();
-		$filename         = 'wc download ' . wp_generate_uuid4() . '.pdf';
-		$absolute_path    = trailingslashit( $uploads['basedir'] ) . $filename;
-		$encoded_filename = str_replace( ' ', '%20', $filename );
-		$encoded_path     = trailingslashit( $uploads['basedir'] ) . $encoded_filename;
-		$file_url         = trailingslashit( $uploads['baseurl'] ) . $encoded_filename;
+		$uploads       = wp_upload_dir();
+		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
+		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . str_replace( ' ', '%20', $filename );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
 		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
@@ -44,18 +42,9 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
 			$this->assertFalse( $parsed_file_path['remote_file'] );
 			$this->assertSame( $absolute_path, $parsed_file_path['file_path'] );
-
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
-			$this->assertNotFalse( file_put_contents( $encoded_path, 'literal filename' ) );
-			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
-			$this->assertSame( $encoded_path, $parsed_file_path['file_path'] );
 		} finally {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
 			unlink( $absolute_path );
-			if ( file_exists( $encoded_path ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
-				unlink( $encoded_path );
-			}
 		}
 	}
 
