@@ -230,6 +230,82 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product image template does not render variation galleries recursively when a gallery callback requests variation data.
+	 */
+	public function test_product_image_template_does_not_render_variation_galleries_recursively(): void {
+		global $product;
+
+		list( $test_product ) = $this->create_variation_gallery_fixture();
+		$previous_product     = $product;
+		$product              = $test_product;
+		$hook_calls           = 0;
+		$callback_results     = array();
+		$buffer_level         = ob_get_level();
+		$callback             = static function () use ( &$hook_calls, &$callback_results ) {
+			global $product;
+
+			if ( ! $product instanceof WC_Product_Variable ) {
+				throw new RuntimeException( 'Expected the gallery template to expose the variable product.' );
+			}
+
+			++$hook_calls;
+			if ( 2 < $hook_calls ) {
+				throw new RuntimeException( 'The gallery template was rendered recursively.' );
+			}
+
+			$callback_results[] = $product->get_available_variations();
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
+
+		ob_start();
+		try {
+			woocommerce_show_product_images();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+			$product = $previous_product;
+		}
+
+		$this->assertSame( 2, $hook_calls, 'The callback should run for the product template and its first variation gallery render.' );
+		$this->assertCount( 2, $callback_results, 'Both bounded callback invocations should return variation data.' );
+		$this->assertSame( '', $callback_results[0][0]['gallery_images_html'], 'Re-entrant variation data should omit gallery markup.' );
+		$this->assertNotEmpty( $callback_results[1][0]['gallery_images_html'], 'The first variation data request should retain gallery markup.' );
+		$this->assertNotEmpty( $markup, 'The product image template should still render.' );
+	}
+
+	/**
+	 * @testdox 'get_available_variations' allows a gallery callback to render a different product gallery.
+	 */
+	public function test_get_available_variations_allows_nested_gallery_for_different_product(): void {
+		list( $outer_product )  = $this->create_variation_gallery_fixture();
+		list( $nested_product ) = $this->create_variation_gallery_fixture();
+		$rendered_product_ids   = array();
+		$nested_result          = null;
+		$callback               = static function () use ( $outer_product, $nested_product, &$rendered_product_ids, &$nested_result ) {
+			global $product;
+
+			$rendered_product_ids[] = $product->get_id();
+			if ( $outer_product->get_id() === $product->get_id() ) {
+				$nested_result = $nested_product->get_available_variations();
+			}
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
+
+		try {
+			$outer_product->get_available_variations();
+		} finally {
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+		}
+
+		$this->assertContains( $outer_product->get_id(), $rendered_product_ids, 'The outer product gallery should render.' );
+		$this->assertContains( $nested_product->get_id(), $rendered_product_ids, 'The nested product gallery should render.' );
+		$this->assertNotEmpty( $nested_result[0]['gallery_images_html'], 'A different product should retain its gallery markup.' );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
 	 */
 	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
