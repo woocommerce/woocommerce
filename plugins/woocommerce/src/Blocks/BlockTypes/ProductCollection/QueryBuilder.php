@@ -283,9 +283,6 @@ class QueryBuilder {
 		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'] ?? false );
 
-		// We exclude applied filters to generate product ids for the filter blocks.
-		$rating_filter_query = $is_exclude_applied_filters ? array() : $this->get_filter_by_rating_query();
-
 		// Allow collections to provide their own query parameters.
 		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
 		if ( isset( $handlers['build_query'] ) ) {
@@ -306,7 +303,6 @@ class QueryBuilder {
 			$on_sale_query,
 			$stock_query,
 			$tax_query,
-			$rating_filter_query,
 			$date_query,
 			$price_query_args,
 			$handpicked_query,
@@ -316,6 +312,8 @@ class QueryBuilder {
 		$final_query['isProductCollection'] = true;
 
 		if ( ! $is_exclude_applied_filters ) {
+			// Rating must be a tax query; the remaining filters are query vars consumed by QueryClauses.
+			$final_query = $this->merge_queries( $final_query, $this->get_filter_by_rating_query() );
 			$final_query = array_merge( $final_query, $this->get_applied_filter_query_vars() );
 		}
 
