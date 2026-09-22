@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\UserDataCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
@@ -73,6 +74,12 @@ class PushNotifications {
 		// available when push notifications are disabled and clients can discover
 		// the state and fall back if needed.
 		wc_get_container()->get( PushNotificationStatusRestController::class )->register();
+
+		// Also registered ahead of the enablement check. Tokens stored while the
+		// feature was on stay in the database once it is off, and a user deleted
+		// in the meantime must not leave records behind for a later reconnection
+		// to start sending against.
+		wc_get_container()->get( UserDataCleanupService::class )->register();
 
 		if ( ! $this->should_be_enabled() ) {
 			return;

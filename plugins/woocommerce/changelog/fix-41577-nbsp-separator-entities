@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Display the real character instead of the raw HTML entity when the price thousand or decimal separator is stored as an entity such as &nbsp; in Analytics, admin screens, and blocks.

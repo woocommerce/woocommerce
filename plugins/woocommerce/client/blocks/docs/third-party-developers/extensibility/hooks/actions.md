@@ -867,7 +867,7 @@ do_action( 'woocommerce_store_api_checkout_order_processed', \WC_Order $order )
 
 ### Description
 
-The action runs before payment is processed, so callbacks can still act on the order on its way to the gateway.
+The action runs before payment is processed, so callbacks can still act on the order on its way to the gateway. Do not use this action for payment-completion logic or to call WC_Order::payment_complete(). Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
 
 This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 
