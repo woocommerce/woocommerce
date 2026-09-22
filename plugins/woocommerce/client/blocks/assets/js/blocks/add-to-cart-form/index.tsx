@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerProductBlockType } from '@woocommerce/product-element-utils';
+import { registerProductBlockType } from '@woocommerce/product-element-utils/register-product-block-type';
 import { Icon, button } from '@wordpress/icons';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { createBlock } from '@wordpress/blocks';

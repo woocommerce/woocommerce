@@ -9,7 +9,7 @@ import {
 	useValidation,
 } from '@woocommerce/base-context/hooks';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
-import { renderParentBlock } from '@woocommerce/product-element-utils';
+import { renderParentBlock } from '@woocommerce/product-element-utils/render-parent-block';
 
 /**
  * Internal dependencies

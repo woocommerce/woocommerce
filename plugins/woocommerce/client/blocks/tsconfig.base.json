@@ -40,8 +40,8 @@
 			"@woocommerce/product-element-blocks/*": [
 				"assets/js/product-element-blocks/*"
 			],
-			"@woocommerce/product-element-utils": [
-				"assets/js/product-element-blocks/utils"
+			"@woocommerce/product-element-utils/*": [
+				"assets/js/utils/*"
 			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"

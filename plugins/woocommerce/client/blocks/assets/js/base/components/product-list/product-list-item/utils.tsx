@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getBlockMap } from '@woocommerce/product-element-utils';
+import { getBlockMap } from '@woocommerce/product-element-utils/get-block-map';
 import { Suspense } from '@wordpress/element';
 import { ProductResponseItem } from '@woocommerce/types';
 

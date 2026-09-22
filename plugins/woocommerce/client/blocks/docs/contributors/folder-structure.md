@@ -87,7 +87,10 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │
 ├── assets/js/product-element-blocks
 │ Reusable blocks for individual product elements such as title, rating,
-│ and image, plus utilities shared by product layouts.
+│ and image.
+│
+├── assets/js/utils
+│ Shared helpers, including product block registration and rendering.
 │
 ├── assets/js/base
 │ Base contains components specific to the frontend of the store.

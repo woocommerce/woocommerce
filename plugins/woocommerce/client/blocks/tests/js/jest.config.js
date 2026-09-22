@@ -58,8 +58,7 @@ module.exports = {
 
 		'@woocommerce/product-element-blocks':
 			'assets/js/product-element-blocks',
-		'@woocommerce/product-element-utils':
-			'assets/js/product-element-blocks/utils',
+		'^@woocommerce/product-element-utils/(.*)$': 'assets/js/utils/$1',
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
 		'^@woocommerce/settings$': 'packages/public-api/settings',

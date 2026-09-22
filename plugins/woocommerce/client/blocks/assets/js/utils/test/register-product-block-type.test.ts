@@ -88,7 +88,9 @@ describe( 'registerProductBlockType', () => {
 		};
 		jest.doMock( '@wordpress/blocks', getBlocksMock );
 		jest.doMock( '@wordpress/data', getDataMock );
-		jest.dontMock( '@woocommerce/product-element-utils' );
+		jest.dontMock(
+			'@woocommerce/product-element-utils/register-product-block-type'
+		);
 	} );
 
 	it( 'registers only post-editor-enabled blocks with the Single Product ancestor', () => {
@@ -254,15 +256,20 @@ describe( 'product block registration call sites', () => {
 		jest.clearAllMocks();
 		jest.dontMock( '@wordpress/blocks' );
 		jest.dontMock( '@wordpress/data' );
-		jest.doMock( '@woocommerce/product-element-utils', () => ( {
-			registerProductBlockType: mockRegisterProductBlockTypeCallSite,
-		} ) );
+		jest.doMock(
+			'@woocommerce/product-element-utils/register-product-block-type',
+			() => ( {
+				registerProductBlockType: mockRegisterProductBlockTypeCallSite,
+			} )
+		);
 	} );
 
 	it( 'declares the post-editor availability of Product Price and Product Image Gallery', () => {
 		jest.isolateModules( () => {
-			jest.requireActual( '../../price' );
-			jest.requireActual( '../../product-image-gallery' );
+			jest.requireActual( '../../product-element-blocks/price' );
+			jest.requireActual(
+				'../../product-element-blocks/product-image-gallery'
+			);
 		} );
 
 		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
@@ -283,11 +290,19 @@ describe( 'product block registration call sites', () => {
 	it( 'declares the deprecated Related Products block unavailable in the post editor and hidden from the inserter', () => {
 		// The editor components load the block editor and the Product Query
 		// variations, which log to the console and aren't part of registration.
-		jest.doMock( '../../related-products/edit', () => () => null );
-		jest.doMock( '../../related-products/save', () => () => null );
+		jest.doMock(
+			'../../product-element-blocks/related-products/edit',
+			() => () => null
+		);
+		jest.doMock(
+			'../../product-element-blocks/related-products/save',
+			() => () => null
+		);
 
 		jest.isolateModules( () => {
-			jest.requireActual( '../../related-products' );
+			jest.requireActual(
+				'../../product-element-blocks/related-products'
+			);
 		} );
 
 		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
@@ -305,11 +320,11 @@ describe( 'product block registration call sites', () => {
 	it( 'declares the Product Details block available in the post editor', () => {
 		// The editor components pull in the block editor, which logs a duplicate Yjs
 		// import when loaded inside isolateModules, and they aren't part of registration.
-		jest.doMock( '../../../blocks/product-details/edit', () => () => null );
-		jest.doMock( '../../../blocks/product-details/save', () => () => null );
+		jest.doMock( '../../blocks/product-details/edit', () => () => null );
+		jest.doMock( '../../blocks/product-details/save', () => () => null );
 
 		jest.isolateModules( () => {
-			jest.requireActual( '../../../blocks/product-details' );
+			jest.requireActual( '../../blocks/product-details' );
 		} );
 
 		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
