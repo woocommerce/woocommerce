@@ -287,19 +287,16 @@ final class ProductFilterAttribute extends AbstractBlock {
 			unset( $query_vars[ 'filter_' . str_replace( 'pa_', '', $slug ) ] );
 		}
 
-		// Product Collection tax queries contain saved block constraints; its active attribute filter is carried separately in filter_* query vars.
-		if ( empty( $query_vars['isProductCollection'] ) ) {
-			if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
-				unset(
-					$query_vars['taxonomy'],
-					$query_vars['term']
-				);
-			}
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
 
-			if ( ! empty( $query_vars['tax_query'] ) ) {
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
-			}
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}
 
 		$container        = wc_get_container();

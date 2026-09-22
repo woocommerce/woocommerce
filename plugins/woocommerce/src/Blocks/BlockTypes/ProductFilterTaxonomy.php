@@ -383,25 +383,23 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			unset( $query_vars[ $param_key ] );
 		}
 
-		if ( empty( $query_vars['isProductCollection'] ) ) {
-			/**
-			 * Prevent circular counting when calculating filter counts with active attribute filters.
-			 * Removes product attribute taxonomy filters to ensure accurate cross-filter counting.
-			 *
-			 * @see https://github.com/woocommerce/woocommerce/pull/52759
-			 */
-			if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
-				unset(
-					$query_vars['taxonomy'],
-					$query_vars['term']
-				);
-			}
+		/**
+		 * Prevent circular counting when calculating filter counts with active attribute filters.
+		 * Removes product attribute taxonomy filters to ensure accurate cross-filter counting.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/pull/52759
+		 */
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
 
-			// Remove from tax_query if present.
-			if ( ! empty( $query_vars['tax_query'] ) ) {
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $taxonomy );
-			}
+		// Remove from tax_query if present.
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $taxonomy );
 		}
 
 		$counts = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_taxonomy_counts( $query_vars, $taxonomy );
