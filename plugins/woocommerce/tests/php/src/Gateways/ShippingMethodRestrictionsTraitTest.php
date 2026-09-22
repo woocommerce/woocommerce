@@ -191,12 +191,12 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep enforcing the cart's shipping method restriction when the order-pay query var does not resolve to an order.
+	 * @testdox Should evaluate the cart's shipping method when the request is not paying for an order.
 	 * @testWith ["0", "flat_rate_a", true]
 	 *           ["0", "flat_rate_b", false]
 	 *           ["999999999", "flat_rate_b", false]
 	 *
-	 * @param string $order_pay   An order-pay query var value that does not resolve to an order.
+	 * @param string $order_pay   Order-pay query var value sent with the request.
 	 * @param string $chosen_rate Symbolic name of the shipping rate selected in the cart.
 	 * @param bool   $expected    Expected availability.
 	 */
@@ -216,7 +216,7 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not treat a cart that needs shipping as virtual when the order-pay query var does not resolve to an order.
+	 * @testdox Should treat a cart that needs shipping as physical when the request is not paying for an order.
 	 */
 	public function test_is_available_does_not_treat_the_cart_as_virtual_when_order_pay_does_not_resolve(): void {
 		$gateway = $this->create_gateway(
@@ -389,7 +389,7 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Simulate the order-pay endpoint the way WC_Query::parse_request() populates it from the request.
+	 * Set the order-pay endpoint context, as WC_Query::parse_request() does when routing a request.
 	 *
 	 * @param string|null $value Query var value, or null to leave the endpoint context.
 	 */
