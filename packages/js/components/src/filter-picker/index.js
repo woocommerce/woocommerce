@@ -50,9 +50,10 @@ function getSearchProps( settings ) {
 
 	if ( Object.keys( legacySearchProps ).length > 0 ) {
 		deprecated(
-			'Passing `type`, `autocompleter`, or `labels.placeholder` in the `settings` of a FilterPicker filter (@woocommerce/components)',
+			'Passing `type`, `autocompleter`, or `labels.placeholder` in the `settings` of a FilterPicker filter',
 			{
 				since: '14.2.0',
+				version: '15.0.0',
 				alternative: '`settings.searchProps`',
 				link: 'https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/filter-picker/README.md',
 				plugin: '@woocommerce/components',

@@ -83,7 +83,9 @@ The `filters` prop is an array of filter objects. Each filter object should have
 
 ### `settings` structure
 
-A filter with `component: 'Search'` renders a `Search` component in the dropdown. Its `settings` object has the following format:
+Two kinds of filter use `settings`. A filter with `component: 'Search'` renders a `Search` component in the dropdown, and `FilterPicker` reads the keys below. A comparison filter (a filter whose `value` starts with `compare`) renders a card instead, and the `Filters` component forwards its `settings` to [CompareFilter](../compare-filter/README.md) as props (`getLabels`, `param`, `labels.title`, `labels.update`, `labels.helpText`, `searchProps`).
+
+A `component: 'Search'` filter has the following `settings` format:
 
 - `param`: String - The url parameter the selected value is stored in.
 - `getLabels`: Function - Function used to fetch labels for the selected values, returns a Promise.
@@ -109,4 +111,4 @@ A filter with `component: 'Search'` renders a `Search` component in the dropdown
 }
 ```
 
-The `type`, `autocompleter`, and `labels.placeholder` settings are deprecated. Use `searchProps.type`, `searchProps.autocompleter`, and `searchProps.placeholder` instead. When a deprecated setting is set, it takes precedence over the matching `searchProps` value, so extensions that change it on core filters keep working.
+The `type`, `autocompleter`, and `labels.placeholder` settings are deprecated. Use `searchProps.type`, `searchProps.autocompleter`, and `searchProps.placeholder` instead. When a deprecated setting is set, it takes precedence over the matching `searchProps` value, so extensions that change it on core filters keep working. The deprecated settings are scheduled for removal in `@woocommerce/components` 15.0.0.

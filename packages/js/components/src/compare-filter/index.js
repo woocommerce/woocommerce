@@ -100,9 +100,10 @@ export class CompareFilter extends Component {
 
 		if ( Object.keys( legacySearchProps ).length > 0 ) {
 			deprecated(
-				'Passing `type`, `autocompleter`, or `labels.placeholder` to CompareFilter (@woocommerce/components)',
+				'Passing `type`, `autocompleter`, or `labels.placeholder` to CompareFilter',
 				{
 					since: '14.2.0',
+					version: '15.0.0',
 					alternative: 'the `searchProps` prop',
 					link: 'https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/compare-filter/README.md',
 					plugin: '@woocommerce/components',
@@ -110,7 +111,7 @@ export class CompareFilter extends Component {
 			);
 		}
 
-		// The deprecated props win, so older code that changes them on an existing config keeps working.
+		// The deprecated props win, so older code that changes them keeps working.
 		return { ...searchProps, ...legacySearchProps };
 	}
 

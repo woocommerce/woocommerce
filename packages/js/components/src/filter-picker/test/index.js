@@ -119,6 +119,19 @@ describe( 'FilterPicker', () => {
 			} );
 			expect( warn ).not.toHaveBeenCalled();
 		} );
+		it( 'should render a filter without `labels`', async () => {
+			delete config.filters[ 1 ].settings.labels;
+
+			openDropdown(
+				render( <FilterPicker path="/foo/bar" config={ config } /> )
+			);
+
+			expect( getLastSearchProps() ).toMatchObject( {
+				type: 'products',
+				placeholder: 'Type to search for a product',
+			} );
+			expect( warn ).not.toHaveBeenCalled();
+		} );
 		it( 'should keep its own Search props and merge `className`', async () => {
 			config.filters[ 1 ].settings.searchProps = {
 				type: 'products',
