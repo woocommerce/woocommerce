@@ -27,9 +27,27 @@
 			"radius": true,
 			"__experimentalSkipSerialization": true
 		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"flexWrap": "wrap",
+				"orientation": "horizontal"
+			},
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowEditing": false,
+			"allowJustification": false,
+			"allowVerticalAlignment": false,
+			"allowOrientation": false,
+			"allowSizingOnChildren": false
+		},
 		"spacing": {
 			"padding": true,
-			"__experimentalSkipSerialization": true
+			"blockGap": true,
+			"__experimentalSkipSerialization": [ "padding" ],
+			"__experimentalDefaultControls": {
+				"childLayout": false
+			}
 		}
 	},
 	"selectors": {
