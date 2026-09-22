@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Expose the coupon auto-apply flag in the REST API, so it can be read and written via wc/v2 and wc/v3 coupon endpoints.

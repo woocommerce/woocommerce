@@ -2311,7 +2311,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * an unbounded recursive chain across every auto-apply coupon; it is also checked by
 	 * remove_coupon() to distinguish this internal removal from a direct/manual one.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 * @return void
 	 */
 	public function auto_apply_coupons(): void {
@@ -2330,34 +2330,42 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
 		add_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
 
-		// Get all auto-apply coupon codes.
-		$auto_apply_codes = $this->get_auto_apply_coupon_codes();
+		try {
+			// Get all auto-apply coupon codes.
+			$auto_apply_codes = $this->get_auto_apply_coupon_codes();
 
-		foreach ( $auto_apply_codes as $code ) {
-			$coupon = new WC_Coupon( $code );
+			foreach ( $auto_apply_codes as $code ) {
+				$coupon = new WC_Coupon( $code );
 
-			// Skip if coupon doesn't exist or isn't marked for auto-apply.
-			if ( ! $coupon->get_id() || ! $coupon->get_auto_apply() ) {
-				continue;
+				// Skip if coupon doesn't exist or isn't marked for auto-apply.
+				if ( ! $coupon->get_id() || ! $coupon->get_auto_apply() ) {
+					continue;
+				}
+
+				$is_valid = $coupon->is_valid();
+
+				// Remove if applied but no longer valid.
+				if ( $this->has_discount( $code ) && ! $is_valid ) {
+					$this->remove_coupon( $code );
+				}
+
+				// Apply if not applied but now valid.
+				if ( ! $this->has_discount( $code ) && $is_valid ) {
+					$this->apply_coupon( $code );
+				}
 			}
+		} finally {
+			/*
+			 * apply_coupon()/remove_coupon() fire hooks that third parties extend, so a callback
+			 * throwing must not leave the notice-silencing filters attached or the reentrancy
+			 * guard raised for the rest of the request: that would swallow coupon errors the
+			 * customer should see, and bypass remove_coupon()'s auto-apply protection.
+			 */
+			remove_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
+			remove_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
 
-			$is_valid = $coupon->is_valid();
-
-			// Remove if applied but no longer valid.
-			if ( $this->has_discount( $code ) && ! $is_valid ) {
-				$this->remove_coupon( $code );
-			}
-
-			// Apply if not applied but now valid.
-			if ( ! $this->has_discount( $code ) && $is_valid ) {
-				$this->apply_coupon( $code );
-			}
+			$this->is_auto_applying_coupons = false;
 		}
-
-		remove_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
-		remove_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
-
-		$this->is_auto_applying_coupons = false;
 	}
 
 	/**
@@ -2366,7 +2374,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Retrieves all published coupon codes that have the auto-apply flag enabled.
 	 * Results are cached for performance.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 * @return array Array of auto-apply coupon codes.
 	 */
 	protected function get_auto_apply_coupon_codes() {
