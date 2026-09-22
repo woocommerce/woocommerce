@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Restore adding PDFs with image previews to product galleries and preserve them when gallery videos are enabled.
+Restore support for other file types (e.g. PDFs) in product galleries.
