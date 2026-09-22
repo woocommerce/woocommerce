@@ -45,12 +45,12 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 			// server (so this works in any site locale). "Draft saved." is
 			// deliberately left as-is: a saved draft is not used for
 			// sending, and "Email saved." would suggest it is.
-			labelKeys: [
-				'item_updated',
-				'item_published',
-				'item_published_privately',
-				'item_scheduled',
-			],
+			// `item_published_privately` and `item_scheduled` are omitted:
+			// the editor removes the "post-status" panel on mount (see
+			// `block-editor/editor.tsx`), so there is no UI to set an email
+			// post's visibility to private or its status to `future` — those
+			// labels can never match a real notice here.
+			labelKeys: [ 'item_updated', 'item_published' ],
 		},
 	};
 }
@@ -77,10 +77,12 @@ function isTemplatePostType( postType: string | undefined ): boolean {
 
 function transformNotice( notice: Notice, labels: PostTypeLabels ): Notice {
 	const overrides = getNoticeOverrides();
-	const override = overrides[ notice.id ];
-	if ( ! override ) {
+	// A plain lookup would resolve ids like `constructor` or `toString` to
+	// an inherited `Object.prototype` member instead of `undefined`.
+	if ( ! Object.prototype.hasOwnProperty.call( overrides, notice.id ) ) {
 		return notice;
 	}
+	const override = overrides[ notice.id ];
 
 	const rewriteText =
 		! override.labelKeys ||
@@ -147,7 +149,11 @@ export function useNoticeOverrides(): void {
 							const notices = originalGetNotices( context );
 							const overrides = getNoticeOverrides();
 							const hasOverridableNotice = notices.some(
-								( notice ) => overrides[ notice.id ]
+								( notice ) =>
+									Object.prototype.hasOwnProperty.call(
+										overrides,
+										notice.id
+									)
 							);
 
 							if ( ! hasOverridableNotice ) {

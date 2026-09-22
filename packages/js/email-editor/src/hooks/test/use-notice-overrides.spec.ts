@@ -297,11 +297,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 	} );
 
-	it.each( [
-		[ 'item_published', 'Příspěvek byl publikován.' ],
-		[ 'item_published_privately', 'Příspěvek byl publikován soukromě.' ],
-		[ 'item_scheduled', 'Příspěvek byl naplánován.' ],
-	] )(
+	it.each( [ [ 'item_published', 'Příspěvek byl publikován.' ] ] )(
 		'transforms an editor-save notice matching the localized %s label',
 		( labelKey, localizedText ) => {
 			const originalNotice = makeNotice( {
@@ -361,6 +357,31 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
+
+	it.each( [
+		[ 'item_published_privately', 'Příspěvek byl publikován soukromě.' ],
+		[ 'item_scheduled', 'Příspěvek byl naplánován.' ],
+	] )(
+		'leaves an editor-save notice matching the localized %s label unchanged, since the editor has no UI to reach that status',
+		( labelKey, localizedText ) => {
+			const originalNotice = makeNotice( {
+				id: 'editor-save',
+				content: localizedText,
+				actions: [ { label: 'View', url: '#' } ],
+			} );
+			const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+				[ labelKey ]: localizedText,
+			} );
+
+			const selectors = pluginResult.select( 'core/notices' ) as {
+				getNotices: () => Notice[];
+			};
+			const result = selectors.getNotices();
+
+			expect( result[ 0 ].content ).toBe( localizedText );
+			expect( result[ 0 ].actions ).toEqual( [] );
+		}
+	);
 
 	it( 'leaves an editor-save notice with "Draft saved." content unchanged but removes the action', () => {
 		// A saved draft is not used for sending; rewriting the notice to
@@ -603,6 +624,27 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ] ).toBe( originalNotice );
 		expect( getEmailPostType ).not.toHaveBeenCalled();
 		expect( getPostType ).not.toHaveBeenCalled();
+	} );
+
+	it( 'leaves a notice whose id collides with an Object.prototype member completely untouched', () => {
+		const originalNotice = makeNotice( {
+			id: 'constructor',
+			content: 'Something else',
+			spokenMessage: 'Something else',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
+			item_updated: 'Post updated.',
+		} );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Something else' );
+		expect( result[ 0 ].spokenMessage ).toBe( 'Something else' );
+		expect( result[ 0 ].actions ).toEqual( originalNotice.actions );
 	} );
 
 	it.each( [ 'wp_template', 'wp_template_part' ] )(
