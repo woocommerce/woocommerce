@@ -456,7 +456,7 @@ class MiniCart extends AbstractBlock {
 			data-wp-watch="callbacks.focusFirstElement"
 			data-wp-class--wc-block-components-drawer__screen-overlay--with-slide-in="state.isOpen"
 			data-wp-class--wc-block-components-drawer__screen-overlay--is-hidden="!state.isOpen"
-			class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden"
+			class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out"
 		>
 			<div
 				data-wp-bind--role="state.drawerRole"
