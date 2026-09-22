@@ -738,4 +738,98 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $second_processor ) ), 'The sibling processor should remain enqueued.' );
 	}
+	/**
+	 * @testdox Shutdown cleanup does not query Action Scheduler for an empty queue.
+	 */
+	public function test_shutdown_skips_scheduler_for_empty_queue(): void {
+		$lookups = 0;
+		$filter  = function ( $query ) use ( &$lookups ) {
+			if ( false !== strpos( $query, 'actionscheduler_actions' ) ) {
+				++$lookups;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$this->run_shutdown_cleanup();
+		} finally {
+			remove_filter( 'query', $filter );
+		}
+
+		$this->assertSame( 0, $lookups );
+	}
+
+	/**
+	 * @testdox A failed scheduler lookup leaves every processor's state and schedule untouched.
+	 * @dataProvider failed_shutdown_lookup_provider
+	 * @param int $failed_lookup The lookup to fail, starting with the watchdog.
+	 */
+	public function test_shutdown_preserves_processors_on_failed_lookup( int $failed_lookup ): void {
+		global $wpdb;
+
+		$processors = array( get_class( $this->test_process ), get_class( $this->get_processor_stub() ) );
+		update_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME, $processors, false );
+		$lookups         = 0;
+		$filter          = function ( $query ) use ( &$lookups, $failed_lookup ) {
+			if ( false !== strpos( $query, 'SELECT a.action_id' ) && false !== strpos( $query, 'actionscheduler_actions' ) ) {
+				++$lookups;
+				if ( $failed_lookup === $lookups ) {
+					return 'SELECT * FROM wooplug_7791_missing_table';
+				}
+			}
+			return $query;
+		};
+		$suppress_errors = $wpdb->suppress_errors( true );
+		add_filter( 'query', $filter );
+		try {
+			$this->run_shutdown_cleanup();
+		} finally {
+			remove_filter( 'query', $filter );
+			$wpdb->suppress_errors( $suppress_errors );
+			$wpdb->flush();
+		}
+
+		$this->assertSame( $failed_lookup, $lookups, 'The failing lookup must run, with no further lookups after it.' );
+		$this->assertSame( $processors, $this->sut->get_enqueued_processors() );
+		foreach ( $processors as $processor ) {
+			$this->assertFalse( get_option( $this->get_processor_state_option_name( $processor ) ), 'A failed lookup must not record a processor failure.' );
+			$this->assertFalse( $this->sut->is_scheduled( $processor ), 'A failed lookup must not schedule a retry.' );
+		}
+	}
+
+	/**
+	 * Scheduler lookup failures to exercise.
+	 *
+	 * @return array
+	 */
+	public function failed_shutdown_lookup_provider(): array {
+		return array(
+			'watchdog'         => array( 1 ),
+			'first processor'  => array( 2 ),
+			'second processor' => array( 3 ),
+		);
+	}
+
+	/**
+	 * @testdox Shutdown cleanup still retries an unscheduled processor after successful lookups.
+	 */
+	public function test_shutdown_retries_unscheduled_processor(): void {
+		$processor = get_class( $this->test_process );
+		update_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME, array( $processor ), false );
+
+		$this->run_shutdown_cleanup();
+
+		$this->assertTrue( $this->sut->is_scheduled( $processor ) );
+		$details = get_option( $this->get_processor_state_option_name( $processor ) );
+		$this->assertSame( 1, $details['recent_failures'] );
+	}
+
+	/**
+	 * Run only this controller's shutdown callback, avoiding unrelated shutdown handlers.
+	 */
+	private function run_shutdown_cleanup(): void {
+		$method = new \ReflectionMethod( $this->sut, 'remove_or_retry_failed_processors' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut );
+	}
 }

@@ -839,6 +839,8 @@ class BatchProcessingController {
 	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
+		global $wpdb;
+
 		if ( ! did_action( 'wp_loaded' ) ) {
 			return;
 		}
@@ -855,17 +857,28 @@ class BatchProcessingController {
 			return;
 		}
 
-		if ( ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		// Normalize corrupted option values before passing processor names to is_scheduled().
+		$enqueued_processors = $this->sanitize_processor_list( $this->get_enqueued_processors() );
+		if ( empty( $enqueued_processors ) ) {
 			return;
 		}
 
-		/*
-		 * Sanitize before array_diff()/array_filter(): array_diff() string-casts its operands (fatal on an object
-		 * entry in PHP 8) and is_scheduled() is typed string, so a corrupted option must be reduced to class-name
-		 * strings first.
-		 */
-		$enqueued_processors    = $this->sanitize_processor_list( $this->get_enqueued_processors() );
-		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
+		$watchdog_scheduled = ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME );
+		if ( $watchdog_scheduled || ! empty( $wpdb->last_error ) ) {
+			return;
+		}
+
+		$unscheduled_processors = array();
+		foreach ( $enqueued_processors as $processor ) {
+			$is_scheduled = $this->is_scheduled( $processor );
+			// A failed lookup is not evidence of a failed processor. Finish all checks before changing state.
+			if ( ! empty( $wpdb->last_error ) ) {
+				return;
+			}
+			if ( ! $is_scheduled ) {
+				$unscheduled_processors[] = $processor;
+			}
+		}
 
 		foreach ( $unscheduled_processors as $processor ) {
 			try {
