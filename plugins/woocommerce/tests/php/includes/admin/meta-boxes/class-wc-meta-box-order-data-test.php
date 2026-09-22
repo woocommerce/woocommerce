@@ -110,6 +110,50 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The customer filter receives keyed registered customers and the legacy guest value.
+	 */
+	public function test_customer_filter_receives_expected_customer_shapes(): void {
+		$customer = WC_Helper_Customer::create_customer( 'order_data_customer', 'password', 'order-data-customer@example.com' );
+		$customer->set_first_name( 'Order Data' );
+		$customer->set_last_name( 'Customer' );
+		$customer->save();
+
+		$registered_order = wc_create_order( array( 'customer_id' => $customer->get_id() ) );
+		$guest_order      = wc_create_order( array( 'customer_id' => 0 ) );
+		$this->orders[]   = $registered_order;
+		$this->orders[]   = $guest_order;
+
+		$filter_inputs     = array();
+		$customer_filter   = static function ( $found_users ) use ( &$filter_inputs ) {
+			$filter_inputs[] = $found_users;
+
+			return array( array( '' ) === $found_users ? 'Filtered guest customer' : 'Filtered registered customer' );
+		};
+		$render_order_data = static function ( WC_Order $order ): string {
+			$GLOBALS['theorder'] = null;
+
+			ob_start();
+			WC_Meta_Box_Order_Data::output( $order );
+
+			return (string) ob_get_clean();
+		};
+		add_filter( 'woocommerce_json_search_found_customers', $customer_filter );
+
+		try {
+			$registered_output = $render_order_data( $registered_order );
+			$guest_output      = $render_order_data( $guest_order );
+		} finally {
+			remove_filter( 'woocommerce_json_search_found_customers', $customer_filter );
+		}
+
+		$this->assertCount( 2, $filter_inputs, 'The filter should run once for each rendered order.' );
+		$this->assertSame( array( $customer->get_id() ), array_keys( $filter_inputs[0] ), 'The registered customer should be keyed by user ID.' );
+		$this->assertSame( array( '' ), $filter_inputs[1], 'Guest orders should retain the legacy filter value.' );
+		$this->assertStringContainsString( '>Filtered registered customer</option>', $registered_output );
+		$this->assertStringContainsString( '>Filtered guest customer</option>', $guest_output );
+	}
+
+	/**
 	 * @testdox The read-only summary hides persisted shipping details when the order does not need shipping.
 	 */
 	public function test_hides_shipping_details_when_order_does_not_need_shipping(): void {
@@ -558,6 +602,90 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$summary = $this->render_shipping_address_summary( $order );
 
 		$this->assertStringContainsString( 'Extension contact reference: Extension reference 39300', $summary );
+	}
+
+	/**
+	 * @testdox Saving the order data meta box persists the $status_label status, date, and transition note.
+	 *
+	 * @dataProvider provider_order_status_transitions
+	 *
+	 * @param string $status       Status to persist.
+	 * @param string $status_label Human-readable status label.
+	 */
+	public function test_save_persists_status_date_and_transition_note( string $status, string $status_label ): void {
+		$order = wc_create_order( array( 'status' => 'processing' ) );
+		if ( ! $order instanceof WC_Order ) {
+			throw new RuntimeException( 'The order fixture could not be created.' );
+		}
+
+		$this->orders[] = $order;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
+		$_POST = array(
+			'order_status'        => 'wc-' . $status,
+			'_payment_method'     => $order->get_payment_method(),
+			'customer_user'       => 0,
+			'order_date'          => '2018-12-14',
+			'order_date_hour'     => '13',
+			'order_date_minute'   => '14',
+			'order_date_second'   => '15',
+			// Billing fields on a guest order go through their own branch in save(),
+			// guarded on the customer being a guest or a valid user. Posting them here
+			// is what covers the deleted "create a simple guest order" E2E title; the
+			// surviving browser test only asserts billing after picking a customer.
+			'_billing_first_name' => 'Guest',
+			'_billing_last_name'  => 'Buyer',
+			'_billing_company'    => 'Guest Co',
+			'_billing_address_1'  => '1 Guest Street',
+			'_billing_city'       => 'Guestville',
+			'_billing_postcode'   => '90210',
+			'_billing_email'      => 'guest.buyer@example.com',
+			'_billing_phone'      => '555-0100',
+		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		WC_Meta_Box_Order_Data::save( $order->get_id() );
+
+		$saved_order = wc_get_order( $order->get_id() );
+		if ( ! $saved_order instanceof WC_Order ) {
+			throw new RuntimeException( 'The saved order could not be reloaded.' );
+		}
+
+		$date_created = $saved_order->get_date_created();
+		if ( ! $date_created instanceof WC_DateTime ) {
+			throw new RuntimeException( 'The saved order date could not be reloaded.' );
+		}
+
+		$this->assertSame( $status, $saved_order->get_status() );
+		$this->assertSame( '2018-12-14 13:14:15', $date_created->date( 'Y-m-d H:i:s' ) );
+
+		$this->assertSame( 'Guest', $saved_order->get_billing_first_name( 'edit' ) );
+		$this->assertSame( 'Buyer', $saved_order->get_billing_last_name( 'edit' ) );
+		$this->assertSame( 'Guest Co', $saved_order->get_billing_company( 'edit' ) );
+		$this->assertSame( '1 Guest Street', $saved_order->get_billing_address_1( 'edit' ) );
+		$this->assertSame( 'Guestville', $saved_order->get_billing_city( 'edit' ) );
+		$this->assertSame( '90210', $saved_order->get_billing_postcode( 'edit' ) );
+		$this->assertSame( 'guest.buyer@example.com', $saved_order->get_billing_email( 'edit' ) );
+		$this->assertSame( '555-0100', $saved_order->get_billing_phone( 'edit' ) );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertNotEmpty( $notes, 'The status transition should create an order note.' );
+		$this->assertSame(
+			"Order status changed from Processing to {$status_label}.",
+			$notes[0]->content
+		);
+	}
+
+	/**
+	 * Status transitions saved through the order data meta box.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function provider_order_status_transitions(): array {
+		return array(
+			'completed' => array( 'completed', 'Completed' ),
+			'cancelled' => array( 'cancelled', 'Cancelled' ),
+		);
 	}
 
 	/**

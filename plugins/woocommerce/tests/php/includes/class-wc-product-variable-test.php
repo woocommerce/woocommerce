@@ -233,6 +233,82 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product image template does not render variation galleries recursively when a gallery callback requests variation data.
+	 */
+	public function test_product_image_template_does_not_render_variation_galleries_recursively(): void {
+		global $product;
+
+		list( $test_product ) = $this->create_variation_gallery_fixture();
+		$previous_product     = $product;
+		$product              = $test_product;
+		$hook_calls           = 0;
+		$callback_results     = array();
+		$buffer_level         = ob_get_level();
+		$callback             = static function () use ( &$hook_calls, &$callback_results ) {
+			global $product;
+
+			if ( ! $product instanceof WC_Product_Variable ) {
+				throw new RuntimeException( 'Expected the gallery template to expose the variable product.' );
+			}
+
+			++$hook_calls;
+			if ( 2 < $hook_calls ) {
+				throw new RuntimeException( 'The gallery template was rendered recursively.' );
+			}
+
+			$callback_results[] = $product->get_available_variations();
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
+
+		ob_start();
+		try {
+			woocommerce_show_product_images();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+			$product = $previous_product;
+		}
+
+		$this->assertSame( 2, $hook_calls, 'The callback should run for the product template and its first variation gallery render.' );
+		$this->assertCount( 2, $callback_results, 'Both bounded callback invocations should return variation data.' );
+		$this->assertSame( '', $callback_results[0][0]['gallery_images_html'], 'Re-entrant variation data should omit gallery markup.' );
+		$this->assertNotEmpty( $callback_results[1][0]['gallery_images_html'], 'The first variation data request should retain gallery markup.' );
+		$this->assertNotEmpty( $markup, 'The product image template should still render.' );
+	}
+
+	/**
+	 * @testdox 'get_available_variations' allows a gallery callback to render a different product gallery.
+	 */
+	public function test_get_available_variations_allows_nested_gallery_for_different_product(): void {
+		list( $outer_product )  = $this->create_variation_gallery_fixture();
+		list( $nested_product ) = $this->create_variation_gallery_fixture();
+		$rendered_product_ids   = array();
+		$nested_result          = null;
+		$callback               = static function () use ( $outer_product, $nested_product, &$rendered_product_ids, &$nested_result ) {
+			global $product;
+
+			$rendered_product_ids[] = $product->get_id();
+			if ( $outer_product->get_id() === $product->get_id() ) {
+				$nested_result = $nested_product->get_available_variations();
+			}
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
+
+		try {
+			$outer_product->get_available_variations();
+		} finally {
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+		}
+
+		$this->assertContains( $outer_product->get_id(), $rendered_product_ids, 'The outer product gallery should render.' );
+		$this->assertContains( $nested_product->get_id(), $rendered_product_ids, 'The nested product gallery should render.' );
+		$this->assertNotEmpty( $nested_result[0]['gallery_images_html'], 'A different product should retain its gallery markup.' );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
 	 */
 	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
@@ -285,6 +361,53 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $parent_featured_id, $available_variation['image_id'] );
 		$this->assertSame( '', $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' prefers the variation's own gallery over the inherited parent featured image.
+	 */
+	public function test_get_available_variation_prefers_own_gallery_over_inherited_parent_image(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame(
+			$variation_gallery_id,
+			$available_variation['image_id'],
+			'A variation that owns a gallery but no featured image should open on gallery[0], not on the inherited parent image.'
+		);
+	}
+
+	/**
+	 * @testdox 'get_available_variation' treats a filtered image equal to the parent featured image as inheritance, so the variation gallery still wins.
+	 */
+	public function test_get_available_variation_treats_filtered_parent_image_as_inherited(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
+		$parent_featured_id                                 = $product->get_image_id();
+
+		// A filter returning exactly the parent's featured image is indistinguishable from
+		// plain inheritance, so the variation-owned gallery takes priority by design.
+		$filter              = static fn() => $parent_featured_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' preserves a filtered variation image when no featured image is stored.
+	 */
+	public function test_get_available_variation_preserves_filtered_image(): void {
+		list( $product, $variation ) = $this->create_variation_gallery_fixture();
+		$filtered_image_id           = $this->create_image_attachment( 'Filtered Variation Image', 'filtered-variation.jpg' );
+
+		$filter              = static fn() => $filtered_image_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $filtered_image_id, $available_variation['image_id'] );
 	}
 
 	/**
@@ -387,6 +510,26 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 			'string' => array( 'bad_return' ),
 			'object' => array( new stdClass() ),
 		);
+	}
+
+	/**
+	 * Create a product with a parent image and an image-less variation with a gallery.
+	 *
+	 * @return array{0: WC_Product_Variable, 1: WC_Product_Variation, 2: int}
+	 */
+	private function create_variation_gallery_fixture(): array {
+		$product              = WC_Helper_Product::create_variation_product();
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		return array( $product, $variation, $variation_gallery_id );
 	}
 
 	/**
