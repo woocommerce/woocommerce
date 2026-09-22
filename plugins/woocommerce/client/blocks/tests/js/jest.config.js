@@ -58,7 +58,6 @@ module.exports = {
 
 		'@woocommerce/product-element-blocks':
 			'assets/js/product-element-blocks',
-		'^@woocommerce/product-element-utils/(.*)$': 'assets/js/utils/$1',
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
 		'^@woocommerce/settings$': 'packages/public-api/settings',
@@ -100,6 +99,7 @@ module.exports = {
 		'@woocommerce/blocks-test-utils': 'tests/utils',
 		'^@woocommerce/types/(.*)$': 'packages/public-api/types/$1',
 		'^@woocommerce/types$': 'packages/public-api/types',
+		'^@woocommerce/utils/(.*)$': 'assets/js/utils/$1',
 		'@woocommerce/utils': 'assets/js/utils',
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',

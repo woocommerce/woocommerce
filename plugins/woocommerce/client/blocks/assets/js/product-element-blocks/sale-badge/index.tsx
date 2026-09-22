@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerProductBlockType } from '@woocommerce/product-element-utils/register-product-block-type';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
 import { percent, Icon } from '@wordpress/icons';
 
 /**

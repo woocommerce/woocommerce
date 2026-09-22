@@ -5,7 +5,7 @@ import { BlockAttributes, InnerBlockTemplate } from '@wordpress/blocks';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
-import { registerProductBlockType } from '@woocommerce/product-element-utils/register-product-block-type';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 

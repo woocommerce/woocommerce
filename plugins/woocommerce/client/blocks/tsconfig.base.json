@@ -40,9 +40,6 @@
 			"@woocommerce/product-element-blocks/*": [
 				"assets/js/product-element-blocks/*"
 			],
-			"@woocommerce/product-element-utils/*": [
-				"assets/js/utils/*"
-			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"
 			],
@@ -174,6 +171,9 @@
 			],
 			"@woocommerce/utils": [
 				"assets/js/utils"
+			],
+			"@woocommerce/utils/*": [
+				"assets/js/utils/*"
 			],
 			"@woocommerce/e2e-utils": [
 				"../../tests/e2e/utils/blocks"

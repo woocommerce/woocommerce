@@ -88,9 +88,7 @@ describe( 'registerProductBlockType', () => {
 		};
 		jest.doMock( '@wordpress/blocks', getBlocksMock );
 		jest.doMock( '@wordpress/data', getDataMock );
-		jest.dontMock(
-			'@woocommerce/product-element-utils/register-product-block-type'
-		);
+		jest.dontMock( '@woocommerce/utils/register-product-block-type' );
 	} );
 
 	it( 'registers only post-editor-enabled blocks with the Single Product ancestor', () => {
@@ -256,12 +254,9 @@ describe( 'product block registration call sites', () => {
 		jest.clearAllMocks();
 		jest.dontMock( '@wordpress/blocks' );
 		jest.dontMock( '@wordpress/data' );
-		jest.doMock(
-			'@woocommerce/product-element-utils/register-product-block-type',
-			() => ( {
-				registerProductBlockType: mockRegisterProductBlockTypeCallSite,
-			} )
-		);
+		jest.doMock( '@woocommerce/utils/register-product-block-type', () => ( {
+			registerProductBlockType: mockRegisterProductBlockTypeCallSite,
+		} ) );
 	} );
 
 	it( 'declares the post-editor availability of Product Price and Product Image Gallery', () => {
