@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Document the WordPress.com connection screen (requires_jpc field) and Terms of Service notice in the Core Profiler docs (no runtime change).

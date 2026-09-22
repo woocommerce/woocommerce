@@ -245,7 +245,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$product->set_gallery_image_ids( array( $gallery_id ) );
 		$product->save();
 
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false ) );
+		$importer = $this->get_importer();
 		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( $new_url ) ) ) );
 		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
 
@@ -268,12 +268,59 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$product->set_gallery_image_ids( array( $gallery_id ) );
 		$product->save();
 
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false ) );
+		$importer = $this->get_importer();
 		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array() ) ) );
 		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
 
 		$this->assertEquals( $featured_id, $product->get_image_id(), 'Featured image should be preserved.' );
 		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Existing gallery should be preserved.' );
+	}
+
+	/**
+	 * @testdox A leading empty value in the images column still imports the remaining gallery images.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/66583: an Images cell
+	 * like ",gallery.jpg" parses to an empty featured-image value followed by gallery URLs. The
+	 * gallery URLs must still be imported (and replace the existing gallery) even though the
+	 * featured-image slot is empty.
+	 */
+	public function test_leading_empty_image_value_still_imports_gallery_images() {
+		$gallery_url = 'http://example.com/gallery.jpg';
+		$gallery_id  = $this->create_sourced_attachment( $gallery_url );
+		$stale_id    = $this->create_sourced_attachment( 'http://example.com/stale.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $this->create_sourced_attachment( 'http://example.com/featured.jpg' ) );
+		$product->set_gallery_image_ids( array( $stale_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( '', $gallery_url ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEmpty( $product->get_image_id(), 'An empty featured-image value should clear the featured image.' );
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Gallery images after a leading empty value should replace the existing gallery.' );
+	}
+
+	/**
+	 * @testdox An images cell containing only separators leaves the existing gallery untouched.
+	 *
+	 * An Images cell like "," parses to an array of empty strings. It carries no image values,
+	 * so it must behave like a fully empty cell and not wipe the existing gallery.
+	 */
+	public function test_separators_only_images_cell_preserves_existing_gallery() {
+		$gallery_id = $this->create_sourced_attachment( 'http://example.com/gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $this->create_sourced_attachment( 'http://example.com/featured.jpg' ) );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( '', '' ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'A separators-only images cell should leave the existing gallery untouched.' );
 	}
 
 	/**
@@ -346,6 +393,40 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
 
 		$this->assertEquals( array_values( $args['mapping'] ), $importer->get_mapped_keys() );
+	}
+
+	/**
+	 * @testdox Special column formatting callbacks are only applied to columns whose name starts with the special prefix.
+	 */
+	public function test_get_formatting_callback_matches_special_columns_by_prefix() {
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'lines' => 1 ) );
+
+		$mapped_keys = array(
+			// Canonical special columns.
+			'attributes:value1'    => array( $importer, 'parse_comma_field' ),
+			'attributes:visible1'  => array( $importer, 'parse_bool_field' ),
+			'attributes:taxonomy1' => array( $importer, 'parse_bool_field' ),
+			'downloads:url1'       => array( $importer, 'parse_download_file_field' ),
+			'meta:_my_field'       => 'wp_kses_post',
+			// Columns that merely contain a special name must fall back to wc_clean.
+			'metamask'             => 'wc_clean',
+			'hellometa:'           => 'wc_clean',
+			'product_metadata'     => 'wc_clean',
+			'my attributes:value'  => 'wc_clean',
+			'a downloads:url1'     => 'wc_clean',
+			// Special columns handled elsewhere still get the default callback.
+			'attributes:name1'     => 'wc_clean',
+			'attributes:default1'  => 'wc_clean',
+			'downloads:name1'      => 'wc_clean',
+		);
+
+		$reflected_keys = new ReflectionProperty( $importer, 'mapped_keys' );
+		$reflected_keys->setAccessible( true );
+		$reflected_keys->setValue( $importer, array_keys( $mapped_keys ) );
+
+		$callbacks = $this->invoke_protected( $importer, 'get_formatting_callback', array() );
+
+		$this->assertEquals( array_values( $mapped_keys ), $callbacks );
 	}
 
 	/**
@@ -886,7 +967,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * This way it is not necessary to perform a regular request to an external server which would
 	 * significantly slow down the tests.
 	 *
-	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 * This function is called by WP_HTTP_TestCase::http_request_listener().
 	 *
 	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.

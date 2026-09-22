@@ -1,6 +1,6 @@
 declare global {
 	interface Window {
-		wcSettings: {
+		wcSettings?: {
 			variationTitleAttributesSeparator?: string;
 			countries: Record< string, string >;
 		};
@@ -9,4 +9,3 @@ declare global {
 
 /*~ If your module exports nothing, you'll need this line. Otherwise, delete it */
 export {};
-

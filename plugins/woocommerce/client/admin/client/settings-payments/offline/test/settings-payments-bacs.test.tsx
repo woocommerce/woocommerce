@@ -17,7 +17,12 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 jest.mock( '~/settings-payments/components/bank-accounts-list', () => ( {
-	BankAccountsList: () => <div data-testid="bank-accounts-list" />,
+	BankAccountsList: ( { defaultCountry }: { defaultCountry: string } ) => (
+		<div
+			data-testid="bank-accounts-list"
+			data-default-country={ defaultCountry }
+		/>
+	),
 } ) );
 
 const bacsSettings = {
@@ -26,6 +31,18 @@ const bacsSettings = {
 	settings: {
 		title: { value: 'Direct bank transfer' },
 		instructions: { value: 'Use your order ID as the payment reference.' },
+		enable_for_methods: {
+			value: [ 'flat_rate:1' ],
+			options: {
+				'Flat rate': {
+					'flat_rate:1': 'Flat rate (#1)',
+				},
+				'Free shipping': {
+					'free_shipping:2': 'Free shipping (#2)',
+				},
+			},
+		},
+		enable_for_virtual: { value: 'yes' },
 	},
 };
 
@@ -80,6 +97,14 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveValue(
 			'Use your order ID as the payment reference.'
 		);
+		expect(
+			screen.getByLabelText( 'Enable for shipping methods' )
+		).toBeInTheDocument();
+		// The stored shipping method selection is rendered as a tag.
+		expect( screen.getByText( 'Flat rate (#1)' ) ).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Accept for virtual orders' )
+		).toBeChecked();
 	} );
 
 	it( 'renders the bank accounts section', () => {
@@ -88,6 +113,116 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect(
 			screen.getByTestId( 'bank-accounts-list' )
 		).toBeInTheDocument();
+	} );
+
+	describe( 'country a new bank account starts in', () => {
+		const setWcSettings = ( admin: unknown ) => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: { admin },
+				writable: true,
+			} );
+		};
+
+		afterEach( () => {
+			Object.defineProperty( window, 'wcSettings', {
+				value: undefined,
+				writable: true,
+			} );
+		} );
+
+		it( 'uses the business location set on the Payments settings screen', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: 'TN',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'TN' );
+		} );
+
+		it( "falls back to the store's base country, without its state suffix", () => {
+			setWcSettings( {
+				preloadSettings: {
+					general: { woocommerce_default_country: 'US:CA' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'ignores locations that are stored empty', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: '',
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: '' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'ignores locations that are not strings', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					general: { woocommerce_default_country: true },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
+
+		it( 'falls through an unusable business location to the store', () => {
+			setWcSettings( {
+				woocommerce_payments_nox_profile: {
+					business_country_code: { country: 'TN' },
+				},
+				preloadSettings: {
+					// Deliberately not US, so this cannot be confused with
+					// the last-resort fallback at the end of the chain.
+					general: { woocommerce_default_country: 'GB' },
+				},
+			} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'GB' );
+		} );
+
+		it( 'falls back to US when the store knows no location at all', () => {
+			setWcSettings( {} );
+
+			render( <SettingsPaymentsBacs /> );
+
+			expect(
+				screen.getByTestId( 'bank-accounts-list' )
+			).toHaveAttribute( 'data-default-country', 'US' );
+		} );
 	} );
 
 	it( 'renders placeholders while loading', () => {
@@ -135,6 +270,7 @@ describe( 'SettingsPaymentsBacs', () => {
 		fireEvent.click(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		);
+		fireEvent.click( screen.getByLabelText( 'Accept for virtual orders' ) );
 		fireEvent.click(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		);
@@ -147,6 +283,8 @@ describe( 'SettingsPaymentsBacs', () => {
 				settings: {
 					title: 'Bank transfer payments',
 					instructions: 'Use your order ID as the payment reference.',
+					enable_for_methods: [ 'flat_rate:1' ],
+					enable_for_virtual: 'no',
 				},
 			} );
 		} );
@@ -183,7 +321,7 @@ describe( 'SettingsPaymentsBacs', () => {
 		} );
 	} );
 
-	it( 'supports keyboard navigation through the form fields', () => {
+	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsBacs /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
@@ -191,20 +329,29 @@ describe( 'SettingsPaymentsBacs', () => {
 			target: { value: 'Edited title' },
 		} );
 
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
-		userEvent.tab();
-		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
-		).toHaveFocus();
+		// The shipping methods tree select and the virtual orders checkbox
+		// sit between Instructions and Save; tab until Save receives focus.
+		const saveButton = screen.getByRole( 'button', {
+			name: 'Save changes',
+		} );
+		for (
+			let i = 0;
+			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
+			i++
+		) {
+			await userEvent.tab();
+		}
+		expect( saveButton ).toHaveFocus();
 	} );
 
 	it( 'shows an error notice when saving fails', async () => {

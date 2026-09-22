@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Stabilize flaky Legacy MiniCart blocks e2e specs (mini-cart variation attributes and product-button rapid-click) by waiting on settled cart state instead of racing Interactivity-API/AJAX updates.

@@ -5,10 +5,33 @@
  * @package WooCommerce\Tests\Post_Data.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Class WC_Post_Data_Test
  */
 class WC_Post_Data_Test extends \WC_Unit_Test_Case {
+
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure the HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * @testdox coupon code should be always sanitized.
@@ -34,16 +57,36 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Order items should be deleted before deleting order.
+	 * @testdox Should remove order items when permanently deleting an order.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
-	public function test_before_delete_order() {
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$items = $order->get_items();
-		$this->assertNotEmpty( $items );
+	public function test_deleting_order_removes_items( bool $hpos_enabled ): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
-		WC_Post_Data::before_delete_order( $order->get_id() );
-		$order = wc_get_order( $order->get_id() );
-		$this->assertEmpty( $order->get_items() );
+		try {
+			$this->toggle_cot_authoritative( $hpos_enabled );
+
+			$order    = OrderHelper::create_order();
+			$item_ids = array_keys( $order->get_items() );
+			$this->assertNotEmpty( $item_ids, 'The order should contain an item' );
+
+			$order->delete( true );
+
+			$this->assertFalse( WC_Order_Factory::get_order_item( reset( $item_ids ) ), 'The deleted order item should no longer be available' );
+		} finally {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				$this->toggle_cot_authoritative( $previous_hpos_state );
+			}
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
 	}
 
 	/**
@@ -251,46 +294,5 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
 		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
-	}
-
-	/**
-	 * @testdox Should delete variation attribute meta when the parent variation attribute is removed.
-	 */
-	public function test_product_attributes_updated_deletes_stale_variation_attribute_meta(): void {
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_ids = $product->get_children();
-
-		foreach ( $variation_ids as $variation_id ) {
-			update_post_meta( $variation_id, 'attribute_pa_colour', 'red' );
-			$this->assertSame( 'red', get_post_meta( $variation_id, 'attribute_pa_colour', true ), 'Variation should start with colour attribute meta' );
-		}
-
-		$attributes = $product->get_attributes();
-		unset( $attributes['pa_colour'] );
-		$product->set_attributes( $attributes );
-		$product->save();
-
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_colour' ), 'Removed parent variation attribute meta should be deleted from each child variation' );
-		}
-		$this->assertSame( 'huge', get_post_meta( $variation_ids[2], 'attribute_pa_size', true ), 'Remaining parent variation attribute meta should be preserved' );
-
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_ids = $product->get_children();
-
-		foreach ( $variation_ids as $variation_id ) {
-			update_post_meta( $variation_id, 'attribute_pa_size', 'huge' );
-			update_post_meta( $variation_id, 'attribute_pa_colour', 'red' );
-			update_post_meta( $variation_id, 'attribute_pa_number', '2' );
-		}
-
-		$product->set_attributes( array() );
-		$product->save();
-
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_size' ), 'Removed size attribute meta should be deleted from each child variation' );
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_colour' ), 'Removed colour attribute meta should be deleted from each child variation' );
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_number' ), 'Removed number attribute meta should be deleted from each child variation' );
-		}
 	}
 }

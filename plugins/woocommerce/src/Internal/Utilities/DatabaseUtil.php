@@ -18,7 +18,7 @@ class DatabaseUtil {
 	 * Wrapper for the WordPress dbDelta function, allows to execute a series of SQL queries.
 	 *
 	 * @param string $queries The SQL queries to execute.
-	 * @param bool   $execute Ture to actually execute the queries, false to only simulate the execution.
+	 * @param bool   $execute True to actually execute the queries, false to only simulate the execution.
 	 * @return array The result of the execution (or simulation) from dbDelta.
 	 */
 	public function dbdelta( string $queries = '', bool $execute = true ): array {

@@ -49,4 +49,40 @@ class Utils {
 		}
 		return $src;
 	}
+
+	/**
+	 * Get the current page URL using the request path relative to home.
+	 *
+	 * @internal This function is used internally by WooCommerce blocks to get the current page URL. It is not intended for external use.
+	 *
+	 * @return string The current page URL.
+	 *
+	 * @since 11.1.0
+	 */
+	public static function get_current_page_url() {
+		global $wp, $wp_rewrite;
+
+		$request_path = is_object( $wp ) && isset( $wp->request ) && is_string( $wp->request ) ? $wp->request : '';
+
+		// PATHINFO permalinks keep index.php in the public URL; $wp->request does not.
+		if (
+			'' !== $request_path &&
+			$wp_rewrite instanceof \WP_Rewrite &&
+			$wp_rewrite->using_index_permalinks()
+		) {
+			$index = is_string( $wp_rewrite->index ) && '' !== $wp_rewrite->index ? $wp_rewrite->index : 'index.php';
+			if ( $index !== $request_path && ! str_starts_with( $request_path, $index . '/' ) ) {
+				$request_path = $index . '/' . $request_path;
+			}
+		}
+
+		$url = home_url( user_trailingslashit( $request_path ) );
+
+		if ( isset( $_SERVER['QUERY_STRING'] ) && is_string( $_SERVER['QUERY_STRING'] ) && '' !== $_SERVER['QUERY_STRING'] ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserving the raw query string encoding and delimiters.
+			$url .= '?' . wp_unslash( $_SERVER['QUERY_STRING'] );
+		}
+
+		return $url;
+	}
 }

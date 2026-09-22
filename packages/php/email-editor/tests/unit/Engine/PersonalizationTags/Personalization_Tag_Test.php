@@ -64,6 +64,24 @@ class Personalization_Tag_Test extends TestCase {
 	}
 
 	/**
+	 * Test the value type defaults to html, accepts text, and falls back to html for unknown values.
+	 */
+	public function testValueType(): void {
+		$callback = function () {
+			return 'test value';
+		};
+
+		$tag = new Personalization_Tag( 'Test Tag', 'test_token', 'Test Category', $callback );
+		$this->assertSame( Personalization_Tag::VALUE_TYPE_HTML, $tag->get_value_type() );
+
+		$tag = new Personalization_Tag( 'Test Tag', 'test_token', 'Test Category', $callback, array(), null, array(), Personalization_Tag::VALUE_TYPE_TEXT );
+		$this->assertSame( Personalization_Tag::VALUE_TYPE_TEXT, $tag->get_value_type() );
+
+		$tag = new Personalization_Tag( 'Test Tag', 'test_token', 'Test Category', $callback, array(), null, array(), 'unknown-type' );
+		$this->assertSame( Personalization_Tag::VALUE_TYPE_HTML, $tag->get_value_type() );
+	}
+
+	/**
 	 * Test that deserialization is prevented for security reasons.
 	 */
 	public function testUnserializeThrowsException(): void {

@@ -27,7 +27,7 @@ const getSimulateErrorOptions = async () => {
 					option_value: string;
 					option_name: string;
 					option_id: number;
-				}
+				},
 			]
 		>( {
 			path,
@@ -55,7 +55,7 @@ const deleteSimulateErrorOption = async () => {
  */
 const addCoreExceptionFilter = () => {
 	addFilter( 'woocommerce_admin_pages_list', 'wc-beta-tester', () => {
-		deleteSimulateErrorOption();
+		void deleteSimulateErrorOption();
 
 		throw new Error(
 			'Test JS exception in WC Core context via WC Beta Tester'
@@ -84,7 +84,7 @@ export const registerExceptionFilter = async () => {
 	if ( context === 'core' ) {
 		addCoreExceptionFilter();
 	} else {
-		deleteSimulateErrorOption();
+		void deleteSimulateErrorOption();
 		throwBetaTesterException();
 	}
 };

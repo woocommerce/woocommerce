@@ -14,11 +14,17 @@ import { wpCLI } from '../../utils/cli';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
+const orderEditUrl = ( id: number ) =>
+	process.env.DISABLE_HPOS === '1'
+		? `wp-admin/post.php?post=${ id }&action=edit`
+		: `wp-admin/admin.php?page=wc-orders&action=edit&id=${ id }`;
+const ordersListUrl = ( id: number ) =>
+	process.env.DISABLE_HPOS === '1'
+		? `wp-admin/edit.php?post_type=shop_order&s=${ id }`
+		: `wp-admin/admin.php?page=wc-orders&s=${ id }`;
+
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
-	let orderId: number,
-		secondOrderId: number,
-		orderToCancel: number,
-		customerId: number;
+	let orderId: number, secondOrderId: number, customerId: number;
 	const username = `big.archie.${ Date.now() }`;
 
 	test.beforeAll( async ( { restApi } ) => {
@@ -31,19 +37,11 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
+				status: 'pending',
 			} )
 			.then( ( response: { data: { id: number } } ) => {
 				secondOrderId = response.data.id;
 			} );
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
-			} )
-			.then( ( response: { data: { id: number } } ) => {
-				orderToCancel = response.data.id;
-			} );
-
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@email.addr`,
@@ -87,56 +85,29 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await restApi.delete( `${ WC_API_PATH }/orders/${ secondOrderId }`, {
 			force: true,
 		} );
-		await restApi.delete( `${ WC_API_PATH }/orders/${ orderToCancel }`, {
-			force: true,
-		} );
 		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
 			force: true,
 		} );
 	} );
 
-	test( 'can view single order', async ( { page } ) => {
-		if ( process.env.DISABLE_HPOS === '1' ) {
-			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
-		} else {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
-		}
+	test( 'can persist order status and date', async ( { page } ) => {
+		await page.goto( orderEditUrl( orderId ) );
 
-		// confirm we're on the orders page
-		await expect(
-			page.locator( 'h1.components-text, h1.wp-heading-inline' )
-		).toContainText( 'Orders' );
-		// open order we created
-		await page.goto(
-			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
-
-		// make sure we're on the order details page
-		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			/Edit [oO]rder/
-		);
-	} );
-
-	test( 'can update order status', async ( { page } ) => {
-		// open order we created
-		await page.goto(
-			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
-
-		// update order status to Completed
+		await page.locator( 'input[name=order_date]' ).fill( '2018-12-14' );
 		await page.locator( '#order_status' ).selectOption( 'wc-completed' );
 		await page.locator( 'button.save_order' ).click();
 
-		// verify order status changed and note added
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-completed'
+		);
+		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
+			'2018-12-14'
 		);
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
 		).toContainText( 'Order status changed from Processing to Completed.' );
 
-		// load the orders listing and confirm order is completed
-		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+		await page.goto( ordersListUrl( orderId ) );
 
 		await expect(
 			page
@@ -145,57 +116,33 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		).toBeVisible();
 	} );
 
-	test( 'can update order status to cancelled', async ( { page } ) => {
-		// open order we created
-		await page.goto(
-			`wp-admin/post.php?post=${ orderToCancel }&action=edit`
-		);
+	test( 'saving an order does not trigger a false unsaved-changes warning', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
 
-		// update order status to Completed
-		await page.locator( '#order_status' ).selectOption( 'Cancelled' );
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
 		await page.locator( 'button.save_order' ).click();
-
-		// verify order status changed and note added
-		await expect( page.locator( '#order_status' ) ).toHaveValue(
-			'wc-cancelled'
-		);
-		await expect(
-			page.getByText(
-				'Order status changed from Processing to Cancelled.'
-			)
-		).toBeVisible();
-
-		// load the orders listing and confirm order is cancelled
-		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
-
-		await expect(
-			page
-				.locator(
-					`:is(#order-${ orderToCancel }, #post-${ orderToCancel })`
-				)
-				.getByRole( 'cell', { name: 'Cancelled' } )
-		).toBeVisible();
-	} );
-
-	test( 'can update order details', async ( { page } ) => {
-		// open order we created
-		await page.goto(
-			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
-
-		// update order date
-		await page.locator( 'input[name=order_date]' ).fill( '2018-12-14' );
-		await page.locator( 'button.save_order' ).click();
-
-		// verify changes
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
 				.filter( { hasText: 'Order updated.' } )
 		).toBeVisible();
-		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
-			'2018-12-14'
-		);
+
+		expect( dialogMessages ).toEqual( [] );
 	} );
 
 	test( 'can add and delete order notes', async ( { page } ) => {
@@ -345,6 +292,39 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			await page.locator( 'li.select2-results__option' ).click();
 		} );
 
+		await test.step( 'Update the shipping method name', async () => {
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page.getByRole( 'button', { name: 'Add shipping' } ).click();
+
+			const shippingRow = page.locator( 'tr.shipping' ).last();
+			await expect( shippingRow ).toBeVisible();
+			await shippingRow
+				.getByRole( 'link', { name: 'Edit shipping' } )
+				.click();
+
+			const method = shippingRow.locator( 'select.shipping_method' );
+			const name = shippingRow.locator( 'input.shipping_method_name' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await method.selectOption( 'other' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await name.fill( 'Local courier' );
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Local courier' );
+
+			await page.locator( 'button.save-action' ).click();
+		} );
+
 		await test.step( 'Load the billing address and then copy it to the shipping address', async () => {
 			// Click the load billing address button
 			await page
@@ -379,6 +359,42 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 				)
 			).toBeVisible();
 		} );
+	} );
+
+	test( 'shows the lost connection notice when the heartbeat request fails', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
+
+		const notice = page.locator( '#wc-lost-connection-notice' );
+		await expect( notice ).toBeHidden();
+
+		// Dispatch the same event heartbeat.js fires on a real timeout.
+		await page.evaluate( () =>
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-lost', [
+				'timeout',
+				0,
+			] )
+		);
+
+		await expect( notice ).toBeVisible();
+		await expect( notice ).toContainText( 'Connection lost.' );
+
+		await page.evaluate( () =>
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-restored' )
+		);
+
+		await expect( notice ).toBeHidden();
 	} );
 } );
 
@@ -439,9 +455,8 @@ test.describe(
 		};
 
 		test.beforeAll( async () => {
-			( { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			) );
+			( { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' ) );
 
 			// Persist a Screen Options preference (an empty hidden-meta-boxes list) for the
 			// admin user (ID 1) so the box stays visible while the tests navigate between

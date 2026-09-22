@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve email editor layout rendering for better parity with the editor: include padding and borders in inner (e.g. image) width calculations so bordered columns no longer overflow, nest a padded group's root and container padding instead of stacking them on each block, and stop using the global vertical block spacing as a horizontal gap between columns.

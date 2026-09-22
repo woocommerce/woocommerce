@@ -62,6 +62,22 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox WordPress personal preferences are excluded from customer meta data.
+	 */
+	public function test_wordpress_personal_preferences_are_excluded_from_customer_meta_data(): void {
+		$customer = WC_Helper_Customer::create_customer();
+
+		update_user_meta( $customer->get_id(), 'infinite_scrolling', 'true' );
+		update_user_meta( $customer->get_id(), 'custom_preference', 'custom-value' );
+
+		$read_customer = new WC_Customer( $customer->get_id() );
+		$meta_keys     = wp_list_pluck( $read_customer->get_meta_data(), 'key' );
+
+		$this->assertNotContains( 'infinite_scrolling', $meta_keys, 'WordPress personal preferences should not be exposed as customer meta data.' );
+		$this->assertContains( 'custom_preference', $meta_keys, 'Custom user meta should remain available as customer meta data.' );
+	}
+
+	/**
 	 * @testdox A backslash in a customer address field survives a save/read round-trip.
 	 *
 	 * Addresses entered through the Store API (block checkout) are not magic-quoted, so the value

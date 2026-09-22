@@ -111,7 +111,6 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 			WC_Unit_Test_Case::with_rest_route_context(
 				$route,
 				static function () {
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 					do_action( 'rest_api_init' );
 				}
 			);

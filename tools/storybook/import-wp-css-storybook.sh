@@ -25,5 +25,5 @@ then
     # The directory is not empty, import css
     download_and_extract_css;
 else
-    echo "Wordpress CSS already imported, pass -f to force an update";
+    echo "WordPress CSS already imported, pass -f to force an update";
 fi

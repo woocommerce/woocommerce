@@ -15,6 +15,7 @@ jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.check-upcoming-release-build.outputs.version }}
       milestone: ${{ steps.check-upcoming-release-build.outputs.milestone }}
@@ -80,6 +81,7 @@ jobs:
     name: Check all open milestones
     needs: check-upcoming-release-events
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Get and process open milestones
         id: process-milestones

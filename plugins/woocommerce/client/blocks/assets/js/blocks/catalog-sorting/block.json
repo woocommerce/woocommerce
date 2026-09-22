@@ -15,6 +15,7 @@
 		}
 	},
 	"viewScriptModule": "woocommerce/catalog-sorting",
+	"style": "file:../woocommerce/catalog-sorting-style.css",
 	"attributes": {
 		"fontSize": {
 			"type": "string",

@@ -57,6 +57,13 @@ class Assets_Manager {
 	private Email_Editor_Logger $logger;
 
 	/**
+	 * Whether the email editor HTML has been rendered.
+	 *
+	 * @var bool
+	 */
+	private bool $editor_html_rendered = false;
+
+	/**
 	 * Assets Manager constructor with all dependencies.
 	 *
 	 * @param Settings_Controller $settings_controller Settings controller instance.
@@ -112,6 +119,8 @@ class Assets_Manager {
 
 		// Load CSS from Post Editor.
 		wp_enqueue_style( 'wp-edit-post' );
+		// Print the personalization tag chip styles right after core's editor styles by attaching them to the wp-edit-post handle.
+		wp_add_inline_style( 'wp-edit-post', (string) file_get_contents( __DIR__ . '/rich-text-comment.css' ) );
 		// Load CSS for the format library - used for example in popover.
 		wp_enqueue_style( 'wp-format-library' );
 		// Enqueue CSS containing --wp--preset variables.
@@ -124,9 +133,18 @@ class Assets_Manager {
 	/**
 	 * Render the email editor's required HTML and admin header.
 	 *
+	 * Renders at most once per instance; repeated calls are no-ops.
+	 *
 	 * @param string $element_id Optional. The ID of the main container element. Default is 'woocommerce-email-editor'.
 	 */
 	public function render_email_editor_html( string $element_id = 'woocommerce-email-editor' ): void {
+		// Integrations render from the `replace_editor` filter, which re-fires while
+		// admin-header.php runs whenever a plugin calls WP_Screen::get() from
+		// admin_enqueue_scripts; a second container echoed inside <head> breaks the page.
+		if ( $this->editor_html_rendered ) {
+			return;
+		}
+		$this->editor_html_rendered = true;
 		// @phpstan-ignore-next-line -- PHPStan tried to check if the file exists.
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 		echo '<div id="' . esc_attr( $element_id ) . '" class="block-editor block-editor__container hide-if-no-js"></div>';
@@ -217,6 +235,7 @@ class Assets_Manager {
 	private function preload_rest_api_data( $post_id, string $post_type ): void {
 		$email_post_type    = $post_type;
 		$user_theme_post_id = $this->user_theme->get_user_theme_post()->ID;
+		$post               = is_numeric( $post_id ) ? get_post( (int) $post_id ) : null;
 		$template_slug      = get_post_meta( (int) $post_id, '_wp_page_template', true );
 		$routes             = array(
 			"/wp/v2/{$email_post_type}/" . intval( $post_id ) . '?context=edit',
@@ -230,13 +249,30 @@ class Assets_Manager {
 			'/wp/v2/taxonomies?context=view',
 		);
 
-		if ( is_string( $template_slug ) ) {
+		if ( is_string( $template_slug ) && '' !== $template_slug ) {
 			$routes[] = '/wp/v2/templates/lookup?slug=' . $template_slug;
-		} else {
+		}
+
+		// Recent emails listed by the template selection modal, which opens on emails with no content.
+		if ( $post instanceof \WP_Post && '' === $post->post_content ) {
 			$routes[] = "/wp/v2/{$email_post_type}?context=edit&per_page=30&status=publish,sent";
 		}
 
-		// Preload the data for the specified routes.
+		/**
+		 * Filters the REST API routes preloaded for the email editor.
+		 *
+		 * @param string[]   $routes    The routes to preload.
+		 * @param string     $post_type The edited post type.
+		 * @param int|string $post_id   The edited post ID.
+		 *
+		 * @since 11.2.0
+		 */
+		$routes = apply_filters( 'woocommerce_email_editor_preload_rest_api_routes', $routes, $post_type, $post_id );
+
+		if ( ! is_array( $routes ) ) {
+			$routes = array();
+		}
+
 		$preload_data = array_reduce(
 			$routes,
 			'rest_preload_api_request',
