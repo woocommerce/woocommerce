@@ -50,9 +50,9 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		admin,
 	} ) => {
-		// The setting is store-wide and nothing in the E2E lifecycle puts it back, so
-		// product-button.classic_theme.spec.ts would run with AJAX still disabled and
-		// never see the "1 in cart" button it asserts on.
+		// The setting is store-wide, but the Blocks `page` fixture restores the database
+		// after every test, failed ones included, so the next spec starts with AJAX
+		// enabled again. The `finally` below is only a safety net.
 		await handleAddToCartAjaxSetting( admin, page, {
 			isChecked: true,
 		} );

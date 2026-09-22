@@ -13,6 +13,14 @@ declare( strict_types = 1 );
 class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Starts each test with an empty WC_Admin_Settings errors array.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->wc_admin_settings_errors_property()->setValue( null, array() );
+	}
+
+	/**
 	 * Resets the static WC_Admin_Settings errors so they do not leak into other tests.
 	 */
 	public function tearDown(): void {
@@ -108,85 +116,82 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_wc_format_option_price_separators(): array {
 		return array(
-			'thousand sep: comma'           => array( 'woocommerce_price_thousand_sep', ',', ',' ),
-			'thousand sep: period'          => array( 'woocommerce_price_thousand_sep', '.', '.' ),
-			'thousand sep: space'           => array( 'woocommerce_price_thousand_sep', ' ', ' ' ),
-			'thousand sep: two spaces'      => array( 'woocommerce_price_thousand_sep', '  ', '  ' ),
-			'thousand sep: empty'           => array( 'woocommerce_price_thousand_sep', '', '' ),
-			'thousand sep: nbsp entity'     => array( 'woocommerce_price_thousand_sep', '&nbsp;', '&nbsp;' ),
-			'thousand sep: comma entity'    => array( 'woocommerce_price_thousand_sep', '&#44;', '&#044;' ),
-			'thousand sep: zero digit'      => array( 'woocommerce_price_thousand_sep', '0', null ),
-			'thousand sep: single digit'    => array( 'woocommerce_price_thousand_sep', '1', null ),
-			'thousand sep: digit+symbol'    => array( 'woocommerce_price_thousand_sep', '1,', null ),
-			'thousand sep: digit entity'    => array( 'woocommerce_price_thousand_sep', '&#49;', null ),
-			'thousand sep: fullwidth digit' => array( 'woocommerce_price_thousand_sep', '１', null ),
-			'decimal sep: period'           => array( 'woocommerce_price_decimal_sep', '.', '.' ),
-			'decimal sep: single digit'     => array( 'woocommerce_price_decimal_sep', '2', null ),
-			'decimal sep: arabic digit'     => array( 'woocommerce_price_decimal_sep', '٢', null ),
+			'thousand sep: comma'           => array( 'woocommerce_price_thousand_sep', ',', ',', false ),
+			'thousand sep: period'          => array( 'woocommerce_price_thousand_sep', '.', '.', false ),
+			'thousand sep: space'           => array( 'woocommerce_price_thousand_sep', ' ', ' ', false ),
+			'thousand sep: two spaces'      => array( 'woocommerce_price_thousand_sep', '  ', '  ', false ),
+			'thousand sep: empty'           => array( 'woocommerce_price_thousand_sep', '', '', false ),
+			'thousand sep: nbsp entity'     => array( 'woocommerce_price_thousand_sep', '&nbsp;', '&nbsp;', false ),
+			'thousand sep: comma entity'    => array( 'woocommerce_price_thousand_sep', '&#44;', '&#044;', false ),
+			'thousand sep: not submitted'   => array( 'woocommerce_price_thousand_sep', null, '|', false ),
+			'thousand sep: single digit'    => array( 'woocommerce_price_thousand_sep', '1', '|', true ),
+			'thousand sep: digit+symbol'    => array( 'woocommerce_price_thousand_sep', '1,', '|', true ),
+			'thousand sep: digit entity'    => array( 'woocommerce_price_thousand_sep', '&#49;', '|', true ),
+			'thousand sep: fullwidth digit' => array( 'woocommerce_price_thousand_sep', '１', '|', true ),
+			'thousand sep: array'           => array( 'woocommerce_price_thousand_sep', array( '1' ), '|', true ),
+			'decimal sep: period'           => array( 'woocommerce_price_decimal_sep', '.', '.', false ),
+			'decimal sep: single digit'     => array( 'woocommerce_price_decimal_sep', '2', '|', true ),
+			'decimal sep: arabic digit'     => array( 'woocommerce_price_decimal_sep', '٢', '|', true ),
 		);
 	}
 
 	/**
-	 * @testdox wc_format_option_price_separators should reject values containing digits by adding an error and returning null.
+	 * @testdox wc_format_option_price_separators should keep valid separators and fall back to the stored one when the input is rejected.
 	 *
 	 * @dataProvider data_provider_wc_format_option_price_separators
 	 *
-	 * @param string      $option_id The option being saved.
-	 * @param string      $raw_value The raw input being saved.
-	 * @param string|null $expected  The value the filter should return, null when the input is rejected.
+	 * @param string $option_id     The option being saved.
+	 * @param mixed  $raw_value     The raw input being saved, null when the field was not submitted.
+	 * @param mixed  $expected      The value the filter should return.
+	 * @param bool   $expects_error Whether the input should be rejected with a settings error.
 	 */
-	public function test_wc_format_option_price_separators( string $option_id, string $raw_value, ?string $expected ): void {
-		$option = array(
-			'id'      => $option_id,
-			'default' => ',',
-		);
+	public function test_wc_format_option_price_separators( string $option_id, $raw_value, $expected, bool $expects_error ): void {
+		update_option( $option_id, '|' );
 
-		$errors_before = $this->get_wc_admin_settings_errors();
-		$result        = wc_format_option_price_separators( $raw_value, $option, $raw_value );
-		$errors_after  = $this->get_wc_admin_settings_errors();
+		$result = wc_format_option_price_separators( $raw_value, array( 'id' => $option_id ), $raw_value );
 
 		$this->assertSame( $expected, $result );
 
-		if ( null === $expected ) {
-			$this->assertCount( count( $errors_before ) + 1, $errors_after, 'An error should be added when a numeric separator is rejected.' );
-			$this->assertStringContainsString( 'cannot contain numbers', end( $errors_after ), 'Error message should mention numbers.' );
-		} else {
-			$this->assertCount( count( $errors_before ), $errors_after, 'No error should be added for valid separators.' );
+		$errors = $this->get_wc_admin_settings_errors();
+
+		$this->assertCount( $expects_error ? 1 : 0, $errors, 'An error should be added only when the separator is rejected.' );
+
+		if ( $expects_error ) {
+			$this->assertStringContainsString( 'cannot contain numbers', end( $errors ), 'Error message should mention numbers.' );
 		}
 	}
 
 	/**
-	 * @testdox wc_format_option_price_separators should reject a non-string raw value.
+	 * @testdox wc_format_option_price_separators should return an empty string when nothing is stored.
 	 */
-	public function test_wc_format_option_price_separators_rejects_non_string_input(): void {
-		$option = array(
-			'id'      => 'woocommerce_price_thousand_sep',
-			'default' => ',',
-		);
+	public function test_wc_format_option_price_separators_returns_empty_string_when_nothing_stored(): void {
+		delete_option( 'woocommerce_price_thousand_sep' );
 
-		$errors_before = $this->get_wc_admin_settings_errors();
-		$result        = wc_format_option_price_separators( ',', $option, array( '1' ) );
-		$errors_after  = $this->get_wc_admin_settings_errors();
+		$result = wc_format_option_price_separators( '1', array( 'id' => 'woocommerce_price_thousand_sep' ), '1' );
 
-		$this->assertNull( $result, 'An array raw value should be rejected.' );
-		$this->assertCount( count( $errors_before ) + 1, $errors_after, 'An error should be added when the raw value is not a string.' );
+		$this->assertSame( '', $result, 'A rejected separator should return an empty string when the option is not stored.' );
 	}
 
 	/**
-	 * @testdox wc_format_option_price_separators should leave the value alone when the field was not submitted.
+	 * @testdox wc_format_option_price_separators should keep a stored empty separator on rejection.
 	 */
-	public function test_wc_format_option_price_separators_skips_missing_field(): void {
-		$option = array(
-			'id'      => 'woocommerce_price_thousand_sep',
-			'default' => ',',
-		);
+	public function test_wc_format_option_price_separators_keeps_stored_empty_separator(): void {
+		update_option( 'woocommerce_price_thousand_sep', '' );
 
-		$errors_before = $this->get_wc_admin_settings_errors();
-		$result        = wc_format_option_price_separators( null, $option, null );
-		$errors_after  = $this->get_wc_admin_settings_errors();
+		$result = wc_format_option_price_separators( '1', array( 'id' => 'woocommerce_price_thousand_sep' ), '1' );
 
-		$this->assertNull( $result, 'A null raw value means the field was not submitted, so nothing should be saved.' );
-		$this->assertCount( count( $errors_before ), $errors_after, 'No error should be added for a field that was not submitted.' );
+		$this->assertSame( '', $result, 'A deliberately empty separator should survive a rejected save.' );
+	}
+
+	/**
+	 * @testdox wc_format_option_price_separators should discard a stored value that is not a string.
+	 */
+	public function test_wc_format_option_price_separators_discards_non_string_stored_value(): void {
+		update_option( 'woocommerce_price_thousand_sep', array( '1' ) );
+
+		$result = wc_format_option_price_separators( '1', array( 'id' => 'woocommerce_price_thousand_sep' ), '1' );
+
+		$this->assertSame( '', $result, 'A stored value that is not a string should not be handed back.' );
 	}
 
 	/**

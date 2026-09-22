@@ -4466,7 +4466,7 @@ function wc_empty_cart_message() {
 
 	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
+	echo '<div class="woocommerce-notices-wrapper wc-empty-cart-message">' . $notice . '</div>';
 }
 
 /**
