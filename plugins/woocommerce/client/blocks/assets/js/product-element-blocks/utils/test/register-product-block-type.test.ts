@@ -262,9 +262,7 @@ describe( 'product block registration call sites', () => {
 	it( 'declares the post-editor availability of Product Price and Product Image Gallery', () => {
 		jest.isolateModules( () => {
 			jest.requireActual( '../../price' );
-			jest.requireActual(
-				'../../product-image-gallery'
-			);
+			jest.requireActual( '../../product-image-gallery' );
 		} );
 
 		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(
@@ -285,19 +283,11 @@ describe( 'product block registration call sites', () => {
 	it( 'declares the deprecated Related Products block unavailable in the post editor and hidden from the inserter', () => {
 		// The editor components load the block editor and the Product Query
 		// variations, which log to the console and aren't part of registration.
-		jest.doMock(
-			'../../related-products/edit',
-			() => () => null
-		);
-		jest.doMock(
-			'../../related-products/save',
-			() => () => null
-		);
+		jest.doMock( '../../related-products/edit', () => () => null );
+		jest.doMock( '../../related-products/save', () => () => null );
 
 		jest.isolateModules( () => {
-			jest.requireActual(
-				'../../related-products'
-			);
+			jest.requireActual( '../../related-products' );
 		} );
 
 		expect( mockRegisterProductBlockTypeCallSite ).toHaveBeenCalledTimes(

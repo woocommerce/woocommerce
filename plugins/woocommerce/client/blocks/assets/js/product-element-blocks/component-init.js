@@ -12,36 +12,28 @@ __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 registerBlockComponent( {
 	blockName: 'woocommerce/product-price',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-price" */ './price/block'
-		)
+		import( /* webpackChunkName: "product-price" */ './price/block' )
 	),
 } );
 
 registerBlockComponent( {
 	blockName: 'woocommerce/product-image',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-image" */ './image/frontend'
-		)
+		import( /* webpackChunkName: "product-image" */ './image/frontend' )
 	),
 } );
 
 registerBlockComponent( {
 	blockName: 'woocommerce/product-title',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-title" */ './title/frontend'
-		)
+		import( /* webpackChunkName: "product-title" */ './title/frontend' )
 	),
 } );
 
 registerBlockComponent( {
 	blockName: 'woocommerce/product-rating',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-rating" */ './rating/block'
-		)
+		import( /* webpackChunkName: "product-rating" */ './rating/block' )
 	),
 } );
 
@@ -75,18 +67,14 @@ registerBlockComponent( {
 registerBlockComponent( {
 	blockName: 'woocommerce/product-button',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-button" */ './button/block'
-		)
+		import( /* webpackChunkName: "product-button" */ './button/block' )
 	),
 } );
 
 registerBlockComponent( {
 	blockName: 'woocommerce/product-summary',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-summary" */ './summary/block'
-		)
+		import( /* webpackChunkName: "product-summary" */ './summary/block' )
 	),
 } );
 
@@ -102,9 +90,7 @@ registerBlockComponent( {
 registerBlockComponent( {
 	blockName: 'woocommerce/product-sku',
 	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-sku" */ './sku/block'
-		)
+		import( /* webpackChunkName: "product-sku" */ './sku/block' )
 	),
 } );
 
