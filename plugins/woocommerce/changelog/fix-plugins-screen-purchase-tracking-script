@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Register the woo-purchase-subscription admin script so its Tracks events fire on the Plugins screen, and mark events from the new notice rows with a no_update property. No merchant-facing change.
