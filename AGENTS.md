@@ -137,7 +137,7 @@ This command prompts for the change type and description. Run it once per affect
 
 Not this: `Type: dev` with the body `Add unit tests covering customer session fallbacks.` — a body always ships, so an internal-only change lands on the plugin's wordpress.org page as a `Dev -` line. Only `Comment:` keeps it out of the release notes.
 
-Not this either: `Make WC_Blocks_Utils::has_block_in_page() search nested blocks recursively.` — a method name is not an outcome. Say what it does: `Detect blocks nested inside other blocks when matching page content.` A body that opens on two filter names and runs past 500 characters fails the same way, from the other end.
+Not this either: `Make WC_Shipping_Cache::refresh_package_rates() run after cart contents change.` — a method name is not an outcome. Say what it does: `Show updated shipping costs after the cart changes, instead of stale ones.` A body that opens on two filter names and runs past 500 characters fails the same way, from the other end.
 
 Use more characters when they identify the affected behavior, an important condition, or a required action. The `woocommerce-git-commit` skill has the file format.
 
