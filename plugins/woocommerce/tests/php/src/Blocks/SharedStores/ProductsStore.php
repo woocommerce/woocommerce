@@ -4360,9 +4360,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * The sweep entries about a cart line's own `productVariations` entry
-	 * and that entry's parent product — two reads `does_cart_item_match_attributes()`
-	 * makes by keys out of state rather than by the id the envelope already
-	 * resolved, so neither is the entry an earlier read validates.
+	 * and that entry's parent product. `does_cart_item_match_attributes()`
+	 * reads both by a key out of state — the cart line's own id, then a
+	 * free-form `parent` — rather than by an id an earlier check already
+	 * validated, so neither entry is one that check covers.
 	 *
 	 * @param array $state   The cart-item-variation-lookup state.
 	 * @param array $matched A context whose selection matches the base product's colour attribute.
