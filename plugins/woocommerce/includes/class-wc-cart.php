@@ -2012,7 +2012,19 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
-					$this->remove_coupon( $code );
+
+					/*
+					 * Dropping a coupon the customer turns out not to be entitled to is validation,
+					 * not a removal they asked for, so it goes around the auto-apply guard -- which
+					 * would otherwise leave the coupon applied while the customer is told it was
+					 * removed. Auto-apply is held off for the removal so nothing re-applies it
+					 * before the rest of the check runs.
+					 */
+					$this->with_auto_apply_suspended(
+						function () use ( $code ) {
+							$this->remove_coupon_unconditionally( $code );
+						}
+					);
 				}
 
 				$coupon_usage_limit = $coupon->get_usage_limit_per_user();

@@ -2444,9 +2444,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'manual-reported' );
+		WC()->cart->calculate_totals();
 
+		$this->assertTrue( WC()->cart->has_discount( 'manual-reported' ), 'precondition: the ordinary coupon is applied' );
 		$this->assertTrue( WC()->cart->is_auto_applied_coupon( 'auto-reported' ), 'an applied auto-apply coupon is refused' );
-		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'manual-reported' ), 'an ordinary coupon is not refused' );
+		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'manual-reported' ), 'an applied ordinary coupon is not refused' );
 
 		// Not on the cart, so there is nothing to refuse: callers can tell this apart from a refusal.
 		WC()->cart->empty_cart();
@@ -2515,6 +2518,45 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$product->delete( true );
 			$coupon->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Checkout validation removes an auto-apply coupon the customer is not entitled to.
+	 */
+	public function test_checkout_validation_removes_ineligible_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-email-restricted',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-email-restricted' ), 'precondition: the coupon is applied' );
+
+		// The coupon has to stay valid for the customer on the session, since that is the guard
+		// check_customer_coupons() applies before it looks at the posted address. The reachable
+		// case is a customer whose own email is allowed typing a different one at checkout.
+		$coupon->set_email_restrictions( array( 'allowed@example.com' ) );
+		$coupon->save();
+		WC()->cart->get_customer()->set_billing_email( 'allowed@example.com' );
+
+		WC()->cart->check_customer_coupons( array( 'billing_email' => 'someone-else@example.com' ) );
+
+		// Without the fix the guard refuses this removal, so the customer is told the coupon was
+		// removed while it is still discounting their order.
+		$this->assertFalse( WC()->cart->has_discount( 'auto-email-restricted' ), 'the coupon should have been removed' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
 	}
 
 	/**
