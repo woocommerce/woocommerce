@@ -615,6 +615,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart item metadata keeps an attribute whose value only appears in the parent product name.
+	 */
+	public function test_formatted_cart_item_data_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Huge"
+		// and the "huge" size must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Huge',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart(
+				$product,
+				$variation,
+				array(
+					'attribute_pa_size'   => 'huge',
+					'attribute_pa_number' => '1',
+					'attribute_pa_colour' => 'black',
+				)
+			);
+
+			$this->assertSame( 'Vienna Huge', WC()->cart->get_item_product_name( $cart_item ) );
+			$this->assertSame(
+				"size: huge\nnumber: 1\ncolour: black",
+				trim( wc_get_formatted_cart_item_data( $cart_item, true ) )
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
 	 */
 	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {

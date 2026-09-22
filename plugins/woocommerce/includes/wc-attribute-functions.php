@@ -440,14 +440,45 @@ function wc_attributes_array_filter_variation( $attribute ) {
 /**
  * Check if an attribute is included in the attributes area of a variation name.
  *
+ * A variation name is the parent product name followed by an optional attribute
+ * list ("Parent - Red, Large"). When the variation is given, only that attribute
+ * list is searched, so a parent name that ends with an attribute value
+ * ("Vienna Black") does not hide the "Black" attribute.
+ *
  * @since  3.0.2
- * @param  string $attribute Attribute value to check for.
- * @param  string $name      Product name to check in.
+ * @param  string          $attribute Attribute value to check for.
+ * @param  string          $name      Product name to check in.
+ * @param  WC_Product|null $product   Variation the name belongs to, when known. Since 11.3.0.
  * @return bool
  */
-function wc_is_attribute_in_product_name( $attribute, $name ) {
-	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
-	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
+function wc_is_attribute_in_product_name( $attribute, $name, $product = null ) {
+	$attributes_area = $name;
+
+	if ( $product instanceof WC_Product && $product->is_type( ProductType::VARIATION ) ) {
+		$parent_name = $product->get_title();
+
+		// Callers may pass the name raw or entity-decoded, so try both forms of the parent name.
+		foreach ( array_unique( array( $parent_name, wp_specialchars_decode( $parent_name, ENT_QUOTES ) ) ) as $prefix ) {
+			if ( '' !== $prefix && 0 === stripos( $name, $prefix ) ) {
+				$attributes_area = substr( $name, strlen( $prefix ) );
+				break;
+			}
+		}
+	}
+
+	$is_in_name = stristr( $attributes_area, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $attributes_area ), strrev( ' ' . $attribute ) );
+
+	/**
+	 * Filters whether an attribute value is already shown in the attributes area of a variation name.
+	 *
+	 * @since 3.0.2
+	 * @since 11.3.0 Added the `$product` parameter.
+	 * @param bool            $is_in_name Whether the attribute value was found in the name.
+	 * @param string          $attribute  Attribute value checked for.
+	 * @param string          $name       Product name checked in.
+	 * @param WC_Product|null $product    Variation the name belongs to, when known.
+	 */
+	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name, $product );
 }
 
 /**

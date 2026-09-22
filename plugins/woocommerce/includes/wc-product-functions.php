@@ -545,7 +545,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			}
 
 			// Do not list attributes already part of the variation name.
-			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name ) ) ) {
+			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name, $product ? $product : null ) ) ) {
 				continue;
 			}
 

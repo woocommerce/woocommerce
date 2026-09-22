@@ -53,6 +53,74 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_is_attribute_in_product_name() should only search the attributes area of a variation name when the variation is given.
+	 */
+	public function test_wc_is_attribute_in_product_name_ignores_the_parent_name_when_the_variation_is_given(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black".
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+
+			$this->assertFalse(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black', $variation ),
+				'A value that only appears in the parent name is not shown by the variation name.'
+			);
+			$this->assertTrue(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black - Huge, Black', $variation ),
+				'A value in the attribute list after the parent name is shown by the variation name.'
+			);
+			$this->assertTrue(
+				wc_is_attribute_in_product_name( 'Black', 'Vienna Black' ),
+				'Without the variation the whole name is searched, as before.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox wc_is_attribute_in_product_name() should match the parent name whether the variation name is raw or entity-decoded.
+	 */
+	public function test_wc_is_attribute_in_product_name_matches_raw_and_decoded_parent_names(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Black &amp; White',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'white',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertFalse( wc_is_attribute_in_product_name( 'White', 'Black &amp; White', $variation ), 'Raw name.' );
+			$this->assertFalse( wc_is_attribute_in_product_name( 'White', 'Black & White', $variation ), 'Decoded name.' );
+			$this->assertTrue( wc_is_attribute_in_product_name( 'White', 'Black & White - Huge, White', $variation ), 'Decoded name with the attribute list.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * Test wc_get_attribute_taxonomy_ids() function.
 	 * Even empty arrays should be cached.
 	 */
