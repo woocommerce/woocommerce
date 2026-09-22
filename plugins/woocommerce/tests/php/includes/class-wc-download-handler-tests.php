@@ -33,7 +33,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$uploads       = wp_upload_dir();
 		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
 		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
-		$file_url      = trailingslashit( $uploads['baseurl'] ) . str_replace( ' ', '%20', $filename );
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . rawurlencode( $filename );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
 		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
