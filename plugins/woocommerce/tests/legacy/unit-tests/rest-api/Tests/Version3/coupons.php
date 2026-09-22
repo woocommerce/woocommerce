@@ -490,6 +490,9 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertFalse( $response->get_data()['auto_apply'], 'auto_apply should be clearable over the API' );
+
+		// An auto-apply coupon left published would apply itself to the carts of later tests.
+		( new WC_Coupon( $data['id'] ) )->delete( true );
 	}
 
 	/**
