@@ -11,7 +11,9 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		WC()->session->set( 'customer', null );
-		// Most tests here cover how a saved shipping address is loaded, so keep it as the default destination.
+		// Most tests here cover how a saved shipping address is loaded, so keep it as the destination. Tests that
+		// need the shipped default set it themselves, and test_setting_default_address_fields_when_shipping_to_billing()
+		// runs the shapes below under that default.
 		update_option( 'woocommerce_ship_to_destination', 'shipping' );
 	}
 
@@ -276,6 +278,101 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $default_location['country'], $customer->get_billing_country(), 'An empty billing country should be replaced with the default location country' );
 		$this->assertSame( $default_location['state'], $customer->get_billing_state(), 'An empty billing state should be replaced with the default location state along with the country' );
+	}
+
+	/**
+	 * @testdox Should use the billing address for every saved address shape when the store ships to the billing address.
+	 *
+	 * Covers the same address shapes as test_setting_default_address_fields(), which is pinned to the "shipping"
+	 * setting. Without this, those shapes would never be exercised under the option's own default value.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/29744
+	 * @dataProvider provide_customers_with_different_addresses
+	 *
+	 * @param Closure $customer_closure       The customer object being tested.
+	 * @param bool    $states_should_match    Unused: under this setting every shape ends up matching.
+	 * @param bool    $countries_should_match Unused: under this setting every shape ends up matching.
+	 */
+	public function test_setting_default_address_fields_when_shipping_to_billing( Closure $customer_closure, bool $states_should_match, bool $countries_should_match ) {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer = $customer_closure();
+
+		( new WC_Customer_Data_Store_Session() )->read( $customer );
+
+		$this->assertSame( $customer->get_billing_state(), $customer->get_shipping_state(), 'The shipping state should follow the billing state when the store ships to the billing address' );
+		$this->assertSame( $customer->get_billing_country(), $customer->get_shipping_country(), 'The shipping country should follow the billing country when the store ships to the billing address' );
+	}
+
+	/**
+	 * @testdox Should default the shipping address to the billing address for a guest customer.
+	 */
+	public function test_shipping_address_defaults_to_billing_address_for_a_guest_customer(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		$customer = new WC_Customer();
+		$customer->set_billing_address_1( 'Stationsplein 23' );
+		$customer->set_billing_city( 'Amsterdam' );
+		$customer->set_billing_postcode( '1010 AA' );
+		$customer->set_billing_country( 'NL' );
+
+		( new WC_Customer_Data_Store_Session() )->read( $customer );
+
+		$this->assertSame( 0, $customer->get_id(), 'The customer should still be a guest' );
+		$this->assertSame( 'Stationsplein 23', $customer->get_shipping_address_1(), 'The guest shipping street should be taken from the billing address' );
+		$this->assertSame( 'Amsterdam', $customer->get_shipping_city(), 'The guest shipping city should be taken from the billing address' );
+		$this->assertSame( 'NL', $customer->get_shipping_country(), 'The guest shipping country should be taken from the billing address' );
+	}
+
+	/**
+	 * @testdox Should default the shipping address to the billing address when the setting was never saved.
+	 */
+	public function test_shipping_address_defaults_to_billing_address_when_the_setting_was_never_saved(): void {
+		delete_option( 'woocommerce_ship_to_destination' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_unset' );
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Stationsplein 23', $customer->get_shipping_address_1(), 'A store that never saved the setting should fall back to the billing address' );
+		$this->assertSame( 'Amsterdam', $customer->get_shipping_city(), 'A store that never saved the setting should fall back to the billing city' );
+	}
+
+	/**
+	 * @testdox Should keep the saved shipping address when the billing address holds little more than a country.
+	 */
+	public function test_saved_shipping_address_is_kept_when_billing_address_is_only_a_country(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'session-sparse-billing-address@example.com' );
+		$customer->set_billing_country( 'NL' );
+		$customer->set_shipping_address_1( 'Brandarisstraat 2' );
+		$customer->set_shipping_city( 'West-Terschelling' );
+		$customer->set_shipping_postcode( '8881 AW' );
+		$customer->set_shipping_country( 'NL' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer->get_id(), true );
+
+		$this->assertSame( 'Brandarisstraat 2', $session_customer->get_shipping_address_1(), 'A billing address without locality details should not replace a complete shipping address' );
+		$this->assertSame( '8881 AW', $session_customer->get_shipping_postcode(), 'A billing address without a postcode should not clear the saved shipping postcode' );
+	}
+
+	/**
+	 * @testdox Should let the shipping to billing default be disabled with a filter.
+	 */
+	public function test_shipping_to_billing_default_can_be_disabled_with_a_filter(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_filtered' );
+
+		add_filter( 'woocommerce_customer_session_default_shipping_to_billing', '__return_false' );
+		try {
+			$customer = new WC_Customer( $customer_id, true );
+		} finally {
+			remove_filter( 'woocommerce_customer_session_default_shipping_to_billing', '__return_false' );
+		}
+
+		$this->assertSame( 'Brandarisstraat 2', $customer->get_shipping_address_1(), 'The filter should keep the saved shipping address' );
+		$this->assertSame( 'West-Terschelling', $customer->get_shipping_city(), 'The filter should keep the saved shipping city' );
 	}
 
 	/**
