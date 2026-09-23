@@ -122,14 +122,14 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 			// Products can be deleted between capture and send, and the templates call methods on each one.
 			$items = array();
 			foreach ( $recovery['items'] as $item ) {
-				if ( is_array( $item ) && ( $item['product'] ?? null ) instanceof WC_Product && absint( $item['quantity'] ?? 0 ) > 0 ) {
+				if ( is_array( $item ) && ( $item['product'] ?? null ) instanceof WC_Product && is_int( $item['quantity'] ?? null ) && $item['quantity'] > 0 ) {
 					$items[] = array(
 						'product'  => $item['product'],
-						'quantity' => absint( $item['quantity'] ),
+						'quantity' => $item['quantity'],
 					);
 				}
 			}
-			$recovery_url = esc_url_raw( (string) ( $recovery['recovery_url'] ?? '' ) );
+			$recovery_url = is_string( $recovery['recovery_url'] ?? null ) ? esc_url_raw( $recovery['recovery_url'] ) : '';
 
 			if ( empty( $items ) || '' === $recovery_url ) {
 				return false;

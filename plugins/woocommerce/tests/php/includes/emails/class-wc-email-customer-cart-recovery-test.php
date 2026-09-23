@@ -130,7 +130,7 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not send when no item has a product or the recovery link is missing.
+	 * @testdox Should not send without a valid product, quantity or recovery link.
 	 */
 	public function test_trigger_rejects_missing_product_or_link(): void {
 		$this->sut->enabled = 'yes';
@@ -142,6 +142,14 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 		$recovery = $this->get_recovery();
 		unset( $recovery['recovery_url'] );
 		$this->assertFalse( $this->sut->trigger( $recovery ), 'An email without a recovery link must not send' );
+
+		$recovery                 = $this->get_recovery();
+		$recovery['recovery_url'] = array( 'https://example.org' );
+		$this->assertFalse( $this->sut->trigger( $recovery ), 'A non-string recovery link must not send' );
+
+		$recovery                         = $this->get_recovery();
+		$recovery['items'][0]['quantity'] = -2;
+		$this->assertFalse( $this->sut->trigger( $recovery ), 'A negative quantity must not become a positive one' );
 	}
 
 	/**
@@ -227,8 +235,11 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_prepare_preview_ignores_other_emails(): void {
 		$other = new WC_Email_Customer_Processing_Order();
 
-		$this->sut->handle_woocommerce_prepare_email_for_preview( $other );
+		$result = $this->sut->handle_woocommerce_prepare_email_for_preview( $other );
 
+		$this->assertSame( $other, $result );
+		$this->assertFalse( property_exists( $other, 'items' ), 'Other emails must not get recovery items' );
+		$this->assertFalse( property_exists( $other, 'recovery_url' ), 'Other emails must not get a recovery link' );
 		$this->assertSame( array(), $this->sut->items );
 	}
 
