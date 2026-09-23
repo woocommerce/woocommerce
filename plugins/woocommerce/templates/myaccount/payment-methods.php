@@ -48,7 +48,13 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 									/* translators: 1: credit card type 2: last 4 digits */
 									printf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ?? '' ) ), esc_html( $method['method']['last4'] ) );
 								} else {
-									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ?? '' ) );
+									$method_label = wc_get_credit_card_type_label( $method['method']['brand'] ?? '' );
+									$display_name = isset( $method['display_name'] ) && is_string( $method['display_name'] ) ? trim( $method['display_name'] ) : '';
+									// Without a brand, use the token's own name. The default name is only the token type, which is not a label.
+									if ( '' === $method_label && '' !== $display_name && strtolower( $display_name ) !== $type ) {
+										$method_label = $display_name;
+									}
+									echo esc_html( $method_label );
 								}
 							} elseif ( 'expires' === $column_id ) {
 								echo esc_html( $method['expires'] );
