@@ -187,7 +187,7 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
-			if ( StockNotifications::is_enabled() ) {
+			if ( FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ) {
 				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller';
 				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Stats\Controller';
 			}
