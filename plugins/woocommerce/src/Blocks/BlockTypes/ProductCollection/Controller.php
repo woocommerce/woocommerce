@@ -70,6 +70,10 @@ class Controller extends AbstractBlock {
 			2
 		);
 
+		// Let the archive template size its own pages. Runs after the default
+		// priority so a value set in the editor wins over a theme's fallback.
+		add_filter( 'loop_shop_per_page', array( $this, 'handle_loop_shop_per_page' ), 20, 1 );
+
 		// Register the backend settings so they can be used in the editor.
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 
@@ -84,6 +88,27 @@ class Controller extends AbstractBlock {
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 		$this->register_core_collections_and_set_handler_store();
+	}
+
+	/**
+	 * Handle the loop_shop_per_page hook.
+	 *
+	 * When the block template rendering a product archive contains a Product
+	 * Collection with the "Default" query type and a products-per-page value, that
+	 * value sizes the archive's main query. Everything reading the main query —
+	 * this block, Pagination, Product Results Count and the filter blocks — then
+	 * agrees on the page size. Without such a template the store setting stands.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 *
+	 * @param int $per_page Products per page from the store setting or an earlier filter.
+	 * @return int
+	 */
+	public function handle_loop_shop_per_page( $per_page ) {
+		$template_per_page = Utils::get_archive_template_products_per_page();
+
+		return null === $template_per_page ? $per_page : $template_per_page;
 	}
 
 	/**
