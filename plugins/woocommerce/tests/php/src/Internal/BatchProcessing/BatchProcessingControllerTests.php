@@ -825,6 +825,32 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A database error from before the lookups does not block cleanup when the lookups never reach $wpdb.
+	 */
+	public function test_shutdown_ignores_stale_db_error(): void {
+		global $wpdb;
+
+		$processor = get_class( $this->test_process );
+		update_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME, array( $processor ), false );
+		// Emptied lookup queries (both hybrid store tables) return before $wpdb->flush(), like a custom store that
+		// bypasses $wpdb, so an error left by an earlier query in the request is still set during the lookups.
+		$filter = function ( $query ) {
+			return preg_match( '/^SELECT (p\.ID|a\.action_id) FROM/', $query ) ? '' : $query;
+		};
+		add_filter( 'query', $filter );
+		try {
+			$wpdb->last_error = 'Stale error from an unrelated query.';
+			$this->run_shutdown_cleanup();
+		} finally {
+			remove_filter( 'query', $filter );
+			$wpdb->flush();
+		}
+
+		$details = get_option( $this->get_processor_state_option_name( $processor ) );
+		$this->assertSame( 1, $details['recent_failures'], 'A stale error must not be treated as a failed lookup.' );
+	}
+
+	/**
 	 * Run only this controller's shutdown callback, avoiding unrelated shutdown handlers.
 	 */
 	private function run_shutdown_cleanup(): void {

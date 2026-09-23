@@ -839,8 +839,6 @@ class BatchProcessingController {
 	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
-		global $wpdb;
-
 		if ( ! did_action( 'wp_loaded' ) ) {
 			return;
 		}
@@ -863,16 +861,16 @@ class BatchProcessingController {
 			return;
 		}
 
-		$watchdog_scheduled = ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME );
-		if ( $watchdog_scheduled || ! empty( $wpdb->last_error ) ) {
+		$watchdog_scheduled = $this->run_scheduler_lookup( fn() => ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) );
+		if ( false !== $watchdog_scheduled ) {
 			return;
 		}
 
 		$unscheduled_processors = array();
 		foreach ( $enqueued_processors as $processor ) {
-			$is_scheduled = $this->is_scheduled( $processor );
+			$is_scheduled = $this->run_scheduler_lookup( fn() => $this->is_scheduled( $processor ) );
 			// A failed lookup is not evidence of a failed processor. Finish all checks before changing state.
-			if ( ! empty( $wpdb->last_error ) ) {
+			if ( null === $is_scheduled ) {
 				return;
 			}
 			if ( ! $is_scheduled ) {
@@ -898,5 +896,24 @@ class BatchProcessingController {
 				$this->schedule_batch_processing( $processor, true );
 			}
 		}
+	}
+
+	/**
+	 * Run an Action Scheduler lookup, distinguishing "not scheduled" from a failed database query.
+	 *
+	 * Action Scheduler returns the same value for both, so the database state is checked directly. Any earlier error
+	 * is cleared first: a failed query elsewhere in the request, or a lookup that never reaches $wpdb (e.g. a custom
+	 * store), must not be mistaken for a failed lookup.
+	 *
+	 * @param callable $lookup Callback performing the lookup.
+	 * @return bool|null The lookup result, or null if the lookup failed.
+	 */
+	private function run_scheduler_lookup( callable $lookup ): ?bool {
+		global $wpdb;
+
+		$wpdb->last_error = '';
+		$result           = (bool) $lookup();
+
+		return empty( $wpdb->last_error ) ? $result : null;
 	}
 }
