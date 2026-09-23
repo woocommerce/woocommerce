@@ -584,7 +584,7 @@ jobs:
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
@@ -661,6 +661,25 @@ jobs:
               .addBreak()
               .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
               .write();
+
+      - name: 'Download merged artifact'
+        if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ runner.temp }}/merged-artifact
+
+      - name: 'Upload CTRF report'
+        if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+          S3_ROOT: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_ROOT }}
+          SOURCE_PATH: ${{ runner.temp }}/merged-artifact
+        run: |
+          aws s3 cp "$SOURCE_PATH" "${S3_ROOT%/}/reports/ctrf/woocommerce/" \
+            --recursive --exclude '*' --include 'ctrf-report-*.json' --no-progress
 
   validate-syncpack:
     name: 'Validate dependencies version'
