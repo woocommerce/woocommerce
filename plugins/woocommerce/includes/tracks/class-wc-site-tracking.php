@@ -119,6 +119,16 @@ class WC_Site_Tracking {
 					return;
 				}
 
+				// Without this, a missing name is prefixed into a bogus `wcadmin_undefined` event that Tracks rejects.
+				if ( typeof name !== 'string' || ! name ) {
+					if ( <?php echo 'production' !== $environment_type ? 'true' : 'false'; ?> ) {
+						/* eslint-disable no-console */
+						console.error( `A valid event name must be specified. The event name: "${ name }" is not valid.` );
+						/* eslint-enable no-console */
+					}
+					return;
+				}
+
 				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
 				let eventProperties = properties || {};
 				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode ?> };
