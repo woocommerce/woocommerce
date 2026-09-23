@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send the product.deleted webhook when a product variation is permanently deleted.
