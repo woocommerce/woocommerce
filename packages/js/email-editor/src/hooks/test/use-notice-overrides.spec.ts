@@ -648,7 +648,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 	} );
 
 	it.each( [ 'wp_template', 'wp_template_part' ] )(
-		'leaves an editor-save notice unchanged for the %s post type even when its content matches item_updated, but still removes the action',
+		'transforms an editor-save notice matching item_updated for the %s post type to "Email design updated."',
 		( postType ) => {
 			const originalNotice = makeNotice( {
 				id: 'editor-save',
@@ -666,8 +666,51 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			};
 			const result = selectors.getNotices();
 
-			expect( result[ 0 ].content ).toBe( 'Template updated.' );
+			expect( result[ 0 ].content ).toBe( 'Email design updated.' );
+			expect( result[ 0 ].spokenMessage ).toBe( 'Email design updated.' );
 			expect( result[ 0 ].actions ).toEqual( [] );
 		}
 	);
+
+	it( 'transforms an editor-save notice matching item_published for the wp_template post type to "Email design updated."', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Post published.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const { pluginResult } = buildSelectOverride(
+			[ originalNotice ],
+			{ item_published: 'Post published.' },
+			'wp_template'
+		);
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+	} );
+
+	it( 'leaves an editor-save notice with content matching no label unchanged for a template post type', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Updating failed.',
+			actions: [],
+		} );
+		const { pluginResult } = buildSelectOverride(
+			[ originalNotice ],
+			{ item_updated: 'Template updated.' },
+			'wp_template'
+		);
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+	} );
 } );

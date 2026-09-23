@@ -27,10 +27,17 @@ interface NoticeOverride {
 	labelKeys?: string[];
 }
 
+// Shared with the `editor-save` override below so a template design save
+// and an in-editor design save report the exact same wording.
+const EMAIL_DESIGN_UPDATED_MESSAGE = __(
+	'Email design updated.',
+	__i18n_text_domain__
+);
+
 function getNoticeOverrides(): Record< string, NoticeOverride > {
 	return {
 		'site-editor-save-success': {
-			content: __( 'Email design updated.', __i18n_text_domain__ ),
+			content: EMAIL_DESIGN_UPDATED_MESSAGE,
 			removeActions: true,
 		},
 		'editor-save': {
@@ -65,17 +72,21 @@ interface Notice {
 
 type PostTypeLabels = Record< string, string > | undefined;
 
-// Post types whose own save notices ("Template updated.", …) must not be
-// rewritten to "Email saved." — that text is reserved for actual email
-// post types. The action is still dropped for these, same as any other
-// `editor-save` notice.
+// Post types whose own save notices ("Template updated.", …) get their own
+// "Email design updated." wording instead of "Email saved." — that text is
+// reserved for actual email post types, since saving a template is a design
+// change, not a change to the email content itself.
 const TEMPLATE_POST_TYPES = [ 'wp_template', 'wp_template_part' ];
 
 function isTemplatePostType( postType: string | undefined ): boolean {
 	return !! postType && TEMPLATE_POST_TYPES.includes( postType );
 }
 
-function transformNotice( notice: Notice, labels: PostTypeLabels ): Notice {
+function transformNotice(
+	notice: Notice,
+	labels: PostTypeLabels,
+	postType: string | undefined
+): Notice {
 	const overrides = getNoticeOverrides();
 	// A plain lookup would resolve ids like `constructor` or `toString` to
 	// an inherited `Object.prototype` member instead of `undefined`.
@@ -90,20 +101,26 @@ function transformNotice( notice: Notice, labels: PostTypeLabels ): Notice {
 			( key ) => labels?.[ key ] && labels[ key ] === notice.content
 		);
 
+	const content =
+		notice.id === 'editor-save' && isTemplatePostType( postType )
+			? EMAIL_DESIGN_UPDATED_MESSAGE
+			: override.content;
+
 	return {
 		...notice,
-		...( rewriteText
-			? { content: override.content, spokenMessage: override.content }
-			: {} ),
+		...( rewriteText ? { content, spokenMessage: content } : {} ),
 		actions: override.removeActions ? [] : notice.actions,
 	};
 }
 
 function applyOverridesToNotices(
 	notices: Notice[],
-	labels: PostTypeLabels
+	labels: PostTypeLabels,
+	postType: string | undefined
 ): Notice[] {
-	return notices.map( ( notice ) => transformNotice( notice, labels ) );
+	return notices.map( ( notice ) =>
+		transformNotice( notice, labels, postType )
+	);
 }
 
 function getStoreName( namespace: string | { name: string } ): string {
@@ -111,9 +128,16 @@ function getStoreName( namespace: string | { name: string } ): string {
 }
 
 const getNoticesWithOverrides = createSelector(
-	( notices: Notice[], labels: PostTypeLabels ) =>
-		applyOverridesToNotices( notices, labels ),
-	( notices: Notice[], labels: PostTypeLabels ) => [ notices, labels ]
+	(
+		notices: Notice[],
+		labels: PostTypeLabels,
+		postType: string | undefined
+	) => applyOverridesToNotices( notices, labels, postType ),
+	(
+		notices: Notice[],
+		labels: PostTypeLabels,
+		postType: string | undefined
+	) => [ notices, labels, postType ]
 );
 
 /**
@@ -159,6 +183,7 @@ export function useNoticeOverrides(): void {
 							if ( ! hasOverridableNotice ) {
 								return getNoticesWithOverrides(
 									notices,
+									undefined,
 									undefined
 								);
 							}
@@ -168,22 +193,25 @@ export function useNoticeOverrides(): void {
 									| { getEmailPostType?: () => string }
 									| undefined
 							 )?.getEmailPostType?.();
-							const labels =
-								postType && ! isTemplatePostType( postType )
-									? (
-											originalSelect( coreStore ) as
-												| {
-														getPostType: (
-															postType: string
-														) => {
-															labels?: PostTypeLabels;
-														};
-												  }
-												| undefined
-									   )?.getPostType( postType )?.labels
-									: undefined;
+							const labels = postType
+								? (
+										originalSelect( coreStore ) as
+											| {
+													getPostType: (
+														postType: string
+													) => {
+														labels?: PostTypeLabels;
+													};
+											  }
+											| undefined
+								   )?.getPostType( postType )?.labels
+								: undefined;
 
-							return getNoticesWithOverrides( notices, labels );
+							return getNoticesWithOverrides(
+								notices,
+								labels,
+								postType
+							);
 						},
 					};
 				},
