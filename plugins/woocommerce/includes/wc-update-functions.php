@@ -4192,11 +4192,12 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
  * and a status change refreshes them, but rows written before that are never revisited.
  *
  * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
- * largest tables on a variation-heavy store, and every filtered catalogue page reads it.
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it. A database error, or a
+ * progress cursor that can't be saved, is logged and stops the migration without a retry.
  *
  * @since 11.3.0
  *
- * @return bool True when another batch is left to process.
+ * @return bool True when another batch is left to process, false when done or stopped.
  */
 function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 	global $wpdb;
