@@ -901,9 +901,9 @@ class BatchProcessingController {
 	/**
 	 * Run an Action Scheduler lookup, distinguishing "not scheduled" from a failed database query.
 	 *
-	 * Action Scheduler returns the same value for both, so the database state is checked directly. Any earlier error
-	 * is cleared first: a failed query elsewhere in the request, or a lookup that never reaches $wpdb (e.g. a custom
-	 * store), must not be mistaken for a failed lookup.
+	 * Action Scheduler returns the same value for both, so the database state is checked directly. $wpdb->last_error
+	 * only counts when the lookup ran a query: otherwise (e.g. a custom store that bypasses $wpdb) it is left over
+	 * from an earlier, unrelated query.
 	 *
 	 * @param callable $lookup Callback performing the lookup.
 	 * @return bool|null The lookup result, or null if the lookup failed.
@@ -911,12 +911,13 @@ class BatchProcessingController {
 	private function run_scheduler_lookup( callable $lookup ): ?bool {
 		global $wpdb;
 
-		$wpdb->last_error = '';
-		$result           = (bool) $lookup();
+		$queries_before = $wpdb->num_queries;
+		$result         = (bool) $lookup();
+		$query_failed   = $wpdb->num_queries > $queries_before && ! empty( $wpdb->last_error );
 
 		// When reconnecting after a lost connection fails, wpdb::query() returns false without an error but discards
 		// the connection handle. A later query can reconnect, so state changes would succeed on top of this failed read.
-		if ( ! empty( $wpdb->last_error ) || empty( $wpdb->dbh ) ) {
+		if ( $query_failed || empty( $wpdb->dbh ) ) {
 			return null;
 		}
 
