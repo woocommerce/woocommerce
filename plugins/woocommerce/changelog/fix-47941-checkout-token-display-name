@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saved payment methods that are not cards now show their name at checkout and in My Account, instead of "Saved token for".
