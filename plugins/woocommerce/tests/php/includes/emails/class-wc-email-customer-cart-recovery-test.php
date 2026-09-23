@@ -82,6 +82,19 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should load the multiselect options once the REST API has initialized, which the REST validator needs.
+	 */
+	public function test_options_loaded_after_rest_api_init(): void {
+		wp_insert_term( 'Gift cards', 'product_cat' );
+		rest_get_server();
+
+		$fields = ( new WC_Email_Customer_Cart_Recovery() )->get_form_fields();
+
+		$this->assertNotEmpty( $fields['excluded_categories']['options'] );
+		$this->assertArrayHasKey( 'customer', $fields['excluded_roles']['options'] );
+	}
+
+	/**
 	 * @testdox Should return an empty list for a non-array multiselect value.
 	 */
 	public function test_validators_handle_non_array(): void {

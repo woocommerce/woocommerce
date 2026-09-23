@@ -291,7 +291,8 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 			$placeholder_text = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}</code>' );
 
 			// Runs on every mailer load, so only build the option lists where the settings UI or REST API needs them.
-			$load_options = is_admin() || WC()->is_rest_api_request();
+			// The REST API drops empty options and its multiselect validator then fails, so internal REST calls need them too.
+			$load_options = is_admin() || WC()->is_rest_api_request() || did_action( 'rest_api_init' );
 
 			$this->form_fields = array(
 				'enabled'             => array(
