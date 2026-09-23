@@ -183,6 +183,8 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	 */
 	public function test_customer_account_filters_only_primary_icon_on_dropdown_path(): void {
 		$this->log_in_fixture_user();
+		// The dropdown needs a logged-in user, who sees an avatar instead of the icon unless avatars are off.
+		update_option( 'show_avatars', 0 );
 		$this->create_page_for_option( 'woocommerce_myaccount_page_id', 'Fixture account page' );
 
 		$output = $this->render_block(
@@ -249,6 +251,27 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $this->icon_filter_calls, 'Text-only display must not invoke the icon filter.' );
 		$this->assertStringNotContainsString( 'fixture-icon', $output );
 		$this->assertStringNotContainsString( '<svg', $output, 'Text-only display should not render an icon element.' );
+	}
+
+	/**
+	 * @testdox Customer Account shows a logged-in user's avatar instead of the icon, without invoking the icon filter.
+	 */
+	public function test_customer_account_avatar_replaces_icon_without_filtering_it(): void {
+		$this->log_in_fixture_user();
+
+		$output = $this->render_block(
+			'woocommerce/customer-account',
+			array(
+				'displayStyle'          => 'icon_and_text',
+				'hasDropdownNavigation' => false,
+				'iconStyle'             => 'line',
+				'iconClass'             => 'fixture-avatar-user-icon',
+			)
+		);
+
+		$this->assertCount( 0, $this->icon_filter_calls, 'The avatar path must not invoke the icon filter.' );
+		$this->assertStringContainsString( 'wc-block-customer-account__avatar', $output );
+		$this->assertStringNotContainsString( '<svg', $output, 'The avatar should replace the icon element.' );
 	}
 
 	/**
