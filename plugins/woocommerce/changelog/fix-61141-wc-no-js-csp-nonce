@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Output wc_no_js via wp_add_inline_script instead of wp_footer for Content Security Policy nonce compatibility.
