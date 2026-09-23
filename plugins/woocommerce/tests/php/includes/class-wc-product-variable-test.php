@@ -463,6 +463,26 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a product with a parent image and an image-less variation with a gallery.
+	 *
+	 * @return array{0: WC_Product_Variable, 1: WC_Product_Variation, 2: int}
+	 */
+	private function create_variation_gallery_fixture(): array {
+		$product              = WC_Helper_Product::create_variation_product();
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		return array( $product, $variation, $variation_gallery_id );
+	}
+
+	/**
 	 * Create a real image attachment that passes `wp_attachment_is_image()`.
 	 *
 	 * @param string $title         Post title.
