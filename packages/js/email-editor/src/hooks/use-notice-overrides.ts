@@ -57,6 +57,17 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 			// `block-editor/editor.tsx`), so there is no UI to set an email
 			// post's visibility to private or its status to `future` — those
 			// labels can never match a real notice here.
+			// `item_trashed` and `item_reverted_to_draft` are omitted too:
+			// Gutenberg only puts them on an `editor-save` notice by way of
+			// its own `trashPost()` and status-change flows, both of which
+			// end in a `dispatch.savePost()` call. The editor doesn't use
+			// either — trashing an email goes through a custom action that
+			// calls `deleteEntityRecord()` directly and reports its own
+			// `trash-email-post-action` notice (see
+			// `components/header/trash-email-post.tsx`), and there is no UI
+			// to revert a published post to draft once the "post-status"
+			// panel is removed above. So these labels can never match a real
+			// `editor-save` notice either.
 			labelKeys: [ 'item_updated', 'item_published' ],
 		},
 	};
