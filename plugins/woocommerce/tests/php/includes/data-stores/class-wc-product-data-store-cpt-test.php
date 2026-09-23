@@ -735,4 +735,87 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Taxonomy attribute term order is preserved after save and read for simple products.
+	 */
+	public function test_taxonomy_attribute_term_order_is_preserved_for_simple_product(): void {
+		$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'XL', 'M' ) );
+		$expected_order = $attribute->get_options();
+
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		wp_cache_delete( $product->get_id(), 'posts' );
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertSame(
+			$expected_order,
+			$product->get_attributes()['pa_size']->get_options(),
+			'Taxonomy attribute term order should be preserved after save/read, not sorted alphabetically.'
+		);
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( $attribute->get_id() );
+	}
+
+	/**
+	 * @testdox Taxonomy attribute term order is preserved after multiple saves.
+	 */
+	public function test_taxonomy_attribute_term_order_is_preserved_after_multiple_saves(): void {
+		$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'XL', 'S', 'M', 'L' ) );
+		$expected_order = $attribute->get_options();
+
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Simulate re-saving from admin.
+		$product->save();
+
+		wp_cache_delete( $product->get_id(), 'posts' );
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertSame(
+			$expected_order,
+			$product->get_attributes()['pa_size']->get_options(),
+			'Taxonomy attribute term order should survive multiple saves.'
+		);
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( $attribute->get_id() );
+	}
+
+	/**
+	 * @testdox Setting attribute options as term names resolves correctly on save and read.
+	 */
+	public function test_rest_api_term_names_are_resolved_correctly(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'M', 'L' ) );
+
+		// Simulate REST API: set options as term names, not IDs.
+		$rest_attribute = new WC_Product_Attribute();
+		$rest_attribute->set_id( $attribute->get_id() );
+		$rest_attribute->set_name( 'pa_size' );
+		$rest_attribute->set_options( array( 'S', 'M', 'L' ) );
+		$rest_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $rest_attribute ) );
+		$product->save();
+
+		wp_cache_delete( $product->get_id(), 'posts' );
+		$product = wc_get_product( $product->get_id() );
+
+		$options = $product->get_attributes()['pa_size']->get_options();
+
+		$this->assertCount( 3, $options );
+		$this->assertNotContains( 0, $options );
+		foreach ( $options as $option ) {
+			$this->assertGreaterThan( 0, $option );
+		}
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( $attribute->get_id() );
+	}
 }

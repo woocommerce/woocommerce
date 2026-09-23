@@ -1199,6 +1199,30 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxonomy attribute term order is preserved after save and read for variable products.
+	 */
+	public function test_taxonomy_attribute_term_order_is_preserved_for_variable_product(): void {
+		$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'XL', 'M' ) );
+		$expected_order = $attribute->get_options();
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		wp_cache_delete( $product->get_id(), 'posts' );
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertSame(
+			$expected_order,
+			$product->get_attributes()['pa_size']->get_options(),
+			'Variable product taxonomy attribute term order should be preserved after save/read.'
+		);
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( $attribute->get_id() );
+	}
+
+	/**
 	 * @testdox read_variation_attributes returns an empty array when the product has no variation attributes.
 	 */
 	public function test_read_variation_attributes_returns_empty_for_no_attributes(): void {
@@ -1944,7 +1968,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$sizes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product )['pa_size'];
 
 		$this->assertSame( array( 'small', 'large', 'huge' ), $sizes );
-
 		$product->delete( true );
 	}
 
@@ -2007,6 +2030,37 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Taxonomy attribute term order falls back gracefully for products saved.
+	 */
+	public function test_taxonomy_attribute_term_order_fallback_for_legacy_products(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'M', 'L' ) );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Simulate legacy product: manually remove 'value' from stored meta.
+		$meta                     = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$meta['pa_size']['value'] = '';
+		// Legacy: no stored order.
+		update_post_meta( $product->get_id(), '_product_attributes', $meta );
+
+		wp_cache_delete( $product->get_id(), 'posts' );
+		$product = wc_get_product( $product->get_id() );
+
+		// Should fall back to wc_get_object_terms without error.
+		$options = $product->get_attributes()['pa_size']->get_options();
+		$this->assertSame(
+			array_values( wc_get_object_terms( $product->get_id(), 'pa_size', 'term_id' ) ),
+			array_values( $options ),
+			'Legacy products should load all assigned terms.'
+		);
+
+		$product->delete( true );
+		WC_Helper_Product::delete_attribute( $attribute->get_id() );
 	}
 
 	/**
