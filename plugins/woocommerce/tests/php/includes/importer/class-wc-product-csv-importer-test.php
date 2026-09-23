@@ -607,6 +607,58 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Existing parent and variation SKUs can be updated together when variations reference the parent's new SKU.
+	 */
+	public function test_import_updates_parent_and_variation_skus_together(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S' ) );
+		$attribute->set_variation( true );
+
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Import 37437 Tee' );
+		$parent->set_sku( 'IMPORT-37437-PARENT-OLD' );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_sku( 'IMPORT-37437-VARIATION-OLD' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-update-parent-and-variation-skus-37437.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		file_put_contents(
+			$csv_file,
+			"ID,Type,SKU,Name,Parent\n{$parent->get_id()},variable,IMPORT-37437-PARENT-NEW,Import 37437 Tee,\n{$variation->get_id()},variation,IMPORT-37437-VARIATION-NEW,Import 37437 Tee - S,IMPORT-37437-PARENT-NEW\n"
+		);
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'     => 'id',
+					'Type'   => 'type',
+					'SKU'    => 'sku',
+					'Name'   => 'name',
+					'Parent' => 'parent_id',
+				),
+			)
+		);
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $parent->get_id(), $variation->get_id() ), $data['updated'], 'Both existing products should be updated.' );
+		$this->assertEmpty( $data['failed'], 'No row should fail to import.' );
+		$this->assertSame( 'IMPORT-37437-PARENT-NEW', wc_get_product( $parent->get_id() )->get_sku(), 'The parent should receive its new SKU.' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation should retain its existing parent.' );
+		$this->assertSame( 'IMPORT-37437-VARIATION-NEW', wc_get_product( $variation->get_id() )->get_sku(), 'The variation should receive its new SKU.' );
+	}
+
+	/**
 	 * @testdox Test that new variations are still skipped when updating existing products if the filter disables their creation.
 	 */
 	public function test_import_skips_new_variations_when_creation_is_disabled_via_filter_26256() {
