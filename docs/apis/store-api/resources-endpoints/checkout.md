@@ -289,3 +289,15 @@ For further information on generating a `stripe_source` please check [the Stripe
   ]
 }
 ```
+
+## Order lifecycle hooks
+
+Checkout requests processed through the Store API do not render any templates. Template hooks such as `woocommerce_thankyou` and `woocommerce_before_thankyou` fire only when a customer's browser loads the order-received (thank you) page. The Checkout block redirects customers to that page after a successful order, so they fire in that flow, but a headless checkout that never loads the order-received page (e.g. one using an off-site payment gateway redirect) will not trigger them.
+
+For post-purchase business logic such as fraud screening, fulfillment, tracking, or upsells, do not rely on template hooks. Use order lifecycle hooks instead:
+
+- `woocommerce_payment_complete` - fires when payment for an order completes, regardless of how the order was placed.
+- `woocommerce_order_status_*` transition hooks (e.g. `woocommerce_order_status_processing`) - fire when an order changes status, regardless of how the order was placed.
+- `woocommerce_store_api_checkout_order_processed` - fires only for orders placed through the Store API, after the order is created but before payment is processed. Use it for pre-payment processing of Store API orders; the classic shortcode checkout fires `woocommerce_checkout_order_processed` instead.
+
+See [Hook alternatives](/docs/block-development/reference/hooks/hook-alternatives/) for a broader mapping of classic hooks to their block and Store API equivalents.
