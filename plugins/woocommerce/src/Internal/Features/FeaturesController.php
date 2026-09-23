@@ -488,6 +488,17 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'cart_recovery'                        => array(
+				'name'                         => __( 'Cart recovery emails', 'woocommerce' ),
+				'description'                  => __(
+					'Email shoppers who start checkout but leave without placing an order, with a link that restores their cart.',
+					'woocommerce'
+				),
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+			),
 			'email_improvements'                   => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(

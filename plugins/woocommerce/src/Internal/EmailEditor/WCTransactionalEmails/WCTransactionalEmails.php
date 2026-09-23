@@ -71,6 +71,10 @@ class WCTransactionalEmails {
 			$emails             = array_merge( $emails, $fulfillment_emails );
 		}
 
+		if ( FeaturesUtil::feature_is_enabled( 'cart_recovery' ) ) {
+			$emails[] = 'customer_cart_recovery';
+		}
+
 		return $emails;
 	}
 
