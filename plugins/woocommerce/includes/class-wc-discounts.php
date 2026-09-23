@@ -414,10 +414,11 @@ class WC_Discounts {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
 		}
 
-		// Scale each item's discount down so the coupon total matches its maximum discount. Skipped when a filter set the amounts.
-		$maximum_discount = wc_add_number_precision( (float) $coupon->get_maximum_discount() );
+		// Scale each item's discount down so the coupon total matches its maximum discount, including amounts set by a filter.
+		// Floored to whole cents, so a fractional cap can't be exceeded by the one-cent remainder step.
+		$maximum_discount = floor( wc_add_number_precision( (float) $coupon->get_maximum_discount() ) );
 
-		if ( $maximum_discount > 0 && $total_discount > $maximum_discount && $adjust_final_discount ) {
+		if ( $maximum_discount > 0 && $total_discount > $maximum_discount ) {
 			$capped_total = 0;
 
 			foreach ( $items_to_apply as $item ) {

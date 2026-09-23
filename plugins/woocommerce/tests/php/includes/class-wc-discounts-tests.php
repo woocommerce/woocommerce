@@ -579,6 +579,7 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	 *           [[[50, 1]], "100", "20", [20]]
 	 *           [[[500, 1]], "10", "", [50]]
 	 *           [[[500, 1]], "10", "0", [50]]
+	 *           [[[500, 1]], "10", "30.005", [30]]
 	 *
 	 * @param array  $lines            List of [ price, quantity ] pairs.
 	 * @param string $percent          Coupon percentage.
@@ -686,9 +687,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not apply the maximum discount when a filter overrides the per-item discount amount.
+	 * @testdox Should apply the maximum discount when a filter overrides the per-item discount amount.
 	 */
-	public function test_percent_coupon_maximum_discount_skipped_when_discount_amount_filtered(): void {
+	public function test_percent_coupon_maximum_discount_applies_when_discount_amount_filtered(): void {
 		add_filter(
 			'woocommerce_coupon_get_discount_amount',
 			static function () {
@@ -705,7 +706,7 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( array( 40 ), $actual, 'A filtered discount amount should be left as the filter set it.' );
+		$this->assertEquals( array( 30 ), $actual, 'A filtered discount amount should still be capped.' );
 	}
 
 	/**
