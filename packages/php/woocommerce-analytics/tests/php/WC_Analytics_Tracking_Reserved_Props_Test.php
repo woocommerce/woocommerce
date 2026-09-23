@@ -94,6 +94,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'store_currency',
 			'timezone',
 			'is_guest',
+			'package_version',
 			// get_server_details(), minus CLIENT_OVERRIDABLE_PROPERTIES.
 			'_via_ua',
 			'_via_ip',
