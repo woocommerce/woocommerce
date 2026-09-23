@@ -1068,7 +1068,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 				'br' => array(),
 			)
 		);
-		$rendered         = (string) apply_filters( 'comment_text', get_comment_text( $comment ), $comment, array() );
+		$rendered         = (string) apply_filters( 'comment_text', get_comment_text( $comment ), $comment, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->assert_html_allowed( $rendered, $rendered_allowed, 'comment_text output' );
 
 		$store_review = $this->get_store_api_review( (int) $comment->comment_ID, $built['product_id'] );
