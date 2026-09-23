@@ -81,27 +81,30 @@ function wc_change_pre_get_terms( $terms_query ) {
 	}
 
 	if ( ! empty( $args['force_menu_order_sort'] ) ) {
-		// Sorting by menu order claims the primary meta clause for the 'order' meta key, so move any meta
-		// filter the caller asked for into meta_query, where it still applies as an additional clause.
+		// Sorting by menu order claims the primary meta clause for the 'order' meta key, so move a meta
+		// filter on any other key into meta_query, where it still applies as an additional clause.
+		// A filter on 'order' itself shares the sort clause, and so does the key left here by an earlier run.
 		$caller_meta_clause = array();
 
-		foreach ( array(
-			'key'         => 'meta_key',
-			'compare'     => 'meta_compare',
-			'type'        => 'meta_type',
-			'compare_key' => 'meta_compare_key',
-			'type_key'    => 'meta_type_key',
-		) as $clause_key => $query_var ) {
-			if ( ! empty( $args[ $query_var ] ) ) {
-				$caller_meta_clause[ $clause_key ] = $args[ $query_var ];
-				$args[ $query_var ]                = '';
+		if ( ! empty( $args['meta_key'] ) && 'order' !== $args['meta_key'] ) {
+			foreach ( array(
+				'key'         => 'meta_key',
+				'compare'     => 'meta_compare',
+				'type'        => 'meta_type',
+				'compare_key' => 'meta_compare_key',
+				'type_key'    => 'meta_type_key',
+			) as $clause_key => $query_var ) {
+				if ( ! empty( $args[ $query_var ] ) ) {
+					$caller_meta_clause[ $clause_key ] = $args[ $query_var ];
+					$args[ $query_var ]                = '';
+				}
 			}
-		}
 
-		// Matches how WP_Meta_Query::parse_query_vars() decides that a meta value was supplied.
-		if ( isset( $args['meta_value'] ) && '' !== $args['meta_value'] && ( ! is_array( $args['meta_value'] ) || $args['meta_value'] ) ) {
-			$caller_meta_clause['value'] = $args['meta_value'];
-			$args['meta_value']          = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			// Matches how WP_Meta_Query::parse_query_vars() decides that a meta value was supplied.
+			if ( isset( $args['meta_value'] ) && '' !== $args['meta_value'] && ( ! is_array( $args['meta_value'] ) || $args['meta_value'] ) ) {
+				$caller_meta_clause['value'] = $args['meta_value'];
+				$args['meta_value']          = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			}
 		}
 
 		if ( ! empty( $caller_meta_clause ) ) {

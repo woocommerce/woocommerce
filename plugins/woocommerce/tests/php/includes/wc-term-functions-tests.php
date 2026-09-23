@@ -361,4 +361,87 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox Running the same product category query object again returns the same terms, including those without order meta.
+	 * @dataProvider provider_repeat_run_args
+	 *
+	 * @param array $extra_args Extra arguments for the term query.
+	 * @param array $expected   Names of the expected terms, in order.
+	 */
+	public function test_product_cat_repeat_query_returns_same_terms( array $extra_args, array $expected ): void {
+		$unordered = wp_insert_term( 'Category A', 'product_cat' );
+		$first     = wp_insert_term( 'Category B', 'product_cat' );
+		$second    = wp_insert_term( 'Category C', 'product_cat' );
+
+		delete_term_meta( $unordered['term_id'], 'order' );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+		add_term_meta( $unordered['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'no' );
+
+		$query = new WP_Term_Query(
+			array_merge(
+				array(
+					'taxonomy'   => 'product_cat',
+					'hide_empty' => false,
+					'fields'     => 'id=>name',
+					'include'    => array( $unordered['term_id'], $first['term_id'], $second['term_id'] ),
+				),
+				$extra_args
+			)
+		);
+
+		$this->assertSame( $expected, array_values( $query->terms ), 'The first run should return the expected terms.' );
+		$this->assertSame( $expected, array_values( $query->get_terms() ), 'A second run of the same query object should return the same terms.' );
+	}
+
+	/**
+	 * Query arguments whose results must not change when the query object runs again.
+	 *
+	 * @return array
+	 */
+	public function provider_repeat_run_args(): array {
+		return array(
+			'default sort'          => array( array(), array( 'Category A', 'Category B', 'Category C' ) ),
+			'explicit order key'    => array(
+				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'top-level meta filter' => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				),
+				array( 'Category A', 'Category B' ),
+			),
+			'nested meta_query'     => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => 'wc_test_flag',
+							'value' => 'yes',
+						),
+					),
+				),
+				array( 'Category A', 'Category B' ),
+			),
+			'order key NOT EXISTS'  => array(
+				array(
+					'meta_key'     => 'order', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare' => 'NOT EXISTS',
+				),
+				array( 'Category A' ),
+			),
+			'compare only, no key'  => array(
+				array( 'meta_compare' => 'EXISTS' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'type only, no key'     => array(
+				array( 'meta_type' => 'NUMERIC' ),
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+		);
+	}
 }
