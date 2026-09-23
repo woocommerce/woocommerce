@@ -23,8 +23,8 @@ import clsx from 'clsx';
  */
 import { ProductGalleryBlockSettings } from './block-settings/index';
 import type { ProductGalleryBlockAttributes } from './types';
-import { resolveAspectRatio } from '../../product-element-blocks/image/utils';
-import type { BlockAttributes as ProductImageBlockAttributes } from '../../product-element-blocks/image/types';
+import { resolveAspectRatio } from '../product-elements-blocks/image/utils';
+import type { BlockAttributes as ProductImageBlockAttributes } from '../product-elements-blocks/image/types';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[ 'woocommerce/product-gallery-thumbnails' ],

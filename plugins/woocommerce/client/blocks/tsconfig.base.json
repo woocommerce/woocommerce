@@ -35,10 +35,10 @@
 		],
 		"paths": {
 			"@woocommerce/product-element-blocks": [
-				"assets/js/product-element-blocks"
+				"assets/js/blocks/product-elements-blocks"
 			],
 			"@woocommerce/product-element-blocks/*": [
-				"assets/js/product-element-blocks/*"
+				"assets/js/blocks/product-elements-blocks/*"
 			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"

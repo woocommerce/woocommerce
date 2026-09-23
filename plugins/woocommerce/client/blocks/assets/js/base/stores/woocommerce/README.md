@@ -179,7 +179,7 @@ Any `ProductResponseItem` field can be bound the same way, e.g. `state.productIn
 
 Import the store for its side effects and reference it with the `ProductsStore` type.
 
-From `product-element-blocks/button/frontend.ts`:
+From `blocks/product-elements-blocks/button/frontend.ts`:
 
 ```ts
 import { store } from '@wordpress/interactivity';

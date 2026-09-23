@@ -85,10 +85,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/_
 │ The React components of the WooCommerce Blocks plugin.
 │
-├── assets/js/product-element-blocks
-│ Reusable blocks for individual product elements such as title, rating,
-│ and image.
-│
 ├── assets/js/utils
 │ Shared helpers, including product block registration and rendering.
 │
@@ -100,6 +96,10 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/blocks
 │ The main blocks of the WooCommerce Blocks plugin such as the Active
 │ Filters Block.
+│
+│   └── product-elements-blocks
+│   Reusable blocks for individual product elements such as title, rating,
+│   and image.
 │
 ├── assets/js/editor-components
 │ Editor components such as the block-title component.

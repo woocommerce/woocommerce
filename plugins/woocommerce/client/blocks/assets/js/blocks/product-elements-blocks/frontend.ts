@@ -12,7 +12,7 @@ import type { ProductResponseItem } from '@woocommerce/types';
 import {
 	swapPreformattedHtml,
 	PRODUCT_ELEMENT_HTML_CONFIG,
-} from '../base/utils/preformatted-html';
+} from '../../base/utils/preformatted-html';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =

@@ -261,9 +261,9 @@ describe( 'product block registration call sites', () => {
 
 	it( 'declares the post-editor availability of Product Price and Product Image Gallery', () => {
 		jest.isolateModules( () => {
-			jest.requireActual( '../../product-element-blocks/price' );
+			jest.requireActual( '../../blocks/product-elements-blocks/price' );
 			jest.requireActual(
-				'../../product-element-blocks/product-image-gallery'
+				'../../blocks/product-elements-blocks/product-image-gallery'
 			);
 		} );
 
@@ -286,17 +286,17 @@ describe( 'product block registration call sites', () => {
 		// The editor components load the block editor and the Product Query
 		// variations, which log to the console and aren't part of registration.
 		jest.doMock(
-			'../../product-element-blocks/related-products/edit',
+			'../../blocks/product-elements-blocks/related-products/edit',
 			() => () => null
 		);
 		jest.doMock(
-			'../../product-element-blocks/related-products/save',
+			'../../blocks/product-elements-blocks/related-products/save',
 			() => () => null
 		);
 
 		jest.isolateModules( () => {
 			jest.requireActual(
-				'../../product-element-blocks/related-products'
+				'../../blocks/product-elements-blocks/related-products'
 			);
 		} );
 

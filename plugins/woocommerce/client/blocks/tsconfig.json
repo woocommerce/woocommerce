@@ -8,7 +8,6 @@
 		"./packages/internal/**/*",
 		"./assets/js/middleware/**/*",
 		"./assets/js/blocks/**/block.json",
-		"./assets/js/product-element-blocks/**/block.json",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
 		"./tests/integration/**/*",
