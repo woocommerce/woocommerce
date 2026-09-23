@@ -132,7 +132,7 @@ class StockNotifications implements RegisterHooksInterface {
 			return;
 		}
 
-		// Frontend-only: `template_redirect` and the add-to-cart hooks never fire in admin.
+		// Frontend-only.
 		$container->get( EmailActionController::class );
 		$container->get( ProductPageIntegration::class );
 		$container->get( FormHandlerService::class );
