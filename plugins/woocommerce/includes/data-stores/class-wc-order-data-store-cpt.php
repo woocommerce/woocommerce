@@ -1135,6 +1135,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			// get_orders_generate_customer_meta_query() can return its WP_Error. Normalize recursively
 			// because a nested array is a supported AND-group shape, not malformed input.
 			if ( ! $this->normalize_customer_value( $values, $normalized_values ) ) {
+				unset( $query_vars['customer'], $wp_query_args['customer'] );
 				$this->fail_query_closed(
 					$wp_query_args,
 					'woocommerce_order_query_invalid_customer',

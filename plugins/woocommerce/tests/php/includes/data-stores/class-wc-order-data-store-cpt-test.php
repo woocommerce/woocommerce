@@ -1965,17 +1965,29 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_nested_customer_array_with_unusable_leaf_fails_closed(): void {
 		OrderHelper::create_order();
+		$captured = array();
+		$capture  = static function ( $args, $query_vars ) use ( &$captured ) {
+			$captured = array( $args, $query_vars );
+			return $args;
+		};
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10, 2 );
 
-		$result = wc_get_orders(
-			array(
-				'customer' => array( array( 'nested@example.com', new stdClass() ) ),
-				'return'   => 'ids',
-				'limit'    => -1,
-				'status'   => 'any',
-			)
-		);
+		try {
+			$result = wc_get_orders(
+				array(
+					'customer' => array( array( 'nested@example.com', new stdClass() ) ),
+					'return'   => 'ids',
+					'limit'    => -1,
+					'status'   => 'any',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10 );
+		}
 
 		$this->assertSame( array(), $result, 'A malformed nested customer leaf must not reopen the query.' );
+		$this->assertArrayNotHasKey( 'customer', $captured[0] );
+		$this->assertArrayNotHasKey( 'customer', $captured[1] );
 	}
 
 	/**
