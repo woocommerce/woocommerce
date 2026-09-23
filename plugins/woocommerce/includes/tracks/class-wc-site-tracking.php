@@ -123,7 +123,8 @@ class WC_Site_Tracking {
 				if ( typeof name !== 'string' || ! name ) {
 					if ( <?php echo 'production' !== $environment_type ? 'true' : 'false'; ?> ) {
 						/* eslint-disable no-console */
-						console.error( `A valid event name must be specified. The event name: "${ name }" is not valid.` );
+						// Pass the value as its own argument: interpolating a Symbol (or null-prototype object) would throw.
+						console.error( 'A valid event name must be specified. Received invalid event name:', name );
 						/* eslint-enable no-console */
 					}
 					return;
