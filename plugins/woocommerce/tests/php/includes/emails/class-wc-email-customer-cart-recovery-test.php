@@ -33,6 +33,17 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Disable the flag and rebuild the mailer registry without the cart recovery email.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_feature_cart_recovery_enabled' );
+		WC()->mailer()->emails = array();
+		WC()->mailer()->init();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should be disabled by default.
 	 */
 	public function test_disabled_by_default(): void {
@@ -100,6 +111,37 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_validators_handle_non_array(): void {
 		$this->assertSame( array(), $this->sut->validate_excluded_categories_field( 'excluded_categories', 'x' ) );
 		$this->assertSame( array(), $this->sut->validate_excluded_roles_field( 'excluded_roles', null ) );
+	}
+
+	/**
+	 * @testdox Should clamp the send delay to the allowed range.
+	 *
+	 * @testWith ["0", "15"]
+	 *           ["-5", "15"]
+	 *           ["90", "90"]
+	 *           ["99999", "1380"]
+	 *           ["abc", "60"]
+	 *
+	 * @param string $value    Posted value.
+	 * @param string $expected Saved value.
+	 */
+	public function test_validate_delay_minutes_clamps( string $value, string $expected ): void {
+		$this->assertSame( $expected, $this->sut->validate_delay_minutes_field( 'delay_minutes', $value ) );
+	}
+
+	/**
+	 * @testdox Should not send when no item has a product or the recovery link is missing.
+	 */
+	public function test_trigger_rejects_missing_product_or_link(): void {
+		$this->sut->enabled = 'yes';
+
+		$recovery                        = $this->get_recovery();
+		$recovery['items'][0]['product'] = false;
+		$this->assertFalse( $this->sut->trigger( $recovery ), 'A deleted product must not reach the templates' );
+
+		$recovery = $this->get_recovery();
+		unset( $recovery['recovery_url'] );
+		$this->assertFalse( $this->sut->trigger( $recovery ), 'An email without a recovery link must not send' );
 	}
 
 	/**
@@ -203,10 +245,15 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 		$other = ob_get_clean();
 
 		ob_start();
+		$this->sut->handle_woocommerce_email_general_block_content( false, false, new WC_Email_Customer_Cart_Recovery() );
+		$other_instance = ob_get_clean();
+
+		ob_start();
 		$this->sut->handle_woocommerce_email_general_block_content( false, false, $this->sut );
 		$own = ob_get_clean();
 
 		$this->assertSame( '', $other, 'Must not print into other emails' );
+		$this->assertSame( '', $other_instance, 'Must not print for another instance of this email' );
 		$this->assertStringContainsString( 'checkout-link=true', $own );
 	}
 }

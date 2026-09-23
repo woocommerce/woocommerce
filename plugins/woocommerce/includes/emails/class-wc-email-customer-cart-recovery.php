@@ -119,9 +119,25 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 				return false;
 			}
 
+			// Products can be deleted between capture and send, and the templates call methods on each one.
+			$items = array();
+			foreach ( $recovery['items'] as $item ) {
+				if ( is_array( $item ) && ( $item['product'] ?? null ) instanceof WC_Product && absint( $item['quantity'] ?? 0 ) > 0 ) {
+					$items[] = array(
+						'product'  => $item['product'],
+						'quantity' => absint( $item['quantity'] ),
+					);
+				}
+			}
+			$recovery_url = esc_url_raw( (string) ( $recovery['recovery_url'] ?? '' ) );
+
+			if ( empty( $items ) || '' === $recovery_url ) {
+				return false;
+			}
+
 			$this->recipient    = (string) $recovery['email'];
-			$this->items        = $recovery['items'];
-			$this->recovery_url = (string) ( $recovery['recovery_url'] ?? '' );
+			$this->items        = $items;
+			$this->recovery_url = $recovery_url;
 
 			if ( ! $this->is_enabled() ) {
 				return false;
@@ -184,7 +200,8 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 		 * @param mixed $email         Email being rendered.
 		 */
 		public function handle_woocommerce_email_general_block_content( $sent_to_admin, $plain_text, $email ): void {
-			if ( ! $email instanceof WC_Email || $this->id !== $email->id ) {
+			// Each mailer init() creates a new instance with this handler attached, so match the instance, not the ID.
+			if ( $this !== $email ) {
 				return;
 			}
 
@@ -238,6 +255,21 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 			$email->recovery_url = wc_get_cart_url();
 
 			return $email;
+		}
+
+		/**
+		 * Clamp the send delay to the allowed range.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string $key   Field key.
+		 * @param mixed  $value Posted value.
+		 * @return string
+		 */
+		public function validate_delay_minutes_field( $key, $value ) {
+			$minutes = is_numeric( $value ) ? (int) $value : self::DEFAULT_DELAY_MINUTES;
+
+			return (string) max( self::MIN_DELAY_MINUTES, min( self::MAX_DELAY_MINUTES, $minutes ) );
 		}
 
 		/**
