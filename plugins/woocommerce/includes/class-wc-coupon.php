@@ -456,10 +456,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return string
 	 */
 	public function get_maximum_discount( $context = 'view' ) {
-		if ( 'edit' !== $context && $this->get_prop( 'maximum_discount', $context ) === '' ) {
+		$maximum_discount = $this->get_prop( 'maximum_discount', $context );
+		if ( 'edit' !== $context && '' === $maximum_discount ) {
 			return wc_format_decimal( 0 );
 		}
-		return wc_format_decimal( $this->get_prop( 'maximum_discount', $context ) );
+		return wc_format_decimal( $maximum_discount );
 	}
 
 	/**
@@ -1481,8 +1482,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return void
 	 */
 	public function add_maximum_discount_to_order_item( \WC_Order_Item_Coupon $order_item ) {
-		if ( (float) $this->get_maximum_discount() > 0 ) {
-			$order_item->add_meta_data( 'maximum_discount', $this->get_maximum_discount() );
+		$maximum_discount = $this->get_maximum_discount();
+		if ( (float) $maximum_discount > 0 ) {
+			$order_item->add_meta_data( 'maximum_discount', $maximum_discount );
 		}
 	}
 
