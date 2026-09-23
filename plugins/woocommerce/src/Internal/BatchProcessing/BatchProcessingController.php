@@ -914,6 +914,12 @@ class BatchProcessingController {
 		$wpdb->last_error = '';
 		$result           = (bool) $lookup();
 
-		return empty( $wpdb->last_error ) ? $result : null;
+		// When reconnecting after a lost connection fails, wpdb::query() returns false without an error but discards
+		// the connection handle. A later query can reconnect, so state changes would succeed on top of this failed read.
+		if ( ! empty( $wpdb->last_error ) || empty( $wpdb->dbh ) ) {
+			return null;
+		}
+
+		return $result;
 	}
 }

@@ -851,6 +851,36 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed reconnect during a lookup leaves the processor's state and schedule untouched.
+	 */
+	public function test_shutdown_preserves_processors_on_failed_reconnect(): void {
+		global $wpdb;
+
+		$processor = get_class( $this->test_process );
+		update_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME, array( $processor ), false );
+		$dbh = $wpdb->dbh;
+		// A failed reconnect returns false without an error and discards the handle; the next query reconnects.
+		$filter = function ( $query ) use ( $wpdb ) {
+			if ( false === strpos( $query, 'SELECT a.action_id' ) ) {
+				return $query;
+			}
+			$wpdb->dbh = null;
+			return '';
+		};
+		add_filter( 'query', $filter );
+		try {
+			$this->run_shutdown_cleanup();
+		} finally {
+			remove_filter( 'query', $filter );
+			$wpdb->dbh = $dbh;
+		}
+
+		$this->assertSame( array( $processor ), $this->sut->get_enqueued_processors() );
+		$this->assertFalse( get_option( $this->get_processor_state_option_name( $processor ) ), 'A failed lookup must not record a processor failure.' );
+		$this->assertFalse( $this->sut->is_scheduled( $processor ), 'A failed lookup must not schedule a retry.' );
+	}
+
+	/**
 	 * Run only this controller's shutdown callback, avoiding unrelated shutdown handlers.
 	 */
 	private function run_shutdown_cleanup(): void {
