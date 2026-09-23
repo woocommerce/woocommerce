@@ -123,7 +123,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Saving Page setup reassigns the selected refund and returns policy page.
+	 * @testdox Saving Page setup reassigns or clears the selected refund and returns policy page.
 	 */
 	public function test_save_reassigns_refund_returns_page(): void {
 		$old_page_id = $this->factory->post->create(
@@ -150,6 +150,11 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 			$this->assertSame( (string) $new_page_id, get_option( 'woocommerce_refund_returns_page_id' ), 'The new selection should be saved.' );
 			$this->assertSame( $new_page_id, wc_get_page_id( 'refund_returns' ), 'Consumers should resolve the reassigned page.' );
+
+			$_POST['woocommerce_refund_returns_page_id'] = '';
+			( new WC_Settings_Advanced() )->save();
+			$this->assertSame( '', get_option( 'woocommerce_refund_returns_page_id' ), 'Clearing the selection should be saved.' );
+			$this->assertSame( -1, wc_get_page_id( 'refund_returns' ), 'Consumers should not resolve a page once selection is cleared.' );
 		} finally {
 			$_POST = $original_post;
 			if ( $had_section ) {
