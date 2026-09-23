@@ -33,24 +33,34 @@ export const isAddingToCart = () => {
 };
 
 export const persistenceLayer = {
-	get: () => {
-		if ( ! hasCartSession() || ! hasValidHash() ) {
+	get: (): Cart | null => {
+		try {
+			if ( ! hasCartSession() || ! hasValidHash() ) {
+				return null;
+			}
+
+			const cached = window.localStorage?.getItem( 'storeApiCartData' );
+
+			if ( ! cached ) {
+				return null;
+			}
+
+			const parsed: unknown = JSON.parse( cached );
+
+			if ( ! parsed || typeof parsed !== 'object' ) {
+				return null;
+			}
+
+			return parsed as Cart;
+		} catch {
+			// Best-effort read: `get` runs at store creation, so any throw
+			// here crashes cart, checkout, and mini-cart alike. Covered:
+			// corrupt JSON, and `window.localStorage` access itself throwing
+			// (private-mode Safari, disabled storage, jsdom teardown in
+			// Jest) — the same cases `set` below guards against. Fall back
+			// to null so the store re-fetches.
 			return null;
 		}
-
-		const cached = window.localStorage?.getItem( 'storeApiCartData' );
-
-		if ( ! cached ) {
-			return null;
-		}
-
-		const parsed = JSON.parse( cached );
-
-		if ( ! parsed || typeof parsed !== 'object' ) {
-			return null;
-		}
-
-		return parsed;
 	},
 	set: ( cartData: Cart ) => {
 		// Wrap in try/catch for two reasons:
