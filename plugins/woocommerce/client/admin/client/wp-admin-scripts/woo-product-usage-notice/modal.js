@@ -52,6 +52,7 @@ export default function ProductUsageNoticeModal( {
 	const isExpired = subscriptionState.expired;
 
 	const dismiss = () => {
+		setIsModalOpen( false );
 		dismissRequest(
 			{
 				dismissAction,
@@ -59,7 +60,6 @@ export default function ProductUsageNoticeModal( {
 				dismissNonce,
 			},
 			() => {
-				setIsModalOpen( false );
 				recordEvent( 'product_usage_notice_dismissed', {
 					product_id: productId,
 					screen_id: screenId,
@@ -68,6 +68,7 @@ export default function ProductUsageNoticeModal( {
 		);
 	};
 	const remindLater = () => {
+		setIsModalOpen( false );
 		remindLaterRequest(
 			{
 				remindLaterAction,
@@ -75,7 +76,6 @@ export default function ProductUsageNoticeModal( {
 				remindLaterNonce,
 			},
 			() => {
-				setIsModalOpen( false );
 				recordEvent( 'product_usage_notice_maybe_later_clicked', {
 					product_id: productId,
 					screen_id: screenId,
