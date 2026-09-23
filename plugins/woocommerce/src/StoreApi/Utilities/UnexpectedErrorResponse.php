@@ -20,7 +20,7 @@ final class UnexpectedErrorResponse {
 	/**
 	 * Log an engine failure and create its Store API response.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param \Throwable  $error           Unexpected engine failure.
 	 * @param string      $failure_context Context in which the failure occurred.
@@ -71,7 +71,7 @@ final class UnexpectedErrorResponse {
 		 *
 		 * Details are only ever sent to users who can manage WooCommerce; this filter cannot bypass that check. It defaults to WP_DEBUG so store staff can debug a production store without enabling debug mode site-wide.
 		 *
-		 * @since 11.2.0
+		 * @since 11.3.0
 		 *
 		 * @param bool $expose_error_details Whether to include the error message and exception class. Defaults to WP_DEBUG.
 		 *
