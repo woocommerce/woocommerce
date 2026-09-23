@@ -21,6 +21,11 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 final class BlockTypesController {
 
 	/**
+	 * Priority of the add_data_attributes render_block filter.
+	 */
+	private const DATA_ATTRIBUTES_PRIORITY = 10;
+
+	/**
 	 * Instance of the asset API.
 	 *
 	 * @var AssetApi
@@ -79,7 +84,7 @@ final class BlockTypesController {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
-		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
@@ -145,6 +150,55 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Prepare block rendering for an email, and register the blocks if this request skipped that.
+	 *
+	 * Registration runs third-party code, and an error there must not stop the email from being sent.
+	 *
+	 * @internal
+	 */
+	public function register_blocks_for_email(): void {
+		$this->suspend_data_attributes_for_email_render();
+
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		try {
+			$this->register_blocks();
+		} catch ( \Throwable $e ) {
+			wc_caught_exception( $e, __METHOD__ );
+		}
+	}
+
+	/**
+	 * Stop adding data- attributes to blocks until the email render ends.
+	 *
+	 * No block that can appear in an email reads the attributes back, so in email HTML they are only weight. A
+	 * filter an extension removed is left alone.
+	 */
+	private function suspend_data_attributes_for_email_render(): void {
+		$data_attributes_callback = array( $this, 'add_data_attributes' );
+		if ( self::DATA_ATTRIBUTES_PRIORITY !== has_filter( 'render_block', $data_attributes_callback ) ) {
+			return;
+		}
+
+		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+	}
+
+	/**
+	 * Add the data- attributes filter back once the email render has ended.
+	 *
+	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 *
+	 * @internal
+	 */
+	public function restore_data_attributes_after_email_render(): void {
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
 	}
 
 	/**
