@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix label for default 'select' attribute type in wc_get_attribute_types() so it displays as 'Select' instead of 'Text'.
