@@ -85,6 +85,8 @@ class CartRecovery {
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'clear' ), 10, 0 );
 		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'clear' ), 10, 0 );
 		add_action( self::ACTION_HOOK, array( $this, 'handle_send' ), 10, 1 );
+		add_filter( 'wc_privacy_policy_content', array( $this, 'handle_wc_privacy_policy_content' ) );
+		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'handle_wp_privacy_personal_data_erasers' ) );
 	}
 
 	/**
@@ -545,6 +547,78 @@ class CartRecovery {
 			sprintf( 'Cart recovery skipped for session %s: %s.', substr( wp_hash( $key ), 0, 12 ), $reason ),
 			array( 'source' => self::LOG_SOURCE )
 		);
+	}
+
+	/**
+	 * Add cart recovery to the suggested privacy policy text.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $content Suggested policy HTML.
+	 * @return mixed
+	 */
+	public function handle_wc_privacy_policy_content( $content ) {
+		if ( ! is_string( $content ) ) {
+			return $content;
+		}
+
+		return $content . '<div class="wp-suggested-text"><p>' . esc_html__( 'If you enter your email address at checkout and leave without placing an order, we may send you one email with a link back to your cart. We keep this only in your shopping session, which expires after a short time.', 'woocommerce' ) . '</p></div>';
+	}
+
+	/**
+	 * Register the cart recovery personal data eraser.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $erasers Registered erasers.
+	 * @return mixed
+	 */
+	public function handle_wp_privacy_personal_data_erasers( $erasers ) {
+		if ( ! is_array( $erasers ) ) {
+			return $erasers;
+		}
+
+		$erasers['woocommerce-cart-recovery'] = array(
+			'eraser_friendly_name' => __( 'WooCommerce cart recovery', 'woocommerce' ),
+			'callback'             => array( $this, 'erase_personal_data' ),
+		);
+
+		return $erasers;
+	}
+
+	/**
+	 * Cancel a pending recovery email for an account and expire its address rate limit.
+	 * Guest sessions cannot be found by email; they expire on their own.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $email_address Email address to erase.
+	 * @param mixed $page          Page number, unused.
+	 * @return array
+	 */
+	public function erase_personal_data( $email_address, $page = 1 ): array {
+		unset( $page ); // Finishes in one pass, so the page is not needed.
+
+		$response = array(
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
+		);
+
+		if ( ! is_string( $email_address ) || ! is_email( $email_address ) ) {
+			return $response;
+		}
+
+		WC_Rate_Limiter::set_rate_limit( 'cart_recovery_email_' . wp_hash( strtolower( trim( $email_address ) ) ), 0 );
+
+		$user = get_user_by( 'email', $email_address );
+		if ( $user instanceof \WP_User && null !== as_unschedule_action( self::ACTION_HOOK, array( (string) $user->ID ), self::ACTION_GROUP ) ) {
+			$response['items_removed'] = true;
+			$response['messages'][]    = __( 'Cancelled a pending cart recovery email.', 'woocommerce' );
+		}
+
+		return $response;
 	}
 
 	/**

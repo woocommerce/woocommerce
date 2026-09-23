@@ -716,4 +716,39 @@ class CartRecoveryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'utm_campaign=cart_recovery', $redirect );
 		$this->assertStringNotContainsString( 'products=', $redirect );
 	}
+
+	/**
+	 * @testdox Should append cart recovery text to the suggested privacy policy.
+	 */
+	public function test_privacy_policy_text(): void {
+		$content = $this->sut->handle_wc_privacy_policy_content( '<div>Base</div>' );
+
+		$this->assertStringStartsWith( '<div>Base</div>', $content );
+		$this->assertStringContainsString( 'one email', $content );
+	}
+
+	/**
+	 * @testdox Should register an eraser that unschedules the user's job.
+	 */
+	public function test_eraser_unschedules_user_job(): void {
+		$user_id = self::factory()->user->create( array( 'user_email' => 'erase@example.com' ) );
+		as_schedule_single_action( time() + 3600, CartRecovery::ACTION_HOOK, array( (string) $user_id ), CartRecovery::ACTION_GROUP );
+
+		$erasers = $this->sut->handle_wp_privacy_personal_data_erasers( array() );
+		$result  = call_user_func( $erasers['woocommerce-cart-recovery']['callback'], 'erase@example.com', 1 );
+
+		$this->assertTrue( $result['items_removed'] );
+		$this->assertTrue( $result['done'] );
+		$this->assertCount( 0, $this->get_pending( (string) $user_id ) );
+	}
+
+	/**
+	 * @testdox Should report nothing removed for an address without an account.
+	 */
+	public function test_eraser_guest_address(): void {
+		$result = $this->sut->erase_personal_data( 'guest@example.com', 1 );
+
+		$this->assertFalse( $result['items_removed'] );
+		$this->assertTrue( $result['done'] );
+	}
 }
