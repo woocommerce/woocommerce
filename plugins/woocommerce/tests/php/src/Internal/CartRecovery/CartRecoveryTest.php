@@ -61,7 +61,9 @@ class CartRecoveryTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			if ( null !== $this->remote_addr ) {
+			if ( null === $this->remote_addr ) {
+				unset( $_SERVER['REMOTE_ADDR'] );
+			} else {
 				$_SERVER['REMOTE_ADDR'] = $this->remote_addr;
 			}
 		} finally {
