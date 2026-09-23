@@ -7,11 +7,16 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\CartRecovery;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use WC_Cache_Helper;
 use WC_Cart;
 use WC_Customer;
+use WC_Email_Customer_Cart_Recovery;
 use WC_Geolocation;
+use WC_Product;
+use WC_Product_Variation;
 use WC_Rate_Limiter;
 use WC_Session;
 use WC_Session_Handler;
@@ -46,6 +51,12 @@ class CartRecovery {
 	// ponytail: one new scheduled session per IP per minute; shared IPs (offices, carrier NAT) can lose captures. Switch to a counter if that shows up.
 	private const IP_WINDOW = MINUTE_IN_SECONDS;
 
+	private const MAX_IDLE = DAY_IN_SECONDS;
+
+	private const DEFAULT_DAILY_LIMIT = 500;
+
+	private const LOG_SOURCE = 'cart-recovery';
+
 	/**
 	 * Register the hooks that must exist whether or not the feature is on.
 	 */
@@ -73,6 +84,7 @@ class CartRecovery {
 		add_action( 'woocommerce_cart_emptied', array( $this, 'clear' ), 10, 0 );
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'clear' ), 10, 0 );
 		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'clear' ), 10, 0 );
+		add_action( self::ACTION_HOOK, array( $this, 'handle_send' ), 10, 1 );
 	}
 
 	/**
@@ -200,6 +212,339 @@ class CartRecovery {
 		}
 
 		WC()->session->set( self::SESSION_KEY, null );
+	}
+
+	/**
+	 * Run the send-time checks for a session and send, reschedule or skip.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $key Session key the job was queued for.
+	 */
+	public function handle_send( $key ): void {
+		$key   = (string) $key;
+		$email = $this->get_email();
+		if ( null === $email || ! $email->is_enabled() ) {
+			$this->log_skip( $key, 'email disabled' );
+			return;
+		}
+
+		$session = $this->load_session( $key );
+		$data    = $session[ self::SESSION_KEY ] ?? null;
+		if ( ! is_array( $data ) || ( $data['key'] ?? '' ) !== $key || ! is_email( $data['email'] ?? '' ) ) {
+			$this->log_skip( $key, 'no recovery data' );
+			return;
+		}
+
+		$cart = $session['cart'] ?? array();
+		if ( ! is_array( $cart ) || empty( $cart ) ) {
+			$this->log_skip( $key, 'empty cart' );
+			return;
+		}
+
+		$now       = time();
+		$last_seen = (int) ( $data['last_seen'] ?? 0 );
+		if ( $now - $last_seen > self::MAX_IDLE ) {
+			$this->log_skip( $key, 'idle too long' );
+			return;
+		}
+
+		$due = $last_seen + $this->get_delay_seconds();
+		if ( $due > $now ) {
+			$this->reschedule( $key, $due );
+			return;
+		}
+
+		$address   = (string) $data['email'];
+		$limit_key = 'cart_recovery_email_' . wp_hash( strtolower( trim( $address ) ) );
+		if ( WC_Rate_Limiter::retried_too_soon( $limit_key ) || $this->daily_limit_reached() ) {
+			$this->log_skip( $key, 'rate limited' );
+			return;
+		}
+
+		$settings = $this->get_settings();
+		$total    = (float) ( $session['cart_totals']['total'] ?? 0 );
+		if ( $total < (float) ( $settings['min_cart_total'] ?? 0 ) ) {
+			$this->reschedule( $key, $now + $this->get_delay_seconds() );
+			return;
+		}
+
+		if ( $this->has_excluded_role( $key, (array) ( $settings['excluded_roles'] ?? array() ) ) ) {
+			$this->log_skip( $key, 'excluded role' );
+			return;
+		}
+
+		if ( $this->has_order_since( $key, $address, (int) ( $data['captured_at'] ?? $now ) ) ) {
+			$this->log_skip( $key, 'order placed' );
+			return;
+		}
+
+		$this->prime_products( $cart );
+
+		if ( $this->has_excluded_category( $cart, array_map( 'absint', (array) ( $settings['excluded_categories'] ?? array() ) ) ) ) {
+			$this->log_skip( $key, 'excluded category' );
+			return;
+		}
+
+		$items = $this->get_items( $cart );
+		if ( empty( $items ) ) {
+			$this->reschedule( $key, $now + $this->get_delay_seconds() );
+			return;
+		}
+
+		$recovery = array(
+			'email'        => $address,
+			'items'        => $items,
+			'recovery_url' => $this->get_recovery_url( $items ),
+		);
+
+		/**
+		 * Filter whether to send the cart recovery email for a session.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool  $eligible Whether to send. Only a strict `true` sends.
+		 * @param array $recovery Email address, items (product and quantity) and recovery URL.
+		 */
+		if ( true !== apply_filters( 'woocommerce_cart_recovery_is_eligible', true, $recovery ) ) {
+			$this->log_skip( $key, 'filtered out' );
+			return;
+		}
+
+		// Set before sending so two runners cannot both pass the check.
+		WC_Rate_Limiter::set_rate_limit( $limit_key, DAY_IN_SECONDS );
+		$this->increment_daily_count();
+
+		if ( ! $email->trigger( $recovery ) ) {
+			$this->log_skip( $key, 'send failed' );
+		}
+	}
+
+	/**
+	 * The recovery email from the mailer.
+	 *
+	 * @return WC_Email_Customer_Cart_Recovery|null
+	 */
+	private function get_email(): ?WC_Email_Customer_Cart_Recovery {
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Cart_Recovery'] ?? null;
+
+		return $email instanceof WC_Email_Customer_Cart_Recovery ? $email : null;
+	}
+
+	/**
+	 * Read a session row fresh from storage, with each value unserialized.
+	 *
+	 * @param string $key Session key.
+	 * @return array
+	 */
+	private function load_session( string $key ): array {
+		// The Store API cart-token handler writes the table without updating this cache entry.
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $key, WC_SESSION_CACHE_GROUP );
+
+		// Capture only runs under WC_Session_Handler, so the row is in the core sessions table.
+		$raw = ( new WC_Session_Handler() )->get_session( $key, array() );
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+
+		// WC_Session::set() stores each value already serialized.
+		return array_map( 'maybe_unserialize', $raw );
+	}
+
+	/**
+	 * Queue the job again. `unique` must be false: the running action still counts as a duplicate.
+	 *
+	 * @param string $key  Session key.
+	 * @param int    $when Unix time to run.
+	 */
+	private function reschedule( string $key, int $when ): void {
+		if ( 0 === as_schedule_single_action( $when, self::ACTION_HOOK, array( $key ), self::ACTION_GROUP, false, 20 ) ) {
+			$this->log_skip( $key, 'reschedule failed' );
+		}
+	}
+
+	/**
+	 * Whether the session belongs to a user with an excluded role.
+	 *
+	 * @param string   $key   Session key; numeric for logged-in users.
+	 * @param string[] $roles Excluded roles.
+	 * @return bool
+	 */
+	private function has_excluded_role( string $key, array $roles ): bool {
+		if ( empty( $roles ) || ! ctype_digit( $key ) ) {
+			return false;
+		}
+
+		$user = get_userdata( (int) $key );
+		return $user instanceof \WP_User && ! empty( array_intersect( $roles, $user->roles ) );
+	}
+
+	/**
+	 * Whether a paid or on-hold order exists for this shopper since capture.
+	 *
+	 * @param string $key     Session key; numeric for logged-in users.
+	 * @param string $address Captured email.
+	 * @param int    $since   Capture time.
+	 * @return bool
+	 */
+	private function has_order_since( string $key, string $address, int $since ): bool {
+		$customer = array( $address );
+		if ( ctype_digit( $key ) ) {
+			$customer[] = (int) $key;
+		}
+
+		$ids = wc_get_orders(
+			array(
+				'type'         => 'shop_order',
+				'customer'     => $customer,
+				'status'       => array_merge( (array) wc_get_is_paid_statuses(), array( OrderStatus::ON_HOLD ) ),
+				'date_created' => '>' . $since,
+				'limit'        => 1,
+				'return'       => 'ids',
+			)
+		);
+
+		return ! empty( $ids );
+	}
+
+	/**
+	 * Load every product and parent in the cart in one query.
+	 *
+	 * @param array $cart Session cart.
+	 */
+	private function prime_products( array $cart ): void {
+		$ids = array();
+		foreach ( $cart as $item ) {
+			$ids[] = absint( $item['product_id'] ?? 0 );
+			$ids[] = absint( $item['variation_id'] ?? 0 );
+		}
+
+		_prime_post_caches( array_values( array_filter( array_unique( $ids ) ) ) );
+	}
+
+	/**
+	 * Whether a cart product is in an excluded category. Parent categories cover their children.
+	 *
+	 * @param array $cart     Session cart.
+	 * @param int[] $excluded Excluded category IDs.
+	 * @return bool
+	 */
+	private function has_excluded_category( array $cart, array $excluded ): bool {
+		if ( empty( $excluded ) ) {
+			return false;
+		}
+
+		foreach ( $cart as $item ) {
+			// wc_get_product_cat_ids() includes ancestor categories.
+			if ( array_intersect( $excluded, wc_get_product_cat_ids( absint( $item['product_id'] ?? 0 ) ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Cart items that can be bought again through a checkout link.
+	 *
+	 * @param array $cart Session cart.
+	 * @return array<int, array{product: WC_Product, quantity: int}>
+	 */
+	private function get_items( array $cart ): array {
+		$items = array();
+		foreach ( $cart as $item ) {
+			$product_id = absint( $item['variation_id'] ?? 0 ) ? absint( $item['variation_id'] ) : absint( $item['product_id'] ?? 0 );
+			$product    = wc_get_product( $product_id );
+
+			if ( ! $product instanceof WC_Product || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
+				continue;
+			}
+
+			// Checkout links cannot carry an "any" attribute choice (#61446).
+			if ( $product instanceof WC_Product_Variation && in_array( '', $product->get_variation_attributes(), true ) ) {
+				continue;
+			}
+
+			$items[] = array(
+				'product'  => $product,
+				'quantity' => max( 1, absint( $item['quantity'] ?? 1 ) ),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Checkout link that rebuilds the cart, tagged for order attribution.
+	 *
+	 * @param array<int, array{product: WC_Product, quantity: int}> $items Items.
+	 * @return string
+	 */
+	private function get_recovery_url( array $items ): string {
+		$products = array();
+		foreach ( $items as $item ) {
+			$products[] = $item['product']->get_id() . ':' . $item['quantity'];
+		}
+
+		return add_query_arg(
+			array(
+				'checkout-link' => 'true',
+				'products'      => implode( ',', $products ),
+				'utm_source'    => 'woocommerce',
+				'utm_medium'    => 'email',
+				'utm_campaign'  => 'cart_recovery',
+			),
+			home_url( '/' )
+		);
+	}
+
+	/**
+	 * Transient holding today's send count.
+	 *
+	 * @return string
+	 */
+	private function get_daily_count_key(): string {
+		return 'wc_cart_recovery_sent_' . gmdate( 'Ymd' );
+	}
+
+	/**
+	 * Whether today's site-wide send limit is reached.
+	 *
+	 * @return bool
+	 */
+	private function daily_limit_reached(): bool {
+		/**
+		 * Filter the maximum number of cart recovery emails the site sends per day.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int $limit Daily limit. Default 500.
+		 */
+		$limit = absint( apply_filters( 'woocommerce_cart_recovery_daily_limit', self::DEFAULT_DAILY_LIMIT ) );
+
+		return (int) get_transient( $this->get_daily_count_key() ) >= $limit;
+	}
+
+	/**
+	 * Count one send against today's limit.
+	 */
+	private function increment_daily_count(): void {
+		$key = $this->get_daily_count_key();
+		set_transient( $key, (int) get_transient( $key ) + 1, DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Log why a job did not send. No email addresses or raw user IDs.
+	 *
+	 * @param string $key    Session key.
+	 * @param string $reason Reason.
+	 */
+	private function log_skip( string $key, string $reason ): void {
+		wc_get_logger()->debug(
+			sprintf( 'Cart recovery skipped for session %s: %s.', substr( wp_hash( $key ), 0, 12 ), $reason ),
+			array( 'source' => self::LOG_SOURCE )
+		);
 	}
 
 	/**
