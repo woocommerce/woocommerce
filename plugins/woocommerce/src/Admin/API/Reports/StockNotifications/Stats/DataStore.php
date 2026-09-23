@@ -98,7 +98,6 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 	public function get_default_query_vars() {
 		$defaults             = parent::get_default_query_vars();
 		$defaults['interval'] = 'day';
-		$defaults['per_page'] = 100;
 		$defaults['orderby']  = 'date';
 
 		return $defaults;

@@ -290,7 +290,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public function get_default_query_vars() {
 		$defaults                     = parent::get_default_query_vars();
-		$defaults['per_page']         = 25;
 		$defaults['orderby']          = 'active_signups';
 		$defaults['order']            = 'desc';
 		$defaults['product_includes'] = array();
