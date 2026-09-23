@@ -121,9 +121,6 @@ class StockNotifications implements RegisterHooksInterface {
 		$container->get( DataRetentionController::class );
 		$container->get( Telemetry::class );
 
-		// The My Account endpoint stays outside the frontend block: its query var
-		// feeds the rewrite rules flushed from admin, and the menu item is listed
-		// in Appearance > Menus and the Customizer.
 		$container->get( MyAccountEndpoint::class );
 
 		// The settings filters must attach outside admin too, or the REST settings
