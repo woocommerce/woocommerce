@@ -4171,3 +4171,14 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
 
 	return false;
 }
+
+/**
+ * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
+ *
+ * @return void
+ */
+function wc_update_1130_set_legacy_variation_price_hash_option() {
+	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
+	}
+}
