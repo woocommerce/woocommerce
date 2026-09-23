@@ -218,6 +218,7 @@ const ProductTemplateEdit = (
 				inherit,
 				taxQuery,
 				pages,
+				archivePerPage,
 				...restQueryArgs
 			},
 			queryContext = [ { page: 1 } ],
@@ -329,7 +330,8 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				query.per_page = loopShopPerPage;
+				// An archive template may size its own pages; otherwise the store default applies.
+				query.per_page = archivePerPage || loopShopPerPage;
 
 				const settings = getEditedEntityRecord(
 					'root',
@@ -383,6 +385,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			archivePerPage,
 			__privateProductCollectionPreviewState,
 		]
 	);
