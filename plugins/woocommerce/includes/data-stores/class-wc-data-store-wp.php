@@ -338,7 +338,7 @@ class WC_Data_Store_WP {
 	 * @param mixed  $query_var A valid date format. Values that cannot be used as a string fail the query.
 	 * @param string $key meta or db column key.
 	 * @param array  $wp_query_args WP_Query args.
-	 * @return array Modified $wp_query_args
+	 * @return array Modified $wp_query_args. Callers must check its `errors` entry before executing the query.
 	 */
 	public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
 		$query_parse_regex = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
@@ -355,18 +355,20 @@ class WC_Data_Store_WP {
 		$raw_end   = '';
 
 		// Validate here so overrides can normalize custom date formats before calling the parent parser.
-		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
-			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+		$usable = is_scalar( $query_var ) || ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) );
 
-			return $wp_query_args;
-		} elseif ( is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
+		if ( $usable && is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
 			try {
 				$query_var = (string) $query_var;
 			} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
-				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
-
-				return $wp_query_args;
+				$usable = false;
 			}
+		}
+
+		if ( ! $usable ) {
+			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+
+			return $wp_query_args;
 		}
 
 		try {
