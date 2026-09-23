@@ -14,8 +14,6 @@ interface WithStyle {
 export interface BlockAttributes {
 	className?: string | undefined;
 	textAlign?: string | undefined;
-	isDescendentOfQueryLoop?: boolean | undefined;
-	isDescendentOfSingleProductBlock?: boolean | undefined;
 	width?: number | undefined;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	'woocommerce/isDescendantOfAddToCartWithOptions'?: boolean | undefined;

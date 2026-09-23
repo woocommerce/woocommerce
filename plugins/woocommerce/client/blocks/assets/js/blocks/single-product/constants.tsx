@@ -38,18 +38,9 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 								PRODUCT_TITLE_VARIATION_NAME,
 						},
 					],
-					[
-						'woocommerce/product-rating',
-						{ isDescendentOfSingleProductBlock: true },
-					],
-					[
-						'woocommerce/product-price',
-						{ isDescendentOfSingleProductBlock: true },
-					],
-					[
-						'woocommerce/product-summary',
-						{ isDescendentOfSingleProductBlock: true },
-					],
+					[ 'woocommerce/product-rating' ],
+					[ 'woocommerce/product-price' ],
+					[ 'woocommerce/product-summary' ],
 					[
 						getSetting( 'isBlockTheme', false )
 							? 'woocommerce/add-to-cart-with-options'

@@ -435,6 +435,106 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it.each( [ '_self', '_SELF', '_Self' ] )(
+		'prompts before navigation with target "%s" while settings are dirty',
+		( target ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'next', label: 'Next', href: '#next' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			try {
+				const input = container.querySelector( 'input' )!;
+				const link = container.querySelector( 'a' )!;
+				link.target = target;
+				act( () => changeTextInput( input, 'Changed' ) );
+				let intercepted: boolean | undefined;
+				link.addEventListener( 'click', ( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				} );
+				act( () => link.click() );
+				expect( intercepted ).toBe( true );
+				expect(
+					document.querySelector(
+						'.wc-settings-ui__unsaved-changes-modal'
+					)
+				).not.toBeNull();
+			} finally {
+				act( () => root.unmount() );
+				container.remove();
+			}
+		}
+	);
+
+	it.each( [ '', 'settings.csv' ] )(
+		'allows a download with attribute "%s" while settings are dirty',
+		( download ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'export', label: 'Export', href: '#export' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
+			if ( ! ( input instanceof window.HTMLInputElement ) ) {
+				throw new Error( 'Expected an editable input.' );
+			}
+			const link = container.querySelector( 'a' )!;
+			link.setAttribute( 'download', download );
+			act( () => changeTextInput( input, 'Changed' ) );
+
+			const click = new window.MouseEvent( 'click', {
+				bubbles: true,
+				cancelable: true,
+				button: 0,
+			} );
+			let intercepted: boolean | undefined;
+			link.addEventListener(
+				'click',
+				( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				},
+				{ once: true }
+			);
+			act( () => {
+				link.dispatchEvent( click );
+			} );
+			expect( intercepted ).toBe( false );
+			expect(
+				document.querySelector(
+					'.wc-settings-ui__unsaved-changes-modal'
+				)
+			).toBeNull();
+			const unload = new Event( 'beforeunload', { cancelable: true } );
+			window.dispatchEvent( unload );
+			expect( unload.defaultPrevented ).toBe( true );
+
+			act( () => root.unmount() );
+			container.remove();
+		}
+	);
+
 	it( 'prompts before navigating away with unsaved changes', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -953,6 +1053,65 @@ describe( 'settings HTML rendering', () => {
 		} finally {
 			act( () => root.unmount() );
 			form.remove();
+		}
+	} );
+
+	it( 'excludes unknown control fields from custom save payloads', async () => {
+		const saveHandler = jest.fn().mockResolvedValue( undefined );
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/custom-field': ( { field, onChange } ) => (
+					<button
+						type="button"
+						onClick={ () =>
+							onChange( {
+								[ field.id ]: 'changed',
+								unknown: 'stray',
+							} )
+						}
+					>
+						Change fields
+					</button>
+				),
+			},
+			saveHandlers: { 'test/save': saveHandler },
+		} );
+		const schema = createSingleFieldSchema(
+			{
+				id: 'name',
+				label: 'Name',
+				type: 'text',
+				value: 'initial',
+				component: 'test/custom-field',
+			},
+			{ save: { adapter: 'custom', handler: 'test/save' } }
+		);
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		try {
+			act( () => container.querySelector( 'button' )!.click() );
+			const saveButton = container.querySelector(
+				'.woocommerce-save-button'
+			);
+			if ( ! ( saveButton instanceof window.HTMLButtonElement ) ) {
+				throw new Error( 'Expected a save button.' );
+			}
+			await act( async () => {
+				saveButton.click();
+			} );
+			expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+			expect( saveHandler.mock.calls[ 0 ][ 0 ] ).toEqual(
+				expect.objectContaining( {
+					values: { name: 'changed' },
+					changedValues: { name: 'changed' },
+					dirtyFields: [ 'name' ],
+				} )
+			);
+		} finally {
+			act( () => root.unmount() );
+			container.remove();
 		}
 	} );
 

@@ -14,7 +14,9 @@ import { useState, useContext, useRef } from '@wordpress/element';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
-import QualityBadge from '../quality-badge/quality-badge';
+import QualityBadge, {
+	getVisibleQualityBadge,
+} from '../quality-badge/quality-badge';
 import {
 	Product,
 	ProductCardType,
@@ -82,6 +84,11 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		iamSettings?.product_previews === 'modal' &&
 		! isTheme &&
 		! isBusinessService;
+	// Business service cards use a layout with no slot for the badge.
+	const showsQualityBadge =
+		! isLoading &&
+		! isBusinessService &&
+		getVisibleQualityBadge( props.product, iamSettings ) !== null;
 
 	const showVendor = ! isCompact && ! isLoading;
 	const showVendorLoading = ! isCompact && isLoading;
@@ -192,6 +199,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 			product_name: product.title,
 			vendor: product.vendorName,
 			product_type: type,
+			has_quality_badge: showsQualityBadge,
 		} );
 
 		if ( shouldShowPreview ) {
@@ -247,15 +255,8 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 				onClick={ ( e ) => {
 					if ( shouldShowPreview ) {
 						e.preventDefault();
-						handleCardClick();
-					} else {
-						recordTracksEvent( 'marketplace_product_card_clicked', {
-							product_id: product.id,
-							product_name: product.title,
-							vendor: product.vendorName,
-							product_type: type,
-						} );
 					}
+					handleCardClick();
 				} }
 			>
 				{ isLoading ? ' ' : product.title }
@@ -298,7 +299,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	};
 
 	const qualityBadge =
-		! isLoading && props.product ? (
+		showsQualityBadge && props.product ? (
 			<QualityBadge product={ props.product } />
 		) : null;
 
