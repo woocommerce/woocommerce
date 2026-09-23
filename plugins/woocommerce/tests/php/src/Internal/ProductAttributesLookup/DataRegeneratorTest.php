@@ -80,6 +80,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [true]
 	 *
 	 * @param bool $previously_existing True to create a lookup table beforehand.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_creates_lookup_table( $previously_existing ) {
 		global $wpdb;
@@ -109,6 +111,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox `initiate_regeneration` initializes the transient options, and enqueues the first step for time()+1.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_initializes_temporary_options_and_enqueues_regeneration_step() {
 		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
@@ -149,6 +153,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [[]]
 	 *
 	 * @param mixed $get_products_result Result from wc_get_products.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_does_not_enqueues_regeneration_step_when_no_products( $get_products_result ) {
 		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
@@ -171,6 +177,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox `initiate_regeneration` processes one chunk of products IDs and enqueues next step if there are more products available.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_correctly_processes_ids_and_enqueues_next_step() {
 		$requested_products_offsets = array();
@@ -220,6 +228,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [false]
 	 *
 	 * @param bool $set_filter Whether to use the filter to change the processing group size or not.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_regeneration_uses_the_woocommerce_attribute_lookup_regeneration_step_size_filter( bool $set_filter ) {
 		$requested_step_sizes = array();
@@ -269,6 +279,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [[]]
 	 *
 	 * @param array $product_ids The products ids that wc_get_products will return.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_finishes_when_no_more_products_available( $product_ids ) {
 		$this->register_legacy_proxy_function_mocks(
@@ -320,6 +332,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox The 'regenerate' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_regenerate_tool_callback_runs_without_a_nonce() {
 		global $wpdb;

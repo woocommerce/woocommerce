@@ -191,8 +191,8 @@ class WC_Unit_Tests_Bootstrap {
 	/**
 	 * Fail tests that run DDL inside their transaction. WC_DDL_GUARD=report lists
 	 * offenders instead, for seeding and triage, and is ignored when CI is set so
-	 * the guard always enforces there. There is no off switch: the allowlist is
-	 * the escape hatch.
+	 * the guard always enforces there. There is no off switch: tests declare DDL
+	 * with @ddlInTransaction, and the shrink-only allowlist holds the rest.
 	 */
 	private function register_ddl_guard() {
 		$mode = WC_DDL_In_Transaction_Guard::MODE_ENFORCE;

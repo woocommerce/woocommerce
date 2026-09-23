@@ -117,6 +117,8 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 	 * Test flush.
 	 *
 	 * @since 3.0.0
+	 *
+	 * @ddlInTransaction WC_Log_Handler_DB::flush() truncates the log table.
 	 */
 	public function test_flush() {
 		global $wpdb;

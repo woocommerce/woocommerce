@@ -61,6 +61,8 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @test Test that we are able to create FTS index on order address table.
+	 *
+	 * @ddlInTransaction Creating the full-text index is the subject.
 	 */
 	public function test_create_fts_index_order_address_table() {
 		$db = wc_get_container()->get( DataSynchronizer::class );
@@ -79,6 +81,8 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @test Test that we are able to create FTS index on order item table.
+	 *
+	 * @ddlInTransaction Creating the full-text index is the subject.
 	 */
 	public function test_create_fts_index_order_item_table() {
 		if ( ! $this->sut->fts_index_on_order_item_table_exists() ) {

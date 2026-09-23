@@ -15,22 +15,36 @@ declare( strict_types = 1 );
  * commit, so every write made earlier in the same test escapes the rollback
  * and leaks into the tests that follow. This hooks the `query` filter after
  * WordPress has had its chance to rewrite CREATE/DROP TABLE into TEMPORARY
- * variants, and reports or fails any remaining DDL that is not allowlisted.
+ * variants, and reports or fails any remaining DDL the test has not declared.
+ *
+ * A test whose subject is schema code declares it with a `@ddlInTransaction`
+ * annotation, at method or class level, followed by the reason. Tests that
+ * should move their DDL out of the transaction but have not yet are listed in
+ * ddl-in-transaction-allowlist.php, which may only shrink.
  */
 final class WC_DDL_In_Transaction_Guard {
 
 	const MODE_ENFORCE = 'enforce';
 	const MODE_REPORT  = 'report';
 
+	const ANNOTATION = 'ddlInTransaction';
+
 	/**
-	 * Whether a per-test transaction is currently open.
+	 * The test that owns the open transaction, as 'Class::method', or null outside one.
+	 *
+	 * @var string|null
+	 */
+	private static $current_test = null;
+
+	/**
+	 * Whether the current test declares its DDL with the annotation.
 	 *
 	 * @var bool
 	 */
-	private static $in_transaction = false;
+	private static $current_test_declares_ddl = false;
 
 	/**
-	 * Allowlisted sites, as 'Class::method' or 'Class::*'.
+	 * Tests allowed to run DDL until they are fixed, as 'Class::method' or 'Class::*'.
 	 *
 	 * @var array<string, true>
 	 */
@@ -53,37 +67,45 @@ final class WC_DDL_In_Transaction_Guard {
 	/**
 	 * Install the guard.
 	 *
-	 * @param string[] $allowlist Sites that may run DDL in a transaction.
+	 * @param string[] $allowlist Tests that may run DDL in a transaction until they are fixed.
 	 * @param string   $mode      One of the MODE_* constants.
 	 */
 	public static function register( array $allowlist, string $mode ): void {
 		self::$allowlist = array_fill_keys( $allowlist, true );
-		// Anything but report enforces. There is no off switch: the allowlist is the escape hatch.
+		// Anything but report enforces. There is no off switch: the annotation and the allowlist are the escape hatches.
 		self::$mode = self::MODE_REPORT === $mode ? self::MODE_REPORT : self::MODE_ENFORCE;
 		// Late priority: WP_UnitTestCase rewrites CREATE/DROP TABLE to TEMPORARY at priority 10.
 		add_filter( 'query', array( self::class, 'inspect_query' ), PHP_INT_MAX );
 	}
 
 	/**
-	 * Track the transaction and check DDL against the allowlist.
+	 * Track the test's transaction and check DDL run inside it.
 	 *
 	 * @param string $query The SQL about to run.
 	 * @return string The query, unchanged.
-	 * @throws RuntimeException In enforce mode, for DDL not on the allowlist.
+	 * @throws RuntimeException In enforce mode, for undeclared DDL; always, for an annotation without a reason.
 	 */
 	public static function inspect_query( $query ) {
 		$sql  = ltrim( (string) $query );
 		$head = strtoupper( substr( $sql, 0, 20 ) );
 
-		if ( 0 === strpos( $head, 'START TRANSACTION' ) || 0 === strpos( $head, 'BEGIN' ) ) {
-			self::$in_transaction = true;
+		// Only the framework's own statements open and close the tracked transaction. Code under
+		// test may COMMIT or START TRANSACTION too; with autocommit off, the test is still exposed.
+		if ( 0 === strpos( $head, 'START TRANSACTION' ) ) {
+			$test = self::framework_test_calling( 'start_transaction' );
+			if ( null !== $test ) {
+				self::$current_test              = get_class( $test ) . '::' . $test->getName( false );
+				self::$current_test_declares_ddl = self::declares_ddl( $test );
+			}
 			return $query;
 		}
-		if ( 0 === strpos( $head, 'ROLLBACK' ) || 0 === strpos( $head, 'COMMIT' ) ) {
-			self::$in_transaction = false;
+		if ( 0 === strpos( $head, 'ROLLBACK' ) ) {
+			if ( null !== self::framework_test_calling( 'tear_down' ) ) {
+				self::$current_test = null;
+			}
 			return $query;
 		}
-		if ( ! self::$in_transaction ) {
+		if ( null === self::$current_test || self::$current_test_declares_ddl ) {
 			return $query;
 		}
 
@@ -96,63 +118,85 @@ final class WC_DDL_In_Transaction_Guard {
 			return $query;
 		}
 
-		$site = self::current_site();
-		if ( self::is_allowed( $site ) ) {
+		$test = self::$current_test;
+		if ( self::is_allowed( $test ) ) {
 			return $query;
 		}
-
-		$message = sprintf(
-			'%s statement inside a test transaction, from %s. DDL commits implicitly, so every write made so far in this test escapes the rollback and leaks into later tests. Move it to wpSetUpBeforeClass(), or add %s to tests/legacy/framework/ddl-in-transaction-allowlist.php with the reason.',
-			$verb,
-			$site,
-			$site
-		);
 
 		if ( self::MODE_REPORT === self::$mode ) {
-			$key = $site . '|' . $verb;
+			$key = $test . '|' . $verb;
 			if ( ! isset( self::$reported[ $key ] ) ) {
 				self::$reported[ $key ] = true;
-				fwrite( STDERR, "\n#DDL-GUARD# {$site} | {$verb}\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Test-runner console output, not a filesystem write.
+				fwrite( STDERR, "\n#DDL-GUARD# {$test} | {$verb}\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Test-runner console output, not a filesystem write.
 			}
 			return $query;
 		}
 
-		throw new RuntimeException( esc_html( $message ) );
+		throw new RuntimeException(
+			esc_html(
+				sprintf(
+					'%s statement inside the test transaction of %s. DDL commits implicitly, so every write made so far in this test escapes the rollback and leaks into later tests. Move it to wpSetUpBeforeClass(). If the DDL is what the test is about, annotate the test with @%s and the reason, and restore anything it writes before the DDL.',
+					$verb,
+					$test,
+					self::ANNOTATION
+				)
+			)
+		);
 	}
 
 	/**
-	 * Name the test that issued the query, as 'Class::method'.
+	 * The test running a WP_UnitTestCase_Base method that issued the current query, if any.
 	 *
-	 * @return string
+	 * @param string $method 'start_transaction' or 'tear_down'.
+	 * @return PHPUnit\Framework\TestCase|null
 	 */
-	private static function current_site(): string {
-		$fallback = '';
-		foreach ( debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS ) as $frame ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-			if ( ! isset( $frame['object'], $frame['function'] ) || ! ( $frame['object'] instanceof PHPUnit\Framework\TestCase ) ) {
+	private static function framework_test_calling( string $method ) {
+		// inspect_query <- WP_Hook::apply_filters <- apply_filters <- wpdb::query <- $method.
+		foreach ( debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 8 ) as $frame ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+			if (
+				isset( $frame['class'], $frame['object'] )
+				&& $method === $frame['function']
+				&& 'WP_UnitTestCase_Base' === $frame['class']
+				&& $frame['object'] instanceof PHPUnit\Framework\TestCase
+			) {
+				return $frame['object'];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether the test declares its DDL, at method or class level.
+	 *
+	 * @param PHPUnit\Framework\TestCase $test The test about to run.
+	 * @return bool
+	 * @throws RuntimeException When the annotation has no reason.
+	 */
+	private static function declares_ddl( PHPUnit\Framework\TestCase $test ): bool {
+		$annotations = PHPUnit\Util\Test::parseTestMethodAnnotations( get_class( $test ), $test->getName( false ) );
+		foreach ( array( 'method', 'class' ) as $depth ) {
+			if ( ! isset( $annotations[ $depth ][ self::ANNOTATION ] ) ) {
 				continue;
 			}
-			$site = get_class( $frame['object'] ) . '::' . $frame['function'];
-			if ( 0 === strpos( $frame['function'], 'test' ) ) {
-				return $site;
+			if ( '' === trim( implode( '', $annotations[ $depth ][ self::ANNOTATION ] ) ) ) {
+				throw new RuntimeException( esc_html( sprintf( '@%s on %s needs a reason: why the DDL is the subject under test.', self::ANNOTATION, get_class( $test ) . '::' . $test->getName( false ) ) ) );
 			}
-			if ( '' === $fallback ) {
-				$fallback = $site;
-			}
+			return true;
 		}
-		return '' !== $fallback ? $fallback : 'unknown';
+		return false;
 	}
 
 	/**
-	 * Whether a site is allowlisted, exactly or by class wildcard.
+	 * Whether a test is allowlisted, exactly or by class wildcard.
 	 *
-	 * @param string $site 'Class::method'.
+	 * @param string $test 'Class::method'.
 	 * @return bool
 	 */
-	private static function is_allowed( string $site ): bool {
-		if ( isset( self::$allowlist[ $site ] ) ) {
+	private static function is_allowed( string $test ): bool {
+		if ( isset( self::$allowlist[ $test ] ) ) {
 			return true;
 		}
-		$class = strtok( $site, ':' );
+		$class = strtok( $test, ':' );
 		return isset( self::$allowlist[ $class . '::*' ] );
 	}
 }

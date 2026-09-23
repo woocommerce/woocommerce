@@ -58,6 +58,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_343_cleanup_foreign_keys_removes_foreign_keys() {
 		global $wpdb;
@@ -87,6 +89,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_352_drop_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -112,6 +116,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_700_remove_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
 		global $wpdb;

@@ -304,6 +304,8 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox The rebuild waits for the re-key instead of parking the cursor at the end of the table.
+	 *
+	 * @ddlInTransaction The tax lookup re-key under test alters the table.
 	 */
 	public function test_rebuild_waits_until_the_lookup_is_keyed_by_order_item(): void {
 		global $wpdb;
