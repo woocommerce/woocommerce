@@ -16546,13 +16546,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -60055,6 +60055,18 @@ parameters:
 		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
