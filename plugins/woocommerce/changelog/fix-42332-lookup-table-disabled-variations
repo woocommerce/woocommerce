@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep disabled variations out of the product attributes lookup table, so classic shop attribute filtering and the Filter Products by Attribute widget stop matching and counting terms that only disabled variations carry.
+Stop classic shop attribute filters from matching or counting terms that only disabled variations have.
