@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 
 export const attributeOptionsPreview = [
 	{
+		id: 'blue',
 		label: __( 'Blue', 'woocommerce' ),
 		value: 'blue',
 		rawData: {
@@ -18,6 +19,7 @@ export const attributeOptionsPreview = [
 		},
 	},
 	{
+		id: 'gray',
 		label: __( 'Gray', 'woocommerce' ),
 		value: 'gray',
 		selected: true,
@@ -32,6 +34,7 @@ export const attributeOptionsPreview = [
 		},
 	},
 	{
+		id: 'green',
 		label: __( 'Green', 'woocommerce' ),
 		value: 'green',
 		rawData: {
@@ -45,6 +48,7 @@ export const attributeOptionsPreview = [
 		},
 	},
 	{
+		id: 'red',
 		label: __( 'Red', 'woocommerce' ),
 		value: 'red',
 		selected: true,
@@ -59,6 +63,7 @@ export const attributeOptionsPreview = [
 		},
 	},
 	{
+		id: 'yellow',
 		label: __( 'Yellow', 'woocommerce' ),
 		value: 'yellow',
 		rawData: {

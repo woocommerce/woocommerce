@@ -19,9 +19,6 @@ table.wc-block-cart-items {
 		.wc-block-cart-items__header-image {
 			width: 80px;
 		}
-		.wc-block-cart-items__header-product {
-			visibility: hidden;
-		}
 		.wc-block-cart-items__header-total {
 			width: 100px;
 			text-align: right;
@@ -96,6 +93,21 @@ table.wc-block-cart-items {
 				}
 			}
 		}
+		.wc-block-cart-item__save-for-later {
+			.wc-block-cart-item__save-for-later-link {
+				@include link-button();
+				@include hover-effect();
+				@include font-small-locked;
+
+				text-transform: none;
+				white-space: nowrap;
+
+				&:disabled {
+					cursor: default;
+					opacity: 0.5;
+				}
+			}
+		}
 		.wc-block-components-product-name {
 			@include font-small-locked;
 			display: block;
@@ -119,6 +131,10 @@ table.wc-block-cart-items {
 			transition: opacity 200ms ease;
 		}
 	}
+
+	&.wc-block-mini-cart-items .wc-block-cart-item__save-for-later {
+		display: none;
+	}
 }
 
 @mixin cart-items-table-styles() {
@@ -140,13 +156,27 @@ table.wc-block-cart-items {
 		}
 		.wc-block-cart-items__row {
 			display: grid;
-			grid-template-columns: 80px 132px;
+			grid-template-columns: 60px 132px;
+			column-gap: $gap-small;
 			padding: $gap 0;
+
+			@include cart-checkout-medium-container {
+				grid-template-columns: 80px 132px;
+				column-gap: $gap-large;
+			}
+
+			@include cart-checkout-large-container {
+				grid-template-columns: 80px 132px;
+				column-gap: $gap;
+			}
 
 			.wc-block-cart-item__image {
 				grid-column-start: 1;
 				grid-row-start: 1;
-				padding-right: $gap;
+
+				@include cart-checkout-large-container {
+					padding-right: $gap;
+				}
 			}
 			.wc-block-cart-item__product {
 				grid-column-start: 2;
@@ -159,7 +189,6 @@ table.wc-block-cart-items {
 				grid-column-start: 1;
 				grid-row-start: 2;
 				vertical-align: bottom;
-				padding-right: $gap;
 				padding-top: 0;
 			}
 			.wc-block-cart-item__total {
@@ -181,7 +210,7 @@ table.wc-block-cart-items {
 	}
 }
 
-// Styles for the mini cart block which is not a container and still uses the `is-` classes
+// Styles for the Mini-Cart block which is not a container and still uses the `is-` classes
 .is-medium,
 .is-small,
 .is-mobile {
@@ -197,16 +226,17 @@ table.wc-block-cart-items {
 			th {
 				padding: $gap-smaller $gap $gap-small 0;
 				white-space: nowrap;
+				text-align: left;
 			}
 			td {
 				border-top: 1px solid $universal-border-light;
-				padding: $gap * 1.25 0 $gap * 1.25 $gap;
+				padding: $gap * 1.25 0;
 				vertical-align: top;
 			}
 			th:last-child {
-				padding-right: $gap;
+				padding-right: 0;
 			}
-			td:last-child {
+			.wc-block-cart-item__image {
 				padding-right: $gap;
 			}
 		}

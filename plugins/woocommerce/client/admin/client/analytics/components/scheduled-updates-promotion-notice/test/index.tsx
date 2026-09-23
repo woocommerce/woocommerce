@@ -50,11 +50,6 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 
-		// Set up default feature flag
-		( window as any ).wcAdminFeatures = {
-			'analytics-scheduled-import': true,
-		};
-
 		// Set up default mocks
 		mockUseSettings.mockReturnValue( {
 			wcAdminSettings: {},
@@ -69,47 +64,6 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 		mockGetAdminLink.mockReturnValue(
 			'http://example.com/admin.php?page=wc-admin&path=/analytics/settings'
 		);
-	} );
-
-	describe( 'Feature flag check', () => {
-		test( 'should not render when feature flag is disabled', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': false,
-			};
-
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
-
-			expect( container.firstChild ).toBeNull();
-		} );
-
-		test( 'should not render when feature flag is undefined', () => {
-			( window as any ).wcAdminFeatures = {};
-
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
-
-			expect( container.firstChild ).toBeNull();
-		} );
-
-		test( 'should render when feature flag is enabled', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': true,
-			};
-
-			render( <ScheduledUpdatesPromotionNotice /> );
-
-			expect(
-				screen.getByText( ( content, element ) => {
-					const textContent = element?.textContent || '';
-					return (
-						element?.tagName.toLowerCase() === 'p' &&
-						textContent.includes(
-							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
-						) &&
-						textContent.includes( 'Settings' )
-					);
-				} )
-			).toBeInTheDocument();
-		} );
 	} );
 
 	describe( 'Option value check', () => {
@@ -326,10 +280,6 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 
 	describe( 'Combined conditions', () => {
 		test( 'should render when all conditions are met', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': true,
-			};
-
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {},
 			} as unknown as ReturnType< typeof useSettings > );
@@ -356,31 +306,7 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 			).toBeInTheDocument();
 		} );
 
-		test( 'should not render when feature flag is disabled even if other conditions are met', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': false,
-			};
-
-			mockUseSettings.mockReturnValue( {
-				wcAdminSettings: {},
-			} as unknown as ReturnType< typeof useSettings > );
-
-			mockUseUserPreferences.mockReturnValue( {
-				updateUserPreferences: jest.fn(),
-				scheduled_updates_promotion_notice_dismissed: undefined,
-				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
-
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
-
-			expect( container.firstChild ).toBeNull();
-		} );
-
-		test( 'should not render when option is set even if feature flag is enabled', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': true,
-			};
-
+		test( 'should not render when option is set', () => {
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {
 					woocommerce_analytics_scheduled_import: 'no',
@@ -398,11 +324,7 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 			expect( container.firstChild ).toBeNull();
 		} );
 
-		test( 'should not render when dismissed even if feature flag is enabled and option is not set', () => {
-			( window as any ).wcAdminFeatures = {
-				'analytics-scheduled-import': true,
-			};
-
+		test( 'should not render when dismissed and option is not set', () => {
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {},
 			} as unknown as ReturnType< typeof useSettings > );

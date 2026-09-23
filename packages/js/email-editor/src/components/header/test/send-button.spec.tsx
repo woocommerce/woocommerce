@@ -1,4 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid ESLint errors */
 import '../../test/__mocks__/setup-shared-mocks';
 
 /**
@@ -8,10 +7,7 @@ import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
-import {
-	// @ts-expect-error -- It is not exported yet.
-	useEntitiesSavedStatesIsDirty,
-} from '@wordpress/editor';
+import { useEntitiesSavedStatesIsDirty } from '@wordpress/editor';
 
 /**
  * Internal dependencies

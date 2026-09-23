@@ -2,6 +2,48 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0](https://www.npmjs.com/package/@woocommerce/experimental/v/4.0.0) - 2026-06-11 
+
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. [#64114]
+-   Major - Updated declared dependencies to React 18 and WordPress 6.6. [#53531]
+-   Minor - Adds an 'in progress' state to WooCommerce onboarding tasks, providing visual feedback when tasks are started but not completed. Initially implemented for the Payments setup task. [#59853]
+-   Minor - Improve build time for experimental by using webpack filesystem cache. [#64082]
+-   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
+-   Minor - Replace react-visibility-sensor with react-intersection-observer to fix deprecated findDOMNode Warning. [#55362]
+-   Minor - Update storybook file format in support with Storybook 7 story indexer. [#51168]
+-   Minor - Upgraded TypeScript in the monorepo to 5.7.2. [#53165]
+-   Minor - Use @woocommerce/sanitize package to sanitize input. [#60324]
+-   Patch - Bump wireit dependency version to latest. [#57299]
+-   Patch - CI: leverage composer packages cache in lint monorepo job. [#52054]
+-   Patch - Clean up CI job config options; remove unused cascading keys. [#55863]
+-   Patch - experimental package: fix TS errors. [#54160]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Patch - Fix task item type. [#54711]
+-   Patch - Fixed stretched images in Inbox notes. [#58131]
+-   Patch - Migrate from React RC types to direct React Props types with jscodeshift codemod. [#56594]
+-   Patch - Monorepo: address circular dependencies surfaced by SWC TDZ. [#64797]
+-   Patch - Monorepo: build RAM usage optimization. [#58861]
+-   Patch - Monorepo: complete migration from `classnames` package to `clsx`. [#58699]
+-   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
+-   Patch - Monorepo: consolidate TypeScript config files and JS test directories naming. [#52191]
+-   Patch - Monorepo: drop the unused `concurrently` package from dependencies. [#58765]
+-   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
+-   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies. [#55095]
+-   Patch - Monorepo: used babel transforms cleanup. [#56486]
+-   Patch - Monorepo: watch startup time optimization. [#59166]
+-   Patch - Monorepo: Webpack deps review and consolidation and a bit of deps grooming. [#56746]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Prevent widows in inbox note and task list description copy with text-wrap: pretty. [#64453]
+-   Patch - Remove "banner" layout test case. [#52088]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Stop rendering thumbnail images in inbox notes. Drop `image` and `layout` from the InboxNoteCard prop type and remove the `.thumbnail` and `.banner` styles. [#64443]
+-   Patch - Update dompurify to 2.5.7. [#52961]
+-   Patch - Update wireit to 0.14.10. [#54996]
+
 ## [3.3.0](https://www.npmjs.com/package/@woocommerce/experimental/v/3.3.0) - 2024-07-25 
 
 -   Patch - Added in missing TS definitions in package.json [#34154]

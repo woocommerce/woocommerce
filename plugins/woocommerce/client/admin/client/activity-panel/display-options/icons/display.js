@@ -1,7 +1,8 @@
 export const DisplayIcon = () => (
 	<svg
-		width="24"
-		height="24"
+		// 18px matches every other floating-header icon (bell, listView, store, gear, ?).
+		width="18"
+		height="18"
 		viewBox="0 0 24 24"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"

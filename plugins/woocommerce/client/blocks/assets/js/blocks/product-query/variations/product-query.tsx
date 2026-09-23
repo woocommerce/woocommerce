@@ -45,7 +45,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Beta)', 'woocommerce' ),
+		title: __( 'Products (Deprecated)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
@@ -71,7 +71,6 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 let currentTemplateSlug: string | undefined;
 subscribe( () => {
 	const previousTemplateSlug = currentTemplateSlug;
-	// @ts-expect-error getEditedPostSlug is not typed
 	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;

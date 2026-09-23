@@ -25,6 +25,15 @@ class ProductCollectionData extends AbstractRoute {
 	const SCHEMA_TYPE = 'product-collection-data';
 
 	/**
+	 * Default maximum number of entries accepted in the `calculate_attribute_counts` and
+	 * `calculate_taxonomy_counts` parameters. Each entry triggers a full-collection aggregate
+	 * query, so this bounds the per-request query fan-out. Matches the batch route's request cap.
+	 *
+	 * @var int
+	 */
+	const COUNTS_MAX_ITEMS = 25;
+
+	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string
@@ -106,14 +115,39 @@ class ProductCollectionData extends AbstractRoute {
 			$taxonomy__and_queries = [];
 
 			foreach ( $request['calculate_attribute_counts'] as $attributes_to_count ) {
-				if ( ! empty( $attributes_to_count['taxonomy'] ) ) {
-					if ( empty( $attributes_to_count['query_type'] ) || 'or' === $attributes_to_count['query_type'] ) {
-						$taxonomy__or_queries[] = $attributes_to_count['taxonomy'];
-					} else {
-						$taxonomy__and_queries[] = $attributes_to_count['taxonomy'];
-					}
+				if ( empty( $attributes_to_count['taxonomy'] ) ) {
+					continue;
+				}
+
+				// Normalize to the canonical taxonomy name before deduping so textual variants
+				// (e.g. differing case or surrounding whitespace) collapse to a single query.
+				$taxonomy = wc_sanitize_taxonomy_name( $attributes_to_count['taxonomy'] );
+
+				// Resolve numeric attribute IDs (e.g. "3") to their taxonomy name (e.g. "pa_color").
+				if ( is_numeric( $taxonomy ) ) {
+					$taxonomy = wc_attribute_taxonomy_name_by_id( (int) $taxonomy );
+				}
+
+				// Skip anything that is not a registered product attribute taxonomy so non-existent
+				// or non-attribute taxonomies do not trigger wasted full-collection queries.
+				if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
+					continue;
+				}
+
+				if ( empty( $attributes_to_count['query_type'] ) || 'or' === $attributes_to_count['query_type'] ) {
+					$taxonomy__or_queries[] = $taxonomy;
+				} else {
+					$taxonomy__and_queries[] = $taxonomy;
 				}
 			}
+
+			// Deduplicate within each query type so the same taxonomy requested multiple times with
+			// the same query type is counted with a single query. The "or" and "and" query types are
+			// counted independently and are not merged across types: the "or" branch removes the active
+			// attribute filter before counting while the "and" branch keeps it, so for the same taxonomy
+			// the two counts can legitimately differ.
+			$taxonomy__or_queries  = array_unique( $taxonomy__or_queries );
+			$taxonomy__and_queries = array_unique( $taxonomy__and_queries );
 
 			$data['attribute_counts'] = [];
 			// Or type queries need special handling because the attribute, if set, needs removing from the query first otherwise counts would not be correct.
@@ -126,7 +160,8 @@ class ProductCollectionData extends AbstractRoute {
 						$filter_attributes = array_filter(
 							$filter_attributes,
 							function ( $query ) use ( $taxonomy ) {
-								return $query['attribute'] !== $taxonomy;
+								// $taxonomy is already sanitized, so sanitize the active attribute too for a like-for-like comparison.
+								return wc_sanitize_taxonomy_name( $query['attribute'] ) !== $taxonomy;
 							}
 						);
 					}
@@ -169,7 +204,10 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
-			$taxonomies              = $request['calculate_taxonomy_counts'];
+			// Normalize to the canonical taxonomy name before deduping so textual variants
+			// (e.g. differing case or surrounding whitespace) collapse to a single query, and keep
+			// only registered taxonomies so non-existent ones do not trigger wasted queries.
+			$taxonomies              = array_unique( array_filter( array_map( 'wc_sanitize_taxonomy_name', $request['calculate_taxonomy_counts'] ), 'taxonomy_exists' ) );
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
@@ -229,6 +267,7 @@ class ProductCollectionData extends AbstractRoute {
 				],
 			],
 			'default'     => [],
+			'maxItems'    => self::COUNTS_MAX_ITEMS,
 		];
 
 		$params['calculate_rating_counts'] = [
@@ -245,6 +284,7 @@ class ProductCollectionData extends AbstractRoute {
 				'description' => __( 'Taxonomy name.', 'woocommerce' ),
 			],
 			'default'     => [],
+			'maxItems'    => self::COUNTS_MAX_ITEMS,
 		];
 
 		return $params;

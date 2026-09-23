@@ -15,6 +15,13 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	const WC_ADMIN_NOTE_OPER_GLOBAL = 'global';
 
 	/**
+	 * Fixed values written to the deprecated `layout` and `image` columns. The columns and the
+	 * values themselves will be removed in a follow-up release once the deprecation cycle ends.
+	 */
+	const DEPRECATED_LAYOUT_VALUE = 'plain';
+	const DEPRECATED_IMAGE_VALUE  = '';
+
+	/**
 	 * Method to create a new note in the database.
 	 *
 	 * @param Note $note Admin note.
@@ -34,8 +41,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			'status'       => $note->get_status(),
 			'source'       => $note->get_source(),
 			'is_snoozable' => (int) $note->get_is_snoozable(),
-			'layout'       => $note->get_layout(),
-			'image'        => $note->get_image(),
+			'layout'       => self::DEPRECATED_LAYOUT_VALUE,
+			'image'        => self::DEPRECATED_IMAGE_VALUE,
 			'is_deleted'   => (int) $note->get_is_deleted(),
 			'is_read'      => (int) $note->get_is_read(),
 		);
@@ -113,8 +120,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_is_snoozable( (bool) $note_row->is_snoozable );
 			$note->set_is_deleted( (bool) $note_row->is_deleted );
 			isset( $note_row->is_read ) && $note->set_is_read( (bool) $note_row->is_read );
-			$note->set_layout( $note_row->layout );
-			$note->set_image( $note_row->image );
 			$this->read_actions( $note );
 			$note->set_object_read( true );
 
@@ -164,8 +169,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 					'date_created'  => $date_created_to_db,
 					'date_reminder' => $date_reminder_to_db,
 					'is_snoozable'  => (int) $note->get_is_snoozable(),
-					'layout'        => $note->get_layout(),
-					'image'         => $note->get_image(),
+					'layout'        => self::DEPRECATED_LAYOUT_VALUE,
+					'image'         => self::DEPRECATED_IMAGE_VALUE,
 					'is_deleted'    => (int) $note->get_is_deleted(),
 					'is_read'       => (int) $note->get_is_read(),
 				),

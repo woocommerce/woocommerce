@@ -7,10 +7,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,11 +73,6 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 * @return string
 	 */
 	public function get_database_schema(): string {
-
-		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			return '';
-		}
-
 		global $wpdb;
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
@@ -446,9 +441,17 @@ CREATE TABLE $meta_table_name (
 		$where        = array();
 		$where_values = array();
 
-		if ( $args['status'] ) {
-			$where[]        = 'status = %s';
-			$where_values[] = esc_sql( $args['status'] );
+		$statuses = array_filter(
+			array_map( 'strval', (array) $args['status'] ),
+			static function ( string $status ): bool {
+				return '' !== $status;
+			}
+		);
+		if ( ! empty( $statuses ) ) {
+			$where[]      = 1 === count( $statuses )
+				? 'status = %s'
+				: 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$where_values = array_merge( $where_values, array_values( $statuses ) );
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
@@ -464,7 +467,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
-			$where_values[] = esc_sql( $args['user_email'] );
+			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {
@@ -564,6 +567,7 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function notification_exists_by_email( int $product_id, string $email ): bool {
 
+		$email = EmailNormalizer::normalize( $email );
 		if ( ! is_email( $email ) ) {
 			return false;
 		}
@@ -602,6 +606,60 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
+	 * Get the ID of the active or pending notification matching an identity, product and posted
+	 * attribute set.
+	 *
+	 * The posted attributes are matched as the serialized string they are stored as, so the
+	 * comparison is exact and case sensitive, but not sensitive to key order: both sides are
+	 * sorted by key. An empty set matches any sign-up for the identity.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param int    $user_id The user ID, or 0 to match on the email instead.
+	 * @param string $user_email The email address, used when no user ID is given.
+	 * @param array  $posted_attributes The posted attributes to match.
+	 * @return int The notification ID, or 0 when nothing matches.
+	 */
+	public function get_matching_notification_id( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ): int {
+
+		if ( empty( $product_id ) ) {
+			return 0;
+		}
+
+		if ( empty( $user_id ) ) {
+			$user_email = EmailNormalizer::normalize( $user_email );
+			if ( ! is_email( $user_email ) ) {
+				return 0;
+			}
+		}
+
+		global $wpdb;
+
+		$table          = $this->get_table_name();
+		$identity_where = empty( $user_id ) ? 'user_email = %s' : 'user_id = %d';
+		$identity_value = empty( $user_id ) ? $user_email : $user_id;
+
+		if ( empty( $posted_attributes ) ) {
+			$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				"SELECT id FROM $table WHERE product_id = %d AND $identity_where AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array( $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+			);
+
+			return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		}
+
+		// Sort by key so the serialized blob is the same whatever order the caller built the set in.
+		ksort( $posted_attributes );
+
+		$meta_table = $this->get_meta_table_name();
+		$sql        = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			"SELECT notifications.id FROM $table AS notifications INNER JOIN $meta_table AS meta ON meta.notification_id = notifications.id AND meta.meta_key = %s WHERE notifications.product_id = %d AND notifications.$identity_where AND notifications.status IN (%s, %s) AND BINARY meta.meta_value = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( 'posted_attributes', $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING, maybe_serialize( $posted_attributes ) )
+		);
+
+		return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Get distinct notification creation dates.
 	 *
 	 * @return array
@@ -622,5 +680,28 @@ CREATE TABLE $meta_table_name (
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Count the notifications of each status.
+	 *
+	 * @return array<string, int> Map of status to the number of notifications in it.
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		$results = $wpdb->get_results(
+			"SELECT status, COUNT(id) AS total FROM $table GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		$counts = array();
+		foreach ( (array) $results as $result ) {
+			$counts[ (string) $result['status'] ] = (int) $result['total'];
+		}
+
+		return $counts;
 	}
 }

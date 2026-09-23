@@ -6,7 +6,51 @@ import * as navigation from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { updateLinkHref } from '../controller';
+import { getPages, updateLinkHref } from '../controller';
+import { isFeatureEnabled } from '~/utils/features';
+
+jest.mock( '@woocommerce/navigation', () => {
+	const actual = jest.requireActual( '@woocommerce/navigation' );
+	return {
+		...actual,
+		getHistory: jest.fn( actual.getHistory ),
+	};
+} );
+
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn().mockReturnValue( true ),
+} ) );
+
+describe( 'getPages', () => {
+	const analyticsPaths = [
+		'/analytics/overview',
+		'/analytics/settings',
+		'/customers',
+		'/analytics/:report',
+	];
+
+	beforeEach( () => {
+		isFeatureEnabled.mockReturnValue( true );
+	} );
+
+	it( 'registers analytics pages when analytics is enabled', () => {
+		const paths = getPages().map( ( page ) => page.path );
+
+		analyticsPaths.forEach( ( path ) => {
+			expect( paths ).toContain( path );
+		} );
+	} );
+
+	it( 'does not register analytics pages when analytics is disabled', () => {
+		isFeatureEnabled.mockReturnValue( false );
+
+		const paths = getPages().map( ( page ) => page.path );
+
+		analyticsPaths.forEach( ( path ) => {
+			expect( paths ).not.toContain( path );
+		} );
+	} );
+} );
 
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
@@ -27,6 +71,7 @@ describe( 'updateLinkHref', () => {
 
 	beforeEach( () => {
 		jest.restoreAllMocks();
+		navigation.getHistory.mockClear();
 	} );
 
 	it( 'should update report urls', () => {
@@ -88,7 +133,6 @@ describe( 'updateLinkHref', () => {
 
 	it( 'should not prevent default when Command key is pressed', () => {
 		const item = { href: REPORT_URL };
-		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
 		const event = {
 			ctrlKey: false,
 			metaKey: true,
@@ -98,13 +142,12 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
 		item.onclick( event );
-		expect( spyGetHistory ).not.toHaveBeenCalled();
+		expect( navigation.getHistory ).not.toHaveBeenCalled();
 		expect( event.preventDefault ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should not prevent default when Control key is pressed', () => {
 		const item = { href: REPORT_URL };
-		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
 		const event = {
 			ctrlKey: true,
 			metaKey: false,
@@ -114,13 +157,12 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
 		item.onclick( event );
-		expect( spyGetHistory ).not.toHaveBeenCalled();
+		expect( navigation.getHistory ).not.toHaveBeenCalled();
 		expect( event.preventDefault ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should prevent default on normal clicks', () => {
 		const item = { href: REPORT_URL };
-		const spyGetHistory = jest.spyOn( navigation, 'getHistory' );
 		const event = {
 			ctrlKey: false,
 			metaKey: false,
@@ -130,7 +172,7 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
 		item.onclick( event );
-		expect( spyGetHistory ).toHaveBeenCalledTimes( 1 );
+		expect( navigation.getHistory ).toHaveBeenCalledTimes( 1 );
 		expect( event.preventDefault ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

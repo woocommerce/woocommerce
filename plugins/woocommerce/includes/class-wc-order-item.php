@@ -82,6 +82,15 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	public $legacy_package_key;
 
 	/**
+	 * The order object is set using set_order. This property was introduced to reduce the number
+	 * of wc_get_order calls when working with this class in core and extension workflows.
+	 * Stored as a WeakReference to avoid circular reference memory retention in batch/CLI workflows.
+	 *
+	 * @var null|\WeakReference<\WC_Order>
+	 */
+	private $order;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
@@ -191,10 +200,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get parent order object.
 	 *
+	 * @since 10.9.0 returns the same order instance associated with the item; previously, a new instance was created on each call.
 	 * @return WC_Order
 	 */
 	public function get_order() {
-		return wc_get_order( $this->get_order_id() );
+		$order = $this->order ? $this->order->get() : null;
+		return $order ?? wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -209,7 +220,31 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int $value Order ID.
 	 */
 	public function set_order_id( $value ) {
-		$this->set_prop( 'order_id', absint( $value ) );
+		$order_id = absint( $value );
+		$this->set_prop( 'order_id', $order_id );
+
+		$order = $this->order ? $this->order->get() : null;
+		if ( null !== $order && $order->get_id() !== $order_id ) {
+			$this->order = null;
+		}
+	}
+
+	/**
+	 * Aggregate and set properties based on passed in order object.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Abstract_Order $order Order instance.
+	 * @return void
+	 */
+	public function set_order( $order ) {
+		if ( ! ( $order instanceof \WC_Abstract_Order ) ) {
+			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
+		}
+		$this->set_order_id( $order->get_id() );
+		// Don't inject the refund object: get_order() declares a WC_Order return type; WC_Order_Refund would violate that contract.
+		if ( $order instanceof \WC_Order ) {
+			$this->order = \WeakReference::create( $order );
+		}
 	}
 
 	/**
@@ -304,6 +339,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 		$order_item_name   = $this->get_name();
 
+		// Compare entity-decoded copies below: wp_kses_post() normalizes special characters
+		// in display values (e.g. "&" to "&amp;") while the item name stores them raw.
+		$decoded_item_name = ! $include_all && $product && $product->is_type( ProductType::VARIATION ) ? wp_specialchars_decode( $order_item_name, ENT_QUOTES ) : null;
+
 		foreach ( $meta_data as $meta ) {
 			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
@@ -323,7 +362,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( null !== $decoded_item_name && wc_is_attribute_in_product_name( wp_specialchars_decode( $display_value, ENT_QUOTES ), $decoded_item_name ) ) {
 				continue;
 			}
 

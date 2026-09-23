@@ -3,11 +3,7 @@
  */
 import { useRef, useState } from 'react';
 import clsx from 'clsx';
-import {
-	useSelect,
-	UseSelectState,
-	UseSelectStateChangeOptions,
-} from 'downshift';
+import { useSelect } from 'downshift';
 import { Button } from '@wordpress/components';
 import { useThrottle } from '@wordpress/compose';
 import { useCallback, useEffect } from '@wordpress/element';
@@ -18,72 +14,13 @@ import { check, chevronDown, Icon } from '@wordpress/icons';
  * Internal dependencies
  */
 import { WC_ASSET_URL } from '~/utils/admin-settings';
-import { Item, ControlProps, UseSelectStateChangeOptionsProps } from './types';
+import { Item, ControlProps } from './types';
 import './country-selector.scss';
 
 // Retrieves the display label for a given value from a list of options.
 const getOptionLabel = ( value: string, options: Item[] ) => {
 	const item = options.find( ( option ) => option.key === value );
 	return item?.name ? item.name : '';
-};
-
-// State reducer to control selection navigation
-const stateReducer = < ItemType extends Item >(
-	state: UseSelectState< ItemType | null >,
-	actionAndChanges: UseSelectStateChangeOptions< ItemType | null >
-): Partial< UseSelectState< ItemType > > => {
-	const extendedAction =
-		actionAndChanges as UseSelectStateChangeOptionsProps< ItemType | null >; // Cast to the extended type
-
-	const { changes, type, props } = extendedAction;
-	const { items } = props;
-	const { selectedItem } = state;
-
-	switch ( type ) {
-		case useSelect.stateChangeTypes.ToggleButtonBlur:
-			// Prevent menu from closing when focus moves to search input.
-			// Also preserve the current selection to avoid resetting it.
-			return {
-				...changes,
-				isOpen: state.isOpen,
-				selectedItem: state.selectedItem,
-			};
-		case useSelect.stateChangeTypes.ItemClick:
-			return {
-				...changes,
-				isOpen: true, // Keep menu open after selection.
-				highlightedIndex: state.highlightedIndex,
-			};
-		case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown:
-			// If we already have a selected item, try to select the next one,
-			// without circular navigation. Otherwise, select the first item.
-			return {
-				selectedItem:
-					items[
-						selectedItem
-							? Math.min(
-									items.indexOf( selectedItem ) + 1,
-									items.length - 1
-							  )
-							: 0
-					],
-				isOpen: true, // Keep menu open after selection.
-			};
-		case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowUp:
-			// If we already have a selected item, try to select the previous one,
-			// without circular navigation. Otherwise, select the last item.
-			return {
-				selectedItem:
-					items[
-						selectedItem
-							? Math.max( items.indexOf( selectedItem ) - 1, 0 )
-							: items.length - 1
-					],
-				isOpen: true, // Keep menu open after selection.
-			};
-		default:
-			return changes;
-	}
 };
 
 /**
@@ -159,7 +96,64 @@ export const CountrySelector = < ItemType extends Item >( {
 	} = useSelect< ItemType >( {
 		initialSelectedItem: value,
 		items: [ ...visibleItems ],
-		stateReducer,
+		stateReducer: ( state, actionAndChanges ) => {
+			const currentItems = [ ...visibleItems ];
+			const { changes, type } = actionAndChanges;
+			const { selectedItem: currentSelectedItem } = state;
+
+			switch ( type ) {
+				case useSelect.stateChangeTypes.ToggleButtonBlur:
+					// Prevent menu from closing when focus moves to search input.
+					// Also preserve the current selection to avoid resetting it.
+					return {
+						...changes,
+						isOpen: state.isOpen,
+						selectedItem: state.selectedItem,
+					};
+				case useSelect.stateChangeTypes.ItemClick:
+					return {
+						...changes,
+						isOpen: true, // Keep menu open after selection.
+						highlightedIndex: state.highlightedIndex,
+					};
+				case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown:
+					// If we already have a selected item, try to select the next one,
+					// without circular navigation. Otherwise, select the first item.
+					return {
+						selectedItem:
+							currentItems[
+								currentSelectedItem
+									? Math.min(
+											currentItems.indexOf(
+												currentSelectedItem
+											) + 1,
+											currentItems.length - 1
+									  )
+									: 0
+							],
+						isOpen: true, // Keep menu open after selection.
+					};
+				case useSelect.stateChangeTypes.ToggleButtonKeyDownArrowUp:
+					// If we already have a selected item, try to select the previous one,
+					// without circular navigation. Otherwise, select the last item.
+					return {
+						selectedItem:
+							currentItems[
+								currentSelectedItem
+									? Math.max(
+											currentItems.indexOf(
+												currentSelectedItem
+											) - 1,
+											0
+									  )
+									: currentItems.length - 1
+							],
+						isOpen: true, // Keep menu open after selection.
+					};
+				default:
+					return changes;
+			}
+		},
 	} );
 
 	const applyButtonRef = useRef< HTMLButtonElement >( null );

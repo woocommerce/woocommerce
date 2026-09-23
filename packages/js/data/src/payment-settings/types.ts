@@ -64,6 +64,7 @@ export type RecommendedPaymentMethod = {
 	category?: 'primary' | 'secondary';
 	icon: string;
 	enabled: boolean;
+	required?: boolean;
 	extraTitle: string;
 	extraDescription: string;
 	extraIcon: string;

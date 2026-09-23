@@ -6,8 +6,6 @@
  * @version 3.3.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -72,16 +70,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	public function column_title( $webhook ) {
 		$edit_link = admin_url( 'admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;edit-webhook=' . $webhook->get_id() );
-		$output    = '';
-
-		// Title.
-		$warning_prefix =
-			$this->uses_legacy_rest_api( $webhook ) && ! WC()->legacy_rest_api_is_available() ?
-			sprintf(
-				"<span title='%s'>⚠️</span>️ ",
-				esc_html__( 'This webhook is configured to be delivered using the Legacy REST API, but the Legacy REST API plugin is not installed on this site.', 'woocommerce' )
-			) : '';
-		$output        .= '<strong>' . $warning_prefix . '<a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
+		$output    = '<strong><a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
 
 		// Get actions.
 		$actions = array(
@@ -205,20 +194,6 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			$status_links[ $status_name ] = "<a href='admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;status=$status_name'$class>" . sprintf( translate_nooped_plural( $label, $num_webhooks[ $status_name ] ), number_format_i18n( $num_webhooks[ $status_name ] ) ) . '</a>';
 		}
 
-		$legacy_webhooks_count = wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count();
-		if ( $legacy_webhooks_count > 0 ) {
-			$class = '';
-
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( 'true' === sanitize_key( wp_unslash( $_REQUEST['legacy'] ?? '' ) ) ) {
-				$class = ' class="current"';
-			}
-
-			$label = $this->get_status_label( __( 'Legacy', 'woocommerce' ), $legacy_webhooks_count );
-
-			$status_links['legacy'] = "<a href='admin.php?page=wc-settings&amp;tab=advanced&amp;section=webhooks&amp;legacy=true'$class>" . sprintf( translate_nooped_plural( $label, $legacy_webhooks_count ), number_format_i18n( $legacy_webhooks_count ) ) . '</a>';
-		}
-
 		return $status_links;
 	}
 
@@ -238,7 +213,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	public function process_bulk_action() {
 		$action   = $this->current_action();
-		$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array(); // WPCS: input var okay, CSRF ok.
+		$webhooks = isset( $_REQUEST['webhook'] ) ? array_map( 'absint', (array) $_REQUEST['webhook'] ) : array();
 
 		if ( false !== $action ) {
 			check_admin_referer( 'woocommerce-settings' );
@@ -281,12 +256,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @param  string $input_id Input ID.
 	 */
 	public function search_box( $text, $input_id ) {
-		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
 			return;
 		}
 
 		$input_id     = $input_id . '-search-input';
-		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
 
 		echo '<p class="search-box">';
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
@@ -317,12 +292,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		);
 
 		// Handle the status query.
-		if ( ! empty( $_REQUEST['status'] ) ) { // WPCS: input var okay, CSRF ok.
-			$args['status'] = sanitize_key( wp_unslash( $_REQUEST['status'] ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_REQUEST['status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
+			$args['status'] = sanitize_key( wp_unslash( $_REQUEST['status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
 		}
 
-		if ( ! empty( $_REQUEST['s'] ) ) { // WPCS: input var okay, CSRF ok.
-			$args['search'] = sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
+			$args['search'] = sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters are sanitized; bulk deletion verifies nonce/capability.
 		}
 
 		$args['paginate'] = true;
@@ -350,21 +325,13 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	/**
 	 * Get how many of the existing webhooks are configured to use the legacy payload format.
 	 *
-	 * @since 9.0.0
+	 * @since      9.0.0
+	 * @deprecated 10.8.0 The Legacy REST API has been removed from WooCommerce core. This always returns 0.
 	 *
-	 * @return int Count of existing webhooks are configured to use the legacy payload format.
+	 * @return int Always 0.
 	 */
 	public function get_legacy_api_webhooks_count() {
-		return count( array_filter( $this->items, array( $this, 'uses_legacy_rest_api' ) ) );
-	}
-
-	/**
-	 * Check if a given webhook is configured to use the legacy payload format.
-	 *
-	 * @param WC_Webhook $webhook Webhook object.
-	 * @return bool True if the webhook is configured to use the legacy payload format.
-	 */
-	private function uses_legacy_rest_api( $webhook ) {
-		return 0 === strpos( $webhook->get_api_version(), 'legacy' );
+		wc_deprecated_function( __METHOD__, '10.8.0' );
+		return 0;
 	}
 }

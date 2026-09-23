@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.2.0
+ * @version 10.8.0
  */
 
 // Exit if accessed directly.
@@ -55,7 +55,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 
 	<table id="notification__footer"><tr><td>
 		<?php
-		echo esc_html( sprintf( __( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' ), $product->get_name() ) );
+		esc_html_e( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' );
 
 		if ( ! $is_guest ) {
 			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.

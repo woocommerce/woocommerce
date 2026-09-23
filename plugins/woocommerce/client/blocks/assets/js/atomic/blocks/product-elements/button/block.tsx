@@ -112,7 +112,7 @@ const AddToCartButtonAdminSide = ( {
 	);
 };
 
-const AddToCartButton = ( {
+export const AddToCartButton = ( {
 	product,
 	isDescendantOfAddToCartWithOptions,
 	className,
@@ -161,7 +161,6 @@ const AddToCartButton = ( {
 		};
 	} else if ( ! allowAddToCart ) {
 		buttonProps.href = permalink;
-		buttonProps.rel = 'nofollow';
 		buttonProps.onClick = () => {
 			dispatchStoreEvent( 'product-view-link', {
 				product,

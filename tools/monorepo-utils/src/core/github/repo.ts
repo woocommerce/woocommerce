@@ -8,10 +8,6 @@ import { Endpoints } from '@octokit/types';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import {
-	CreatePullRequestEndpointResponse,
-	GetPullRequestEndpointResponse,
-} from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -106,10 +102,7 @@ export const updateIssue = async (
 	updates: {
 		labels?: string[];
 	}
-): Promise<
-	| Endpoints[ 'PATCH /repos/{owner}/{repo}/issues/{issue_number}' ][ 'response' ]
-	| false
-> => {
+) => {
 	const { owner, name } = options;
 
 	try {
@@ -307,7 +300,7 @@ export const createPullRequest = async ( options: {
 	title: string;
 	body: string;
 	reviewers?: string[];
-} ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
+} ) => {
 	const { head, base, owner, name, title, body, reviewers } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
@@ -353,7 +346,7 @@ export const getPullRequest = async ( options: {
 	owner: string;
 	name: string;
 	prNumber: string;
-} ): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
+} ) => {
 	const { owner, name, prNumber } = options;
 	const pr = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
@@ -370,13 +363,16 @@ export const getPullRequest = async ( options: {
 /**
  * Determine if a pull request is coming from a community contribution, i.e., not from a member of the WooCommerce organization.
  *
- * @param {Object} pullRequestData pull request data.
- * @param {string} owner           repository owner.
- * @param {string} name            repository name.
+ * @param {Object} pullRequestData                     pull request data.
+ * @param {Object} pullRequestData.head                head branch info.
+ * @param {Object} pullRequestData.head.repo           head repository info.
+ * @param {string} pullRequestData.head.repo.full_name full repository name (owner/repo).
+ * @param {string} owner                               repository owner.
+ * @param {string} name                                repository name.
  * @return {boolean} if a pull request is coming from a community contribution.
  */
 export const isCommunityPullRequest = (
-	pullRequestData: GetPullRequestEndpointResponse[ 'data' ],
+	pullRequestData: { head: { repo: { full_name: string } } },
 	owner: string,
 	name: string
 ) => {

@@ -1,0 +1,3 @@
+# Files not needed to be distributed in the package.
+.gitattributes    export-ignore
+.github/          export-ignore

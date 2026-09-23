@@ -25,8 +25,6 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );
-		$note->set_layout( 'plain' );
-		$note->set_image( '' );
 		$note->add_action(
 			'PHPUNIT_TEST_ACTION_SLUG',
 			'PHPUNIT_TEST_ACTION_LABEL',
@@ -46,8 +44,6 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $note->get_name(), $read_note->get_name() );
 		$this->assertEquals( $note->get_source(), $read_note->get_source() );
 		$this->assertEquals( $note->get_is_snoozable(), false !== $read_note->get_is_snoozable() );
-		$this->assertEquals( $note->get_layout(), $read_note->get_layout() );
-		$this->assertEquals( $note->get_image(), $read_note->get_image() );
 		$this->assertEquals( $note->get_actions(), $read_note->get_actions() );
 		$this->assertEquals( $note->get_is_deleted(), $read_note->get_is_deleted() );
 	}
@@ -364,8 +360,6 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 			$note->set_name( 'PHPUNIT_PAGING_TEST_NOTE_NAME' );
 			$note->set_source( 'PHPUNIT_TEST' );
 			$note->set_is_snoozable( false );
-			$note->set_layout( 'plain' );
-			$note->set_image( '' );
 			$note->add_action(
 				'PHPUNIT_TEST_ACTION_SLUG',
 				'PHPUNIT_TEST_ACTION_LABEL',
@@ -437,8 +431,6 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 			$note->set_source( 'PHPUNIT_TEST' );
 			$note->set_is_snoozable( false );
-			$note->set_layout( 'plain' );
-			$note->set_image( '' );
 			$note->add_action(
 				'PHPUNIT_TEST_ACTION_SLUG',
 				'PHPUNIT_TEST_ACTION_LABEL',

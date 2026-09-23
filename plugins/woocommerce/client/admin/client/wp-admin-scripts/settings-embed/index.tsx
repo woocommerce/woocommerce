@@ -6,10 +6,12 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import '@wordpress/theme/design-tokens.css';
 
 /**
  * Internal dependencies
  */
+import './settings-ui.scss';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
@@ -30,6 +32,7 @@ import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-ema
 import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
 import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
+import { registerSettingsUIScreens } from '~/settings/settings-ui-registry';
 
 const renderPaymentsSettings = () => {
 	const pages = [
@@ -76,9 +79,8 @@ const registerSlotFills = () => {
 	registerPaymentsSettingsBannerFill();
 
 	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
+
+	registerSiteVisibilitySlotFill();
 
 	if ( isFeatureEnabled( 'blueprint' ) ) {
 		registerBlueprintSlotfill();
@@ -86,6 +88,10 @@ const registerSlotFills = () => {
 
 	if ( isFeatureEnabled( 'block_email_editor' ) ) {
 		registerSettingsEmailListingFill();
+	}
+
+	if ( features?.[ 'settings-ui' ] === true ) {
+		registerSettingsUIScreens();
 	}
 
 	registerSettingsEmailColorPaletteFill();

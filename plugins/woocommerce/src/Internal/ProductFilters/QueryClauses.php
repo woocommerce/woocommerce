@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -358,33 +359,19 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-				$expanded_term_ids = $term_ids;
+				// Expand chosen terms to include descendants. get_term_children()
+				// resolves from the precomputed {$taxonomy}_children option, so it
+				// adds no per-term query.
+				$descendant_sets = array( $term_ids );
 
 				foreach ( $term_ids as $term_id ) {
-					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
-					$children  = wp_cache_get( $cache_key );
-
-					if ( false === $children ) {
-						$children = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'child_of'   => $term_id,
-								'fields'     => 'ids',
-								'hide_empty' => false,
-							)
-						);
-
-						if ( ! is_wp_error( $children ) ) {
-							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
-						} else {
-							$children = array();
-						}
+					$children = get_term_children( (int) $term_id, $taxonomy );
+					if ( ! is_wp_error( $children ) ) {
+						$descendant_sets[] = $children;
 					}
-
-					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
 				}
 
-				$term_ids = array_unique( $expanded_term_ids );
+				$term_ids = array_unique( array_merge( ...$descendant_sets ) );
 			}
 
 			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
@@ -433,12 +420,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( string $sql ): string {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
@@ -451,7 +433,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 */
 	private function should_adjust_price_filters_for_displayed_taxes(): bool {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -488,6 +470,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {
+			$tax_class             = (string) $tax_class;
 			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
 			$or_queries[]          = $wpdb->prepare(
 				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
@@ -522,7 +505,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *
@@ -593,7 +576,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
-			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
+			if ( isset( $query_vars[ $param ] ) && is_string( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
 				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) ) );
 			}
 		}

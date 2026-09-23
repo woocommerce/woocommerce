@@ -158,10 +158,13 @@ export const Plugins = ( {
 
 	const pluginsSlugToName = useMemo(
 		() =>
-			context.pluginsAvailable.reduce( ( acc, plugin ) => {
-				acc[ plugin.key ] = plugin.name;
-				return acc;
-			}, {} as Record< string, string > ),
+			context.pluginsAvailable.reduce(
+				( acc, plugin ) => {
+					acc[ plugin.key ] = plugin.name;
+					return acc;
+				},
+				{} as Record< string, string >
+			),
 		[ context.pluginsAvailable ]
 	);
 

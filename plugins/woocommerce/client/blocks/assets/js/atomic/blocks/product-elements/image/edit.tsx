@@ -9,26 +9,12 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
-import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { useEffect, useRef } from '@wordpress/element';
 import { useProduct } from '@woocommerce/entities';
-import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import {
 	ToggleControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -40,7 +26,7 @@ import {
  */
 import Block from './block';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { BlockAttributes, ImageSizing } from './types';
+import { BlockAttributes } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
 const TEMPLATE = [
@@ -54,7 +40,6 @@ const TEMPLATE = [
 
 const DEFAULT_ATTRIBUTES = {
 	showProductLink: true,
-	imageSizing: ImageSizing.SINGLE,
 };
 
 const Edit = ( {
@@ -63,7 +48,7 @@ const Edit = ( {
 	context,
 	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
-	const { showProductLink, imageSizing, width, height, scale } = attributes;
+	const { showProductLink, width, height, scale } = attributes;
 
 	const ref = useRef< HTMLDivElement >( null );
 
@@ -76,8 +61,6 @@ const Edit = ( {
 					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 				isInProductGallery:
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).getBlockParentsByBlockName(
 						clientId,
 						'woocommerce/product-gallery'
@@ -93,27 +76,24 @@ const Edit = ( {
 			blockClientId: blockProps?.id,
 		} );
 
+	const showAllControls =
+		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+	const showSaleBadge = showAllControls ? false : attributes.showSaleBadge;
+
+	// Persist this so PHP doesn't render the legacy sale badge alongside the inner block.
 	useEffect( () => {
-		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-				showSaleBadge: false,
-			} );
-		} else {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-			} );
+		if (
+			( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) &&
+			attributes.showSaleBadge !== false
+		) {
+			setAttributes( { showSaleBadge: false } );
 		}
 	}, [
 		isDescendentOfQueryLoop,
 		isDescendentOfSingleProductBlock,
+		attributes.showSaleBadge,
 		setAttributes,
 	] );
-
-	const showAllControls =
-		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
 
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -123,12 +103,6 @@ const Edit = ( {
 			dropZoneElement: ref.current,
 			template: wasBlockJustInserted ? TEMPLATE : undefined,
 		}
-	);
-
-	const isBlockTheme = getSettingWithCoercion(
-		'isBlockTheme',
-		false,
-		isBoolean
 	);
 
 	const { product, isResolving } = useProduct( context.postId );
@@ -151,7 +125,6 @@ const Edit = ( {
 							setAttributes( {
 								showProductLink:
 									DEFAULT_ATTRIBUTES.showProductLink,
-								imageSizing: DEFAULT_ATTRIBUTES.imageSizing,
 							} )
 						}
 					>
@@ -190,65 +163,12 @@ const Edit = ( {
 								}
 							/>
 						</ToolsPanelItem>
-						<ToolsPanelItem
-							label={ __( 'Resolution', 'woocommerce' ) }
-							hasValue={ () =>
-								imageSizing !== DEFAULT_ATTRIBUTES.imageSizing
-							}
-							onDeselect={ () =>
-								setAttributes( {
-									imageSizing: DEFAULT_ATTRIBUTES.imageSizing,
-								} )
-							}
-							isShownByDefault
-						>
-							<ToggleGroupControl
-								__next40pxDefaultSize
-								__nextHasNoMarginBottom
-								label={ __( 'Resolution', 'woocommerce' ) }
-								isBlock
-								help={
-									! isBlockTheme
-										? createInterpolateElement(
-												__(
-													'Product image cropping can be modified in the <a>Customizer</a>.',
-													'woocommerce'
-												),
-												{
-													a: (
-														// eslint-disable-next-line jsx-a11y/anchor-has-content
-														<a
-															href={ `${ getAdminLink(
-																'customize.php'
-															) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-															target="_blank"
-															rel="noopener noreferrer"
-														/>
-													),
-												}
-										  )
-										: null
-								}
-								value={ imageSizing }
-								onChange={ ( value: ImageSizing ) =>
-									setAttributes( { imageSizing: value } )
-								}
-							>
-								<ToggleGroupControlOption
-									value={ ImageSizing.SINGLE }
-									label={ __( 'Full Size', 'woocommerce' ) }
-								/>
-								<ToggleGroupControlOption
-									value={ ImageSizing.THUMBNAIL }
-									label={ __( 'Thumbnail', 'woocommerce' ) }
-								/>
-							</ToggleGroupControl>
-						</ToolsPanelItem>
 					</ToolsPanel>
 				</InspectorControls>
 			) }
 			<Block
 				{ ...{ ...attributes, ...context } }
+				showSaleBadge={ showSaleBadge }
 				isAdmin={ true }
 				product={ product }
 				isResolving={ isResolving }

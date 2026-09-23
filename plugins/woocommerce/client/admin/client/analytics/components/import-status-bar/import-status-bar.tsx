@@ -14,6 +14,31 @@ import { useImportStatus } from './use-import-status';
 import './import-status-bar.scss';
 
 /**
+ * Format an import status date string for display.
+ *
+ * Shared by the "Last updated" and "Next update" values so the
+ * format stays consistent between the two.
+ *
+ * @param {string|null} date - Date string in 'Y-m-d H:i:s' format (site timezone)
+ * @return {string} Formatted date string or "Never"
+ */
+const formatStatusDate = ( date: string | null ): string => {
+	if ( ! date ) {
+		return __( 'Never', 'woocommerce' );
+	}
+	return dateI18n(
+		/**
+		 * translators: PHP date format for the Analytics import status dates,
+		 * e.g. "Nov 21 at 12:00". "M j" shows the month and day, "at" is a
+		 * literal, "H:i" shows the time (24-hour format).
+		 */
+		__( 'M j \\a\\t H:i', 'woocommerce' ),
+		date,
+		undefined
+	);
+};
+
+/**
  * Analytics Import Status Bar Component
  *
  * Displays the current analytics import status including:
@@ -45,36 +70,6 @@ export function ImportStatusBar(): JSX.Element | null {
 	) {
 		return null;
 	}
-
-	/**
-	 * Format a date string for display
-	 *
-	 * @param {string|null} date - Date string in 'Y-m-d H:i:s' format (site timezone)
-	 * @return {string} Formatted date string or "Never"
-	 */
-	const formatLastProcessedDate = ( date: string | null ): string => {
-		if ( ! date ) {
-			return __( 'Never', 'woocommerce' );
-		}
-		return dateI18n( 'M j H:i', date, undefined );
-	};
-
-	const formatNextScheduledDate = ( date: string | null ): string => {
-		if ( ! date ) {
-			return __( 'Never', 'woocommerce' );
-		}
-
-		return dateI18n(
-			/**
-			 * translators: %s: formatted date and time in site timezone.
-			 * Used to display the next scheduled time for the Analytics import, e.g. "Nov 21 at 12:00".
-			 * "M j" shows the month and day, "at" as literal, "H:i" shows time (24-hour format).
-			 */
-			__( 'M j \\a\\t H:i', 'woocommerce' ),
-			date,
-			undefined
-		);
-	};
 
 	/**
 	 * Handle manual import trigger
@@ -114,7 +109,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	return (
 		<div className="woocommerce-analytics-import-status-bar-wrapper">
 			<div className="woocommerce-analytics-import-status-bar-wrapper__label">
-				{ __( 'Data status:', 'woocommerce' ) }
+				{ __( 'Data status', 'woocommerce' ) }
 			</div>
 			<div
 				className="woocommerce-analytics-import-status-bar"
@@ -132,7 +127,7 @@ export function ImportStatusBar(): JSX.Element | null {
 							{ isLoading ? (
 								<Spinner />
 							) : (
-								formatLastProcessedDate(
+								formatStatusDate(
 									status?.last_processed_date || null
 								)
 							) }
@@ -146,7 +141,7 @@ export function ImportStatusBar(): JSX.Element | null {
 							{ isLoading ? (
 								<Spinner />
 							) : (
-								formatNextScheduledDate(
+								formatStatusDate(
 									status?.next_scheduled || null
 								)
 							) }

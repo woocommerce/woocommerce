@@ -8,6 +8,7 @@ import {
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { getSetting } from '@woocommerce/settings';
 import { useProduct } from '@woocommerce/entities';
 
 /**
@@ -24,8 +25,14 @@ import type { Attributes } from '../types';
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
 ) => {
+	const isWishlistFeatureEnabled = getSetting< boolean >(
+		'wishlistFeatureEnabled',
+		false
+	);
 	const { product } = useProduct( props.context?.postId );
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: 'wc-block-add-to-cart-with-options',
+	} );
 	const blockClientId = blockProps?.id;
 
 	const {
@@ -59,6 +66,7 @@ const AddToCartOptionsEdit = (
 			{ isCoreProductType ? (
 				<AddToCartWithOptionsEditTemplatePart
 					productType={ productType }
+					showAddToWishlist={ isWishlistFeatureEnabled }
 				/>
 			) : (
 				<div { ...blockProps }>

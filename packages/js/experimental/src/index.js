@@ -7,7 +7,6 @@ import {
 	__experimentalNavigationGroup,
 	__experimentalNavigationMenu,
 	__experimentalNavigationItem,
-	__experimentalText,
 	__experimentalUseSlot,
 	__experimentalUseSlotFills as useSlotFillsHook,
 	Navigation as NavigationComponent,
@@ -15,9 +14,12 @@ import {
 	NavigationGroup as NavigationGroupComponent,
 	NavigationMenu as NavigationMenuComponent,
 	NavigationItem as NavigationItemComponent,
-	Text as TextComponent,
 	useSlot as useSlotHook,
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
 
 /**
  * Prioritize exports of non-experimental components over experimental.
@@ -31,7 +33,7 @@ export const NavigationMenu =
 	NavigationMenuComponent || __experimentalNavigationMenu;
 export const NavigationItem =
 	NavigationItemComponent || __experimentalNavigationItem;
-export const Text = TextComponent || __experimentalText;
+export { Text } from './text';
 
 // Add a fallback for useSlotFills hook to not break in older versions of wp.components.
 // This hook was introduced in wp.components@21.2.0.

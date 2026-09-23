@@ -8,6 +8,7 @@ import type { UserPatternCategory } from '@wordpress/core-data/build-types/selec
 import { dispatch, useSelect } from '@wordpress/data';
 import { Modal, Button, Flex, FlexItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { Tabs } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -31,7 +32,7 @@ function getCategoriesFromTemplates(
 		patternCategories.map( ( cat ) => [ cat.name, cat.label ] )
 	);
 	// Add localized label for 'recent' category (used by email posts)
-	categoryLabels.set( 'recent', __( 'Recent', 'woocommerce' ) );
+	categoryLabels.set( 'recent', __( 'Recent', __i18n_text_domain__ ) );
 
 	const uniqueCategories = new Set< string >();
 	for ( const template of templates ) {
@@ -102,26 +103,43 @@ function SelectTemplateBody( {
 		return () => clearTimeout( timeoutId );
 	}, [ displayCategories, selectedCategory ] );
 
-	return (
-		<div
-			className={ `block-editor-block-patterns-explorer${
-				displayCategories.length === 0 ? ' no-sidebar' : ''
-			}` }
-		>
-			{ displayCategories.length > 0 && (
-				<TemplateCategoriesListSidebar
-					templateCategories={ displayCategories }
+	if ( displayCategories.length === 0 ) {
+		return (
+			<div className="email-editor-template-select">
+				<TemplateList
+					templates={ templates }
+					onTemplateSelection={ handleTemplateSelection }
 					selectedCategory={ selectedCategory }
-					onClickCategory={ handleCategorySelection }
 				/>
-			) }
+			</div>
+		);
+	}
 
-			<TemplateList
-				templates={ templates }
-				onTemplateSelection={ handleTemplateSelection }
-				selectedCategory={ selectedCategory }
+	return (
+		<Tabs.Root
+			className="email-editor-template-select"
+			orientation="vertical"
+			value={ selectedCategory }
+			onValueChange={ handleCategorySelection }
+		>
+			<TemplateCategoriesListSidebar
+				templateCategories={ displayCategories }
 			/>
-		</div>
+			{ displayCategories.map( ( { name } ) => (
+				<Tabs.Panel
+					key={ name }
+					value={ name }
+					tabIndex={ -1 }
+					className="email-editor-template-select__panel"
+				>
+					<TemplateList
+						templates={ templates }
+						onTemplateSelection={ handleTemplateSelection }
+						selectedCategory={ name }
+					/>
+				</Tabs.Panel>
+			) ) }
+		</Tabs.Root>
 	);
 }
 
@@ -179,8 +197,8 @@ export function SelectTemplateModal( {
 		<Modal
 			title={
 				templateSelectMode === 'new'
-					? __( 'Start with an email preset', 'woocommerce' )
-					: __( 'Select a template', 'woocommerce' )
+					? __( 'Start with an email preset', __i18n_text_domain__ )
+					: __( 'Select a template', __i18n_text_domain__ )
 			}
 			onRequestClose={ () => {
 				recordEvent( 'template_select_modal_closed', {
@@ -211,7 +229,7 @@ export function SelectTemplateModal( {
 						} }
 						isBusy={ ! hasTemplates }
 					>
-						{ __( 'Start from scratch', 'woocommerce' ) }
+						{ __( 'Start from scratch', __i18n_text_domain__ ) }
 					</Button>
 				</FlexItem>
 			</Flex>

@@ -7,6 +7,8 @@ type Feature = {
 
 type Layout = {
 	image: string;
+	image_label?: string;
+	description?: string;
 	features: Feature[];
 };
 

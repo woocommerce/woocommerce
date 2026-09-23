@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { dispatch, useDispatch } from '@wordpress/data';
@@ -171,9 +171,14 @@ export const EnableGatewayButton = ( {
 						}
 					} else {
 						createErrorNotice(
-							__(
-								'The provider could not be enabled. Check the Manage page for details.',
-								'woocommerce'
+							sprintf(
+								/* translators: %s: payment gateway title, or 'this payment method'. */
+								__(
+									'Finish setting up %s before enabling it.',
+									'woocommerce'
+								),
+								gatewayProvider.title ||
+									__( 'this payment method', 'woocommerce' )
 							),
 							{
 								type: 'snackbar',
@@ -202,11 +207,13 @@ export const EnableGatewayButton = ( {
 				}
 
 				// If no redirect occurred, the data needs to be refreshed.
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 
 				if ( isOffline ) {
 					// We need to invalidate both selectors since they share the same data source and resolver chain.
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getOfflinePaymentGateways'
 					);
 				}

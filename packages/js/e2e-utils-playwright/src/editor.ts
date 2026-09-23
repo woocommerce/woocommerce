@@ -55,17 +55,19 @@ export const disableWelcomeModal = async ( {
 	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
 
-	const isWelcomeGuideActive = await page.evaluate( () =>
-		( window as unknown as WindowWithWp ).wp?.data
-			?.select( 'core/edit-post' )
-			?.isFeatureActive( 'welcomeGuide' )
+	const isWelcomeGuideActive = await page.evaluate(
+		() =>
+			( window as unknown as WindowWithWp ).wp?.data
+				?.select( 'core/edit-post' )
+				?.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
-		await page.evaluate( () =>
-			( window as unknown as WindowWithWp ).wp?.data
-				?.dispatch( 'core/edit-post' )
-				?.toggleFeature( 'welcomeGuide' )
+		await page.evaluate(
+			() =>
+				( window as unknown as WindowWithWp ).wp?.data
+					?.dispatch( 'core/edit-post' )
+					?.toggleFeature( 'welcomeGuide' )
 		);
 	}
 };
@@ -90,19 +92,35 @@ export const openEditorSettings = async ( {
 /**
  * Returns the editor canvas frame for Gutenberg interactions.
  *
- * The Gutenberg editor content can be contained within an iframe in some contexts.
- * This helper function returns the content frame of the editor canvas iframe if it exists,
- * or falls back to the main page if the iframe isn't present.
+ * The Gutenberg editor mounts either inside an `iframe[name="editor-canvas"]`
+ * (modern site/post editor) or directly on the outer page (non-iframed
+ * contexts, e.g. accessibility mode). Recent Gutenberg
+ * builds mount the iframe slightly after initial paint, so callers that resolve
+ * the canvas before the iframe attaches end up running locators against the
+ * outer page and timing out inside the editor.
+ *
+ * Resolves as soon as either surface becomes visible, using a union selector
+ * so neither path incurs a hardcoded probe timeout. If neither surface appears
+ * within Playwright's default timeout, the underlying `waitFor` throws and the
+ * test fails loudly rather than silently degrading to the wrong document.
  *
  * @param page - The Playwright page object
  * @return The editor canvas frame or the original page
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
-	const iframeLocator = page.locator( 'iframe[name="editor-canvas"]' );
-	if ( ( await iframeLocator.count() ) > 0 ) {
-		return iframeLocator.contentFrame();
-	}
-	return page;
+	const canvasLocator = page
+		.locator(
+			'iframe[name="editor-canvas"]:visible, .wp-block-post-content:visible'
+		)
+		.first();
+
+	await canvasLocator.waitFor();
+
+	const isFramed = await canvasLocator.evaluate(
+		( node ) => node.tagName === 'IFRAME'
+	);
+
+	return isFramed ? canvasLocator.contentFrame() : page;
 };
 
 /**

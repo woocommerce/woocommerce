@@ -25,6 +25,7 @@ abstract class Notification {
 	const NOTIFICATION_CLASSES = array(
 		'store_order'  => NewOrderNotification::class,
 		'store_review' => NewReviewNotification::class,
+		'store_stock'  => StockNotification::class,
 	);
 
 	/**
@@ -139,7 +140,13 @@ abstract class Notification {
 			throw new InvalidArgumentException( sprintf( 'Unknown notification type: %s', $type ) );
 		}
 
-		return new $class( $resource_id );
+		$instance = new $class( $resource_id );
+
+		if ( method_exists( $instance, 'hydrate' ) ) {
+			$instance->hydrate( $data );
+		}
+
+		return $instance;
 	}
 
 	/**
@@ -163,5 +170,67 @@ abstract class Notification {
 	 */
 	public function get_resource_id(): int {
 		return $this->resource_id;
+	}
+
+	/**
+	 * Canonical positional ActionScheduler arguments for the safety-net job.
+	 *
+	 * Single source of truth shared by the scheduler (and its dedupe guard) and
+	 * the cancel path so the serialized args always match. Action Scheduler
+	 * matches the stored args by exact equality, so any divergence between the
+	 * schedule-side and cancel-side shapes silently breaks cancellation.
+	 *
+	 * The args are keyed on the notification's *identity* — the minimal data
+	 * needed to uniquely identify and reconstruct the notification — mirroring
+	 * {@see self::get_identifier()}. Volatile payload fields (e.g. a stock
+	 * snapshot captured at trigger time) must not be included: they are not part
+	 * of the identity and may differ between schedule and cancel.
+	 *
+	 * @return array<int, mixed>
+	 *
+	 * @since 10.9.0
+	 */
+	public function get_safety_net_args(): array {
+		return array( $this->get_type(), $this->get_resource_id() );
+	}
+
+	/**
+	 * Decide whether this notification should be delivered to a user given
+	 * their stored preference value for {@see static::get_type()}.
+	 *
+	 * `$pref_value` is whatever the user has stored under this notification
+	 * type's preference key, or `null` if they have nothing stored. The
+	 * {@see NotificationPreferencesService} stores each preference as an
+	 * object so future sub-fields (thresholds, sub-toggles) can be added
+	 * without bumping the schema version — today's shape is
+	 * `['enabled' => bool]`, future shapes might add e.g.
+	 * `['enabled' => true, 'min_value' => 500]` for an order threshold.
+	 *
+	 * Default: read the universal `enabled` sub-field, defaulting to `true`
+	 * when the value is missing or has no `enabled` key (so newly-added
+	 * notification types are opt-in by default). Subclasses override to
+	 * read richer sub-fields and to consult their own resource (e.g.
+	 * compare an order total to the user's `min_value`).
+	 *
+	 * Subclasses must keep this side-effect-free — the {@see NotificationProcessor}
+	 * may call it once per recipient user per notification.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return bool True if this notification should be sent to that user.
+	 *
+	 * @since 10.9.0
+	 */
+	public function should_send_to_user( $pref_value ): bool {
+		if ( null === $pref_value ) {
+			return true;
+		}
+
+		if ( is_array( $pref_value ) ) {
+			return (bool) ( $pref_value['enabled'] ?? true );
+		}
+
+		// Defensive fallback for unexpected scalar values; the service
+		// always normalises stored prefs to the array shape above.
+		return (bool) $pref_value;
 	}
 }

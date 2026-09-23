@@ -24,11 +24,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	protected $endpoint;
 
 	/**
-	 * Test user ID.
+	 * Shared admin user ID for REST authentication.
 	 *
 	 * @var int
 	 */
-	protected $user;
+	protected static $user;
 
 	/**
 	 * Payments instance.
@@ -69,6 +69,15 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -88,12 +97,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		// Manually register ONLY our controller's routes to avoid triggering global REST API init.
 		$this->endpoint->register_routes();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 	}
 
 	/**

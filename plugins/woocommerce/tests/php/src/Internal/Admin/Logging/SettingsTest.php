@@ -410,4 +410,25 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
+
+	/**
+	 * @testdox The filesystem settings status panel reports Ready when the log directory is writable.
+	 *
+	 * The complementary "not writable" branch is intentionally not asserted here:
+	 * making wp_is_writable() return false requires either (a) running as a
+	 * non-root user with a chmod-restricted directory, which is unreliable in
+	 * containerized test environments that run PHP CLI as root, or (b) mocking
+	 * a non-proxied core function. Inverting the conditional or breaking the
+	 * "Ready" branch is the regression most likely to ship; this test catches
+	 * that.
+	 */
+	public function test_render_form_filesystem_status_ready_when_writable(): void {
+		// The default upload-based log directory is writable in the test environment.
+		ob_start();
+		$this->sut->render_form();
+		$content = ob_get_clean();
+
+		$this->assertStringContainsString( '✅ Ready', $content );
+		$this->assertStringNotContainsString( 'The log directory is not writable.', $content );
+	}
 }

@@ -81,7 +81,7 @@ export function RichTextWithButton( {
 			<Button
 				className="woocommerce-settings-panel-personalization-tags-button"
 				icon="shortcode"
-				title={ __( 'Personalization Tags', 'woocommerce' ) }
+				title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
 				onClick={ () => {
 					setIsModalOpened( true );
 					recordEvent(

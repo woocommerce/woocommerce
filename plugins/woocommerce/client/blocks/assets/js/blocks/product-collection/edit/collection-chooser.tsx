@@ -9,9 +9,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	BlockInstance,
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	store as blocksStore,
 	BlockVariation,
 	BlockIcon,

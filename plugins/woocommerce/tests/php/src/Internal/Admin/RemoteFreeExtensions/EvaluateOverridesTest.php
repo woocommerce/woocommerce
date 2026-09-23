@@ -69,7 +69,7 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 		$extensions = $this->get_extensions();
 		$result     = $evaluator->evaluate( array( $extensions[3] ) );
 
-		// Evaluation should pass and return the overriden value.
+		// Evaluation should pass and return the overridden value.
 		$this->assertEquals( 2, $result[0]->order );
 
 		// Reset the default country.

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
@@ -44,6 +45,7 @@ type EditModeRequiredAttributes = {
 interface EditModeRequiredProps< T > {
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
 	clientId: string;
+	effectiveCategoryId?: number;
 	debouncedSpeak: ( label: string ) => void;
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
@@ -60,11 +62,13 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
+			effectiveCategoryId,
 			debouncedSpeak,
 			name,
 			setAttributes,
 			triggerUrlUpdate = () => void null,
 			error,
+			isLoading: isItemLoading,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
@@ -77,7 +81,13 @@ export const withEditMode =
 
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
-			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
+			( name === BLOCK_NAMES.featuredCategory &&
+				( attributes.categoryId || effectiveCategoryId ) );
+		const canEditItem = ! (
+			name === BLOCK_NAMES.featuredCategory &&
+			! attributes.categoryId &&
+			effectiveCategoryId
+		);
 
 		// Only show edit mode for newly inserted blocks without existing selection
 		const [ editMode, setEditMode ] = useState< boolean >(
@@ -95,14 +105,25 @@ export const withEditMode =
 		const itemId =
 			name === BLOCK_NAMES.featuredProduct
 				? attributes?.productId
-				: attributes?.categoryId;
+				: attributes?.categoryId || effectiveCategoryId;
 
-		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
+		const {
+			status,
+			isDeleted,
+			isLoading: isStatusLoading,
+		} = useFeaturedItemStatus( {
 			itemId,
 			itemType: name,
 		} );
+		const isLoading = isItemLoading || isStatusLoading;
+
+		const isPreviewMode = usePreviewMode();
 
 		useEffect( () => {
+			if ( isPreviewMode || ! canEditItem ) {
+				return;
+			}
+
 			if ( ! isLoading ) {
 				const currEditModeValue =
 					( name === BLOCK_NAMES.featuredProduct &&
@@ -113,9 +134,9 @@ export const withEditMode =
 					setEditMode( currEditModeValue );
 				}
 			}
-		}, [ status, isDeleted, name, isLoading ] );
+		}, [ status, isDeleted, name, isLoading, isPreviewMode, canEditItem ] );
 
-		if ( editMode ) {
+		if ( editMode && canEditItem ) {
 			return (
 				<Placeholder
 					icon={ <Icon icon={ icon } /> }
@@ -191,6 +212,7 @@ export const withEditMode =
 		return (
 			<Component
 				{ ...props }
+				canEditItem={ canEditItem }
 				isLoading={ isLoading }
 				error={ isLoading ? null : error }
 				useEditMode={ [ editMode, setEditMode ] }

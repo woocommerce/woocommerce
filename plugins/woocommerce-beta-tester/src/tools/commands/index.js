@@ -22,7 +22,7 @@ import {
 
 import {
 	UPDATE_WCCOM_REQUEST_ERRORS_MODE,
-	SetWccomRequestErrros,
+	SetWccomRequestErrors,
 } from './set-wccom-request-errors';
 import {
 	SetWccomBaseUrl,
@@ -106,7 +106,7 @@ export default [
 	},
 	{
 		command: 'Force errors on woocommerce.com requests',
-		description: <SetWccomRequestErrros />,
+		description: <SetWccomRequestErrors />,
 		action: UPDATE_WCCOM_REQUEST_ERRORS_MODE,
 	},
 	{

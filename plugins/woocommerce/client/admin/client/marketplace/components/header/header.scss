@@ -27,7 +27,8 @@
 	}
 
 	.woocommerce-marketplace__header-title {
-		font-size: 14px;
+		// Must stay larger than the tab labels below it.
+		font-size: 16px;
 		font-weight: 600;
 		margin: 0;
 		padding: 10px 0 0;
@@ -69,7 +70,7 @@
 .woocommerce-marketplace__header-meta {
 	grid-area: mktpl-meta;
 	justify-self: end;
-	padding-top: 10px;
+	padding-top: $grid-unit-10;
 
 	@media screen and (max-width: $breakpoint-large) {
 		margin-right: $content-spacing-large;

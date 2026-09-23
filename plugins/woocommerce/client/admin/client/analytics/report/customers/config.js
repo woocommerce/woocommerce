@@ -49,15 +49,17 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 						chartMode: 'item-comparison',
 						path: [ 'select_customer' ],
 						settings: {
-							type: 'customers',
 							param: 'customers',
 							getLabels: getCustomerLabels,
 							labels: {
+								button: __( 'Single Customer', 'woocommerce' ),
+							},
+							searchProps: {
+								type: 'customerNames',
 								placeholder: __(
 									'Type to search for a customer',
 									'woocommerce'
 								),
-								button: __( 'Single Customer', 'woocommerce' ),
 							},
 						},
 					},
@@ -127,7 +129,7 @@ export const advancedFilters = applyFilters(
 				],
 				input: {
 					component: 'Search',
-					type: 'customers',
+					type: 'customerNames',
 					getLabels: getRequestByIdString(
 						NAMESPACE + '/customers',
 						( customer ) => ( {
@@ -172,9 +174,10 @@ export const advancedFilters = applyFilters(
 					component: 'Search',
 					type: 'countries',
 					getLabels: async ( value ) => {
-						const countries = await resolveSelect(
-							COUNTRIES_STORE_NAME
-						).getCountries();
+						const countries =
+							await resolveSelect(
+								COUNTRIES_STORE_NAME
+							).getCountries();
 
 						const allLabels = countries.map( ( country ) => ( {
 							key: country.code,

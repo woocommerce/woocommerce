@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use Automattic\WooCommerce\Container;
+use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -106,6 +107,19 @@ class ApiController {
 				? $generator->force_regeneration( $params )
 				: $generator->get_status( $params );
 
+			// Build the download URL from the current site configuration instead of persisting it with the feed status.
+			unset( $response['url'] );
+			if ( AsyncGenerator::STATE_COMPLETED === ( $response['state'] ?? '' ) ) {
+				$file_name = ! empty( $response['file_name'] )
+					? (string) $response['file_name']
+					: wp_basename( (string) ( $response['path'] ?? '' ) );
+
+				$file_url = JsonFileFeed::get_file_url_for_identifier( $file_name );
+				if ( null !== $file_url ) {
+					$response['url'] = $file_url;
+				}
+			}
+
 			// Use the right datetime format.
 			if ( isset( $response['scheduled_at'] ) ) {
 				$response['scheduled_at'] = wc_rest_prepare_date_response( $response['scheduled_at'] );
@@ -114,13 +128,15 @@ class ApiController {
 				$response['completed_at'] = wc_rest_prepare_date_response( $response['completed_at'] );
 			}
 
-			// Remove sensitive data from the response.
-			if ( isset( $response['action_id'] ) ) {
-				unset( $response['action_id'] );
-			}
-			if ( isset( $response['path'] ) ) {
-				unset( $response['path'] );
-			}
+			// Remove sensitive and internal data from the response.
+			unset(
+				$response['action_id'],
+				$response['path'],
+				$response['file_name'],
+				$response['page'],
+				$response['entries_written'],
+				$response['updated_at']
+			);
 		} catch ( \Exception $e ) {
 			wc_get_logger()->error(
 				'Feed generation failed',

@@ -47,17 +47,17 @@ function JustificationControls( {
 		{
 			value: 'left',
 			icon: justifyLeft,
-			label: __( 'Justify items left', 'woocommerce' ),
+			label: __( 'Justify items left', __i18n_text_domain__ ),
 		},
 		{
 			value: 'center',
 			icon: justifyCenter,
-			label: __( 'Justify items center', 'woocommerce' ),
+			label: __( 'Justify items center', __i18n_text_domain__ ),
 		},
 		{
 			value: 'right',
 			icon: justifyRight,
-			label: __( 'Justify items right', 'woocommerce' ),
+			label: __( 'Justify items right', __i18n_text_domain__ ),
 		},
 	];
 
@@ -80,7 +80,7 @@ function JustificationControls( {
 	return (
 		<ToggleGroupControl
 			__nextHasNoMarginBottom
-			label={ __( 'Justification', 'woocommerce' ) }
+			label={ __( 'Justification', __i18n_text_domain__ ) }
 			value={ justificationValue }
 			onChange={ onChange }
 			className="block-editor-hooks__flex-layout-justification-controls"
@@ -133,7 +133,7 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Layout', 'woocommerce' ) }
+					label={ __( 'Layout', __i18n_text_domain__ ) }
 					resetAll={ resetAll }
 				>
 					<ToolsPanelItem
@@ -142,7 +142,7 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 						hasValue={ () =>
 							attributes.layout?.justifyContent || false
 						}
-						label={ __( 'Justification', 'woocommerce' ) }
+						label={ __( 'Justification', __i18n_text_domain__ ) }
 					>
 						<Flex>
 							<FlexItem>

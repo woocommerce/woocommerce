@@ -112,7 +112,6 @@ export const Menu = ( {
 export const MenuSlot = () =>
 	createPortal(
 		<div aria-live="off">
-			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 			<Popover.Slot name="woocommerce-select-control-menu" />
 		</div>,
 		document.body

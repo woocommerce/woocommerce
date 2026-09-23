@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use WP_Block_Patterns_Registry;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
@@ -308,14 +307,9 @@ class BlockTemplateUtils {
 			'product-search-results.html',
 			'single-product.html',
 			'taxonomy-product_attribute.html',
-			'taxonomy-product_brand.html',
-			'taxonomy-product_cat.html',
-			'taxonomy-product_tag.html',
 		);
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$wp_template_filenames[] = 'coming-soon.html';
-		}
+		$wp_template_filenames[] = 'coming-soon.html';
 
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
@@ -629,8 +623,8 @@ class BlockTemplateUtils {
 	 * Determines whether the provided $blocks contains any of the $block_names,
 	 * or if they contain a pattern that contains any of the $block_names.
 	 *
-	 * @param string[]   $block_names Full block types to look for.
-	 * @param WP_Block[] $blocks      Array of block objects.
+	 * @param string[] $block_names Full block types to look for.
+	 * @param array    $blocks      Array of blocks as returned by parse_blocks().
 	 * @return bool Whether the content contains the specified block.
 	 */
 	public static function has_block_including_patterns( $block_names, $blocks ) {

@@ -347,7 +347,7 @@ const attachProductInventoryTabTracks = () => {
  * Attaches product tags tracks.
  */
 const attachProductTagsTracks = () => {
-	function deleteTagEventListener(/* event: Event */) {
+	function deleteTagEventListener( /* event: Event */ ) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -371,7 +371,7 @@ const attachProductTagsTracks = () => {
 
 	document
 		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', (/* event: Event */) => {
+		?.addEventListener( 'click', ( /* event: Event */ ) => {
 			const tagInput = document.querySelector< HTMLInputElement >(
 				'#new-tag-product_tag'
 			);
@@ -457,8 +457,7 @@ const attachAddCustomAttributeTracks = () => {
  */
 const attachAddExistingAttributeTracks = () => {
 	window
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore Need to use jQuery to hook up to the select2:select event since the select2 component is jQuery-based
+		// @ts-expect-error jQuery is attached to window by WordPress at runtime but is not declared on the Window type.
 		?.jQuery( 'select.wc-attribute-search' )
 		.on( 'select2:select', function () {
 			recordEvent( 'product_attributes_buttons', {
@@ -782,7 +781,7 @@ export function addExitPageListener( pageId: string ) {
 		}
 		return isDisabled;
 	}
-	window.addEventListener( 'beforeunload', function (/* event */) {
+	window.addEventListener( 'beforeunload', function ( /* event */ ) {
 		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
 		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
 			productChanged = false;

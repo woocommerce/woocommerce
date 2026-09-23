@@ -6,6 +6,7 @@ import {
 	useInnerBlocksProps,
 	BlockContextProvider,
 } from '@wordpress/block-editor';
+import type { RemovableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -32,9 +33,10 @@ const Edit = () => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/removableItems': {
 							items: filtersPreview,
-						},
+							storeNamespace: 'woocommerce/product-filters',
+						} satisfies RemovableItemsContext,
 					} }
 				>
 					{ children }

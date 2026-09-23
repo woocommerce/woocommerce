@@ -34,11 +34,11 @@ const { checkoutStore } = window.wc.wcBlocksData
 
 Returns the WordPress user ID of the customer whose order is currently processed by the Checkout block.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `number`: The WordPress user ID of the customer.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -49,11 +49,11 @@ const customerId = store.getCustomerId();
 
 Returns the WooCommerce order ID of the order that is currently being processed by the Checkout block.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `number`: The WooCommerce order ID.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -64,11 +64,11 @@ const orderId = store.getOrderId();
 
 Returns the order notes.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `string`: The order notes.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -79,11 +79,11 @@ const orderNotes = store.getOrderNotes();
 
 Returns the URL to redirect to after checkout is complete.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `string`: The URL to redirect to.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -94,7 +94,7 @@ const redirectUrl = store.getRedirectUrl();
 
 Returns the extra data registered by extensions.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `object`: The extra data registered by extensions.
 
@@ -106,7 +106,7 @@ Returns the extra data registered by extensions.
 }
 ```
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -117,11 +117,11 @@ const extensionData = store.getExtensionData();
 
 Returns the current status of the checkout process.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `string`: The current status of the checkout process. Possible values are: `pristine`, `before-processing`, `processing`, `after-processing`, `complete`, `idle`.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -132,11 +132,11 @@ const checkoutStatus = store.getCheckoutStatus();
 
 Returns true if the shopper has opted to create an account with their order.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the shopper has opted to create an account with their order.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -147,11 +147,11 @@ const shouldCreateAccount = store.getShouldCreateAccount();
 
 Returns true if the shopper has opted to use their shipping address as their billing address.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the shipping address should be used as the billing address.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -162,11 +162,11 @@ const useShippingAsBilling = store.getUseShippingAsBilling();
 
 Returns true if the billing address is being edited.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the billing address is being edited.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -177,11 +177,11 @@ const editingBillingAddress = store.getEditingBillingAddress();
 
 Returns true if the shipping address is being edited.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the shipping address is being edited.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -192,11 +192,11 @@ const editingShippingAddress = store.getEditingShippingAddress();
 
 Returns true if an error occurred, and false otherwise.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if an error occurred.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -207,11 +207,11 @@ const hasError = store.hasError();
 
 Returns true if a draft order had been created, and false otherwise.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if a draft order had been created.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -222,11 +222,11 @@ const hasOrder = store.hasOrder();
 
 When the checkout status is `IDLE` this flag is true. Checkout will be this status after any change to checkout state after the block is loaded. It will also be this status when retrying a purchase is possible after processing happens with an error.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the checkout has had some activity, but is currently waiting for user input.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -237,11 +237,11 @@ const isIdle = store.isIdle();
 
 When the checkout status is `BEFORE_PROCESSING` this flag is true. Checkout will be this status when the user submits checkout for processing.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if an order is about to be processed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -252,11 +252,11 @@ const isBeforeProcessing = store.isBeforeProcessing();
 
 When the checkout status is `PROCESSING` this flag is true. Checkout will be this status when all the observers on the event emitted with the `BEFORE_PROCESSING` status are completed without error. It is during this status that the block will be sending a request to the server on the checkout endpoint for processing the order.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the checkout is processing.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -267,11 +267,11 @@ const isProcessing = store.isProcessing();
 
 When the checkout status is `AFTER_PROCESSING` this flag is true. Checkout will have this status after the block receives the response from the server side processing request.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if an order had just been processed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -282,11 +282,11 @@ const isAfterProcessing = store.isAfterProcessing();
 
 When the checkout status is `COMPLETE` this flag is true. Checkout will have this status after all observers on the events emitted during the `AFTER_PROCESSING` status are completed successfully. When checkout is at this status, the shopper's browser will be redirected to the value of `redirectUrl` at that point (usually the `order-received` route).
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if the order is complete.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -297,11 +297,11 @@ const isComplete = store.isComplete();
 
 This is true when the total is being re-calculated for the order. There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. This flag consolidates all activity that might be occurring (including requests to the server that potentially affect calculation of totals). So instead of having to check each of those individual states you can reliably just check if this boolean is true (calculating) or false (not calculating).
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   `boolean`: True if there is an in-flight request to update any values.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -312,11 +312,11 @@ const isCalculating = store.isCalculating();
 
 Returns true if the customer prefers to collect their order, and false otherwise.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   _prefersCollection_ `boolean`: True if the shopper prefers to collect their order.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -327,11 +327,11 @@ const prefersCollection = store.prefersCollection();
 
 Returns a list of registered address autocomplete provider IDs.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   _addressAutocompleteProviders_ `string[]`: A list of registered address autocomplete provider IDs.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -346,11 +346,11 @@ Returns the active address autocomplete provider for a given address type.
 
 -   _type_ `'billing' | 'shipping'`: The address type.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ {/* omit in toc */}
 
 -   _activeAddressAutocompleteProvider_ `string`: The currently active address autocomplete provider for the passed address type.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = select( checkoutStore );
@@ -364,11 +364,11 @@ const activeBillingProvider = store.getActiveAutocompleteProvider( 'billing' );
 
 Sets the `prefersCollection` flag to true or false.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ {/* omit in toc */}
 
 -   _prefersCollection_ `boolean`: True if the shopper prefers to collect their order.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = dispatch( checkoutStore );
@@ -379,11 +379,11 @@ store.setPrefersCollection( true );
 
 Set the billing address to editing state or collapsed state. Note that if the address has invalid fields, it will not be set to collapsed state.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ {/* omit in toc */}
 
 -   _isEditing_ `boolean`: True to set the billing address to editing state, false to set it to collapsed state.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = dispatch( checkoutStore );
@@ -394,11 +394,11 @@ store.setEditingBillingAddress( true );
 
 Set the shipping address to editing state or collapsed state. Note that if the address has invalid fields, it will not be set to collapsed state.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ {/* omit in toc */}
 
 -   _isEditing_ `boolean`: True to set the shipping address to editing state, false to set it to collapsed state.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = dispatch( checkoutStore );
@@ -409,11 +409,11 @@ store.setEditingShippingAddress( true );
 
 Adds an address autocomplete provider 
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ {/* omit in toc */}
 
 -   _providerId_ `string`: The provider's name. Note, providers should be registered with `wc.addressAutocomplete.registerAddressAutocompleteProvider`.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = dispatch( checkoutStore );
@@ -424,12 +424,12 @@ store.addAddressAutocompleteProvider( 'my-address-provider' );
 
 Adds an address autocomplete provider 
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ {/* omit in toc */}
 
 -   _providerId_ `string`: Sets the active autocomplete provider's id. Note, providers should be registered with `wc.addressAutocomplete.registerAddressAutocompleteProvider`.
 -   _addressType_ `'billing' | 'shipping'`: Which address type this is the active provider for. Since billing and shipping can be in different countries, there may be a different provider for each country.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ {/* omit in toc */}
 
 ```js
 const store = dispatch( checkoutStore );

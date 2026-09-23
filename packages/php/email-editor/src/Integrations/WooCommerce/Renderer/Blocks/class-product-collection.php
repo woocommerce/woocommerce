@@ -121,9 +121,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				if ( $index > 0 && ! isset( $email_attrs['margin-top'] ) ) {
 					$email_attrs['margin-top'] = $block_gap;
 				}
-				$content .= $this->add_spacer(
+				$content .= $this->add_spacer_with_context(
 					$this->render_product_content( $product, $inner_block, $collection_type ),
-					$email_attrs
+					$email_attrs,
+					$rendering_context
 				);
 				++$index;
 			}
@@ -132,9 +133,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 		// Two-column layout using HTML tables for email compatibility.
 		// Wrap with add_spacer to match single-column spacing behavior.
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context, $block_gap ),
-			$inner_block['email_attrs'] ?? array()
+			$inner_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -173,7 +175,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			foreach ( $row_products as $col_index => $product ) {
 				$cell_style  = 'width: 50%; vertical-align: top; padding: 0;';
-				$cell_style .= 0 === $col_index ? ' padding-right: 10px;' : ' padding-left: 10px;';
+				$cell_style .= 0 === $col_index ? ' padding-' . $rendering_context->get_end_side() . ': 10px;' : ' padding-' . $rendering_context->get_start_side() . ': 10px;';
 
 				$content .= sprintf(
 					'<td style="%s">%s</td>',
@@ -184,7 +186,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			// If odd number of products, add empty cell to complete the row.
 			if ( 1 === count( $row_products ) ) {
-				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-left: 10px;"></td>';
+				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-' . esc_attr( $rendering_context->get_start_side() ) . ': 10px;"></td>';
 			}
 
 			$content .= '</tr>';

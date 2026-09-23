@@ -459,7 +459,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		if ( empty( $note_ids ) ) {
 			// Promo note doesn't exist, this could happen in cases where
-			// user might have disabled RemoteInboxNotications via disabling
+			// user might have disabled RemoteInboxNotifications via disabling
 			// marketing suggestions. Thus we'd have to manually add the note.
 			$note = new Note();
 			$note->set_name( $promo_note_name );
@@ -785,13 +785,13 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'layout'            => array(
-					'description' => __( 'The layout of the note (e.g. banner, thumbnail, plain).', 'woocommerce' ),
+					'description' => __( 'Deprecated. Always returns "plain". Inbox notes no longer support layout variants; this field will be removed in a future release.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'image'             => array(
-					'description' => __( 'The image of the note, if any.', 'woocommerce' ),
+					'description' => __( 'Deprecated. Always returns an empty string. Inbox notes no longer render images; this field will be removed in a future release.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

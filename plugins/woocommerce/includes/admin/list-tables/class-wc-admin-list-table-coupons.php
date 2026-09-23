@@ -42,10 +42,10 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 * Render blank state.
 	 */
 	protected function render_blank_state() {
-		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState woocommerce-BlankState--coupons">';
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Coupons are a great way to offer discounts and rewards to your customers. They will appear here once created.', 'woocommerce' ) . '</h2>';
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ) . '">' . esc_html__( 'Create your first coupon', 'woocommerce' ) . '</a>';
-		echo '<a class="woocommerce-BlankState-cta button" target="_blank" href="https://woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about coupons', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ) . '">' . esc_html__( 'Create your first coupon', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" target="_blank" rel="noopener noreferrer" href="https://woocommerce.com/document/coupon-management/?utm_source=blankslate&utm_medium=product&utm_content=couponsdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about coupons', 'woocommerce' ) . '</a>';
 		echo '</div>';
 	}
 
@@ -204,8 +204,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 			foreach ( $types as $name => $type ) {
 				echo '<option value="' . esc_attr( $name ) . '"';
 
-				if ( isset( $_GET['coupon_type'] ) ) { // WPCS: input var ok.
-					selected( $name, wc_clean( wp_unslash( $_GET['coupon_type'] ) ) ); // WPCS: input var ok, sanitization ok.
+				if ( isset( $_GET['coupon_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter; values are unslashed and sanitized.
+					selected( $name, wc_clean( wp_unslash( $_GET['coupon_type'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter; values are unslashed and sanitized.
 				}
 
 				echo '>' . esc_html( $type ) . '</option>';
@@ -222,7 +222,7 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
-		if ( ! empty( $_GET['coupon_type'] ) ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_GET['coupon_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filter; values are unslashed and sanitized.
 			$query_vars['meta_key']   = 'discount_type'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$query_vars['meta_value'] = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		}

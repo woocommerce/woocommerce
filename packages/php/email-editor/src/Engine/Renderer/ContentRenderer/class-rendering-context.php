@@ -36,14 +36,23 @@ class Rendering_Context {
 	private array $email_context;
 
 	/**
+	 * Email language used for deterministic direction fallback.
+	 *
+	 * @var string|null
+	 */
+	private ?string $language;
+
+	/**
 	 * Rendering_Context constructor.
 	 *
 	 * @param WP_Theme_JSON        $theme_json Theme Json used in the email.
 	 * @param array<string, mixed> $email_context Email-specific context data.
+	 * @param string|null          $language Email language.
 	 */
-	public function __construct( WP_Theme_JSON $theme_json, array $email_context = array() ) {
+	public function __construct( WP_Theme_JSON $theme_json, array $email_context = array(), ?string $language = null ) {
 		$this->theme_json    = $theme_json;
 		$this->email_context = $email_context;
+		$this->language      = $language;
 	}
 
 	/**
@@ -132,6 +141,15 @@ class Rendering_Context {
 	}
 
 	/**
+	 * Get the email language.
+	 *
+	 * @return string|null
+	 */
+	public function get_language(): ?string {
+		return $this->language;
+	}
+
+	/**
 	 * Get the user ID from the email context.
 	 *
 	 * @return int|null The user ID if available, null otherwise.
@@ -161,5 +179,124 @@ class Rendering_Context {
 	 */
 	public function get( string $key, $default_value = null ) {
 		return $this->email_context[ $key ] ?? $default_value;
+	}
+
+	/**
+	 * Whether this render should use right-to-left direction.
+	 *
+	 * @return bool
+	 */
+	public function is_rtl(): bool {
+		if ( isset( $this->email_context['is_rtl'] ) && is_bool( $this->email_context['is_rtl'] ) ) {
+			return $this->email_context['is_rtl'];
+		}
+
+		$primary_language = $this->get_primary_language_subtag( $this->language );
+		if ( null === $primary_language ) {
+			return false;
+		}
+
+		return in_array(
+			$primary_language,
+			array(
+				'ar',
+				'arc',
+				'azb',
+				'ckb',
+				'dv',
+				'fa',
+				'he',
+				'ku',
+				'nqo',
+				'ps',
+				'sd',
+				'ug',
+				'ur',
+				'yi',
+			),
+			true
+		);
+	}
+
+	/**
+	 * Get the HTML/CSS text direction.
+	 *
+	 * @return string
+	 */
+	public function get_text_direction(): string {
+		return $this->is_rtl() ? 'rtl' : 'ltr';
+	}
+
+	/**
+	 * Get the default physical text alignment for this render.
+	 *
+	 * @return string
+	 */
+	public function get_default_text_align(): string {
+		return $this->is_rtl() ? 'right' : 'left';
+	}
+
+	/**
+	 * Get the physical start side.
+	 *
+	 * @return string
+	 */
+	public function get_start_side(): string {
+		return $this->is_rtl() ? 'right' : 'left';
+	}
+
+	/**
+	 * Get the physical end side.
+	 *
+	 * @return string
+	 */
+	public function get_end_side(): string {
+		return $this->is_rtl() ? 'left' : 'right';
+	}
+
+	/**
+	 * Sanitize a text alignment value.
+	 *
+	 * @param mixed $alignment Alignment candidate.
+	 * @return string|null
+	 */
+	public function sanitize_text_align( $alignment ): ?string {
+		if ( ! is_string( $alignment ) ) {
+			return null;
+		}
+		return in_array( $alignment, array( 'left', 'center', 'right' ), true ) ? $alignment : null;
+	}
+
+	/**
+	 * Resolve a text alignment value with direction-aware default.
+	 *
+	 * @param mixed $alignment Alignment candidate.
+	 * @return string
+	 */
+	public function resolve_text_align( $alignment ): string {
+		return $this->sanitize_text_align( $alignment ) ?? $this->get_default_text_align();
+	}
+
+	/**
+	 * Get the primary language subtag from a locale/language value.
+	 *
+	 * @param string|null $language Language or locale.
+	 * @return string|null
+	 */
+	private function get_primary_language_subtag( ?string $language ): ?string {
+		if ( null === $language || '' === trim( $language ) ) {
+			return null;
+		}
+
+		$language = strtolower( str_replace( '_', '-', trim( $language ) ) );
+		$parts    = explode( '-', $language );
+		$primary  = $parts[0] ?? '';
+		$length   = strlen( $primary );
+
+		if ( $length < 2 || $length > 3 ) {
+			return null;
+		}
+
+		return strspn( $primary, 'abcdefghijklmnopqrstuvwxyz' ) === $length ? $primary : null;
 	}
 }

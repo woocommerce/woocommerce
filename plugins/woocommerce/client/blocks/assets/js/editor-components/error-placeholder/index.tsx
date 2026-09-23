@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, warning } from '@wordpress/icons';
+import { Icon, cautionFilled } from '@wordpress/icons';
 import clsx from 'clsx';
 import { Button, Placeholder, Spinner } from '@wordpress/components';
 
@@ -54,7 +54,7 @@ const ErrorPlaceholder = ( {
 	onRetry,
 }: ErrorPlaceholderProps ): JSX.Element => (
 	<Placeholder
-		icon={ <Icon icon={ warning } /> }
+		icon={ <Icon icon={ cautionFilled } /> }
 		label={ __( 'Sorry, an error occurred', 'woocommerce' ) }
 		className={ clsx( 'wc-block-api-error', className ) }
 	>

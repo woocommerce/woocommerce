@@ -2,10 +2,14 @@
 declare( strict_types = 1 );
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- legacy conventions.
+
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+
 /**
  * Tests relating to WC_REST_Customers_V2_Controller.
  */
 class WC_REST_Customers_V2_Controller_Tests extends WC_Unit_Test_Case {
+	use MetaDataAssertionTrait;
 
 	/**
 	 * @var WC_REST_Customers_V2_Controller System under test.
@@ -192,5 +196,25 @@ class WC_REST_Customers_V2_Controller_Tests extends WC_Unit_Test_Case {
 		$customer = new WC_Customer( $response->get_data()['id'] );
 		$this->assertEquals( 'test_value', $customer->get_meta( 'test_key' ) );
 		$this->assertEmpty( $customer->get_meta( '_internal_test_key' ) );
+	}
+
+	/**
+	 * @testdox Updating a customer with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$api_request = new WP_REST_Request( 'PUT', '/wc/v2/customers/' );
+		$api_request->set_body_params(
+			array(
+				'id'        => $this->admin_id,
+				'meta_data' => $this->get_incomplete_meta_data_input(),
+			)
+		);
+
+		$response = $this->sut->update_item( $api_request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( new \WC_Customer( $this->admin_id ) );
 	}
 }

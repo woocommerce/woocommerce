@@ -9,7 +9,6 @@ import {
 } from '@woocommerce/blocks/product-collection/constants';
 import {
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
 	type BlockInstance,
 	type InnerBlockTemplate,

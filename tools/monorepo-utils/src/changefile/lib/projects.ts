@@ -91,6 +91,9 @@ export const getTouchedFilePaths = async (
 ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 

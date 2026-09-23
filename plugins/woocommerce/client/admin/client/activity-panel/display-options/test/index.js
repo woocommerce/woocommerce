@@ -9,8 +9,16 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { DisplayOptions } from '../';
+import { isTaskListActive } from '../../../hooks/use-tasklists-state';
+import { isFeatureEnabled } from '~/utils/features';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '../../../hooks/use-tasklists-state', () => ( {
+	isTaskListActive: jest.fn().mockReturnValue( false ),
+} ) );
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn().mockReturnValue( true ),
+} ) );
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUserPreferences: jest
@@ -32,6 +40,15 @@ jest.mock( '@wordpress/data', () => {
 } );
 
 describe( 'Activity Panel - Homescreen Display Options', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+		isTaskListActive.mockReturnValue( false );
+		isFeatureEnabled.mockReturnValue( true );
+		useUserPreferences.mockReturnValue( {
+			updateUserPreferences: jest.fn(),
+		} );
+	} );
+
 	it( 'correctly tracks opening the options', () => {
 		const { getByRole } = render( <DisplayOptions /> );
 
@@ -68,5 +85,16 @@ describe( 'Activity Panel - Homescreen Display Options', () => {
 		expect( updateUserPreferences ).toHaveBeenCalledWith( {
 			homepage_layout: 'two_columns',
 		} );
+	} );
+
+	it( 'does not render when setup is active and analytics is disabled', () => {
+		isTaskListActive.mockReturnValue( true );
+		isFeatureEnabled.mockReturnValue( false );
+
+		const { queryByRole } = render( <DisplayOptions /> );
+
+		expect(
+			queryByRole( 'button', { name: 'Display options' } )
+		).toBeNull();
 	} );
 } );

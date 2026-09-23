@@ -141,7 +141,7 @@ class DateRangeFilterPicker extends Component {
 		return (
 			<div className="woocommerce-filters-filter">
 				<span className="woocommerce-filters-label">
-					{ __( 'Date range', 'woocommerce' ) }:
+					{ __( 'Date range', 'woocommerce' ) }
 				</span>
 				<Dropdown
 					contentClassName={ contentClasses }

@@ -2,3 +2,9 @@ plugins/woocommerce-docs/tests/src/Blocks/fixtures/*
 plugins/woocommerce/lib/classes/*
 plugins/woocommerce/lib/packages/*
 packages/php/email-editor/vendor-prefixed/*
+plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE-RAW.md
+packages/php/woocommerce-analytics/CHANGELOG.md
+# Agent instruction shims: a single "@AGENTS.md" import, not prose (MD041).
+/CLAUDE.md
+plugins/woocommerce/packages/action-scheduler/CLAUDE.md
+plugins/woocommerce/tests/php/src/CLAUDE.md

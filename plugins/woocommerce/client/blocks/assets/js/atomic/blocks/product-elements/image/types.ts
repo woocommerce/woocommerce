@@ -6,7 +6,15 @@ import { ProductQueryContext } from '@woocommerce/blocks/product-query/types';
 export enum ImageSizing {
 	SINGLE = 'single',
 	THUMBNAIL = 'thumbnail',
+	// Deprecated synonym for THUMBNAIL.
+	CROPPED = 'cropped',
 }
+
+export type AspectRatioStyle = {
+	dimensions?: {
+		aspectRatio?: string;
+	};
+};
 
 export interface BlockAttributes {
 	// The product ID.
@@ -21,10 +29,7 @@ export interface BlockAttributes {
 	saleBadgeAlign: 'left' | 'center' | 'right';
 	// Size of image to use.
 	imageSizing: ImageSizing;
-	// Whether or not the block is within the context of a Query Loop Block.
-	isDescendentOfQueryLoop: boolean;
-	// Whether or not the block is within the context of a Single Product Block.
-	isDescendentOfSingleProductBlock: boolean;
+
 	// Height of the image.
 	height?: string;
 	// Width of the image.
@@ -33,6 +38,8 @@ export interface BlockAttributes {
 	scale: 'cover' | 'contain' | 'fill';
 	// Aspect ratio of the image.
 	aspectRatio: string;
+	// Block style from dimensions support (not React CSSProperties).
+	style?: AspectRatioStyle;
 }
 
 export interface ProductImageContext extends ProductQueryContext {

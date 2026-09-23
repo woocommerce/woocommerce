@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 
 /**
@@ -29,7 +28,11 @@ class TaskList {
 	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
 
 	/**
-	 * Option name of hidden reminder bar.
+	 * Option name of the dismissed reminder bar option.
+	 *
+	 * @deprecated 10.9.0 The reminder bar feature was removed; this option is no longer used.
+	 *                    Retained as a stub to avoid fatal errors in third-party code that
+	 *                    references the constant.
 	 */
 	const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
@@ -148,8 +151,6 @@ class TaskList {
 			$task  = new $class( $this );
 			$this->add_task( $task );
 		}
-
-		$this->possibly_remove_reminder_bar();
 	}
 
 	/**
@@ -406,20 +407,6 @@ class TaskList {
 	}
 
 	/**
-	 * Remove reminder bar four weeks after store creation.
-	 */
-	public static function possibly_remove_reminder_bar() {
-		$bar_hidden            = get_option( self::REMINDER_BAR_HIDDEN_OPTION, 'no' );
-		$active_for_four_weeks = WCAdminHelper::is_wc_admin_active_for( WEEK_IN_SECONDS * 4 );
-
-		if ( 'yes' === $bar_hidden || ! $active_for_four_weeks ) {
-			return;
-		}
-
-		update_option( self::REMINDER_BAR_HIDDEN_OPTION, 'yes' );
-	}
-
-	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array
@@ -451,5 +438,18 @@ class TaskList {
 			'displayProgressHeader' => $this->display_progress_header,
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 		);
+	}
+
+	/**
+	 * Possibly remove the task list reminder bar.
+	 *
+	 * @deprecated 10.9.0 The reminder bar feature was removed; this method is now a no-op.
+	 *                    Retained as a stub to avoid fatal errors in third-party code that
+	 *                    references the method.
+	 *
+	 * @return void
+	 */
+	public static function possibly_remove_reminder_bar(): void {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
 	}
 }

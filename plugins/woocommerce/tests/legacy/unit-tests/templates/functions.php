@@ -218,6 +218,45 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_query_string_form_fields with nested array params.
+	 *
+	 * @dataProvider provide_nested_array_cases
+	 *
+	 * @param string $url            URL to parse.
+	 * @param string $expected_name  Expected hidden field name attribute.
+	 * @param string $expected_value Expected hidden field value attribute.
+	 * @return void
+	 */
+	public function test_wc_query_string_form_fields_nested_arrays( string $url, string $expected_name, string $expected_value ): void {
+		$html = wc_query_string_form_fields( $url, array(), '', true );
+
+		$this->assertStringContainsString( 'name="' . $expected_name . '"', $html );
+		$this->assertStringContainsString( 'value="' . $expected_value . '"', $html );
+		$this->assertStringNotContainsString( '{dot}', $html );
+		$this->assertStringNotContainsString( '{plus}', $html );
+	}
+
+	/**
+	 * Data provider for test_wc_query_string_form_fields_nested_arrays.
+	 *
+	 * @return array[]
+	 */
+	public function provide_nested_array_cases(): array {
+		return array(
+			// Baseline: nested params without any special chars.
+			'nested baseline'      => array( 'https://x/?products[1][id]=12345', 'products[1][id]', '12345' ),
+			// Nested params with dots in nested keys.
+			'dot in nested key'    => array( 'https://x/?products[1.5][id]=12345', 'products[1.5][id]', '12345' ),
+			// Nested params with dots in nested values.
+			'dot in nested value'  => array( 'https://x/?products[1][price]=12.50', 'products[1][price]', '12.50' ),
+			// Same as dot-in-key case but with + instead of .
+			'plus in nested key'   => array( 'https://x/?products[a+b][id]=12345', 'products[a+b][id]', '12345' ),
+			// Same as dot-in-value case but with + instead of .
+			'plus in nested value' => array( 'https://x/?products[1][label]=hello+world', 'products[1][label]', 'hello+world' ),
+		);
+	}
+
+	/**
 	 * Test test_wc_get_pay_buttons().
 	 */
 	public function test_wc_get_pay_buttons() {
@@ -251,6 +290,106 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected_html, $actual_html );
+	}
+
+	/**
+	 * Item data used by the wc_get_formatted_cart_item_data tests, mixing rows
+	 * that should render (scalar or stringable rendered fields) with rows that
+	 * should be dropped (non-scalar rendered fields or malformed entries).
+	 *
+	 * @param array $item_data Existing item data.
+	 * @return array
+	 */
+	public function get_cart_item_data_fixture( $item_data ) {
+		$item_data[] = array(
+			'key'   => 'Gift wrap',
+			'value' => 'Included',
+		);
+		$item_data[] = array(
+			'key'     => 'Attachments',
+			'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
+			'display' => '2 files',
+		);
+		$item_data[] = array(
+			'key'      => 'Custom',
+			'value'    => 'Hidden value',
+			'display'  => 'Shown',
+			'_private' => array( 'internal' => 'data' ),
+		);
+		$item_data[] = array(
+			'key'     => 'Note',
+			'display' => new class() {
+				public function __toString() { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+					return 'From object';
+				}
+			},
+		);
+		$item_data[] = array(
+			'key'   => 'Files',
+			'value' => array( 'file-c.pdf' ),
+		);
+		$item_data[] = array(
+			'key'     => 'Extra',
+			'value'   => 'Details',
+			'display' => new stdClass(),
+		);
+		$item_data[] = 'Malformed item data';
+
+		return $item_data;
+	}
+
+	/**
+	 * Calls wc_get_formatted_cart_item_data with the shared fixture hooked into
+	 * the woocommerce_get_item_data filter.
+	 *
+	 * @param bool $flat Whether to request flat output.
+	 * @return string
+	 */
+	private function get_formatted_cart_item_data_with_fixture( $flat ) {
+		$filter = array( $this, 'get_cart_item_data_fixture' );
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			return wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				),
+				$flat
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+	}
+
+	/**
+	 * @testdox 'wc_get_formatted_cart_item_data' renders rows whose label and display value are stringable and drops the rest.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data() {
+		$html = $this->get_formatted_cart_item_data_with_fixture( false );
+
+		$this->assertStringContainsString( 'Gift wrap', $html );
+		$this->assertStringContainsString( 'Included', $html );
+		$this->assertStringContainsString( 'Attachments', $html );
+		$this->assertStringContainsString( '2 files', $html );
+		$this->assertStringContainsString( 'Custom', $html );
+		$this->assertStringContainsString( 'Shown', $html );
+		$this->assertStringContainsString( 'Note', $html );
+		$this->assertStringContainsString( 'From object', $html );
+		$this->assertStringNotContainsString( 'Hidden value', $html );
+		$this->assertStringNotContainsString( 'file-a.pdf', $html );
+		$this->assertStringNotContainsString( 'Files', $html );
+		$this->assertStringNotContainsString( 'Extra', $html );
+		$this->assertStringNotContainsString( 'Malformed item data', $html );
+	}
+
+	/**
+	 * @testdox 'wc_get_formatted_cart_item_data' renders the same rows in flat output.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data_in_flat_output() {
+		$output = $this->get_formatted_cart_item_data_with_fixture( true );
+
+		$this->assertSame( "Gift wrap: Included\nAttachments: 2 files\nCustom: Shown\nNote: From object\n", $output );
 	}
 
 	public function test_hidden_field() {

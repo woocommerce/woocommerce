@@ -7,6 +7,7 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	verbose="true"
+	defaultTestSuite="wc-phpunit-legacy,wc-phpunit-main"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
 		<testsuite name="wc-phpunit-legacy">
@@ -16,6 +17,9 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<!-- Email-template fixtures are plain PHP that emit markup at
+			     include-time (top-level HTML and `echo`). Exclude to silence them. -->
+			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>

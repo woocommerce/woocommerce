@@ -18,7 +18,7 @@ class WC_REST_WCCOM_Site_Installer_Error_Codes {
 	const NOT_AUTHENTICATED                   = 'not_authenticated';
 	const NO_ACCESS_TOKEN                     = 'no_access_token';
 	const NO_SIGNATURE                        = 'no_signature';
-	const SITE_NOT_CONNECTED                  = 'site_not_connnected';
+	const SITE_NOT_CONNECTED                  = 'site_not_connected';
 	const INVALID_TOKEN                       = 'invalid_token';
 	const REQUEST_VERIFICATION_FAILED         = 'request_verification_failed';
 	const USER_NOT_FOUND                      = 'user_not_found';

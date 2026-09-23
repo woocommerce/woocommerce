@@ -11,6 +11,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
 -   [Renderer Classes](#renderer-classes)
     -   [Renderer](#renderer)
     -   [Content_Renderer](#content_renderer)
+-   [Rendering Direction](#rendering-direction)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
 -   [Styles Helper](#styles-helper)
@@ -117,6 +118,45 @@ $html_content = $rendered_email['html'];
 $text_content = $rendered_email['text'];
 ```
 
+#### Rendering without a saved post
+
+Use `render_from_content()` to render block markup that has no database record.
+
+```php
+/**
+ * Renders block markup that has no backing post.
+ *
+ * @param string $content       Block HTML markup to render.
+ * @param string $template_slug Block template slug to render the content with.
+ * @param string $subject Email subject.
+ * @param string $pre_header An email preheader or preview text.
+ * @param string $language Email language.
+ * @param string $meta_robots Optional meta robots value for browser display.
+ * @return array
+ */
+public function render_from_content(
+    string $content,
+    string $template_slug,
+    string $subject,
+    string $pre_header,
+    string $language = 'en',
+    string $meta_robots = ''
+): array
+```
+
+**Example Usage:**
+
+```php
+$rendered_email = $renderer->render_from_content(
+    $block_markup,
+    'my-email-template-slug',
+    'Order Confirmation',
+    'Your order has been confirmed'
+);
+```
+
+Internally the renderer wraps the markup in a synthetic `WP_Post` with `ID === 0`; the rendering pipeline treats that ID as "no database record" and reads everything from the post object.
+
 ### Content_Renderer
 
 The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer` class is responsible for rendering only the HTML of block template content and a post. The block template has to contain a `core/post-content` block.
@@ -183,6 +223,26 @@ $result      = $content_renderer->render_without_css_inline( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```
+
+## Rendering Direction
+
+Full email rendering resolves text direction once per render and shares it with the template shell, preprocessors, and block renderers.
+
+Integrations can pass an optional boolean `is_rtl` value through the `woocommerce_email_editor_rendering_email_context` filter:
+
+```php
+add_filter(
+    'woocommerce_email_editor_rendering_email_context',
+    function ( array $context ): array {
+        $context['is_rtl'] = true;
+        return $context;
+    }
+);
+```
+
+When `is_rtl` is explicitly `true`, the rendered email uses RTL direction. When it is explicitly `false`, the rendered email uses LTR direction even if the `$language` argument is an RTL language. Non-boolean values are ignored.
+
+When `is_rtl` is absent, `Renderer::render()` falls back to the `$language` argument using a conservative RTL primary-language allow-list, then defaults to LTR when the language is empty or not recognized. Direct `Content_Renderer` callers do not have a language argument, so they use explicit filtered `is_rtl` when present and otherwise default to LTR.
 
 ## Core Blocks Integration
 
@@ -259,20 +319,20 @@ $table_html = Table_Wrapper_Helper::render_table_wrapper(
 
 ```html
 <table
-    border="0"
-    cellpadding="0"
-    cellspacing="0"
-    role="presentation"
-    width="100%"
-    style="max-width: 600px;"
+	border="0"
+	cellpadding="0"
+	cellspacing="0"
+	role="presentation"
+	width="100%"
+	style="max-width: 600px;"
 >
-    <tbody>
-        <tr style="background-color: #f0f0f0;">
-            <td align="center" style="padding: 20px;">
-                <p>Email content here</p>
-            </td>
-        </tr>
-    </tbody>
+	<tbody>
+		<tr style="background-color: #f0f0f0;">
+			<td align="center" style="padding: 20px;">
+				<p>Email content here</p>
+			</td>
+		</tr>
+	</tbody>
 </table>
 ```
 

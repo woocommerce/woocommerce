@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -30,11 +31,33 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private static array $created_order_ids = array();
 
 	/**
+	 * Import action IDs created for shared order fixtures.
+	 *
+	 * @var int[]
+	 */
+	private static array $created_import_action_ids = array();
+
+	/**
 	 * Created user ID for testing purposes.
 	 *
 	 * @var int
 	 */
 	private static int $created_user_id = -1;
+
+	/**
+	 * Order ID for an order owned by the created test user (non-admin customer).
+	 *
+	 * @var int
+	 */
+	private static int $customer_order_id = -1;
+
+	/**
+	 * Fulfillment IDs keyed by order ID, populated during setup so tests don't
+	 * need a preflight GET request to resolve them.
+	 *
+	 * @var array<int, int[]>
+	 */
+	private static array $created_fulfillment_ids = array();
 
 	/**
 	 * Original value of the fulfillments feature flag.
@@ -58,6 +81,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setupBeforeClass(): void {
 		parent::setupBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
@@ -66,18 +90,48 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller->initialize_fulfillments();
 
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
+		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 
 		for ( $order_number = 1; $order_number <= 10; $order_number++ ) {
 			$order                     = WC_Helper_Order::create_order( get_current_user_id() );
 			self::$created_order_ids[] = $order->get_id();
 			for ( $fulfillment = 1; $fulfillment <= 10; $fulfillment++ ) {
-				FulfillmentsHelper::create_fulfillment(
+				$f = FulfillmentsHelper::create_fulfillment(
 					array(
 						'entity_type' => WC_Order::class,
 						'entity_id'   => $order->get_id(),
 					)
 				);
+				self::$created_fulfillment_ids[ $order->get_id() ][] = $f->get_id();
 			}
+		}
+
+		// Create an order owned by the non-admin test user for customer permission tests.
+		$customer_order            = WC_Helper_Order::create_order( self::$created_user_id );
+		self::$customer_order_id   = $customer_order->get_id();
+		self::$created_order_ids[] = $customer_order->get_id();
+		for ( $fulfillment = 1; $fulfillment <= 10; $fulfillment++ ) {
+			$f = FulfillmentsHelper::create_fulfillment(
+				array(
+					'entity_type' => WC_Order::class,
+					'entity_id'   => $customer_order->get_id(),
+				)
+			);
+			self::$created_fulfillment_ids[ $customer_order->get_id() ][] = $f->get_id();
+		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::disable_direct_product_attribute_lookup_updates();
+	}
+
+	/**
+	 * Track import actions created for shared order fixtures.
+	 *
+	 * @param int $action_id Action ID.
+	 */
+	public static function track_import_action( $action_id ): void {
+		$action = \ActionScheduler_Store::instance()->fetch_action( $action_id );
+		if ( 'wc-admin_import_orders' === $action->get_hook() ) {
+			self::$created_import_action_ids[] = (int) $action_id;
 		}
 	}
 
@@ -85,31 +139,56 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Destroys the test environment after all tests on this file are run.
 	 */
 	public static function tearDownAfterClass(): void {
-		// Delete the created orders and their fulfillments.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
-		foreach ( self::$created_order_ids as $order_id ) {
-			WC_Helper_Order::delete_order( $order_id );
-		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			$fulfillments_data_store = new FulfillmentsDataStore();
+			$action_store            = \ActionScheduler_Store::instance();
+			foreach ( self::$created_import_action_ids as $action_id ) {
+				$action_store->delete_action( $action_id );
+			}
 
-		// Delete the created user.
-		wp_delete_user( self::$created_user_id );
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
+			// Delete the created orders and their fulfillments.
+			foreach ( self::$created_order_ids as $order_id ) {
+				$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
+				WC_Helper_Order::delete_order( $order_id );
+			}
 
-		parent::tearDownAfterClass();
+			// Delete the created user.
+			wp_delete_user( self::$created_user_id );
+		} finally {
+			try {
+				if ( false === self::$original_fulfillments_flag ) {
+					delete_option( 'woocommerce_feature_fulfillments_enabled' );
+				} else {
+					update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+				}
+			} finally {
+				try {
+					parent::tearDownAfterClass();
+				} finally {
+					self::$created_order_ids          = array();
+					self::$created_import_action_ids  = array();
+					self::$created_fulfillment_ids    = array();
+					self::$created_user_id            = -1;
+					self::$customer_order_id          = -1;
+					self::$original_fulfillments_flag = null;
+					self::disable_direct_product_attribute_lookup_updates();
+				}
+			}
+		}
 	}
 
 	/**
 	 * Test the get_items method.
 	 */
 	public function test_get_fulfillments_nominal() {
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
+
 		// Do the request for an order which the current user owns.
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$created_order_ids[0] . '/fulfillments' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$customer_order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
 		// Check the response.
@@ -123,8 +202,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		foreach ( $fulfillments as $fulfillment ) {
 			$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
-			$this->assertEquals( self::$created_order_ids[0], $fulfillment['entity_id'] );
+			$this->assertEquals( self::$customer_order_id, $fulfillment['entity_id'] );
 		}
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
@@ -164,6 +246,31 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Clean up the test environment.
 		wp_set_current_user( $current_user->ID );
+	}
+
+	/**
+	 * Test that unauthenticated users cannot access guest order fulfillments.
+	 *
+	 * Guest orders have customer_id = 0, and unauthenticated users have user_id = 0.
+	 * Without proper validation, 0 === 0 would grant access to any guest order's fulfillments.
+	 */
+	public function test_get_fulfillments_guest_order_unauthenticated() {
+		wp_set_current_user( 0 );
+
+		// Verify we are not logged in (user ID = 0).
+		$this->assertEquals( 0, get_current_user_id() );
+
+		// The pre-created orders have customer_id = 0 (guest orders).
+		$order = wc_get_order( self::$created_order_ids[0] );
+		$this->assertEquals( 0, $order->get_customer_id() );
+
+		// An unauthenticated request to a guest order should be denied.
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$created_order_ids[0] . '/fulfillments' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
 	}
 
 	/**
@@ -486,8 +593,12 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting a single fulfillment for a regular user.
 	 */
 	public function test_get_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
+
+		// Get a previously created order owned by the test customer.
+		$order_id = self::$customer_order_id;
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
@@ -512,22 +623,17 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $fulfillments[0]['is_fulfilled'], $fulfillment['is_fulfilled'] );
 		$this->assertEquals( $fulfillments[0]['meta_data'], $fulfillment['meta_data'] );
 		$this->assertEquals( $fulfillments[0]['date_updated'], $fulfillment['date_updated'] );
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
 	 * Test getting a single fulfillment for an admin user.
 	 */
 	public function test_get_fulfillment_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Set the current user to an admin.
 		wp_set_current_user( 1 );
@@ -536,27 +642,18 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id );
 		$response = $this->server->dispatch( $request );
 
-		// Check if $fulfillments[0] is the same as $response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
 		$fulfillment = $response->get_data();
-		$this->assertEquals( $fulfillments[0]['id'], $fulfillment['id'] );
+		$this->assertEquals( $fulfillment_id, $fulfillment['id'] );
 	}
 
 	/**
 	 * Test getting a single fulfillment with an invalid order ID.
 	 */
 	public function test_get_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Get the fulfillment for the order with an invalid order ID.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/999999/fulfillments/' . $fulfillment_id );
@@ -574,14 +671,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting a single fulfillment with an invalid fulfillment ID.
 	 */
 	public function test_get_fulfillment_invalid_fulfillment_id() {
-		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
+		wp_set_current_user( 1 );
 
 		// Get the fulfillment for the order with an invalid fulfillment ID.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/999999' );
@@ -594,6 +686,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $data['code'] );
 		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
 		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
+
+		wp_set_current_user( 0 );
 	}
 
 	/**
@@ -603,16 +697,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -634,16 +720,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment for a regular user.
 	 */
 	public function test_update_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( self::$created_user_id );
@@ -698,16 +776,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment for an admin user.
 	 */
 	public function test_update_fulfillment_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		// Use a dedicated order to avoid mutating shared state used by other tests.
+		$order_id       = self::$created_order_ids[8];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( 1 );
@@ -810,16 +881,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment with an invalid order ID.
 	 */
 	public function test_update_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order with an invalid order ID.
 		wp_set_current_user( 1 );
@@ -877,12 +940,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_fulfillment_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		// Update the fulfillment for the order with an invalid fulfillment ID.
 		wp_set_current_user( 1 );
@@ -941,16 +998,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment without items.
 	 */
 	public function test_update_fulfillment_without_items() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order with an invalid fulfillment ID.
 		wp_set_current_user( 1 );
@@ -997,16 +1046,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @dataProvider invalid_items_provider
 	 */
 	public function test_update_fulfillment_with_invalid_items( $items ) {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1096,16 +1137,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting a fulfillment for a regular user.
 	 */
 	public function test_delete_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1126,15 +1159,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_fulfillment_for_admin_user() {
 		// Use a dedicated order to avoid mutating shared state used by other tests.
-		$order_id = self::$created_order_ids[9];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertNotEmpty( $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[9];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1150,16 +1176,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting a fulfillment with an invalid order ID.
 	 */
 	public function test_delete_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1181,12 +1199,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_delete_fulfillment_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1209,16 +1221,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1240,22 +1244,18 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting fulfillment meta data for a regular user.
 	 */
 	public function test_get_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
 
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$customer_order_id;
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Get the fulfillment meta data for the order.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
 		$response = $this->server->dispatch( $request );
 
-		// Check the response. It should be an error saying that a regular user cannot view a fulfillment.
+		// Check the response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertEquals(
 			array(
@@ -1286,22 +1286,17 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				$response->get_data()
 			)
 		);
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
 	 * Test getting fulfillment meta data for an admin user.
 	 */
 	public function test_get_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1345,16 +1340,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting fulfillment meta data with an invalid order ID.
 	 */
 	public function test_get_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1376,12 +1363,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_get_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1404,16 +1385,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1435,16 +1408,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data for a regular user.
 	 */
 	public function test_update_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[1];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[1]['id'];
+		$order_id       = self::$created_order_ids[1];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][1];
 
 		// Update the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1479,16 +1444,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data for an admin user.
 	 */
 	public function test_update_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[2];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[2]['id'];
+		$order_id       = self::$created_order_ids[2];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][2];
 
 		wp_set_current_user( 1 );
 
@@ -1563,16 +1520,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data with an invalid order ID.
 	 */
 	public function test_update_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1613,12 +1562,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1660,16 +1603,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1708,16 +1643,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data for a regular user.
 	 */
 	public function test_delete_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[4];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[4]['id'];
+		$order_id       = self::$created_order_ids[4];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][4];
 
 		// Delete the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1743,16 +1670,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data for an admin user.
 	 */
 	public function test_delete_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1778,16 +1697,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data with an invalid order ID.
 	 */
 	public function test_delete_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1819,12 +1730,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_delete_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1857,16 +1762,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -2048,6 +1945,381 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
 		$this->assertNotContains( '_tracking_number', $meta_keys, 'Fulfillment without tracking should not have tracking number metadata' );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should accept customer_note in update request and forward sanitized value to notification hook.
+	 */
+	public function test_update_fulfillment_with_customer_note_fires_notification_with_sanitized_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => "Hello customer!\n<script>alert('xss')</script>",
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by wp_kses_post' );
+		$this->assertStringContainsString( 'Hello customer!', $captured_note, 'Legitimate note text should be preserved' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should preserve safe HTML (links, bold, italic) in customer_note.
+	 */
+	public function test_update_fulfillment_preserves_safe_html_in_customer_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => 'Please <strong>call us</strong> at <a href="https://example.com">our site</a>.',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with HTML customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringContainsString( '<strong>call us</strong>', $captured_note, 'Safe bold markup should be preserved' );
+		$this->assertStringContainsString( '<a href="https://example.com">our site</a>', $captured_note, 'Safe link markup should be preserved' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should fire notification with empty customer_note when parameter is omitted.
+	 */
+	public function test_update_fulfillment_without_customer_note_fires_notification_with_empty_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update without customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired' );
+		$this->assertSame( '', $captured_note, 'Customer note should be empty when not provided' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should not fire notification hook when notify_customer is false even with customer_note.
+	 */
+	public function test_update_fulfillment_with_note_but_no_notification_does_not_fire_hook(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$hook_fired = false;
+		$callback   = function () use ( &$hook_fired ) {
+			$hook_fired = true;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => false,
+					'customer_note'   => 'This should not be sent',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update should succeed' );
+		$this->assertFalse( $hook_fired, 'Notification hook should not fire when notify_customer is false' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * A `_date_fulfilled` value supplied via meta_data on create must be routed
+	 * through the UTC normalization contract (set_date_fulfilled), and the
+	 * response must surface it as ISO 8601 with a 'Z' suffix.
+	 */
+	public function test_create_fulfillment_normalizes_date_fulfilled_meta_to_utc() {
+		$original_timezone = get_option( 'timezone_string' );
+		$original_offset   = get_option( 'gmt_offset' );
+
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		update_option( 'gmt_offset', '' );
+
+		$date_fulfilled = $this->dispatch_create_with_date_fulfilled_meta( '2025-01-15 10:30:00' );
+
+		update_option( 'timezone_string', $original_timezone );
+		update_option( 'gmt_offset', $original_offset );
+
+		// Bare MySQL string is treated as site-local (LA, UTC-8 in January) and
+		// surfaced as ISO 8601 with explicit 'Z'.
+		$this->assertSame( '2025-01-15T18:30:00Z', $date_fulfilled );
+	}
+
+	/**
+	 * Dispatches a create-fulfillment REST request with a `_date_fulfilled` meta
+	 * value and returns the value the API surfaces back for that key.
+	 *
+	 * @param string $date_fulfilled Value to send in `meta_data['_date_fulfilled']`.
+	 * @return string|null
+	 */
+	private function dispatch_create_with_date_fulfilled_meta( string $date_fulfilled ): ?string {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Use is_fulfilled=false so the data store does not unconditionally overwrite
+		// date_fulfilled with current_time() during create; this isolates the test to
+		// the meta-data normalization path under test.
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => $date_fulfilled,
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		wp_set_current_user( 0 );
+
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				return $meta['value'];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The /metadata endpoints must format `_date_fulfilled` as ISO 8601 with 'Z'
+	 * suffix instead of leaking the raw 'Y-m-d H:i:s' UTC storage form.
+	 */
+	public function test_get_fulfillment_meta_formats_date_fulfilled_as_iso8601() {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		wp_set_current_user( 1 );
+
+		// Use is_fulfilled=false so the data store does not overwrite the
+		// _date_fulfilled meta value with current_time() during create.
+		$create = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$create->set_header( 'content-type', 'application/json' );
+		$create->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => '2025-01-15T10:30:00Z',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$create_response = $this->server->dispatch( $create );
+		$this->assertEquals( WP_Http::CREATED, $create_response->get_status() );
+		$fulfillment_id = $create_response->get_data()['id'];
+
+		$get          = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment_id . '/metadata' );
+		$get_response = $this->server->dispatch( $get );
+		$this->assertEquals( WP_Http::OK, $get_response->get_status() );
+
+		$get_meta = null;
+		foreach ( $get_response->get_data() as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$get_meta = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $get_meta );
 
 		wp_set_current_user( 0 );
 	}

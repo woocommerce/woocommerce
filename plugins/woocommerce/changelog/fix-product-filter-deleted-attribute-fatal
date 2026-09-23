@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal error on shop page when a product attribute taxonomy used in Product Filters block is deleted.

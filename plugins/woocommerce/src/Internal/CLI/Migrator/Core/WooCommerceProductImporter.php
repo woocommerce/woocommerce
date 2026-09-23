@@ -342,7 +342,7 @@ class WooCommerceProductImporter {
 			$existing_posts = get_posts(
 				array(
 					'post_type'   => 'product',
-					'post_status' => 'any', // Find regardless of status.
+					'post_status' => 'any',
 					'meta_key'    => '_original_product_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value'  => $product_data['original_product_id'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					'fields'      => 'ids',
@@ -488,8 +488,20 @@ class WooCommerceProductImporter {
 			$product->set_date_created( $product_data['date_created_gmt'] );
 		}
 
-		if ( ! empty( $product_data['weight'] ) ) {
-			$product->set_weight( $product_data['weight'] );
+		// Only touch weight/dimensions when the mapper actually emits the key. This importer is
+		// shared across platforms (e.g. Shopify maps no length/width/height), so on a re-run an
+		// absent key must leave the existing value untouched rather than clearing it.
+		if ( array_key_exists( 'weight', $product_data ) ) {
+			$product->set_weight( $product_data['weight'] ?? '' );
+		}
+		if ( array_key_exists( 'length', $product_data ) ) {
+			$product->set_length( ! empty( $product_data['length'] ) ? (string) $product_data['length'] : '' );
+		}
+		if ( array_key_exists( 'width', $product_data ) ) {
+			$product->set_width( ! empty( $product_data['width'] ) ? (string) $product_data['width'] : '' );
+		}
+		if ( array_key_exists( 'height', $product_data ) ) {
+			$product->set_height( ! empty( $product_data['height'] ) ? (string) $product_data['height'] : '' );
 		}
 
 		if ( ! empty( $product_data['tax_status'] ) ) {
@@ -807,7 +819,20 @@ class WooCommerceProductImporter {
 			$variation->set_stock_quantity( $var_data['stock_quantity'] ?? null );
 			$variation->set_stock_status( $var_data['stock_status'] ?? 'instock' );
 
-			$variation->set_weight( $var_data['weight'] ?? '' );
+			// Only touch weight/dimensions when the mapper emits the key (see the product block above):
+			// an absent key on a re-run must preserve the existing value rather than clear it.
+			if ( array_key_exists( 'weight', $var_data ) ) {
+				$variation->set_weight( $var_data['weight'] ?? '' );
+			}
+			if ( array_key_exists( 'length', $var_data ) ) {
+				$variation->set_length( ! empty( $var_data['length'] ) ? (string) $var_data['length'] : '' );
+			}
+			if ( array_key_exists( 'width', $var_data ) ) {
+				$variation->set_width( ! empty( $var_data['width'] ) ? (string) $var_data['width'] : '' );
+			}
+			if ( array_key_exists( 'height', $var_data ) ) {
+				$variation->set_height( ! empty( $var_data['height'] ) ? (string) $var_data['height'] : '' );
+			}
 
 			if ( ! empty( $var_data['tax_status'] ) ) {
 				$variation->set_tax_status( $var_data['tax_status'] );

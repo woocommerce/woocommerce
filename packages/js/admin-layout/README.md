@@ -7,5 +7,5 @@ A collection of WooCommerce Admin layout components and utilities.
 Install the module
 
 ```bash
-pnpm install @woocommerce/product-editor --save
+pnpm install @woocommerce/admin-layout --save
 ```

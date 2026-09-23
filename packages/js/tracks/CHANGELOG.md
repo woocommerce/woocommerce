@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1](https://www.npmjs.com/package/@woocommerce/tracks/v/1.5.1) - 2026-06-10 
+
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+
 ## [1.5.0](https://www.npmjs.com/package/@woocommerce/tracks/v/1.5.0) - 2026-02-23 
 
 -   Minor - Add bumpStats and fix unit test tooling [#50155]

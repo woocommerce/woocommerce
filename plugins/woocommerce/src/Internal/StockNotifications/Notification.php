@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -237,10 +237,12 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the user email.
 	 *
+	 * The value is stored in canonical form (trimmed, lowercased).
+	 *
 	 * @param string $user_email User email.
 	 */
 	public function set_user_email( string $user_email ) {
-		$this->set_prop( 'user_email', $user_email );
+		$this->set_prop( 'user_email', EmailNormalizer::normalize( $user_email ) );
 	}
 
 	/**
@@ -429,11 +431,17 @@ class Notification extends \WC_Data {
 			return '';
 		}
 
-		if ( $product->is_type( 'variation' ) && ! empty( $this->get_meta( 'posted_attributes' ) ) ) {
-			return $product->get_permalink( array( 'item_meta_array' => $this->get_meta( 'posted_attributes' ) ) );
-		} else {
+		$posted_attributes = $this->get_meta( 'posted_attributes' );
+		if ( ! $product instanceof \WC_Product_Variation || empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
 			return $product->get_permalink();
 		}
+
+		// Posted attributes hold only the values chosen for "Any" attributes, so merge them over the variation's own attributes to build a complete link.
+		// Keys that no longer belong to the variation (e.g. a removed attribute) are dropped so they don't leak into the URL.
+		$variation_attributes = $product->get_variation_attributes();
+		$attributes           = array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
+
+		return $product->get_permalink( array( 'variation' => $attributes ) );
 	}
 
 	/**
@@ -459,7 +467,7 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
-		$action_key = $this->get_meta( 'email_link_action_key' );
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
@@ -472,20 +480,18 @@ class Notification extends \WC_Data {
 			return false;
 		}
 
-		return HasherHelper::wp_verify_fast_hash( $key, $hash );
+		return wp_verify_fast_hash( $key, $hash );
 	}
 
 	/**
-	 * Maybe setup verification data for the notification.
-	 *
-	 * This is used to ensure that the notification has valid verification data.
+	 * Generate a verification key and store its hash.
 	 *
 	 * @param bool $persist If true, save the changes to the database.
 	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
 		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'email_link_action_key', time() . ':' . HasherHelper::wp_fast_hash( $key ) );
+		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
 
 		if ( $persist ) {
 			$this->save();
@@ -501,21 +507,22 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_unsubscribe_key( string $key ): bool {
-		return HasherHelper::wp_verify_fast_hash( $key, $this->get_meta( 'email_link_action_key' ) );
+		$stored = (string) $this->get_meta( 'unsubscribe_action_key' );
+		if ( '' === $stored ) {
+			return false;
+		}
+		return wp_verify_fast_hash( $key, $stored );
 	}
 
 	/**
-	 * Maybe setup verification data for the notification.
-	 *
-	 * This is used to ensure that the notification has valid verification data.
+	 * Generate an unsubscribe key and store its hash.
 	 *
 	 * @param bool $persist If true, save the changes to the database.
 	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key  = wp_generate_password( 20, false );
-		$hash = HasherHelper::wp_fast_hash( $key );
-		$this->update_meta_data( 'email_link_action_key', $hash );
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
 
 		if ( $persist ) {
 			$this->save();

@@ -704,6 +704,77 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report no tokens when none are registered.
+	 */
+	public function test_has_tokens_returns_false_when_no_tokens_exist(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should not query again once a lookup found no tokens.
+	 */
+	public function test_has_tokens_memoizes_a_negative_result(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->has_tokens();
+
+		$queries_before = $wpdb->num_queries;
+		$data_store->has_tokens();
+
+		$this->assertSame( $queries_before, $wpdb->num_queries );
+	}
+
+	/**
+	 * @testdox Should report tokens once one is registered, regardless of the owner's role.
+	 */
+	public function test_has_tokens_returns_true_when_a_token_exists(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $subscriber_id,
+				'token'         => 'subscriber_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'subscriber-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( ( new PushTokensDataStore() )->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should report tokens after one is created, when an earlier lookup found none.
+	 */
+	public function test_has_tokens_reflects_a_token_created_after_an_earlier_lookup(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( $data_store->has_tokens() );
+		$this->assertCount( 1, $data_store->get_tokens_for_roles( array( 'administrator' ) ) );
+	}
+
+	/**
 	 * @testdox Should return tokens for users with matching roles.
 	 */
 	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {
@@ -851,6 +922,189 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
 
 		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should exclude tokens whose owner no longer exists.
+	 */
+	public function test_get_tokens_for_roles_excludes_tokens_of_deleted_users(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		wp_delete_user( $admin_id );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should paginate tokens and report totals.
+	 */
+	public function test_get_tokens_for_roles_supports_pagination(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->create_push_token_for_user( $data_store, $admin_id );
+		}
+
+		$page_one = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 2 );
+
+		$this->assertCount( 2, $page_one['tokens'] );
+		$this->assertSame( 3, $page_one['total'] );
+		$this->assertSame( 2, $page_one['total_pages'] );
+
+		$page_two = $data_store->get_tokens_for_roles( array( 'administrator' ), 2, 2 );
+
+		$this->assertCount( 1, $page_two['tokens'] );
+	}
+
+	/**
+	 * @testdox Should not run any user query when no tokens exist.
+	 */
+	public function test_get_tokens_for_roles_skips_user_query_when_no_tokens_exist(): void {
+		$this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$user_queries = 0;
+		$count        = function () use ( &$user_queries ) {
+			++$user_queries;
+		};
+		add_action( 'pre_get_users', $count );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		remove_action( 'pre_get_users', $count );
+
+		$this->assertSame( array(), $tokens );
+		$this->assertSame( 0, $user_queries, 'With no stored tokens there is nothing to look up: an empty include must short-circuit before get_users(), because WP_User_Query ignores an empty include argument and would fall back to the unrestricted role scan.' );
+	}
+
+	/**
+	 * @testdox Should only run user queries restricted to token owners.
+	 */
+	public function test_get_tokens_for_roles_only_queries_users_owning_tokens(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$includes = array();
+		$capture  = function ( $query ) use ( &$includes ) {
+			$includes[] = $query->query_vars['include'];
+		};
+		add_action( 'pre_get_users', $capture );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		remove_action( 'pre_get_users', $capture );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertNotEmpty( $includes, 'The role lookup should run through WP_User_Query.' );
+		foreach ( $includes as $include ) {
+			$this->assertNotEmpty( $include, 'User queries on this path must be restricted to token owners: an unrestricted role__in query scans the capabilities meta of every user and does not scale on large sites.' );
+		}
+	}
+
+	/**
+	 * Creates a push token owned by the given user.
+	 *
+	 * @param PushTokensDataStore $data_store The data store instance.
+	 * @param int                 $user_id    The owner user ID.
+	 * @return PushToken The created push token object.
+	 */
+	private function create_push_token_for_user( PushTokensDataStore $data_store, int $user_id ): PushToken {
+		return $data_store->create(
+			array(
+				'user_id'       => $user_id,
+				'token'         => 'test_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'test-device-uuid-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should delete every token owned by the user and report how many went.
+	 */
+	public function test_delete_for_user_deletes_all_of_that_users_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, 101 );
+		$this->create_push_token_for_user( $data_store, 101 );
+		$retained = $this->create_push_token_for_user( $data_store, 102 );
+
+		$this->assertSame( 2, $data_store->delete_for_user( 101 ) );
+		$this->assertSame( 0, $this->count_tokens_for_user( 101 ) );
+		$this->assertNotNull( get_post( $retained->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should report zero when the user owns no tokens.
+	 */
+	public function test_delete_for_user_returns_zero_when_the_user_has_no_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertSame( 0, $data_store->delete_for_user( 103 ) );
+	}
+
+	/**
+	 * A caller that loses the user ID must not match every author-less row.
+	 *
+	 * @testdox Should refuse a non-positive user ID and delete nothing.
+	 */
+	public function test_delete_for_user_refuses_a_non_positive_user_id(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$this->create_push_token_for_user( $data_store, 105 );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = %s",
+				PushToken::POST_TYPE
+			)
+		);
+
+		$this->assertSame( 0, $data_store->delete_for_user( 0 ) );
+		$this->assertSame( 1, $this->count_tokens_for_user( 0 ) );
+	}
+
+	/**
+	 * @testdox Should remove the token's meta along with the record.
+	 */
+	public function test_delete_for_user_removes_token_meta(): void {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_push_token_for_user( $data_store, 104 );
+		$token_id   = $push_token->get_id();
+
+		$data_store->delete_for_user( 104 );
+
+		$this->assertSame( '', get_post_meta( $token_id, 'token', true ) );
+	}
+
+	/**
+	 * Counts the push token records owned by a user.
+	 *
+	 * @param int $user_id The owning user ID.
+	 * @return int The number of records.
+	 */
+	private function count_tokens_for_user( int $user_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d",
+				PushToken::POST_TYPE,
+				$user_id
+			)
+		);
 	}
 
 	/**

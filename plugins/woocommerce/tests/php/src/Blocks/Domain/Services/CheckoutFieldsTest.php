@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use WP_UnitTestCase;
 
@@ -90,6 +91,20 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'label'    => __( 'Please leave my package on the porch if I\'m not home', 'woocommerce' ),
 				'location' => 'order',
 				'type'     => 'checkbox',
+			),
+			array(
+				'id'       => 'plugin-namespace/delivery-date',
+				'label'    => 'Preferred delivery date',
+				'location' => 'order',
+				'type'     => 'date',
+			),
+			array(
+				'id'       => 'plugin-namespace/appointment-date',
+				'label'    => 'Appointment date',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'P0D',
+				'max'      => 'P30D',
 			),
 			array(
 				'id'         => 'namespace/vat-number',
@@ -187,5 +202,324 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$fields = $this->controller->get_contextual_fields_for_location( 'address', $document_object );
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
+	}
+
+	/**
+	 * @testdox Date fields can be registered, with their constraints stored as registered.
+	 */
+	public function test_date_fields_can_be_registered() {
+		$fields = $this->controller->get_additional_fields();
+
+		$this->assertArrayHasKey( 'plugin-namespace/delivery-date', $fields, 'Date fields should be a supported field type.' );
+		$this->assertSame( 'date', $fields['plugin-namespace/delivery-date']['type'] );
+		$this->assertSame( array(), $fields['plugin-namespace/delivery-date']['validation'], 'A date field without custom rules should not gain a validation schema.' );
+
+		// The constraint rules themselves are covered by DateFieldTypeTest; this only checks registration carries them through unresolved.
+		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
+		$this->assertSame( 'P30D', $fields['plugin-namespace/appointment-date']['max'] );
+	}
+
+	/**
+	 * @testdox Old order dates can be edited without the current checkout limits.
+	 */
+	public function test_order_editor_omits_date_constraints(): void {
+		$sut   = Package::container()->get( CheckoutFieldsAdmin::class );
+		$order = new \WC_Order();
+		$key   = '_wc_other/plugin-namespace/appointment-date';
+		$order->set_created_via( 'store-api' );
+		$order->update_meta_data( $key, '1900-01-01' );
+
+		$fields = $sut->admin_order_fields( array(), $order );
+		$field  = $fields['plugin-namespace/appointment-date'];
+
+		$this->assertSame( '1900-01-01', $field['value'] );
+		$this->assertArrayNotHasKey( 'min', $field['custom_attributes'] ?? array() );
+		$this->assertArrayNotHasKey( 'max', $field['custom_attributes'] ?? array() );
+
+		$sut->update_callback( $key, '1900-01-02', $order );
+		$this->assertSame( '1900-01-02', $order->get_meta( $key ) );
+	}
+
+	/**
+	 * @testdox Invalid dates still reach custom validation and both validation hooks.
+	 */
+	public function test_invalid_date_runs_custom_validation_and_hooks(): void {
+		$calls = array();
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$field['validate_callback'] = static function ( $value ) use ( &$calls ) {
+			$calls['callback'] = $value;
+			return new \WP_Error( 'custom_date_error', 'Custom validation error.' );
+		};
+
+		$hooks = array(
+			'__experimental_woocommerce_blocks_validate_additional_field',
+			'woocommerce_validate_additional_field',
+		);
+		$this->setExpectedDeprecated( $hooks[0] );
+
+		foreach ( $hooks as $hook ) {
+			add_action(
+				$hook,
+				static function ( $errors, $key, $value ) use ( &$calls, $hook ) {
+					$calls[ $hook ] = array( $key, $value, $errors->get_error_codes() );
+				},
+				10,
+				3
+			);
+		}
+
+		$errors = $this->controller->validate_field( $field, '2026-02-31' );
+
+		$this->assertSame( '2026-02-31', $calls['callback'] ?? null );
+		$this->assertContains( 'woocommerce_invalid_checkout_field', $errors->get_error_codes() );
+		$this->assertContains( 'custom_date_error', $errors->get_error_codes() );
+		foreach ( $hooks as $hook ) {
+			$this->assertArrayHasKey( $hook, $calls, 'Both validation hooks must run after a type error.' );
+			$this->assertSame( $field['id'], $calls[ $hook ][0] );
+			$this->assertSame( '2026-02-31', $calls[ $hook ][1] );
+			$this->assertContains( 'woocommerce_invalid_checkout_field', $calls[ $hook ][2] );
+			$this->assertContains( 'custom_date_error', $calls[ $hook ][2] );
+		}
+	}
+
+	/**
+	 * @testdox Date field validation is delegated to the date field type.
+	 */
+	public function test_date_field_validation_is_delegated() {
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$this->assertFalse( $this->controller->validate_field( $field, '2025-08-26' )->has_errors() );
+		$this->assertTrue( $this->controller->validate_field( $field, '2025-02-31' )->has_errors() );
+	}
+
+	/**
+	 * @testdox A date field whose constraints the date field type rejects is not registered.
+	 */
+	public function test_date_field_with_invalid_constraint_is_not_registered() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/invalid-constraint',
+				'label'    => 'Invalid constraint',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'not-a-date',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/invalid-constraint', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox A field whose rules reference another field with $data is registered.
+	 */
+	public function test_field_with_data_reference_rule_is_registered() {
+		$this->register_stay_dates();
+
+		$this->assertArrayHasKey( 'plugin-namespace/check-out', $this->controller->get_additional_fields(), 'A $data reference in a validation rule should not be rejected as an invalid schema.' );
+	}
+
+	/**
+	 * @testdox Date comparison schemas default to date strings and keep supplied keywords.
+	 *
+	 * @testWith [[], "string"]
+	 *           [{"type": "string"}, "string"]
+	 *           [{"format": "date"}, "string"]
+	 *           [{"type": ["string", "null"], "format": "date"}, ["string", "null"]]
+	 *
+	 * @param array        $schema The supplied schema keywords.
+	 * @param string|array $type   The expected schema type.
+	 */
+	public function test_date_comparison_schema_defaults( array $schema, $type ): void {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => array_merge( array( 'formatMinimum' => '2026-05-02' ), $schema ),
+			)
+		);
+
+		$fields = $this->controller->get_additional_fields();
+		$this->assertArrayHasKey( 'plugin-namespace/check-out', $fields, 'Date limits should register without explicit type and format keywords.' );
+		$field = $fields['plugin-namespace/check-out'];
+
+		$this->assertSame( $type, $field['validation']['type'] );
+		$this->assertSame( 'date', $field['validation']['format'] );
+		$this->assertTrue( $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-02' ) ) );
+		$this->assertWPError( $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-01' ) ) );
+	}
+
+	/**
+	 * @testdox Date schema defaults do not replace invalid keywords supplied by the caller.
+	 *
+	 * @testWith [{"format": "date-time"}]
+	 *           [{"format": null}]
+	 *           [{"type": null}]
+	 *
+	 * @param array $schema The invalid schema keywords.
+	 */
+	public function test_date_schema_defaults_preserve_invalid_keywords( array $schema ): void {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => array_merge( array( 'formatMaximum' => '2026-05-02' ), $schema ),
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/check-out', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox A $data rule orders one date field against another.
+	 *
+	 * @testWith ["2026-05-01", "2026-05-02", true]
+	 *           ["2026-05-01", "2026-05-01", false]
+	 *           ["2026-05-04", "2026-05-01", false]
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @param bool   $is_valid  Whether the pair should pass validation.
+	 */
+	public function test_data_reference_rule_compares_two_date_fields( string $check_in, string $check_out, bool $is_valid ) {
+		$this->register_stay_dates();
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertSame(
+			$is_valid,
+			true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ),
+			sprintf( 'Check-out %s against check-in %s was not judged as expected.', $check_out, $check_in )
+		);
+	}
+
+	/**
+	 * @testdox Optional blank dates do not trigger a cross-field comparison.
+	 *
+	 * @testWith ["2026-05-01", "", true]
+	 *           ["", "2026-05-04", true]
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @param bool   $is_valid  Whether the pair should pass validation.
+	 */
+	public function test_blank_dates_skip_cross_field_comparisons( string $check_in, string $check_out, bool $is_valid ) {
+		$this->register_stay_dates( true );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertSame( $is_valid, true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ) );
+	}
+
+	/**
+	 * @testdox Each field type contributes its own keywords to the REST API value schema.
+	 */
+	public function test_prepare_field_value_schema() {
+		$fields = $this->controller->get_additional_fields();
+
+		$date = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/delivery-date'] );
+		$this->assertSame( 'string', $date['type'] );
+		$this->assertArrayNotHasKey( 'pattern', $date, 'Date validation runs outside the REST API value schema.' );
+
+		$checkbox = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/leave-on-porch'] );
+		$this->assertSame( 'boolean', $checkbox['type'] );
+
+		$select = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/job-function'] );
+		$this->assertSame( array( 'director', 'engineering', 'customer-support', 'other' ), $select['enum'] );
+
+		$text = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/gov-id'] );
+		$this->assertSame( array( 'type' => 'string' ), $text, 'A type with no keywords of its own should leave the schema alone.' );
+	}
+
+	/**
+	 * Registers a pair of date fields where the second must fall after the first.
+	 *
+	 * @param bool $allow_empty Whether the schema accepts an empty check-out.
+	 */
+	private function register_stay_dates( bool $allow_empty = false ) {
+		$validation = array(
+			'type'                   => 'string',
+			'format'                 => 'date',
+			'formatExclusiveMinimum' => array( '$data' => '1/plugin-namespace~1check-in' ),
+		);
+		if ( $allow_empty ) {
+			$validation = array( 'anyOf' => array( array( 'const' => '' ), $validation ) );
+		} else {
+			unset( $validation['type'], $validation['format'] );
+		}
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/check-in',
+				'label'    => 'Check-in',
+				'location' => 'order',
+				'type'     => 'date',
+			)
+		);
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => $validation,
+			)
+		);
+	}
+
+	/**
+	 * Builds a document object holding the two stay dates as they reach rule evaluation.
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @return DocumentObject
+	 */
+	private function stay_document_object( string $check_in, string $check_out ): DocumentObject {
+		$document_object = new DocumentObject(
+			array(
+				'checkout' => array(
+					'additional_fields' => array(
+						'plugin-namespace/check-in'  => $check_in,
+						'plugin-namespace/check-out' => $check_out,
+					),
+				),
+			)
+		);
+		$document_object->set_customer( new \WC_Customer( 0 ) );
+
+		return $document_object;
+	}
+
+	/**
+	 * Registering a field before after_setup_theme warns the developer.
+	 */
+	public function test_registering_before_after_setup_theme_triggers_notice() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		$saved_action = $GLOBALS['wp_actions']['after_setup_theme'] ?? null;
+		unset( $GLOBALS['wp_actions']['after_setup_theme'] );
+
+		try {
+			woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => 'test-namespace/early-field',
+					'label'    => 'Early field',
+					'location' => 'contact',
+				)
+			);
+		} finally {
+			if ( null !== $saved_action ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the count cleared above to simulate registering before after_setup_theme.
+				$GLOBALS['wp_actions']['after_setup_theme'] = $saved_action;
+			}
+			__internal_woocommerce_blocks_deregister_checkout_field( 'test-namespace/early-field' );
+		}
 	}
 }

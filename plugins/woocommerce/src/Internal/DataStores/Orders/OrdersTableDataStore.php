@@ -265,7 +265,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @var \string[][]
 	 */
-	protected $order_column_mapping = array(
+	/**
+	 * Full set of order columns for the base order data store. Used via self:: to ensure cached
+	 * order data objects always contain the complete column set, even when a subclass overrides
+	 * $order_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_ORDER_COLUMN_MAPPING = array(
 		'id'                   => array(
 			'type' => 'int',
 			'name' => 'id',
@@ -337,11 +344,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for billing addresses in wc_address table.
+	 * Table column to WC_Order mapping for wc_orders table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $billing_address_column_mapping = array(
+	protected $order_column_mapping = self::BASE_ORDER_COLUMN_MAPPING;
+
+	/**
+	 * Full set of billing address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $billing_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_BILLING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -392,11 +408,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for shipping addresses in wc_address table.
+	 * Table column to WC_Order mapping for billing addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $shipping_address_column_mapping = array(
+	protected $billing_address_column_mapping = self::BASE_BILLING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of shipping address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $shipping_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_SHIPPING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -444,11 +469,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for wc_operational_data table.
+	 * Table column to WC_Order mapping for shipping addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $operational_data_column_mapping = array(
+	protected $shipping_address_column_mapping = self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of operational data columns for the base order data store. Used via self:: to ensure
+	 * cached order data objects always contain the complete column set, even when a subclass
+	 * overrides $operational_data_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_OPERATIONAL_DATA_COLUMN_MAPPING = array(
 		'id'                          => array( 'type' => 'int' ),
 		'order_id'                    => array( 'type' => 'int' ),
 		'created_via'                 => array(
@@ -518,11 +552,25 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
+	 * Table column to WC_Order mapping for wc_operational_data table.
+	 *
+	 * @var \string[][]
+	 */
+	protected $operational_data_column_mapping = self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING;
+
+	/**
 	 * Cache variable to store combined mapping.
 	 *
 	 * @var array[][][]
 	 */
 	private $all_order_column_mapping;
+
+	/**
+	 * Cache variable to store combined mapping with full operational data columns.
+	 *
+	 * @var array<string, array<string, array<string, string>>>|null
+	 */
+	private $all_order_column_mapping_for_cache;
 
 	/**
 	 * Return combined mappings for all order tables.
@@ -540,6 +588,30 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		return $this->all_order_column_mapping;
+	}
+
+	/**
+	 * Return combined mappings for all order tables, always using the full set of operational
+	 * data columns defined in the base OrdersTableDataStore class. This ensures that cached
+	 * order data objects are complete regardless of which data store subclass populates the
+	 * cache, preventing cross-bleed when different data stores (orders, refunds, subscriptions)
+	 * share the same cache group.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return array<string, array<string, array<string, string>>> Return combined mapping with full operational data columns.
+	 */
+	private function get_all_order_column_mappings_for_cache() {
+		if ( ! isset( $this->all_order_column_mapping_for_cache ) ) {
+			$this->all_order_column_mapping_for_cache = array(
+				'orders'           => self::BASE_ORDER_COLUMN_MAPPING,
+				'billing_address'  => self::BASE_BILLING_ADDRESS_COLUMN_MAPPING,
+				'shipping_address' => self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING,
+				'operational_data' => self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING,
+			);
+		}
+
+		return $this->all_order_column_mapping_for_cache;
 	}
 
 	/**
@@ -1049,7 +1121,9 @@ WHERE
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -1411,6 +1485,73 @@ WHERE
 	 * @return array Filtered meta data.
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+
+		/*
+		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
+		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object, a
+		 * well-formed array whose elements are not meta rows, or an array of objects that are missing
+		 * required columns. Any of these would otherwise fatal or silently load wrong values
+		 * downstream (array_filter()/array_diff() on a non-array, $meta->meta_key on a non-object
+		 * element, or a real key hydrated with a null value from a partial row).
+		 *
+		 * A row is usable when it carries meta_key and meta_value - the fields init_meta_data() reads
+		 * as data. meta_id is intentionally NOT required here: unlike OrdersTableDataStoreMeta::
+		 * is_valid_cached_meta(), which validates raw database rows at the HPOS 'orders_meta'
+		 * boundary (those always have a meta_id), this guard also runs against the post-filter output
+		 * that WC_Data::read_meta_data() caches and re-validates on a cache hit. That output can
+		 * legitimately include virtual rows injected by extensions via the
+		 * woocommerce_data_store_wp_post_read_meta filter (orders use the 'post' meta type), which
+		 * carry meta_key and meta_value but no meta_id (init_meta_data() reads such a row's id as 0).
+		 * Requiring meta_id would reclassify those legitimate rows as corrupt and churn the cache -
+		 * purging it and re-logging on every read - so we only treat a missing meta_key or meta_value
+		 * as corruption. Drop
+		 * anything that is not a usable meta row so the order still loads, and when corruption is
+		 * detected invalidate the cached entries so the next read self-heals from the database.
+		 */
+		$is_corrupt = false;
+		if ( is_array( $raw_meta_data ) ) {
+			$valid_meta_data = array_filter(
+				$raw_meta_data,
+				static fn( $meta ) => is_object( $meta )
+					&& property_exists( $meta, 'meta_key' )
+					&& property_exists( $meta, 'meta_value' )
+			);
+			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
+			$raw_meta_data   = $valid_meta_data;
+		} else {
+			$is_corrupt    = true;
+			$raw_meta_data = array();
+		}
+
+		if ( $is_corrupt ) {
+			$this->error_logger->warning(
+				sprintf(
+					'Discarded malformed meta data for order %1$d while reading; invalidating the cached entry so it is re-read from the database.',
+					(int) $object->get_id()
+				),
+				array( 'source' => 'hpos-data-cache' )
+			);
+
+			/*
+			 * Invalidate every cache the corrupt value could have come from so the next read
+			 * self-heals from the database. The HPOS meta cache (orders_meta group) is primed by
+			 * init_order_record(), while WC_Data::read_meta_data() reads the object's own legacy
+			 * meta cache (the 'orders' group for orders) and, on a cache hit, skips re-caching -
+			 * so without clearing that group the corrupt entry would persist across reads.
+			 */
+			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+
+			/*
+			 * delete_meta_cache() is defined on WC_Data, so $object always has it in a consistent
+			 * deploy. The guard only covers the brief window during a plugin upgrade where this
+			 * (newer) class can be loaded before an opcode-cached, older abstract-wc-data.php gains
+			 * the method, which would otherwise fatal on an undefined method.
+			 */
+			if ( is_callable( array( $object, 'delete_meta_cache' ) ) ) {
+				$object->delete_meta_cache();
+			}
+		}
+
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
 		$allowed_keys       = array(
 			'_billing_address_index',
@@ -1689,12 +1830,26 @@ WHERE
 	 * @param object             $order_data A row of order data from the database.
 	 */
 	protected function set_order_props_from_data( &$order, $order_data ) {
+		// Uses $this->get_all_order_column_mappings() (not the cache variant) intentionally:
+		// each data store subclass should only attempt to set properties it actually maps.
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
 					continue;
 				}
 				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
+					$this->error_logger->debug(
+						sprintf(
+							'Property \'%1$s\' (column \'%2$s\' from table group \'%3$s\') missing from data for order %4$d. Order will use default value for this property.',
+							$prop_details['name'],
+							$column_name,
+							$table_name,
+							$order->get_id()
+						),
+						array(
+							'source' => 'hpos-data-cache',
+						)
+					);
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
@@ -1826,7 +1981,7 @@ WHERE
 		foreach ( $table_data as $table_datum ) {
 			$id                = $table_datum->{"{$order_table_alias}_id"};
 			$order_data[ $id ] = new \stdClass();
-			foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mappings ) {
+			foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
 				$table_alias = $table_aliases[ $table_name ];
 				// This remapping is required to keep the query length small enough to be supported by implementations such as HyperDB (i.e. fetching some tables in join via alias.*, while others via full name). We can revert this commit if HyperDB starts supporting SRTM for query length more than 3076 characters.
 				foreach ( $column_mappings as $field => $map ) {
@@ -1857,8 +2012,71 @@ WHERE
 	 */
 	private function get_order_data_for_ids_from_cache( array $ids ): array {
 		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+		$order_data   = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
 
-		return array_filter( $cache_engine->get_cached_objects( $ids, $this->get_cache_group() ) );
+		foreach ( $order_data as $id => $datum ) {
+			/*
+			 * Cached order data is always a complete plain stdClass whose id matches the cache key
+			 * and which carries every mapped column property (see get_order_data_for_ids_from_db()).
+			 * Accept only that shape. Anything else - a scalar, an array, a foreign/incomplete
+			 * object such as __PHP_Incomplete_Class, a record whose id is missing or belongs to a
+			 * different order (cross-contamination), or a truncated record missing mapped columns -
+			 * would fatal or silently hydrate the wrong/default order state downstream
+			 * (read_multiple() dereferences $order_data->id and indexes $orders[$order_id];
+			 * set_order_props_from_data() defaults any missing property). This can happen when a
+			 * third-party persistent object cache returns a corrupt or cross-contaminated value, or
+			 * when a stale entry written by an older version predates the complete-column-set fix.
+			 * Invalidate the entry so it is re-read from the database, and surface it for diagnosis.
+			 */
+			if ( $this->is_valid_cached_order_data( $datum, (int) $id ) ) {
+				continue;
+			}
+
+			if ( null !== $datum ) {
+				$cache_engine->delete_cached_object( $id, $this->get_cache_group() );
+				$this->error_logger->warning(
+					sprintf(
+						'Discarded a corrupt HPOS order cache entry for order %1$d (unexpected shape, mismatched id, or missing mapped columns); it will be re-read from the database.',
+						(int) $id
+					),
+					array( 'source' => 'hpos-data-cache' )
+				);
+			}
+
+			unset( $order_data[ $id ] );
+		}
+
+		return $order_data;
+	}
+
+	/**
+	 * Determine whether a cached order data record is complete and belongs to the requested order.
+	 *
+	 * A valid entry is a plain stdClass whose id matches the cache key and which carries every
+	 * column property that get_order_data_for_ids_from_db() populates from
+	 * get_all_order_column_mappings_for_cache(). Rejecting truncated records forces a fresh database
+	 * read instead of letting set_order_props_from_data() silently default the missing properties.
+	 *
+	 * @param mixed $datum The cached value to validate.
+	 * @param int   $id    The order id the entry is cached under.
+	 *
+	 * @return bool True when the record is a complete order data object for the given id.
+	 */
+	private function is_valid_cached_order_data( $datum, int $id ): bool {
+		if ( ! $datum instanceof \stdClass || ! property_exists( $datum, 'id' ) || (int) $datum->id !== $id ) {
+			return false;
+		}
+
+		foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
+			foreach ( $column_mappings as $field => $map ) {
+				$field_name = $map['name'] ?? "{$table_name}_$field";
+				if ( ! property_exists( $datum, $field_name ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -2129,12 +2347,17 @@ FROM $order_meta_table
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
 		$data = array(
-			'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-			'post_status'   => 'draft',
-			'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
-			'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+			'post_status' => 'draft',
+			'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
 		);
+
+		// An order with no created date leaves the post dates to WordPress rather than failing the whole sync batch.
+		$date_created = $order->get_date_created( 'edit' );
+		if ( ! is_null( $date_created ) ) {
+			$data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
+			$data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
+		}
 
 		if ( 'backfill' === $context ) {
 			if ( ! $order->get_id() ) {
@@ -2492,6 +2715,18 @@ FROM $order_meta_table
 	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
 		global $wpdb;
 
+		// Notes are the order's own data, not the backup post's, so they shouldn't wait on a deferred post record.
+		$comments = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d",
+				$order_id
+			)
+		);
+
+		foreach ( $comments as $comment_id ) {
+			wp_delete_comment( $comment_id, true );
+		}
+
 		$post_type = $wpdb->get_var(
 			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
 		);
@@ -2685,11 +2920,47 @@ FROM $order_meta_table
 		 */
 		do_action( 'woocommerce_untrash_order', $order->get_id(), $previous_status );
 
-		$order->set_status( $previous_status );
-		$order->save();
+		// Customer order emails (and other transactional emails) are dispatched via WC_Emails
+		// listeners on the woocommerce_order_status_* actions. Suppress dispatch for this order
+		// while we restore it so customers aren't re-notified about an order they
+		// already received emails for. The status transition actions themselves still fire,
+		// so any 3rd-party code hooked into them keeps working.
+		$suspended_email_dispatch = $this->suspend_transactional_email_dispatch( $order->get_id() );
+
+		try {
+			$order->set_status( $previous_status );
+			$order->save();
+		} finally {
+			$this->restore_transactional_email_dispatch( $suspended_email_dispatch );
+		}
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
 		if ( 'wc-' . $order->get_status() === $previous_status ) {
+			wp_untrash_post_comments( $id );
+
+			// Order notes are always restored. Other comment types are left alone.
+			global $wpdb;
+			$order_note_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_approved = %s AND comment_type = %s",
+					$id,
+					'post-trashed',
+					'order_note'
+				)
+			);
+			if ( $order_note_ids ) {
+				$wpdb->update(
+					$wpdb->comments,
+					array( 'comment_approved' => '1' ),
+					array(
+						'comment_post_ID'  => $id,
+						'comment_approved' => 'post-trashed',
+						'comment_type'     => 'order_note',
+					)
+				);
+				clean_comment_cache( $order_note_ids );
+			}
+
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
@@ -2709,7 +2980,6 @@ FROM $order_meta_table
 
 		return false;
 	}
-
 
 	/**
 	 * Deletes order data from custom order tables.
@@ -3163,9 +3433,10 @@ FROM $order_meta_table
 	 */
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -3191,17 +3462,15 @@ FROM $order_meta_table
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
-				FROM %i
+			"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM {$orders_table}
 				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
-				GROUP BY parent_order_id",
-				self::get_orders_table_name()
-			)
+				GROUP BY parent_order_id"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -3309,7 +3578,7 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key(100)),
+	KEY meta_key_value (meta_key(50), meta_value(20)),
 	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";

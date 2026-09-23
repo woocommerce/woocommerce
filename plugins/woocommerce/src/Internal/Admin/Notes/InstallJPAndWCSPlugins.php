@@ -99,10 +99,30 @@ class InstallJPAndWCSPlugins {
 	 * being clicked in the admin note.
 	 *
 	 * @param Note $note The note being actioned.
+	 *
+	 * @throws NoteActionForbiddenException When the current user lacks the `install_plugins` capability.
 	 */
 	public function install_jp_and_wcs_plugins( $note ) {
 		if ( self::NOTE_NAME !== $note->get_name() ) {
 			return;
+		}
+
+		// The route-level permission check on `POST /wc-analytics/admin/notes/.../action/...`
+		// only requires `manage_woocommerce`, which `shop_manager` satisfies. Plugin install
+		// requires the dedicated `install_plugins` capability — gate per-handler.
+		//
+		// Throwing (rather than returning silently) prevents `Notes::trigger_note_action()`
+		// from persisting the action's `E_WC_ADMIN_NOTE_ACTIONED` status: the exception
+		// aborts the dispatch before the status-saving `$note->save()` inside
+		// `Notes::trigger_note_action()` runs, so the note stays actionable in the inbox.
+		// (The REST controller has already saved `is_read = true` at this point — that
+		// earlier save is intentional and unaffected by the cap check.)
+		// `NoteActions::trigger_note_action()` catches the typed exception and maps it
+		// to a 403 REST response.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			throw new NoteActionForbiddenException(
+				esc_html__( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' )
+			);
 		}
 
 		$this->install_and_activate_plugin( 'jetpack' );

@@ -12,7 +12,6 @@ import {
 import {
 	BlockInstance,
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 
@@ -49,9 +48,7 @@ const getBlockifiedTemplate = () =>
 					createBlock( 'woocommerce/product-price', {
 						fontSize: 'large',
 					} ),
-					createBlock( 'woocommerce/product-summary', {
-						isDescendentOfSingleProductTemplate: true,
-					} ),
+					createBlock( 'woocommerce/product-summary' ),
 					createBlock(
 						getSetting( 'isBlockTheme', false )
 							? 'woocommerce/add-to-cart-with-options'

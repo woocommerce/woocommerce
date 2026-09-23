@@ -27,6 +27,45 @@ wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
+/*
+ * WordPress deactivates a plugin before running its uninstall.php, so `plugins_loaded` has already
+ * fired without WooCommerce. When WooCommerce is the only plugin bundling Action Scheduler, nothing
+ * has loaded the library and the cleanup below would be skipped, leaving every pending action behind.
+ *
+ * Requiring the bundled bootstrap is enough to fully initialize it: the file self-initializes once
+ * `plugins_loaded` has fired (the same path it uses when loaded from a theme).
+ *
+ * That initialization fires `action_scheduler_init`, and WordPress does not deactivate WooCommerce
+ * extensions before deleting WooCommerce, so a still-active extension's callback runs here without
+ * WooCommerce loaded. Anything it throws is caught: leaving actions behind is the bug we are fixing,
+ * but aborting uninstall_plugin() would also stop WordPress from deleting the plugin's files.
+ */
+if ( ! class_exists( 'ActionScheduler', false ) ) {
+	$wc_action_scheduler_bootstrap = __DIR__ . '/packages/action-scheduler/action-scheduler.php';
+
+	if ( is_readable( $wc_action_scheduler_bootstrap ) ) {
+		try {
+			require_once $wc_action_scheduler_bootstrap;
+		} catch ( Throwable $e ) {
+			// Leave a trace; whether the cleanup below still runs depends on how far initialization got.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- No WooCommerce logger during uninstall.
+			error_log( 'WooCommerce: Action Scheduler threw while loading during uninstall: ' . $e->getMessage() );
+		} finally {
+			/*
+			 * WordPress deletes this plugin's files later in the same request, so the queue runner's
+			 * shutdown hook would autoload Action Scheduler classes that no longer exist and fatal.
+			 * The hook is registered before `action_scheduler_init` fires, so a throw from a callback on
+			 * that action still leaves it attached; is_initialized() is set at the same point.
+			 */
+			if ( class_exists( 'ActionScheduler', false ) && ActionScheduler::is_initialized() ) {
+				ActionScheduler::runner()->unhook_dispatch_async_request();
+			}
+		}
+	}
+
+	unset( $wc_action_scheduler_bootstrap );
+}
+
 if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized() && function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
 	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
@@ -39,6 +78,20 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'wc_admin_daily' );
 	as_unschedule_all_actions( 'generate_category_lookup_table' );
 	as_unschedule_all_actions( 'wc_admin_unsnooze_admin_notes' );
+
+	// WooCommerce::register_recurring_actions() schedules these four under wrapper hooks.
+	as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits_wrapper' );
+	as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
+	as_unschedule_all_actions( 'generate_category_lookup_table_wrapper' );
+
+	/*
+	 * PTKPatternsStore cancels this itself on `deactivated_plugin`, but it is only instantiated for
+	 * admin and REST requests, so a WP-CLI deactivation never registers that callback and leaves the
+	 * recurring action behind. The group is passed because `fetch_patterns` is not namespaced and an
+	 * unscoped call would cancel another plugin's action of the same name.
+	 */
+	as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
 }
 
 /*
@@ -86,12 +139,99 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Tables.
 	WC_Install::drop_tables();
 
+	/*
+	 * Action Scheduler is a shared library that other active plugins may also use, so its tables are
+	 * kept by default. They are only dropped when the site owner additionally sets the
+	 * WC_REMOVE_ACTION_SCHEDULER constant to true in wp-config.php, confirming that no other plugin
+	 * relies on Action Scheduler (otherwise that plugin would lose its scheduled actions).
+	 */
+	if ( defined( 'WC_REMOVE_ACTION_SCHEDULER' ) && true === WC_REMOVE_ACTION_SCHEDULER ) {
+		foreach ( WC_Install::get_action_scheduler_tables() as $as_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$as_table}" );
+		}
+	}
+
+	// Placeholder image: delete the attachment post, its meta and the file.
+	WC_Install::delete_placeholder_image();
+
 	// Delete options.
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta.
-	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+	/*
+	 * Delete user meta created by WooCommerce.
+	 *
+	 * The woocommerce_ and _woocommerce_ prefixes are uniquely namespaced, so a LIKE wildcard is safe.
+	 * The wc_ / _wc_ namespace is only two characters: a blanket wc_% / _wc_% wildcard would also delete
+	 * other plugins' user meta and, critically, WordPress core's own role/capability meta (the
+	 * {prefix}capabilities and {prefix}user_level keys) on any site whose database table prefix is "wc_",
+	 * which would strip every user's roles and could lock the site out. We therefore match only
+	 * WooCommerce's own known wc_ / _wc_ user meta keys (the wc_admin_ legacy prefix; the _wc_egg_
+	 * easter-egg meta; the per-site customer lookup, push notification preferences, shopper-list, and
+	 * email-verification meta, whose keys are suffixed with the site's table prefix; and the exact
+	 * wc_last_active and wc_marketplace_suggestions_dismissed_suggestions keys) rather than a blanket
+	 * wildcard.
+	 *
+	 * The push-notification-preferences, shopper-list, and email-verification prefixes below mirror,
+	 * respectively, NotificationPreferencesDataStore::META_KEY, ShopperList::META_KEY_PREFIX, and
+	 * EmailVerificationService::VERIFIED_META / ::KEY_META. This script runs before PSR-4 autoloading is
+	 * available, so those constants cannot be referenced directly here; keep the literals below in sync if
+	 * the constants ever change.
+	 *
+	 * Note: wp_usermeta is shared across a multisite network while this uninstall runs per site, so the
+	 * matching meta is removed network-wide, consistent with the woocommerce_ option/meta cleanup above.
+	 */
+	$wpdb->query(
+		"DELETE FROM $wpdb->usermeta WHERE
+			meta_key LIKE 'woocommerce\_%'
+			OR meta_key LIKE '\_woocommerce\_%'
+			OR meta_key LIKE 'wc\_admin\_%'
+			OR meta_key LIKE '\_wc\_egg\_%'
+			OR meta_key LIKE '\_wc\_shopper\_list\_%'
+			OR meta_key LIKE '\_wc\_email\_verified\_%'
+			OR meta_key LIKE '\_wc\_email\_verification\_%'
+			OR meta_key LIKE 'wc\_last\_order\_%'
+			OR meta_key LIKE 'wc\_order\_count\_%'
+			OR meta_key LIKE 'wc\_money\_spent\_%'
+			OR meta_key LIKE 'wc\_push\_notification\_preferences\_%'
+			OR meta_key IN ( 'wc_last_active', 'wc_marketplace_suggestions_dismissed_suggestions' );"
+	);
+
+	/*
+	 * Remove direct POS capabilities (woocommerce_pos_*) granted per user via WP_User::add_cap().
+	 *
+	 * Unlike the woocommerce_pos_preset meta removed above, these caps live inside the serialized
+	 * {prefix}capabilities meta row rather than a woocommerce_ meta key, so the sweep above can't reach
+	 * them. Left behind, a reinstall would silently restore POS access because has_pos_access() keys off
+	 * these caps. The row also stores the user's role, so strip only the woocommerce_pos_ caps per user
+	 * via remove_cap() rather than deleting the row.
+	 *
+	 * Users are matched by the woocommerce_pos_ cap prefix — the same {prefix}capabilities LIKE that
+	 * WP_User_Query's capability__in (used by Capabilities::pos_staff_user_query_args()) is built on —
+	 * so no fixed cap list is duplicated here; the PSR-4 Capabilities class is not autoloadable during
+	 * uninstall. The per-user strip is prefix-based for the same reason.
+	 */
+	$pos_staff_ids = get_users(
+		array(
+			'fields'     => 'ID',
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one-off uninstall cleanup, not a runtime query.
+				array(
+					'key'     => $wpdb->prefix . 'capabilities',
+					'value'   => 'woocommerce_pos_',
+					'compare' => 'LIKE',
+				),
+			),
+		)
+	);
+	foreach ( $pos_staff_ids as $pos_staff_id ) {
+		$pos_staff_user = new WP_User( (int) $pos_staff_id );
+		foreach ( array_keys( $pos_staff_user->caps ) as $pos_capability ) {
+			if ( 0 === strpos( (string) $pos_capability, 'woocommerce_pos_' ) ) {
+				$pos_staff_user->remove_cap( (string) $pos_capability );
+			}
+		}
+	}
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
@@ -103,7 +243,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type', 'product_visibility' ) as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(

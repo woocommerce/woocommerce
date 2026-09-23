@@ -40,7 +40,7 @@ jQuery( function( $ ) {
 
 	// When a gateway registers after a page load, render its button if it's selected.
 	$( document.body ).on( 'wc_custom_place_order_button_registered', function( e, gatewayId ) {
-		wc.customPlaceOrderButton.__maybeShow( gatewayId, createAddPaymentMethodApi() );
+		window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createAddPaymentMethodApi() );
 	} );
 
 	/* Payment option selection */
@@ -58,14 +58,14 @@ jQuery( function( $ ) {
 		}
 
 		// Handle custom place order button for selected gateway
-		wc.customPlaceOrderButton.__maybeShow( $( this ).val(), createAddPaymentMethodApi() );
+		window.wc.customPlaceOrderButton.__maybeShow( $( this ).val(), createAddPaymentMethodApi() );
 	});
 
 	// Hide default button immediately if initially selected gateway has custom button.
 	// This must happen BEFORE triggering click to prevent flash of the default button.
 	var $initialPaymentMethod = $form.find( 'input[name="payment_method"]:checked' );
 	if ( $initialPaymentMethod.length ) {
-		wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $initialPaymentMethod.val() );
+		window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $initialPaymentMethod.val() );
 	}
 
 	// Trigger initial click

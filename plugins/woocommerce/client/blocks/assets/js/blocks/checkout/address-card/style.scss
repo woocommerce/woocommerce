@@ -12,14 +12,6 @@
 			&--primary {
 				font-weight: 500;
 			}
-
-			&--secondary {
-				color: $universal-body-low-emphasis;
-
-				.has-dark-controls & {
-					color: $input-placeholder-dark;
-				}
-			}
 		}
 	}
 }

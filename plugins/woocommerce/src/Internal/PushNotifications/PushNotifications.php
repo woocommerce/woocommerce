@@ -6,18 +6,20 @@ namespace Automattic\WooCommerce\Internal\PushNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\UserDataCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WC_Logger;
-use Exception;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationRecoveryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationTrigger;
 
 /**
  * WC Push Notifications
@@ -68,6 +70,17 @@ class PushNotifications {
 	 * @since 10.6.0
 	 */
 	public function on_init(): void {
+		// Registered ahead of the enablement check, so the status endpoint stays
+		// available when push notifications are disabled and clients can discover
+		// the state and fall back if needed.
+		wc_get_container()->get( PushNotificationStatusRestController::class )->register();
+
+		// Also registered ahead of the enablement check. Tokens stored while the
+		// feature was on stay in the database once it is off, and a user deleted
+		// in the meantime must not leave records behind for a later reconnection
+		// to start sending against.
+		wc_get_container()->get( UserDataCleanupService::class )->register();
+
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
@@ -78,10 +91,14 @@ class PushNotifications {
 
 		( new PushTokenRestController() )->register();
 		( new PushNotificationRestController() )->register();
+		( new NotificationPreferencesRestController() )->register();
 		( new NewOrderNotificationTrigger() )->register();
 		( new NewReviewNotificationTrigger() )->register();
+		( new StockNotificationTrigger() )->register();
+		( new StockNotificationRecoveryHandler() )->register();
 
 		wc_get_container()->get( NotificationProcessor::class )->register();
+		wc_get_container()->get( NotificationRetryHandler::class )->register();
 	}
 
 	/**
@@ -116,9 +133,9 @@ class PushNotifications {
 
 	/**
 	 * Determines if local push notification functionality should be enabled.
-	 * Push notifications require both the feature flag to be enabled and
-	 * Jetpack to be connected. Memoize the value so we only check once per
-	 * request.
+	 * The module runs on the remote proxy driver, so it is enabled exactly when
+	 * that driver can send (feature not disabled and Jetpack connected). Memoize
+	 * the value so we only check once per request.
 	 *
 	 * @return bool
 	 *
@@ -129,29 +146,7 @@ class PushNotifications {
 			return $this->enabled;
 		}
 
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
-			$this->enabled = false;
-			return $this->enabled;
-		}
-
-		try {
-			$proxy = wc_get_container()->get( LegacyProxy::class );
-
-			$this->enabled = (
-				class_exists( JetpackConnectionManager::class )
-				&& $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
-			);
-		} catch ( Exception $e ) {
-			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-
-			if ( $logger instanceof WC_Logger ) {
-				$logger->error(
-					'Error determining if PushNotifications feature should be enabled: ' . $e->getMessage()
-				);
-			}
-
-			$this->enabled = false;
-		}
+		$this->enabled = wc_get_container()->get( DriverAvailabilityService::class )->is_remote_proxy_available();
 
 		return $this->enabled;
 	}

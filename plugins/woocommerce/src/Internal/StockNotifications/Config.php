@@ -71,7 +71,7 @@ class Config {
 	}
 
 	/**
-	 * Get the supported product stock statuses.
+	 * Get the supported product statuses.
 	 *
 	 * @return array<string>
 	 */
@@ -81,14 +81,14 @@ class Config {
 		}
 
 		/**
-		 * Filter: woocommerce_customer_stock_notifications_supported_product_stock_statuses
+		 * Filter: woocommerce_customer_stock_notifications_supported_product_statuses
 		 *
 		 * @since 10.2.0
 		 *
-		 * @param array $product_stock_statuses Product stock statuses.
+		 * @param array $product_statuses Product statuses.
 		 */
 		self::$supported_product_statuses = (array) apply_filters(
-			'woocommerce_customer_stock_notifications_supported_product_stock_statuses',
+			'woocommerce_customer_stock_notifications_supported_product_statuses',
 			array(
 				ProductStatus::PUBLISH,
 			)
@@ -162,12 +162,17 @@ class Config {
 	}
 
 	/**
-	 * Check if an account is created on signup.
+	 * Whether an account is created on signup.
+	 *
+	 * Guest sign-ups no longer create accounts, so this always returns false.
+	 *
+	 * @deprecated 11.2.0 Account creation on sign-up was removed.
 	 *
 	 * @return bool
 	 */
 	public static function creates_account_on_signup(): bool {
-		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' );
+		wc_deprecated_function( __METHOD__, '11.2.0' );
+		return false;
 	}
 
 	/**

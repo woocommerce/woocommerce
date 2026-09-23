@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * Privacy eraser for WooCommerce Customer Stock Notifications.
@@ -54,6 +56,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'done'           => true,
 		);
 
+		$email_address = EmailNormalizer::normalize( $email_address );
+
 		$notifications = NotificationQuery::get_notifications(
 			array(
 				'user_email' => $email_address,
@@ -61,15 +65,20 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 		);
 
 		foreach ( $notifications as $notification_id ) {
-			$notification    = Factory::get_notification( $notification_id );
+			$notification = Factory::get_notification( $notification_id );
+			if ( ! $notification instanceof Notification ) {
+				continue;
+			}
+
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );
 			$notification->set_status( NotificationStatus::CANCELLED );
 			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( current_time( 'mysql' ) );
+			$notification->set_date_cancelled( time() );
 			$notification->update_meta_data( '_anonymized', 'yes' );
-			$notification->update_meta_data( 'email_link_action_key', '' );
+			$notification->update_meta_data( 'verification_action_key', '' );
+			$notification->update_meta_data( 'unsubscribe_action_key', '' );
 			$notification->save();
 			$response['messages'][] = sprintf(
 			/* translators: %d the numeric product ID */
@@ -77,7 +86,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 				$notification->get_product_id()
 			);
 			$response['items_removed'] = true;
-		}
+		}//end foreach
 
 		return $response;
 	}
