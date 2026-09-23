@@ -434,12 +434,30 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				),
 				array( 'Category A' ),
 			),
+			'top-level NOT EXISTS'  => array(
+				array(
+					'meta_key'     => 'wc_test_missing', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare' => 'NOT EXISTS', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				),
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
 			'compare only, no key'  => array(
 				array( 'meta_compare' => 'EXISTS' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
 				array( 'Category A', 'Category B', 'Category C' ),
 			),
 			'type only, no key'     => array(
 				array( 'meta_type' => 'NUMERIC' ),
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'nested NOT EXISTS'     => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'wc_test_missing',
+							'compare' => 'NOT EXISTS',
+						),
+					),
+				),
 				array( 'Category A', 'Category B', 'Category C' ),
 			),
 		);
