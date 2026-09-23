@@ -11,6 +11,8 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Download handler class.
@@ -1036,13 +1038,9 @@ class WC_Download_Handler {
 			 */
 			$window = absint( apply_filters( 'woocommerce_partial_download_tracking_window', 30 * MINUTE_IN_SECONDS, $download->get_id() ) );
 
-			// If we do not have Action Scheduler 3.6.0+ (this would be an unexpected scenario) then we cannot
-			// track partial downloads, because we require support for unique actions.
-			if ( version_compare( ActionScheduler_Versions::instance()->latest_version(), '3.6.0', '<' ) ) {
-				throw new Exception( 'Support for unique scheduled actions is not currently available.' );
-			}
-
-			as_schedule_single_action(
+			// Tracking needs a unique action. In strict mode the scheduler throws when the queue cannot
+			// provide one natively, which lands in the catch below like any other failure.
+			wc_get_container()->get( Scheduler::class )->schedule_single(
 				time() + $window,
 				self::TRACK_DOWNLOAD_CALLBACK,
 				array(
@@ -1051,7 +1049,11 @@ class WC_Download_Handler {
 					$user_ip_address,
 				),
 				'woocommerce',
-				true
+				array(
+					'unique' => true,
+					'strict' => true,
+					'queue'  => SchedulerQueue::DEFAULT,
+				)
 			);
 		} catch ( Exception $e ) {
 			wc_get_logger()->error(

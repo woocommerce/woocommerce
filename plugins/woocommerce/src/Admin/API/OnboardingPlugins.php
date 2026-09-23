@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -158,7 +159,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		$source  = $request->get_param( 'source' );
 		$job_id  = uniqid();
 
-		WC()->queue()->add( 'woocommerce_plugins_install_and_activate_async_callback', array( $plugins, $job_id, $source ) );
+		$this->get_scheduler()->add( 'woocommerce_plugins_install_and_activate_async_callback', array( $plugins, $job_id, $source ) );
 
 		$plugin_status = array();
 		foreach ( $plugins as $plugin ) {
@@ -185,7 +186,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	public function get_scheduled_installs( WP_REST_Request $request ) {
 		$job_id = $request->get_param( 'job_id' );
 
-		$actions = WC()->queue()->search(
+		$actions = $this->get_scheduler()->search(
 			array(
 				'hook'    => 'woocommerce_plugins_install_and_activate_async_callback',
 				'search'  => $job_id,
@@ -406,5 +407,14 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'slug'              => $slug,
 		);
 		wc_admin_record_tracks_event( 'coreprofiler_install_plugin_error', $properties );
+	}
+
+	/**
+	 * Get the scheduler.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 }

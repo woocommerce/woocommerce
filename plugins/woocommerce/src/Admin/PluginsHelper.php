@@ -14,6 +14,7 @@ use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Plugin_Upgrader;
 use WC_Helper;
@@ -607,7 +608,7 @@ class PluginsHelper {
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_install_callback', array( $plugins ) );
+		wc_get_container()->get( Scheduler::class )->schedule_single( time() + 5, 'woocommerce_plugins_install_callback', array( $plugins ) );
 
 		return $job_id;
 	}
@@ -716,7 +717,7 @@ class PluginsHelper {
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time() + 5,
 			'woocommerce_plugins_activate_callback',
 			array( $plugins, $job_id )
@@ -733,7 +734,7 @@ class PluginsHelper {
 	 * @return array Job data.
 	 */
 	public static function get_installation_status( $job_id = null ) {
-		$actions = WC()->queue()->search(
+		$actions = wc_get_container()->get( Scheduler::class )->search(
 			array(
 				'hook'    => 'woocommerce_plugins_install_callback',
 				'search'  => $job_id,
@@ -776,7 +777,7 @@ class PluginsHelper {
 	 * @return array Array of action data.
 	 */
 	public static function get_activation_status( $job_id = null ) {
-		$actions = WC()->queue()->search(
+		$actions = wc_get_container()->get( Scheduler::class )->search(
 			array(
 				'hook'    => 'woocommerce_plugins_activate_callback',
 				'search'  => $job_id,

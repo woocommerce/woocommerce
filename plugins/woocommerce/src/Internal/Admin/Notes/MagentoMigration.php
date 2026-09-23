@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * MagentoMigration
@@ -59,7 +60,7 @@ class MagentoMigration {
 			return;
 		}
 
-		WC()->queue()->schedule_single( time() + ( 5 * MINUTE_IN_SECONDS ), 'woocommerce_admin_magento_migration_note' );
+		wc_get_container()->get( Scheduler::class )->schedule_single( time() + ( 5 * MINUTE_IN_SECONDS ), 'woocommerce_admin_magento_migration_note' );
 	}
 
 	/**

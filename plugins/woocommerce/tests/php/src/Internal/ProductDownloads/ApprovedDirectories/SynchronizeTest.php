@@ -105,10 +105,8 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 				}
 			);
 
-		$sut            = new Synchronize();
-		$queue_property = new \ReflectionProperty( $sut, 'queue' );
-		$queue_property->setAccessible( true );
-		$queue_property->setValue( $sut, $queue );
+		$this->register_legacy_proxy_class_mocks( array( WC_Queue_Interface::class => $queue ) );
+		$sut = wc_get_container()->get( Synchronize::class );
 
 		$this->assertFalse( $sut->start(), 'A running synchronization task should prevent another synchronization from starting.' );
 		$this->assertSame(

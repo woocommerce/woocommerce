@@ -142,6 +142,9 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 	public function test_background_actions_scheduled() {
 		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
 		$order_count_cache_service->schedule_background_actions();
+
+		// The registration is scheduled when Action Scheduler asks for recurring actions.
+		do_action( 'action_scheduler_ensure_recurring_actions' );
 		$this->assertTrue( as_has_scheduled_action( 'woocommerce_refresh_order_count_cache' ) );
 	}
 

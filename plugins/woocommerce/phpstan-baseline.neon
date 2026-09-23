@@ -48149,27 +48149,9 @@ parameters:
 			path: src/Admin/ReportCSVExporter.php
 
 		-
-			message: '#^Call to method cancel_all\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
 			message: '#^Call to method getTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 2
 			path: src/Admin/ReportExporter.php
 
 		-
@@ -48233,18 +48215,6 @@ parameters:
 			path: src/Admin/ReportExporter.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:queue\(\) has invalid return type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:queue\(\) should return Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface but returns Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\|WC_Queue_Interface\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:schedule_action\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -48289,24 +48259,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, Automattic\\WooCommerce\\Admin\\Schedulers\\DateTime\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Parameter \$queue of method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:set_queue\(\) has invalid type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\ReportExporter\:\:\$queue has unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Static property Automattic\\WooCommerce\\Admin\\ReportExporter\:\:\$queue \(Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\) does not accept WC_Queue_Interface\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/ReportExporter.php
 
@@ -57635,27 +57587,9 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Call to method cancel_all\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Call to method getTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 4
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
@@ -57725,18 +57659,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:queue\(\) has invalid return type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:queue\(\) should return Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface but returns Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\|WC_Queue_Interface\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:schedule_action\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -57782,24 +57704,6 @@ parameters:
 			message: '#^Parameter \#2 \$range_end of static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:queue_batches\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Parameter \$queue of method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:set_queue\(\) has invalid type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:\$queue has unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Static property Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:\$queue \(Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\) does not accept WC_Queue_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
@@ -62518,12 +62422,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of method Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Register\:\:add_approved_directory\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Synchronize.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Synchronize\:\:\$queue \(WC_Queue_Interface\) does not accept object\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Synchronize.php
 

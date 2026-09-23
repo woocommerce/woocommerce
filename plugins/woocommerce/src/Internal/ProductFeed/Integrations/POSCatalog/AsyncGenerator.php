@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use ActionScheduler_AsyncRequest_QueueRunner;
 use ActionScheduler_Store;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
@@ -92,6 +94,15 @@ class AsyncGenerator {
 	}
 
 	/**
+	 * Get the scheduler, resolving it on first use.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
+	}
+
+	/**
 	 * Register hooks for the async generator.
 	 *
 	 * @since 10.5.0
@@ -141,7 +152,7 @@ class AsyncGenerator {
 		}
 
 		// Clear all previous actions to avoid race conditions.
-		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' );
+		$this->get_scheduler()->cancel_all( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed', array( 'queue' => SchedulerQueue::DEFAULT ) );
 
 		$status = array(
 			'scheduled_at' => time(),
@@ -168,16 +179,18 @@ class AsyncGenerator {
 	 * @return void
 	 */
 	private function schedule_generation_action( string $option_key ): void {
-		// Deliberately not enqueued as "unique": Action Scheduler's uniqueness check matches on hook +
-		// group only (not args) and treats a running action as a blocker, so a unique enqueue of the next
-		// chunk would be rejected while the current chunk's action is still running. Per-job de-duplication
-		// is handled by as_unschedule_all_actions() in get_status() instead.
-		as_enqueue_async_action(
+		// Deliberately not enqueued as "unique": uniqueness treats a running action with the same hook,
+		// args and group as a blocker, so a unique enqueue of the next chunk would be rejected while the
+		// current chunk's action is still running. Per-job de-duplication is handled by the cancel in
+		// get_status() instead.
+		$this->get_scheduler()->enqueue_async(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
 			'woo-product-feed',
-			false,
-			1
+			array(
+				'priority' => 1,
+				'queue'    => SchedulerQueue::DEFAULT,
+			)
 		);
 
 		// Force an async request so the action runs immediately.
@@ -274,12 +287,12 @@ class AsyncGenerator {
 				update_option( $option_key, $status );
 
 				// Schedule deletion of the file after the expiry time.
-				as_schedule_single_action(
+				$this->get_scheduler()->schedule_single(
 					time() + self::FEED_EXPIRY,
 					self::FEED_DELETION_ACTION,
 					array( $option_key, $feed->get_file_path() ),
 					'woo-product-feed',
-					false
+					array( 'queue' => SchedulerQueue::DEFAULT )
 				);
 			} else {
 				$feed->flush();

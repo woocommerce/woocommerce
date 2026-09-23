@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * WooCommerce_Payments
@@ -90,8 +91,9 @@ class WooCommercePayments {
 
 			$hook_name = sprintf( '%s_add_note', self::NOTE_NAME );
 
-			if ( ! WC()->queue()->get_next( $hook_name ) ) {
-				WC()->queue()->schedule_single( $publish_date->getTimestamp(), $hook_name );
+			$scheduler = wc_get_container()->get( Scheduler::class );
+			if ( ! $scheduler->get_next( $hook_name ) ) {
+				$scheduler->schedule_single( $publish_date->getTimestamp(), $hook_name );
 			}
 		}
 	}

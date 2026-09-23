@@ -5,6 +5,10 @@
 
 namespace Automattic\WooCommerce\Admin\Schedulers;
 
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+
+use Automattic\WooCommerce\Queue\Scheduler;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -21,7 +25,7 @@ trait SchedulerTraits {
 	/**
 	 * Queue instance.
 	 *
-	 * @var WC_Queue_Interface
+	 * @var \WC_Queue_Interface|null
 	 */
 	protected static $queue = null;
 
@@ -38,7 +42,7 @@ trait SchedulerTraits {
 	/**
 	 * Get queue instance.
 	 *
-	 * @return WC_Queue_Interface
+	 * @return \WC_Queue_Interface
 	 */
 	public static function queue() {
 		if ( is_null( self::$queue ) ) {
@@ -51,10 +55,25 @@ trait SchedulerTraits {
 	/**
 	 * Set queue instance.
 	 *
-	 * @param WC_Queue_Interface $queue Queue instance.
+	 * @param \WC_Queue_Interface|null $queue Queue instance, or null to go back to the scheduler.
 	 */
 	public static function set_queue( $queue ) {
 		self::$queue = $queue;
+	}
+
+	/**
+	 * Where scheduling calls go: a queue injected through set_queue() takes precedence, otherwise the scheduler.
+	 *
+	 * The two share the method names and argument order used here, so callers do not need to know which one they got.
+	 *
+	 * @return Scheduler|\WC_Queue_Interface
+	 */
+	private static function scheduler() {
+		if ( ! is_null( self::$queue ) ) {
+			return self::$queue;
+		}
+
+		return wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -175,7 +194,7 @@ trait SchedulerTraits {
 	 * @return bool
 	 */
 	public static function has_existing_jobs( $action_name, $args ) {
-		$existing_jobs = self::queue()->search(
+		$existing_jobs = self::scheduler()->search(
 			array(
 				'status'   => 'pending',
 				'per_page' => 1,
@@ -217,7 +236,7 @@ trait SchedulerTraits {
 			return false;
 		}
 
-		$blocking_jobs = self::queue()->search(
+		$blocking_jobs = self::scheduler()->search(
 			array(
 				'status'   => 'pending',
 				'orderby'  => 'date',
@@ -250,11 +269,11 @@ trait SchedulerTraits {
 				$next_action_time = new \DateTime();
 			}
 
-			self::queue()->schedule_single(
+			self::scheduler()->schedule_single(
 				$next_action_time->getTimestamp() + 5,
 				$action_hook,
 				$args,
-				static::$group
+				(string) static::$group
 			);
 		} else {
 			call_user_func_array( array( static::class, $action_name ), $args );
@@ -305,7 +324,7 @@ trait SchedulerTraits {
 			return;
 		}
 
-		self::queue()->schedule_single( time() + 5, $action_hook, $args, static::$group );
+		self::scheduler()->schedule_single( time() + 5, $action_hook, $args, (string) static::$group );
 	}
 
 	/**
@@ -354,13 +373,7 @@ trait SchedulerTraits {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
-			\ActionScheduler::store()->cancel_actions_by_group( static::$group );
-		} else {
-			$actions = static::get_actions();
-			foreach ( $actions as $action ) {
-				self::queue()->cancel_all( $action, null, static::$group );
-			}
-		}
+		// The store-level cancel this replaces bypassed custom queues, so the stock queue is selected explicitly.
+		self::scheduler()->cancel_all( '', array(), (string) static::$group, array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 }

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Email;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Factory as StockNotificationFactory;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification as StockNotification;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Handles deferred transactional email sending via Action Scheduler.
@@ -101,8 +102,9 @@ final class DeferredEmailQueue {
 			return;
 		}
 
+		$scheduler = wc_get_container()->get( Scheduler::class );
 		foreach ( $this->queue as $item ) {
-			\WC()->queue()->add(
+			$scheduler->add(
 				self::AS_HOOK,
 				array( $item['filter'], $item['args'] ),
 				self::AS_GROUP

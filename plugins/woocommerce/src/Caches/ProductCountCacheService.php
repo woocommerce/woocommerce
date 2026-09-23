@@ -4,7 +4,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Caches;
 
+use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WC_Product;
 use WP_Post;
 
@@ -48,14 +50,24 @@ class ProductCountCacheService {
 	private array $products_in_creation = array();
 
 	/**
+	 * The scheduler.
+	 *
+	 * @var Scheduler
+	 */
+	private Scheduler $scheduler;
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
+	 *
+	 * @param Scheduler $scheduler The scheduler.
 	 */
-	final public function init(): void {
+	final public function init( Scheduler $scheduler ): void {
+		$this->scheduler           = $scheduler;
 		$this->product_count_cache = new ProductCountCache();
 
-		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
+		$this->schedule_background_actions();
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
 		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
 		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
@@ -96,14 +108,17 @@ class ProductCountCacheService {
 	}
 
 	/**
-	 * Register background caching for each product type.
+	 * Keep the background caching action registered with the scheduler for each product type.
+	 *
+	 * The scheduler re-asserts the registration whenever Action Scheduler asks for recurring actions,
+	 * as a unique action.
 	 *
 	 * @return void
 	 */
 	public function schedule_background_actions(): void {
 		$frequency = HOUR_IN_SECONDS * 12;
 		$timestamp = time() + $frequency;
-		as_schedule_recurring_action( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', true );
+		$this->scheduler->ensure_recurring( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -112,7 +127,7 @@ class ProductCountCacheService {
 	 * @return void
 	 */
 	public function unschedule_background_actions(): void {
-		WC()->queue()->cancel_all( self::BACKGROUND_EVENT_HOOK );
+		$this->scheduler->cancel_all( self::BACKGROUND_EVENT_HOOK );
 	}
 
 	/**

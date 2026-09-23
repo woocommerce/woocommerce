@@ -2,7 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\TransientFiles;
 
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use \DateTime;
 use \Exception;
 use \InvalidArgumentException;
@@ -53,6 +54,13 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	private $legacy_proxy;
 
 	/**
+	 * The scheduler used for the expired files cleanup action.
+	 *
+	 * @var Scheduler
+	 */
+	private $scheduler;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register() {
@@ -70,9 +78,11 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param LegacyProxy $legacy_proxy The instance of LegacyProxy to use.
+	 * @param Scheduler   $scheduler    The scheduler used for the expired files cleanup action.
 	 */
-	final public function init( LegacyProxy $legacy_proxy ) {
+	final public function init( LegacyProxy $legacy_proxy, Scheduler $scheduler ) {
 		$this->legacy_proxy = $legacy_proxy;
+		$this->scheduler    = $scheduler;
 	}
 
 	/**
@@ -371,7 +381,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return bool True if the expired files cleanup action is currently scheduled, false otherwise.
 	 */
 	public function expired_files_cleanup_is_scheduled(): bool {
-		return ActionSchedulerUtil::has_scheduled_action( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
+		return $this->scheduler->has_scheduled_action( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP, array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -380,7 +390,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 */
 	public function schedule_expired_files_cleanup(): void {
 		$this->unschedule_expired_files_cleanup();
-		as_schedule_single_action( time() + 1, self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
+		$this->scheduler->schedule_single( time() + 1, self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP, array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -388,7 +398,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 */
 	public function unschedule_expired_files_cleanup(): void {
 		if ( $this->expired_files_cleanup_is_scheduled() ) {
-			as_unschedule_action( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
+			$this->scheduler->cancel( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP, array( 'queue' => SchedulerQueue::DEFAULT ) );
 		}
 	}
 
@@ -430,7 +440,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 			}
 
 			$next_time = $this->legacy_proxy->call_function( 'time' ) + $new_interval;
-			$this->legacy_proxy->call_function( 'as_schedule_single_action', $next_time, self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
+			$this->scheduler->schedule_single( $next_time, self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP, array( 'queue' => SchedulerQueue::DEFAULT ) );
 		}
 	}
 

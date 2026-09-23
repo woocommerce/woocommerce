@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStat
 use Automattic\WooCommerce\Internal\Admin\Notes\RefundDoubleCountToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -607,14 +609,15 @@ class Analytics {
 	 */
 	private static function is_batch_pending_or_running( string $hook ): bool {
 		return ! empty(
-			as_get_scheduled_actions(
+			wc_get_container()->get( Scheduler::class )->search(
 				array(
 					'hook'     => $hook,
 					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
 					'per_page' => 1,
 					'orderby'  => 'none',
 				),
-				'ids'
+				'ids',
+				array( 'queue' => SchedulerQueue::DEFAULT )
 			)
 		);
 	}
@@ -628,7 +631,7 @@ class Analytics {
 	 * @return void
 	 */
 	private static function schedule_batch( string $hook, array $args, int $delay = 0 ): void {
-		WC()->queue()->schedule_single(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time() + $delay,
 			$hook,
 			$args,
@@ -872,7 +875,7 @@ class Analytics {
 		}
 
 		self::update_refund_double_count_state( array( 'status' => self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED ) );
-		as_unschedule_all_actions( self::REFUND_DOUBLE_COUNT_FIX_HOOK );
+		wc_get_container()->get( Scheduler::class )->cancel_all( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 		self::record_refund_double_count_fix_finished( $state, self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED );
 	}
 

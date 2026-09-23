@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Caches;
 
 use WC_Order;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -23,6 +25,13 @@ class OrderCountCacheService {
 	 * @var OrderCountCache
 	 */
 	private $order_count_cache;
+
+	/**
+	 * The scheduler.
+	 *
+	 * @var Scheduler
+	 */
+	private $scheduler;
 
 	/**
 	 * Array of order ids with their last transitioned status as key value pairs.
@@ -44,8 +53,11 @@ class OrderCountCacheService {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
+	 *
+	 * @param Scheduler $scheduler The scheduler.
 	 */
-	final public function init() {
+	final public function init( Scheduler $scheduler ) {
+		$this->scheduler         = $scheduler;
 		$this->order_count_cache = new OrderCountCache();
 		add_action( 'woocommerce_new_order', array( $this, 'update_on_new_order' ), 10, 2 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_on_order_status_changed' ), 10, 4 );
@@ -54,7 +66,7 @@ class OrderCountCacheService {
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
 		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
 		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
-		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
+		$this->schedule_background_actions();
 
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
@@ -110,7 +122,10 @@ class OrderCountCacheService {
 	}
 
 	/**
-	 * Register background caching for each order type.
+	 * Keep the background caching action registered with the scheduler for each order type.
+	 *
+	 * The scheduler re-asserts the registrations whenever Action Scheduler asks for recurring actions,
+	 * as unique actions.
 	 *
 	 * @return void
 	 */
@@ -119,7 +134,7 @@ class OrderCountCacheService {
 		$frequency   = HOUR_IN_SECONDS * 12;
 		$timestamp   = time() + $frequency;
 		foreach ( $order_types as $order_type ) {
-			as_schedule_recurring_action( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( $order_type ), 'count', true );
+			$this->scheduler->ensure_recurring( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( $order_type ), 'count', array( 'queue' => SchedulerQueue::DEFAULT ) );
 		}
 	}
 
@@ -132,7 +147,7 @@ class OrderCountCacheService {
 	 * @return void
 	 */
 	public function unschedule_background_actions() {
-		WC()->queue()->cancel_all( self::BACKGROUND_EVENT_HOOK );
+		$this->scheduler->cancel_all( self::BACKGROUND_EVENT_HOOK );
 	}
 
 	/**

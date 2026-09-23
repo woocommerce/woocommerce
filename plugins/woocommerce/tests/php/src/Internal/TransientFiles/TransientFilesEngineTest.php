@@ -737,18 +737,18 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'time'                      => fn() => 10000000,
-				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
-					$actual_next_time = $timestamp;
-				},
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'time'          => fn() => 10000000,
 			)
 		);
+		as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 
 		try {
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
+			$actual_next_time = as_next_scheduled_action( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
+			as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		}
 
 		$this->assertEquals( 10000000 + DAY_IN_SECONDS, $actual_next_time );
@@ -764,21 +764,21 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'time'                      => fn() => 10000000,
-				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
-					$actual_next_time = $timestamp;
-				},
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'time'          => fn() => 10000000,
 			)
 		);
+		as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 
 		add_filter( 'woocommerce_delete_expired_transient_files_interval', fn( $interval ) => HOUR_IN_SECONDS );
 
 		try {
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
+			$actual_next_time = as_next_scheduled_action( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
 			remove_all_filters( 'woocommerce_delete_expired_transient_files_interval' );
+			as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		}
 
 		$this->assertEquals( 10000000 + HOUR_IN_SECONDS, $actual_next_time );
@@ -795,22 +795,19 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'dirname'                   =>
+				'dirname'       =>
 					function( $path ) {
 						return false === StringUtil::ends_with( $path, '/TransientFiles/TransientFilesEngine.php' ) ?
 							dirname( $path ) : __DIR__;
 					},
-				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'time'                      => fn() => 10000000,
-				'gmdate'                    => function( $format, $date = null ) use ( &$today ) {
+				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
+				'time'          => fn() => 10000000,
+				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
 					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
 				},
-				'as_schedule_single_action' =>
-					function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
-						$actual_next_time = $timestamp;
-					},
 			)
 		);
+		as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 
 		$this->sut->create_transient_file( 'simple', '2023-12-02' );
 
@@ -818,8 +815,10 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		try {
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
+			$actual_next_time = as_next_scheduled_action( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
+			as_unschedule_all_actions( 'woocommerce_expired_transient_files_cleanup', array(), 'wc_batch_processes' );
 		}
 
 		$this->assertEquals( 10000001, $actual_next_time );

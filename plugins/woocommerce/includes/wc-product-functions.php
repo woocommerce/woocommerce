@@ -21,6 +21,8 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -609,7 +611,9 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 		// daily cron) already scheduled it after the unschedule-all step ran. The query
 		// filters by the exact timestamp: a pending action for a different time (e.g. left
 		// behind by a process that saw older sale dates) must not block scheduling.
-		$identical_pending = as_get_scheduled_actions(
+		$scheduler         = wc_get_container()->get( Scheduler::class );
+		$options           = array( 'queue' => SchedulerQueue::DEFAULT );
+		$identical_pending = $scheduler->search(
 			array(
 				'hook'         => $hook,
 				'args'         => $args,
@@ -619,11 +623,12 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 				'date_compare' => '=',
 				'per_page'     => 1,
 			),
-			'ids'
+			'ids',
+			$options
 		);
 
 		if ( empty( $identical_pending ) ) {
-			as_schedule_single_action( $timestamp, $hook, $args, 'woocommerce-sales' );
+			$scheduler->schedule_single( $timestamp, $hook, $args, 'woocommerce-sales', $options );
 		}
 	};
 
@@ -784,8 +789,10 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): 
 	$product_id = $product->get_id();
 
 	// Always clear existing events first.
-	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
-	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	$scheduler = wc_get_container()->get( Scheduler::class );
+	$options   = array( 'queue' => SchedulerQueue::DEFAULT );
+	$scheduler->cancel_all( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales', $options );
+	$scheduler->cancel_all( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales', $options );
 
 	$date_from = $product->get_date_on_sale_from( 'edit' );
 	$date_to   = $product->get_date_on_sale_to( 'edit' );
@@ -2136,7 +2143,7 @@ function wc_deferred_product_sync( $product_id ) {
  * @return bool
  */
 function wc_update_product_lookup_tables_is_running() {
-	$table_updates_pending = WC()->queue()->search(
+	$table_updates_pending = wc_get_container()->get( Scheduler::class )->search(
 		array(
 			'status'   => 'pending',
 			'group'    => 'wc_update_product_lookup_tables',
@@ -2197,7 +2204,7 @@ function wc_update_product_lookup_tables() {
 		if ( $is_cli ) {
 			wc_update_product_lookup_tables_column( $column );
 		} else {
-			WC()->queue()->schedule_single(
+			wc_get_container()->get( Scheduler::class )->schedule_single(
 				time() + $index,
 				'wc_update_product_lookup_tables_column',
 				array(
@@ -2225,7 +2232,7 @@ function wc_update_product_lookup_tables() {
 		);
 		wc_update_product_lookup_tables_rating_count( $rating_count_rows );
 	} else {
-		WC()->queue()->schedule_single(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time() + 10,
 			'wc_update_product_lookup_tables_rating_count_batch',
 			array(
@@ -2432,7 +2439,7 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 
 	if ( $rating_count_rows ) {
 		wc_update_product_lookup_tables_rating_count( $rating_count_rows );
-		WC()->queue()->schedule_single(
+		wc_get_container()->get( Scheduler::class )->schedule_single(
 			time() + 1,
 			'wc_update_product_lookup_tables_rating_count_batch',
 			array(

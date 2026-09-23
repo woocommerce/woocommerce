@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForProducts;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Remote Inbox Notifications engine.
@@ -52,13 +53,14 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		add_action(
 			'woocommerce_updated',
 			function () {
-				$next_hook = WC()->queue()->get_next(
+				$scheduler = wc_get_container()->get( Scheduler::class );
+				$next_hook = $scheduler->get_next(
 					'woocommerce_run_on_woocommerce_admin_updated',
 					array(),
 					'woocommerce-remote-inbox-engine'
 				);
 				if ( null === $next_hook ) {
-					WC()->queue()->schedule_single(
+					$scheduler->schedule_single(
 						time(),
 						'woocommerce_run_on_woocommerce_admin_updated',
 						array(),

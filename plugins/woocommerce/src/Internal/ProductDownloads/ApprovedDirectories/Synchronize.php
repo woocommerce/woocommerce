@@ -7,7 +7,7 @@ use Exception;
 use Automattic\WooCommerce\Internal\Utilities\URL;
 use WC_Admin_Notices;
 use WC_Product;
-use WC_Queue_Interface;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Ensures that any downloadable files have a corresponding entry in the Approved Product
@@ -48,11 +48,11 @@ class Synchronize {
 	public const SYNC_TASK_BATCH_SIZE = 20;
 
 	/**
-	 * WC Queue.
+	 * The scheduler used for sync tasks.
 	 *
-	 * @var WC_Queue_Interface
+	 * @var Scheduler
 	 */
-	private $queue;
+	private $scheduler;
 
 	/**
 	 * Register of approved directories.
@@ -66,13 +66,13 @@ class Synchronize {
 	 * the current approved download directory mode.
 	 *
 	 * @internal
-	 * @throws Exception If the WC_Queue instance cannot be obtained.
 	 *
-	 * @param Register $register The active approved download directories instance in use.
+	 * @param Register  $register  The active approved download directories instance in use.
+	 * @param Scheduler $scheduler The scheduler used for sync tasks.
 	 */
-	final public function init( Register $register ) {
-		$this->queue    = WC()->get_instance_of( WC_Queue_Interface::class );
-		$this->register = $register;
+	final public function init( Register $register, Scheduler $scheduler ) {
+		$this->scheduler = $scheduler;
+		$this->register  = $register;
 
 	}
 
@@ -131,7 +131,7 @@ class Synchronize {
 
 		delete_option( self::SYNC_TASK_CANCELLED );
 		update_option( self::SYNC_TASK_PAGE, 1 );
-		$this->queue->schedule_single( time(), self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
+		$this->scheduler->schedule_single( time(), self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
 		wc_get_logger()->log( 'info', __( 'Approved Download Directories sync: new scan scheduled.', 'woocommerce' ) );
 		return true;
 	}
@@ -141,7 +141,7 @@ class Synchronize {
 	 */
 	private function has_scheduled_task(): bool {
 		foreach ( array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ) as $status ) {
-			$scheduled_tasks = $this->queue->search(
+			$scheduled_tasks = $this->scheduler->search(
 				array(
 					'hook'     => self::SYNC_TASK,
 					'status'   => $status,
@@ -192,7 +192,7 @@ class Synchronize {
 					$this->get_progress()
 				)
 			);
-			$this->queue->schedule_single( time() + 1, self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
+			$this->scheduler->schedule_single( time() + 1, self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
 		}
 	}
 
@@ -237,7 +237,7 @@ class Synchronize {
 	private function clean_up(): void {
 		delete_option( self::SYNC_TASK_PAGE );
 		delete_option( self::SYNC_TASK_PROGRESS );
-		$this->queue->cancel( self::SYNC_TASK );
+		$this->scheduler->cancel( self::SYNC_TASK );
 	}
 
 	/**

@@ -16,7 +16,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -530,13 +531,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( null === $action_hook ) {
 			return;
 		}
-		if ( ActionSchedulerUtil::has_scheduled_action( $action_hook ) ) {
-			return;
-		}
-
-		$interval = self::get_import_interval();
-
-		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group ?? '', true );
+		// A unique action covers the former "already scheduled" pre-check.
+		wc_get_container()->get( Scheduler::class )->schedule_recurring(
+			time(),
+			self::get_import_interval(),
+			$action_hook,
+			array(),
+			static::$group ?? '',
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
+		);
 	}
 
 	/**
@@ -559,7 +565,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			// Unschedule the recurring batch processor.
 			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 			if ( null !== $action_hook ) {
-				as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
+				wc_get_container()->get( Scheduler::class )->cancel_all( $action_hook, array(), static::$group ?? '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 			}
 
 			// Schedule an immediate catchup batch to process all orders up to now.

@@ -10,7 +10,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
@@ -71,6 +72,15 @@ class PendingNotificationStore {
 	final public function init( InternalNotificationDispatcher $dispatcher, PushTokensDataStore $data_store ): void {
 		$this->dispatcher = $dispatcher;
 		$this->data_store = $data_store;
+	}
+
+	/**
+	 * Get the scheduler, resolving it on first use.
+	 *
+	 * @return Scheduler
+	 */
+	private function get_scheduler(): Scheduler {
+		return wc_get_container()->get( Scheduler::class );
 	}
 
 	/**
@@ -142,16 +152,16 @@ class PendingNotificationStore {
 		// them from the same place; see Notification::get_safety_net_args().
 		$args = $notification->get_safety_net_args();
 
-		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
-			return;
-		}
-
-		as_schedule_single_action(
+		// A unique action covers the former "already scheduled" pre-check.
+		$this->get_scheduler()->schedule_single(
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
-			true
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
 		);
 	}
 

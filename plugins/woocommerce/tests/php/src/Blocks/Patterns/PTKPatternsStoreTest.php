@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\Patterns;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 use WP_Error;
 
 /**
@@ -473,51 +476,46 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test flush_cached_patterns defers unscheduling when called before action_scheduler_init.
+	 * Test flush_cached_patterns defers unscheduling until the scheduler is ready.
 	 *
-	 * This test simulates the scenario where flush_cached_patterns is called during early
-	 * initialization, before Action Scheduler has been initialized.
+	 * Simulates a call during early initialization, before Action Scheduler has initialized: the stock
+	 * queue reports not ready and `action_scheduler_init` has not fired, so the scheduler defers the
+	 * unscheduling to that event.
 	 */
-	public function test_flush_cached_patterns_defers_unscheduling_before_action_scheduler_init() {
+	public function test_flush_cached_patterns_defers_unscheduling_until_the_scheduler_is_ready() {
 		global $wp_actions;
 
-		// Schedule an action.
 		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should be scheduled initially' );
 
-		// Save the original action_scheduler_init count.
+		$stock_queue = new class() extends OptionsAwareActionQueue {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+			public $ready = false;
+			public function is_ready(): bool {
+				return $this->ready;
+			}
+			// phpcs:enable
+		};
+		$scheduler   = new Scheduler();
+		$scheduler->init( wc_get_container()->get( LegacyProxy::class ), $stock_queue );
+		wc_get_container()->replace( Scheduler::class, $scheduler );
+
 		$original_count = $wp_actions['action_scheduler_init'] ?? 0;
+		unset( $wp_actions['action_scheduler_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook not having fired; restored below.
 
-		// Simulate that action_scheduler_init has not yet fired by unsetting it.
-		if ( isset( $wp_actions['action_scheduler_init'] ) ) {
-			unset( $wp_actions['action_scheduler_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		try {
+			$this->pattern_store->flush_cached_patterns();
+
+			$this->assertFalse( get_option( PTKPatternsStore::OPTION_NAME ), 'Patterns option should be deleted immediately' );
+			$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should still be scheduled while the scheduler is not ready' );
+
+			$stock_queue->ready = true;
+			do_action( 'action_scheduler_init' );
+
+			$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should be unscheduled once the scheduler is ready and action_scheduler_init fires' );
+		} finally {
+			$wp_actions['action_scheduler_init'] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter.
+			wc_get_container()->reset_replacement( Scheduler::class );
 		}
-
-		// Verify did_action returns 0 (not fired).
-		$this->assertEquals( 0, did_action( 'action_scheduler_init' ), 'action_scheduler_init should appear not fired' );
-
-		// Call flush_cached_patterns before action_scheduler_init has fired.
-		$this->pattern_store->flush_cached_patterns();
-
-		// The option should be deleted immediately.
-		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
-		$this->assertFalse( $patterns, 'Patterns option should be deleted immediately' );
-
-		// The action should still be scheduled (unscheduling is deferred).
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should still be scheduled before action_scheduler_init fires' );
-
-		/**
-		 * Simulate action_scheduler_init firing.
-		 *
-		 * @since 10.4.1
-		 * @return void
-		 */
-		do_action( 'action_scheduler_init' );
-
-		// After action_scheduler_init fires, the action should be unscheduled.
-		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should be unscheduled after action_scheduler_init fires' );
-
-		// Restore the original action count.
-		$wp_actions['action_scheduler_init'] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 }

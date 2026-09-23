@@ -10,7 +10,9 @@ use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMig
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,6 +99,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $batch_processing_controller;
 
 	/**
+	 * The scheduler used for background sync actions.
+	 *
+	 * @var Scheduler
+	 */
+	private $scheduler;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -135,6 +144,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
 	 * @param OrderCacheController             $order_cache_controller The order cache controller instance to use.
 	 * @param BatchProcessingController        $batch_processing_controller The batch processing controller to use.
+	 * @param Scheduler                        $scheduler The scheduler used for background sync actions.
 	 * @internal
 	 */
 	final public function init(
@@ -143,8 +153,10 @@ class DataSynchronizer implements BatchProcessorInterface {
 		PostsToOrdersMigrationController $posts_to_cot_migrator,
 		LegacyProxy $legacy_proxy,
 		OrderCacheController $order_cache_controller,
-		BatchProcessingController $batch_processing_controller
+		BatchProcessingController $batch_processing_controller,
+		Scheduler $scheduler
 	) {
+		$this->scheduler                   = $scheduler;
 		$this->data_store                  = $data_store;
 		$this->database_util               = $database_util;
 		$this->posts_to_cot_migrator       = $posts_to_cot_migrator;
@@ -384,14 +396,16 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private function schedule_background_sync() {
 		$interval = $this->get_background_sync_interval();
 
-		// Calling Action Scheduler directly because WC_Action_Queue doesn't support the unique parameter yet.
-		as_schedule_recurring_action(
+		$this->scheduler->schedule_recurring(
 			time() + $interval,
 			$interval,
 			self::BACKGROUND_SYNC_EVENT_HOOK,
 			array(),
 			'',
-			true
+			array(
+				'unique' => true,
+				'queue'  => SchedulerQueue::DEFAULT,
+			)
 		);
 	}
 
@@ -401,7 +415,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @return void
 	 */
 	private function unschedule_background_sync() {
-		WC()->queue()->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
+		$this->scheduler->cancel_all( self::BACKGROUND_SYNC_EVENT_HOOK );
 	}
 
 	/**

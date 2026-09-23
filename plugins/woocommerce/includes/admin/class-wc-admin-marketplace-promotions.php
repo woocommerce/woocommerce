@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Queue\Scheduler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -738,9 +740,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function clear_deprecated_scheduled_event() {
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'woocommerce_marketplace_fetch_promotions' );
-		}
+		wc_get_container()->get( Scheduler::class )->cancel_all( 'woocommerce_marketplace_fetch_promotions', array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 
 	/**
@@ -749,9 +749,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * `woocommerce_marketplace_fetch_promotions` action.
 	 */
 	public static function clear_deprecated_action() {
-		if ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action( time(), 'woocommerce_marketplace_fetch_promotions_clear' );
-		}
+		wc_get_container()->get( Scheduler::class )->schedule_single( time(), 'woocommerce_marketplace_fetch_promotions_clear', array(), '', array( 'queue' => SchedulerQueue::DEFAULT ) );
 	}
 }
 
