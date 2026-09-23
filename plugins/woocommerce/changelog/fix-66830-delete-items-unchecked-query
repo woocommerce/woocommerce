@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep order items in place when deleting their item meta fails, so the meta is not left orphaned.
