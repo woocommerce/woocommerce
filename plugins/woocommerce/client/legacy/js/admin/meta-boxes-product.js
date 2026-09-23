@@ -1471,7 +1471,7 @@ jQuery( function ( $ ) {
 			return createProductGalleryImageItem( attachment, $el );
 		}
 
-		if ( allowVideos && 'video' === mediaType ) {
+		if ( allowVideos ) {
 			return createProductGalleryVideoItem( attachment, $el );
 		}
 
