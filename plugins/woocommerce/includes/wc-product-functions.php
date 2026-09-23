@@ -534,12 +534,26 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			$return = '<' . $list_type . ' class="variation">';
 		}
 
+		// Performance note: prefetch parent taxonomy terms to avoid per-attribute get_term_by queries.
+		$taxonomy_terms = array();
+		$parent_id      = $product instanceof WC_Product_Variation ? $product->get_parent_id() : 0;
+		if ( $parent_id ) {
+			foreach ( array_filter( array_keys( $variation_attributes ), 'taxonomy_exists' ) as $taxonomy ) {
+				$terms = get_the_terms( $parent_id, $taxonomy );
+				if ( is_array( $terms ) ) {
+					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) { // @phpstan-ignore instanceof.alwaysTrue (defensive checks agains get_the_terms filter)
+						$taxonomy_terms[ $taxonomy ][ $term->slug ] = $term;
+					}
+				}
+			}
+		}
+
 		$variation_list = array();
 
 		foreach ( $variation_attributes as $name => $value ) {
 			// If this is a term slug, get the term's nice name.
 			if ( taxonomy_exists( $name ) ) {
-				$term = get_term_by( 'slug', $value, $name );
+				$term = $taxonomy_terms[ $name ][ $value ] ?? get_term_by( 'slug', $value, $name );
 				if ( ! is_wp_error( $term ) && $term && null !== $term->name && '' !== $term->name ) {
 					$value = $term->name;
 				}
