@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a "Products per page" control to the Product Collection block when it uses the Default query type on an archive template. The value sizes that template's archive pages, so pagination, the product results count and the filter blocks stay in sync with the collection.
