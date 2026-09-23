@@ -541,7 +541,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			foreach ( array_filter( array_keys( $variation_attributes ), 'taxonomy_exists' ) as $taxonomy ) {
 				$terms = get_the_terms( $parent_id, $taxonomy );
 				if ( is_array( $terms ) ) {
-					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) {
+					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) { // @phpstan-ignore instanceof.alwaysTrue (defensive checks agains get_the_terms filter)
 						$taxonomy_terms[ $taxonomy ][ $term->slug ] = $term;
 					}
 				}
