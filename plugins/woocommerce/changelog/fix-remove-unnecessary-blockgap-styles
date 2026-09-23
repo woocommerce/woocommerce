@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove unused blockGap support from Product Item Label and Product Description blocks
