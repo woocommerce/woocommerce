@@ -517,7 +517,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$props     = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
 
 		$this->assertSame(
-			rawurlencode( implode( ',', array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, 'a' ) ) ),
+			implode( ',', array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, 'a' ) ),
 			$props['pc']
 		);
 	}
