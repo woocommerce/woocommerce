@@ -49,13 +49,30 @@ class WC_My_Account_Payment_Methods_Template_Test extends WC_Unit_Test_Case {
 
 		$html = wc_get_template_html( 'myaccount/payment-methods.php' );
 
-		preg_match_all( '#<td class="[^"]*payment-method-method"[^>]*>(.*?)</td>#s', $html, $method_cells );
+		$document = new DOMDocument();
+		$errors   = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!doctype html><html><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $errors );
+		$xpath = new DOMXPath( $document );
+
+		$method_cells = $xpath->query( '//td[contains(concat(" ", normalize-space(@class), " "), " payment-method-method ")]' );
+		$delete_links = $xpath->query( '//a[contains(concat(" ", normalize-space(@class), " "), " delete ")]' );
+		if ( false === $method_cells || false === $delete_links ) {
+			throw new \RuntimeException( 'Unable to query the payment methods table.' );
+		}
+
+		$method_labels = array();
+		foreach ( $method_cells as $method_cell ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
+			$method_labels[] = trim( $method_cell->textContent );
+		}
 		$this->assertSame(
 			array( FakeCustomPaymentToken::DISPLAY_NAME, 'Wallet', '' ),
-			array_map( 'trim', $method_cells[1] ),
+			$method_labels,
 			'Rows without a brand should show the token name, a brand should win, and a name equal to the token type should be skipped.'
 		);
-		$this->assertSame( 3, substr_count( $html, 'class="button delete"' ), 'Every row should keep its Delete action.' );
+		$this->assertSame( 3, $delete_links->length, 'Every row should keep its Delete action.' );
 		$this->assertStringNotContainsString( 'Undefined array key', $html, 'The template should not emit PHP notices for tokens without a brand.' );
 	}
 }
