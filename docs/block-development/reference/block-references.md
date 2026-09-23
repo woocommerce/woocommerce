@@ -851,8 +851,8 @@ Visually highlight a product category and encourage prompt action.
 
 - **Name:** woocommerce/featured-category
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
-- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
+- **Supports:** align, allowedBlocks, anchor, ariaLabel, color (background, gradients, heading, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), layout (allowVerticalAlignment, default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowWrap~~), shadow, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Attributes:** alt, anchor, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
 
 ## Featured Product - woocommerce/featured-product
 
@@ -860,8 +860,8 @@ Highlight a product or variation.
 
 - **Name:** woocommerce/featured-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
-- **Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
+- **Supports:** align, allowedBlocks, anchor, ariaLabel, color (background, gradients, heading, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), layout (allowVerticalAlignment, default, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowWrap~~), multiple, shadow, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Attributes:** alt, anchor, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
 
 ## Filter Block - woocommerce/filter-wrapper
 

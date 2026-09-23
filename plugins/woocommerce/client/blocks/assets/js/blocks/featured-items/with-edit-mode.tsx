@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { ComponentType } from 'react';
@@ -43,6 +44,7 @@ type EditModeRequiredAttributes = {
 };
 
 interface EditModeRequiredProps< T > {
+	blockProps: ReturnType< typeof useBlockProps >;
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
 	clientId: string;
 	effectiveCategoryId?: number;
@@ -139,9 +141,10 @@ export const withEditMode =
 		if ( editMode && canEditItem ) {
 			return (
 				<Placeholder
+					{ ...props.blockProps }
 					icon={ <Icon icon={ icon } /> }
 					label={ label }
-					className={ className }
+					className={ `${ props.blockProps.className } ${ className }` }
 				>
 					<HStack alignment="center">
 						{ isDeleted ? (
