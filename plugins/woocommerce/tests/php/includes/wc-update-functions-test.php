@@ -869,19 +869,27 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$variation_id = $this->create_private_variation_with_lookup_row();
 		$option       = 'woocommerce_update_1130_last_unpublished_variation_id';
 		$lookup_table = $GLOBALS['wpdb']->prefix . 'wc_product_attributes_lookup';
-		// The other run saves its cursor while this one is deleting the same batch.
+		// The other run saves its cursor while this one is deleting the same batch. It is another process, so it writes the
+		// row without going through this process's option cache, which still holds the option as missing.
 		add_filter(
 			'query',
 			function ( $query ) use ( $option, $variation_id, $ahead, $lookup_table ) {
+				global $wpdb;
 				if ( str_starts_with( ltrim( $query ), 'DELETE' ) && str_contains( $query, $lookup_table ) ) {
-					update_option( $option, $variation_id + $ahead, false );
+					$wpdb->query(
+						$wpdb->prepare(
+							"INSERT INTO {$wpdb->options} ( option_name, option_value, autoload ) VALUES ( %s, %d, 'off' )",
+							$option,
+							$variation_id + $ahead
+						)
+					);
 				}
 				return $query;
 			}
 		);
 
 		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'A cursor saved by another run is progress, not a failure.' );
-		$this->assertSame( $variation_id + $ahead, (int) get_option( $option ), 'The cursor must never move backwards.' );
+		$this->assertGreaterThanOrEqual( $variation_id, (int) get_option( $option ), 'The saved cursor covers this batch.' );
 	}
 
 	/**
@@ -902,11 +910,17 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			10,
 			2
 		);
+		// Saving the variation queued its own invalidation, flush it so that only the migration's is observed.
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$counts_transient = 'wc_layered_nav_counts_pa_size';
+		set_transient( $counts_transient, array( 'query_hash' => array( 1 => 2 ) ) );
 
 		$this->assertFalse( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'An unsaved cursor would select the same batch forever, so the migration stops.' );
 		$this->assertFalse( get_option( $option ), 'The cursor is cleaned up when the migration stops.' );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup" ), 'The batch deleted before the stop stays deleted.' );
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$this->assertFalse( get_transient( $counts_transient ), 'The layered nav counts cached from the deleted batch are invalidated when the migration stops.' );
 	}
 
 	/**

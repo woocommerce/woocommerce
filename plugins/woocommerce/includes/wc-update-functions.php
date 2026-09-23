@@ -4241,14 +4241,18 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false !== $deleted ) {
-			// The cursor only ever moves forward: a concurrent run (the queue plus `wp wc update`) may already have saved this id or a
-			// later one, and update_option() reports that as false just like a failed write. The variations stay unpublished, so
-			// without a saved cursor the next run would pick the same batch again.
+			// A concurrent run (the queue plus `wp wc update`) may already have saved this id or a later one, and update_option()
+			// reports that as false just like a failed write. It can also replace a later cursor with this one, which only makes a
+			// run reselect variations whose rows are already gone. The variations stay unpublished, so without a saved cursor the
+			// next run would pick the same batch again.
 			$cursor = end( $variation_ids );
 			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
 				return true;
 			}
+			// Re-read from the database. If the other run created the option after this process found it missing, the stale
+			// "missing" entry sits in 'notoptions', not under the option's own key.
 			wp_cache_delete( $last_id_option, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
 			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
 				return true;
 			}
