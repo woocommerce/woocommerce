@@ -367,6 +367,38 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox unique_slot_items collapses the same product's line items to one row.
+	 */
+	public function test_unique_slot_items_collapses_same_product_line_items(): void {
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $line ) {
+			$order->remove_item( $line->get_id() );
+		}
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$this->assertCount( 2, $order->get_items(), 'Fixture should carry two line items.' );
+
+		$unique = ItemEligibility::unique_slot_items( $order->get_items() );
+
+		$this->assertCount( 1, $unique );
+		$this->assertSame( $product->get_id(), reset( $unique )->get_product_id() );
+	}
+
+	/**
+	 * @testdox unique_slot_items keeps distinct variations of the same product as separate rows.
+	 */
+	public function test_unique_slot_items_keeps_distinct_variations(): void {
+		$built = $this->make_variation_order( 'jane@example.test' );
+
+		$unique = ItemEligibility::unique_slot_items( $built['order']->get_items() );
+
+		$this->assertCount( 2, $unique );
+	}
+
+	/**
 	 * Build a completed order with two variations of one parent variable product.
 	 *
 	 * @param string $email Billing email to set on the order.
