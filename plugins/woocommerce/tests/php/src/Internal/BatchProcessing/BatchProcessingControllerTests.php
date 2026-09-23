@@ -835,7 +835,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		// Emptied lookup queries (both hybrid store tables) return before $wpdb->flush(), like a custom store that
 		// bypasses $wpdb, so an error left by an earlier query in the request is still set during the lookups.
 		$filter = function ( $query ) {
-			return preg_match( '/^SELECT (p\.ID|a\.action_id) FROM/', $query ) ? '' : $query;
+			return str_starts_with( $query, 'SELECT p.ID FROM' ) || str_starts_with( $query, 'SELECT a.action_id FROM' ) ? '' : $query;
 		};
 		add_filter( 'query', $filter );
 		try {
