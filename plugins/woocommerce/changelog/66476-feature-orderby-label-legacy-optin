@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `woocommerce_catalog_orderby_use_label` filter to opt into more accessible orderby dropdowns
