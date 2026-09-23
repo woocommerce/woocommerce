@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
-use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WP_REST_Request;
@@ -27,26 +26,13 @@ trait ReportTestTrait {
 		update_option( 'timezone_string', 'UTC' );
 		update_option( 'gmt_offset', 0 );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
-		$this->set_reports_version_bumped( false );
 	}
 
 	/**
-	 * Undo the process state that the transaction rollback does not cover.
+	 * Restore the feature option that the transaction rollback does not cover.
 	 */
 	private function tear_down_stock_notifications_report(): void {
-		$this->set_reports_version_bumped( false );
 		$this->restore_stock_notifications_feature_option();
-	}
-
-	/**
-	 * Set the once-per-request guard on the reports cache version bump.
-	 *
-	 * @param bool $value Whether the version counts as already bumped.
-	 */
-	private function set_reports_version_bumped( bool $value ): void {
-		$property = new \ReflectionProperty( StockNotificationsDataStore::class, 'reports_version_bumped' );
-		$property->setAccessible( true );
-		$property->setValue( null, $value );
 	}
 
 	/**

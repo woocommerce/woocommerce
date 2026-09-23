@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -18,20 +19,6 @@ defined( 'ABSPATH' ) || exit;
  * The Stock Notifications Data Store.
  */
 class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
-
-	/**
-	 * Option holding the stock notifications report cache version. Bumped on every write.
-	 *
-	 * @var string
-	 */
-	public const REPORTS_VERSION_OPTION = 'woocommerce_stock_notifications_reports_version';
-
-	/**
-	 * Whether the reports cache version was already bumped in this request.
-	 *
-	 * @var bool
-	 */
-	private static bool $reports_version_bumped = false;
 
 	/**
 	 * The database util object to use.
@@ -209,7 +196,7 @@ CREATE TABLE $meta_table_name (
 			return new \WP_Error( 'db_insert_error', 'Could not insert stock notification into the database.' );
 		}
 
-		$this->bump_reports_version();
+		ReportsCache::invalidate();
 
 		$notification_id = (int) $wpdb->insert_id;
 		$notification->set_id( $notification_id );
@@ -314,7 +301,7 @@ CREATE TABLE $meta_table_name (
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
 
-			$this->bump_reports_version();
+			ReportsCache::invalidate();
 		}
 
 		$notification->save_meta_data();
@@ -340,22 +327,8 @@ CREATE TABLE $meta_table_name (
 
 		if ( $deleted > 0 ) {
 			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
-			$this->bump_reports_version();
+			ReportsCache::invalidate();
 		}
-	}
-
-	/**
-	 * Invalidate the stock notifications reports cache.
-	 *
-	 * Bumps the version once per request, so a batch of writes costs a single option update.
-	 */
-	private function bump_reports_version(): void {
-		if ( self::$reports_version_bumped ) {
-			return;
-		}
-
-		self::$reports_version_bumped = true;
-		update_option( self::REPORTS_VERSION_OPTION, (int) get_option( self::REPORTS_VERSION_OPTION, 0 ) + 1, false );
 	}
 
 	/**

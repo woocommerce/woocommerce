@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
-use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -255,14 +255,14 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->insert_row( $product->get_id(), NotificationStatus::ACTIVE, gmdate( 'Y-m-d H:i:s' ) );
 		$this->assertSame( 1, $this->get_rows( $period )[ $product->get_id() ]['signups'], 'A direct insert should not invalidate the cache.' );
 
-		$version      = (int) get_option( StockNotificationsDataStore::REPORTS_VERSION_OPTION, 0 );
+		$version      = ReportsCache::get_version();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_user_email( 'crud@example.com' );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
-		$this->assertSame( $version + 1, (int) get_option( StockNotificationsDataStore::REPORTS_VERSION_OPTION ), 'Saving a notification should bump the cache version.' );
+		$this->assertNotSame( $version, ReportsCache::get_version(), 'Saving a notification should invalidate the reports cache.' );
 		$this->assertSame( 3, $this->get_rows( $period )[ $product->get_id() ]['signups'], 'The report should be recomputed after the bump.' );
 	}
 

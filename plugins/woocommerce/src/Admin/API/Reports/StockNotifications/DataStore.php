@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 /**
@@ -266,18 +265,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->interval_query->add_sql_clause( 'where_time', $wpdb->prepare( "AND {$column} <= %s", $this->get_utc_datetime_string( $query_args['adj_before'] ) ) );
 		$this->interval_query->add_sql_clause( 'where_time', $wpdb->prepare( "AND {$column} >= %s", $this->get_utc_datetime_string( $query_args['adj_after'] ) ) );
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	}
-
-	/**
-	 * Returns the cache key, including a version bumped on every stock notification write.
-	 *
-	 * @override ReportsDataStore::get_cache_key()
-	 *
-	 * @param array $params Query parameters.
-	 * @return string
-	 */
-	protected function get_cache_key( $params ) {
-		return parent::get_cache_key( $params ) . '_' . (int) get_option( StockNotificationsDataStore::REPORTS_VERSION_OPTION, 0 );
 	}
 
 	/**
