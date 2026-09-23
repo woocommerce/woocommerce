@@ -66,7 +66,16 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		title: __( 'Performance', 'woocommerce' ),
 		isVisible: true,
 		icon: arrowRight,
-		hiddenBlocks: [],
+		// Today's five plus the five most-toggled metrics. The tax and discount
+		// breakdowns stay hidden, so no visible tile is a total of other visible
+		// tiles.
+		hiddenBlocks: [
+			'coupons/amount',
+			'downloads/download_count',
+			'taxes/order_tax',
+			'taxes/total_tax',
+			'taxes/shipping_tax',
+		],
 	},
 	{
 		key: 'charts',
