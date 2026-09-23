@@ -30,6 +30,7 @@ class WC_WCCOM_Site {
 
 		add_action( 'woocommerce_wccom_install_products', array( 'WC_WCCOM_Site_Installer', 'install' ) );
 		add_filter( 'determine_current_user', array( __CLASS__, 'authenticate_wccom' ), 14 );
+		add_filter( 'rest_authentication_errors', array( __CLASS__, 'authentication_fallback' ) );
 		add_action( 'woocommerce_rest_api_get_rest_namespaces', array( __CLASS__, 'register_rest_namespace' ) );
 	}
 
@@ -48,7 +49,7 @@ class WC_WCCOM_Site {
 	 *
 	 * @since 3.7.0
 	 * @param int|false $user_id User ID.
-	 * @return int|false
+	 * @return int|WP_User|false
 	 */
 	public static function authenticate_wccom( $user_id ) {
 		if ( ! empty( $user_id ) || ! self::is_request_to_wccom_site_rest_api() ) {
@@ -135,6 +136,31 @@ class WC_WCCOM_Site {
 	}
 
 	/**
+	 * Authenticate a WooCommerce.com request that was not recognized during `determine_current_user`.
+	 *
+	 * WordPress determines the current user before it parses the request, so a route carried in
+	 * `rest_route` is only known here.
+	 *
+	 * @since 11.3.0
+	 * @param WP_Error|null|bool $error Error from another authentication handler, null if none.
+	 * @return WP_Error|null|bool
+	 */
+	public static function authentication_fallback( $error ) {
+		if ( ! empty( $error ) || 0 !== get_current_user_id() ) {
+			return $error;
+		}
+
+		$user = self::authenticate_wccom( false );
+
+		if ( ! $user instanceof WP_User ) {
+			return $error;
+		}
+
+		wp_set_current_user( $user->ID );
+		return true;
+	}
+
+	/**
 	 * Get the authorization header.
 	 *
 	 * On certain systems and configurations, the Authorization header will be
@@ -170,16 +196,21 @@ class WC_WCCOM_Site {
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
+		global $wp;
 
-		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$route       = wp_unslash( $_REQUEST['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
-			$rest_prefix = '';
-		} else {
-			$route       = wp_unslash( add_query_arg( array() ) );
-			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		// Once WordPress is dispatching REST, the route it resolved is the one that counts.
+		if ( wp_is_rest_endpoint() ) {
+			$route = $wp instanceof WP ? ( $wp->query_vars['rest_route'] ?? null ) : null;
+			return is_string( $route ) && str_starts_with( ltrim( $route, '/' ), 'wccom-site/' );
 		}
 
-		return false !== strpos( $route, $rest_prefix . 'wccom-site/' );
+		// Before that, a rest_route in the query or body can override the path, so leave those requests to authentication_fallback().
+		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
+		}
+
+		$path = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared against the REST prefix.
+		return is_string( $path ) && str_contains( $path, trailingslashit( rest_get_url_prefix() ) . 'wccom-site/' );
 	}
 
 	/**
