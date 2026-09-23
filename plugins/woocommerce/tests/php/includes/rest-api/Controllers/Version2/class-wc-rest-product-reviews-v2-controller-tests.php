@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 /**
  * Tests relating to the Product Reviews controller in APIv2.
  */
