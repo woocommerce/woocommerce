@@ -30,6 +30,13 @@ class CartRecoveryTest extends WC_Unit_Test_Case {
 	private $remote_addr;
 
 	/**
+	 * Session customer ID before the test, restored in tearDown.
+	 *
+	 * @var string|int
+	 */
+	private $session_customer_id;
+
+	/**
 	 * Enable the flag and the email, and start with an empty cart.
 	 */
 	public function setUp(): void {
@@ -51,16 +58,21 @@ class CartRecoveryTest extends WC_Unit_Test_Case {
 		$this->sut = new CartRecovery();
 		$this->sut->maybe_register_hooks();
 
+		$this->session_customer_id = WC()->session->get_customer_id();
 		WC()->cart->empty_cart();
 		WC()->session->set( CartRecovery::SESSION_KEY, null );
 		as_unschedule_all_actions( CartRecovery::ACTION_HOOK );
 	}
 
 	/**
-	 * Restore REMOTE_ADDR, which no base class resets.
+	 * Restore REMOTE_ADDR and the session customer ID, which no base class resets.
 	 */
 	public function tearDown(): void {
 		try {
+			$property = new \ReflectionProperty( \WC_Session::class, '_customer_id' );
+			$property->setAccessible( true );
+			$property->setValue( WC()->session, $this->session_customer_id );
+
 			if ( null === $this->remote_addr ) {
 				unset( $_SERVER['REMOTE_ADDR'] );
 			} else {
