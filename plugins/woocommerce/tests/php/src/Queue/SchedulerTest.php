@@ -1,0 +1,1122 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Queue;
+
+use Automattic\WooCommerce\Enums\QueueCapability;
+use Automattic\WooCommerce\Enums\SchedulerQueue;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+use Automattic\WooCommerce\Queue\OptionsAwareQueueInterface;
+use Automattic\WooCommerce\Queue\Scheduler;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the Scheduler class.
+ */
+class SchedulerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var Scheduler
+	 */
+	private $sut;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = wc_get_container()->get( Scheduler::class );
+	}
+
+	/**
+	 * Build a plain queue double that records every call and answers get_next() with a fixed value.
+	 *
+	 * @param mixed $next What get_next() returns. The base interface has no return type, so this may be false.
+	 * @return \WC_Queue_Interface
+	 */
+	private function plain_queue( $next = null ): \WC_Queue_Interface {
+		return new class( $next ) implements \WC_Queue_Interface {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+			public $calls = array();
+			private $next;
+			public function __construct( $next ) {
+				$this->next = $next;
+			}
+			public function add( $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'add', func_get_args() );
+				return 11;
+			}
+			public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'schedule_single', func_get_args() );
+				return 12;
+			}
+			public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'schedule_recurring', func_get_args() );
+				return 13;
+			}
+			public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'schedule_cron', func_get_args() );
+				return 14;
+			}
+			public function cancel( $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'cancel', func_get_args() );
+			}
+			public function cancel_all( $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'cancel_all', func_get_args() );
+			}
+			public function get_next( $hook, $args = null, $group = '' ) {
+				$this->calls[] = array( 'get_next', func_get_args() );
+				return $this->next;
+			}
+			public function search( $args = array(), $return_format = OBJECT ) {
+				$this->calls[] = array( 'search', func_get_args() );
+				return 'ids' === $return_format ? array( 101, 102, 103 ) : array( 'searched' );
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Build an options-aware queue double that records every call, including the options it receives.
+	 *
+	 * @param string[] $unsupported Options the double reports as unsupported.
+	 * @param bool     $ready       What is_ready() reports.
+	 * @return OptionsAwareQueueInterface
+	 */
+	private function options_aware_queue( array $unsupported = array(), bool $ready = true ): OptionsAwareQueueInterface {
+		return new class( $unsupported, $ready ) implements OptionsAwareQueueInterface {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+			public $calls = array();
+			private $unsupported;
+			private $ready;
+			public function __construct( array $unsupported, bool $ready ) {
+				$this->unsupported = $unsupported;
+				$this->ready       = $ready;
+			}
+			public function supports( $option ) {
+				return in_array( $option, array( 'priority', 'unique' ), true ) && ! in_array( $option, $this->unsupported, true );
+			}
+			public function is_ready() {
+				return $this->ready;
+			}
+			public function add( $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'add', func_get_args() );
+				return 21;
+			}
+			public function enqueue_async( $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'enqueue_async', func_get_args() );
+				return 27;
+			}
+			public function schedule_single( $timestamp, $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'schedule_single', func_get_args() );
+				return 22;
+			}
+			public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'schedule_recurring', func_get_args() );
+				return 23;
+			}
+			public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $options = array() ) {
+				$this->calls[] = array( 'schedule_cron', func_get_args() );
+				return 24;
+			}
+			public function has_scheduled_action( $hook, $args = null, $group = '' ) {
+				$this->calls[] = array( 'has_scheduled_action', func_get_args() );
+				return true;
+			}
+			public function cancel( $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'cancel', func_get_args() );
+			}
+			public function cancel_all( $hook, $args = array(), $group = '' ) {
+				$this->calls[] = array( 'cancel_all', func_get_args() );
+			}
+			public function get_next( $hook, $args = null, $group = '' ) {
+				$this->calls[] = array( 'get_next', func_get_args() );
+				return null;
+			}
+			public function search( $args = array(), $return_format = OBJECT ) {
+				$this->calls[] = array( 'search', func_get_args() );
+				return array();
+			}
+			public function count( $args = array() ) {
+				$this->calls[] = array( 'count', func_get_args() );
+				return 7;
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Build a stock queue that believes an Action Scheduler copy predating both options is loaded.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function stock_queue_on_old_action_scheduler(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			protected function get_action_scheduler_version(): ?string {
+				return '3.4.0';
+			}
+			protected function loaded_scheduling_api_accepts( string $parameter ): bool {
+				return false;
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Build a stock queue whose loaded Action Scheduler never fires the ensure-recurring hook.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function stock_queue_without_ensure_hook(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function reasserts_recurring_actions(): bool {
+				return false;
+			}
+		};
+	}
+
+	/**
+	 * Build a stock queue that reports Action Scheduler as not ready.
+	 *
+	 * @return OptionsAwareActionQueue
+	 */
+	private function not_ready_stock_queue(): OptionsAwareActionQueue {
+		return new class() extends OptionsAwareActionQueue {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+			public $ready = false;
+			public function is_ready(): bool {
+				return $this->ready;
+			}
+			// phpcs:enable
+		};
+	}
+
+	/**
+	 * Run a callback with the given hooks marked as not yet fired, restoring the counters afterwards.
+	 *
+	 * @param string[] $hooks    Hook names to un-fire.
+	 * @param callable $callback What to run.
+	 */
+	private function with_unfired_hooks( array $hooks, callable $callback ): void {
+		$saved = array();
+		foreach ( $hooks as $hook ) {
+			$saved[ $hook ] = $GLOBALS['wp_actions'][ $hook ] ?? null;
+			unset( $GLOBALS['wp_actions'][ $hook ] );
+		}
+		try {
+			$callback();
+		} finally {
+			foreach ( $saved as $hook => $count ) {
+				if ( null === $count ) {
+					unset( $GLOBALS['wp_actions'][ $hook ] );
+				} else {
+					$GLOBALS['wp_actions'][ $hook ] = $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter this helper changed.
+				}
+			}
+		}
+	}
+
+	/**
+	 * Count the callbacks attached to a hook at the default priority.
+	 *
+	 * @param string $hook Hook name.
+	 * @return int
+	 */
+	private function count_callbacks( string $hook ): int {
+		return isset( $GLOBALS['wp_filter'][ $hook ] ) ? count( $GLOBALS['wp_filter'][ $hook ]->callbacks[10] ?? array() ) : 0;
+	}
+
+	/**
+	 * Make the given queue the active one.
+	 *
+	 * @param \WC_Queue_Interface $queue The queue double.
+	 */
+	private function use_queue( \WC_Queue_Interface $queue ): void {
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+	}
+
+	/**
+	 * Build a scheduler whose stock queue is the given one, for the paths that bypass the active queue.
+	 *
+	 * @param OptionsAwareActionQueue $default_queue The stock queue to inject.
+	 * @return Scheduler
+	 */
+	private function scheduler_with_default_queue( OptionsAwareActionQueue $default_queue ): Scheduler {
+		$scheduler = new Scheduler();
+		$scheduler->init( wc_get_container()->get( LegacyProxy::class ), $default_queue );
+
+		return $scheduler;
+	}
+
+	/**
+	 * Read the stored Action Scheduler priority of an action.
+	 *
+	 * @param int $action_id The action ID.
+	 * @return int
+	 */
+	private function get_stored_priority( int $action_id ): int {
+		return \ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority();
+	}
+
+	/**
+	 * @testdox Should pass priority and unique to an options-aware queue and never the scheduler's own keys.
+	 */
+	public function test_passes_options_to_an_options_aware_queue(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->schedule_single(
+			123,
+			'wc_scheduler_test_hook',
+			array( 'a' => 1 ),
+			'wc-scheduler-test',
+			array(
+				'priority' => 3,
+				'unique'   => true,
+				'strict'   => true,
+				'queue'    => SchedulerQueue::ACTIVE,
+			)
+		);
+
+		$this->assertSame( 22, $action_id );
+		$this->assertCount( 1, $queue->calls );
+		$this->assertSame( 'schedule_single', $queue->calls[0][0] );
+		$this->assertSame(
+			array(
+				123,
+				'wc_scheduler_test_hook',
+				array( 'a' => 1 ),
+				'wc-scheduler-test',
+				array(
+					'priority' => 3,
+					'unique'   => true,
+				),
+			),
+			$queue->calls[0][1]
+		);
+	}
+
+	/**
+	 * @testdox Should call the plain four-argument methods on a plain queue and drop the options.
+	 */
+	public function test_calls_plain_methods_on_a_plain_queue(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$single    = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test', array( 'priority' => 1 ) );
+		$recurring = $this->sut->schedule_recurring( 123, 60, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'priority' => 1 ) );
+		$cron      = $this->sut->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'priority' => 1 ) );
+
+		$this->assertSame( array( 12, 13, 14 ), array( $single, $recurring, $cron ) );
+		$this->assertSame( array( 'schedule_single', 'schedule_recurring', 'schedule_cron' ), array_column( $queue->calls, 0 ) );
+		$this->assertSame( array( 123, 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test' ), $queue->calls[0][1], 'A plain queue must receive exactly the base interface arguments' );
+		$this->assertCount( 5, $queue->calls[1][1] );
+		$this->assertCount( 5, $queue->calls[2][1] );
+	}
+
+	/**
+	 * @testdox Should emulate uniqueness on a plain queue by returning 0 when get_next() reports a pending match.
+	 */
+	public function test_emulates_unique_on_a_plain_queue_with_a_pending_match(): void {
+		$queue = $this->plain_queue( new \WC_DateTime( '@' . ( time() + 60 ) ) );
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test', array( 'unique' => true ) );
+
+		$this->assertSame( 0, $action_id );
+		$this->assertSame( array( 'get_next' ), array_column( $queue->calls, 0 ), 'Nothing should be scheduled when a match is pending' );
+		$this->assertSame( array( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test' ), $queue->calls[0][1] );
+	}
+
+	/**
+	 * @testdox Should schedule a unique action on a plain queue when get_next() reports no match.
+	 */
+	public function test_schedules_unique_on_a_plain_queue_without_a_match(): void {
+		$queue = $this->plain_queue( null );
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->add( 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'unique' => true ) );
+
+		$this->assertSame( 11, $action_id, 'add() calls the queue\'s own add() after the pending-action check' );
+		$this->assertSame( array( 'get_next', 'add' ), array_column( $queue->calls, 0 ) );
+	}
+
+	/**
+	 * A custom queue may answer false from get_next() when nothing is scheduled, as wp_next_scheduled() does.
+	 *
+	 * @testdox Should treat only a WC_DateTime from get_next() as a scheduled action on a plain queue.
+	 */
+	public function test_only_a_datetime_from_get_next_counts_as_scheduled(): void {
+		$queue = $this->plain_queue( false );
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', array( 'unique' => true ) );
+
+		$this->assertSame( 12, $action_id, 'A false from get_next() must not block a unique action' );
+		$this->assertFalse( $this->sut->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+	}
+
+	/**
+	 * @testdox Should not consult get_next() on a plain queue when unique is not requested.
+	 */
+	public function test_does_not_check_get_next_when_not_unique(): void {
+		$queue = $this->plain_queue( new \WC_DateTime( '@' . ( time() + 60 ) ) );
+		$this->use_queue( $queue );
+
+		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test' );
+
+		$this->assertSame( array( 'schedule_single' ), array_column( $queue->calls, 0 ) );
+	}
+
+	/**
+	 * @testdox Should bypass the active queue and store a real action when the queue option selects the default queue.
+	 */
+	public function test_default_queue_option_bypasses_the_active_queue(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$action_id = $this->sut->schedule_single(
+			time() + HOUR_IN_SECONDS,
+			'wc_scheduler_test_default',
+			array(),
+			'wc-scheduler-test',
+			array(
+				'priority' => 4,
+				'queue'    => SchedulerQueue::DEFAULT,
+			)
+		);
+
+		$this->assertGreaterThan( 0, $action_id );
+		$this->assertSame( 4, $this->get_stored_priority( $action_id ) );
+		$this->assertSame( array(), $queue->calls, 'The active queue must not see a call routed to the default queue' );
+	}
+
+	/**
+	 * The queue owns validation and defaults, so the scheduler must not touch the value.
+	 *
+	 * @testdox Should forward the priority to an options-aware queue exactly as the caller gave it.
+	 * @testWith [300]
+	 *           ["high"]
+	 *           [null]
+	 *           [3.9]
+	 *
+	 * @param mixed $requested The priority given by the caller.
+	 */
+	public function test_forwards_priority_as_given( $requested ): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+
+		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'priority' => $requested ) );
+
+		$this->assertSame( $requested, $queue->calls[0][1][4]['priority'] );
+	}
+
+	/**
+	 * @testdox Should forward only unique when no priority is given, and drop unknown option keys.
+	 */
+	public function test_default_options(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+
+		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'mystery' => true ) );
+
+		$this->assertSame( array( 'unique' => false ), $queue->calls[0][1][4], 'No priority key means the queue applies its own default' );
+	}
+
+	/**
+	 * @testdox Should let the stock queue clamp a priority that reaches it through the scheduler.
+	 */
+	public function test_stock_queue_clamps_priority_end_to_end(): void {
+		$action_id = $this->sut->schedule_single( time() + HOUR_IN_SECONDS, 'wc_scheduler_test_clamp', array(), 'wc-scheduler-test', array( 'priority' => 300 ) );
+
+		$this->assertSame( 255, $this->get_stored_priority( $action_id ) );
+	}
+
+	/**
+	 * @testdox Should fall back to the active queue and raise a notice for an unknown queue option value.
+	 */
+	public function test_unknown_queue_option_falls_back_to_active(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::schedule_single' );
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'queue' => 'elsewhere' ) );
+
+		$this->assertSame( 22, $action_id, 'The call should reach the active queue' );
+	}
+
+	/**
+	 * @testdox Should list every queue option value in SchedulerQueue::get_all().
+	 */
+	public function test_scheduler_queue_enum_lists_every_value(): void {
+		$this->assertSame( array( SchedulerQueue::ACTIVE, SchedulerQueue::DEFAULT ), SchedulerQueue::get_all() );
+	}
+
+	/**
+	 * @testdox Should list every capability in QueueCapability::get_all().
+	 */
+	public function test_queue_capability_enum_lists_every_value(): void {
+		$this->assertSame( array( QueueCapability::PRIORITY, QueueCapability::UNIQUE ), QueueCapability::get_all() );
+	}
+
+	/**
+	 * @testdox Should pass cancel, cancel_all, get_next and search straight through to the selected queue.
+	 */
+	public function test_passthrough_methods(): void {
+		$next  = new \WC_DateTime( '@' . ( time() + 60 ) );
+		$queue = $this->plain_queue( $next );
+		$this->use_queue( $queue );
+
+		$this->sut->cancel( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test' );
+		$this->sut->cancel_all( 'wc_scheduler_test_hook', array(), 'wc-scheduler-test' );
+		$got_next = $this->sut->get_next( 'wc_scheduler_test_hook', null, 'wc-scheduler-test' );
+		$results  = $this->sut->search( array( 'hook' => 'wc_scheduler_test_hook' ), 'ids' );
+
+		$this->assertSame( $next, $got_next );
+		$this->assertSame( array( 101, 102, 103 ), $results, 'search() returns whatever the queue returns, here the IDs the double answers for the ids format' );
+		$this->assertSame(
+			array(
+				array( 'cancel', array( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'wc-scheduler-test' ) ),
+				array( 'cancel_all', array( 'wc_scheduler_test_hook', array(), 'wc-scheduler-test' ) ),
+				array( 'get_next', array( 'wc_scheduler_test_hook', null, 'wc-scheduler-test' ) ),
+				array( 'search', array( array( 'hook' => 'wc_scheduler_test_hook' ), 'ids' ) ),
+			),
+			$queue->calls
+		);
+	}
+
+	/**
+	 * @testdox Should answer has_scheduled_action() from get_next() on a plain queue and from the queue itself when options-aware.
+	 */
+	public function test_has_scheduled_action(): void {
+		$this->use_queue( $this->plain_queue( new \WC_DateTime( '@' . ( time() + 60 ) ) ) );
+		$this->assertTrue( $this->sut->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+
+		$this->use_queue( $this->plain_queue( null ) );
+		$this->assertFalse( $this->sut->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+
+		$aware = $this->options_aware_queue();
+		$this->use_queue( $aware );
+		$this->assertTrue( $this->sut->has_scheduled_action( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'g' ) );
+		$this->assertSame( array( array( 'has_scheduled_action', array( 'wc_scheduler_test_hook', array( 'a' => 1 ), 'g' ) ) ), $aware->calls );
+	}
+
+	/**
+	 * @testdox Should report a real pending action through the stock queue.
+	 */
+	public function test_has_scheduled_action_on_the_stock_queue(): void {
+		$this->assertFalse( $this->sut->has_scheduled_action( 'wc_scheduler_test_stock', array( 'a' => 1 ), 'wc-scheduler-test' ) );
+
+		$this->sut->schedule_single( time() + HOUR_IN_SECONDS, 'wc_scheduler_test_stock', array( 'a' => 1 ), 'wc-scheduler-test' );
+
+		$this->assertTrue( $this->sut->has_scheduled_action( 'wc_scheduler_test_stock', array( 'a' => 1 ), 'wc-scheduler-test' ) );
+	}
+
+	/**
+	 * @testdox Should report native support only: both options on the stock and options-aware queues, neither on a plain queue.
+	 */
+	public function test_supports(): void {
+		$this->assertTrue( $this->sut->supports( 'priority' ), 'The stock queue on the bundled Action Scheduler supports priority' );
+		$this->assertTrue( $this->sut->supports( 'unique' ) );
+		$this->assertFalse( $this->sut->supports( 'mystery' ) );
+
+		$this->use_queue( $this->options_aware_queue() );
+		$this->assertTrue( $this->sut->supports( 'priority' ) );
+		$this->assertTrue( $this->sut->supports( 'unique' ) );
+
+		$this->use_queue( $this->plain_queue() );
+		$this->assertFalse( $this->sut->supports( 'priority' ), 'A plain queue drops the priority' );
+		$this->assertFalse( $this->sut->supports( 'unique' ), 'A plain queue only gets emulated uniqueness, which is not native support' );
+		$this->assertTrue( $this->sut->supports( 'priority', array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The default queue supports priority even when a plain queue is active' );
+	}
+
+	/**
+	 * @testdox Should report no native support on a stock queue whose Action Scheduler predates both options.
+	 */
+	public function test_supports_follows_the_action_scheduler_version(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_on_old_action_scheduler() );
+
+		$this->assertFalse( $scheduler->supports( 'unique', array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+		$this->assertFalse( $scheduler->supports( 'priority', array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when unique is requested on a plain queue.
+	 */
+	public function test_strict_unique_on_a_plain_queue_throws(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'The unique scheduling option cannot take effect' );
+
+		try {
+			$options = array(
+				'unique' => true,
+				'strict' => true,
+			);
+
+			$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+		} finally {
+			$this->assertSame( array(), $queue->calls, 'Nothing should reach the queue when strict mode throws' );
+		}
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when a non-default priority is requested on a plain queue.
+	 */
+	public function test_strict_priority_on_a_plain_queue_throws(): void {
+		$this->use_queue( $this->plain_queue() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'does not implement OptionsAwareQueueInterface' );
+
+		$options = array(
+			'priority' => 1,
+			'strict'   => true,
+		);
+
+		$this->sut->schedule_recurring( 123, 60, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should schedule in strict mode on a plain queue when no capability is requested.
+	 */
+	public function test_strict_with_default_options_on_a_plain_queue_schedules(): void {
+		$queue = $this->plain_queue();
+		$this->use_queue( $queue );
+
+		$options = array(
+			'strict' => true,
+			'unique' => false,
+		);
+
+		$action_id = $this->sut->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+
+		$this->assertSame( 14, $action_id );
+		$this->assertSame( array( 'schedule_cron' ), array_column( $queue->calls, 0 ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode on a stock queue whose Action Scheduler predates unique actions.
+	 */
+	public function test_strict_unique_on_old_action_scheduler_throws(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_on_old_action_scheduler() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'does not accept unique, which arrived in 3.5.0' );
+
+		$options = array(
+			'unique' => true,
+			'strict' => true,
+			'queue'  => SchedulerQueue::DEFAULT,
+		);
+
+		$scheduler->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should keep best-effort behaviour when strict is not set, even where support is missing.
+	 */
+	public function test_non_strict_falls_back_where_support_is_missing(): void {
+		$queue = $this->plain_queue( null );
+		$this->use_queue( $queue );
+
+		$options = array(
+			'unique'   => true,
+			'priority' => 1,
+		);
+
+		$action_id = $this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+
+		$this->assertSame( 12, $action_id );
+		$this->assertSame( array( 'get_next', 'schedule_single' ), array_column( $queue->calls, 0 ), 'Uniqueness is emulated and the priority dropped' );
+	}
+
+	/**
+	 * @testdox Should report the loaded Action Scheduler version.
+	 */
+	public function test_get_action_scheduler_version(): void {
+		$version = $this->sut->get_action_scheduler_version();
+
+		$this->assertIsString( $version );
+		$this->assertMatchesRegularExpression( '/^\d+\.\d+/', $version );
+	}
+
+	/**
+	 * @testdox Should be ready in the test environment, whichever kind of queue is active.
+	 */
+	public function test_is_ready(): void {
+		$this->assertTrue( $this->sut->is_ready(), 'Stock queue: Action Scheduler is initialised in the test environment' );
+
+		$this->use_queue( $this->plain_queue() );
+		$this->assertTrue( $this->sut->is_ready(), 'A queue that does not extend WC_Action_Queue only needs plugins_loaded' );
+
+		$this->use_queue( new class() extends \WC_Action_Queue {} );
+		$this->assertTrue( $this->sut->is_ready(), 'A WC_Action_Queue subclass is checked against Action Scheduler, which is initialised here' );
+		$this->assertTrue( $this->sut->is_ready( array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The default queue can be asked directly' );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when the priority key is present on a plain queue, even at the default value.
+	 */
+	public function test_strict_priority_key_on_a_plain_queue_throws_even_at_default(): void {
+		$this->use_queue( $this->plain_queue() );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'The priority scheduling option cannot take effect' );
+
+		$options = array(
+			'priority' => 10,
+			'strict'   => true,
+		);
+
+		$this->sut->schedule_single( 123, 'wc_scheduler_test_hook', array(), 'wc-scheduler-test', $options );
+	}
+
+	/**
+	 * @testdox Should return neutral values with a notice, and touch nothing, when the stock queue is not ready.
+	 */
+	public function test_not_ready_stock_queue_returns_neutral_values_with_a_notice(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+
+		$this->assertFalse( $scheduler->is_ready() );
+		$this->assertFalse( $scheduler->is_ready( array( 'queue' => SchedulerQueue::DEFAULT ) ) );
+
+		foreach ( array( 'schedule_single', 'schedule_recurring', 'schedule_cron', 'cancel', 'cancel_all', 'get_next', 'search', 'has_scheduled_action' ) as $method ) {
+			$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::' . $method );
+		}
+
+		$this->assertSame( 0, $scheduler->schedule_single( 123, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( 0, $scheduler->schedule_recurring( 123, 60, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( 0, $scheduler->schedule_cron( 123, '0 0 * * *', 'wc_scheduler_test_hook' ) );
+		$scheduler->cancel( 'wc_scheduler_test_hook' );
+		$scheduler->cancel_all( 'wc_scheduler_test_hook' );
+		$this->assertNull( $scheduler->get_next( 'wc_scheduler_test_hook' ) );
+		$this->assertSame( array(), $scheduler->search( array( 'hook' => 'wc_scheduler_test_hook' ) ) );
+		$this->assertFalse( $scheduler->has_scheduled_action( 'wc_scheduler_test_hook' ) );
+	}
+
+	/**
+	 * @testdox Should throw in strict mode when the queue is not ready.
+	 */
+	public function test_not_ready_in_strict_mode_throws(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'not ready to accept calls yet' );
+
+		$scheduler->schedule_single( 123, 'wc_scheduler_test_hook', array(), '', array( 'strict' => true ) );
+	}
+
+	/**
+	 * @testdox Should honour an options-aware queue that reports itself not ready.
+	 */
+	public function test_options_aware_queue_reporting_not_ready_is_honoured(): void {
+		$queue = $this->options_aware_queue( array(), false );
+		$this->use_queue( $queue );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Queue\Scheduler::schedule_single' );
+
+		$this->assertFalse( $this->sut->is_ready() );
+		$this->assertSame( 0, $this->sut->schedule_single( 123, 'wc_scheduler_test_hook' ) );
+		$this->assertSame( array(), $queue->calls, 'A queue that is not ready must not be called' );
+	}
+
+	/**
+	 * @testdox Should judge a plain WC_Action_Queue subclass by the stock queue's readiness.
+	 */
+	public function test_plain_action_queue_subclass_follows_stock_readiness(): void {
+		$scheduler = $this->scheduler_with_default_queue( $this->not_ready_stock_queue() );
+		$this->use_queue( new class() extends \WC_Action_Queue {} );
+
+		$this->assertFalse( $scheduler->is_ready(), 'A WC_Action_Queue subclass delegates to Action Scheduler, so it is as ready as the stock queue' );
+
+		$this->use_queue( $this->plain_queue() );
+		$this->assertTrue( $scheduler->is_ready(), 'A queue that does not extend WC_Action_Queue only needs plugins_loaded' );
+	}
+
+	/**
+	 * @testdox Should ask an options-aware queue which options it honours instead of assuming all of them.
+	 */
+	public function test_supports_asks_the_options_aware_queue(): void {
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $this->options_aware_queue( array( 'priority' ) ) ) );
+
+		$this->assertTrue( $this->sut->supports( 'unique' ) );
+		$this->assertFalse( $this->sut->supports( 'priority' ), 'The queue reported no native priority support' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'reports no native support for priority' );
+		$this->sut->schedule_single(
+			time() + HOUR_IN_SECONDS,
+			'wc_scheduler_test_oaq_strict',
+			array(),
+			'wc-scheduler-test',
+			array(
+				'priority' => 1,
+				'strict'   => true,
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should call the queue's own add() so a queue that overrides it keeps intercepting.
+	 */
+	public function test_add_calls_the_queue_add_method(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 21, $this->sut->add( 'wc_scheduler_test_add', array( 'k' => 1 ), 'wc-scheduler-test', array( 'unique' => true ) ) );
+		$this->assertSame( 'add', $queue->calls[0][0] );
+		$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][3] );
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->sut->add( 'wc_scheduler_test_add', array(), 'wc-scheduler-test' );
+		$this->assertSame( 'add', $plain->calls[0][0] );
+	}
+
+	/**
+	 * @testdox Should pass null args through cancel() and cancel_all() so a queue can match any args.
+	 */
+	public function test_cancel_passes_null_args_through(): void {
+		foreach ( array( $this->plain_queue(), $this->options_aware_queue() ) as $queue ) {
+			$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+			$this->sut->cancel( 'wc_scheduler_test_cancel', null, 'wc-scheduler-test' );
+			$this->sut->cancel_all( 'wc_scheduler_test_cancel', null, 'wc-scheduler-test' );
+
+			$this->assertSame( array( 'cancel', 'cancel_all' ), array_column( $queue->calls, 0 ) );
+			$this->assertNull( $queue->calls[0][1][1], 'cancel() should forward null args unchanged' );
+			$this->assertNull( $queue->calls[1][1][1], 'cancel_all() should forward null args unchanged' );
+		}
+	}
+
+	/**
+	 * @testdox Should count through the queue's own count() where it has one, and through an ID search otherwise.
+	 */
+	public function test_count_uses_the_queue_count_or_falls_back_to_an_id_search(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 7, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
+		$this->assertSame( array( 'count', array( array( 'hook' => 'wc_scheduler_test_count' ) ) ), $queue->calls[0] );
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->assertSame( 3, $this->sut->count( array( 'hook' => 'wc_scheduler_test_count' ) ) );
+		$this->assertSame(
+			array(
+				'search',
+				array(
+					array(
+						'hook'     => 'wc_scheduler_test_count',
+						'per_page' => -1,
+						'offset'   => 0,
+					),
+					'ids',
+				),
+			),
+			$plain->calls[0],
+			'A plain queue is searched for every ID, ignoring the default page size'
+		);
+	}
+
+	/**
+	 * @testdox Should run a when_ready() callback at once when the queue is ready.
+	 */
+	public function test_when_ready_runs_immediately_when_ready(): void {
+		$this->use_queue( $this->plain_queue() );
+		$ran = 0;
+
+		$ran_now = $this->sut->when_ready(
+			function () use ( &$ran ) {
+				++$ran;
+			}
+		);
+
+		$this->assertTrue( $ran_now, 'when_ready() reports that the callback ran immediately' );
+		$this->assertSame( 1, $ran );
+	}
+
+	/**
+	 * @testdox Should defer a when_ready() callback to action_scheduler_init and run it once the queue is ready.
+	 */
+	public function test_when_ready_waits_for_action_scheduler_init(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+		$ran = 0;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_init' ),
+			function () use ( $scheduler, $stock, &$ran ) {
+				$before = $this->count_callbacks( 'action_scheduler_init' );
+
+				$ran_now = $scheduler->when_ready(
+					function () use ( &$ran ) {
+						++$ran;
+					}
+				);
+
+				$this->assertFalse( $ran_now, 'when_ready() reports that the callback was deferred' );
+				$this->assertSame( $before + 1, $this->count_callbacks( 'action_scheduler_init' ), 'The callback waits for action_scheduler_init' );
+				$this->assertSame( 0, $ran, 'Nothing runs before the queue is ready' );
+
+				$stock->ready = true;
+				do_action( 'action_scheduler_init' );
+
+				$this->assertSame( 1, $ran, 'The callback runs once the queue is ready and the event fires' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should drop a when_ready() callback with a notice when no readiness event is left in the request.
+	 */
+	public function test_when_ready_drops_the_callback_with_a_notice_when_no_event_is_left(): void {
+		$stock     = $this->not_ready_stock_queue();
+		$scheduler = $this->scheduler_with_default_queue( $stock );
+		$this->use_queue( $stock );
+		$this->setExpectedIncorrectUsage( 'Automattic\\WooCommerce\\Queue\\Scheduler::when_ready' );
+		$before = $this->count_callbacks( 'action_scheduler_init' );
+		$ran    = 0;
+
+		$ran_now = $scheduler->when_ready(
+			function () use ( &$ran ) {
+				++$ran;
+			}
+		);
+
+		$this->assertFalse( $ran_now, 'A dropped callback is reported as not run' );
+		$this->assertSame( 0, $ran );
+		$this->assertSame( $before, $this->count_callbacks( 'action_scheduler_init' ), 'A fired event is not hooked' );
+	}
+
+	/**
+	 * Build a scheduler of its own for registry tests, so registrations do not persist on the shared container instance.
+	 *
+	 * @return Scheduler
+	 */
+	private function fresh_scheduler(): Scheduler {
+		return $this->scheduler_with_default_queue( wc_get_container()->get( OptionsAwareActionQueue::class ) );
+	}
+
+	/**
+	 * @testdox Should re-assert ensure_recurring() and ensure_cron() registrations, as unique actions, when Action Scheduler asks.
+	 */
+	public function test_ensure_recurring_schedules_registrations_on_the_ensure_hook(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+		$scheduler = $this->fresh_scheduler();
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $queue, $scheduler, $timestamp ) {
+				$scheduler->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_ensure', array( 'a' => 1 ), 'wc-scheduler-test', array( 'priority' => 5 ) );
+				$scheduler->ensure_cron( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test' );
+
+				$this->assertSame( array(), $queue->calls, 'Registering schedules nothing until Action Scheduler asks' );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+
+				$this->assertSame(
+					array(
+						array(
+							'schedule_recurring',
+							array(
+								$timestamp,
+								DAY_IN_SECONDS,
+								'wc_scheduler_test_ensure',
+								array( 'a' => 1 ),
+								'wc-scheduler-test',
+								array(
+									'priority' => 5,
+									'unique'   => true,
+								),
+							),
+						),
+						array( 'schedule_cron', array( $timestamp, '0 3 * * *', 'wc_scheduler_test_ensure_cron', array(), 'wc-scheduler-test', array( 'unique' => true ) ) ),
+					),
+					$queue->calls
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should schedule an ensure_recurring() registration at once when the ensure hook already fired.
+	 */
+	public function test_ensure_recurring_schedules_immediately_after_the_hook_fired(): void {
+		$queue = $this->options_aware_queue();
+		$this->use_queue( $queue );
+		$scheduler = $this->fresh_scheduler();
+		$saved     = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
+		$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook having fired; restored below.
+
+		try {
+			$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_late', array(), 'wc-scheduler-test' );
+		} finally {
+			if ( null === $saved ) {
+				unset( $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] );
+			} else {
+				$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter.
+			}
+		}
+
+		$this->assertCount( 1, $queue->calls );
+		$this->assertSame( 'schedule_recurring', $queue->calls[0][0] );
+		$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][5] );
+	}
+
+	/**
+	 * @testdox Should keep exactly one pending instance of an ensured recurring action on the stock queue.
+	 */
+	public function test_ensure_recurring_keeps_one_pending_instance_on_the_stock_queue(): void {
+		$criteria = array(
+			'hook'   => 'wc_scheduler_test_ensure_stock',
+			'group'  => 'wc-scheduler-test',
+			'status' => \ActionScheduler_Store::STATUS_PENDING,
+		);
+
+		$scheduler = $this->fresh_scheduler();
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $criteria, $scheduler ) {
+				$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_ensure_stock', array(), 'wc-scheduler-test' );
+				$this->assertSame( 0, $scheduler->count( $criteria ) );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+				$this->assertSame( 1, $scheduler->count( $criteria ) );
+
+				do_action( 'action_scheduler_ensure_recurring_actions' );
+				$this->assertSame( 1, $scheduler->count( $criteria ), 'A second pass does not add a duplicate' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should enqueue async through the queue's enqueue_async() where it has one, and through add() otherwise.
+	 */
+	public function test_enqueue_async_uses_the_queue_primitive_or_falls_back_to_add(): void {
+		$queue = $this->options_aware_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $queue ) );
+
+		$this->assertSame( 27, $this->sut->enqueue_async( 'wc_scheduler_test_async', array( 'k' => 1 ), 'wc-scheduler-test', array( 'priority' => 1 ) ) );
+		$this->assertSame( 'enqueue_async', $queue->calls[0][0] );
+		$this->assertSame(
+			array(
+				'priority' => 1,
+				'unique'   => false,
+			),
+			$queue->calls[0][1][3]
+		);
+
+		$plain = $this->plain_queue();
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => $plain ) );
+
+		$this->assertSame( 11, $this->sut->enqueue_async( 'wc_scheduler_test_async', array(), 'wc-scheduler-test' ) );
+		$this->assertSame( 'add', $plain->calls[0][0], 'A plain queue has no async primitive and receives add()' );
+	}
+
+	/**
+	 * @testdox Should not select the queue when supports() is asked before plugins_loaded.
+	 */
+	public function test_supports_does_not_select_the_queue_before_plugins_loaded(): void {
+		$instance = new \ReflectionProperty( \WC_Queue::class, 'instance' );
+		$instance->setAccessible( true );
+		$original = $instance->getValue();
+		$instance->setValue( null, null );
+
+		try {
+			$this->with_unfired_hooks(
+				array( 'plugins_loaded' ),
+				function () use ( $instance ) {
+					$this->assertFalse( $this->sut->supports( 'priority' ), 'Nothing is supported before plugins_loaded' );
+					$this->assertNull( $instance->getValue(), 'The queue singleton must not be created before woocommerce_queue_class callbacks can attach' );
+				}
+			);
+		} finally {
+			$instance->setValue( null, $original );
+		}
+	}
+
+	/**
+	 * @testdox Should count every match through a plain queue, ignoring the search page size.
+	 */
+	public function test_count_through_a_plain_queue_is_unbounded(): void {
+		$this->register_legacy_proxy_class_mocks( array( \WC_Queue_Interface::class => new \WC_Action_Queue() ) );
+		$timestamp = time() + HOUR_IN_SECONDS;
+		for ( $i = 1; $i <= 7; $i++ ) {
+			$this->sut->schedule_single( $timestamp, 'wc_scheduler_test_plain_count', array( 'n' => $i ), 'wc-scheduler-count' );
+		}
+		$criteria = array(
+			'hook'   => 'wc_scheduler_test_plain_count',
+			'group'  => 'wc-scheduler-count',
+			'status' => \ActionScheduler_Store::STATUS_PENDING,
+		);
+
+		$this->assertSame( 7, $this->sut->count( $criteria ), 'A plain queue search defaults to five results; the count must not' );
+		$this->assertSame( 7, $this->sut->count( array_merge( $criteria, array( 'per_page' => 2 ) ) ), 'Pagination keys do not change the total' );
+		$this->assertSame( 7, $this->sut->count( $criteria, array( 'queue' => SchedulerQueue::DEFAULT ) ), 'The stock path agrees' );
+	}
+
+	/**
+	 * @testdox Should schedule recurring registrations once ready when the loaded Action Scheduler never fires the ensure hook.
+	 */
+	public function test_ensure_recurring_schedules_when_the_ensure_hook_is_unavailable(): void {
+		$queue     = $this->options_aware_queue();
+		$scheduler = $this->scheduler_with_default_queue( $this->stock_queue_without_ensure_hook() );
+		$this->use_queue( $queue );
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$this->with_unfired_hooks(
+			array( 'action_scheduler_ensure_recurring_actions' ),
+			function () use ( $queue, $scheduler, $timestamp ) {
+				$scheduler->ensure_recurring( $timestamp, DAY_IN_SECONDS, 'wc_scheduler_test_no_hook', array(), 'wc-scheduler-test' );
+
+				$this->assertCount( 1, $queue->calls, 'Without the ensure hook the registration is scheduled as soon as the queue is ready' );
+				$this->assertSame( 'schedule_recurring', $queue->calls[0][0] );
+				$this->assertSame( array( 'unique' => true ), $queue->calls[0][1][5] );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should keep a late registration for a later ensure event in the same request.
+	 */
+	public function test_ensure_recurring_retains_late_registrations(): void {
+		$queue     = $this->options_aware_queue();
+		$scheduler = $this->fresh_scheduler();
+		$this->use_queue( $queue );
+		$saved = $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] ?? null;
+		$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates the hook having fired; restored below.
+
+		try {
+			$scheduler->ensure_recurring( time() + HOUR_IN_SECONDS, DAY_IN_SECONDS, 'wc_scheduler_test_late_retained', array(), 'wc-scheduler-test' );
+			$this->assertCount( 1, $queue->calls, 'Registered after the hook fired: scheduled at once' );
+
+			do_action( 'action_scheduler_ensure_recurring_actions' );
+			$this->assertCount( 2, $queue->calls, 'A later firing re-asserts the late registration too' );
+			$this->assertSame( 'schedule_recurring', $queue->calls[1][0] );
+		} finally {
+			if ( null === $saved ) {
+				unset( $GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] );
+			} else {
+				$GLOBALS['wp_actions']['action_scheduler_ensure_recurring_actions'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the counter.
+			}
+		}
+	}
+}
