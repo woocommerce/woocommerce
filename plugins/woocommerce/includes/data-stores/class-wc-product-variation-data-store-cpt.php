@@ -89,40 +89,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$updates = array();
 
-		// Resync the variation title with the parent if it has drifted (e.g. parent renamed, or saved
-		// pre-3.0). generate_product_title() costs one term query per variation, so skip it when the
-		// stored title is still in sync; otherwise regenerate (self-heals legacy / out-of-band edits).
-
-		// Any of the three title-shaping filters generate_product_title() applies can alter the
-		// result, so only skip when none of them are hooked (else the stored title may not reflect them).
-		$title_is_filtered = has_filter( 'woocommerce_product_variation_title' )
-			|| has_filter( 'woocommerce_product_variation_title_include_attributes' )
-			|| has_filter( 'woocommerce_product_variation_title_attributes_separator' );
-
-		/**
-		 * Filters whether the per-read variation title resync may be skipped when the stored title is
-		 * already in sync with the parent. Skipping avoids one attribute-term query per variation on
-		 * read. Defaults to true unless one of the woocommerce_product_variation_title,
-		 * woocommerce_product_variation_title_include_attributes or
-		 * woocommerce_product_variation_title_attributes_separator filters is registered (those may
-		 * compute a dynamic title); return false to always regenerate.
-		 *
-		 * @since 11.0.0
-		 *
-		 * @param bool       $skip_resync Whether the resync may be skipped.
-		 * @param WC_Product $product     The variation being read.
-		 */
-		$skip_resync = apply_filters( 'woocommerce_variation_skip_title_resync_on_read', ! $title_is_filtered, $product );
-
-		if ( $skip_resync && $this->is_variation_title_in_sync_with_parent( $product, $post_object->post_title ) ) {
-			$new_title = $post_object->post_title;
-		} else {
-			$new_title = $this->generate_product_title( $product );
-		}
-
+		// If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
+		// This also covers edge-cases such as term name changes, or extensions bypassing product APIs and manipulating product data directly.
+		// Originally introduced in v2.7, this workaround still holds for v11.2 - with all filters added over years we are hardlocked now to keep it.
+		$new_title = $this->generate_product_title( $product );
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+			$updates['post_title'] = $new_title;
 		}
 
 		if ( ! empty( $updates ) ) {
@@ -311,61 +284,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
-
-	/**
-	 * Cheaply check whether a variation's stored title is still in sync with its parent, without
-	 * resolving attribute terms. A generated title is "Name" or "Name - Value, Value"; only the parent
-	 * portion drifts outside a save, so the parent title (alone, or followed by the default " - "
-	 * separator) being a prefix means in sync. Requiring the separator avoids a false match when the
-	 * parent is renamed to a leading word of its old name; custom separators fall back to regeneration.
-	 *
-	 * @since 11.0.0
-	 * @param WC_Product $product      Product variation object.
-	 * @param string     $stored_title The variation's stored post title.
-	 * @return bool True when the stored title is consistent with the parent title.
-	 */
-	protected function is_variation_title_in_sync_with_parent( $product, $stored_title ) {
-		$title_base = (string) get_post_field( 'post_title', $product->get_parent_id() );
-		// When attributes are omitted (e.g. 3+ attributes) the title is just the parent name, so it must
-		// match exactly. A stored attribute suffix in that case is stale and must be regenerated away.
-		if ( ! $this->should_include_attributes_in_title( $product ) ) {
-			return $stored_title === $title_base;
-		}
-		return $stored_title === $title_base || 0 === strpos( (string) $stored_title, $title_base . ' - ' );
-	}
-
-	/**
-	 * Whether a variation's attribute suffix should be part of its generated title. Cheap (no term
-	 * queries): attributes are omitted for variations with 3+ attributes, or with multiple attributes
-	 * when any attribute name contains a hyphen.
-	 *
-	 * @since 11.0.0
-	 * @param WC_Product $product Product variation object.
-	 * @return bool
-	 */
-	protected function should_include_attributes_in_title( $product ) {
-		$attributes = (array) $product->get_attributes();
-		$include    = count( $attributes ) < 3;
-
-		if ( $include && 1 < count( $attributes ) ) {
-			foreach ( $attributes as $name => $value ) {
-				if ( false !== strpos( $name, '-' ) ) {
-					$include = false;
-					break;
-				}
-			}
-		}
-
-		/**
-		 * Filters whether the attribute suffix should be included in a variation's generated title.
-		 *
-		 * @since 3.0.0
-		 *
-		 * @param bool       $include Whether to include the attribute suffix.
-		 * @param WC_Product $product The variation being titled.
-		 */
-		return (bool) apply_filters( 'woocommerce_product_variation_title_include_attributes', $include, $product );
-	}
 
 	/**
 	 * Generates a title with attribute information for a variation.
