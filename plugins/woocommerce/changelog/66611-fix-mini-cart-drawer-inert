@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the `inert` attribute to the Mini Cart drawer container when it is closed, via `data-wp-bind--inert="!state.isOpen"`. This makes the focusable descendants inside the closed, aria-hidden drawer (the Close button and Start shopping link) non-focusable, fixing the Lighthouse/axe-core "Elements with aria-hidden contain focusable descendants" accessibility violation.
