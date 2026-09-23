@@ -23,7 +23,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  * - active_signups: rows currently active, whatever the period. Totals only; it has no meaning per interval.
  */
 class DataStore extends StockNotificationsDataStore implements DataStoreInterface {
-	use StatsDataStoreTrait;
+	use StatsDataStoreTrait {
+		get_noncached_data as private get_noncached_stats_report;
+	}
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -131,6 +133,24 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 			$query->add_sql_clause( 'where_time', $where_time );
 			$query->add_sql_clause( 'where', $where );
 		}
+	}
+
+	/**
+	 * Returns the stats report data based on normalized parameters.
+	 *
+	 * Wraps the trait method with fully qualified return types so PHPStan resolves
+	 * them outside the reports namespace.
+	 *
+	 * @override StatsDataStoreTrait::get_noncached_data()
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return \stdClass|\WP_Error Data object, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
+		/** @var \stdClass|\WP_Error $data */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$data = $this->get_noncached_stats_report( $query_args );
+
+		return $data;
 	}
 
 	/**
