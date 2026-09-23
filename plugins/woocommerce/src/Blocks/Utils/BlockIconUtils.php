@@ -50,7 +50,7 @@ final class BlockIconUtils {
 	 * @param array  $block_attributes Caller-local block attributes.
 	 * @return string Filtered SVG markup.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public static function get_cart_icon( $requested_icon, $icon_color, $block_name, $block_attributes ) {
 		$icon_name   = in_array( $requested_icon, array( 'bag', 'bag-alt' ), true ) ? $requested_icon : 'cart';
@@ -68,7 +68,7 @@ final class BlockIconUtils {
 	 * @param array  $block_attributes Caller-local block attributes.
 	 * @return string Filtered SVG markup.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public static function filter_block_icon( $default_svg, $icon_name, $block_name, $block_attributes ) {
 		/**
@@ -89,7 +89,7 @@ final class BlockIconUtils {
 		 * @param string $block_name      Block name.
 		 * @param array  $block_attributes Caller-local render-time block attributes.
 		 *
-		 * @since 11.2.0
+		 * @since 11.3.0
 		 */
 		$filtered_svg = apply_filters( 'woocommerce_blocks_icon_svg', $default_svg, $icon_name, $block_name, $block_attributes );
 
