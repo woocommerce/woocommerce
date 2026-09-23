@@ -265,6 +265,87 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product deletion webhooks are delivered when a variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_delivers_for_permanently_deleted_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = $this->record_deliveries( $this->create_active_webhook( 'product.deleted' ) );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertSame( array( $variation_id ), $delivered_ids->getArrayCopy() );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered for the variations removed when a variable product changes type.
+	 */
+	public function test_product_deletion_webhook_delivers_for_variations_removed_by_type_change(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$expected_ids  = $product->get_children();
+		$delivered_ids = $this->record_deliveries( $this->create_active_webhook( 'product.deleted' ) );
+
+		( new WC_Product_Simple( $product->get_id() ) )->save();
+
+		$actual_ids = $delivered_ids->getArrayCopy();
+		sort( $expected_ids );
+		sort( $actual_ids );
+		$this->assertSame( $expected_ids, $actual_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered again when a trashed variable product is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_already_trashed_variations_of_deleted_product(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		wp_trash_post( $product->get_id() );
+		$delivered_ids = $this->record_deliveries( $this->create_active_webhook( 'product.deleted' ) );
+
+		wp_delete_post( $product->get_id(), true );
+
+		$this->assertSame( array(), $delivered_ids->getArrayCopy() );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered again when a trashed variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_already_trashed_variation(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		wc_get_product( $variation_id )->delete();
+		$delivered_ids = $this->record_deliveries( $this->create_active_webhook( 'product.deleted' ) );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertSame( array(), $delivered_ids->getArrayCopy() );
+	}
+
+	/**
+	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
+	 *
+	 * @param WC_Webhook $webhook Webhook to enqueue.
+	 * @return ArrayObject<int, mixed> Resource IDs, filled as deliveries happen.
+	 */
+	private function record_deliveries( WC_Webhook $webhook ): ArrayObject {
+		$delivered_ids = new ArrayObject();
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, $delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		return $delivered_ids;
+	}
+
+	/**
 	 * Create an active webhook for integration tests.
 	 *
 	 * @param string $topic Webhook topic.

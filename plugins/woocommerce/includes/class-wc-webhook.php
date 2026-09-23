@@ -13,6 +13,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -192,6 +193,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 			case 'delete_user':
 				$return = $this->is_valid_user_action( $arg );
+				break;
+			case 'woocommerce_before_delete_product_variation':
+				// A trashed variation was already reported as deleted when it was trashed.
+				$return = ProductStatus::TRASH !== get_post_status( absint( $arg ) );
 				break;
 		}
 
@@ -1044,6 +1049,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'product.deleted'   => array(
 				'wp_trash_post',
+				'woocommerce_before_delete_product_variation',
 			),
 			'product.restored'  => array(
 				'untrashed_post',
