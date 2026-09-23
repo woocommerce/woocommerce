@@ -25,6 +25,10 @@
 #
 set -uo pipefail
 
+# Bare macOS mktemp ignores $TMPDIR and writes to the per-user /var/folders dir, which a
+# sandbox may deny. Pass an explicit template so it honours $TMPDIR.
+mktemp() { command mktemp "$@" "${TMPDIR:-/tmp}/wpenv.XXXXXX"; }
+
 SELF=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")
 REPO="woocommerce/woocommerce"
 # The retry loop and its annotations landed here. Nothing before this date is measurable.
@@ -128,6 +132,10 @@ classify() {
   elif grep -qaE  'RequestError: connect ETIMEDOUT 140\.82\.' "$s"; then echo github-codeload
   # install-k6.sh saves GitHub's error body as the archive, then fails the checksum.
   elif grep -qaF  'Checksum verification failed!' "$s"; then echo github-releases
+  # A runtime fatal in the branch's own PHP, which kills wp-env's WP-CLI setup calls. Same
+  # cause as the parse-error rule at the top, but kept down here so it can only take jobs
+  # that nothing else matched.
+  elif grep -qaE  'PHP Fatal error: +Uncaught ' "$s"; then echo plugin-code
   else echo unclassified
   fi
 }
@@ -139,8 +147,8 @@ scan_run() {
   [ -z "$run" ] && return 0
   local z d out
   out="$OUTDIR/$run-$att.tsv"
-  z=$(mktemp) || return 0
-  d=$(mktemp -d) || { rm -f "$z"; return 0; }
+  z=$(mktemp) || { : > "$OUTDIR/$run-$att.fail"; return 0; }
+  d=$(mktemp -d) || { rm -f "$z"; : > "$OUTDIR/$run-$att.fail"; return 0; }
   # One API call returns every job log for the attempt -- ~20x cheaper than fetching
   # annotations per job. Always address the attempt explicitly: the bare /logs endpoint
   # serves only the latest attempt, so a re-run would hide every failure that caused it.
@@ -273,7 +281,7 @@ if [ "$report_only" -eq 0 ]; then
       count=$(printf '%s' "$new" | grep -c . || true)
       if [ "${count:-0}" -gt 0 ]; then
         echo "  $day: $count new run-attempt(s)"
-        OUTDIR=$(mktemp -d); export OUTDIR
+        OUTDIR=$(mktemp -d) || exit 1; export OUTDIR
         # Fan out in fixed-size batches. Passing the fields as separate arguments matters:
         # `xargs -I` collapses the tabs in a TSV line into spaces, which silently merges
         # every field into one.
