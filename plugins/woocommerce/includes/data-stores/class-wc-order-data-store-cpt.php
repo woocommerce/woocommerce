@@ -521,7 +521,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					return $query_part;
 				}
 				$meta_query[] = $query_part;
-			} elseif ( is_email( $value ) ) {
+			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
 			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
@@ -916,7 +916,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
 	 * later status checks do not invoke extension code repeatedly.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @param mixed $status            The status value to normalize.
 	 * @param mixed $normalized_status The normalized value, passed by reference.
 	 * @return bool True when the value can continue through status normalization.
@@ -945,12 +945,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Normalizes the leaves of a customer query value.
 	 *
 	 * Nested arrays are supported grouping constructs. Stringable leaves are converted once so the
-	 * customer meta-query builder receives only scalar values.
+	 * customer meta-query builder receives only scalar or null values.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @param mixed $value            The value to normalize.
 	 * @param mixed $normalized_value The normalized value, passed by reference.
-	 * @return bool True when every leaf can be used as a string.
+	 * @return bool True when every leaf can continue through customer query parsing.
 	 */
 	private function normalize_customer_value( $value, &$normalized_value ) {
 		if ( is_array( $value ) ) {
@@ -969,7 +969,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			return true;
 		}
 
-		if ( is_scalar( $value ) ) {
+		if ( null === $value || is_scalar( $value ) ) {
 			$normalized_value = $value;
 			return true;
 		}
@@ -991,7 +991,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * Marks a query as invalid, so it returns no orders rather than running without the filter the
 	 * caller asked for.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @param array  $wp_query_args WP_Query args, passed by reference.
 	 * @param string $code          Error code.
 	 * @param string $message       Error message.

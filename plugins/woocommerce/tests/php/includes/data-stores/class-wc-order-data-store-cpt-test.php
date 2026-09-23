@@ -1891,6 +1891,47 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A null customer leaf keeps the legacy error and filter values without a PHP diagnostic.
+	 */
+	public function test_null_customer_leaf_keeps_legacy_query_behavior(): void {
+		$captured    = array();
+		$diagnostics = array();
+		$capture     = static function ( $args, $query_vars ) use ( &$captured ) {
+			$captured = array( $args, $query_vars );
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10, 2 );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capture the diagnostic to assert that none occurs.
+		set_error_handler(
+			static function ( $severity, $message ) use ( &$diagnostics ) {
+				$diagnostics[] = $message;
+				return true;
+			}
+		);
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'customer' => array( null ),
+					'return'   => 'ids',
+					'limit'    => -1,
+					'status'   => 'any',
+				)
+			);
+		} finally {
+			restore_error_handler();
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10 );
+		}
+
+		$this->assertSame( array(), $result );
+		$this->assertSame( array(), $diagnostics );
+		$this->assertSame( array( null ), $captured[0]['customer'] );
+		$this->assertSame( array( null ), $captured[1]['customer'] );
+		$this->assertSame( 'woocommerce_query_invalid', $captured[0]['errors'][0]->get_error_code() );
+	}
+
+	/**
 	 * @testdox A nested customer array still builds an AND group rather than failing closed.
 	 *
 	 * Nested arrays are a supported grouping shape that get_orders_generate_customer_meta_query()
