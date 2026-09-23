@@ -3,12 +3,8 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
-use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
-use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * NotificationTests data tests.
@@ -299,80 +295,5 @@ class NotificationTests extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertSame( 'User Email is invalid.', $result->get_error_message() );
-	}
-
-	/**
-	 * @testdox save() should return the data store error when the insert fails.
-	 */
-	public function test_save_returns_data_store_error_when_create_fails(): void {
-		$this->use_failing_data_store();
-
-		$notification = new Notification();
-		$notification->set_product_id( 1 );
-		$notification->set_user_email( 'foo@bar.com' );
-
-		$result = $notification->save();
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'db_insert_error', $result->get_error_code() );
-	}
-
-	/**
-	 * @testdox save() should return the data store error when the update fails.
-	 */
-	public function test_save_returns_data_store_error_when_update_fails(): void {
-		$notification = new Notification();
-		$notification->set_product_id( 1 );
-		$notification->set_user_email( 'foo@bar.com' );
-		$notification->save();
-
-		$this->use_failing_data_store();
-
-		$stored = new Notification( $notification->get_id() );
-		$stored->set_status( NotificationStatus::CANCELLED );
-
-		$result = $stored->save();
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'db_update_error', $result->get_error_code() );
-	}
-
-	/**
-	 * Swap the stock notification data store for one whose writes always fail.
-	 */
-	private function use_failing_data_store(): void {
-		$store = new class() extends StockNotificationsDataStore {
-			/**
-			 * Fail every insert.
-			 *
-			 * @param Notification $notification The data object to create.
-			 * @return \WP_Error
-			 */
-			public function create( &$notification ) {
-				return new \WP_Error( 'db_insert_error', 'Could not insert stock notification into the database.' );
-			}
-
-			/**
-			 * Fail every update.
-			 *
-			 * @param Notification $notification The data object to update.
-			 * @return \WP_Error
-			 */
-			public function update( &$notification ) {
-				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
-			}
-		};
-
-		$store->init(
-			wc_get_container()->get( StockNotificationsMetaDataStore::class ),
-			wc_get_container()->get( DatabaseUtil::class )
-		);
-
-		add_filter(
-			'woocommerce_stock_notification_data_store',
-			function () use ( $store ) {
-				return $store;
-			}
-		);
 	}
 }

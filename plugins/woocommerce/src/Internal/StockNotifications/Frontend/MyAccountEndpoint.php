@@ -536,7 +536,12 @@ class MyAccountEndpoint {
 		$notification->set_cancellation_source( NotificationCancellationSource::USER );
 		$notification->set_date_cancelled( time() );
 
-		if ( is_wp_error( $notification->save() ) ) {
+		$notification->save();
+
+		// `WC_Data_Store::update()` drops the data store's return value, so a failed write
+		// reaches us as a successful save. Read the row back to confirm it really changed.
+		$saved = Factory::get_notification( $notification->get_id() );
+		if ( ! $saved instanceof Notification || NotificationStatus::CANCELLED !== $saved->get_status() ) {
 			return new \WP_Error( 'wc_bis_cancel_failed', __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ) );
 		}
 

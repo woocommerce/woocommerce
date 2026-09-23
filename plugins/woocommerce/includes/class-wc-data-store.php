@@ -181,10 +181,10 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
-	 * @return mixed Whatever the underlying data store returns. Most core data stores return nothing; some return a WP_Error on failure.
+	 * @return void
 	 */
 	public function create( &$data ) {
-		return $this->instance->create( $data );
+		$this->instance->create( $data );
 	}
 
 	/**
@@ -192,10 +192,10 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
-	 * @return mixed Whatever the underlying data store returns. Most core data stores return nothing; some return a WP_Error on failure.
+	 * @return void
 	 */
 	public function update( &$data ) {
-		return $this->instance->update( $data );
+		$this->instance->update( $data );
 	}
 
 	/**

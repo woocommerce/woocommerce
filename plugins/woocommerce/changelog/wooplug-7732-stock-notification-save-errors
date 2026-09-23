@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Surface failed database writes when saving a back in stock notification instead of reporting success.
