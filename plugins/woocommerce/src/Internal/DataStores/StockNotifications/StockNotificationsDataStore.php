@@ -190,7 +190,7 @@ CREATE TABLE $meta_table_name (
 		);
 
 		if ( false === $insert ) {
-			return new \WP_Error( 'db_insert_error', 'Could not insert stock notification into the database.' );
+			return new \WP_Error( 'db_insert_error', __( 'Could not insert stock notification into the database.', 'woocommerce' ) );
 		}
 
 		$notification_id = (int) $wpdb->insert_id;
@@ -260,7 +260,7 @@ CREATE TABLE $meta_table_name (
 		global $wpdb;
 
 		if ( 0 === $notification->get_id() ) {
-			return new \WP_Error( 'invalid_stock_notification', 'Invalid notification ID.' );
+			return new \WP_Error( 'invalid_stock_notification', __( 'Invalid notification ID.', 'woocommerce' ) );
 		}
 
 		$changes = $notification->get_changes();
