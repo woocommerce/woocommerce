@@ -856,6 +856,93 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Migration keeps going when another run has already saved the same or a later cursor.
+	 *
+	 * @testWith [0]
+	 *           [1000]
+	 *
+	 * @param int $ahead How far past this batch the other run has already moved the cursor.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_accepts_a_concurrent_cursor( int $ahead ): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$variation_id = $this->create_private_variation_with_lookup_row();
+		$option       = 'woocommerce_update_1130_last_unpublished_variation_id';
+		$lookup_table = $GLOBALS['wpdb']->prefix . 'wc_product_attributes_lookup';
+		// The other run saves its cursor while this one is deleting the same batch.
+		add_filter(
+			'query',
+			function ( $query ) use ( $option, $variation_id, $ahead, $lookup_table ) {
+				if ( str_starts_with( ltrim( $query ), 'DELETE' ) && str_contains( $query, $lookup_table ) ) {
+					update_option( $option, $variation_id + $ahead, false );
+				}
+				return $query;
+			}
+		);
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'A cursor saved by another run is progress, not a failure.' );
+		$this->assertSame( $variation_id + $ahead, (int) get_option( $option ), 'The cursor must never move backwards.' );
+	}
+
+	/**
+	 * @testdox Migration stops instead of reselecting the same batch when its cursor can't be saved.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_stops_when_the_cursor_cannot_be_saved(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$this->create_private_variation_with_lookup_row();
+		$option = 'woocommerce_update_1130_last_unpublished_variation_id';
+		add_filter(
+			"pre_update_option_{$option}",
+			function ( $value, $old_value ) {
+				return $old_value;
+			},
+			10,
+			2
+		);
+
+		$this->assertFalse( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'An unsaved cursor would select the same batch forever, so the migration stops.' );
+		$this->assertFalse( get_option( $option ), 'The cursor is cleaned up when the migration stops.' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup" ), 'The batch deleted before the stop stays deleted.' );
+	}
+
+	/**
+	 * Create a variable product with one private variation, leaving that variation's row as the lookup table's only row.
+	 *
+	 * @return int The id of the private variation.
+	 */
+	private function create_private_variation_with_lookup_row(): int {
+		global $wpdb;
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$wpdb->insert(
+			$lookup_table,
+			array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => 'pa_size',
+				'term_id'                => 1,
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			),
+			array( '%d', '%d', '%s', '%d', '%d', '%d' )
+		);
+
+		return $variation_id;
+	}
+
+	/**
 	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
 	 */
 	public function test_wc_update_1120_removes_variation_thumbnail_duplicating_parent() {

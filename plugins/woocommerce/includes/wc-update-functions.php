@@ -4241,8 +4241,21 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false !== $deleted ) {
-			update_option( $last_id_option, end( $variation_ids ), false );
-			return true;
+			// The cursor only ever moves forward: a concurrent run (the queue plus `wp wc update`) may already have saved this id or a
+			// later one, and update_option() reports that as false just like a failed write. The variations stay unpublished, so
+			// without a saved cursor the next run would pick the same batch again.
+			$cursor = end( $variation_ids );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
+				return true;
+			}
+			wp_cache_delete( $last_id_option, 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
+				return true;
+			}
+			wc_get_logger()->error(
+				'Stopped deleting the lookup rows of unpublished variations: the progress cursor could not be saved.',
+				array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+			);
 		}
 	}
 
