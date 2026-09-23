@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -186,6 +187,11 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
+			if ( StockNotifications::is_enabled() ) {
+				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller';
+				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Stats\Controller';
+			}
+
 			// Registered whenever analytics is enabled (not gated on the
 			// scheduled-import feature): the status endpoint reports failed
 			// order imports in both immediate and scheduled modes.
@@ -233,24 +239,26 @@ class Init {
 		return array_merge(
 			$data_stores,
 			array(
-				'report-revenue-stats'    => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore',
-				'report-orders'           => 'Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore',
-				'report-orders-stats'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore',
-				'report-products'         => 'Automattic\WooCommerce\Admin\API\Reports\Products\DataStore',
-				'report-variations'       => 'Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore',
-				'report-products-stats'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Stats\DataStore',
-				'report-variations-stats' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\DataStore',
-				'report-categories'       => 'Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore',
-				'report-taxes'            => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore',
-				'report-taxes-stats'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore',
-				'report-coupons'          => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore',
-				'report-coupons-stats'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore',
-				'report-downloads'        => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore',
-				'report-downloads-stats'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\DataStore',
-				'admin-note'              => 'Automattic\WooCommerce\Admin\Notes\DataStore',
-				'report-customers'        => 'Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore',
-				'report-customers-stats'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore',
-				'report-stock-stats'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\DataStore',
+				'report-revenue-stats'             => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore',
+				'report-orders'                    => 'Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore',
+				'report-orders-stats'              => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore',
+				'report-products'                  => 'Automattic\WooCommerce\Admin\API\Reports\Products\DataStore',
+				'report-variations'                => 'Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore',
+				'report-products-stats'            => 'Automattic\WooCommerce\Admin\API\Reports\Products\Stats\DataStore',
+				'report-variations-stats'          => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\DataStore',
+				'report-categories'                => 'Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore',
+				'report-taxes'                     => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore',
+				'report-taxes-stats'               => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore',
+				'report-coupons'                   => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore',
+				'report-coupons-stats'             => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore',
+				'report-downloads'                 => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore',
+				'report-downloads-stats'           => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\DataStore',
+				'admin-note'                       => 'Automattic\WooCommerce\Admin\Notes\DataStore',
+				'report-customers'                 => 'Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore',
+				'report-customers-stats'           => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore',
+				'report-stock-stats'               => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\DataStore',
+				'report-stock-notifications'       => 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\DataStore',
+				'report-stock-notifications-stats' => 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Stats\DataStore',
 			)
 		);
 	}

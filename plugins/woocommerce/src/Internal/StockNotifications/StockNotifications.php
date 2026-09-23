@@ -194,7 +194,7 @@ class StockNotifications implements RegisterHooksInterface {
 	 *
 	 * @return bool
 	 */
-	private static function is_enabled(): bool {
+	public static function is_enabled(): bool {
 		return FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) || self::is_alpha_enabled();
 	}
 

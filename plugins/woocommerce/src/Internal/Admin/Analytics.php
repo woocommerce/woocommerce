@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStat
 use Automattic\WooCommerce\Internal\Admin\Notes\RefundDoubleCountToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -1302,6 +1303,12 @@ class Analytics {
 				'title'  => __( 'Stock', 'woocommerce' ),
 				'parent' => 'woocommerce-analytics',
 				'path'   => '/analytics/stock',
+			) : null,
+			StockNotifications::is_enabled() ? array(
+				'id'     => 'woocommerce-analytics-stock-notifications',
+				'title'  => __( 'Stock notifications', 'woocommerce' ),
+				'parent' => 'woocommerce-analytics',
+				'path'   => '/analytics/stock-notifications',
 			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-customers',
