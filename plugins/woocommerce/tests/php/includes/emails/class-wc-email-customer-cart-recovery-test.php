@@ -88,4 +88,112 @@ class WC_Email_Customer_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->sut->validate_excluded_categories_field( 'excluded_categories', 'x' ) );
 		$this->assertSame( array(), $this->sut->validate_excluded_roles_field( 'excluded_roles', null ) );
 	}
+
+	/**
+	 * Build a recovery payload with one saved simple product.
+	 *
+	 * @return array
+	 */
+	private function get_recovery(): array {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Blue <b>mug</b>' ) );
+
+		return array(
+			'email'        => 'shopper@example.com',
+			'items'        => array(
+				array(
+					'product'  => $product,
+					'quantity' => 2,
+				),
+			),
+			'recovery_url' => 'https://example.org/?checkout-link=true&products=' . $product->get_id() . ':2',
+		);
+	}
+
+	/**
+	 * @testdox Should send to the recipient with escaped item names and the recovery link.
+	 */
+	public function test_trigger_sends_email(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+		$mailer             = tests_retrieve_phpmailer_instance();
+
+		$sent = $this->sut->trigger( $this->get_recovery() );
+
+		$this->assertTrue( $sent, 'trigger() should report a successful send' );
+		$message = $mailer->get_sent();
+		$this->assertSame( 'shopper@example.com', $message->to[0][0] );
+		$this->assertStringContainsString( 'Blue &lt;b&gt;mug&lt;/b&gt;', $message->body, 'Product names must be escaped' );
+		$this->assertStringContainsString( 'checkout-link=true', $message->body, 'Body must contain the recovery link' );
+	}
+
+	/**
+	 * @testdox Should not send when the email is disabled.
+	 */
+	public function test_trigger_is_noop_when_disabled(): void {
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$sent = $this->sut->trigger( $this->get_recovery() );
+
+		$this->assertFalse( $sent );
+		$this->assertCount( $before, $mailer->mock_sent, 'A disabled email must not send' );
+	}
+
+	/**
+	 * @testdox Should not send without items or with a malformed payload.
+	 *
+	 * @testWith [{"email": "shopper@example.com", "items": [], "recovery_url": "https://example.org"}]
+	 *           [{"email": "not-an-email", "items": [], "recovery_url": "https://example.org"}]
+	 *           ["not-an-array"]
+	 *
+	 * @param mixed $recovery Payload.
+	 */
+	public function test_trigger_rejects_bad_payload( $recovery ): void {
+		$this->sut->enabled = 'yes';
+
+		$this->assertFalse( $this->sut->trigger( $recovery ) );
+	}
+
+	/**
+	 * @testdox Should fill dummy items and a link when prepared for preview.
+	 */
+	public function test_prepare_preview_fills_dummy_data(): void {
+		$result = $this->sut->handle_woocommerce_prepare_email_for_preview( $this->sut );
+
+		$this->assertSame( $this->sut, $result );
+		$this->assertNotEmpty( $this->sut->items, 'Preview needs items to render' );
+		$this->assertInstanceOf( WC_Product::class, $this->sut->items[0]['product'] );
+		$this->assertNotSame( '', $this->sut->recovery_url );
+	}
+
+	/**
+	 * @testdox Should leave other emails untouched when prepared for preview.
+	 */
+	public function test_prepare_preview_ignores_other_emails(): void {
+		$other = new WC_Email_Customer_Processing_Order();
+
+		$this->sut->handle_woocommerce_prepare_email_for_preview( $other );
+
+		$this->assertSame( array(), $this->sut->items );
+	}
+
+	/**
+	 * @testdox Should render items only for this email in the block content area.
+	 */
+	public function test_block_content_only_for_own_email(): void {
+		$recovery                = $this->get_recovery();
+		$this->sut->items        = $recovery['items'];
+		$this->sut->recovery_url = $recovery['recovery_url'];
+
+		ob_start();
+		$this->sut->handle_woocommerce_email_general_block_content( false, false, new WC_Email_Customer_Processing_Order() );
+		$other = ob_get_clean();
+
+		ob_start();
+		$this->sut->handle_woocommerce_email_general_block_content( false, false, $this->sut );
+		$own = ob_get_clean();
+
+		$this->assertSame( '', $other, 'Must not print into other emails' );
+		$this->assertStringContainsString( 'checkout-link=true', $own );
+	}
 }

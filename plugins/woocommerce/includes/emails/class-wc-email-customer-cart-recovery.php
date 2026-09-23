@@ -62,6 +62,10 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 			$this->template_plain = 'emails/plain/customer-cart-recovery.php';
 			$this->placeholders   = array();
 
+			add_action( 'woocommerce_email_general_block_content', array( $this, 'handle_woocommerce_email_general_block_content' ), 10, 3 );
+			add_filter( 'woocommerce_emails_general_block_content_emails_without_order_details', array( $this, 'handle_emails_without_order_details' ) );
+			add_filter( 'woocommerce_prepare_email_for_preview', array( $this, 'handle_woocommerce_prepare_email_for_preview' ) );
+
 			parent::__construct();
 
 			// Must be after the parent constructor, which sets `block_email_editor_enabled`.
@@ -96,6 +100,144 @@ if ( ! class_exists( 'WC_Email_Customer_Cart_Recovery', false ) ) :
 		 */
 		public function get_default_additional_content() {
 			return __( 'If you have any questions, reply to this email and we\'ll help out.', 'woocommerce' );
+		}
+
+		/**
+		 * Send the email for a prepared recovery.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param mixed $recovery Array with `email`, `items` and `recovery_url`.
+		 * @return bool Whether the email was sent.
+		 */
+		public function trigger( $recovery ): bool {
+			$this->recipient    = '';
+			$this->items        = array();
+			$this->recovery_url = '';
+
+			if ( ! is_array( $recovery ) || ! is_email( $recovery['email'] ?? '' ) || empty( $recovery['items'] ) || ! is_array( $recovery['items'] ) ) {
+				return false;
+			}
+
+			$this->recipient    = (string) $recovery['email'];
+			$this->items        = $recovery['items'];
+			$this->recovery_url = (string) ( $recovery['recovery_url'] ?? '' );
+
+			if ( ! $this->is_enabled() ) {
+				return false;
+			}
+
+			$this->setup_locale();
+			$sent = (bool) $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+			$this->restore_locale();
+
+			return $sent;
+		}
+
+		/**
+		 * Get content html.
+		 *
+		 * @return string
+		 */
+		public function get_content_html() {
+			return wc_get_template_html(
+				$this->template_html,
+				array(
+					'items'              => $this->items,
+					'recovery_url'       => $this->recovery_url,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get content plain.
+		 *
+		 * @return string
+		 */
+		public function get_content_plain() {
+			return wc_get_template_html(
+				$this->template_plain,
+				array(
+					'items'              => $this->items,
+					'recovery_url'       => $this->recovery_url,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Print the item list and link into the block email content area.
+		 *
+		 * @internal
+		 *
+		 * @param mixed $sent_to_admin Whether the email is for the admin.
+		 * @param mixed $plain_text    Whether the email is plain text.
+		 * @param mixed $email         Email being rendered.
+		 */
+		public function handle_woocommerce_email_general_block_content( $sent_to_admin, $plain_text, $email ): void {
+			if ( ! $email instanceof WC_Email || $this->id !== $email->id ) {
+				return;
+			}
+
+			echo '<ul>';
+			foreach ( $this->items as $item ) {
+				/* translators: 1: product name, 2: quantity */
+				echo '<li>' . esc_html( sprintf( __( '%1$s &times; %2$d', 'woocommerce' ), $item['product']->get_name(), $item['quantity'] ) ) . '</li>';
+			}
+			echo '</ul>';
+			echo '<p><a href="' . esc_url( $this->recovery_url ) . '">' . esc_html__( 'Return to your cart', 'woocommerce' ) . '</a></p>';
+		}
+
+		/**
+		 * Keep order details out of this email in the block editor.
+		 *
+		 * @internal
+		 *
+		 * @param mixed $email_ids Email IDs without order details.
+		 * @return mixed
+		 */
+		public function handle_emails_without_order_details( $email_ids ) {
+			if ( is_array( $email_ids ) ) {
+				$email_ids[] = $this->id;
+			}
+			return $email_ids;
+		}
+
+		/**
+		 * Fill dummy items and a link for the email preview.
+		 *
+		 * @internal
+		 *
+		 * @param mixed $email Email being previewed.
+		 * @return mixed
+		 */
+		public function handle_woocommerce_prepare_email_for_preview( $email ) {
+			if ( ! $email instanceof self ) {
+				return $email;
+			}
+
+			$product = new WC_Product_Simple();
+			$product->set_name( __( 'Dummy Product', 'woocommerce' ) );
+			$product->set_regular_price( '25' );
+
+			$email->items        = array(
+				array(
+					'product'  => $product,
+					'quantity' => 2,
+				),
+			);
+			$email->recovery_url = wc_get_cart_url();
+
+			return $email;
 		}
 
 		/**

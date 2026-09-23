@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an experimental cart recovery email with delay, minimum total, category and role settings.
