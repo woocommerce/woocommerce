@@ -833,6 +833,49 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Each site links only its own selected return-policy page on multisite.
+	 */
+	public function test_online_store_uses_current_sites_policy_page(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+
+		$first_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $first_page_id );
+		$second_site_id = self::factory()->blog->create();
+		$original_query = $GLOBALS['wp_query'];
+
+		switch_to_blog( $second_site_id );
+		try {
+			$second_page_id = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+				)
+			);
+			update_option( 'woocommerce_refund_returns_page_id', $second_page_id );
+			// Set the page query without loading unrelated WooCommerce tables on the new test site.
+			$GLOBALS['wp_query']                    = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate a page request without installing unrelated WooCommerce tables on the new test site.
+			$GLOBALS['wp_query']->is_page           = true;
+			$GLOBALS['wp_query']->queried_object    = get_post( $second_page_id );
+			$GLOBALS['wp_query']->queried_object_id = $second_page_id;
+			$this->structured_data->generate_online_store_data();
+			$markup = $this->structured_data->get_structured_data( array( 'onlinestore' ) );
+			$this->assertSame( get_permalink( $second_page_id ), $markup['hasMerchantReturnPolicy']['merchantReturnLink'], 'The second site should advertise its own policy URL.' );
+		} finally {
+			$GLOBALS['wp_query'] = $original_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request changed only for this test.
+			restore_current_blog();
+		}
+
+		$this->assertSame( $first_page_id, wc_get_page_id( 'refund_returns' ), 'The first site should retain its own selected page.' );
+	}
+
+	/**
 	 * @testdox Invalid permalink filters cannot advertise a missing or unsafe URL.
 	 */
 	public function test_online_store_rejects_invalid_permalink(): void {
