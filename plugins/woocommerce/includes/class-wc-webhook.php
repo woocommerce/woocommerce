@@ -195,8 +195,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$return = $this->is_valid_user_action( $arg );
 				break;
 			case 'woocommerce_before_delete_product_variation':
-				// A trashed variation was already reported as deleted when it was trashed.
-				$return = ProductStatus::TRASH !== get_post_status( absint( $arg ) );
+				// Product webhooks already reported a trashed variation as deleted when it was trashed.
+				$return = 'product' !== $this->get_resource() || ProductStatus::TRASH !== get_post_status( absint( $arg ) );
 				break;
 		}
 

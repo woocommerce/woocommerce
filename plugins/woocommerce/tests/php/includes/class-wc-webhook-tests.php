@@ -298,6 +298,21 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Action webhooks on the variation delete hook are still delivered for trashed variations.
+	 */
+	public function test_action_webhook_on_variation_delete_hook_delivers_for_trashed_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = array();
+		wc_get_product( $variation_id )->delete();
+		$this->record_deliveries( $this->create_active_webhook( 'action.woocommerce_before_delete_product_variation' ), $delivered_ids );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertSame( array( $variation_id ), $delivered_ids );
+	}
+
+	/**
 	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
 	 *
 	 * @param WC_Webhook   $webhook       Webhook to enqueue.
