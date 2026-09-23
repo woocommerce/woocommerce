@@ -301,6 +301,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
 		add_term_meta( $second['term_id'], 'wc_test_flag', 'yes' );
 		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
+		add_term_meta( $first['term_id'], 'wc_test_marker', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_marker', 'yes' );
 		update_term_meta( $first['term_id'], 'order', 1 );
 		update_term_meta( $second['term_id'], 'order', 2 );
 
@@ -334,6 +336,11 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				array(
 					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				),
+			),
+			'meta_key only'           => array(
+				array(
+					'meta_key' => 'wc_test_marker', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				),
 			),
 			'nested meta_query'       => array(
