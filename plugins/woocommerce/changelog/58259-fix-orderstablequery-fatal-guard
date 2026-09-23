@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent malformed wc_get_orders() arguments from raising an uncaught fatal error on HPOS, so an invalid order query returns an empty result set and is logged instead of taking down the request.

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Helpers\DateQueryGuardTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
@@ -18,6 +19,8 @@ use WC_Order;
  * @group order-query-tests
  */
 class OrdersTableQueryTests extends \WC_Unit_Test_Case {
+	use DateQueryGuardTrait;
+
 	use HPOSToggleTrait;
 
 	/**
@@ -1079,5 +1082,808 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'UNION ALL', $sql, 'The rewrite should be enabled by default once cached order counts reach the threshold' );
 		$this->assertSame( $ids, $queried_ids, 'The rewritten query should return all orders, most recent first' );
+	}
+
+	/**
+	 * Malformed values for args that RESTRICT the result set.
+	 *
+	 * Each raised an uncaught fatal before #58259. The correct outcome is an empty result set:
+	 * discarding a restricting arg would widen the query, which is the dangerous direction.
+	 * meta_query is absent because its fatal lives in OrdersTableMetaQuery, fixed separately.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_malformed_restricting_args(): array {
+		return array(
+			'date_created array'         => array( array( 'date_created' => array( 'foo' ) ) ),
+			'date_created nested array'  => array( array( 'date_created' => array( array() ) ) ),
+			'date_created object'        => array( array( 'date_created' => new \stdClass() ) ),
+			'date_paid array'            => array( array( 'date_paid' => array( 'foo' ) ) ),
+			'date_completed array'       => array( array( 'date_completed' => array( 'foo' ) ) ),
+			'date_created_gmt object'    => array( array( 'date_created_gmt' => new \stdClass() ) ),
+			'date_query string'          => array( array( 'date_query' => 'bogus' ) ),
+			'date_query int'             => array( array( 'date_query' => 12345 ) ),
+			'date_query true'            => array( array( 'date_query' => true ) ),
+			'status object'              => array( array( 'status' => new \stdClass() ) ),
+			'search_filter array'        => array(
+				array(
+					's'             => 'x',
+					'search_filter' => array( 'y' ),
+				),
+			),
+			'field_query field array'    => array( array( 'field_query' => array( array( 'field' => array() ) ) ) ),
+			'field_query compare array'  => array(
+				array(
+					'field_query' => array(
+						array(
+							'field'   => 'id',
+							'compare' => array(),
+						),
+					),
+				),
+			),
+			'field_query IN object'      => array(
+				array(
+					'field_query' => array(
+						array(
+							'field'   => 'id',
+							'compare' => 'IN',
+							'value'   => new \stdClass(),
+						),
+					),
+				),
+			),
+			'field_query BETWEEN object' => array(
+				array(
+					'field_query' => array(
+						array(
+							'field'   => 'id',
+							'compare' => 'BETWEEN',
+							'value'   => new \stdClass(),
+						),
+					),
+				),
+			),
+			'bool field object'          => array( array( 'prices_include_tax' => new \stdClass() ) ),
+			// Nested, not array( 'x' ): where() decomposes a top-level array into an IN list.
+			'bool field array'           => array( array( 'prices_include_tax' => array( array() ) ) ),
+			'decimal field object'       => array( array( 'tax_amount' => new \stdClass() ) ),
+			'decimal field array'        => array( array( 'tax_amount' => array( array() ) ) ),
+			'date_query nested column'   => array( array( 'date_query' => array( array( 'column' => new \stdClass() ) ) ) ),
+			'date_query nested value'    => array(
+				array(
+					'date_query' => array(
+						array(
+							'column' => 'date_created',
+							'before' => new \stdClass(),
+						),
+					),
+				),
+			),
+			'date_query nested array'    => array(
+				array(
+					'date_query' => array(
+						array(
+							'column' => 'date_created',
+							'after'  => array( 'year' => 2000 ),
+						),
+					),
+				),
+			),
+			'date_query gmt before'      => array(
+				array(
+					'date_query' => array(
+						array(
+							'column' => 'date_created_gmt',
+							'before' => new \stdClass(),
+						),
+					),
+				),
+			),
+			'date_query no column'       => array( array( 'date_query' => array( 'before' => new \stdClass() ) ) ),
+			'date_query relation'        => array(
+				array(
+					'date_query' => array(
+						'relation' => new \stdClass(),
+						array(
+							'column' => 'date_created_gmt',
+							'after'  => '2000-01-01',
+						),
+					),
+				),
+			),
+			'date_query year'            => array(
+				array(
+					'date_query' => array(
+						array(
+							'column' => 'date_created_gmt',
+							'year'   => new \stdClass(),
+						),
+					),
+				),
+			),
+			'total BETWEEN object'       => array(
+				array(
+					'total' => array(
+						'value'    => array( new \stdClass(), 5 ),
+						'operator' => 'BETWEEN',
+					),
+				),
+			),
+			'bool field resource'        => array( array( 'prices_include_tax' => STDIN ) ),
+			'field_query compare object' => array(
+				array(
+					'field_query' => array(
+						array(
+							'field'   => 'id',
+							'compare' => new \stdClass(),
+						),
+					),
+				),
+			),
+			'field_query LIKE object'    => array(
+				array(
+					'field_query' => array(
+						array(
+							'field'   => 'status',
+							'compare' => 'LIKE',
+							'value'   => new \stdClass(),
+						),
+					),
+				),
+			),
+			'currency object'            => array( array( 'currency' => new \stdClass() ) ),
+			'type object'                => array( array( 'type' => new \stdClass() ) ),
+			'payment_method object'      => array( array( 'payment_method' => new \stdClass() ) ),
+			'billing_email object'       => array( array( 'billing_email' => new \stdClass() ) ),
+			'transaction_id object'      => array( array( 'transaction_id' => new \stdClass() ) ),
+			'customer_note object'       => array( array( 'customer_note' => new \stdClass() ) ),
+		);
+	}
+
+	/**
+	 * @testDox A malformed restricting arg returns no orders instead of raising a fatal error.
+	 *
+	 * @dataProvider provider_malformed_restricting_args
+	 *
+	 * @param array $args Malformed args to pass to `wc_get_orders()`.
+	 */
+	public function test_malformed_restricting_args_fail_closed( array $args ): void {
+		// Also asserts the notice fires: WP fails if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$this->create_orders_with_different_dates();
+
+		$result = wc_get_orders(
+			array_merge(
+				$args,
+				array(
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+
+		// assertSame( array() ), not assertIsArray(): a type-only check would pass even if the
+		// arg were dropped and the query widened.
+		$this->assertSame( array(), $result, 'A malformed restricting arg must match no orders.' );
+	}
+
+	/**
+	 * Args that already worked before the fatal-error guard and must be completely unaffected.
+	 *
+	 * The third element indexes into create_orders_with_different_dates(), so a guard that wrongly
+	 * rejects a valid value fails here.
+	 *
+	 * @return array<string, array{0: mixed, 1: string, 2: array<int>}>
+	 */
+	public function provider_unaffected_date_args(): array {
+		// Order 0 created 2000-01-01, order 1 on 2000-02-01, order 2 on 2001-01-01.
+		return array(
+			'plain date'         => array( '2000-01-01', 'date_created', array( 0 ) ),
+			'shorthand >='       => array( '>=2000-02-01', 'date_created', array( 1, 2 ) ),
+			'shorthand <'        => array( '<2000-02-01', 'date_created', array( 0 ) ),
+			'range'              => array( '2000-01-01...2000-12-31', 'date_created', array( 0, 1 ) ),
+			'gmt key plain date' => array( '2000-01-01', 'date_created_gmt', array( 0 ) ),
+			'gmt key range'      => array( '2000-01-01...2000-12-31', 'date_created_gmt', array( 0, 1 ) ),
+			'unparseable string' => array( 'not-a-date', 'date_created', array() ),
+			'WC_DateTime'        => array( new \WC_DateTime( '2001-01-01T10:00:00', new \DateTimeZone( 'UTC' ) ), 'date_created', array( 2 ) ),
+		);
+	}
+
+	/**
+	 * Args that must not fatal, exercised under production error semantics.
+	 *
+	 * Some fail on trunk by way of a warning first. phpunit converts that into an exception the
+	 * data store catches, so without production semantics they would pass with no guard at all.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_args_not_allowed_to_fatal(): array {
+		return array(
+			'search term array'    => array( array( 's' => array( 'x' ) ) ),
+			'search term object'   => array( array( 's' => new \stdClass() ) ),
+			'order as array'       => array( array( 'order' => array( 'DESC' ) ) ),
+			// Objects, not arrays: an array only warns on a string cast, an object raises an Error,
+			// so only the object form fails if the fallback is removed.
+			'order as object'      => array( array( 'order' => new \stdClass() ) ),
+			'field_query type'     => array(
+				array(
+					'field_query' => array(
+						array(
+							'field' => 'id',
+							'type'  => array(),
+						),
+					),
+				),
+			),
+			'field_query type obj' => array(
+				array(
+					'field_query' => array(
+						array(
+							'field' => 'id',
+							'type'  => new \stdClass(),
+						),
+					),
+				),
+			),
+			'field_query relation' => array(
+				array(
+					'field_query' => array(
+						'relation' => new \stdClass(),
+						array(
+							'field'   => 'id',
+							'value'   => 1,
+							'compare' => '>',
+						),
+						array(
+							'field'   => 'id',
+							'value'   => 99999,
+							'compare' => '<',
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testDox Malformed args do not fatal under production error semantics.
+	 *
+	 * @dataProvider provider_args_not_allowed_to_fatal
+	 *
+	 * @param array $args Malformed args to pass to `wc_get_orders()`.
+	 */
+	public function test_malformed_args_do_not_fatal_under_production_semantics( array $args ): void {
+		// Declaring this asserts the notice actually fires: WP fails the test both if an
+		// undeclared incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$this->create_orders_with_different_dates();
+
+		// Swallow warnings and continue, as production does. Without this the first warning
+		// becomes an exception the data store catches, and the assertion proves nothing.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true );
+
+		try {
+			$result = wc_get_orders(
+				array_merge(
+					$args,
+					array(
+						'return' => 'ids',
+						'limit'  => -1,
+					)
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertIsArray( $result, 'A malformed arg must not raise a fatal error.' );
+	}
+
+	/**
+	 * @testDox An unusable relation or cast type falls back instead of emptying the query.
+	 */
+	public function test_field_query_fallbacks_do_not_empty_the_query(): void {
+		// Declaring this asserts the notice actually fires: WP fails the test both if an
+		// undeclared incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$orders = $this->create_orders_with_different_dates();
+		$id     = $orders[1]->get_id();
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true );
+
+		try {
+			// An unusable cast type must behave like an absent one, not invalidate the clause.
+			$result = wc_get_orders(
+				array(
+					'field_query' => array(
+						array(
+							'field' => 'id',
+							'value' => $id,
+							'type'  => array(),
+						),
+					),
+					'return'      => 'ids',
+					'limit'       => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( array( $id ), $result, 'An unusable cast type must still match the order.' );
+	}
+
+	/**
+	 * @testDox A string field with one unusable element still matches its usable ones.
+	 *
+	 * strval() yields 'Array' rather than raising, so this list worked before and must keep
+	 * working. Rejecting the whole clause would empty a working query.
+	 */
+	public function test_string_field_keeps_matching_usable_elements(): void {
+		$order = OrderHelper::create_order();
+		$order->set_billing_email( 'guard-test@example.com' );
+		$order->save();
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true );
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'billing_email' => array( 'guard-test@example.com', array() ),
+					'return'        => 'ids',
+					'limit'         => -1,
+					'status'        => 'any',
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertContains( $order->get_id(), $result, 'A usable element must still match.' );
+	}
+
+	/**
+	 * @testDox Args that never fatalled keep returning every order.
+	 *
+	 * @dataProvider provider_args_that_never_fatalled
+	 *
+	 * @param array $args Args that are inert rather than restricting.
+	 */
+	public function test_args_that_never_fatalled_are_unchanged( array $args ): void {
+		$orders = $this->create_orders_with_different_dates();
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true );
+
+		try {
+			// 'status' goes FIRST because it is a default: a later key wins, and one provider case
+			// supplies its own status.
+			$result = wc_get_orders(
+				array_merge(
+					array( 'status' => 'any' ),
+					$args,
+					array(
+						'return' => 'ids',
+						'limit'  => -1,
+					)
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertCount( count( $orders ), $result, 'An arg that never fatalled must keep matching every order.' );
+	}
+
+	/**
+	 * Args that produced results on trunk and must be left alone by the guards.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_args_that_never_fatalled(): array {
+		return array(
+			'exclude object'      => array( array( 'exclude' => new \stdClass() ) ),
+			'status nested array' => array( array( 'status' => array( array() ) ) ),
+			'orderby array'       => array( array( 'orderby' => array( array() ) ) ),
+			'date_query false'    => array( array( 'date_query' => false ) ),
+			'search_filter alone' => array( array( 'search_filter' => array( 'x' ) ) ),
+			'status all'          => array( array( 'status' => 'all' ) ),
+			'status any'          => array( array( 'status' => 'any' ) ),
+			'status array all'    => array( array( 'status' => array( 'all' ) ) ),
+			'empty status list'   => array( array( 'status' => array() ) ),
+		);
+	}
+
+	/**
+	 * @testDox An unusable customer is left to the existing 1=0 handling rather than guarded.
+	 *
+	 * generate_customer_query() already resolves an unusable value to a false predicate, so it
+	 * never fatalled. Guarding it in an earlier revision broke the nested-array grouping form.
+	 */
+	public function test_unusable_customer_is_not_guarded(): void {
+		$this->create_orders_with_different_dates();
+
+		$result = wc_get_orders(
+			array(
+				'customer' => new \stdClass(),
+				'return'   => 'ids',
+				'limit'    => -1,
+				'status'   => 'any',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable customer must match no orders.' );
+	}
+
+	/**
+	 * Falsy date_query values, which carried no restriction before this change.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_falsy_date_query_values(): array {
+		return array(
+			'false'       => array( false ),
+			'zero'        => array( 0 ),
+			'zero string' => array( '0' ),
+		);
+	}
+
+	/**
+	 * @testDox A falsy date_query is normalised rather than rejected, so other date args still work.
+	 *
+	 * arg_isset() does not treat these as unset, so they reached array_merge() as soon as another
+	 * date arg was present. Normalised rather than rejected, because alone they were inert.
+	 *
+	 * @dataProvider provider_falsy_date_query_values
+	 *
+	 * @param mixed $falsy The falsy date_query value.
+	 */
+	public function test_falsy_date_query_is_normalised_not_rejected( $falsy ): void {
+		$orders = $this->create_orders_with_different_dates();
+
+		$result = wc_get_orders(
+			array(
+				'date_query'   => $falsy,
+				'date_created' => '2000-01-01',
+				'return'       => 'ids',
+				'limit'        => -1,
+				'orderby'      => 'id',
+				'order'        => 'ASC',
+			)
+		);
+
+		// The surviving date_created filter still applies: only order 0 was created that day.
+		$this->assertSame( array( $orders[0]->get_id() ), $result, 'The other date arg must still filter.' );
+	}
+
+	/**
+	 * @testDox Date args that worked before the guard keep matching exactly the same orders.
+	 *
+	 * @dataProvider provider_unaffected_date_args
+	 *
+	 * @param mixed  $value            The date value.
+	 * @param string $date_key         The date query arg to set.
+	 * @param array  $expected_indexes Indexes of the orders the arg must match.
+	 */
+	public function test_valid_date_args_are_unaffected( $value, string $date_key, array $expected_indexes ): void {
+		$orders = $this->create_orders_with_different_dates();
+
+		$result = wc_get_orders(
+			array(
+				$date_key => $value,
+				'return'  => 'ids',
+				'limit'   => -1,
+				'orderby' => 'id',
+				'order'   => 'ASC',
+			)
+		);
+
+		$expected = array_map(
+			static function ( $index ) use ( $orders ) {
+				return $orders[ $index ]->get_id();
+			},
+			$expected_indexes
+		);
+
+		$this->assertSame( $expected, $result, 'A valid date arg must keep matching the same orders.' );
+	}
+
+	/**
+	 * @testDox The 'total' arg keeps using the store's configured price decimals.
+	 *
+	 * Guards a regression in which resolving the decimals was gated on the internal 'total_amount'
+	 * key, which the public 'total' arg is only remapped to later, so 'total' silently fell back to
+	 * two decimals and stopped matching on stores configured for anything else.
+	 */
+	public function test_total_arg_respects_store_price_decimals(): void {
+		update_option( 'woocommerce_price_num_decimals', 4 );
+
+		try {
+			$order = OrderHelper::create_order();
+			$order->set_total( 25.1235 );
+			$order->save();
+
+			$by_alias  = wc_get_orders(
+				array(
+					'total'  => 25.1235,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+			$by_column = wc_get_orders(
+				array(
+					'total_amount' => 25.1235,
+					'return'       => 'ids',
+					'limit'        => -1,
+				)
+			);
+
+			$this->assertSame( array( $order->get_id() ), $by_alias, "The 'total' arg must match a 4-decimal total." );
+			$this->assertSame( $by_column, $by_alias, "'total' and 'total_amount' must agree." );
+		} finally {
+			update_option( 'woocommerce_price_num_decimals', 2 );
+		}
+	}
+
+	/**
+	 * @testDox An unusable field_query comparison invalidates the clause instead of inverting it.
+	 *
+	 * Falling back to '=' is unsafe here: an array value promotes the default to 'IN', so a
+	 * malformed 'NOT IN' would return the complement of what the caller asked for.
+	 */
+	public function test_unusable_field_query_compare_does_not_invert_the_clause(): void {
+		// Declaring this asserts the notice actually fires: WP fails the test both if an
+		// undeclared incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$orders = $this->create_orders_with_different_dates();
+		$ids    = array( $orders[0]->get_id(), $orders[1]->get_id() );
+
+		$complement = wc_get_orders(
+			array(
+				'field_query' => array(
+					array(
+						'field'   => 'id',
+						'value'   => $ids,
+						'compare' => 'NOT IN',
+					),
+				),
+				'return'      => 'ids',
+				'limit'       => -1,
+				'status'      => 'any',
+			)
+		);
+
+		// An object, not an array: an array only warns, which phpunit converts, so it would pass
+		// with the guard removed. The array form is the motivating case in production.
+		$malformed = wc_get_orders(
+			array(
+				'field_query' => array(
+					array(
+						'field'   => 'id',
+						'value'   => $ids,
+						'compare' => new \stdClass(),
+					),
+				),
+				'return'      => 'ids',
+				'limit'       => -1,
+				'status'      => 'any',
+			)
+		);
+
+		$this->assertNotEmpty( $complement, 'A valid NOT IN must still match the other orders.' );
+		$this->assertSame( array(), $malformed, 'An unusable comparison must not silently invert the predicate.' );
+	}
+
+	/**
+	 * Status lists pairing an unusable object with a sibling that filters nothing on its own.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_unusable_status_with_inert_sibling(): array {
+		return array(
+			'empty string sibling' => array( array( '', new \stdClass() ) ),
+			'null sibling'         => array( array( null, new \stdClass() ) ),
+			'empty array sibling'  => array( array( array(), new \stdClass() ) ),
+		);
+	}
+
+	/**
+	 * @testDox An unusable status whose only siblings are inert fails the query closed.
+	 *
+	 * @dataProvider provider_unusable_status_with_inert_sibling
+	 *
+	 * @param array $status Status list mixing an unusable entry with an inert one.
+	 */
+	public function test_unusable_status_with_inert_sibling_fails_closed( array $status ): void {
+		// Also asserts the notice fires: WP fails if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// An array entry warns on the 'wc-' concatenation exactly as it did before this change.
+		// Swallow it and continue, as production does, rather than let phpunit convert it.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
+		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
+
+		try {
+			// An inert entry constrains no status, so keeping it as a survivor would drop the
+			// clause and return every order, including trashed ones.
+			$result = wc_get_orders(
+				array(
+					'status' => $status,
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( array(), $result, 'The query must match no orders.' );
+	}
+
+	/**
+	 * @testDox An unusable status entry is dropped while a usable sibling keeps filtering.
+	 */
+	public function test_partially_usable_status_list_keeps_working(): void {
+		// The dropped entry is still reported even though the query runs; declaring this also
+		// asserts the notice fires, since WP fails the test if a declared one never does.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		// An unregistered string sibling is already carried into the IN clause and simply matches
+		// nothing, leaving 'completed' filtering. An unusable object gets the same treatment, so
+		// the result must not depend on which kind of junk the caller passed.
+		$result = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, new \stdClass() ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'A usable sibling must keep filtering.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The surviving status must still restrict the query.' );
+	}
+
+	/**
+	 * @testDox An unregistered status string does not poison its siblings.
+	 */
+	public function test_unregistered_status_string_keeps_sibling(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		// This is the pre-existing contract the object case above is aligned with.
+		$result = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, 'bogus-not-a-status' ),
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
+
+	/**
+	 * @testDox An unsupported operator still returns an empty clause rather than throwing.
+	 */
+	public function test_unsupported_operator_returns_empty_clause(): void {
+		$query = new OrdersTableQuery( array( 'limit' => 1 ) );
+
+		// where() is public. An unsupported operator short-circuits before the value is used, and
+		// callers rely on the empty clause rather than an exception.
+		$this->assertSame(
+			'',
+			$query->where( 't', 'f', 'BOGUS', new \stdClass(), 'string' ),
+			'An unsupported operator must not throw on an unusable value it never reaches.'
+		);
+	}
+
+	/**
+	 * @testDox A date_query the guard must honour still matches, shared with the legacy suite.
+	 *
+	 * @dataProvider provider_date_query_must_match
+	 *
+	 * @param array $date_query   The clause under test.
+	 * @param bool  $should_match Whether the seeded order should be returned.
+	 */
+	public function test_shared_date_query_must_match( array $date_query, bool $should_match = true ): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		if ( $should_match ) {
+			$this->assertContains( $order->get_id(), $result, 'A supported date_query must keep matching.' );
+		} else {
+			$this->assertNotContains( $order->get_id(), $result, 'The clause must still restrict the query.' );
+		}
+	}
+
+	/**
+	 * @testDox An unusable date_query column fails the query closed.
+	 *
+	 * Not in the shared set: WP_Query ignores an unusable column, so the legacy store answers this
+	 * differently and correctly.
+	 */
+	public function test_unusable_date_query_column_fails_closed(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		OrderHelper::create_order();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => array(
+					array(
+						'column' => new \stdClass(),
+						'year'   => 2024,
+					),
+				),
+				'return'     => 'ids',
+				'limit'      => -1,
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable column must fail the query closed.' );
+	}
+
+	/**
+	 * @testDox A date_query the guard must reject returns nothing, shared with the legacy suite.
+	 *
+	 * @dataProvider provider_date_query_must_fail_closed
+	 *
+	 * @param array $date_query The clause under test.
+	 */
+	public function test_shared_date_query_must_fail_closed( array $date_query ): void {
+		// Also asserts the notice fires: WP fails the test both if an undeclared
+		// incorrect-usage notice is raised and if a declared one never is.
+		$this->setExpectedIncorrectUsage( 'wc_get_orders' );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2024-06-01' );
+		$order->save();
+
+		$result = wc_get_orders(
+			array(
+				'date_query' => $date_query,
+				'return'     => 'ids',
+				'limit'      => -1,
+				'status'     => 'any',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'An unusable date_query must fail closed rather than widen the query.' );
 	}
 }
