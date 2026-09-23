@@ -123,6 +123,39 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving Page setup reassigns the selected refund and returns policy page.
+	 */
+	public function test_save_reassigns_refund_returns_page(): void {
+		$old_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$new_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $old_page_id );
+
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restore the test request after saving.
+		$original_section = $GLOBALS['current_section'] ?? null;
+		try {
+			$GLOBALS['current_section'] = '';
+			$_POST                      = array( 'woocommerce_refund_returns_page_id' => (string) $new_page_id );
+			( new WC_Settings_Advanced() )->save();
+
+			$this->assertSame( (string) $new_page_id, get_option( 'woocommerce_refund_returns_page_id' ), 'The new selection should be saved.' );
+			$this->assertSame( $new_page_id, wc_get_page_id( 'refund_returns' ), 'Consumers should resolve the reassigned page.' );
+		} finally {
+			$_POST                      = $original_post;
+			$GLOBALS['current_section'] = $original_section;
+		}
+	}
+
+	/**
 	 * @testdox get_settings('woocommerce_com') should return all the settings for the woocommerce_com section.
 	 */
 	public function test_get_woocommerce_com_settings_returns_all_settings() {
