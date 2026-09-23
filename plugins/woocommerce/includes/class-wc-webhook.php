@@ -195,8 +195,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$return = $this->is_valid_user_action( $arg );
 				break;
 			case 'woocommerce_before_delete_product_variation':
-				// Product webhooks already reported a trashed variation as deleted when it was trashed.
-				$return = 'product' !== $this->get_resource() || ProductStatus::TRASH !== get_post_status( absint( $arg ) );
+				$return = $this->is_valid_variation_delete_action( $arg );
 				break;
 		}
 
@@ -231,6 +230,26 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$post_type             = get_post_type( $post_id );
 
 		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
+	}
+
+	/**
+	 * Validates variation deletions, skipping variations product webhooks already reported.
+	 *
+	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
+	 * so a variation trashed that way is not reported again when it is permanently deleted.
+	 *
+	 * @since  11.3.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_variation_delete_action( $arg ) {
+		if ( 'product' !== $this->get_resource() ) {
+			return true;
+		}
+
+		$variation_id = absint( $arg );
+
+		return ProductStatus::TRASH !== get_post_status( $variation_id ) || ! metadata_exists( 'post', $variation_id, '_wp_trash_meta_status' );
 	}
 
 	/**

@@ -3,6 +3,8 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * Tests for WC_Webhook class.
  */
@@ -295,6 +297,23 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		wc_get_product( $variation_id )->delete( true );
 
 		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered for a variation moved to trash without wp_trash_post().
+	 */
+	public function test_product_deletion_webhook_delivers_for_variation_trashed_without_wp_trash_post(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$variation     = wc_get_product( $variation_id );
+		$delivered_ids = array();
+		$variation->set_status( ProductStatus::TRASH );
+		$variation->save();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		$variation->delete( true );
+
+		$this->assertSame( array( $variation_id ), $delivered_ids );
 	}
 
 	/**
