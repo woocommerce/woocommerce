@@ -160,6 +160,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				array(
+					'title'    => __( 'Refund and returns policy', 'woocommerce' ),
+					'desc'     => __( 'Select the page describing your store\'s refund and returns policy. WooCommerce shares it with search engines once it is publicly available.', 'woocommerce' ),
+					'id'       => 'woocommerce_refund_returns_page_id',
+					'default'  => '',
+					'class'    => 'wc-page-search',
+					'css'      => 'min-width:300px;',
+					'type'     => 'single_select_page_with_search',
+					'args'     => array( 'exclude' => array() ),
+					'desc_tip' => true,
+					'autoload' => false,
+				),
+
+				array(
 					'type' => 'sectionend',
 					'id'   => 'advanced_page_options',
 				),

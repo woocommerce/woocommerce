@@ -94,6 +94,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_checkout_page_id'                 => 'single_select_page_with_search',
 			'woocommerce_myaccount_page_id'                => 'single_select_page_with_search',
 			'woocommerce_terms_page_id'                    => 'single_select_page_with_search',
+			'woocommerce_refund_returns_page_id'           => 'single_select_page_with_search',
 			'checkout_process_options'                     => array( 'title', 'sectionend' ),
 			'woocommerce_force_ssl_checkout'               => 'checkbox',
 			'woocommerce_unforce_ssl_checkout'             => 'checkbox',

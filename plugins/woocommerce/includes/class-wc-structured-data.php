@@ -41,6 +41,7 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
+		add_action( 'wp_footer', array( $this, 'generate_online_store_data' ), 9 );
 
 		// Output structured data.
 		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
@@ -102,6 +103,7 @@ class WC_Structured_Data {
 	 * 'review',
 	 * 'breadcrumblist',
 	 * 'website',
+	 * 'onlinestore',
 	 * 'order',
 	 *
 	 * @param  array $types Structured data types.
@@ -149,9 +151,12 @@ class WC_Structured_Data {
 	 * @return array
 	 */
 	protected function get_data_type_for_page() {
+		$policy_page_id = wc_get_page_id( 'refund_returns' );
+
 		$types   = array();
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
+		$types[] = $policy_page_id > 0 && is_page( $policy_page_id ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
 		$types[] = is_product() ? 'review' : '';
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
@@ -201,6 +206,7 @@ class WC_Structured_Data {
 	| - Review
 	| - BreadcrumbList
 	| - WebSite
+	| - OnlineStore
 	| - Order
 	|
 	| The generated data is stored into `$this->_data`.
@@ -622,6 +628,49 @@ class WC_Structured_Data {
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
+	}
+
+	/**
+	 * Generates link-only return-policy data on the selected public policy page.
+	 *
+	 * Hooked into `wp_footer` before structured data is output, so it cannot leak into order emails.
+	 *
+	 * @since 11.3.0
+	 */
+	public function generate_online_store_data(): void {
+		$page_id = wc_get_page_id( 'refund_returns' );
+		$page    = $page_id > 0 ? get_post( $page_id ) : null;
+
+		if ( ! $page instanceof WP_Post || 'page' !== $page->post_type || 'publish' !== $page->post_status || ! is_post_publicly_viewable( $page ) || $page->post_password || ! is_page( $page_id ) ) {
+			return;
+		}
+
+		$url = wc_get_page_permalink( 'refund_returns', '' );
+		if ( ! is_string( $url ) || ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) || ! wp_parse_url( $url, PHP_URL_HOST ) ) {
+			return;
+		}
+
+		$markup = array(
+			'@type'                   => 'OnlineStore',
+			'name'                    => get_bloginfo( 'name' ),
+			'url'                     => home_url(),
+			'hasMerchantReturnPolicy' => array(
+				'@type'              => 'MerchantReturnPolicy',
+				'merchantReturnLink' => esc_url_raw( $url ),
+			),
+		);
+
+		/**
+		 * Filters the store and return-policy structured data on the policy page.
+		 *
+		 * @since 11.3.0
+		 * @param array   $markup Structured data for the online store.
+		 * @param WP_Post $page   Selected refund and returns policy page.
+		 */
+		$markup = apply_filters( 'woocommerce_structured_data_online_store', $markup, $page );
+		if ( is_array( $markup ) ) {
+			$this->set_data( $markup );
+		}
 	}
 
 	/**
