@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Skip wiring the front-end stock notification services on admin requests.
