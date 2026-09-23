@@ -639,9 +639,12 @@ class WC_Structured_Data {
 	 */
 	public function generate_online_store_data(): void {
 		$page_id = wc_get_page_id( 'refund_returns' );
-		$page    = $page_id > 0 ? get_post( $page_id ) : null;
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return;
+		}
 
-		if ( ! $page instanceof WP_Post || 'page' !== $page->post_type || 'publish' !== $page->post_status || ! is_post_publicly_viewable( $page ) || $page->post_password || ! is_page( $page_id ) ) {
+		$page = get_post( $page_id );
+		if ( ! $page instanceof WP_Post || 'page' !== $page->post_type || 'publish' !== $page->post_status || ! is_post_publicly_viewable( $page ) || $page->post_password ) {
 			return;
 		}
 
