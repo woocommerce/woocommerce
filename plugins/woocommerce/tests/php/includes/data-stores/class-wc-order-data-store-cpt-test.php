@@ -1745,37 +1745,44 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Status values that are not usable but never raised a fatal error.
+	 * Status values that do not trigger the malformed-status guard.
 	 *
-	 * @return array<string, array{0: mixed}>
+	 * @return array<string, array{0: mixed, 1: array}>
 	 */
 	public function provider_inert_status_values(): array {
 		return array(
-			'array entry' => array( array( array() ) ),
-			'null entry'  => array( array( null ) ),
+			'array entry' => array( array( array() ), array() ),
+			'null entry'  => array( array( null ), array() ),
 		);
 	}
 
 	/**
-	 * @testdox Status values that were inert before the guard still return every order.
+	 * @testdox Inert status values do not trigger the malformed-status error.
 	 *
 	 * @dataProvider provider_inert_status_values
 	 *
-	 * @param mixed $status The status value to query with.
+	 * @param mixed $status            The status value to query with.
+	 * @param array $expected_warnings Expected PHP warnings.
 	 */
-	public function test_inert_status_values_still_return_every_order( $status ): void {
-		$order = OrderHelper::create_order();
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-
-		// WP_Query reduces these to '' and drops the status clause, so they match every order.
-		// Rejecting them would turn a working query into an empty one. The handler swallows the
-		// array-to-string notice, which phpunit would otherwise convert into an exception.
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: keeps a pre-existing PHP notice from failing the assertion.
-		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
+	public function test_inert_status_values_do_not_trigger_malformed_status_error( $status, $expected_warnings ): void {
+		$captured = array();
+		$warnings = array();
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10 );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capture the expected warnings explicitly.
+		set_error_handler(
+			static function ( $severity, $message ) use ( &$warnings ) {
+				$warnings[] = $message;
+				return true;
+			},
+			E_WARNING | E_NOTICE
+		);
 
 		try {
-			$result = wc_get_orders(
+			wc_get_orders(
 				array(
 					'status' => $status,
 					'return' => 'ids',
@@ -1784,9 +1791,12 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			);
 		} finally {
 			restore_error_handler();
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10 );
 		}
 
-		$this->assertContains( $order->get_id(), $result, 'An inert status value must not empty the result set.' );
+		$error_codes = array_map( static fn( $error ) => $error->get_error_code(), $captured['errors'] ?? array() );
+		$this->assertNotContains( 'woocommerce_order_query_invalid_status', $error_codes );
+		$this->assertSame( $expected_warnings, $warnings );
 	}
 
 	/**
@@ -1999,12 +2009,20 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$stringable_status = new class() {
+			/** @var int */
+			public $conversion_count = 0;
+
 			/**
 			 * Return a valid order status.
 			 *
 			 * @return string
 			 */
 			public function __toString(): string {
+				++$this->conversion_count;
+				if ( 1 < $this->conversion_count ) {
+					throw new TypeError( 'String conversion repeated.' );
+				}
+
 				return OrderStatus::COMPLETED;
 			}
 		};
@@ -2021,6 +2039,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( $order->get_id(), $result, 'A stringable status must keep filtering as its string value.' );
+		$this->assertSame( 1, $stringable_status->conversion_count );
 	}
 
 	/**
@@ -2183,9 +2202,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_unusable_status_matches_no_orders(): void {
 		OrderHelper::create_order();
 
-		// A result count would pass with the guard removed: unsetting post_status leaves
-		// WP_Query's 'publish' default, which no wc-* order matches. Capture the
-		// built args so the fail-closed markers themselves are what the test depends on.
+		// A result count alone does not prove the unknown-status guard ran.
 		$captured = null;
 		$capture  = static function ( $args ) use ( &$captured ) {
 			$captured = $args;
@@ -2213,9 +2230,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 
 	/**
-	 * @testdox A status list fails closed when any entry is unusable.
+	 * @testdox A status list keeps valid entries when non-Stringable values are ignored.
 	 */
-	public function test_partially_usable_status_list_fails_closed(): void {
+	public function test_partially_usable_status_list_keeps_valid_entries(): void {
 		$completed = OrderHelper::create_order();
 		$completed->set_status( OrderStatus::COMPLETED );
 		$completed->save();
@@ -2228,7 +2245,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array(), $result, 'An unusable status must fail the whole query closed.' );
+		$this->assertSame( array( $completed->get_id() ), $result );
 	}
 
 	/**

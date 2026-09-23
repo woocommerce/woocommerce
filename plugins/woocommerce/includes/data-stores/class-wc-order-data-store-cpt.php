@@ -1039,10 +1039,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			$statuses = is_string( $query_vars['post_status'] )
 				? explode( ',', $query_vars['post_status'] )
-				: (array) $query_vars['post_status'];
+				: ( is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] ) );
 
 			$normalized_statuses = array();
 			foreach ( $statuses as $status ) {
+				if ( is_object( $status ) && ! method_exists( $status, '__toString' ) ) {
+					continue;
+				}
+
 				$normalized_status = null;
 				if ( ! $this->normalize_status_value( $status, $normalized_status ) ) {
 					$has_unusable_status = true;
