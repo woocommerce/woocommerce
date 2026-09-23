@@ -64,12 +64,27 @@ class WC_DDL_In_Transaction_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A COMMIT or START TRANSACTION from code under test does not switch the guard off.
+	 * @testdox A transaction statement from code under test fails, since it commits the test transaction.
+	 *
+	 * @testWith ["COMMIT"]
+	 *           ["START TRANSACTION"]
+	 *           ["BEGIN"]
+	 *
+	 * @param string $sql The transaction statement.
 	 */
-	public function test_transaction_statements_from_code_under_test_keep_the_guard_on(): void {
+	public function test_transaction_statement_from_code_under_test_fails( string $sql ): void {
 		$this->skip_unless_enforcing();
-		WC_DDL_In_Transaction_Guard::inspect_query( 'COMMIT' );
-		WC_DDL_In_Transaction_Guard::inspect_query( 'START TRANSACTION' );
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( $sql . ' from code under test inside the test transaction of ' . __CLASS__ . '::test_transaction_statement_from_code_under_test_fails.' );
+
+		WC_DDL_In_Transaction_Guard::inspect_query( $sql );
+	}
+
+	/**
+	 * @testdox A ROLLBACK from code under test does not switch the guard off.
+	 */
+	public function test_rollback_from_code_under_test_keeps_the_guard_on(): void {
+		$this->skip_unless_enforcing();
 		WC_DDL_In_Transaction_Guard::inspect_query( 'ROLLBACK' );
 
 		$this->expectException( RuntimeException::class );
@@ -77,12 +92,22 @@ class WC_DDL_In_Transaction_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A table whose name contains "temporary" is not a temporary table.
+	 */
+	public function test_table_named_temporary_is_not_a_temporary_table(): void {
+		$this->skip_unless_enforcing();
+		$this->expectException( RuntimeException::class );
+
+		WC_DDL_In_Transaction_Guard::inspect_query( 'CREATE TABLE temporary_orders (id INT)' );
+	}
+
+	/**
 	 * @testdox Temporary table DDL passes, since it does not commit.
 	 */
 	public function test_passes_temporary_table_ddl(): void {
-		$sql = 'CREATE TEMPORARY TABLE wc_ddl_guard_probe (id INT)';
-
-		$this->assertSame( $sql, WC_DDL_In_Transaction_Guard::inspect_query( $sql ) );
+		foreach ( array( 'CREATE TEMPORARY TABLE wc_ddl_guard_probe (id INT)', 'DROP  TEMPORARY TABLE IF EXISTS wc_ddl_guard_probe' ) as $sql ) {
+			$this->assertSame( $sql, WC_DDL_In_Transaction_Guard::inspect_query( $sql ) );
+		}
 	}
 
 	/**

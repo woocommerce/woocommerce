@@ -16,6 +16,9 @@ declare( strict_types = 1 );
  * and leaks into the tests that follow. This hooks the `query` filter after
  * WordPress has had its chance to rewrite CREATE/DROP TABLE into TEMPORARY
  * variants, and reports or fails any remaining DDL the test has not declared.
+ * A COMMIT, START TRANSACTION or BEGIN from code under test commits the
+ * transaction too, and is handled the same way, as is a test that ends
+ * without its tearDown() reaching the framework's ROLLBACK.
  *
  * A test whose subject is schema code declares it with a `@ddlInTransaction`
  * annotation, at method or class level, followed by the reason. Tests that
@@ -28,6 +31,9 @@ final class WC_DDL_In_Transaction_Guard {
 	const MODE_REPORT  = 'report';
 
 	const ANNOTATION = 'ddlInTransaction';
+
+	// Pseudo-verb for a test whose transaction was still open when the next one started.
+	const UNFINISHED = 'UNFINISHED';
 
 	/**
 	 * The test that owns the open transaction, as 'Class::method', or null outside one.
@@ -79,48 +85,74 @@ final class WC_DDL_In_Transaction_Guard {
 	}
 
 	/**
-	 * Track the test's transaction and check DDL run inside it.
+	 * Track the test's transaction and check statements that would commit it.
 	 *
 	 * @param string $query The SQL about to run.
 	 * @return string The query, unchanged.
-	 * @throws RuntimeException In enforce mode, for undeclared DDL; always, for an annotation without a reason.
+	 * @throws RuntimeException In enforce mode, for an undeclared commit; always, for an annotation without a reason.
 	 */
 	public static function inspect_query( $query ) {
 		$sql  = ltrim( (string) $query );
 		$head = strtoupper( substr( $sql, 0, 20 ) );
 
-		// Only the framework's own statements open and close the tracked transaction. Code under
-		// test may COMMIT or START TRANSACTION too; with autocommit off, the test is still exposed.
-		if ( 0 === strpos( $head, 'START TRANSACTION' ) ) {
-			$test = self::framework_test_calling( 'start_transaction' );
-			if ( null !== $test ) {
-				self::$current_test              = get_class( $test ) . '::' . $test->getName( false );
-				self::$current_test_declares_ddl = self::declares_ddl( $test );
+		// Only the framework's own statements open and close the tracked transaction.
+		if ( 0 === strpos( $head, 'START TRANSACTION' ) || 0 === strpos( $head, 'BEGIN' ) ) {
+			$frame = self::framework_frame( 'start_transaction' );
+			if ( null !== $frame && ( $frame['object'] ?? null ) instanceof PHPUnit\Framework\TestCase ) {
+				$previous                        = self::$current_test;
+				self::$current_test              = get_class( $frame['object'] ) . '::' . $frame['object']->getName( false );
+				self::$current_test_declares_ddl = self::declares_ddl( $frame['object'] );
+				if ( null !== $previous ) {
+					self::flag( $previous, self::UNFINISHED );
+				}
+				return $query;
 			}
-			return $query;
-		}
-		if ( 0 === strpos( $head, 'ROLLBACK' ) ) {
-			if ( null !== self::framework_test_calling( 'tear_down' ) ) {
+			// From code under test, starting a transaction commits the open one.
+			$verb = 0 === strpos( $head, 'BEGIN' ) ? 'BEGIN' : 'START TRANSACTION';
+		} elseif ( 0 === strpos( $head, 'ROLLBACK' ) ) {
+			// A ROLLBACK from code under test discards the test's writes rather than leaking them.
+			if ( null !== self::framework_frame( 'tear_down' ) ) {
 				self::$current_test = null;
 			}
 			return $query;
-		}
-		if ( null === self::$current_test || self::$current_test_declares_ddl ) {
-			return $query;
+		} elseif ( 0 === strpos( $head, 'COMMIT' ) ) {
+			// WP_UnitTestCase_Base::commit_transaction() runs between classes, after the last test's rollback.
+			if ( null !== self::framework_frame( 'commit_transaction' ) ) {
+				$previous           = self::$current_test;
+				self::$current_test = null;
+				if ( null !== $previous ) {
+					self::flag( $previous, self::UNFINISHED );
+				}
+				return $query;
+			}
+			$verb = 'COMMIT';
+		} else {
+			$verb = strtok( $head, " \t\n(" );
+			if ( ! in_array( $verb, array( 'CREATE', 'DROP', 'ALTER', 'TRUNCATE', 'RENAME' ), true ) ) {
+				return $query;
+			}
+			// Temporary tables carry no implicit commit. Match the keyword, not a table name that contains it.
+			if ( preg_match( '/^(?:CREATE|DROP)\s+TEMPORARY\s+TABLE\b/i', $sql ) ) {
+				return $query;
+			}
 		}
 
-		$verb = strtok( $head, " \t\n(" );
-		if ( ! in_array( $verb, array( 'CREATE', 'DROP', 'ALTER', 'TRUNCATE', 'RENAME' ), true ) ) {
-			return $query;
+		if ( null !== self::$current_test && ! self::$current_test_declares_ddl ) {
+			self::flag( self::$current_test, $verb );
 		}
-		// Temporary tables carry no implicit commit.
-		if ( false !== stripos( substr( $sql, 0, 40 ), 'TEMPORARY' ) ) {
-			return $query;
-		}
+		return $query;
+	}
 
-		$test = self::$current_test;
+	/**
+	 * Report or fail a statement that commits a test's transaction, unless the test is allowlisted.
+	 *
+	 * @param string $test 'Class::method'.
+	 * @param string $verb The SQL verb, or UNFINISHED.
+	 * @throws RuntimeException In enforce mode.
+	 */
+	private static function flag( string $test, string $verb ): void {
 		if ( self::is_allowed( $test ) ) {
-			return $query;
+			return;
 		}
 
 		if ( self::MODE_REPORT === self::$mode ) {
@@ -129,37 +161,44 @@ final class WC_DDL_In_Transaction_Guard {
 				self::$reported[ $key ] = true;
 				fwrite( STDERR, "\n#DDL-GUARD# {$test} | {$verb}\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Test-runner console output, not a filesystem write.
 			}
-			return $query;
+			return;
 		}
 
-		throw new RuntimeException(
-			esc_html(
-				sprintf(
-					'%s statement inside the test transaction of %s. DDL commits implicitly, so every write made so far in this test escapes the rollback and leaks into later tests. Move it to wpSetUpBeforeClass(). If the DDL is what the test is about, annotate the test with @%s and the reason, and restore anything it writes before the DDL.',
-					$verb,
-					$test,
-					self::ANNOTATION
-				)
-			)
-		);
+		if ( self::UNFINISHED === $verb ) {
+			$message = sprintf(
+				'%s ended without WP_UnitTestCase_Base::tear_down() rolling back its transaction, so the next transaction statement committed every write it made. Make sure its tearDown() reaches parent::tearDown(), even when setUp() skips the test, and that setUp() carries no @before annotation, which makes PHPUnit run it twice.',
+				$test
+			);
+		} elseif ( in_array( $verb, array( 'COMMIT', 'START TRANSACTION', 'BEGIN' ), true ) ) {
+			$message = sprintf(
+				'%s from code under test inside the test transaction of %s. It commits the transaction, so every write made so far in this test escapes the rollback and leaks into later tests. If committing is what the test is about, annotate the test with @%s and the reason, and restore anything it writes before the commit.',
+				$verb,
+				$test,
+				self::ANNOTATION
+			);
+		} else {
+			$message = sprintf(
+				'%s statement inside the test transaction of %s. DDL commits implicitly, so every write made so far in this test escapes the rollback and leaks into later tests. Move it to wpSetUpBeforeClass(). If the DDL is what the test is about, annotate the test with @%s and the reason, and restore anything it writes before the DDL.',
+				$verb,
+				$test,
+				self::ANNOTATION
+			);
+		}
+
+		throw new RuntimeException( esc_html( $message ) );
 	}
 
 	/**
-	 * The test running a WP_UnitTestCase_Base method that issued the current query, if any.
+	 * The backtrace frame of a WP_UnitTestCase_Base method that issued the current query, if any.
 	 *
-	 * @param string $method 'start_transaction' or 'tear_down'.
-	 * @return PHPUnit\Framework\TestCase|null
+	 * @param string $method 'start_transaction', 'tear_down' or 'commit_transaction'.
+	 * @return array<string, mixed>|null
 	 */
-	private static function framework_test_calling( string $method ) {
+	private static function framework_frame( string $method ): ?array {
 		// inspect_query <- WP_Hook::apply_filters <- apply_filters <- wpdb::query <- $method.
 		foreach ( debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 8 ) as $frame ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-			if (
-				isset( $frame['class'], $frame['object'] )
-				&& $method === $frame['function']
-				&& 'WP_UnitTestCase_Base' === $frame['class']
-				&& $frame['object'] instanceof PHPUnit\Framework\TestCase
-			) {
-				return $frame['object'];
+			if ( isset( $frame['class'] ) && $method === $frame['function'] && 'WP_UnitTestCase_Base' === $frame['class'] ) {
+				return $frame;
 			}
 		}
 		return null;
