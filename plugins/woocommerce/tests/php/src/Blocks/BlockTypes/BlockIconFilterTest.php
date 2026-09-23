@@ -264,8 +264,6 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 			array(
 				'displayStyle'          => 'icon_and_text',
 				'hasDropdownNavigation' => false,
-				'iconStyle'             => 'line',
-				'iconClass'             => 'fixture-avatar-user-icon',
 			)
 		);
 

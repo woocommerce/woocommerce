@@ -76,7 +76,7 @@ final class BlockIconUtils {
 		 *
 		 * Supported callers are the Mini-Cart, Cart Link, and Customer Account primary icons. Block attributes contain caller-local render-time context and are not a normalized cross-block schema.
 		 * Mini-Cart and Cart Link report `cart`, `bag`, or `bag-alt`; Customer Account reports `default`, `line`, or `alt`. Match both the block name and icon name; future callers may add names.
-		 * This filter does not change editor previews, avatars, or functional controls such as the account dropdown caret. Customer Account shows its icon only to logged-out visitors, or when avatars are turned off; logged-in users see their avatar instead, and text-only account blocks do not call it.
+		 * This filter does not change editor previews, avatars, or functional controls such as the account dropdown caret. Customer Account calls it only for logged-out visitors or when avatars are off. Text-only account blocks never call it.
 		 * The exact unchanged default is byte-preserved. Changed non-empty strings are sanitized and validated as one static SVG.
 		 * Sanitization strips unsupported elements and attributes. The remaining markup must be one complete SVG containing only groups, paths, and basic shapes, without text or comments.
 		 * Inline styles, scripts, events, animation, images, references, gradients, masks, and filters are unsupported. Fill and stroke accept flat keywords/named colors, hex, and numeric RGB(A)/HSL(A); CSS escapes, variables, and resource URLs are rejected.
