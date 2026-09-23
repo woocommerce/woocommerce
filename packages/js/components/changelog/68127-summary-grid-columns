@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Give the Summary grid column rules for eleven to fifteen items instead of falling back to the ten-item grid.
