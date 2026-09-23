@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error in Legacy Taxes by Date report when a partial refund occurs on a date with no corresponding orders.
