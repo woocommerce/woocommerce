@@ -76,11 +76,14 @@ class Universal {
 		$is_clickhouse_enabled     = Features::is_clickhouse_enabled();
 		$is_proxy_tracking_enabled = Features::is_proxy_tracking_enabled();
 		// When proxy tracking is enabled, we don't need to send the common properties to the client.
-		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_common_properties();
+		// Otherwise send only the page-safe properties: this markup is cacheable, so nothing
+		// derived from the current request may go into it.
+		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_page_common_properties();
 		?>
 		<script type="text/javascript">
 			(function() {
-				window.wcAnalytics = window.wcAnalytics || {};
+				// Always start from a fresh object: a `||` fallback would keep a same-named DOM element alive.
+				window.wcAnalytics = {};
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set the assets URL for webpack to find the split assets.
@@ -536,14 +539,18 @@ class Universal {
 
 	/**
 	 * Capture a search event.
+	 *
+	 * The term is capped because this event is assembled here but fired by the
+	 * client, so it travels through the page markup and then reaches the pixel
+	 * URL. See `cap_page_string()`.
 	 */
 	public function capture_search_query() {
 		if ( is_search() ) {
 			global $wp_query;
 			$this->enqueue_event(
-				'search',
+				'search_performed',
 				array(
-					'search_query' => $wp_query->get( 's' ),
+					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,
 				)
 			);

@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix the Storybook nightly build: skip type-only tsconfig path mappings when generating Blocks Storybook webpack aliases. Dev tooling only, no user-facing changes.

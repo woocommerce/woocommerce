@@ -61,7 +61,7 @@ export const Card = ( {
 						redirectToStripeTaxSettings();
 					} }
 				>
-					{ __( 'Continue to setttings', 'woocommerce' ) }
+					{ __( 'Continue to settings', 'woocommerce' ) }
 				</Button>
 			) : (
 				<Plugins
@@ -77,14 +77,14 @@ export const Card = ( {
 						} );
 						const { updateAndPersistSettingsForGroup } =
 							dispatch( settingsStore );
-						updateAndPersistSettingsForGroup( 'general', {
+						void updateAndPersistSettingsForGroup( 'general', {
 							general: {
 								woocommerce_calc_taxes: 'yes', // Stripe tax requires tax calculation to be enabled so let's do it here to save the user from doing it manually
 							},
 						} ).then( () => {
 							createSuccessNotice(
 								__(
-									"Stripe Tax for Woocommerce has been successfully installed. Let's configure it now.",
+									"Stripe Tax for WooCommerce has been successfully installed. Let's configure it now.",
 									'woocommerce'
 								)
 							);

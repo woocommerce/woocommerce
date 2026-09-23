@@ -27,14 +27,45 @@ import {
 	TextareaEdit,
 	type OfflineFormValues,
 } from './dataform-controls';
+import {
+	getShippingRestrictionFields,
+	getShippingRestrictionSettings,
+	getShippingRestrictionValues,
+} from './shipping-restriction-fields';
+
+/**
+ * Reads a country code out of a location setting.
+ *
+ * These settings reach the client through filters, so treat anything that is
+ * not a string as no answer rather than assuming the declared type holds. A
+ * stored base location can also carry a state suffix ('US:CA'), which matches
+ * neither the country field's options nor the routing-number rules, so keep
+ * only the country.
+ *
+ * @param value The stored setting value.
+ * @return The ISO 3166-1 alpha-2 country code, or an empty string if there is none.
+ */
+const toCountryCode = ( value: unknown ): string =>
+	typeof value === 'string' ? value.split( ':' )[ 0 ] : '';
 
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
  */
 export const SettingsPaymentsBacs = () => {
-	const storeCountryCode =
-		window.wcSettings?.admin?.preloadSettings?.general
-			?.woocommerce_default_country || 'US';
+	// The Payments settings header lets the merchant set a business location
+	// independently of the store address, and keeps this global in sync when
+	// they change it. Start a new account there, since it is the more recent
+	// statement of where they bank. The store's base country is the fallback.
+	const defaultAccountCountry =
+		toCountryCode(
+			window.wcSettings?.admin?.woocommerce_payments_nox_profile
+				?.business_country_code
+		) ||
+		toCountryCode(
+			window.wcSettings?.admin?.preloadSettings?.general
+				?.woocommerce_default_country
+		) ||
+		'US';
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
@@ -79,6 +110,7 @@ export const SettingsPaymentsBacs = () => {
 				title: bacsSettings.settings.title.value,
 				description: bacsSettings.description,
 				instructions: bacsSettings.settings.instructions.value,
+				...getShippingRestrictionValues( bacsSettings ),
 			} );
 			setHasChanges( false );
 		}
@@ -133,8 +165,12 @@ export const SettingsPaymentsBacs = () => {
 				),
 				Edit: TextareaEdit,
 			},
+			...getShippingRestrictionFields(
+				bacsSettings,
+				__( 'direct bank transfer', 'woocommerce' )
+			),
 		],
-		[]
+		[ bacsSettings ]
 	);
 
 	const saveSettings = async () => {
@@ -146,6 +182,7 @@ export const SettingsPaymentsBacs = () => {
 		const settings: Record< string, string | string[] > = {
 			title: String( formValues.title ),
 			instructions: String( formValues.instructions ),
+			...getShippingRestrictionSettings( formValues ),
 		};
 
 		try {
@@ -187,8 +224,10 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
-			invalidateResolution( 'getPaymentProviders', [] );
-			invalidateResolutionForStoreSelector( 'getOfflinePaymentGateways' );
+			void invalidateResolution( 'getPaymentProviders', [] );
+			void invalidateResolutionForStoreSelector(
+				'getOfflinePaymentGateways'
+			);
 		}
 	};
 
@@ -198,7 +237,7 @@ export const SettingsPaymentsBacs = () => {
 				<Settings.Form
 					onSubmit={ ( e ) => {
 						e.preventDefault();
-						saveSettings();
+						void saveSettings();
 					} }
 				>
 					<Settings.Section
@@ -214,6 +253,8 @@ export const SettingsPaymentsBacs = () => {
 								<FieldPlaceholder size="medium" />
 								<FieldPlaceholder size="large" />
 								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="small" />
 							</>
 						) : (
 							<DataForm
@@ -226,6 +267,8 @@ export const SettingsPaymentsBacs = () => {
 										'title',
 										'description',
 										'instructions',
+										'enable_for_methods',
+										'enable_for_virtual',
 									],
 								} }
 								onChange={ ( edits: OfflineFormValues ) => {
@@ -255,7 +298,7 @@ export const SettingsPaymentsBacs = () => {
 									setAccounts( bankAccounts );
 									setHasChanges( true );
 								} }
-								defaultCountry={ storeCountryCode }
+								defaultCountry={ defaultAccountCountry }
 							/>
 						) }
 					</Settings.Section>

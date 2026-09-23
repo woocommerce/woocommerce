@@ -69,7 +69,6 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_' . $this->email_type . '_settings' );
 		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
 		WCEmailTemplateSyncRegistry::reset_cache();
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
 	}
 
 	/**
@@ -352,16 +351,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_reset_response_overwrites_post_content_and_stamps_sync_meta(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		// Simulate merchant customisation that diverges from the core render.
 		wp_update_post(
@@ -425,6 +417,67 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should dispatch the registered reset route for a capable user and persist canonical sync state.
+	 */
+	public function test_reset_route_dispatches_registered_callback_and_persists_sync_state(): void {
+		$email_type = 'customer_new_account';
+
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$post_id = $this->create_published_email_post( $email_type );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<!-- wp:paragraph --><p>Customized before REST reset</p><!-- /wp:paragraph -->',
+			)
+		);
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+
+		$email = $this->resolve_wc_email( $email_type );
+		$this->assertNotNull( $email );
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		global $wp_rest_server;
+
+		$previous_rest_server = $wp_rest_server;
+		$wp_rest_server       = new \WP_REST_Server();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
+			do_action( 'rest_api_init', $wp_rest_server );
+			$this->email_api_controller->register_routes();
+			$request  = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+			$response = $wp_rest_server->dispatch( $request );
+		} finally {
+			// tear_down() resets the current user; $wp_rest_server it does not touch.
+			$wp_rest_server = $previous_rest_server;
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'The registered route must authorize a manage_woocommerce user.' );
+
+		$response_data = $response->get_data();
+		$this->assertSame( $expected_canonical, $response_data['content'], 'The route response must contain the canonical render.' );
+		$this->assertSame( sha1( $expected_canonical ), $response_data['source_hash'], 'The route response must contain the canonical source hash.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $response_data['status'], 'The route response must report in_sync.' );
+		$this->assertNotEmpty( $response_data['version'], 'The route response must contain a template version.' );
+		$this->assertNotEmpty( $response_data['synced_at'], 'The route response must contain a sync timestamp.' );
+
+		$persisted_post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $persisted_post );
+		$this->assertSame( $expected_canonical, $persisted_post->post_content, 'The route callback must persist the canonical content.' );
+		$this->assertSame( $response_data['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ), 'Persisted version meta must match the REST response.' );
+		$this->assertSame( $response_data['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ), 'Persisted source hash meta must match the REST response.' );
+		$this->assertSame( $response_data['synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ), 'Persisted sync timestamp must match the REST response.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ), 'Persisted status meta must be in_sync.' );
+		$this->assertSame( $expected_canonical, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ), 'Persisted base render meta must match canonical content.' );
+	}
+
+	/**
 	 * @testdox Should return 404 when reset post ID has no associated email type.
 	 */
 	public function test_reset_response_returns_404_for_unknown_post(): void {
@@ -453,15 +506,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_reset_response_resets_content_without_meta_for_non_sync_enabled_email(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
-
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		// Capture meta stamped at generation time so we can assert it is unchanged after reset.
 		$baseline_version     = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
@@ -535,16 +580,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_reset_response_returns_wp_error_when_wp_update_post_fails(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		$pre_call_content = (string) get_post( $post_id )->post_content;
 		$pre_call_meta    = array(
@@ -598,17 +636,10 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_change_summary_route_returns_structured_payload(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateChangeSummary::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		// Diverge the post from the canonical render so the summary has something to say.
 		wp_update_post(
@@ -678,17 +709,10 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_apply_route_returns_merged_content_and_revision_id(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateChangeSummary::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		// Diverge the post so the change-summary has something to apply.
 		wp_update_post(
@@ -747,17 +771,10 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_undo_route_restores_pre_apply_content(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateChangeSummary::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		$pre_apply_content = "<!-- wp:paragraph -->\n<p>Merchant edit.</p>\n<!-- /wp:paragraph -->";
 		wp_update_post(
@@ -796,16 +813,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	public function test_undo_route_returns_410_when_no_snapshot(): void {
 		$email_type = 'customer_new_account';
 
-		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-
-		$post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$post_manager->clear_caches();
-		$post_manager->delete_email_template( $email_type );
 		WCEmailTemplateSyncRegistry::reset_cache();
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
-		$this->assertIsInt( $post_id );
+		$post_id = $this->create_published_email_post( $email_type );
 
 		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/undo' );
 		$request->set_param( 'id', $post_id );
@@ -862,6 +872,36 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertArrayHasKey( 'GET', $methods, 'Change-summary endpoint must accept GET.' );
+	}
+
+	/**
+	 * Helper: create a published, mapped `woo_email` post for the given email type.
+	 *
+	 * Mirrors the production flow: a draft is created from the file template
+	 * and then published. The Integration `transition_post_status` hook is not
+	 * registered in this suite, so the email_type => post_id mapping is written
+	 * explicitly.
+	 *
+	 * @param string $email_type Email type ID (e.g. 'customer_new_account').
+	 * @return int The published post ID.
+	 */
+	private function create_published_email_post( string $email_type ): int {
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->clear_caches();
+
+		$email = $post_manager->get_email_by_id( $email_type );
+		$this->assertInstanceOf( \WC_Email::class, $email, "Email type {$email_type} must be registered with WC_Emails." );
+
+		$post_id = ( new WCTransactionalEmailPostsGenerator() )->create_draft( $email );
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'publish',
+			)
+		);
+		$post_manager->save_email_template_post_id( $email_type, $post_id );
+
+		return $post_id;
 	}
 
 	/**

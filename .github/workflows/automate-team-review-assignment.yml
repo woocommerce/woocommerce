@@ -20,13 +20,14 @@ jobs:
         name: Add community label
         if: ${{ github.event.action == 'opened' }}
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - name: Check if community contribution
               id: check
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   script: |
-                      const username = '${{ github.event.pull_request.user.login || github.event.issue.user.login }}';
+                      const username = context.payload.pull_request?.user.login ?? context.payload.issue.user.login;
                       const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
                           owner: context.repo.owner,
                           repo: context.repo.repo,
@@ -40,17 +41,17 @@ jobs:
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   script: |
-                      github.rest.issues.addLabels({
-                          issue_number: ${{ github.event.pull_request.number || github.event.issue.number }},
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          labels: [ 'type: community contribution' ]
-                      });
+                      await github.rest.issues.addLabels( {
+                          ...context.repo,
+                          issue_number: context.issue.number,
+                          labels: [ 'type: community contribution' ],
+                      } );
 
     assign-reviewers:
       name: Assign reviewers
       if: ${{ github.event.pull_request && ( github.event.action == 'opened' || github.event.action == 'ready_for_review' ) }}
       runs-on: ubuntu-latest
+      timeout-minutes: 5
       steps:
         - name: Check if community contribution
           id: check
@@ -61,29 +62,41 @@ jobs:
               const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  username: '${{ github.event.pull_request.user.login }}',
+                  username: context.payload.pull_request.user.login,
               } );
               core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
 
+        - name: Check out the composite action and the reviewer configs
+          if: ${{ github.event.pull_request.draft == false }}
+          uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+          with:
+              # Never the pull request head: the configs decide who gets write-scoped review requests.
+              ref: ${{ github.sha }}
+              sparse-checkout: .github
+              persist-credentials: false
+
         - name: Assign reviewers for a community PR
           if: ${{ steps.check.outputs.contributor == 'yes' && github.event.pull_request.draft == false }}
-          uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
+          uses: ./.github/actions/assign-reviewers
           with:
-              config: '.github/project-community-pr-assigner.yml'
-              token: ${{ secrets.PR_ASSIGN_TOKEN }}
+              mode: changed-files
+              config: .github/project-community-pr-assigner.json
+              github-token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
         - name: Assign reviewers for a teams PR
           if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) && ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) }}
-          continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
-          uses: acq688/Request-Reviewer-For-Team-Action@fca1c60fd0504aef59bdc925f3902c8a2d8bce62 # v1.1
+          continue-on-error: ${{ github.event.pull_request.head.repo.fork }}
+          uses: ./.github/actions/assign-reviewers
           with:
-              config: '.github/automate-team-review-assignment-config.yml'
-              GITHUB_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+              mode: author-team
+              config: .github/automate-team-review-assignment-config.json
+              github-token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
     add-testing-instructions-review-comment:
       name: Remind reviewers to also review the testing instructions and test coverage
       if: ${{ github.event.pull_request && github.event.action == 'review_requested' }}
       runs-on: ubuntu-latest
+      timeout-minutes: 5
       steps:
         - name: Check if community contribution
           id: check
@@ -94,7 +107,7 @@ jobs:
               const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  username: '${{ github.event.pull_request.user.login }}',
+                  username: context.payload.pull_request.user.login,
               } );
               core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
 

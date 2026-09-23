@@ -108,6 +108,35 @@ describe( 'withCategory Component', () => {
 		} );
 	} );
 
+	it.each( [
+		[ {}, { termId: 42, taxonomy: 'product_cat' }, [ [ 42 ] ] ],
+		[
+			{},
+			{ termId: 42, termTaxonomy: 'product_cat', taxonomy: 'category' },
+			[ [ 42 ] ],
+		],
+		[
+			{ categoryId: 7 },
+			{ termId: 42, taxonomy: 'product_cat' },
+			[ [ 7 ] ],
+		],
+		[ {}, { termId: 42, taxonomy: 'category' }, [] ],
+	] )(
+		'resolves category selection %j with context %j',
+		async ( selectedAttributes, context, expectedCalls ) => {
+			mockUtils.getCategory.mockResolvedValue( mockCategory );
+			await renderComponent( {
+				attributes: selectedAttributes,
+				context,
+			} );
+
+			expect( mockUtils.getCategory.mock.calls ).toEqual( expectedCalls );
+			expect( lastProps.effectiveCategoryId ).toBe(
+				expectedCalls[ 0 ]?.[ 0 ]
+			);
+		}
+	);
+
 	describe( 'when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
 		const formattedError = { message: 'There was an error.', type: 'api' };
@@ -116,7 +145,9 @@ describe( 'withCategory Component', () => {
 			mockUtils.getCategory.mockImplementation( () =>
 				Promise.reject( error )
 			);
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			await renderComponent();
 		} );
 

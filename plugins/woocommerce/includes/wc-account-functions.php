@@ -31,7 +31,7 @@ function wc_lostpassword_url( $default_url = '' ) {
 	}
 
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
-	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Value is compared only with network_admin_url(); it is not used as a redirect.
 		return $default_url;
 	}
 

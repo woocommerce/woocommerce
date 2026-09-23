@@ -23,14 +23,6 @@
 		},
 		"width": {
 			"type": "number"
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {
@@ -65,8 +57,10 @@
 			"padding": true,
 			"__experimentalSkipSerialization": true
 		},
-		"email": true,
-		"__experimentalSelector": ".wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button"
+		"email": true
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-button .wc-block-components-product-button__button"
 	},
 	"ancestor": [
 		"woocommerce/all-products",

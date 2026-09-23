@@ -11,63 +11,97 @@ import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 test.describe( 'Cart Store', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-short-nonce-life'
-		);
-	} );
-
 	test( 'should refresh nonce from Store API and use it for cart mutations', async ( {
 		page,
 		frontendUtils,
 	} ) => {
-		let refreshNonce: string | null = null;
-		let requestNonce: string | null = null;
-		let responseNonce: string | null = null;
+		const refreshCartResponse = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/cart' ) &&
+				response.request().method() === 'GET'
+		);
+		let initialBatchRequestNonce: string | null = null;
+		let invalidateNextBatch = false;
+		let invalidBatchRequestNonce: string | null = null;
+		let invalidResponseNonce: string | null = null;
+		let invalidResponseBody = '';
+		let captureRecoveryBatch = false;
+		let recoveryBatchRequestNonce: string | null = null;
 
-		// Intercept GET /cart (refreshCartItems) to capture the nonce.
-		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
-			if ( route.request().method() === 'GET' ) {
-				const response = await route.fetch();
-				refreshNonce = response.headers().nonce || null;
-				await route.fulfill( { response } );
-			} else {
-				await route.continue();
-			}
-		} );
-
-		// Intercept batch requests to track which nonce the client sends
-		// and which nonce the server returns.
+		// Forward exactly one invalid nonce to the real Store API so its response
+		// supplies the replacement nonce the client must use for the next mutation.
 		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
-			requestNonce = route.request().headers().nonce || null;
+			const batch = JSON.parse( route.request().postData() || '{}' );
+			const [ batchRequest ] = batch.requests || [];
+			const isCartAddItemBatch =
+				batch.requests?.length === 1 &&
+				batchRequest?.method === 'POST' &&
+				batchRequest.path === '/wc/store/v1/cart/add-item';
+			const requestNonce = isCartAddItemBatch
+				? batchRequest.headers?.Nonce || null
+				: null;
+
+			if ( invalidateNextBatch && isCartAddItemBatch ) {
+				invalidateNextBatch = false;
+				invalidBatchRequestNonce = requestNonce;
+				const invalidBatch = {
+					...batch,
+					requests: [
+						{
+							...batchRequest,
+							headers: {
+								...batchRequest.headers,
+								Nonce: 'invalid-test-nonce',
+							},
+						},
+					],
+				};
+				const response = await route.fetch( {
+					postData: JSON.stringify( invalidBatch ),
+				} );
+				invalidResponseNonce = response.headers().nonce || null;
+				invalidResponseBody = await response.text();
+				await route.fulfill( { response } );
+				return;
+			}
+
+			if (
+				isCartAddItemBatch &&
+				captureRecoveryBatch &&
+				! recoveryBatchRequestNonce
+			) {
+				recoveryBatchRequestNonce = requestNonce;
+			} else if ( isCartAddItemBatch && ! initialBatchRequestNonce ) {
+				initialBatchRequestNonce = requestNonce;
+			}
+
 			const response = await route.fetch();
-			responseNonce = response.headers().nonce || null;
 			await route.fulfill( { response } );
 		} );
 
 		await frontendUtils.goToShop();
-
-		// The GET /cart fires during page load, so a waitForResponse set up
-		// here can miss it — poll the intercepted nonce instead.
-		await expect.poll( () => refreshNonce ).toBeTruthy();
+		const refreshCartNonce =
+			( await refreshCartResponse ).headers().nonce || null;
+		expect( refreshCartNonce ).toBeTruthy();
 
 		// Adding a product should use the nonce from refreshCartItems.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		expect( requestNonce ).toBe( refreshNonce );
+		expect( initialBatchRequestNonce ).toBe( refreshCartNonce );
 
-		// Wait for the nonce to expire.
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 2000 );
-
-		// Adding another product should fail because it is using an expired nonce.
+		// Forward an invalid nonce and let the real Store API return its error and replacement nonce.
+		invalidateNextBatch = true;
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		expect( invalidResponseBody ).toContain(
+			'woocommerce_rest_invalid_nonce'
+		);
 		await expect( page.getByText( 'Nonce is invalid.' ) ).toBeVisible();
-		const previousResponseNonce = responseNonce;
+		expect( invalidBatchRequestNonce ).toBe( initialBatchRequestNonce );
+		expect( invalidResponseNonce ).toBeTruthy();
 
-		// Nonce should be updated now and the request should succeed.
+		// The next mutation should use the exact nonce returned by the invalid response.
+		captureRecoveryBatch = true;
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		expect( requestNonce ).not.toBe( refreshNonce );
-		expect( requestNonce ).toBe( previousResponseNonce );
+		expect( recoveryBatchRequestNonce ).toBe( invalidResponseNonce );
 
 		// Verify the product was actually added to the cart properly.
 		await frontendUtils.goToCart();

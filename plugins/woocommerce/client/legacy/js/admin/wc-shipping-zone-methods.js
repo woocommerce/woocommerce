@@ -437,7 +437,7 @@
 				},
 				highlightOnFocus: function( query ) {
 					const inputs = $( query );
-					inputs.focus( function() {
+					inputs.on( 'focus', function() {
 						$( this ).select();
 					} );
 				},
@@ -517,7 +517,13 @@
 							// There was an error modifying the decimal, so we leave the original value as-is.
 							return;
 						}
-						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+						// Keep any decimals beyond the store precision, so the stored cost is not rounded on display.
+						// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+						const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
+						const formatConfig = decimals > config.precision
+							? Object.assign( {}, config, { precision: decimals } )
+							: config;
+						const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
 
@@ -708,7 +714,13 @@
 
 							$('.wc-shipping-modal-price').on('blur', function() {
 								const value = $(this).val();
-								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+								// Keep any decimals beyond the store precision, so the typed cost is not rounded on blur.
+								// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+								const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
+								const formatConfig = decimals > config.precision
+									? Object.assign( {}, config, { precision: decimals } )
+									: config;
+								const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 								$(this).val( formattedValue );
 							});
 						}

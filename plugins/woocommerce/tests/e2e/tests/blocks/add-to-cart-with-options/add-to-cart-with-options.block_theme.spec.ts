@@ -801,7 +801,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
+				const { actions } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
 				await actions.waitForIdle();
 			} );
 
@@ -1535,7 +1539,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		for ( const optionStyle of [ 'chips', 'dropdown' ] as (
 			| 'chips'
 			| 'dropdown'
-		 )[] ) {
+		)[] ) {
 			// eslint-disable-next-line playwright/expect-expect
 			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
 				page,

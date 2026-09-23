@@ -5,16 +5,15 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Unit tests for the ProductQueryFilters class.
  */
-class ProductQueryFiltersTest extends TestCase {
+class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	/**
 	 * Setup test product data. Called before every test.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$fixtures = new FixtureData();

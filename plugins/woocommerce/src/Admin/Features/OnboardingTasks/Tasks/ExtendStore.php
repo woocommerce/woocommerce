@@ -63,12 +63,12 @@ class ExtendStore extends Task {
 	}
 
 	/**
-	 * Always dismissable.
+	 * Check if a task is dismissable.
 	 *
 	 * @return bool
 	 */
 	public function is_dismissable() {
-		return false;
+		return true;
 	}
 
 	/**

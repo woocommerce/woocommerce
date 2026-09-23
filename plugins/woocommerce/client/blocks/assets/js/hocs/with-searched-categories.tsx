@@ -21,7 +21,7 @@ export interface WithSearchedCategoriesProps {
  * A higher order component that enhances the provided component with categories from a search query.
  */
 const withSearchedCategories = <
-	T extends Record< string, unknown > & WithSearchedCategoriesProps
+	T extends Record< string, unknown > & WithSearchedCategoriesProps,
 >(
 	OriginalComponent: React.ComponentType< T & WithInjectedSearchedCategories >
 ) => {

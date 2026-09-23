@@ -28,10 +28,7 @@ class CustomTemplatedPathPlugin {
 		this.handlers = [];
 
 		for ( const [ key, handler ] of Object.entries( handlers ) ) {
-			const regexp = new RegExp(
-				`\\[${ escapeRegExp( key ) }\\]`,
-				'gi'
-			);
+			const regexp = new RegExp( `\\[${ escapeRegExp( key ) }\\]`, 'gi' );
 			this.handlers.push( [ regexp, handler ] );
 		}
 	}

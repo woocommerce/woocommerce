@@ -52,11 +52,15 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	dependencyRequestToExternal = requestToExternal,
+	dependencyRequestToHandle = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					// This plugin calls exclude.test() directly, so it must be a
+					// single RegExp, not the array webpack's module rules accept.
+					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )
@@ -72,8 +76,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: dependencyRequestToExternal,
+			requestToHandle: dependencyRequestToHandle,
 		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
@@ -858,7 +862,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					},
 					base: {
 						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
-						test: /assets[\\/]js[\\/](settings|previews|base|data|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/](checkout|components)|atomic[\\/]utils/,
+						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]|atomic[\\/]utils/,
 						name: 'wc-cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
@@ -884,6 +888,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 };
 
 module.exports = {
+	getSharedPlugins,
 	getCoreConfig,
 	getFrontConfig,
 	getMainConfig,

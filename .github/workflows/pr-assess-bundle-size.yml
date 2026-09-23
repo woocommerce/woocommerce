@@ -42,6 +42,7 @@ jobs:
         name: Check Asset Sizes
         if: github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         permissions:
             contents: read
             pull-requests: write

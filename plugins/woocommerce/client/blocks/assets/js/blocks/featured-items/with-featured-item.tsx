@@ -1,9 +1,8 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
-
 /**
  * External dependencies
  */
 import type { BlockAlignment } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
@@ -82,7 +81,7 @@ interface FeaturedItemRequiredProps< T > {
 	attributes: (
 		| FeaturedCategoryRequiredAttributes
 		| FeaturedProductRequiredAttributes
-	 ) &
+	) &
 		EditorBlock< T >[ 'attributes' ] & {
 			// This is hardcoded because border and color are not yet included
 			// in Gutenberg's official types.
@@ -93,6 +92,7 @@ interface FeaturedItemRequiredProps< T > {
 			textColor?: string;
 		};
 	isLoading: boolean;
+	canEditItem: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
@@ -126,6 +126,7 @@ export const withFeaturedItem =
 
 		const {
 			attributes,
+			canEditItem,
 			category,
 			isLoading,
 			isSelected,
@@ -163,7 +164,9 @@ export const withFeaturedItem =
 				const element =
 					featuredProductParentRef.current as HTMLElement | null;
 
-				if ( ! element ) return;
+				if ( ! element ) {
+					return;
+				}
 
 				observer.observe( element );
 			}
@@ -200,7 +203,18 @@ export const withFeaturedItem =
 			[ setAttributes ]
 		);
 
-		const renderNoItemButton = () => {
+		const renderNoItemContent = () => {
+			if ( ! canEditItem ) {
+				return (
+					<p>
+						{ __(
+							'No product category is available.',
+							'woocommerce'
+						) }
+					</p>
+				);
+			}
+
 			return (
 				<>
 					<p>{ emptyMessage }</p>
@@ -242,14 +256,19 @@ export const withFeaturedItem =
 			return (
 				<BlockContextProvider
 					value={ {
-						termId: category.term_id,
+						termId:
+							attributes.categoryId === 'preview'
+								? undefined
+								: category.id,
 						termTaxonomy: 'product_cat',
+						taxonomy: 'product_cat',
 					} }
 				>
 					<div className={ `${ className }__inner-blocks` }>
 						<InnerBlocks
 							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
-								category
+								category,
+								! attributes.categoryId
 							) }
 							templateLock={ false }
 						/>
@@ -264,7 +283,7 @@ export const withFeaturedItem =
 				icon={ <Icon icon={ icon } /> }
 				label={ label }
 			>
-				{ isLoading ? <Spinner /> : renderNoItemButton() }
+				{ isLoading ? <Spinner /> : renderNoItemContent() }
 			</Placeholder>
 		);
 
@@ -376,6 +395,10 @@ export const withFeaturedItem =
 				</>
 			);
 		};
+
+		if ( ! item && isLoading && ! canEditItem ) {
+			return null;
+		}
 
 		if ( isEditingImage ) {
 			return (
