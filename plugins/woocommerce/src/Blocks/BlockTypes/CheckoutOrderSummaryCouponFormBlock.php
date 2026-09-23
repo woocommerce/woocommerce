@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * CheckoutOrderSummaryCouponFormBlock class.
  */
 class CheckoutOrderSummaryCouponFormBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

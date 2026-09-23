@@ -23,6 +23,7 @@
 	"parent": [
 		"woocommerce/checkout-order-summary-totals-block"
 	],
+	"editorStyle": "wc-blocks-editor-style",
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3
