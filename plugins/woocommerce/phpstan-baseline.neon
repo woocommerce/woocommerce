@@ -62612,12 +62612,6 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Variable \$chosen_attributes in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Variable \$stock_statuses in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
