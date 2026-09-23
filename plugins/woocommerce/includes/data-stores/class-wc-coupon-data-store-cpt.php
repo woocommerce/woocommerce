@@ -186,6 +186,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
+
+		if ( null === $coupon->get_date_created( 'edit' ) ) {
+			$coupon->set_date_created( time() );
+		}
+
 		$changes = $coupon->get_changes();
 
 		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $changes ) ) ) {

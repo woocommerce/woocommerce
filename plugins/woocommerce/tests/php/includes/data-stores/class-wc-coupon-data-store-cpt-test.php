@@ -357,4 +357,31 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A subclass reading the deprecated property must keep seeing the historical accumulated list after saves.'
 		);
 	}
+
+	/**
+	 * @testdox Should backfill date_created when updating a coupon with an empty post_date_gmt.
+	 */
+	public function test_update_backfills_date_created_when_empty(): void {
+		global $wpdb;
+
+		$coupon    = $this->create_settled_coupon();
+		$coupon_id = $coupon->get_id();
+
+		// Simulate empty post_date_gmt as found in unpublished or draft posts.
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_date_gmt' => '0000-00-00 00:00:00' ),
+			array( 'ID' => $coupon_id )
+		);
+		clean_post_cache( $coupon_id );
+
+		$coupon = new WC_Coupon( $coupon_id );
+		$this->assertNull( $coupon->get_date_created( 'edit' ) );
+
+		$coupon->set_description( 'Updated description' );
+		$coupon->save();
+
+		$this->assertNotNull( $coupon->get_date_created( 'edit' ) );
+		$this->assertSame( 'Updated description', $coupon->get_description() );
+	}
 }

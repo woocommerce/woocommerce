@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error when saving a coupon with empty post_date_gmt by backfilling date_created in WC_Coupon_Data_Store_CPT.
