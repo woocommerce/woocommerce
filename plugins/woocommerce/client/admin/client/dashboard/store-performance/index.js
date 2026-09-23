@@ -14,6 +14,7 @@ import {
 	SummaryList,
 	SummaryListPlaceholder,
 	SummaryNumber,
+	TourKit,
 } from '@woocommerce/components';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
@@ -33,7 +34,74 @@ const { performanceIndicators: indicators } = getAdminSetting(
 	}
 );
 
+const TOUR_SEEN_KEY = 'wc-performance-metrics-tour-seen';
+
+const hasSeenTour = () => {
+	try {
+		return window.localStorage.getItem( TOUR_SEEN_KEY ) === 'yes';
+	} catch {
+		// Storage unavailable: treat as seen so the tour never traps anyone.
+		return true;
+	}
+};
+
 class StorePerformance extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = { showTour: ! hasSeenTour() };
+		this.dismissTour = this.dismissTour.bind( this );
+	}
+
+	dismissTour() {
+		try {
+			window.localStorage.setItem( TOUR_SEEN_KEY, 'yes' );
+		} catch {}
+		this.setState( { showTour: false } );
+	}
+
+	renderTour() {
+		if ( ! this.state.showTour ) {
+			return null;
+		}
+
+		return (
+			<TourKit
+				config={ {
+					steps: [
+						{
+							referenceElements: {
+								desktop:
+									'.woocommerce-dashboard__performance-menu .woocommerce-ellipsis-menu__toggle',
+							},
+							meta: {
+								heading: __(
+									'Choose which metrics to display',
+									'woocommerce'
+								),
+								descriptions: {
+									desktop: __(
+										'Open this menu to show or hide any of the metrics available for your store.',
+										'woocommerce'
+									),
+								},
+								primaryButton: {
+									text: __( 'Got it', 'woocommerce' ),
+								},
+							},
+						},
+					],
+					closeHandler: this.dismissTour,
+					options: {
+						effects: {
+							arrowIndicator: true,
+							spotlight: { interactivity: { enabled: true } },
+						},
+					},
+				} }
+			/>
+		);
+	}
+
 	renderMenu() {
 		const {
 			hiddenBlocks,
@@ -50,6 +118,7 @@ class StorePerformance extends Component {
 
 		return (
 			<EllipsisMenu
+				className="woocommerce-dashboard__performance-menu"
 				label={ __(
 					'Choose which analytics to display and the section name',
 					'woocommerce'
@@ -186,6 +255,7 @@ class StorePerformance extends Component {
 						{ this.renderList() }
 					</div>
 				) }
+				{ this.renderTour() }
 			</Fragment>
 		);
 	}

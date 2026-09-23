@@ -139,6 +139,20 @@ $border: $gray-200;
 			@include make-cols( 5 );
 			@include wrap-contents;
 		}
+
+		// Eleven and twelve divide into six, thirteen to fifteen into five.
+		&.has-11-items,
+		&.has-12-items {
+			@include make-cols( 6 );
+			@include wrap-contents;
+		}
+
+		&.has-13-items,
+		&.has-14-items,
+		&.has-15-items {
+			@include make-cols( 5 );
+			@include wrap-contents;
+		}
 	}
 
 	@include breakpoint( '<1440px' ) {
@@ -154,6 +168,17 @@ $border: $gray-200;
 		}
 
 		&.has-10-items {
+			@include make-cols( 4 );
+			@include wrap-contents;
+		}
+
+		// Five columns at this width leaves the labels too narrow to sit on one
+		// line, so counts above ten stay at four as well and accept the gap.
+		&.has-11-items,
+		&.has-12-items,
+		&.has-13-items,
+		&.has-14-items,
+		&.has-15-items {
 			@include make-cols( 4 );
 			@include wrap-contents;
 		}
