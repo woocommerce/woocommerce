@@ -22,7 +22,7 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	private const TAXONOMY_PARAMS = array(
 		'product_cat'   => 'categories',
 		'product_tag'   => 'tags',
-		'product_brand' => 'brands',
+		'product_brand' => 'wc_brands',
 	);
 
 	/**
@@ -129,9 +129,9 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	 * @testdox A taxonomy param absent from the Params map is left unchanged.
 	 */
 	public function test_unknown_taxonomy_set_param_is_not_normalised(): void {
-		$result = $this->normalize( array( 'wc_brands' => 'nike,adidas' ) );
+		$result = $this->normalize( array( 'brands' => 'nike,adidas' ) );
 
-		$this->assertSame( 'nike,adidas', $result['wc_brands'], 'Only params reported by Params should be treated as unordered sets.' );
+		$this->assertSame( 'nike,adidas', $result['brands'], 'Only params reported by Params should be treated as unordered sets.' );
 	}
 
 	/**
