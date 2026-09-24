@@ -151,7 +151,6 @@ class MiniCart extends \WP_UnitTestCase {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 
@@ -160,6 +159,11 @@ class MiniCart extends \WP_UnitTestCase {
 		if ( $this->original_block_type ) {
 			$registry->register( $this->original_block_type );
 		}
+
+		// parent::tearDown() must run last: it issues the transaction ROLLBACK,
+		// so any database work above stays inside the test's own transaction
+		// instead of opening a fresh one that never gets closed.
+		parent::tearDown();
 	}
 
 	/**
@@ -517,5 +521,27 @@ class MiniCart extends \WP_UnitTestCase {
 		// Clean up.
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
+
+	/**
+	 * Test that the document-level cart events call the unified store's refreshCart action.
+	 *
+	 * Runs in its own process: is_cart()/is_checkout() fall back to the
+	 * WOOCOMMERCE_CART/WOOCOMMERCE_CHECKOUT constants, and once any test
+	 * anywhere in the suite defines one via wc_maybe_define_constant() it
+	 * stays defined for the rest of the process, which would otherwise make
+	 * this block always render the collapsed cart-page placeholder.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 *
+	 * @return void
+	 */
+	public function test_document_events_call_refresh_cart_action() {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCart"', $output, 'The added-to-cart document event should call the unified refreshCart action.' );
+		$this->assertStringContainsString( 'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCart"', $output, 'The removed-from-cart document event should call the unified refreshCart action.' );
 	}
 }

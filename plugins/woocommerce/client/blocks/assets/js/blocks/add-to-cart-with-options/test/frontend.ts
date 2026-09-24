@@ -227,9 +227,8 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			expect( mockAddCartItem ).toHaveBeenCalledWith(
 				{
 					id: 42,
-					quantityToAdd: 2,
+					quantity: 2,
 					variation: selectedAttributes,
-					type,
 				},
 				{ showCartUpdatesNotices: false }
 			);

@@ -168,7 +168,7 @@ describe( 'Wishlist onClickAddToCart', () => {
 	} );
 
 	it( 'removes the entry when the add succeeds with a server-normalized quantity', async () => {
-		// Wishlist always requests quantityToAdd: 1, but the server may still
+		// Wishlist always requests quantity: 1, but the server may still
 		// resolve the line to a different final quantity (e.g. merging with
 		// an existing line); that is still a success and must not block
 		// removal.
@@ -232,5 +232,42 @@ describe( 'Wishlist onClickAddToCart', () => {
 		await runAction( actions.onClickAddToCart() );
 
 		expect( mockContext.pendingKeys[ 'list-key-1' ] ).toBeUndefined();
+	} );
+
+	it( 'posts quantity 1 with no options for a simple product', async () => {
+		mockContext.listItem = makeListItem();
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		// A single-argument call is what keeps the cart-update notices
+		// showing: passing no `options` leaves `addCartItem`'s
+		// `showCartUpdatesNotices` default (`true`) in place.
+		expect( mockAddCartItem ).toHaveBeenCalledWith( {
+			id: 42,
+			quantity: 1,
+		} );
+	} );
+
+	it( 'forwards the mapped variation for a variable product', async () => {
+		mockContext.listItem = makeListItem( {
+			variation_id: 99,
+			variation: [
+				{
+					raw_attribute: 'attribute_pa_color',
+					attribute: 'Color',
+					value: 'Red',
+				},
+			],
+		} );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		expect( mockAddCartItem ).toHaveBeenCalledWith( {
+			id: 42,
+			quantity: 1,
+			variation: [ { attribute: 'attribute_pa_color', value: 'Red' } ],
+		} );
 	} );
 } );

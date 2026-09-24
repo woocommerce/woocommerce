@@ -133,12 +133,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			frontendUtils,
 		} ) => {
 			// Saved-for-later "Move to cart" and wishlist "Add to cart" call the
-			// same keyless `addCartItem` path this exercises (quantityToAdd, no
-			// key). Here we assert the cart outcome those consumers depend on —
-			// a new standalone line beside the untouched meta line, no error
-			// notice. The consumer-specific guarantees (list entry removed, no
-			// spurious "quantity changed" info notice shown to the shopper) are
-			// covered authoritatively by the store/consumer unit tests,
+			// same keyless `addCartItem` path this exercises (a `quantity`
+			// delta, no key). Here we assert the cart outcome those consumers
+			// depend on — a new standalone line beside the untouched meta
+			// line, no error notice. The consumer-specific guarantees (list
+			// entry removed, no spurious "quantity changed" info notice shown
+			// to the shopper) are covered authoritatively by the
+			// store/consumer unit tests,
 			// because the saved-for-later and wishlist blocks are gated behind
 			// the `product_wishlist` feature flag and are not registered in
 			// this e2e environment.

@@ -263,14 +263,14 @@ Both types are exported from the cart store module and reach consumers through t
 import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
 ```
 
-**`addCartItem` stays fire-and-forget.** It never rejects because of a request or server failure — every request path, whether the Store API accepts or rejects it, resolves with an outcome instead of throwing. The action still throws synchronously for its two programmer-error guards (both `quantity` and `quantityToAdd` supplied together, or a keyless call — no `key` — that passes an absolute `quantity` instead of a `quantityToAdd` delta) — those are argument-validation bugs, unrelated to the request outcome below.
+**`addCartItem` stays fire-and-forget.** It never rejects because of a request or server failure — every request path, whether the Store API accepts or rejects it, resolves with an outcome instead of throwing.
 
 Read the outcome from a consuming generator:
 
 ```ts
 const outcome = ( yield cartActions.addCartItem( {
 	id,
-	quantityToAdd,
+	quantity,
 } ) ) as AddCartItemOutcome;
 
 if ( ! outcome.success ) {
@@ -284,9 +284,9 @@ if ( ! outcome.success ) {
 
 **Attribution is per-call, never per-batch.** When several `addCartItem` calls are dispatched within the same tick and coalesced into one `wc/store/v1/batch` request, or issued one after another in a loop, each call's outcome reflects only that call's own product result — never a shared or last-write-wins value from a sibling call, even when calls in the same batch land different outcomes (one product accepted, another rejected).
 
-**Both call shapes share the same request path.** A keyless call (no `key`, posts to `add-item`) and a keyed call (`key` supplied, posts to `update-item`) both resolve through the same single request and outcome capture — there is no separate contract for either shape.
+**`addCartItem` always posts to `add-item`; a keyed update is a different action.** `addCartItem` never takes a `key` — its `quantity` is always a delta added to any matching existing line. Setting a cart line's absolute quantity by key (Mini-Cart's quantity stepper) goes through `updateCartItem( { key, quantity } )` instead, which posts to `update-item` and resolves `Promise<void>`, not an `AddCartItemOutcome`.
 
-**`removeCartItem` and `batchAddCartItems` do not share this contract.** Both remain typed `Promise<void>` and swallow their own errors the way `addCartItem` used to. Don't assume parity when touching either of them — extending this contract to other cart actions is a separate decision, not something the store does today.
+**`removeCartItem`, `updateCartItem`, and `batchAddCartItems` do not share this contract.** All are typed `Promise<void>` and swallow their own errors the way `addCartItem` used to. Don't assume parity when touching any of them — extending this contract to other cart actions is a separate decision, not something the store does today.
 
 For a worked example, see `onClickMoveToCart` in `saved-for-later/frontend.ts` and `onClickAddToCart` in `wishlist/frontend.ts` — both read the outcome and gate a destructive list-removal on `outcome.success`.
 
@@ -300,7 +300,7 @@ The store emits three cart-wide side effects whenever a mutation succeeds:
 
 These fire **exactly once per mutation batch cycle, not once per request**. When the mutation batcher (`mutation-batcher.ts`) coalesces several concurrent mutations — e.g. N concurrent `addCartItem` calls issued in the same tick — into one processing cycle and one `/wc/store/v1/batch` request, each of the three effects fires only once for that cycle, not once per coalesced request. Before this mechanism existed, each of the three effects was wired per request rather than per cycle, so N coalesced mutations produced N sync events (N redundant resync GETs), N legacy events, and N announcements; a single successful mutation still produces exactly one of each, unchanged.
 
-**Mechanism.** Every action that calls `sendCartRequest` attaches a per-request `meta: { quantityChanges, origin }` (type `CartMutationMeta`) describing that one mutation: `quantityChanges` is its contribution to the sync event's payload (`productsPendingAdd` / `cartItemsPendingQuantity` / `cartItemsPendingDelete`), and `origin` is `'add'` (set by `addCartItem` and `batchAddCartItems`, regardless of whether the mutation hit `add-item` or `update-item`) or `'remove'` (set by `removeCartItem`). The batcher carries `meta` through unchanged and, once a cycle settles — synchronously, after the cycle's server state is committed (or rolled back) and before the queue's `isProcessing` state clears — invokes the mutation queue's `onCycleSettled` config callback exactly once, with one `{ success, meta }` entry per request in the cycle. The `onCycleSettled` callback built into the queue passed to `createMutationQueue` inside `sendCartRequest` is the single place in `cart.ts` that emits the three effects; no action emits them itself.
+**Mechanism.** Every action that calls `sendCartRequest` attaches a per-request `meta: { quantityChanges, origin }` (type `CartMutationMeta`) describing that one mutation: `quantityChanges` is its contribution to the sync event's payload (`productsPendingAdd` / `cartItemsPendingQuantity` / `cartItemsPendingDelete`), and `origin` is `'add'` (set by `addCartItem`, `updateCartItem`, and `batchAddCartItems`, regardless of whether the mutation hit `add-item` or `update-item`) or `'remove'` (set by `removeCartItem`). The batcher carries `meta` through unchanged and, once a cycle settles — synchronously, after the cycle's server state is committed (or rolled back) and before the queue's `isProcessing` state clears — invokes the mutation queue's `onCycleSettled` config callback exactly once, with one `{ success, meta }` entry per request in the cycle. The `onCycleSettled` callback built into the queue passed to `createMutationQueue` inside `sendCartRequest` is the single place in `cart.ts` that emits the three effects; no action emits them itself.
 
 **Gates.** The callback applies three rules to the cycle's successful entries (`entry.success && entry.meta`):
 

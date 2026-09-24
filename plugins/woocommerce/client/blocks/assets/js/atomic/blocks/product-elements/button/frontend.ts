@@ -158,13 +158,12 @@ const productButtonStore = {
 
 			const context = getContext< Context >();
 
-			// Pass quantityToAdd as a delta. The cart store will add this
+			// Pass quantity as a delta. The cart store will add this
 			// to the current quantity, ensuring rapid clicks compound correctly.
 			yield actions.addCartItem(
 				{
 					id: product.id,
-					quantityToAdd: context.quantityToAdd,
-					type: product.type,
+					quantity: context.quantityToAdd,
 				},
 				{
 					showCartUpdatesNotices: false,
@@ -173,7 +172,7 @@ const productButtonStore = {
 
 			context.displayViewCart = true;
 		},
-		*refreshCartItems() {
+		*refreshCart() {
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
@@ -182,7 +181,7 @@ const productButtonStore = {
 				{},
 				{ lock: universalLock }
 			);
-			void actions.refreshCartItems();
+			void actions.refreshCart();
 		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
