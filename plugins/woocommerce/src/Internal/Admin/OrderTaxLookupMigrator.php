@@ -22,15 +22,10 @@ defined( 'ABSPATH' ) || exit;
  * Rebuilds the `wc_order_tax_lookup` rows of orders recorded before the table held the full tax
  * detail the reports read today, by re-syncing each order through the Taxes data store.
  *
- * Two shapes qualify, one pass over the table each. A row written before the table held one row
- * per tax order item carries the zero default of the `order_item_id` column, and the Taxes report
- * keeps matching those on their tax rate id alone, the way it did before the column existed. A row
- * written before the taxable amount was split into its order and shipping parts carries a base but
- * no split, and the report shows the parts of every rate holding such a row as unknown rather than
- * as the short sum of the rows it has been through.
- *
- * Either way reporting stays as it was while this runs, and an order the processor cannot rebuild
- * keeps reporting the way it did.
+ * It makes one pass per shape: rows written before the table held one row per tax order item
+ * (`order_item_id = 0`), and rows written before the taxable amount was split into its order and
+ * shipping parts. Reporting stays as it was while this runs, and an order the processor cannot
+ * rebuild keeps reporting the way it did.
  *
  * Additionally, this class manages the "Rebuild analytics tax data" tool.
  *
@@ -56,11 +51,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	/**
 	 * Option holding the highest order id the taxable amount split pass has been through.
 	 *
-	 * Each pass carries its own cursor so that a new one starts at the beginning of the table
-	 * without touching the cursor of the pass before it. Resetting a shared cursor instead would
-	 * race the batch in flight while the update runs: that batch writes the cursor it read before
-	 * the reset, which parks the new pass past every row it never went through, and the count the
-	 * tool shows reads from the cursor, so nothing would say so.
+	 * A cursor of its own, since resetting the shared one would race a batch in flight, which
+	 * writes back the cursor it read before the reset.
 	 *
 	 * @since 11.3.0
 	 *
@@ -72,10 +64,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * Option holding the highest order id the lookup table held when the taxable amount split
 	 * update ran.
 	 *
-	 * Every row up to it predates the split. A row whose base nets to zero, such as a negative fee
-	 * offsetting shipping at the same rate, has parts that the base alone does not show, so the
-	 * split pass rebuilds every row up to here that holds no split. Past it, a row with no split
-	 * really did apply to nothing, unless it still carries a base.
+	 * Rows up to it predate the split, so the split pass also rebuilds those whose base nets to
+	 * zero (for example a negative fee offsetting shipping at the same rate).
 	 *
 	 * @since 11.3.0
 	 *
@@ -123,19 +113,14 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	}
 
 	/**
-	 * The passes the rebuild makes over the lookup table: the rows each one rewrites, and the
-	 * cursor that bounds it.
-	 *
-	 * A pass is only offered once the columns it reads are there, so that a store still waiting on
-	 * the schema update counts and rebuilds the rows it can.
+	 * The passes the rebuild makes over the lookup table. A pass is only offered once the columns
+	 * it reads exist.
 	 *
 	 * @return array[] List of `array( 'condition' => string, 'values' => int[], 'cursor' => string )`,
 	 *                 the values in the placeholder order of the condition.
 	 */
 	private function get_pending_passes(): array {
 		$passes = array(
-			// A row written before the table held one row per tax order item sits at the zero
-			// default of the column.
 			array(
 				'condition' => 'order_item_id = 0',
 				'values'    => array(),
@@ -143,11 +128,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			),
 		);
 
-		// The base says a row predates the split, so both it and the split columns have to be
-		// there to tell such a row apart from one that really did apply to nothing.
-		if ( TaxesDataStore::has_taxable_amount_column() && TaxesDataStore::has_taxable_amount_split_columns() ) {
-			// A row holding a base but no split predates the split. Up to SPLIT_END_OPTION so
-			// does a row with no base, whose parts can offset each other.
+		if ( TaxesDataStore::has_taxable_amount_split_columns() ) {
 			$passes[] = array(
 				'condition' => 'order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND ( taxable_amount <> 0 OR order_id <= %d )',
 				'values'    => array( (int) get_option( self::SPLIT_END_OPTION, 0 ) ),
@@ -179,8 +160,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	}
 
 	/**
-	 * Get the number of orders left to go through that still hold rows in a shape that predates
-	 * the tax detail the reports read today, up to PENDING_COUNT_LIMIT.
+	 * Get the number of orders left to go through that still hold rows in an outdated shape, up to
+	 * PENDING_COUNT_LIMIT.
 	 *
 	 * Counts from the cursor, the same place `get_next_batch_to_process()` reads from, so the
 	 * number the tool shows is the number the rebuild will actually get through. Counting the whole
@@ -202,7 +183,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the conditions are built above, one per pass.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
 				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE {$pending['where']} LIMIT %d ) AS pending",
 				array_merge( $pending['values'], array( self::PENDING_COUNT_LIMIT ) )
 			)
@@ -236,7 +217,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		$order_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the conditions are built above, one per pass.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
 				"SELECT DISTINCT order_id FROM {$table_name} WHERE {$pending['where']} ORDER BY order_id ASC LIMIT %d",
 				array_merge( $pending['values'], array( $size ) )
 			)
@@ -282,12 +263,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				continue;
 			}
 
-			// An order that could not be read while its analytics data is still there, and a write
-			// that did not land, both leave the order holding the rows it came in with. The cursor
-			// steps past it either way, so record it as a failed analytics import: that is the list
-			// Analytics settings offers a retry over, and the retry re-imports the order, which is
-			// the same work this pass could not do. One row left behind costs more than its own
-			// order, since a rate holding it reports no taxable amount split at all.
+			// The cursor steps past an order that could not be rebuilt, so record it as a failed
+			// analytics import, which Analytics settings offers to retry.
 			if ( true !== $synced ) {
 				$reason = -1 === $synced
 					? 'The order could not be read (which is what a deactivated order type plugin looks like) or has no creation date to report it by.'
@@ -312,14 +289,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	/**
 	 * Step every pass past the orders the batch covered.
 	 *
-	 * A pass already further along keeps its place. The batch is read from the lowest cursor of
-	 * them all and in order, so a pass whose cursor sits above the batch has been through those
-	 * orders already, and moving it back would hand them to it a second time.
-	 *
-	 * A pass only steps up to the first order below the end of the batch that it still has to
-	 * rebuild and the batch did not hold. The batch was read with the passes on offer at the time,
-	 * and a pass that came on offer while it was in flight, such as the split pass once its update
-	 * runs, has not been through the orders between the batch ids.
+	 * A pass never moves back, and stops short of any order it still has to rebuild that the batch
+	 * left out. That happens when the pass came on offer while the batch was in flight.
 	 *
 	 * @param non-empty-array<int> $batch Order ids of the batch.
 	 */
@@ -339,14 +310,12 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 			$skipped = $wpdb->get_var(
 				$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The values come as one array.
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the condition and placeholders are built above.
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
 					"SELECT MIN(order_id) FROM {$table_name} WHERE order_id > %d AND order_id < %d AND order_id NOT IN ( {$placeholders} ) AND ( {$pass['condition']} )",
 					array_merge( array( $cursor, $last ), $batch, $pass['values'] )
 				)
 			);
 
-			// Without an answer there is no telling what the pass would step past, so it keeps its
-			// place and the next batch goes through these orders again.
 			if ( $wpdb->last_error ) {
 				continue;
 			}

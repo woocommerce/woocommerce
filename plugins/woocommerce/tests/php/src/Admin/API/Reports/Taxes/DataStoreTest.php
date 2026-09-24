@@ -570,8 +570,6 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
 		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
 
-		// Reporting 210 and 5 here, the parts of the one rebuilt order, would read as the whole
-		// period against a taxable amount of 430 and no sign that it is short.
 		$this->assertSame( 430.0, $row['taxable_amount'], 'The taxable amount is recorded on both rows, so it stays whole.' );
 		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while a row of the rate holds no split.' );
 		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while a row of the rate holds no split.' );
@@ -602,8 +600,6 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
 		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
 
-		// A zero-rated rate charges no tax, so a zero part cannot be told from a recorded one by
-		// the tax beside it the way a taxed rate's can.
 		$this->assertSame( 0.0, $row['total_tax'], 'The rate should charge no tax.' );
 		$this->assertSame( 215.0, $row['taxable_amount'], 'A zero-rated sale still records the base it was taxed on.' );
 		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while the row holds no split.' );

@@ -8,8 +8,6 @@ const TAXABLE_AMOUNT = 5;
 const ORDER_GROSS = 6;
 const SHIPPING_GROSS = 7;
 
-// Stand-in for the currency context, rendering an amount as a plain number so the
-// assertions read what the cell was given rather than how it was formatted.
 const currencyContext = {
 	render: ( amount ) => `[${ amount }]`,
 	formatDecimal: ( amount ) => amount,
@@ -79,8 +77,6 @@ describe( 'TaxesReportTable taxable amount cells', () => {
 	} );
 
 	it( 'renders a zero under a tax that was charged as unknown, not as a zero', () => {
-		// A lookup row recorded before the base existed, or a manual tax line: the rate
-		// charged tax, so a zero base is a base nobody recorded.
 		const cells = rowCells(
 			taxRow( {
 				taxable_amount: 0,
@@ -101,8 +97,6 @@ describe( 'TaxesReportTable taxable amount cells', () => {
 	} );
 
 	it( 'renders a zero part of a rate that charged no tax on that part as a zero', () => {
-		// A rate that applied to shipping alone charged no order tax, so its zero order
-		// part is a real zero rather than a missing one.
 		const cells = rowCells(
 			taxRow( {
 				order_tax: 0,

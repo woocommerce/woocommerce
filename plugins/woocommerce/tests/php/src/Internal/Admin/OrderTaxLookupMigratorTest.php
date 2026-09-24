@@ -626,9 +626,6 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		wc_update_1130_split_tax_lookup_taxable_amount();
 
-		// The earlier pass keeps its place, so an order it could not rebuild is not put back in
-		// front of it, and the split pass still reaches that order because it starts at the top of
-		// the table on a cursor of its own.
 		$this->assertSame( $order->get_id() + 1, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The update should leave the cursor of the earlier pass alone.' );
 		$this->assertFalse( get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should start at the top of the table.' );
 		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should reach an order the earlier pass has stepped past.' );

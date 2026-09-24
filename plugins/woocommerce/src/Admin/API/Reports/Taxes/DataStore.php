@@ -131,29 +131,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * SQL selecting one part of the taxable amount of a tax rate, or NULL while the rate holds a
-	 * row the rebuild has not reached.
+	 * SQL summing one part of the taxable amount of a tax rate.
 	 *
-	 * A report row sums the lookup rows of a rate over the reporting period, and a row recorded
-	 * before the split carries a base with both parts at zero. Summing it in with the rows that do
-	 * carry a split reports a part that is short by whatever those rows hold, and that number
-	 * reads as a filing figure since nothing about it says it is incomplete. The tax charged does
-	 * not say it either: it is non-zero on the rows that were left out, and a zero-rated rate has
-	 * no tax to read at all. So the sum says so itself, and `get_noncached_data()` drops the part
-	 * from the row, which is the shape the report already has while the columns are missing.
+	 * Selects NULL while the rate holds a row recorded before the split (a base with both parts at
+	 * zero), since summing it in would report a part that is short with nothing saying so.
 	 *
 	 * @param string $column Column holding the part, `order_taxable_amount` or `shipping_taxable_amount`.
 	 * @return string
 	 */
 	private static function taxable_amount_part_column( string $column ): string {
-		// Without the base there is nothing to tell an unrebuilt row from a rate that really did
-		// apply to nothing, so the sum is all there is to report.
-		if ( ! static::has_taxable_amount_column() ) {
-			return "SUM({$column}) as {$column}";
-		}
-
-		// The row shape the rebuild counts as pending, less the rows whose base nets to zero,
-		// which read the same as a rate that applied to nothing. See OrderTaxLookupMigrator.
 		$unsplit_rows = 'SUM( CASE WHEN order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0 THEN 1 ELSE 0 END )';
 
 		return "CASE WHEN {$unsplit_rows} > 0 THEN NULL ELSE SUM({$column}) END as {$column}";
@@ -323,10 +309,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Check if the wc_order_tax_lookup table has the columns holding the taxable amount split
-	 * into its order and shipping parts.
-	 *
-	 * Both are added by the same schema update, so the report only reads them together.
+	 * Check if the wc_order_tax_lookup table has the taxable_amount column and the columns
+	 * holding its order and shipping parts.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.3.0
@@ -334,13 +318,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return bool
 	 */
 	public static function has_taxable_amount_split_columns() {
-		return self::lookup_has_column( 'order_taxable_amount' ) && self::lookup_has_column( 'shipping_taxable_amount' );
+		return static::has_taxable_amount_column()
+			&& self::lookup_has_column( 'order_taxable_amount' )
+			&& self::lookup_has_column( 'shipping_taxable_amount' );
 	}
 
 	/**
-	 * Columns of the lookup table this request has read, keyed by blog id since the schema is per
-	 * site. One read answers for every column, so this is asked once a request however many times
-	 * the columns are checked: imports reach them once per synced order.
+	 * Columns of the lookup table, read once per request and keyed by blog id.
 	 *
 	 * @var array<int, string[]>
 	 */
@@ -377,9 +361,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * The columns the wc_order_tax_lookup table holds.
 	 *
-	 * Asks the schema rather than caching the answer in an option, so a column that appears or
-	 * disappears behind WooCommerce's back (a partial restore, a manual drop) corrects the report
-	 * by itself.
+	 * Asks the schema rather than an option, so a column dropped or restored behind WooCommerce's
+	 * back corrects the report by itself.
 	 *
 	 * @return string[] Column names, empty while the table does not exist.
 	 */
@@ -594,12 +577,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Leave out the parts of the taxable amount of a report row that the rate cannot report yet.
-	 *
-	 * `taxable_amount_part_column()` selects NULL for those, which has to go before the row is
-	 * cast, since a float cast would turn it into the zero the NULL is there to avoid. A row
-	 * without the key reads as unknown in the table and as an empty cell in the export, the same
-	 * way a row from a store still missing the columns does.
+	 * Drop the taxable amount parts selected as NULL, before the float cast turns them into zeros.
 	 *
 	 * @param array $row Single report row.
 	 * @return array
@@ -791,7 +769,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// Also skip orders without tax lines: computing bases would hydrate every
 		// line item, fee and shipping row for a write that never happens.
-		if ( ( $has_taxable_amount_column || $has_split_columns ) && ! empty( $tax_items ) ) {
+		if ( $has_taxable_amount_column && ! empty( $tax_items ) ) {
 			// A refund's tax items re-derive the compound flag from the live rate, which can
 			// be gone by refund time; the parent's tax items carry the flags as charged, and
 			// the refund base must mirror them or a refunded order stops netting to zero.
@@ -817,11 +795,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$compound_rate_ids[] = $tax_item->get_rate_id();
 				}
 			}
-			// Each is asked for on its own, so a subclass overriding either one keeps deciding
-			// what its column records.
-			if ( $has_taxable_amount_column ) {
-				$taxable_amounts = static::get_taxable_amounts_by_rate( $order, $compound_rate_ids );
-			}
+			// Both stay called so a subclass overriding either one keeps working.
+			$taxable_amounts = static::get_taxable_amounts_by_rate( $order, $compound_rate_ids );
 
 			if ( $has_split_columns ) {
 				$taxable_amount_parts = static::get_taxable_amount_parts_by_rate( $order, $compound_rate_ids );
@@ -852,10 +827,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$placeholders = '(%d, %s, %d, %d, %f, %f, %f';
 
-			// The bases are computed per rate and the report sums the columns per rate, so
-			// when tax lines share a rate only the first row carries the rate's bases. On an
-			// unkeyed table the lines collapse into one row and the last write wins, so
-			// there every write carries them.
+			// When tax lines share a rate only the first row carries the rate's bases. On an
+			// unkeyed table the lines collapse into one row, so every write carries them.
 			if ( $has_taxable_amount_column ) {
 				$values[]      = $taxable_amounts[ $tax_rate_id ] ?? 0;
 				$placeholders .= ', %f';
@@ -976,7 +949,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Sum the net totals each tax rate applied to, split into the order part (line items and
-	 * fees) and the shipping part, the same way an order's tax lines split their tax totals.
+	 * fees) and the shipping part.
 	 *
 	 * Computed from the items rather than derived from the tax amounts, so zero-rated
 	 * sales still record the base amount they were taxed on. A compound rate is applied
@@ -1003,8 +976,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				continue;
 			}
 
-			// An order's tax line counts shipping separately from line items and fees, so the
-			// bases follow the same split.
 			$part = OrderItemType::SHIPPING === $item->get_type() ? 'shipping' : 'order';
 
 			$non_compound_tax = 0.0;

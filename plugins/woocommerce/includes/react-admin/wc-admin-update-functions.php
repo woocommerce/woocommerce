@@ -333,12 +333,6 @@ function wc_update_11201_migrate_tax_lookup_order_items() {
  * Queue the rebuild of `wc_order_tax_lookup` rows recorded before the taxable amount was split
  * into its order and shipping parts.
  *
- * Every row the store already holds predates the split, including the ones an earlier pass has
- * been through, so the rebuild goes over the whole table again. It does that on a cursor of its
- * own rather than by clearing the one the earlier pass left behind, which a batch in flight could
- * write straight back. Until a rate has been rebuilt the Taxes report shows its order and shipping
- * parts as unknown, so nothing waits on this finishing.
- *
  * @since 11.3.0
  *
  * @return void
@@ -346,16 +340,12 @@ function wc_update_11201_migrate_tax_lookup_order_items() {
 function wc_update_1130_split_tax_lookup_taxable_amount() {
 	global $wpdb;
 
-	// Mark where the rows that predate the split end, so the rebuild also reaches the rows whose
-	// base nets to zero. See OrderTaxLookupMigrator::SPLIT_END_OPTION.
 	$table_name = TaxesDataStore::get_db_table_name();
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
 	update_option( OrderTaxLookupMigrator::SPLIT_END_OPTION, (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$table_name}" ), false );
 
 	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 
-	// Report responses are cached for a week and keyed on the query arguments alone. The rebuild
-	// invalidates the cache as each batch lands, but a store with nothing left to rebuild would
-	// otherwise go on serving rows that have no split in them.
+	// A store with nothing to rebuild would otherwise keep serving cached rows without the split.
 	ReportsCache::invalidate();
 }

@@ -16,12 +16,8 @@ import { getTaxCode } from './utils';
 import ReportTable from '../../components/report-table';
 
 /**
- * Whether a taxable amount was recorded for a report row.
- *
- * The report leaves the amount out when it cannot report one, which it does while a rate holds
- * a row the rebuild has not reached and on a store still missing the column. A zero base under
- * a non-zero tax marks a lookup row recorded before that base existed (or a manual tax line) -
- * unknown, not zero.
+ * Whether a taxable amount was recorded for a report row. A zero base under a non-zero tax
+ * marks a row recorded before that base existed (or a manual tax line) - unknown, not zero.
  *
  * @param {number|undefined} amount Taxable amount.
  * @param {number}           tax    Tax charged on that amount.
