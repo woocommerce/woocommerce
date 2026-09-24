@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use dark arrows on a white background by default for gallery and carousel navigation, while preserving custom colors.
+Use contrasting default colors and consistent disabled styling for gallery and carousel arrows, while preserving custom colors.
