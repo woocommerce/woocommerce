@@ -45,7 +45,7 @@ final class BlockIconUtils {
 		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
 		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
-		 * An empty string removes the icon, and anything invalid falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
+		 * Anything invalid, including an empty string, falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
 		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
@@ -59,11 +59,6 @@ final class BlockIconUtils {
 
 		if ( ! is_string( $filtered_svg ) || $default_svg === $filtered_svg ) {
 			return $default_svg;
-		}
-
-		$filtered_svg = trim( $filtered_svg, " \t\r\n\f" );
-		if ( '' === $filtered_svg ) {
-			return '';
 		}
 
 		$sanitized_svg = trim( wp_kses( $filtered_svg, self::get_allowed_svg_html() ), " \t\r\n\f" );

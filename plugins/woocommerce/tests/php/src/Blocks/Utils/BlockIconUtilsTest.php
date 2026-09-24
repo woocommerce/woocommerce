@@ -68,30 +68,6 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty and whitespace-only filter returns remove the icon.
-	 * @dataProvider provide_empty_replacements
-	 *
-	 * @param string $replacement Filter replacement.
-	 */
-	public function test_filter_block_icon_allows_empty_replacement( string $replacement ): void {
-		$this->assertSame( '', $this->filter_with_replacement( $replacement ) );
-	}
-
-	/**
-	 * Provides empty icon replacements.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function provide_empty_replacements(): array {
-		return array(
-			'empty'            => array( '' ),
-			'spaces'           => array( '   ' ),
-			'mixed whitespace' => array( " \n\t " ),
-			'form feed'        => array( "\f" ),
-		);
-	}
-
-	/**
 	 * @testdox Non-string filter returns fall back to the exact default.
 	 * @dataProvider provide_non_string_replacements
 	 *
@@ -157,7 +133,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Invalid or text-bearing changed markup falls back to the exact default.
+	 * @testdox Empty, invalid, or text-bearing changed markup falls back to the exact default.
 	 * @dataProvider provide_invalid_svg_replacements
 	 *
 	 * @param string $replacement Filter replacement.
@@ -173,6 +149,10 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function provide_invalid_svg_replacements(): array {
 		return array(
+			'empty'                 => array( '' ),
+			'spaces'                => array( '   ' ),
+			'mixed whitespace'      => array( " \n\t " ),
+			'form feed'             => array( "\f" ),
 			'plain text'            => array( 'hello' ),
 			'foreign content text'  => array( '<svg><foreignObject><div>visible</div></foreignObject></svg>' ),
 			'script text'           => array( '<svg><script>alert(1)</script></svg>' ),
