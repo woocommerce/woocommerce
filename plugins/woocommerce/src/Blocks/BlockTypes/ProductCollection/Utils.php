@@ -90,7 +90,7 @@ class Utils {
 	/**
 	 * Resolve the block template WordPress will use for the current product archive request.
 	 *
-	 * @return WP_Block_Template|null
+	 * @return WP_Block_Template|string|null Block template, PHP template path, or null.
 	 */
 	private static function get_current_archive_block_template() {
 		$type      = '';
@@ -101,6 +101,13 @@ class Utils {
 			$type      = 'search';
 			$templates = array( 'search.php' );
 		} elseif ( is_post_type_archive( 'product' ) ) {
+			if ( is_front_page() ) {
+				$front_page_template = self::get_template_from_hierarchy( 'frontpage', array( 'front-page.php' ) );
+				if ( null !== $front_page_template ) {
+					return $front_page_template;
+				}
+			}
+
 			$type      = 'archive';
 			$templates = array( 'archive-product.php', 'archive.php' );
 		} elseif ( is_tax( get_object_taxonomies( 'product' ) ) ) {
@@ -120,8 +127,26 @@ class Utils {
 			return null;
 		}
 
+		return self::get_template_from_hierarchy( $type, $templates );
+	}
+
+	/**
+	 * Resolve a filtered hierarchy, preserving PHP templates that stop the template loader's search.
+	 *
+	 * @param string   $type      Template type.
+	 * @param string[] $templates Template filenames in descending order of priority.
+	 * @return WP_Block_Template|string|null Block template, PHP template path, or null.
+	 */
+	private static function get_template_from_hierarchy( $type, $templates ) {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core hook, documented in wp-includes/template.php.
 		$templates = apply_filters( "{$type}_template_hierarchy", $templates );
+		if ( ! is_array( $templates ) ) {
+			return null;
+		}
+		$templates = array_values( array_filter( $templates, 'is_string' ) );
+		if ( empty( $templates ) ) {
+			return null;
+		}
 
 		// A PHP template of equal or higher specificity in the theme wins over less specific block templates.
 		$php_template = locate_template( $templates );
@@ -137,27 +162,7 @@ class Utils {
 			}
 		}
 
-		$slugs = array_map(
-			static function ( $template ) {
-				return preg_replace( '/\.php$/', '', $template );
-			},
-			$templates
-		);
-
-		$block_templates = get_block_templates( array( 'slug__in' => $slugs ), 'wp_template' );
-		if ( empty( $block_templates ) ) {
-			return null;
-		}
-
-		$priorities = array_flip( $slugs );
-		usort(
-			$block_templates,
-			static function ( $a, $b ) use ( $priorities ) {
-				return ( $priorities[ $a->slug ] ?? PHP_INT_MAX ) <=> ( $priorities[ $b->slug ] ?? PHP_INT_MAX );
-			}
-		);
-
-		return $block_templates[0];
+		return resolve_block_template( $type, $templates, $php_template ) ?? ( $php_template ? $php_template : null );
 	}
 
 	/**
@@ -173,7 +178,19 @@ class Utils {
 			return null;
 		}
 
-		$flattened = BlockTemplateUtils::flatten_blocks( $blocks );
+		$flattened   = BlockTemplateUtils::flatten_blocks( $blocks );
+		$pattern_ids = array();
+		if ( $depth > 0 ) {
+			foreach ( $flattened as $block ) {
+				if ( 'core/block' === ( $block['blockName'] ?? '' ) && is_numeric( $block['attrs']['ref'] ?? null ) && (int) $block['attrs']['ref'] > 0 ) {
+					$pattern_ids[] = (int) $block['attrs']['ref'];
+				}
+			}
+		}
+		if ( ! empty( $pattern_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $pattern_ids, false, false );
+		}
 
 		foreach ( $flattened as $block ) {
 			$name = $block['blockName'] ?? '';
@@ -196,6 +213,11 @@ class Utils {
 			} elseif ( 'core/pattern' === $name && ! empty( $block['attrs']['slug'] ) ) {
 				$pattern        = WP_Block_Patterns_Registry::get_instance()->get_registered( $block['attrs']['slug'] );
 				$nested_content = $pattern['content'] ?? null;
+			} elseif ( 'core/block' === $name && is_numeric( $block['attrs']['ref'] ?? null ) && (int) $block['attrs']['ref'] > 0 ) {
+				$pattern = get_post( (int) $block['attrs']['ref'] );
+				if ( $pattern && 'wp_block' === $pattern->post_type && 'publish' === $pattern->post_status && empty( $pattern->post_password ) ) {
+					$nested_content = $pattern->post_content;
+				}
 			}
 
 			if ( is_string( $nested_content ) && '' !== $nested_content ) {

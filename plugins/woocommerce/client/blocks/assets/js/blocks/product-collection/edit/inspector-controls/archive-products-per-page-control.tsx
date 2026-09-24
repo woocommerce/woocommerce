@@ -39,7 +39,7 @@ const ArchiveProductsPerPageControl = ( {
 		isNumber
 	);
 	const hasValue = query.archivePerPage !== undefined;
-	const value = hasValue ? query.archivePerPage : storeDefault;
+	const value = query.archivePerPage ?? storeDefault;
 
 	const deselectCallback = () => {
 		setQueryAttribute( { archivePerPage: undefined } );

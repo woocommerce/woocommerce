@@ -163,6 +163,74 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use the rendered template's page size when the shop is the homepage.
+	 * @testWith [true, 11, 11]
+	 *           [true, null, 16]
+	 *           [false, null, 7]
+	 *
+	 * @param bool     $has_front_page_template Whether to create a front-page template.
+	 * @param int|null $per_page                Front-page collection page size.
+	 * @param int      $expected                Expected main query page size.
+	 */
+	public function test_front_page_shop_uses_rendered_template( bool $has_front_page_template, ?int $per_page, int $expected ): void {
+		$original_theme = get_stylesheet();
+		switch_theme( 'twentytwentytwo' );
+		add_theme_support( 'block-templates' );
+
+		$fixture = $this->set_up_product_archive();
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $fixture['created_shop_page_id'] );
+		$this->create_archive_product_template( $this->get_inherited_collection_markup( array( 'archivePerPage' => 7 ) ) );
+		if ( $has_front_page_template ) {
+			$this->create_archive_product_template(
+				$this->get_inherited_collection_markup( array( 'archivePerPage' => $per_page ) ),
+				'front-page'
+			);
+		}
+		add_filter( 'loop_shop_per_page', static fn() => 16 );
+		add_filter( 'loop_shop_per_page', array( $this->sut, 'handle_loop_shop_per_page' ), 20 );
+
+		try {
+			$this->go_to( home_url( '/' ) );
+			$this->assertTrue( is_front_page() );
+			$this->assertTrue( is_post_type_archive( 'product' ) );
+			$this->assertSame( $expected, (int) $GLOBALS['wp_query']->get( 'posts_per_page' ) );
+		} finally {
+			$this->tear_down_product_archive( $fixture );
+			switch_theme( $original_theme );
+		}
+	}
+
+	/**
+	 * @testdox Should normalize filtered hierarchy keys and ignore invalid template lists.
+	 * @testWith [{"catalog":"archive-product.php","fallback":"index.php"}, 7]
+	 *           [{"fallback":"index.php","catalog":"archive-product.php"}, 16]
+	 *           ["archive-product.php", 16]
+	 *
+	 * @param mixed $templates Filtered template hierarchy.
+	 * @param int   $expected  Expected main query page size.
+	 */
+	public function test_filtered_archive_template_hierarchy( $templates, int $expected ): void {
+		$original_theme = get_stylesheet();
+		switch_theme( 'twentytwentytwo' );
+		$this->assertNotEmpty( locate_template( array( 'index.php' ) ) );
+
+		$fixture = $this->set_up_product_archive();
+		$this->create_archive_product_template( $this->get_inherited_collection_markup( array( 'archivePerPage' => 7 ) ) );
+		add_filter( 'archive_template_hierarchy', static fn() => $templates );
+		add_filter( 'loop_shop_per_page', static fn() => 16 );
+		add_filter( 'loop_shop_per_page', array( $this->sut, 'handle_loop_shop_per_page' ), 20 );
+
+		try {
+			$this->go_to( $fixture['archive_url'] );
+			$this->assertSame( $expected, (int) $GLOBALS['wp_query']->get( 'posts_per_page' ) );
+		} finally {
+			$this->tear_down_product_archive( $fixture );
+			switch_theme( $original_theme );
+		}
+	}
+
+	/**
 	 * Give the store a shop page so WooCommerce treats the product archive as its own.
 	 *
 	 * @return array<string, mixed> Fixture state for tear_down_product_archive().
@@ -229,11 +297,12 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Save a customised Product Catalog template for the active theme.
+	 * Save a customised block template for the active theme.
 	 *
 	 * @param string $content Serialized block content.
+	 * @param string $slug    Template slug.
 	 */
-	private function create_archive_product_template( string $content ): void {
+	private function create_archive_product_template( string $content, string $slug = 'archive-product' ): void {
 		$theme = get_stylesheet();
 		$term  = get_term_by( 'name', $theme, 'wp_theme', ARRAY_A );
 		if ( ! $term ) {
@@ -242,7 +311,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 
 		$this->created_template_id = wp_insert_post(
 			array(
-				'post_name'    => 'archive-product',
+				'post_name'    => $slug,
 				'post_type'    => 'wp_template',
 				'post_title'   => 'Product Catalog',
 				'post_status'  => 'publish',

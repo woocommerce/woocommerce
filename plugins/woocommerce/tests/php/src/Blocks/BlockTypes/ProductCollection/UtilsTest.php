@@ -179,6 +179,108 @@ class UtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should follow a published synced pattern to find the inherited collection.
+	 */
+	public function test_follows_synced_pattern_to_inherited_collection(): void {
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_block',
+				'post_status'  => 'publish',
+				'post_content' => $this->get_collection_markup(
+					array(
+						'inherit'        => true,
+						'archivePerPage' => 7,
+					)
+				),
+			)
+		);
+
+		$this->assertSame(
+			7,
+			ProductCollectionUtils::get_archive_products_per_page_from_content( sprintf( '<!-- wp:block {"ref":%d} /-->', $pattern_id ) )
+		);
+	}
+
+	/**
+	 * @testdox Should ignore referenced content that WordPress will not render as a synced pattern.
+	 * @testWith ["wp_block", "draft", ""]
+	 *           ["wp_block", "publish", "secret"]
+	 *           ["page", "publish", ""]
+	 *
+	 * @param string $post_type     Referenced post type.
+	 * @param string $post_status   Referenced post status.
+	 * @param string $post_password Referenced post password.
+	 */
+	public function test_ignores_unrendered_synced_patterns( string $post_type, string $post_status, string $post_password ): void {
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'     => $post_type,
+				'post_status'   => $post_status,
+				'post_password' => $post_password,
+				'post_content'  => $this->get_collection_markup(
+					array(
+						'inherit'        => true,
+						'archivePerPage' => 7,
+					)
+				),
+			)
+		);
+
+		$this->assertNull(
+			ProductCollectionUtils::get_archive_products_per_page_from_content( sprintf( '<!-- wp:block {"ref":%d} /-->', $pattern_id ) )
+		);
+	}
+
+	/**
+	 * @testdox Should not resolve an empty synced pattern reference to the global post.
+	 */
+	public function test_ignores_empty_synced_pattern_reference(): void {
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_block',
+				'post_status'  => 'publish',
+				'post_content' => $this->get_collection_markup(
+					array(
+						'inherit'        => true,
+						'archivePerPage' => 7,
+					)
+				),
+			)
+		);
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reproduce get_post( 0 ) falling back to the current pattern.
+		$GLOBALS['post'] = get_post( $pattern_id );
+
+		$this->assertNull( ProductCollectionUtils::get_archive_products_per_page_from_content( '<!-- wp:block {"ref":0} /-->' ) );
+	}
+
+	/**
+	 * @testdox Should stop circular synced patterns and continue scanning the template.
+	 */
+	public function test_skips_circular_synced_pattern(): void {
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'wp_block',
+				'post_status' => 'publish',
+			)
+		);
+		$reference  = sprintf( '<!-- wp:block {"ref":%d} /-->', $pattern_id );
+		wp_update_post(
+			array(
+				'ID'           => $pattern_id,
+				'post_content' => $reference,
+			)
+		);
+		$content = $reference . $this->get_collection_markup(
+			array(
+				'inherit'        => true,
+				'archivePerPage' => 9,
+			)
+		);
+
+		$this->assertSame( 9, ProductCollectionUtils::get_archive_products_per_page_from_content( $content ) );
+	}
+
+	/**
 	 * @testdox Should use the first inherited collection when a template holds more than one collection.
 	 */
 	public function test_uses_first_inherited_collection(): void {

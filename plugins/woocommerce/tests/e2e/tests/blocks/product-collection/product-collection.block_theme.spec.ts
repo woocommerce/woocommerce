@@ -630,9 +630,7 @@ test.describe( 'Product Collection', () => {
 			await resetSidebar
 				.getByRole( 'button', { name: 'Settings options' } )
 				.click();
-			await page
-				.getByRole( 'menuitem', { name: 'Reset all' } )
-				.click();
+			await page.getByRole( 'menuitem', { name: 'Reset all' } ).click();
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
