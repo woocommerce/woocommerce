@@ -1,6 +1,5 @@
 <?php
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -1994,6 +1993,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->delete( true );
 	}
 
+<<<<<<< HEAD
 	/**
 	 * Creates a variation under the class fixture product with the given stored state.
 	 *
@@ -2211,5 +2211,38 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $logger->errors, "A failed read of {$table} must be logged once." );
 		$this->assertSame( self::$product_id, $logger->errors[0][1]['product_id'] );
 		$this->assertSame( array(), $result, 'A failed read defers every variation rather than promoting it.' );
+=======
+
+	/**
+	 * @testdox get_price_hash respects the woocommerce_use_legacy_get_variations_price_hash option.
+	 */
+	public function test_get_price_hash_respects_legacy_price_hash_option(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$captured       = null;
+		$capture_filter = function ( $use_legacy ) use ( &$captured ) {
+			$captured = $use_legacy;
+			return $use_legacy;
+		};
+		add_filter( 'woocommerce_use_legacy_get_variations_price_hash', $capture_filter );
+
+		// Option 'yes' → legacy enabled → filter receives true.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertTrue( $captured, 'Option "yes" must dispatch true (legacy enabled) into the filter.' );
+
+		// Option 'no' → legacy disabled → filter receives false.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertFalse( $captured, 'Option "no" must dispatch false (legacy disabled) into the filter.' );
+
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertTrue( $captured, 'Missing option must dispatch true (legacy enabled) into the filter.' );
+
+		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', $capture_filter );
+
+		$product->delete();
+>>>>>>> 0b08fc82c4 (Revert the purchasable-variations candidate scan from #68272 (#69056))
 	}
 }
