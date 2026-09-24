@@ -26,6 +26,7 @@ import {
  */
 import type { CartItem, Currency } from '@woocommerce/types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import { getClosestColor } from '../../utils/get-closest-color';
 import {
 	getEntryFieldRaw,
 	isItemDataEntryVisible,
@@ -73,32 +74,6 @@ const scalePrice = ( {
 	// Remove extra decimals.
 	return Math.round( scaledPrice );
 };
-
-/**
- * Recursively traverses the DOM hierarchy to find the closest non-transparent color.
- *
- * @param element   The starting element to check.
- * @param colorType Either 'color' (text) or 'backgroundColor'.
- * @return The computed color as an RGB string, or null if not found.
- */
-function getClosestColor(
-	element: Element | null,
-	colorType: 'color' | 'backgroundColor'
-): string | null {
-	if ( ! element ) {
-		return null;
-	}
-	const color = window.getComputedStyle( element )[ colorType ];
-	if ( color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent' ) {
-		const matches = color.match( /\d+/g );
-		if ( ! matches || matches.length < 3 ) {
-			return null;
-		}
-		const [ r, g, b ] = matches.slice( 0, 3 );
-		return `rgb(${ r }, ${ g }, ${ b })`;
-	}
-	return getClosestColor( element.parentElement, colorType );
-}
 
 type MiniCart = {
 	state: {
