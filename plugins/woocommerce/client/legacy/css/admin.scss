@@ -3905,7 +3905,8 @@ ul.order_notes {
 
 	#add_order_note {
 		width: 100%;
-		height: 60px;
+		min-height: 60px;
+		field-sizing: content;
 	}
 
 	.order_note_visibility {
