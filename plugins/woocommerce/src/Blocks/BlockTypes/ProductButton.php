@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Blocks\InCartQuantity;
 
 /**
  * ProductButton class.
@@ -21,14 +22,6 @@ class ProductButton extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-button';
-
-
-	/**
-	 * Cart.
-	 *
-	 * @var array
-	 */
-	private static $cart = null;
 
 	/**
 	 * Register the context.
@@ -100,7 +93,7 @@ class ProductButton extends AbstractBlock {
 
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+		$number_of_items_in_cart  = $this->get_in_cart_quantity_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
@@ -329,18 +322,20 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the number of items in the cart for a given product id.
+	 * Get the quantity of a product from the published Store API cart.
 	 *
-	 * @param number $product_id The product id.
-	 * @return number The number of items in the cart.
+	 * @param int $product_id The product ID.
+	 * @return int|float The product quantity in the cart.
 	 */
-	private function get_cart_item_quantities_by_product_id( $product_id ) {
-		if ( ! isset( WC()->cart ) ) {
-			return 0;
+	private function get_in_cart_quantity_by_product_id( int $product_id ) {
+		$woocommerce_state = wp_interactivity_state( 'woocommerce' );
+		$cart_items        = $woocommerce_state['cart']['items'] ?? array();
+
+		if ( ! is_array( $cart_items ) ) {
+			$cart_items = array();
 		}
 
-		$cart = WC()->cart->get_cart_item_quantities();
-		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
+		return InCartQuantity::for_product( $cart_items, $product_id );
 	}
 
 	/**
