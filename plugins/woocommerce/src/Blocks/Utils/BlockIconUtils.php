@@ -12,36 +12,6 @@ use WP_HTML_Tag_Processor;
  */
 final class BlockIconUtils {
 	/**
-	 * Positive grammar for supported flat SVG paint values.
-	 */
-	private const SAFE_PAINT_PATTERN = '
-		/\A(?:
-			[A-Z][A-Z-]*
-			|
-			\#(?:[0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})
-			|
-			rgba?\(
-				[\x20\t\r\n\f]*
-				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?(?:[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
-					|
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?(?:[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
-				)
-				[\x20\t\r\n\f]*
-			\)
-			|
-			hsla?\(
-				[\x20\t\r\n\f]*
-				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)% (?:[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
-					|
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%(?:[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
-				)
-				[\x20\t\r\n\f]*
-			\)
-		)\z/ix';
-
-	/**
 	 * Gets a filtered cart icon while preserving the legacy bundled SVG.
 	 *
 	 * @param mixed  $requested_icon   Requested cart icon.
@@ -75,7 +45,7 @@ final class BlockIconUtils {
 		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
 		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
-		 * An empty string removes the icon, and anything invalid falls back to the default. `BlockIconUtils` lists the accepted elements, attributes, and colors.
+		 * An empty string removes the icon, and anything invalid falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
 		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
@@ -247,13 +217,17 @@ final class BlockIconUtils {
 	}
 
 	/**
-	 * Checks a paint value against the supported positive grammar.
+	 * Checks that a fill or stroke value cannot reference anything outside the icon.
 	 *
-	 * @param string $paint Paint value.
-	 * @return bool Whether the value is supported.
+	 * `url()` and `src()` are the only paint syntax that can load or reference a resource, so any color syntax is fine without them.
+	 * Allowing only plain characters rules out CSS escapes and quotes that could disguise either function, and stops declaration injection.
+	 *
+	 * @param string $paint Decoded paint value.
+	 * @return bool Whether the value is safe.
 	 */
 	private static function is_safe_paint( string $paint ): bool {
-		return 1 === preg_match( self::SAFE_PAINT_PATTERN, trim( $paint, " \t\r\n\f" ) );
+		return 1 === preg_match( '/\A[a-z0-9#%.,+\/()\x20\t\r\n\f-]+\z/i', $paint )
+			&& 1 !== preg_match( '/(?:url|src)\(/i', $paint );
 	}
 
 	/**
