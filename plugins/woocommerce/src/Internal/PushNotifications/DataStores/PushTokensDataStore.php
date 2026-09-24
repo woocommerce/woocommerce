@@ -436,8 +436,10 @@ class PushTokensDataStore {
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
-	 * flat array (cached per-request). When $page and $per_page are
-	 * provided, returns a paginated result with total counts.
+	 * flat array (cached per-request), most recently registered first. When
+	 * $page and $per_page are provided, returns a paginated result with total
+	 * counts, ordered by ID so a re-registration cannot move a token between
+	 * pages.
 	 *
 	 * The eligible-user lookup is restricted to users that actually own
 	 * push tokens, so the role check runs against a handful of IDs instead
@@ -515,6 +517,11 @@ class PushTokensDataStore {
 			$query_args['paged']   = $page;
 			$query_args['orderby'] = 'ID';
 			$query_args['order']   = 'ASC';
+		} else {
+			$query_args['orderby'] = array(
+				'modified' => 'DESC',
+				'ID'       => 'DESC',
+			);
 		}
 
 		if ( null !== $device_uuid ) {
