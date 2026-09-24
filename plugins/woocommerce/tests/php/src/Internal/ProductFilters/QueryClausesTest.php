@@ -315,4 +315,26 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 			wp_delete_term( $term['term_id'], 'product_cat' );
 		}
 	}
+
+	/**
+	 * @testdox Price clauses adjust for standard tax class when shop displays prices including tax.
+	 */
+	public function test_price_clauses_with_tax_inclusive_display(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		$clauses = $this->sut->add_price_clauses(
+			array(
+				'where' => '',
+				'join'  => '',
+			),
+			array(
+				'min_price' => 20,
+				'max_price' => 50,
+			)
+		);
+
+		$this->assertStringContainsString( "wc_product_meta_lookup.tax_class = ''", $clauses['where'] );
+	}
 }

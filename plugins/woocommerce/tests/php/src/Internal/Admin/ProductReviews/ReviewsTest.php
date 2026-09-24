@@ -93,6 +93,120 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `load_reviews_screen` registers the "per page" screen option bound to the dedicated reviews user option.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the property is not found.
+	 */
+	public function test_load_reviews_screen_registers_per_page_option(): void {
+		global $current_screen;
+
+		$previous_screen     = $current_screen;
+		$reviews             = wc_get_container()->get( Reviews::class );
+		$list_table_property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
+		$list_table_property->setAccessible( true );
+		$previous_list_table = $list_table_property->getValue( $reviews );
+
+		try {
+			set_current_screen( 'product_page_product-reviews' );
+
+			// Exercise the production wiring: registration must happen through `load_reviews_screen()`, so that
+			// dropping the `add_screen_options()` call from it would fail this test.
+			$reviews->load_reviews_screen();
+
+			$option = get_current_screen()->get_option( 'per_page' );
+
+			$this->assertIsArray( $option );
+			$this->assertArrayHasKey( 'option', $option );
+			$this->assertSame( Reviews::PER_PAGE_USER_OPTION_KEY, $option['option'] );
+			$this->assertArrayHasKey( 'default', $option );
+			$this->assertSame( 20, $option['default'] );
+		} finally {
+			$list_table_property->setValue( $reviews, $previous_list_table );
+			$current_screen = $previous_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox `set_reviews_per_page_option` saves values within the 1–999 bounds and rejects everything else.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
+	 *
+	 * @return void
+	 */
+	public function test_set_reviews_per_page_option(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// Values inside the 1–999 range are saved.
+		$this->assertSame( 1, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 1 ) );
+		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+		$this->assertSame( 999, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 999 ) );
+
+		// Values outside the range are always rejected, so nothing is saved.
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 0 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, -5 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
+
+		// Leaves other options untouched (returns the incoming status).
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, 'some_other_per_page', 55 ) );
+	}
+
+	/**
+	 * @testdox The dynamic screen-option filter saves valid values and rejects invalid values.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::__construct()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
+	 *
+	 * @return void
+	 */
+	public function test_set_reviews_per_page_option_filter(): void {
+		wc_get_container()->get( Reviews::class );
+		$hook = 'set_screen_option_' . Reviews::PER_PAGE_USER_OPTION_KEY;
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+		$this->assertSame( 55, apply_filters( $hook, false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+		$this->assertFalse( apply_filters( $hook, 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
+	}
+
+	/**
+	 * @testdox The legacy filter is bridged and the dedicated reviews filter wins when it registers first.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::__construct()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
+	 *
+	 * @return void
+	 */
+	public function test_reviews_per_page_filter_bridge_and_precedence(): void {
+		$legacy    = static function () {
+			return 10;
+		};
+		$dedicated = static function () {
+			return 5;
+		};
+
+		add_filter( 'edit_comments_per_page', $legacy );
+
+		$sut = wc_get_container()->get( Reviews::class );
+		$sut->__construct();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises the public Product Reviews per-page filter.
+		$this->assertSame( 10, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
+
+		// Reset the dedicated hook to reproduce an extension loading before WooCommerce.
+		remove_all_filters( Reviews::PER_PAGE_USER_OPTION_KEY );
+		add_filter( Reviews::PER_PAGE_USER_OPTION_KEY, $dedicated );
+		$sut->__construct();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises Product Reviews per-page filter precedence.
+		$this->assertSame( 5, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
+	}
+
+	/**
 	 * @testdox `get_pending_count_bubble` will return the HTML for the pending reviews (awaiting moderation).
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()
@@ -226,6 +340,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<input type="hidden" name="page" value="' . Reviews::MENU_SLUG . '" />', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="post_type" value="product" />', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="pagegen_timestamp" value="', $output );
+		$this->assertStringContainsString( 'id="trash-undo-holder"', $output, 'Core comment list script copies the trash Undo notice from this holder.' );
 		$this->assertStringEndsWith( 'custom additional content', $output );
 
 		remove_all_filters( 'woocommerce_product_reviews_list_table' );

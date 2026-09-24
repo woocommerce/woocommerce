@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProce
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -27,6 +28,7 @@ use WC_Unit_Test_Case;
 class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 	use LoggerSpyTrait;
+	use PushNotificationsTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -140,6 +142,26 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
 		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
+
+	/**
+	 * The sent marker is the idempotency guard, so it must survive the cleanup
+	 * that clears the claimed and triggered markers.
+	 *
+	 * @testdox Should keep the sent meta when clearing the delivery state.
+	 */
+	public function test_reset_processing_meta_keeps_the_sent_marker(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+		$notification->write_meta( NotificationProcessor::SENT_META_KEY );
+		$notification->write_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$notification->write_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$notification->reset_processing_meta();
+
+		$this->assertTrue( $notification->has_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
 	}
 
 	/**
@@ -257,6 +279,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $this->order_id );
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
 	}
 
 	/**
@@ -489,6 +513,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					'to_payload',
 					'has_meta',
 					'write_meta',
+					'read_meta',
 					'delete_meta',
 					'should_send_to_user',
 				)
@@ -715,7 +740,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
 		$store = new PendingNotificationStore();
-		$store->init( $this->createMock( InternalNotificationDispatcher::class ) );
+		$store->init( $this->createMock( InternalNotificationDispatcher::class ), $this->create_data_store_with_tokens( true ) );
 
 		$method = new \ReflectionMethod( PendingNotificationStore::class, 'schedule_safety_net' );
 		$method->setAccessible( true );

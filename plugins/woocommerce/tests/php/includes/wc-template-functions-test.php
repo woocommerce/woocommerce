@@ -85,6 +85,43 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product archive titles fall back to Shop when the configured Shop page is missing.
+	 */
+	public function test_product_archive_title_falls_back_to_shop_when_shop_page_is_missing(): void {
+		global $wp_query, $wp_the_query;
+
+		// Nothing is restored by hand. The transaction rollback covers the option
+		// and the page, and `WP_UnitTestCase_Base::tear_down()` replaces both
+		// query globals with a fresh `WP_Query` before the next test runs.
+		$shop_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Retired catalog',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		wp_delete_post( $shop_page_id, true );
+
+		$query                       = new WP_Query( array( 'post_type' => 'product' ) );
+		$query->is_post_type_archive = true;
+		$query->is_archive           = true;
+		$query->is_tax               = false;
+		$query->is_home              = false;
+		$wp_query                    = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertTrue( is_shop(), 'The query must represent the product archive.' );
+		$this->assertSame( '', get_the_title( $shop_page_id ), 'The configured Shop page must be missing.' );
+		$this->assertSame( 10, has_filter( 'post_type_archive_title', 'wc_update_product_archive_title' ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core owns this hook; the test exercises WooCommerce's registered callback.
+		$title = apply_filters( 'post_type_archive_title', 'Products', 'product' );
+
+		$this->assertSame( __( 'Shop', 'woocommerce' ), $title );
+	}
+
+	/**
 	 * @testdox woocommerce_get_product_subcategories caches results under the expected key.
 	 */
 	public function test_subcategories_are_cached_under_expected_key(): void {
@@ -319,5 +356,21 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
 		$this->assertStringContainsString( 'Matte', $markup );
+	}
+
+	/**
+	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
+	 */
+	public function test_empty_cart_message_uses_notices_wrapper(): void {
+		ob_start();
+		wc_empty_cart_message();
+		$markup = (string) ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<div class="woocommerce-notices-wrapper wc-empty-cart-message">',
+			$markup,
+			'The empty cart message should keep its own class and gain the notices wrapper class.'
+		);
+		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
 	}
 }

@@ -114,7 +114,7 @@ class WC_Structured_Data {
 		foreach ( $this->get_data() as $value ) {
 			if ( is_array( $value['@type'] ) ) {
 				$value_types    = array_map( 'strtolower', $value['@type'] );
-				$matching_types = array_intersect( $types, $value_types );
+				$matching_types = is_array( $types ) ? array_intersect( $types, $value_types ) : array();
 				$type           = $matching_types ? reset( $matching_types ) : reset( $value_types );
 
 				$data[ $type ][] = $value;

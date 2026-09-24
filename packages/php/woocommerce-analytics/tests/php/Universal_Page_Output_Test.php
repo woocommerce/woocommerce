@@ -229,7 +229,7 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	public function test_page_output_retains_store_properties(): void {
 		$output = $this->render_analytics_data();
 
-		foreach ( array( 'timezone', 'wp_version', 'store_currency' ) as $property ) {
+		foreach ( array( 'timezone', 'wp_version', 'store_currency', 'package_version' ) as $property ) {
 			$this->assertStringContainsString(
 				'"' . $property . '"',
 				$output,

@@ -42,4 +42,47 @@ class WC_REST_Terms_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'taxonomy_1', $value1 );
 		$this->assertEquals( 'taxonomy_2', $value2 );
 	}
+
+	/**
+	 * @testdox 'get_collection_params' passes params and the taxonomy object through the filter.
+	 */
+	public function test_get_collection_params_is_filterable() {
+		$received = null;
+
+		add_filter(
+			'rest_product_cat_collection_params',
+			function ( $params, $taxonomy ) use ( &$received ) {
+				$received         = $taxonomy;
+				$params['custom'] = array( 'type' => 'string' );
+				return $params;
+			},
+			10,
+			2
+		);
+
+		$params = ( new WC_REST_Product_Categories_Controller() )->get_collection_params();
+
+		$this->assertArrayHasKey( 'custom', $params );
+		$this->assertInstanceOf( WP_Taxonomy::class, $received );
+		$this->assertSame( 'product_cat', $received->name );
+	}
+
+	/**
+	 * @testdox 'get_collection_params' does not filter when the controller has no taxonomy.
+	 */
+	public function test_get_collection_params_skips_filter_without_taxonomy() {
+		$fired = false;
+
+		add_filter(
+			'rest__collection_params',
+			function ( $params ) use ( &$fired ) {
+				$fired = true;
+				return $params;
+			}
+		);
+
+		$this->sut->get_collection_params();
+
+		$this->assertFalse( $fired );
+	}
 }
