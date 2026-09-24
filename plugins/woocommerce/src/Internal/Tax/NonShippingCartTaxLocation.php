@@ -28,6 +28,13 @@ class NonShippingCartTaxLocation {
 	private $dispatch_contexts = array();
 
 	/**
+	 * Whether the cart shipping check is running, so re-entrant calls from needs_shipping filter callbacks are skipped.
+	 *
+	 * @var bool
+	 */
+	private $is_checking_shipping = false;
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
@@ -151,21 +158,20 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		if ( $cart->needs_shipping() ) {
+		// needs_shipping filter callbacks may resolve the taxable address again (e.g. to price with tax).
+		if ( $this->is_checking_shipping ) {
 			return $taxable_address;
 		}
 
-		$cart_contents = $cart->get_cart();
-
-		if ( empty( $cart_contents ) ) {
-			return $taxable_address;
+		$this->is_checking_shipping = true;
+		try {
+			$has_only_non_shipping_products = $this->has_only_non_shipping_products( $cart );
+		} finally {
+			$this->is_checking_shipping = false;
 		}
 
-		foreach ( $cart_contents as $cart_item ) {
-			$product = $cart_item['data'] ?? null;
-			if ( ! $product instanceof \WC_Product || $product->needs_shipping() ) {
-				return $taxable_address;
-			}
+		if ( ! $has_only_non_shipping_products ) {
+			return $taxable_address;
 		}
 
 		return array(
@@ -174,6 +180,34 @@ class NonShippingCartTaxLocation {
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
 		);
+	}
+
+	/**
+	 * Determine whether the cart is non-empty and none of its products need shipping.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Cart $cart The cart to check.
+	 * @return bool True when the cart has products and none of them need shipping.
+	 */
+	private function has_only_non_shipping_products( \WC_Cart $cart ): bool {
+		if ( $cart->needs_shipping() ) {
+			return false;
+		}
+
+		$cart_contents = $cart->get_cart();
+		if ( empty( $cart_contents ) ) {
+			return false;
+		}
+
+		foreach ( $cart_contents as $cart_item ) {
+			$product = $cart_item['data'] ?? null;
+			if ( ! $product instanceof \WC_Product || $product->needs_shipping() ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

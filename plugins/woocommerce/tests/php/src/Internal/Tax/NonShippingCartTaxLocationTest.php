@@ -273,6 +273,38 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Does not recurse when a woocommerce_product_needs_shipping callback resolves the taxable address.
+	 */
+	public function test_does_not_recurse_when_needs_shipping_callback_resolves_taxable_address(): void {
+		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
+
+		// The instance hooked at boot differs from the SUT in tests, so keep only the SUT hooked.
+		remove_all_filters( 'woocommerce_customer_taxable_address' );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
+
+		$calls          = 0;
+		$inner_address  = null;
+		$customer       = $this->customer;
+		$needs_shipping = function ( $needs_shipping ) use ( &$calls, &$inner_address, $customer ) {
+			++$calls;
+			$inner_address = $customer->get_taxable_address();
+			return $needs_shipping;
+		};
+		add_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
+
+		try {
+			$result = $this->customer->get_taxable_address();
+		} finally {
+			remove_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
+		}
+
+		$this->assertSame( 1, $calls, 'The needs_shipping callback should run once, without re-entering the check.' );
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $inner_address, 'A re-entrant lookup should get the unfiltered taxable address.' );
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'The outer lookup should still use the billing address.' );
+	}
+
+	/**
 	 * @testdox Leaves the taxable address unchanged when the woocommerce_cart_needs_shipping filter forces shipping.
 	 */
 	public function test_leaves_address_unchanged_when_cart_needs_shipping_filter_forces_shipping(): void {
