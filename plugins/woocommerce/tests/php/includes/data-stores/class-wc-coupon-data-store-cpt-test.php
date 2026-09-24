@@ -370,7 +370,10 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// Simulate empty post_date_gmt as found in unpublished or draft posts.
 		$wpdb->update(
 			$wpdb->posts,
-			array( 'post_date_gmt' => '0000-00-00 00:00:00' ),
+			array(
+				'post_status'   => 'draft',
+				'post_date_gmt' => '0000-00-00 00:00:00',
+			),
 			array( 'ID' => $coupon_id )
 		);
 		clean_post_cache( $coupon_id );
