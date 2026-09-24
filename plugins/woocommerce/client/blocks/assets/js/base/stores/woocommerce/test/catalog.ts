@@ -79,5 +79,21 @@ describe( 'woocommerce store — catalog layer', () => {
 		const state = ( mockRegisteredStore as { state: CatalogState } ).state;
 		expect( Object.keys( state.products ) ).toHaveLength( 0 );
 		expect( Object.keys( state.productVariations ) ).toHaveLength( 0 );
+
+		// `template` is server-seeded too (by `SingleProductTemplate`), so
+		// the merged state must not carry the key at all.
+		expect( 'template' in state ).toBe( false );
+
+		// `scope.ts`'s state is merged into the same object via
+		// `Object.defineProperties`. `productScopes` is the module's own
+		// initial value; `productScope` must stay a live getter rather than
+		// a snapshot copied by a plain spread.
+		const scopeState = state as unknown as {
+			productScopes: Record< string, unknown >;
+		};
+		expect( scopeState.productScopes ).toEqual( {} );
+		expect(
+			typeof Object.getOwnPropertyDescriptor( state, 'productScope' )?.get
+		).toBe( 'function' );
 	} );
 } );

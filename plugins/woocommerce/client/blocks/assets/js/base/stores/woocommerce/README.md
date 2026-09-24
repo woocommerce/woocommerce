@@ -5,6 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce`](#woocommerce-store-catalog-layer) — the unified store's catalog layer: server-populated product and variation data in Store API format, at module id `@woocommerce/stores/woocommerce`. Also carries the `woocommerce/cart` state and actions described below, registered separately from `cart.ts`.
+-   [`woocommerce` product scopes](#woocommerce-store-product-scopes) — `state.productScope` / `state.findProductScope( ref )`: the product a form or tile is about, its cart line, and the shopper's unsaved input, in one object.
 -   [`woocommerce/products`](#woocommerceproducts-store) — a view over the `woocommerce` store's catalog data, kept working for existing consumers. New code should read the catalog data from `woocommerce` directly.
 -   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
@@ -22,6 +23,19 @@ The catalog layer of the unified `woocommerce` Interactivity API store: `state.p
 -   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/catalog.ts`
 
 A module that reads this data imports it by its module id, `@woocommerce/stores/woocommerce` — never by a relative path, which would make webpack bundle a second copy instead of resolving to the one registered store. See `does-cart-item-match-attributes.ts` for a consumer that reads `state.products` / `state.productVariations` directly, and the `woocommerce/products` section below for the view most blocks bind to instead.
+
+## `woocommerce` store — product scopes
+
+A _product scope_ is any markup about one product: a form, a collection tile, a grouped-product row. `state.productScope` reads the reading element's declared `woocommerce` context (`productId`, `variation`, `scopeName`, `cartItemKey`); `state.findProductScope( ref )` does the same from a caller-built ref instead. Both return one envelope: `productId`, `variation` and `draftCartItem` (writable), plus the read-only `scopeName`, `baseProduct`, `productVariation`, `product` and `cartItem`.
+
+**Source file:** `scope.ts`. **Tests:** `test/scope.ts`.
+
+-   `productId`, `variation` and `draftCartItem` resolve in this order: the scope's own record under `state.productScopes` (keyed by `scopeName`, or `'_default'`), then the declared context (or ref), then `state.template` — seeded only by the single-product template, so it is absent on every other page.
+-   Identity writes (`productId`, `variation`) update both the record and the declared context; every other `draftCartItem` write, extension props included, updates the record only. The first write to a scope creates its record.
+-   `draftCartItem.quantity` reads `1` until the shopper sets it.
+-   `state.productScope`'s members read the element's context when accessed, so read them inside a directive or a store action (including generator actions). Outside a scope, for example after an `await` in a plain async function or in a `setTimeout`, use `state.findProductScope( ref )` instead.
+
+Nothing in the codebase reads `productScope` yet — it lands ahead of the blocks that will use it.
 
 ## `woocommerce/products` store
 
