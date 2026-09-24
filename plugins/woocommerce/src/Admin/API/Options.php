@@ -209,6 +209,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_block_product_tour_shown',
 			'woocommerce_revenue_report_date_tour_shown',
 			'woocommerce_orders_report_date_tour_shown',
+			'woocommerce_analytics_performance_tour_shown',
 			'woocommerce_show_prepublish_checks_enabled',
 			'woocommerce_date_type',
 			'woocommerce_onboarding_profile',
