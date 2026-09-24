@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 /**
  * Selects the billing address for shipping-based tax when cart products do not need shipping.
  *
- * @since 11.2.0
+ * @since 11.3.0
  */
 class NonShippingCartTaxLocation {
 
@@ -30,7 +30,7 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Register hooks.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @internal
 	 */
 	final public function init(): void {
@@ -46,7 +46,7 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Register Store API cart and checkout context after a route matches, before its callback runs.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed            $response Result to send to the client.
@@ -71,7 +71,7 @@ class NonShippingCartTaxLocation {
 	 * Paired with rest_request_before_callbacks inside WP_REST_Server::respond_to_request(),
 	 * so the stack stays balanced for both external and internal (rest_do_request) dispatches.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed            $response Result to send to the client.
@@ -89,7 +89,7 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Remove a dispatch's cart/checkout context from the stack.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param \WP_REST_Request $request Request whose context should be cleared.
@@ -113,7 +113,7 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Use the customer's billing address for shipping-based tax when no product in a non-empty cart needs shipping.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @param mixed $taxable_address The current taxable address.
 	 * @param mixed $customer        The customer whose taxable address is being determined.
@@ -121,6 +121,10 @@ class NonShippingCartTaxLocation {
 	 */
 	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer ) {
 		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
+			return $taxable_address;
+		}
+
+		if ( ! $customer instanceof \WC_Customer ) {
 			return $taxable_address;
 		}
 
@@ -143,7 +147,7 @@ class NonShippingCartTaxLocation {
 		}
 
 		$cart = WC()->cart;
-		if ( ! $cart instanceof \WC_Cart || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
+		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
 			return $taxable_address;
 		}
 
@@ -175,7 +179,7 @@ class NonShippingCartTaxLocation {
 	/**
 	 * Determine whether local pickup requires taxes to use the store base address.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 *
 	 * @return bool True when local pickup taxes are based on the store address.
 	 */
