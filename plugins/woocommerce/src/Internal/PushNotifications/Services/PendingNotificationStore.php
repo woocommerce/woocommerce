@@ -6,10 +6,14 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Throwable;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
@@ -37,6 +41,13 @@ class PendingNotificationStore {
 	private InternalNotificationDispatcher $dispatcher;
 
 	/**
+	 * The push tokens data store.
+	 *
+	 * @var PushTokensDataStore
+	 */
+	private PushTokensDataStore $data_store;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -56,11 +67,13 @@ class PendingNotificationStore {
 	 * @internal
 	 *
 	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 * @param PushTokensDataStore            $data_store The push tokens data store.
 	 *
 	 * @since 10.7.0
 	 */
-	final public function init( InternalNotificationDispatcher $dispatcher ): void {
+	final public function init( InternalNotificationDispatcher $dispatcher, PushTokensDataStore $data_store ): void {
 		$this->dispatcher = $dispatcher;
+		$this->data_store = $data_store;
 	}
 
 	/**
@@ -83,6 +96,8 @@ class PendingNotificationStore {
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *
+	 * Notifications are dropped when no push token is registered, so neither the safety net job nor the loopback request is created for a send that has no recipient.
+	 *
 	 * @param Notification $notification The notification to add.
 	 * @return void
 	 *
@@ -93,6 +108,10 @@ class PendingNotificationStore {
 			return;
 		}
 
+		if ( ! $this->data_store->has_tokens() ) {
+			return;
+		}
+
 		$key = $notification->get_identifier();
 
 		if ( isset( $this->pending[ $key ] ) ) {
@@ -100,6 +119,12 @@ class PendingNotificationStore {
 		}
 
 		$this->pending[ $key ] = $notification;
+
+		// Capture the trigger time now, but persist it on shutdown (see
+		// dispatch_all()). Writing here would land inside the order-creation
+		// call stack, where an HPOS meta save can escalate into a full
+		// $order->save() on an order whose line items have not been written yet.
+		$notification->set_triggered_at( time() );
 
 		$this->schedule_safety_net( $notification );
 
@@ -126,7 +151,7 @@ class PendingNotificationStore {
 		// them from the same place; see Notification::get_safety_net_args().
 		$args = $notification->get_safety_net_args();
 
-		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
+		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
 			return;
 		}
 
@@ -142,8 +167,9 @@ class PendingNotificationStore {
 	/**
 	 * Dispatches all pending notifications via InternalNotificationDispatcher.
 	 *
-	 * Called on shutdown. Sends all pending notifications through the
-	 * InternalNotificationDispatcher, then clears the store.
+	 * Called on shutdown. Records each notification's trigger time, sends all
+	 * pending notifications through the InternalNotificationDispatcher, then
+	 * clears the store.
 	 *
 	 * @return void
 	 *
@@ -154,10 +180,62 @@ class PendingNotificationStore {
 			return;
 		}
 
+		$this->record_trigger_times();
+
 		$this->dispatcher->dispatch( $this->sort_with_new_orders_first( array_values( $this->pending ) ) );
 
 		$this->enabled = false;
 		$this->pending = array();
+	}
+
+	/**
+	 * Persists each pending notification's trigger time to its resource.
+	 *
+	 * Runs on shutdown rather than at trigger time so the write stays out of
+	 * the order-creation call stack. WordPress fires `shutdown` on fatal errors
+	 * too, so the only requests that lose the value are those killed outright
+	 * (OOM, SIGKILL), the same requests the safety net exists for, and where
+	 * the payload falls back to the current time.
+	 *
+	 * The recorded time stays that of the first trigger. Core fires the stock
+	 * hooks on every reduction past the threshold, not only on the crossing, so
+	 * a product that keeps selling while its notification is in flight would
+	 * otherwise drag its own recorded time forward and understate its delivery
+	 * age. The sent marker is checked as well because a send clears the trigger
+	 * time, so a repeat trigger after one would recreate a value that nothing
+	 * clears again.
+	 *
+	 * Failures are caught so that a third-party handler on the resource's save
+	 * hooks cannot stop the dispatch below from running.
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	private function record_trigger_times(): void {
+		foreach ( $this->pending as $notification ) {
+			try {
+				if ( $notification->has_meta( NotificationProcessor::SENT_META_KEY )
+					|| $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) ) {
+					continue;
+				}
+
+				$notification->write_meta(
+					NotificationProcessor::TRIGGERED_META_KEY,
+					$notification->get_triggered_at()
+				);
+			} catch ( Throwable $e ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Failed to record push notification trigger time (type=%s, resource_id=%d): %s',
+						$notification->get_type(),
+						$notification->get_resource_id(),
+						$e->getMessage()
+					),
+					array( 'source' => PushNotifications::FEATURE_NAME )
+				);
+			}
+		}
 	}
 
 	/**

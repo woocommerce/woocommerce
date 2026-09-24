@@ -75,7 +75,10 @@ class WC_CLI_Update_Command {
 		);
 
 		foreach ( $callbacks_to_run as $update_callback ) {
-			call_user_func( $update_callback );
+			// Batched callbacks return true while more work remains, as WC_Install::run_update_callback() expects.
+			do {
+				$needs_another_run = (bool) call_user_func( $update_callback );
+			} while ( $needs_another_run );
 			$update_count ++;
 			$progress->tick();
 		}

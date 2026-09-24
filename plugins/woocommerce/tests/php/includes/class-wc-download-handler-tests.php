@@ -27,6 +27,28 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Encoded spaces in a local URL resolve to an existing file with spaces in its name.
+	 */
+	public function test_parse_file_path_for_encoded_space_in_existing_file(): void {
+		$uploads       = wp_upload_dir();
+		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
+		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . rawurlencode( $filename );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
+		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
+
+		try {
+			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
+			$this->assertFalse( $parsed_file_path['remote_file'] );
+			$this->assertSame( $absolute_path, $parsed_file_path['file_path'] );
+		} finally {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
+			unlink( $absolute_path );
+		}
+	}
+
+	/**
 	 * Test for local file with `file` protocol.
 	 */
 	public function test_parse_file_path_for_local_file_protocol() {
@@ -649,6 +671,62 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$method->invoke( null, 'https://evil.example.com/uc', 'payload.html', true ),
 			'A remote-derived .html filename should not switch the response to text/html.'
 		);
+	}
+
+	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		$string_args = array(
+			'download_file' => '1',
+			'order'         => 'wc_order_x',
+			'key'           => 'k',
+			'email'         => 'a@example.org',
+		);
+
+		$product_was_looked_up = false;
+		$lookup_watcher        = function ( $type ) use ( &$product_was_looked_up ) {
+			$product_was_looked_up = true;
+			return $type;
+		};
+
+		add_filter( 'woocommerce_product_type_query', $lookup_watcher );
+
+		try {
+			foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+				$_GET = $string_args;
+
+				if ( 'uid' === $arg ) {
+					// The UID is only consulted when no email address is supplied.
+					unset( $_GET['email'] );
+				}
+
+				$_GET[ $arg ]          = array( 'x' );
+				$wp_die_message        = '';
+				$product_was_looked_up = false;
+
+				// We do not use expectException() here because every argument is checked in turn.
+				try {
+					WC_Download_Handler::download_product();
+				} catch ( WPDieException $e ) {
+					$wp_die_message = $e->getMessage();
+				}
+
+				$this->assertStringContainsString(
+					'Invalid download link',
+					$wp_die_message,
+					"An array value for the \"$arg\" query argument should render the invalid download link error."
+				);
+
+				$this->assertFalse(
+					$product_was_looked_up,
+					"Array query arguments are rejected before any product lookup, but the \"$arg\" case reached one."
+				);
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $lookup_watcher );
+			$_GET = array();
+		}
 	}
 
 	/**

@@ -669,13 +669,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			);
 		}
 
-		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+		$filter_names         = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
+		$use_legacy_algorithm = 'yes' === get_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes' );
 
 		/**
 		 * Filters whether to use the legacy callback serialization algorithm.
 		 *
-		 * By default, WooCommerce will use the legacy algorithm to get the callback signatures
-		 * for variation price hash calculation. That algorithm includes the callback array as it
+		 * The legacy algorithm for variation price hash calculation includes the callback array as it
 		 * comes from $wp_filter in the hashed data, which is then JSON encoded. For callbacks that
 		 * are class methods, JSON encoding captures the object's PUBLIC property values only;
 		 * private and protected properties are not captured. Note that dynamically created
@@ -690,13 +690,15 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 *
 		 * IMPORTANT: see also the documentation for the 'woocommerce_variation_prices_price' filter.
 		 *
-		 * @since 10.5.0
+		 * @since 10.5.0 the hook is introduced and all stores use the legacy algorith by default.
+		 * @since 11.3.0 the new stores use optimized algorithm by default.
 		 *
-		 * @param bool       $use_legacy  True to use the legacy algorithm (default), false to use CallbackUtil
-		 * @param WC_Product $product     The product object.
-		 * @param bool       $for_display If taxes should be calculated or not.
+		 * @param bool       $use_legacy_algorithm True to use the legacy algorithm, false to use CallbackUtil.
+		 * @param WC_Product $product              The product object.
+		 * @param bool       $for_display          If taxes should be calculated or not.
+		 * @return bool
 		 */
-		$use_legacy_algorithm = apply_filters( 'woocommerce_use_legacy_get_variations_price_hash', true, $product, $for_display );
+		$use_legacy_algorithm = (bool) apply_filters( 'woocommerce_use_legacy_get_variations_price_hash', $use_legacy_algorithm, $product, $for_display );
 
 		if ( $use_legacy_algorithm ) {
 			global $wp_filter;

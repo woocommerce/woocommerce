@@ -2,6 +2,23 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.2](https://github.com/woocommerce/email-editor/releases/tag/2.17.2) - 2026-09-09 
+
+-   Patch - Keep Media & Text blocks in normal document flow so a button placed after one no longer paints its background across it. The wrapper table's align="left" rendered as a float in email clients, pulling the block out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS. [#68443]
+
+## [2.17.1](https://github.com/woocommerce/email-editor/releases/tag/2.17.1) - 2026-09-07 
+
+-   Patch - Restrict the send preview email endpoint to posts of registered email post types. [#68414]
+
+## [2.17.0](https://github.com/woocommerce/email-editor/releases/tag/2.17.0) - 2026-09-03 
+
+-   Patch - Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails. [#67790]
+-   Patch - Guard against non-array return values from the woocommerce_email_editor_preload_rest_api_routes filter. [#68021]
+-   Patch - Preload the recent emails used by the template selection modal, and add the woocommerce_email_editor_preload_rest_api_routes filter. [#67911]
+-   Patch - Render spacing between Social Links icons in emails and match pill-shape icon padding with the editor. [#67642]
+-   Patch - Render the email editor HTML only once per request — a plugin calling WP_Screen::get() from admin_enqueue_scripts (e.g. Yoast SEO Premium) re-fires the replace_editor filter mid-render and echoed a second editor container that broke the editor [#68150]
+-   Minor - Add a value-interception extension point to the Personalizer. [#66874]
+
 ## [2.16.1](https://github.com/woocommerce/email-editor/releases/tag/2.16.1) - 2026-08-14 
 
 -   Patch - Render a block's background color once instead of twice, which made a translucent palette color appear darker than intended. [#67673]

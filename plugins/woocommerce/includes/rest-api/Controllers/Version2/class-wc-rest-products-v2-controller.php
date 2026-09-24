@@ -419,7 +419,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Exact _sku match; wc_product_meta_lookup truncates SKUs to 100 chars and is empty while it regenerates, so it is not an equivalent path.
 				$args,
 				array(
 					'key'     => '_sku',
@@ -431,7 +431,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- wc_product_meta_lookup.tax_class is unindexed and holds NULL where _tax_class is unset, so it is neither faster nor equivalent.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -442,12 +442,12 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- _price is stored once per child price; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Postmeta stays correct while wc_product_meta_lookup is stale or regenerating; the _stock_status meta_key index bounds the scan.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -601,7 +601,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return     string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
-		$tax    = get_taxonomy( $name );
+		$tax = get_taxonomy( $name );
+		if ( ! $tax ) {
+			return wc_attribute_taxonomy_slug( $name );
+		}
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
@@ -640,7 +643,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
 			$taxonomy = $attribute->get_taxonomy_object();
-			return $taxonomy->attribute_label;
+			return $taxonomy ? $taxonomy->attribute_label : $slug;
 		}
 
 		// Custom product attribute name.
