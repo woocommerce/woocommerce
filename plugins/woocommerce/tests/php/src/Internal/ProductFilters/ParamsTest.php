@@ -294,9 +294,9 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy params can be released via the woocommerce_product_filter_taxonomy_params filter.
+	 * @testdox Omitting a taxonomy from the filtered map keeps its default parameter.
 	 */
-	public function test_taxonomy_params_are_filterable_by_release(): void {
+	public function test_omitted_taxonomy_param_keeps_default(): void {
 		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
 			unset( $taxonomy_params['product_brand'] );
 			return $taxonomy_params;
@@ -306,8 +306,8 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
 		$param_keys      = $this->sut->get_param_keys();
 
-		$this->assertArrayNotHasKey( 'product_brand', $taxonomy_params, 'Released taxonomy should be removed from the param map.' );
-		$this->assertNotContains( 'brands', $param_keys, 'Released taxonomy param should not appear in get_param_keys().' );
+		$this->assertSame( 'brands', $taxonomy_params['product_brand'], 'Omitting a taxonomy must not disable its filter.' );
+		$this->assertContains( 'brands', $param_keys, 'The default brand param must remain registered.' );
 		$this->assertContains( 'categories', $param_keys, 'Unrelated taxonomy params should be unaffected.' );
 		$this->assertContains( 'tags', $param_keys, 'Unrelated taxonomy params should be unaffected.' );
 	}
@@ -335,22 +335,23 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox The taxonomy params filter still applies after the static params cache has already been warmed.
+	 * @testdox The taxonomy params filter runs once before the map is cached.
 	 */
-	public function test_taxonomy_params_filter_applies_after_static_cache_is_warm(): void {
-		// Warm the static cache before any callback is registered.
-		$this->sut->get_param( 'taxonomy' );
-
-		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
+	public function test_taxonomy_params_filter_runs_once_before_cache_is_warm(): void {
+		$calls                        = 0;
+		$this->taxonomy_params_filter = function ( array $taxonomy_params ) use ( &$calls ): array {
+			++$calls;
 			$taxonomy_params['product_brand'] = 'wc_brands';
 			return $taxonomy_params;
 		};
 		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
 
-		// No cache-clearing call here: the filter must apply on a warm cache too.
-		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$this->assertSame( 'wc_brands', $this->sut->get_param( 'taxonomy' )['product_brand'] );
+		remove_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+		$this->taxonomy_params_filter = null;
 
-		$this->assertSame( 'wc_brands', $taxonomy_params['product_brand'], 'The filter must apply even when the static params cache was warmed before the callback was added.' );
+		$this->assertSame( 'wc_brands', $this->sut->get_param( 'taxonomy' )['product_brand'], 'The cached map remains stable after the callback is removed.' );
+		$this->assertSame( 1, $calls, 'The filter should only run when the map is initialized.' );
 	}
 
 	/**
@@ -382,13 +383,14 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy param entries that are not name => string pairs are discarded.
+	 * @testdox Invalid taxonomy param values keep their defaults and unknown taxonomies are ignored.
 	 */
-	public function test_taxonomy_params_filter_discards_unusable_entries(): void {
+	public function test_taxonomy_params_filter_ignores_invalid_entries(): void {
 		$this->taxonomy_params_filter = static function ( array $taxonomy_params ): array {
 			$taxonomy_params['product_cat']   = array( 'categories', 'cats' );
 			$taxonomy_params['product_tag']   = 42;
 			$taxonomy_params['product_brand'] = '';
+			$taxonomy_params['post_tag']      = 'post_tags';
 			$taxonomy_params[]                = 'orphan';
 
 			return $taxonomy_params;
@@ -398,9 +400,10 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
 		$param_keys      = $this->sut->get_param_keys();
 
-		$this->assertArrayNotHasKey( 'product_cat', $taxonomy_params, 'An array param value should be discarded.' );
-		$this->assertArrayNotHasKey( 'product_tag', $taxonomy_params, 'A non-string param value should be discarded.' );
-		$this->assertArrayNotHasKey( 'product_brand', $taxonomy_params, 'An empty param value should be discarded.' );
+		$this->assertSame( 'categories', $taxonomy_params['product_cat'], 'An array value must not disable the category filter.' );
+		$this->assertSame( 'tags', $taxonomy_params['product_tag'], 'A non-string value must not disable the tag filter.' );
+		$this->assertSame( 'brands', $taxonomy_params['product_brand'], 'An empty value must not disable the brand filter.' );
+		$this->assertArrayNotHasKey( 'post_tag', $taxonomy_params, 'Taxonomies outside the product map should be discarded.' );
 		$this->assertArrayNotHasKey( 0, $taxonomy_params, 'A numerically keyed entry should be discarded.' );
 
 		foreach ( $param_keys as $param_key ) {

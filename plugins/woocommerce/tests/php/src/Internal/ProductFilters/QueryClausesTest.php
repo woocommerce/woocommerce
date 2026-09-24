@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 require_once WC_ABSPATH . '/includes/class-wc-brands.php';
@@ -27,13 +26,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
-	 * Instance of Params, used to assert on the taxonomy param map these tests rely on.
-	 *
-	 * @var Params
-	 */
-	private $params;
-
-	/**
 	 * Callback added to the woocommerce_product_filter_taxonomy_params filter during a test.
 	 *
 	 * @var callable|null
@@ -49,9 +41,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		// Ensure brands taxonomy is registered for testing.
 		\WC_Brands::init_taxonomy();
 
-		$container    = wc_get_container();
-		$this->sut    = $container->get( QueryClauses::class );
-		$this->params = $container->get( Params::class );
+		$this->sut = wc_get_container()->get( QueryClauses::class );
 
 		// The static map may have been warmed by another test class before product_brand existed.
 		$this->clear_params_cache();
@@ -355,20 +345,9 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Releasing a taxonomy filter param must not fail-close the rest of the main query.
+	 * @testdox Omitting a taxonomy from the filtered map does not disable its main-query filter.
 	 */
-	public function test_released_taxonomy_param_is_ignored_on_main_query(): void {
-		$this->assertSame(
-			'brands',
-			$this->params->get_param( 'taxonomy' )['product_brand'] ?? null,
-			'This test is only meaningful while core still claims the bare "brands" param for product_brand.'
-		);
-
-		list( $where, $posts ) = $this->query_main_products( $this->cat_and_unknown_brand_query_vars() );
-
-		$this->assertStringContainsString( 'AND 1=0', $where, 'Before the param is released, the unmatched brand must still fail the query closed.' );
-		$this->assertCount( 0, $posts, 'Before the param is released, no products should be returned.' );
-
+	public function test_omitted_taxonomy_param_still_filters_main_query(): void {
 		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
 			unset( $taxonomy_params['product_brand'] );
 			return $taxonomy_params;
@@ -377,24 +356,14 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		list( $where, $posts ) = $this->query_main_products( $this->cat_and_unknown_brand_query_vars() );
 
-		$this->assertStringNotContainsString( 'AND 1=0', $where, 'Releasing a taxonomy filter param must not fail-close the main query.' );
-		$this->assertEqualsCanonicalizing(
-			$this->get_product_names_in_category( 'cat-1' ),
-			$this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) ),
-			'Releasing the brands param should leave the category filter working on its own.'
-		);
+		$this->assertStringContainsString( 'AND 1=0', $where, 'The default brands param must still fail-close an unmatched brand.' );
+		$this->assertCount( 0, $posts, 'Omitting the mapping must not disable the brand filter.' );
 	}
 
 	/**
 	 * @testdox Renaming a taxonomy filter param releases the old param and filters on the new one.
 	 */
 	public function test_renamed_taxonomy_param_is_used_on_main_query(): void {
-		$this->assertSame(
-			'brands',
-			$this->params->get_param( 'taxonomy' )['product_brand'] ?? null,
-			'This test is only meaningful while core still claims the bare "brands" param for product_brand.'
-		);
-
 		$brand_owner = $this->products[0];
 		$brand_slug  = $this->assign_brand_to_product( $brand_owner, 'Acme' );
 
@@ -442,24 +411,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		return array(
 			'product_cat' => 'cat-1',
 			'brands'      => 'no-such-brand',
-		);
-	}
-
-	/**
-	 * Names of the fixture products in the given product category.
-	 *
-	 * @param string $category_slug Category slug.
-	 * @return array
-	 */
-	private function get_product_names_in_category( string $category_slug ): array {
-		return $this->get_data_from_products_array(
-			array_filter(
-				$this->products,
-				function ( \WC_Product $product ) use ( $category_slug ) {
-					$product_terms = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'slugs' ) );
-					return ! is_wp_error( $product_terms ) && in_array( $category_slug, $product_terms, true );
-				}
-			)
 		);
 	}
 
