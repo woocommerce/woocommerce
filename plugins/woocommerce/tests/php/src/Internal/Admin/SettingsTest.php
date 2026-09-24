@@ -309,6 +309,30 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The preloaded component settings expose coupon discount types, including ones added by extensions.
+	 */
+	public function test_component_settings_expose_coupon_types(): void {
+		$add_type = function ( $types ) {
+			$types['custom_discount'] = 'Custom discount';
+			return $types;
+		};
+		add_filter( 'woocommerce_coupon_discount_types', $add_type );
+		$this->added_filters[] = array( 'woocommerce_coupon_discount_types', $add_type );
+		// Coupon types are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$settings = $this->sut->add_component_settings( array() );
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
+		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
 	 * Get the resolved wc_admin group settings via the REST settings controller.
 	 *
 	 * @return array

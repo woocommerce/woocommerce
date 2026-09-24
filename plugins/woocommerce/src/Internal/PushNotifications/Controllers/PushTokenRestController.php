@@ -102,7 +102,21 @@ class PushTokenRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
 					'args'                => $this->get_args( 'create' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-					'schema'              => array( $this, 'get_schema' ),
+				),
+				'schema' => fn () => array_merge(
+					$this->get_base_schema(),
+					array(
+						'title'      => 'push_tokens',
+						'properties' => array(
+							'tokens' => array(
+								'description' => __( 'The push tokens registered on this store.', 'woocommerce' ),
+								'type'        => 'array',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+								'items'       => $this->get_schema(),
+							),
+						),
+					)
 				),
 			)
 		);
@@ -116,15 +130,16 @@ class PushTokenRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'args'                => $this->get_args( 'delete' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-					'schema'              => array( $this, 'get_schema' ),
 				),
+				'schema' => array( $this, 'get_schema' ),
 			)
 		);
 	}
 
 	/**
 	 * Returns all push tokens for roles that can receive push notifications,
-	 * formatted for the WPCOM push notifications endpoint.
+	 * along with when each token was registered, when the app last confirmed
+	 * it, and the username and email of the account it belongs to.
 	 *
 	 * @since 10.8.0
 	 *
@@ -154,12 +169,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		}
 
 		$response = new WP_REST_Response(
-			array(
-				'tokens' => array_map(
-					fn ( $token ) => $token->to_wpcom_format(),
-					$result['tokens']
-				),
-			),
+			array( 'tokens' => $this->prepare_tokens_for_response( $result['tokens'] ) ),
 			WP_Http::OK
 		);
 
@@ -167,6 +177,59 @@ class PushTokenRestController extends RestApiControllerBase {
 		$response->header( 'X-WP-TotalPages', (string) $result['total_pages'] );
 
 		return $response;
+	}
+
+	/**
+	 * Formats tokens for the index response.
+	 *
+	 * The account fields are added here rather than in
+	 * {@see PushToken::to_rest_format()}, so the users for a whole page are
+	 * loaded in one query rather than one per token.
+	 *
+	 * Requesting three named columns rather than user objects skips loading
+	 * usermeta, and keeps WP_User_Query's result cache on.
+	 *
+	 * @param PushToken[] $tokens The tokens to format.
+	 * @return array[]
+	 */
+	private function prepare_tokens_for_response( array $tokens ): array {
+		$user_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( fn ( PushToken $token ) => $token->get_user_id(), $tokens )
+				)
+			)
+		);
+
+		if ( ! $user_ids ) {
+			return array();
+		}
+
+		$users = array_column(
+			get_users(
+				array(
+					'include' => $user_ids,
+					'fields'  => array( 'ID', 'user_login', 'user_email' ),
+				)
+			),
+			null,
+			'ID'
+		);
+
+		return array_map(
+			function ( PushToken $token ) use ( $users ) {
+				$user = $users[ $token->get_user_id() ] ?? null;
+
+				return array_merge(
+					$token->to_rest_format(),
+					array(
+						'user_login' => $user ? $user->user_login : null,
+						'user_email' => $user ? $user->user_email : null,
+					)
+				);
+			},
+			$tokens
+		);
 	}
 
 	/**
@@ -265,58 +328,100 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Get the schema for the POST endpoint.
+	 * Get the schema for a single push token.
+	 *
+	 * Describes the token as the index returns it. The fields a client sends
+	 * when registering one are published separately, through the route `args`
+	 * that OPTIONS reports per endpoint.
 	 *
 	 * @since 10.6.0
 	 *
-	 * @return array[]
+	 * @return array
 	 */
 	public function get_schema(): array {
 		return array_merge(
 			$this->get_base_schema(),
 			array(
 				'title'      => PushToken::POST_TYPE,
-				'properties' => array_map(
-					fn ( $item ) => array_intersect_key(
-						$item,
-						array(
-							'description' => null,
-							'type'        => null,
-							'enum'        => null,
-							'minimum'     => null,
-							'default'     => null,
-							'required'    => null,
-						)
+				'properties' => array(
+					'id'                    => array(
+						'description' => __( 'Unique identifier for the token.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
 					),
-					$this->get_args()
+					'user_id'               => array(
+						'description' => __( 'The user the token belongs to.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'user_login'            => array(
+						'description' => __( 'The username of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'user_email'            => array(
+						'description' => __( 'The email address of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'token'                 => array(
+						'description' => __( 'The push token issued by Apple or Google.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'platform'              => array(
+						'description' => __( 'The platform the token was issued for.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => PushToken::PLATFORMS,
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'origin'                => array(
+						'description' => __( 'The app the token was registered from.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => PushToken::ORIGINS,
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'device_uuid'           => array(
+						'description' => __( 'An identifier the app generates for its own install, so a re-registration matches the existing record after the OS issues a new token. Null for browser tokens.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'device_locale'         => array(
+						'description' => __( 'The locale the device is set to.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'metadata'              => array(
+						'description' => __( 'Values the app supplies to describe itself and the device, such as the app and OS version.', 'woocommerce' ),
+						'type'        => 'object',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'created_at_gmt'        => array(
+						'description' => __( 'The date the token was registered, as GMT. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'last_confirmed_at_gmt' => array(
+						'description' => __( 'The date the app last registered this token, as GMT. The app re-sends the token periodically, not only when the token value changes, so this shows how recently the app read the token from the device. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 				),
 			)
-		);
-	}
-
-	/**
-	 * Validates that the request is signed with a Jetpack blog token,
-	 * ensuring only WPCOM can access this endpoint.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 */
-	public function authorize_as_from_wpcom( WP_REST_Request $request ) {
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
-		}
-
-		if ( $this->is_signed_with_blog_token() ) {
-			return true;
-		}
-
-		return new WP_Error(
-			'woocommerce_rest_cannot_view',
-			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-			array( 'status' => rest_authorization_required_code() )
 		);
 	}
 
