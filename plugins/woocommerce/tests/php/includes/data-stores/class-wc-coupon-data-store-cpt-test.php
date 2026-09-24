@@ -359,9 +359,9 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should backfill date_created when updating a coupon with an empty post_date_gmt.
+	 * @testdox Should update coupon with empty post_date_gmt without error and without pinning date_created.
 	 */
-	public function test_update_backfills_date_created_when_empty(): void {
+	public function test_update_coupon_with_empty_post_date_gmt(): void {
 		global $wpdb;
 
 		$coupon    = $this->create_settled_coupon();
@@ -381,7 +381,8 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$coupon->set_description( 'Updated description' );
 		$coupon->save();
 
-		$this->assertNotNull( $coupon->get_date_created( 'edit' ) );
-		$this->assertSame( 'Updated description', $coupon->get_description() );
+		$reloaded_coupon = new WC_Coupon( $coupon_id );
+		$this->assertNull( $reloaded_coupon->get_date_created( 'edit' ) );
+		$this->assertSame( 'Updated description', $reloaded_coupon->get_description() );
 	}
 }

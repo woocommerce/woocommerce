@@ -187,10 +187,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
 
-		if ( null === $coupon->get_date_created( 'edit' ) ) {
-			$coupon->set_date_created( time() );
-		}
-
 		$changes = $coupon->get_changes();
 
 		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $changes ) ) ) {
@@ -198,11 +194,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'post_title'        => $coupon->get_code( 'edit' ),
 				'post_excerpt'      => $coupon->get_description( 'edit' ),
 				'post_status'       => $coupon->get_status( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			);
+
+			if ( $coupon->get_date_created( 'edit' ) ) {
+				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() );
+			}
 
 			/**
 			 * When updating this object, to prevent infinite loops, use $wpdb
