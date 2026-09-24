@@ -560,7 +560,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		// The shape a row carries until the rebuild reaches it: a base, with neither part of it.
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = 0, shipping_taxable_amount = 0 WHERE order_id = %d",
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
 				$unsplit->get_id()
 			)
 		);
@@ -573,6 +573,36 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( 430.0, $row['taxable_amount'], 'The taxable amount is recorded on both rows, so it stays whole.' );
 		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while a row of the rate holds no split.' );
 		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while a row of the rate holds no split.' );
+	}
+
+	/**
+	 * @testdox A rate whose unrebuilt row has a base netting to zero reports no split, rather than two zero parts.
+	 */
+	public function test_report_hides_the_split_of_an_unrebuilt_row_netting_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// A negative fee offsetting shipping at the same rate leaves a zero base before the split.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET taxable_amount = 0, order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		ReportsCache::invalidate();
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
+
+		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while the row holds no split.' );
+		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while the row holds no split.' );
 	}
 
 	/**
@@ -590,7 +620,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = 0, shipping_taxable_amount = 0 WHERE order_id = %d",
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
 				$order->get_id()
 			)
 		);

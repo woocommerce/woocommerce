@@ -8,7 +8,6 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
-use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
@@ -338,12 +337,6 @@ function wc_update_11201_migrate_tax_lookup_order_items() {
  * @return void
  */
 function wc_update_1130_split_tax_lookup_taxable_amount() {
-	global $wpdb;
-
-	$table_name = TaxesDataStore::get_db_table_name();
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-	update_option( OrderTaxLookupMigrator::SPLIT_END_OPTION, (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$table_name}" ), false );
-
 	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 
 	// A store with nothing to rebuild would otherwise keep serving cached rows without the split.

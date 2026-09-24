@@ -51,7 +51,6 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
 		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
-		delete_option( OrderTaxLookupMigrator::SPLIT_END_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		$this->sut = wc_get_container()->get( OrderTaxLookupMigrator::class );
@@ -64,7 +63,6 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
 		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
-		delete_option( OrderTaxLookupMigrator::SPLIT_END_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( OrderTaxLookupMigrator::class );
 
@@ -231,7 +229,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-				"UPDATE {$table_name} SET taxable_amount = %f, order_taxable_amount = 0, shipping_taxable_amount = 0 WHERE order_id = %d",
+				"UPDATE {$table_name} SET taxable_amount = %f, order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
 				$taxable_amount,
 				$order_id
 			)
@@ -286,19 +284,16 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An order holding a base with no order and shipping split is pending, one with no base to split is not.
+	 * @testdox An order holding no order and shipping split is pending, one holding a split of zero is not.
 	 */
 	public function test_orders_holding_an_unsplit_taxable_amount_are_pending(): void {
-		$unsplit  = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
-		$no_base  = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
-		$order_id = $unsplit->get_id();
+		$unsplit = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
 
-		$this->unsplit_lookup_rows( $order_id, 215.0 );
-		// A row with nothing to split would be rewritten to the same zeros, so it is left alone.
-		$this->unsplit_lookup_rows( $no_base->get_id(), 0.0 );
+		$this->unsplit_lookup_rows( $unsplit->get_id(), 215.0 );
 
-		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'Only the order holding a base with no split should be pending.' );
-		$this->assertSame( array( $order_id ), $this->sut->get_next_batch_to_process( 10 ), 'The batch should hold only that order.' );
+		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'Only the order holding no split should be pending.' );
+		$this->assertSame( array( $unsplit->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The batch should hold only that order.' );
 	}
 
 	/**
@@ -567,6 +562,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->unmigrate_lookup_rows( $left->get_id(), 0, 0.25 );
 
 		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $stepped_past->get_id() );
+		update_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION, $stepped_past->get_id() );
 
 		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The count should hold what is left of the pass.' );
 
@@ -634,7 +630,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The split pass rebuilds an order whose base nets to zero, up to where the table ended when the update ran.
+	 * @testdox The split pass rebuilds an order whose base nets to zero.
 	 */
 	public function test_split_pass_rebuilds_a_base_that_nets_to_zero(): void {
 		global $wpdb;
@@ -643,13 +639,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$order = $this->seed_taxed_order( '-205' );
 		$this->unsplit_lookup_rows( $order->get_id(), 0.0 );
 
-		wc_update_1130_split_tax_lookup_taxable_amount();
-
-		$later = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
-		$this->unsplit_lookup_rows( $later->get_id(), 0.0 );
-
-		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::SPLIT_END_OPTION ), 'The update should mark the highest order id the table held.' );
-		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'Only the order recorded before the update should be pending. A later one with no base really did apply to nothing.' );
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'An order holding no split should be pending, whatever its base.' );
 
 		$this->sut->process_batch( array( $order->get_id() ) );
 
@@ -684,23 +674,17 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A batch read before the split update ran does not step the split pass past the orders it left out.
+	 * @testdox A batch read before the split columns existed does not step the split pass past the orders it left out.
 	 */
 	public function test_batch_in_flight_does_not_step_a_new_pass_past_orders_it_left_out(): void {
-		// Holds no base, so it only becomes pending once the update marks where the old rows end.
 		$left_out = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
-		$this->unsplit_lookup_rows( $left_out->get_id(), 0.0 );
+		$this->unsplit_lookup_rows( $left_out->get_id(), 215.0 );
 
 		$in_batch = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
 		$this->unmigrate_lookup_rows( $in_batch->get_id(), 0, 0.25 );
 
-		$batch = $this->sut->get_next_batch_to_process( 10 );
-		$this->assertSame( array( $in_batch->get_id() ), $batch, 'Before the update only the order without a tax order item should be pending.' );
-
-		// The split update runs while the batch is in flight.
-		update_option( OrderTaxLookupMigrator::SPLIT_END_OPTION, $in_batch->get_id(), false );
-
-		$this->sut->process_batch( $batch );
+		// The batch the order item pass alone would have read, before the split columns existed.
+		$this->sut->process_batch( array( $in_batch->get_id() ) );
 
 		$this->assertSame( $in_batch->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The pass the batch was read for should step past it.' );
 		$this->assertSame( $left_out->get_id() - 1, (int) get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should stop before the order the batch left out.' );

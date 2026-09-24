@@ -133,16 +133,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * SQL summing one part of the taxable amount of a tax rate.
 	 *
-	 * Selects NULL while the rate holds a row recorded before the split (a base with both parts at
-	 * zero), since summing it in would report a part that is short with nothing saying so.
+	 * Selects NULL while the rate holds a row recorded before the split (the part is NULL), since
+	 * summing it in would report a part that is short with nothing saying so.
 	 *
 	 * @param string $column Column holding the part, `order_taxable_amount` or `shipping_taxable_amount`.
 	 * @return string
 	 */
 	private static function taxable_amount_part_column( string $column ): string {
-		$unsplit_rows = 'SUM( CASE WHEN order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0 THEN 1 ELSE 0 END )';
-
-		return "CASE WHEN {$unsplit_rows} > 0 THEN NULL ELSE SUM({$column}) END as {$column}";
+		return "CASE WHEN MAX( {$column} IS NULL ) = 1 THEN NULL ELSE SUM({$column}) END as {$column}";
 	}
 
 	/**

@@ -61,19 +61,6 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	const SPLIT_CURSOR_OPTION = 'woocommerce_order_tax_lookup_split_migration_last_order_id';
 
 	/**
-	 * Option holding the highest order id the lookup table held when the taxable amount split
-	 * update ran.
-	 *
-	 * Rows up to it predate the split, so the split pass also rebuilds those whose base nets to
-	 * zero (for example a negative fee offsetting shipping at the same rate).
-	 *
-	 * @since 11.3.0
-	 *
-	 * @var string
-	 */
-	const SPLIT_END_OPTION = 'woocommerce_order_tax_lookup_split_migration_end_order_id';
-
-	/**
 	 * How far `get_total_pending_count()` counts before it reports "this many or more".
 	 *
 	 * Nothing indexes the tax order item column, so counting every order left to rebuild reads the
@@ -116,22 +103,19 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * The passes the rebuild makes over the lookup table. A pass is only offered once the columns
 	 * it reads exist.
 	 *
-	 * @return array[] List of `array( 'condition' => string, 'values' => int[], 'cursor' => string )`,
-	 *                 the values in the placeholder order of the condition.
+	 * @return array[] List of `array( 'condition' => string, 'cursor' => string )`.
 	 */
 	private function get_pending_passes(): array {
 		$passes = array(
 			array(
 				'condition' => 'order_item_id = 0',
-				'values'    => array(),
 				'cursor'    => self::CURSOR_OPTION,
 			),
 		);
 
 		if ( TaxesDataStore::has_taxable_amount_split_columns() ) {
 			$passes[] = array(
-				'condition' => 'order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND ( taxable_amount <> 0 OR order_id <= %d )',
-				'values'    => array( (int) get_option( self::SPLIT_END_OPTION, 0 ) ),
+				'condition' => 'order_taxable_amount IS NULL',
 				'cursor'    => self::SPLIT_CURSOR_OPTION,
 			);
 		}
@@ -150,7 +134,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		foreach ( $this->get_pending_passes() as $pass ) {
 			$clauses[] = "( order_id > %d AND ( {$pass['condition']} ) )";
-			$values    = array_merge( $values, array( $this->get_cursor( $pass['cursor'] ) ), $pass['values'] );
+			$values[]  = $this->get_cursor( $pass['cursor'] );
 		}
 
 		return array(
@@ -312,7 +296,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The values come as one array.
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
 					"SELECT MIN(order_id) FROM {$table_name} WHERE order_id > %d AND order_id < %d AND order_id NOT IN ( {$placeholders} ) AND ( {$pass['condition']} )",
-					array_merge( array( $cursor, $last ), $batch, $pass['values'] )
+					array_merge( array( $cursor, $last ), $batch )
 				)
 			);
 
