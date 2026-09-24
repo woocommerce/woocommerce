@@ -30581,12 +30581,6 @@ parameters:
 			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
 
 		-
-			message: '#^Function remove_shortcode invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
-
-		-
 			message: '#^Method WC_Shipping_Flat_Rate\:\:calculate_shipping\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
