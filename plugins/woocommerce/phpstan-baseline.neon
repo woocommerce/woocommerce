@@ -49271,12 +49271,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AllReviews.php
 
 		-
-			message: '#^Return type \(null\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AtomicBlock\:\:get_block_type_editor_script\(\) should be compatible with return type \(array\|string\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:get_block_type_editor_script\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Blocks/BlockTypes/AtomicBlock.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -69454,30 +69448,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Call to method get_id\(\) on an unknown class WC_Token\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:get_saved_payment_methods\(\) should return array but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Parameter \$token of method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:include_token_id_with_payment_methods\(\) has invalid type WC_Token\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/StoreApi/Utilities/PaymentUtils.php
 
