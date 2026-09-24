@@ -127,7 +127,8 @@ class Params implements FilterUrlParam {
 		}
 
 		/**
-		 * Filters product taxonomy URL parameters (`product_brand` => `brands`; custom taxonomies use `filter_{taxonomy}`).
+		 * Filters product taxonomy URL parameters: `product_cat` => `categories`, `product_tag` => `tags`,
+		 * `product_brand` => `brands`; other product taxonomies use `filter_{taxonomy}`.
 		 * Rename with a non-empty string; omitted or invalid entries keep their defaults.
 		 * Register callbacks before Params is first read; the map is cached per request.
 		 *
