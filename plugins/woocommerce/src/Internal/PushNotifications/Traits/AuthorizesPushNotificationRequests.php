@@ -39,6 +39,32 @@ trait AuthorizesPushNotificationRequests {
 	}
 
 	/**
+	 * Checks the request is signed with the Jetpack blog token, so only WPCOM
+	 * can reach the endpoint.
+	 *
+	 * The module does not have to be enabled. WPCOM reads a disabled store to see
+	 * which devices it has registered, and a store is most worth looking at once
+	 * push notifications have been switched off for it.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error
+	 *
+	 * @since 11.2.0
+	 */
+	public function authorize_as_from_wpcom( WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Kept so every permission callback in this trait takes the same argument.
+		if ( $this->is_signed_with_blog_token() ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'woocommerce_rest_cannot_view',
+			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
 	 * Checks the caller is either WPCOM or an allowed user, without requiring
 	 * the module to be enabled.
 	 *
