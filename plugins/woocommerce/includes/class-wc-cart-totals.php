@@ -131,7 +131,7 @@ final class WC_Cart_Totals {
 	 * @throws Exception If missing WC_Cart object.
 	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
-	public function __construct( &$cart = null ) {
+	public function __construct( $cart = null ) {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
 			throw new Exception( 'A valid WC_Cart object is required' );
 		}
@@ -161,7 +161,7 @@ final class WC_Cart_Totals {
 	 * Get default blank set of props used per item.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return object
 	 */
 	protected function get_default_item_props() {
 		return (object) array(
@@ -184,7 +184,7 @@ final class WC_Cart_Totals {
 	 * Get default blank set of props used per fee.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return object
 	 */
 	protected function get_default_fee_props() {
 		return (object) array(
@@ -200,7 +200,7 @@ final class WC_Cart_Totals {
 	 * Get default blank set of props used per shipping row.
 	 *
 	 * @since  3.2.0
-	 * @return array
+	 * @return object
 	 */
 	protected function get_default_shipping_props() {
 		return (object) array(
@@ -498,7 +498,7 @@ final class WC_Cart_Totals {
 	 * Get discounted price of an item with precision (in cents).
 	 *
 	 * @since  3.2.0
-	 * @param  object $item_key Item to get the price of.
+	 * @param  string $item_key Item to get the price of.
 	 * @return int
 	 */
 	protected function get_discounted_price_in_cents( $item_key ) {
@@ -835,7 +835,7 @@ final class WC_Cart_Totals {
 			}
 		}
 
-		$this->coupon_discount_totals     = (array) $discounts->get_discounts_by_item( true );
+		$this->coupon_discount_totals     = $discounts->get_discounts_by_item( true );
 		$this->coupon_discount_tax_totals = $coupon_discount_tax_amounts;
 
 		if ( wc_prices_include_tax() ) {
