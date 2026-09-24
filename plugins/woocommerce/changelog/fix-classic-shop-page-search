@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent excessive memory usage in Products settings by searching and paginating Shop page choices.
