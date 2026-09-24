@@ -138,7 +138,6 @@ export type Store = {
 		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCart: () => Promise< void >;
-		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
 			notices: Notice[],
@@ -988,11 +987,5 @@ export function* refreshCart(): AsyncAction< void > {
 		refreshTimeout *= 2;
 	} finally {
 		pendingRefresh = false;
-	}
-}
-
-export function* waitForIdle(): AsyncAction< void > {
-	if ( cartQueue ) {
-		yield cartQueue.waitForIdle();
 	}
 }
