@@ -46,7 +46,7 @@ const flattenColors = (
 	return flattenedColors;
 };
 
-const getColorObject = (
+export const getColorObject = (
 	colors: ColorPaletteOption[] & GradientPaletteOption[],
 	colorValue: string | undefined,
 	context: string
@@ -54,14 +54,17 @@ const getColorObject = (
 	if ( ! colorValue ) {
 		return;
 	}
-	const colorObject =
-		( colors?.find( ( color ) => {
+	// Copy the palette entry: `colors` holds the theme's own palette objects,
+	// and adding `class` to one would change the theme palette.
+	const colorObject = {
+		...( colors?.find( ( color ) => {
 			return color.color === colorValue || color.slug === colorValue;
-		} ) as {
-			color: string;
-			slug?: string | undefined;
-			class?: string | undefined;
-		} ) || {};
+		} ) || {} ),
+	} as {
+		color: string;
+		slug?: string | undefined;
+		class?: string | undefined;
+	};
 	if ( ! colorObject?.color ) {
 		colorObject.color = colorValue;
 	}
