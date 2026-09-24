@@ -39,11 +39,11 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * Three-way payload consumption (since 10.9.0): when the post has
  * {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta,
  * `apply_selectively()` passes the change-summary's payload through to
- * `merge()`, which uses it to gate matched-pair classification:
+ * `merge()`, together with that base render:
  *
- * - LCS pairs whose paths the summary classified as separate add+remove are
- *   rejected by Pass 1 (preventing false yours+core pairings on parallel
- *   additions); Pass 2/3 then handle them as two independent adds.
+ * - Core and post blocks are paired through the base, exactly as the summary
+ *   pairs them, so the merge writes what the merchant reviewed. Blocks the
+ *   merchant deleted are not re-inserted.
  * - Matched pairs whose paths are NOT in `copy_changes` are silently
  *   preserved (yours-only edits aren't conflicts; the `use_core` decision
  *   is ignored on those paths).
@@ -188,13 +188,12 @@ class WCEmailTemplateSelectiveApplier {
 		}//end try
 
 		// When the post has `last_core_render` meta, the change-summary already classified
-		// each block via three-way attribution (yours-vs-base, core-vs-base) and the merge
-		// can consume that payload directly — gating use_core decisions to "real" conflicts
-		// only and rejecting LCS pairs that the summary classified as separate add+remove.
+		// each block via three-way attribution (yours-vs-base, core-vs-base). The merge pairs
+		// blocks through the same base and only accepts use_core on the summary's conflicts.
 		$base_render_for_merge = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
 		$summary_for_merge     = '' !== $base_render_for_merge ? $summary : null;
 
-		$merged_result      = self::merge( $post_content, $core_content, $choices, $summary_for_merge );
+		$merged_result      = self::merge( $post_content, $core_content, $choices, $summary_for_merge, $base_render_for_merge );
 		$merged_content     = $merged_result['content'];
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
@@ -453,29 +452,28 @@ class WCEmailTemplateSelectiveApplier {
 	 * layering on core's changes per the v1 algorithm.
 	 *
 	 * When `$precomputed_summary` is provided (the caller's `last_core_render`
-	 * meta was set, so the change-summary ran three-way attribution), the merge
-	 * defers to the summary's classification:
+	 * meta was set, so the change-summary ran three-way attribution), core and
+	 * post blocks are paired through `$base_content` with
+	 * {@see WCEmailTemplateChangeSummary::align_to_base()}, the same pairing the
+	 * summary shown to the merchant uses:
 	 *
-	 * - Matched pairs whose path is in `removed_blocks` (yours-only) or
-	 *   `added_blocks` (core-only) are REJECTED — the summary correctly
-	 *   identified them as separate adds; the local LCS may have falsely
-	 *   paired them by name. The reject lets Pass 2 / Pass 3 handle them.
-	 * - Matched pairs not in `copy_changes` are silent — Pass 1 skips them
-	 *   even if a `use_core` decision was passed (yours-only edit, no
-	 *   conflict to resolve).
+	 * - Only pairs whose path is in `copy_changes` accept `use_core`; yours-only
+	 *   edits are preserved even if a `use_core` decision was passed.
+	 * - Core blocks the merchant deleted are not re-inserted.
 	 *
-	 * Without `$precomputed_summary` (legacy two-way fallback), the existing
-	 * behavior is preserved: every matched pair with differing inner_text is
-	 * eligible for `use_core`, and the local LCS drives matched-set tracking.
+	 * Without `$precomputed_summary` (legacy two-way fallback), core and post
+	 * are paired with a direct LCS and every matched pair with differing
+	 * inner_text is eligible for `use_core`.
 	 *
 	 * @param string                                                     $post_content        Merchant's current `post_content`.
 	 * @param string                                                     $core_content        Canonical core render.
 	 * @param array<int, array{path:array<int|string>, decision:string}> $choices             Per-conflict choices.
 	 * @param array<string, mixed>|null                                  $precomputed_summary Optional three-way summary payload from {@see WCEmailTemplateChangeSummary::summarize()}; pass `null` to use the legacy two-way merge.
+	 * @param string                                                     $base_content        The `last_core_render` the summary was computed against. Used only with `$precomputed_summary`.
 	 *
 	 * @return array{content:string, structural_skipped:bool, aliases_migrated:string[]}
 	 */
-	private static function merge( string $post_content, string $core_content, array $choices, ?array $precomputed_summary = null ): array {
+	private static function merge( string $post_content, string $core_content, array $choices, ?array $precomputed_summary = null, string $base_content = '' ): array {
 		$post_blocks = parse_blocks( $post_content );
 		$core_blocks = parse_blocks( $core_content );
 
@@ -489,7 +487,24 @@ class WCEmailTemplateSelectiveApplier {
 
 		$post_records = WCEmailTemplateChangeSummary::flatten_blocks( $post_blocks );
 		$core_records = WCEmailTemplateChangeSummary::flatten_blocks( $core_blocks );
-		$matches      = WCEmailTemplateChangeSummary::lcs_matches( $core_records, $post_records );
+
+		$merchant_removed_core_set = array();
+		if ( null !== $precomputed_summary ) {
+			$base_records = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $base_content ) );
+			$matches      = array();
+			foreach ( WCEmailTemplateChangeSummary::align_to_base( $core_records, $base_records, $post_records ) as $sides ) {
+				if ( null === $sides['core'] ) {
+					continue;
+				}
+				if ( null === $sides['post'] ) {
+					$merchant_removed_core_set[ $sides['core'] ] = true;
+					continue;
+				}
+				$matches[] = array( $sides['core'], $sides['post'] );
+			}
+		} else {
+			$matches = WCEmailTemplateChangeSummary::lcs_matches( $core_records, $post_records );
+		}
 
 		$choice_map = array();
 		foreach ( $choices as $choice ) {
@@ -503,26 +518,13 @@ class WCEmailTemplateSelectiveApplier {
 			$choice_map[ self::path_key( $choice['path'] ) ] = $decision;
 		}
 
-		// Three-way overrides derived from the precomputed summary. `null`
-		// signals the legacy two-way path (no gating).
+		// `null` signals the legacy two-way path (every differing pair is eligible).
 		$copy_change_paths = null;
-		$added_path_keys   = array();
-		$removed_path_keys = array();
 		if ( null !== $precomputed_summary ) {
 			$copy_change_paths = array();
 			foreach ( $precomputed_summary['copy_changes'] ?? array() as $cc ) {
 				if ( isset( $cc['path'] ) && is_array( $cc['path'] ) ) {
 					$copy_change_paths[ self::path_key( $cc['path'] ) ] = true;
-				}
-			}
-			foreach ( $precomputed_summary['added_blocks'] ?? array() as $ab ) {
-				if ( isset( $ab['path'] ) && is_array( $ab['path'] ) ) {
-					$added_path_keys[ self::path_key( $ab['path'] ) ] = true;
-				}
-			}
-			foreach ( $precomputed_summary['removed_blocks'] ?? array() as $rb ) {
-				if ( isset( $rb['path'] ) && is_array( $rb['path'] ) ) {
-					$removed_path_keys[ self::path_key( $rb['path'] ) ] = true;
 				}
 			}
 		}
@@ -536,17 +538,7 @@ class WCEmailTemplateSelectiveApplier {
 		foreach ( $matches as $pair ) {
 			$core_rec = $core_records[ $pair[0] ];
 			$post_rec = $post_records[ $pair[1] ];
-			$core_key = self::path_key( $core_rec['path'] );
 			$post_key = self::path_key( $post_rec['path'] );
-
-			// Three-way reject: applier's LCS paired these but the summary
-			// classified them as separate add+remove. Don't track as matched
-			// (so Pass 2 / Pass 3 will handle them) and don't apply.
-			if ( null !== $precomputed_summary
-				&& ( isset( $added_path_keys[ $core_key ] ) || isset( $removed_path_keys[ $post_key ] ) )
-			) {
-				continue;
-			}
 
 			$matched_core_set[ $pair[0] ] = true;
 			$matched_post_set[ $pair[1] ] = true;
@@ -587,6 +579,9 @@ class WCEmailTemplateSelectiveApplier {
 			}
 			if ( self::is_structural_block( $rec['name'] ) ) {
 				$structural_skipped = true;
+				continue;
+			}
+			if ( isset( $merchant_removed_core_set[ $i ] ) ) {
 				continue;
 			}
 			$core_block = self::block_at_path( $core_blocks, $rec['path'] );
