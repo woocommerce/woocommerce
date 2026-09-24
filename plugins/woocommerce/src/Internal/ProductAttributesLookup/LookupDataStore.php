@@ -902,6 +902,7 @@ class LookupDataStore {
 
 		// * Obtain list of published product variations, together with stock statuses; also get the product type.
 		// For a variation this will return just one entry, with type 'variation'.
+		// Scheduled and auto-draft products get data too, as in the non-optimized path; it's used only once they're published.
 		// Output: $product_ids_with_stock_status = associative array where 'id' is the key and values are the stock status (1 for "in stock", 0 otherwise).
 		// $variation_ids = raw list of variation ids.
 		// $is_variable_product = true or false.
@@ -914,7 +915,7 @@ class LookupDataStore {
 			left join {$wpdb->term_taxonomy} tt on tt.term_taxonomy_id=tr.term_taxonomy_id
 			left join {$wpdb->terms} t on t.term_id=tt.term_id
 			where p.post_type = 'product'
-			and p.post_status in ('publish', 'draft', 'pending', 'private')
+			and p.post_status in ('publish', 'draft', 'pending', 'private', 'future', 'auto-draft')
 			and tt.taxonomy='product_type'
 			and t.name != 'exclude-from-search'
 			and p.id=%d

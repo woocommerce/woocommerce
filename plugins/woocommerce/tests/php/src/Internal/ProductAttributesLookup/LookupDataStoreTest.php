@@ -1380,6 +1380,163 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `create_data_for_product` creates all the entries for a scheduled or auto-draft variable product with published variations.
+	 *
+	 * @testWith ["future", false]
+	 *           ["future", true]
+	 *           ["auto-draft", false]
+	 *           ["auto-draft", true]
+	 *
+	 * @param string $status The status of the variable product.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_unpublished_variable_product_creates_all_entries( string $status, bool $use_optimized_db_access ): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( $status, 2 );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product, $use_optimized_db_access );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The operation succeeds.' );
+		$this->assertEqualsCanonicalizing( $this->variable_product_lookup_rows( $product, $variation_ids ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` with optimized db access creates all the entries of a scheduled variable product that need more than one INSERT batch.
+	 */
+	public function test_create_data_for_scheduled_variable_product_with_many_variations_creates_all_entries(): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( ProductStatus::FUTURE, 1 );
+		// The optimized path reads only posts and postmeta, so these variations are seeded directly:
+		// 101 variation rows and the parent row take two 100-row batches.
+		$attribute_meta_key = 'attribute_' . self::$attributes[1]['name'];
+		for ( $i = 0; $i < 100; $i++ ) {
+			$variation_ids[] = wp_insert_post(
+				array(
+					'post_type'   => 'product_variation',
+					'post_status' => ProductStatus::PUBLISH,
+					'post_parent' => $product->get_id(),
+					'meta_input'  => array(
+						$attribute_meta_key => 'term_2_1',
+						'_stock_status'     => ProductStockStatus::IN_STOCK,
+					),
+				)
+			);
+		}
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product->get_id(), true );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The operation succeeds.' );
+		$this->assertEqualsCanonicalizing( $this->variable_product_lookup_rows( $product, $variation_ids ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox The entries regenerated for a scheduled variable product are kept when the product is published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_entries_of_scheduled_variable_product_are_kept_when_it_is_published( bool $use_optimized_db_access ): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( ProductStatus::FUTURE, 2 );
+		$this->empty_lookup_table();
+		$expected_rows = $this->variable_product_lookup_rows( $product, $variation_ids );
+
+		if ( $use_optimized_db_access ) {
+			update_option( 'woocommerce_attribute_lookup_optimized_updates', 'yes' );
+			$this->sut = new LookupDataStore();
+		}
+		$this->set_direct_update_option( true );
+
+		$this->sut->on_product_changed( $product, array( 'attributes' => array() ) );
+		$this->assertEqualsCanonicalizing( $expected_rows, $this->get_lookup_table_data(), 'An attribute change regenerates the entries of the scheduled product.' );
+
+		wp_publish_post( $product->get_id() );
+
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
+		$this->assertEqualsCanonicalizing( $expected_rows, $this->get_lookup_table_data(), 'Publishing the product keeps its entries.' );
+	}
+
+	/**
+	 * Create a variable product with a non-variation attribute (self::$attributes[0], first term), a variation
+	 * attribute (self::$attributes[1], all three terms), and published, in-stock variations defined by 'term_2_1'.
+	 *
+	 * @param string $status The status of the variable product; a 'future' product is scheduled a week ahead.
+	 * @param int    $variations_count How many variations to create.
+	 * @return array The product and the ids of its variations: [ \WC_Product_Variable, int[] ].
+	 */
+	private function create_variable_product_with_variations( string $status, int $variations_count ): array {
+		$product = new \WC_Product_Variable();
+		$this->set_product_attributes(
+			$product,
+			array(
+				self::$attributes[0]['name'] => array(
+					'id'      => self::$attributes[0]['id'],
+					'options' => array( self::$attributes[0]['term_ids'][0] ),
+				),
+				self::$attributes[1]['name'] => array(
+					'id'        => self::$attributes[1]['id'],
+					'options'   => self::$attributes[1]['term_ids'],
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->set_status( $status );
+		if ( ProductStatus::FUTURE === $status ) {
+			$product->set_date_created( time() + WEEK_IN_SECONDS );
+		}
+		$product->save();
+
+		$variation_ids = array();
+		for ( $i = 0; $i < $variations_count; $i++ ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_1' ) );
+			$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+			$variation->set_parent_id( $product->get_id() );
+			$variation_ids[] = $variation->save();
+		}
+
+		$product->set_children( $variation_ids );
+		\WC_Product_Variable::sync( $product );
+
+		return array( $product, $variation_ids );
+	}
+
+	/**
+	 * The lookup table rows expected for a product created by create_variable_product_with_variations.
+	 *
+	 * @param \WC_Product_Variable $product The parent product.
+	 * @param int[]                $variation_ids The ids of the variations.
+	 * @return array Rows in the format returned by get_lookup_table_data.
+	 */
+	private function variable_product_lookup_rows( \WC_Product_Variable $product, array $variation_ids ): array {
+		$rows = array(
+			array(
+				'product_id'             => $product->get_id(),
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => self::$attributes[0]['name'],
+				'term_id'                => self::$attributes[0]['term_ids'][0],
+				'is_variation_attribute' => 0,
+				'in_stock'               => 1,
+			),
+		);
+
+		foreach ( $variation_ids as $variation_id ) {
+			$rows[] = array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => self::$attributes[1]['name'],
+				'term_id'                => self::$attributes[1]['term_ids'][0],
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			);
+		}
+
+		return $rows;
+	}
+
+	/**
 	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
 	 * and one published, in-stock variation defined by the first term ('term_2_1').
 	 *
