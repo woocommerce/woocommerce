@@ -213,6 +213,76 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Copy buttons are shown for the billing and shipping addresses when both are displayed.
+	 */
+	public function test_shows_copy_address_buttons_when_addresses_are_displayed(): void {
+		$order = $this->create_order_with_shipping_data( true );
+
+		$xpath = $this->render_order_data( $order );
+
+		$this->assertSame( array( 'billing', 'shipping' ), $this->get_columns_with_copy_address_button( $xpath ) );
+		foreach ( array( 'billing', 'shipping' ) as $column ) {
+			$addresses = $xpath->query( "//div[contains(@class, 'order_data_column_{$column}')]/div[contains(@class, 'address')]/p[contains(@class, 'wc-order-formatted-address')]" );
+			$this->assertSame( 1, $addresses->length, "The {$column} column should mark the formatted address for the copy button." );
+			$this->assertStringContainsString( '500 Billing Avenue', $addresses->item( 0 )->textContent, "The {$column} copy target should be the displayed address." );
+		}
+	}
+
+	/**
+	 * @testdox The shipping copy button is not shown when core hides billing-derived shipping details.
+	 */
+	public function test_hides_shipping_copy_address_button_when_shipping_details_are_hidden(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$xpath = $this->render_order_data( $order );
+
+		$this->assertSame( array( 'billing' ), $this->get_columns_with_copy_address_button( $xpath ) );
+	}
+
+	/**
+	 * @testdox The shipping copy button is shown when an extension displays otherwise hidden shipping details.
+	 */
+	public function test_shows_shipping_copy_address_button_when_filter_displays_shipping_details(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		add_filter( 'woocommerce_hide_order_admin_shipping_details', '__return_false' );
+
+		try {
+			$xpath = $this->render_order_data( $order );
+		} finally {
+			remove_filter( 'woocommerce_hide_order_admin_shipping_details', '__return_false' );
+		}
+
+		$this->assertSame( array( 'billing', 'shipping' ), $this->get_columns_with_copy_address_button( $xpath ) );
+	}
+
+	/**
+	 * @testdox Copy buttons are not shown when the order has no addresses.
+	 */
+	public function test_hides_copy_address_buttons_when_order_has_no_addresses(): void {
+		$order          = wc_create_order( array( 'customer_id' => 0 ) );
+		$this->orders[] = $order;
+
+		$xpath = $this->render_order_data( $order );
+
+		$this->assertSame( array(), $this->get_columns_with_copy_address_button( $xpath ) );
+	}
+
+	/**
+	 * @testdox Copy buttons are not shown when the customer does not exist in the current site.
+	 */
+	public function test_hides_copy_address_buttons_when_customer_is_not_in_current_site(): void {
+		$order = $this->create_order_with_shipping_data( true );
+		$order->set_customer_id( PHP_INT_MAX );
+		$order->save();
+
+		$xpath = $this->render_order_data( $order );
+
+		$this->assertSame( array(), $this->get_columns_with_copy_address_button( $xpath ) );
+		$this->assertSame( 0, $xpath->query( "//*[contains(@class, 'wc-order-formatted-address')]" )->length, 'No address should be rendered for a customer outside the current site.' );
+	}
+
+	/**
 	 * @testdox The read-only summary displays shipping details for a physical Store API order without a shipping method.
 	 */
 	public function test_displays_shipping_details_for_physical_store_api_order_without_shipping_method(): void {
@@ -758,6 +828,46 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$order->set_shipping_postcode( '94105' );
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_phone( '555-0100' );
+	}
+
+	/**
+	 * Render the order data meta box.
+	 *
+	 * @param WC_Order $order Order to render.
+	 * @return DOMXPath
+	 */
+	private function render_order_data( WC_Order $order ): DOMXPath {
+		$GLOBALS['theorder'] = null;
+
+		ob_start();
+		WC_Meta_Box_Order_Data::output( $order );
+		$output = (string) ob_get_clean();
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!DOCTYPE html><html><body>' . $output . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		return new DOMXPath( $document );
+	}
+
+	/**
+	 * Get the address columns whose heading contains a copy address button.
+	 *
+	 * @param DOMXPath $xpath Rendered order data meta box.
+	 * @return string[]
+	 */
+	private function get_columns_with_copy_address_button( DOMXPath $xpath ): array {
+		$columns = array();
+
+		foreach ( array( 'billing', 'shipping' ) as $column ) {
+			if ( $xpath->query( "//div[contains(@class, 'order_data_column_{$column}')]/h3/button[contains(@class, 'wc-order-copy-address')]" )->length ) {
+				$columns[] = $column;
+			}
+		}
+
+		return $columns;
 	}
 
 	/**

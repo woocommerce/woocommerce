@@ -2206,6 +2206,11 @@ ul.wc_coupon_list_block {
 			content: "\f464";
 		}
 
+		.wc-order-copy-address {
+			float: right;
+			margin: 0 0 0 6px;
+		}
+
 		.billing-same-as-shipping,
 		.load_customer_shipping,
 		.load_customer_billing {
@@ -2217,6 +2222,32 @@ ul.wc_coupon_list_block {
 		.load_customer_shipping {
 			margin-right: 0.3em;
 		}
+	}
+}
+
+.wc-order-copy-address {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	background: none;
+	color: $subtext;
+	cursor: pointer;
+	vertical-align: middle;
+
+	&:hover,
+	&:focus {
+		color: var(--wp-admin-theme-color, #007cba);
+	}
+
+	&::before {
+		display: block;
+		width: 14px;
+		height: 14px;
+		font-family: Dashicons;
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 14px;
+		content: "\f105";
 	}
 }
 
@@ -3597,6 +3628,11 @@ body.woocommerce_page_wc-orders {
 
 			h2 {
 				margin-top: 0;
+
+				.wc-order-copy-address {
+					display: inline-block;
+					margin-left: 4px;
+				}
 			}
 
 			strong {

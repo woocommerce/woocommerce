@@ -326,6 +326,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'version'      => $version,
 				),
 				array(
+					'handle'       => 'wc-order-copy-address',
+					'path'         => $plugin_url . '/assets/js/admin/wc-order-copy-address' . $suffix . '.js',
+					'dependencies' => array( 'jquery', 'wc-clipboard', 'wc-jquery-tiptip', 'wp-a11y' ),
+					'version'      => $version,
+				),
+				array(
 					'legacy_handle' => 'select2',
 					'handle'        => 'wc-select2',
 					'path'          => $plugin_url . '/assets/js/select2/select2.full' . $suffix . '.js',
@@ -458,7 +464,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
-			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui' ), $version, array( 'in_footer' => false ) );
+			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui', 'wc-order-copy-address' ), $version, array( 'in_footer' => false ) );
 			wp_localize_script(
 				'wc-orders',
 				'wc_orders_params',
@@ -606,7 +612,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y', 'wc-order-copy-address' ), $version );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
