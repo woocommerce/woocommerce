@@ -2632,6 +2632,7 @@ class WC_AJAX {
 
 	/**
 	 * Ajax request handling for page searching.
+	 * Requests with a page parameter return bounded results and pagination metadata.
 	 *
 	 * @return void
 	 */
@@ -2647,8 +2648,13 @@ class WC_AJAX {
 		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : -1;
 		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+		$page        = isset( $_GET['page'] ) ? max( 1, absint( wp_unslash( $_GET['page'] ) ) ) : 0;
 
-		$args                 = array(
+		if ( $page ) {
+			$limit = $limit > 0 ? min( 50, $limit ) : 20;
+		}
+
+		$args = array(
 			'no_found_rows'          => true,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
@@ -2658,10 +2664,27 @@ class WC_AJAX {
 			's'                      => $search_text,
 			'post__not_in'           => $exclude_ids,
 		);
+
+		if ( $page ) {
+			// Fetch one extra page to detect more results without a total count query.
+			$args['posts_per_page'] = $limit + 1;
+			$args['offset']         = ( $page - 1 ) * $limit;
+			$args['orderby']        = array(
+				'menu_order' => 'ASC',
+				'ID'         => 'ASC',
+			);
+		}
+
 		$search_results_query = new WP_Query( $args );
+		$posts                = $search_results_query->posts;
+		$has_more             = $page && count( $posts ) > $limit;
+
+		if ( $page ) {
+			$posts = array_slice( $posts, 0, $limit );
+		}
 
 		$pages_results = array();
-		foreach ( $search_results_query->get_posts() as $post ) {
+		foreach ( $posts as $post ) {
 			$pages_results[ $post->ID ] = sprintf(
 				/* translators: 1: page name 2: page ID */
 				__( '%1$s (ID: %2$s)', 'woocommerce' ),
@@ -2670,7 +2693,18 @@ class WC_AJAX {
 			);
 		}
 
-		wp_send_json( apply_filters( 'woocommerce_json_search_found_pages', $pages_results ) );
+		$pages_results = apply_filters( 'woocommerce_json_search_found_pages', $pages_results );
+
+		if ( $page ) {
+			wp_send_json(
+				array(
+					'results'    => is_array( $pages_results ) ? $pages_results : array(),
+					'pagination' => array( 'more' => $has_more ),
+				)
+			);
+		}
+
+		wp_send_json( $pages_results );
 	}
 
 	/**

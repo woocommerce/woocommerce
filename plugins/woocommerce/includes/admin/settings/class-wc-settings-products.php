@@ -82,15 +82,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'    => 'catalog_options',
 				),
 				array(
-					'title'    => __( 'Shop page', 'woocommerce' ),
+					'title'             => __( 'Shop page', 'woocommerce' ),
 					/* translators: %s: URL to settings. */
-					'desc'     => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
-					'id'       => 'woocommerce_shop_page_id',
-					'type'     => 'single_select_page',
-					'default'  => '',
-					'class'    => 'wc-enhanced-select-nostd',
-					'css'      => 'min-width:300px;',
-					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
+					'desc'              => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
+					'id'                => 'woocommerce_shop_page_id',
+					'type'              => 'single_select_page_with_search',
+					'default'           => '',
+					'class'             => 'wc-page-search',
+					'custom_attributes' => array(
+						'data-pagination' => 'true',
+						'data-limit'      => 20,
+					),
+					'css'               => 'min-width:300px;',
+					'desc_tip'          => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
 				),
 				array(
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),

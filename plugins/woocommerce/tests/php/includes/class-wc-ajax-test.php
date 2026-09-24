@@ -2745,6 +2745,136 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should paginate page searches without losing duplicate titles or eligible statuses.
+	 */
+	public function test_json_search_pages_paginates_matches(): void {
+		$this->_setRole( 'administrator' );
+		$page_ids = array();
+		foreach ( array( 'publish', 'private', 'draft', 'publish', 'publish' ) as $status ) {
+			$page_ids[] = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => $status,
+					'post_title'  => 'Page search fixture',
+				)
+			);
+		}
+		self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'trash',
+				'post_title'  => 'Page search fixture',
+			)
+		);
+		self::factory()->post->create(
+			array(
+				'post_type'  => 'post',
+				'post_title' => 'Page search fixture',
+			)
+		);
+		$_GET = array(
+			'security' => wp_create_nonce( 'search-pages' ),
+			'term'     => 'Page search fixture',
+			'limit'    => 2,
+			'page'     => 1,
+			'exclude'  => array( $page_ids[4] ),
+		);
+
+		$first = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertSame( array_slice( $page_ids, 0, 2 ), array_keys( $first['results'] ) );
+		$this->assertTrue( $first['pagination']['more'] );
+		$this->assertStringContainsString( '(ID: ' . $page_ids[0] . ')', $first['results'][ $page_ids[0] ] );
+
+		$_GET['page'] = 2;
+		$second       = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertSame( array_slice( $page_ids, 2, 2 ), array_keys( $second['results'] ) );
+		$this->assertFalse( $second['pagination']['more'] );
+
+		$_GET['page'] = 3;
+		$last         = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertSame( array(), $last['results'] );
+		$this->assertFalse( $last['pagination']['more'] );
+	}
+
+	/**
+	 * @testdox Should bound paginated page queries even when the requested limit is missing, zero or excessive.
+	 * @testWith [null, 20]
+	 *           [0, 20]
+	 *           [1000, 50]
+	 *
+	 * @param int|null $limit Requested limit.
+	 * @param int      $expected_limit Maximum number of results.
+	 */
+	public function test_json_search_pages_bounds_paginated_queries( ?int $limit, int $expected_limit ): void {
+		$this->_setRole( 'administrator' );
+		self::factory()->post->create_many(
+			$expected_limit + 1,
+			array(
+				'post_type'  => 'page',
+				'post_title' => 'Bounded page fixture',
+			)
+		);
+		$_GET         = array(
+			'security' => wp_create_nonce( 'search-pages' ),
+			'term'     => 'Bounded page fixture',
+			'page'     => 0,
+			'limit'    => $limit,
+		);
+		$query_limits = array();
+		add_action(
+			'pre_get_posts',
+			static function ( $query ) use ( &$query_limits ) {
+				if ( 'page' === $query->get( 'post_type' ) ) {
+					$query_limits[] = $query->get( 'posts_per_page' );
+				}
+			}
+		);
+
+		$response = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertCount( $expected_limit, $response['results'] );
+		$this->assertTrue( $response['pagination']['more'] );
+		$this->assertSame( array( $expected_limit + 1 ), $query_limits, 'The database query itself must be bounded.' );
+	}
+
+	/**
+	 * @testdox Should keep legacy page search responses and apply the result filter in both modes.
+	 */
+	public function test_json_search_pages_preserves_legacy_response_and_filter(): void {
+		$this->_setRole( 'administrator' );
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'  => 'page',
+				'post_title' => 'Filtered page fixture',
+			)
+		);
+		add_filter(
+			'woocommerce_json_search_found_pages',
+			static function ( $results ) use ( $page_id ) {
+				$results[ $page_id ] = 'Filtered label';
+				return $results;
+			}
+		);
+		$_GET = array(
+			'security' => wp_create_nonce( 'search-pages' ),
+			'term'     => 'Filtered page fixture',
+		);
+
+		$legacy = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertSame( array( $page_id => 'Filtered label' ), $legacy );
+
+		$_GET['page'] = 1;
+		$paginated    = $this->do_ajax( 'woocommerce_json_search_pages' );
+
+		$this->assertSame( $legacy, $paginated['results'] );
+		$this->assertFalse( $paginated['pagination']['more'] );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

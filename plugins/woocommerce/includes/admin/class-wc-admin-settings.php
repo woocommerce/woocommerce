@@ -720,10 +720,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					case 'single_select_page_with_search':
 						$option_value = $value['value'];
-						$page         = get_post( $option_value );
+						$page         = $option_value ? get_post( $option_value ) : null;
 
 						if ( ! is_null( $page ) ) {
-							$page                = get_post( $option_value );
 							$option_display_name = sprintf(
 								/* translators: 1: page name 2: page ID */
 								__( '%1$s (ID: %2$s)', 'woocommerce' ),
@@ -745,7 +744,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									data-placeholder="<?php esc_attr_e( 'Search for a page&hellip;', 'woocommerce' ); ?>"
 									data-allow_clear="true"
-									data-exclude="<?php echo wc_esc_json( wp_json_encode( $value['args']['exclude'] ) ); ?>"
+									data-exclude="<?php echo wc_esc_json( wp_json_encode( $value['args']['exclude'] ?? array() ) ); ?>"
 									>
 									<option value=""></option>
 									<?php if ( ! is_null( $page ) ) { ?>

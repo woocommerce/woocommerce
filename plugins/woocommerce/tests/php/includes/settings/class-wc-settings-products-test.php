@@ -88,7 +88,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 
 		$expected = array(
 			'catalog_options'                              => array( 'title', 'sectionend' ),
-			'woocommerce_shop_page_id'                     => 'single_select_page',
+			'woocommerce_shop_page_id'                     => 'single_select_page_with_search',
 			'woocommerce_cart_redirect_after_add'          => 'checkbox',
 			'woocommerce_enable_ajax_add_to_cart'          => 'checkbox',
 			'woocommerce_placeholder_image'                => 'text',

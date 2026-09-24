@@ -30,6 +30,92 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render only the selected shop page without loading the page list.
+	 */
+	public function test_shop_page_search_does_not_load_all_pages(): void {
+		set_current_screen( 'woocommerce_page_wc-settings' );
+		WC_Admin_Settings::get_settings_pages();
+		$settings = ( new WC_Settings_Products() )->get_settings_for_section( '' );
+		$fields   = array_filter(
+			$settings,
+			static fn( $field ) => 'woocommerce_shop_page_id' === ( $field['id'] ?? '' )
+		);
+
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Selected shop',
+				'post_status' => 'draft',
+			)
+		);
+		self::factory()->post->create(
+			array(
+				'post_type'  => 'page',
+				'post_title' => 'Unselected page',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $page_id );
+
+		$page_queries = 0;
+		add_filter(
+			'get_pages',
+			static function ( $pages ) use ( &$page_queries ) {
+				++$page_queries;
+				return $pages;
+			}
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $fields );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertSame( 0, $page_queries, 'Rendering must not enumerate the site pages.' );
+		$this->assertStringContainsString( 'Selected shop', $output );
+		$this->assertStringNotContainsString( 'Unselected page', $output );
+		$this->assertStringContainsString( 'data-pagination="true"', $output );
+		$this->assertSame( 2, substr_count( $output, '<option ' ), 'Only the empty option and saved page should be rendered.' );
+
+		WC_Admin_Settings::save_fields( $fields, array( 'woocommerce_shop_page_id' => '' ) );
+
+		$this->assertEmpty( get_option( 'woocommerce_shop_page_id' ) );
+
+		WC_Admin_Settings::save_fields( $fields, array( 'woocommerce_shop_page_id' => $page_id ) );
+
+		$this->assertSame( $page_id, (int) get_option( 'woocommerce_shop_page_id' ) );
+	}
+
+	/**
+	 * @testdox Should not use the global post as the selection when a searchable page setting is empty.
+	 */
+	public function test_empty_page_search_does_not_select_global_post(): void {
+		$page_id = self::factory()->post->create( array( 'post_title' => 'Unrelated global post' ) );
+		$this->go_to( get_permalink( $page_id ) );
+		the_post();
+		$fields = array(
+			array(
+				'id'    => 'empty_page',
+				'type'  => 'single_select_page_with_search',
+				'value' => 0,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $fields );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertStringNotContainsString( 'Unrelated global post', $output );
+		$this->assertSame( 1, substr_count( $output, '<option ' ) );
+	}
+
+	/**
 	 * @testdox Should preserve percent-encoded sequences in password fields.
 	 */
 	public function test_save_fields_preserves_percent_encoded_chars_in_password_fields(): void {
