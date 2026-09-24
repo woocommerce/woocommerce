@@ -146,14 +146,9 @@ class Params implements FilterUrlParam {
 			return $params;
 		}
 
-		$used_params = array_values( $params );
-		foreach ( $other_params as $type => $type_params ) {
-			$used_params = array_merge( $used_params, array_values( $type_params ) );
-			if ( 'attribute' === $type ) {
-				foreach ( array_keys( $type_params ) as $attribute ) {
-					$used_params[] = 'query_type_' . $attribute;
-				}
-			}
+		$used_params = array_merge( array_values( $params ), ...array_values( $other_params ) );
+		foreach ( array_keys( $other_params['attribute'] ) as $attribute ) {
+			$used_params[] = 'query_type_' . $attribute;
 		}
 
 		foreach ( $params as $taxonomy => $default_param ) {
