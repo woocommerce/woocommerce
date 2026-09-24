@@ -63,6 +63,30 @@ export const PerformanceMetricsTour = ( {
 			},
 		],
 		closeHandler: dismissTour,
+		options: {
+			// Setting effects replaces the TourKit defaults, so they are repeated
+			// here alongside autoScroll. Merchants can move the Performance
+			// section below the fold, and the spotlight would then lock a page
+			// whose tour sits off-screen.
+			effects: {
+				spotlight: {
+					interactivity: {
+						enabled: true,
+						rootElementSelector: '#wpwrap',
+					},
+				},
+				arrowIndicator: true,
+				autoScroll: {
+					behavior: 'auto',
+					block: 'center',
+				},
+				liveResize: {
+					mutation: true,
+					resize: true,
+					rootElementSelector: '#wpwrap',
+				},
+			},
+		},
 	};
 
 	return <TourKit config={ config } />;
