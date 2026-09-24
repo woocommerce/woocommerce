@@ -64,6 +64,11 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
+	 * The token list is registered whatever the module's state. The write
+	 * endpoints are only registered while it is enabled, because the apps read
+	 * the 404 for a missing route as push notifications being unavailable.
+	 * Registering a second handler on an existing route adds to it.
+	 *
 	 * @since 10.6.0
 	 *
 	 * @return void
@@ -97,12 +102,6 @@ class PushTokenRestController extends RestApiControllerBase {
 						),
 					),
 				),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
-					'args'                => $this->get_args( 'create' ),
-					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-				),
 				'schema' => fn () => array_merge(
 					$this->get_base_schema(),
 					array(
@@ -117,6 +116,23 @@ class PushTokenRestController extends RestApiControllerBase {
 							),
 						),
 					)
+				),
+			)
+		);
+
+		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
+			return;
+		}
+
+		register_rest_route(
+			$this->route_namespace,
+			$this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
+					'args'                => $this->get_args( 'create' ),
+					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 				),
 			)
 		);

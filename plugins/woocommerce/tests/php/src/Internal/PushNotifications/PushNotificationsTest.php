@@ -19,6 +19,7 @@ use WC_Logger;
 use WC_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * PushNotifications test.
@@ -262,8 +263,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->method( 'is_connected' )
 			->willReturn( false );
 
-		$push_notifications = new PushNotifications();
-		$push_notifications->on_init();
+		wc_get_container()->get( PushNotifications::class )->on_init();
 
 		$registered = $this->get_registered_rest_controllers();
 
@@ -329,9 +329,43 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that registering a token is refused while the module is disabled.
+	 * @testdox Tests that registering a token returns a missing route while the module is disabled.
 	 */
-	public function test_token_registration_is_refused_when_disabled_via_filter() {
+	public function test_token_registration_returns_no_route_when_disabled_via_filter() {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'refused-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+
+		$response = $this->dispatch_as_shop_manager_while_disabled( $request );
+
+		$this->assertSame( WP_Http::NOT_FOUND, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Tests that deleting a token returns a missing route while the module is disabled.
+	 */
+	public function test_token_deletion_returns_no_route_when_disabled_via_filter() {
+		$response = $this->dispatch_as_shop_manager_while_disabled(
+			new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/1' )
+		);
+
+		$this->assertSame( WP_Http::NOT_FOUND, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Dispatches a request as a shop manager against the token routes, with the
+	 * module disabled through the filter.
+	 *
+	 * @param WP_REST_Request $request The request to dispatch.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_as_shop_manager_while_disabled( WP_REST_Request $request ): WP_REST_Response {
 		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
 
 		try {
@@ -344,19 +378,10 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 				true
 			);
 
-			$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-			$request->set_param( 'token', str_repeat( 'a', 64 ) );
-			$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
-			$request->set_param( 'device_uuid', 'refused-device-uuid' );
-			$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
-			$request->set_param( 'device_locale', 'en_US' );
-
-			$response = $server->dispatch( $request );
+			return $server->dispatch( $request );
 		} finally {
 			remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
 		}
-
-		$this->assertSame( WP_Http::FORBIDDEN, $response->get_status() );
 	}
 
 	/**
