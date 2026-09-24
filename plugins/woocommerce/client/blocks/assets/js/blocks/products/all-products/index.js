@@ -3,7 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, grid } from '@wordpress/icons';
-import '@woocommerce/product-element-blocks';
+import '@woocommerce/product-elements';
 
 /**
  * Internal dependencies

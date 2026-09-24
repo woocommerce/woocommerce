@@ -34,10 +34,10 @@
 			"jquery"
 		],
 		"paths": {
-			"@woocommerce/product-element-blocks": [
+			"@woocommerce/product-elements": [
 				"assets/js/blocks/product-elements-blocks"
 			],
-			"@woocommerce/product-element-blocks/*": [
+			"@woocommerce/product-elements/*": [
 				"assets/js/blocks/product-elements-blocks/*"
 			],
 			"@woocommerce/base-components/*": [

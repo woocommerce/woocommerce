@@ -56,7 +56,7 @@ module.exports = {
 		'@wordpress/core-data/build/(.*)$':
 			'<rootDir>/node_modules/@wordpress/core-data/build/$1',
 
-		'@woocommerce/product-element-blocks':
+		'@woocommerce/product-elements':
 			'assets/js/blocks/product-elements-blocks',
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',

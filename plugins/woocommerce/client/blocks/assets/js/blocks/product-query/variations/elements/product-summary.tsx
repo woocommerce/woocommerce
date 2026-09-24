@@ -6,7 +6,7 @@ import { page } from '@wordpress/icons';
 import {
 	BLOCK_DESCRIPTION,
 	BLOCK_TITLE,
-} from '@woocommerce/product-element-blocks/summary/constants';
+} from '@woocommerce/product-elements/summary/constants';
 
 /**
  * Internal dependencies
