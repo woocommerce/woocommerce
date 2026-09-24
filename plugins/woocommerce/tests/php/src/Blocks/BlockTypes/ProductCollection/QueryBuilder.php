@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use WC_Helper_Product;
 use WP_Query;
 
@@ -1501,6 +1502,50 @@ class QueryBuilder extends \WP_UnitTestCase {
 					$query['orderBy']    = 'title';
 					$query['order']      = 'asc';
 					break;
+				case 'decimal-minimum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '15.50',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'min' => 15.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'decimal-maximum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '15.25',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'max' => 15.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
 				case 'inclusive-price':
 					$query['priceRange'] = array(
 						'min' => 10,
@@ -1604,19 +1649,21 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	public function inspector_query_result_provider(): array {
 		return array(
-			'category'         => array( 'category', array( 'Alpha inspector target' ) ),
-			'tag'              => array( 'tag', array( 'Alpha inspector target' ) ),
-			'brand'            => array( 'brand', array( 'Alpha inspector target' ) ),
-			'combined attrs'   => array( 'attributes', array( 'Alpha inspector target' ) ),
-			'keyword search'   => array( 'search', array( 'Alpha inspector target' ) ),
-			'stock'            => array( 'stock', array( 'Alpha inspector target' ) ),
-			'minimum price'    => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
-			'maximum price'    => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
-			'inclusive price'  => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
-			'created before'   => array( 'created-before', array( 'Alpha inspector target' ) ),
-			'created within'   => array( 'created-within', array( 'Zulu inspector distractor' ) ),
-			'hand picked'      => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
-			'title descending' => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'category'              => array( 'category', array( 'Alpha inspector target' ) ),
+			'tag'                   => array( 'tag', array( 'Alpha inspector target' ) ),
+			'brand'                 => array( 'brand', array( 'Alpha inspector target' ) ),
+			'combined attrs'        => array( 'attributes', array( 'Alpha inspector target' ) ),
+			'keyword search'        => array( 'search', array( 'Alpha inspector target' ) ),
+			'stock'                 => array( 'stock', array( 'Alpha inspector target' ) ),
+			'minimum price'         => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
+			'maximum price'         => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
+			'decimal minimum price' => array( 'decimal-minimum-price', array( 'Decimal inspector target' ) ),
+			'decimal maximum price' => array( 'decimal-maximum-price', array( 'Alpha inspector target', 'Below inspector distractor', 'Decimal inspector target', 'Zulu inspector distractor' ) ),
+			'inclusive price'       => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
+			'created before'        => array( 'created-before', array( 'Alpha inspector target' ) ),
+			'created within'        => array( 'created-within', array( 'Zulu inspector distractor' ) ),
+			'hand picked'           => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'title descending'      => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
 		);
 	}
 
