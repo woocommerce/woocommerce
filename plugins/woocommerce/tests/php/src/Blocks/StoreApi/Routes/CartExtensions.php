@@ -37,7 +37,7 @@ class CartExtensions extends ControllerTestCase {
 		woocommerce_store_api_register_update_callback(
 			array(
 				'namespace' => 'valid-test-plugin',
-				'callback'  => function() {
+				'callback'  => function () {
 					add_action(
 						'woocommerce_cart_calculate_fees',
 						function() {
