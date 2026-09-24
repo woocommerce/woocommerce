@@ -1,21 +1,24 @@
 /**
  * External dependencies
  */
-import type { BlockConfiguration } from '@wordpress/blocks';
-import { registerProductBlockType } from '@woocommerce/atomic-utils';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
+import { percent, Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-
 import edit from './edit';
-import { BLOCK_ICON as icon } from './constants';
 import metadata from './block.json';
 import deprecated from './deprecated';
 
-const blockConfig: BlockConfiguration = {
+const blockConfig = {
 	...metadata,
-	icon: { src: icon },
+	icon: (
+		<Icon
+			icon={ percent }
+			className="wc-block-editor-components-block-icon"
+		/>
+	),
 	edit,
 	save: () => null,
 	deprecated,

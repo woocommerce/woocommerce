@@ -280,7 +280,7 @@ store< BlockStore >(
 
 			// Single shared innerHTML-swap callback for any slot whose
 			// content is one of the schema's preformatted HTML fields.
-			// Mirrors the atomic product-elements `updateValue` callback:
+			// Mirrors the product elements `updateValue` callback:
 			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
 			// (or `"image_html"`), and this callback reads that field
 			// off the row's `listItem` and pastes its sanitized HTML into

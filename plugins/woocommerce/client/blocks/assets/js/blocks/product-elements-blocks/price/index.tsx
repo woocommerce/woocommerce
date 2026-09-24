@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerProductBlockType } from '@woocommerce/atomic-utils';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
 import { currencyDollar, Icon } from '@wordpress/icons';
 
 /**
