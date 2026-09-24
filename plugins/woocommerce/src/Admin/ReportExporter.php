@@ -225,8 +225,15 @@ class ReportExporter {
 
 		if ( null === $remaining ) {
 			// An export queued before 11.3.0 has no batch count, so it keeps reporting the position of
-			// whichever page ran last and is emailed by the action queued alongside its batches.
-			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+			// whichever page ran last and is emailed by the action queued alongside its batches. The last
+			// page still writes the headers row file, as generate_file() did, so the emailed link works.
+			$percent_complete = $exporter->get_percent_complete();
+
+			if ( 100 === $percent_complete ) {
+				$exporter->write_headers_row_file();
+			}
+
+			self::update_export_percentage_complete( $report_type, $export_id, $percent_complete );
 			return;
 		}
 

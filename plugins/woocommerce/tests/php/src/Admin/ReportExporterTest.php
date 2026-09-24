@@ -879,6 +879,11 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			get_option( ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:preupgrade' ), null ),
 			'A batch must not start counting an export that was queued without a count.'
 		);
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-preupgrade' );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The last page must still write the headers row file, or the emailed link is not downloadable.' );
 	}
 
 	/**
