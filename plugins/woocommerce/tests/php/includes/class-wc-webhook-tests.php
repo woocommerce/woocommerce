@@ -317,6 +317,42 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product deletion webhooks are not delivered when a pre_delete_post filter cancels the variation deletion.
+	 */
+	public function test_product_deletion_webhook_skips_variation_deletion_cancelled_by_pre_delete_post(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = array();
+		add_filter(
+			'pre_delete_post',
+			function ( $check, $post ) use ( $variation_id ) {
+				return $variation_id === $post->ID ? false : $check;
+			},
+			10,
+			2
+		);
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertNotNull( get_post( $variation_id ), 'The filter should have kept the variation' );
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered when a post that is not a variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_permanently_deleted_non_variation_post(): void {
+		$post_id       = $this->factory->post->create();
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wp_delete_post( $post_id, true );
+
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
 	 * @testdox Action webhooks on the variation delete hook are still delivered for trashed variations.
 	 */
 	public function test_action_webhook_on_variation_delete_hook_delivers_for_trashed_variation(): void {
