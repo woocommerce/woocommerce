@@ -1333,20 +1333,24 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests a second send updates the existing row rather than replacing it.
+	 * @testdox Tests a later send advances the stored time in the existing row.
 	 *
 	 * The row is updated in place so that repeatedly sending to the same device
 	 * does not consume `meta_id` values or churn the primary key on what is the
-	 * busiest write path in the feature.
+	 * busiest write path in the feature. The earlier time is seeded an hour back
+	 * because two sends in the same second write an identical value, which the
+	 * advance-only guard skips. The unrelated row holds the same earlier time so
+	 * the guard would not protect it if the update matched on more than its key.
 	 */
-	public function test_a_second_send_updates_the_row_in_place() {
+	public function test_a_later_send_advances_the_stored_time_in_place() {
 		global $wpdb;
 
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
+		$earlier    = gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS );
 
-		$data_store->record_last_sent_at( array( $push_token ) );
-		$data_store->flush_last_sent_at();
+		update_post_meta( $push_token->get_id(), PushTokensDataStore::LAST_SENT_AT_META_KEY, $earlier );
+		update_post_meta( $push_token->get_id(), 'unrelated_meta', $earlier );
 
 		$meta_id = $wpdb->get_var(
 			$wpdb->prepare(
@@ -1359,6 +1363,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store->record_last_sent_at( array( $push_token ) );
 		$data_store->flush_last_sent_at();
 
+		$this->assertNotNull( $meta_id );
+		$this->assertGreaterThan( $earlier, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+		$this->assertSame( $earlier, get_post_meta( $push_token->get_id(), 'unrelated_meta', true ) );
 		$this->assertSame(
 			$meta_id,
 			$wpdb->get_var(
