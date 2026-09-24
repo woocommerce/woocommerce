@@ -136,6 +136,13 @@ class DatePickerContent extends Component {
 									<ComparePeriods
 										onSelect={ onUpdate }
 										compare={ compare }
+										period={
+											selected.name === 'custom'
+												? 'custom'
+												: period
+										}
+										after={ after }
+										before={ before }
 									/>
 									<div className="woocommerce-filters-date__button-group">
 										{ selected.name === 'custom' && (

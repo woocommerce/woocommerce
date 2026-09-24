@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `getComparePeriods()` and `getValidCompare()` to offer compare options per period, and add `previous_week` and `previous_month` compare values.
