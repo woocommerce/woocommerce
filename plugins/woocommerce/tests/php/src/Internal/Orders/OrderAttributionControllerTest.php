@@ -152,6 +152,70 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that a label filtered without a %s placeholder is used as the whole origin.
+	 *
+	 * @return void
+	 */
+	public function test_output_origin_column_uses_filtered_label_without_placeholder() {
+		$test_cases = array(
+			array(
+				'source_type'     => 'trade-show',
+				'source'          => '',
+				'label'           => 'Trade show',
+				'expected_output' => 'Trade show',
+			),
+			// A placeholder is still filled with the formatted source, which is "Unknown" for a custom type.
+			array(
+				'source_type'     => 'trade-show',
+				'source'          => 'booth-12',
+				'label'           => 'Trade show: %s',
+				'expected_output' => 'Trade show: Unknown',
+			),
+			array(
+				'source_type'     => 'trade-show',
+				'source'          => '',
+				'label'           => '',
+				'expected_output' => 'Unknown',
+			),
+			array(
+				'source_type'     => 'utm',
+				'source'          => 'example',
+				'label'           => 'Campaign',
+				'expected_output' => 'Campaign',
+			),
+		);
+
+		$anon_test = Closure::bind(
+			function ( $order ) {
+				$this->output_origin_column( $order );
+			},
+			$this->attribution_class,
+			$this->attribution_class
+		);
+
+		foreach ( $test_cases as $test_case ) {
+			$order = $this->getMockBuilder( WC_Order::class )
+				->onlyMethods( array( 'get_meta' ) )
+				->getMock();
+			$order->method( 'get_meta' )
+				->willReturnOnConsecutiveCalls( $test_case['source_type'], $test_case['source'] );
+
+			$label_filter = function () use ( $test_case ) {
+				return $test_case['label'];
+			};
+			add_filter( 'wc_order_attribution_origin_label', $label_filter );
+
+			ob_start();
+			$anon_test( $order );
+			$output = ob_get_clean();
+
+			remove_filter( 'wc_order_attribution_origin_label', $label_filter );
+
+			$this->assertEquals( $test_case['expected_output'], $output, "Source type {$test_case['source_type']} with label '{$test_case['label']}'" );
+		}
+	}
+
+	/**
 	 * Tests that stamp_html_element outputs the correct HTML element.
 	 *
 	 * @return void
