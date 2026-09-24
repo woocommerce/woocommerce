@@ -67,7 +67,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * The token list is registered whatever the module's state. The write
 	 * endpoints are only registered while it is enabled, because the apps read
 	 * the 404 for a missing route as push notifications being unavailable.
-	 * Registering a second handler on an existing route adds to it.
+	 * Once the apps read that from {@see PushNotificationStatusRestController}
+	 * instead, the write endpoints can be registered unconditionally again and
+	 * left to their permission callbacks. Registering a second handler on an
+	 * existing route adds to it.
 	 *
 	 * @since 10.6.0
 	 *
