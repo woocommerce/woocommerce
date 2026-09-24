@@ -248,7 +248,7 @@ class PendingNotificationStore {
 	 * @param Notification[] $notifications The notifications about to be dispatched.
 	 * @return Notification[]
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	private function sort_with_new_orders_first( array $notifications ): array {
 		$new_orders = array();
