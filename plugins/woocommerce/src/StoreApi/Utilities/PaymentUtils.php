@@ -14,8 +14,8 @@ class PaymentUtils {
 	 * Callback for woocommerce_payment_methods_list_item filter to add token id
 	 * to the generated list.
 	 *
-	 * @param array     $list_item The current list item for the saved payment method.
-	 * @param \WC_Token $token     The token for the current list item.
+	 * @param array             $list_item The current list item for the saved payment method.
+	 * @param \WC_Payment_Token $token     The token for the current list item.
 	 *
 	 * @return array The list item with the token id added.
 	 */
@@ -48,11 +48,11 @@ class PaymentUtils {
 	/**
 	 * Returns enabled saved payment methods for a customer and the default method if there are multiple.
 	 *
-	 * @return array
+	 * @return array|null Null when no customer is logged in.
 	 */
 	public static function get_saved_payment_methods() {
 		if ( ! is_user_logged_in() ) {
-			return;
+			return null;
 		}
 
 		add_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'include_token_id_with_payment_methods' ], 10, 2 );
@@ -79,7 +79,7 @@ class PaymentUtils {
 			);
 		}
 
-		remove_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'include_token_id_with_payment_methods' ], 10, 2 );
+		remove_filter( 'woocommerce_payment_methods_list_item', [ self::class, 'include_token_id_with_payment_methods' ], 10 );
 
 		return $payment_methods;
 	}
