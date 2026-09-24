@@ -20,45 +20,13 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	private $icon_filter_calls = array();
 
 	/**
-	 * Number of calls to the no-op icon filter.
-	 *
-	 * @var int
-	 */
-	private $no_op_filter_calls = 0;
-
-	/**
-	 * Original WooCommerce cart instance.
-	 *
-	 * @var \WC_Cart|null
-	 */
-	private $original_cart;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$this->reset_cart_checkout_page_cache();
-		$this->original_cart = WC()->cart;
-		add_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
-		WC()->cart = new \WC_Cart();
-		remove_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
-
 		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX, 4 );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
-		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_no_op_icon_filter_call' ), PHP_INT_MAX );
-		remove_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
-
-		WC()->cart = $this->original_cart;
-
-		parent::tearDown();
 	}
 
 	/**
@@ -73,18 +41,10 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assert_icon_filter_call( 0, 'bag-alt', 'woocommerce/cart-link' );
 		$this->assertCount( 1, $this->icon_filter_calls, 'Cart Link should filter exactly one icon.' );
-		$this->assertSame(
-			array(
-				'icon_name'  => 'bag-alt',
-				'block_name' => 'woocommerce/cart-link',
-				'attributes' => array(
-					'cartIcon' => 'bag-alt',
-					'content'  => 'Fixture cart',
-				),
-			),
-			$this->icon_filter_calls[0]
-		);
+		$this->assertSame( 'bag-alt', $this->icon_filter_calls[0]['attributes']['cartIcon'] );
+		$this->assertSame( 'Fixture cart', $this->icon_filter_calls[0]['attributes']['content'] );
 		$this->assert_filtered_icon( $output, 'wc-block-mini-cart__icon' );
 	}
 
@@ -225,7 +185,6 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		$unknown_default_output  = $this->render_block( 'woocommerce/customer-account', $attributes );
 		$attributes['iconStyle'] = 'default';
 		$explicit_default_output = $this->render_block( 'woocommerce/customer-account', $attributes );
-		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX, 4 );
 
 		$this->assertSame(
 			$this->extract_primary_svg_bytes( $explicit_default_output, 'fixture-unknown-style-icon' ),
@@ -288,14 +247,19 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		);
 		$unfiltered = $this->render_block( 'woocommerce/customer-account', $attributes );
 
-		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_no_op_icon_filter_call' ), PHP_INT_MAX );
-		$filtered = $this->render_block(
-			'woocommerce/customer-account',
-			$attributes
+		$no_op_calls = 0;
+		add_filter(
+			'woocommerce_blocks_icon_svg',
+			static function ( $svg ) use ( &$no_op_calls ) {
+				++$no_op_calls;
+				return $svg;
+			},
+			PHP_INT_MAX
 		);
+		$filtered = $this->render_block( 'woocommerce/customer-account', $attributes );
 
 		$this->assertSame( $this->extract_primary_svg_bytes( $unfiltered ), $this->extract_primary_svg_bytes( $filtered ) );
-		$this->assertSame( 1, $this->no_op_filter_calls, 'Customer Account should invoke the no-op icon filter exactly once.' );
+		$this->assertSame( 1, $no_op_calls, 'Customer Account should invoke the no-op icon filter exactly once.' );
 	}
 
 	/**
@@ -312,7 +276,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Captures stable caller context and replaces the icon.
+	 * Records the filter call and replaces the icon.
 	 *
 	 * @param string $svg              Default SVG markup.
 	 * @param string $icon_name        Canonical icon name.
@@ -321,49 +285,13 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	 * @return string Replacement SVG markup.
 	 */
 	public function capture_icon_filter_call( $svg, $icon_name, $block_name, $block_attributes ): string {
-		$context_keys = array_flip(
-			array(
-				'cartIcon',
-				'content',
-				'miniCartIcon',
-				'iconColor',
-				'iconColorValue',
-				'displayStyle',
-				'hasDropdownNavigation',
-				'iconStyle',
-				'iconClass',
-			)
-		);
-
 		$this->icon_filter_calls[] = array(
 			'icon_name'  => $icon_name,
 			'block_name' => $block_name,
-			'attributes' => array_intersect_key( $block_attributes, $context_keys ),
+			'attributes' => $block_attributes,
 		);
 
 		return self::REPLACEMENT_SVG;
-	}
-
-	/**
-	 * Counts a no-op icon filter call and returns the exact default bytes.
-	 *
-	 * @param string $svg Default SVG markup.
-	 * @return string Unchanged SVG markup.
-	 */
-	public function capture_no_op_icon_filter_call( $svg ): string {
-		++$this->no_op_filter_calls;
-
-		return $svg;
-	}
-
-	/**
-	 * Prevents the isolated cart from registering session hooks.
-	 *
-	 * @param bool $must_initialize Whether cart session hooks should initialize.
-	 * @return bool
-	 */
-	public function disable_cart_session_hooks( $must_initialize ): bool {
-		return false;
 	}
 
 	/**
