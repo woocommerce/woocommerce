@@ -72,22 +72,16 @@ final class BlockIconUtils {
 	 */
 	public static function filter_block_icon( $default_svg, $icon_name, $block_name, $block_attributes ) {
 		/**
-		 * Filters eligible decorative block icon SVG markup during frontend/server rendering.
+		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
-		 * Supported callers are the Mini-Cart, Cart Link, and Customer Account primary icons. Block attributes contain caller-local render-time context and are not a normalized cross-block schema.
-		 * Mini-Cart and Cart Link report `cart`, `bag`, or `bag-alt`; Customer Account reports `default`, `line`, or `alt`. Match both the block name and icon name; future callers may add names.
-		 * This filter does not change editor previews, avatars, or functional controls such as the account dropdown caret. Customer Account calls it only for logged-out visitors or when avatars are off. Text-only account blocks never call it.
-		 * The exact unchanged default is byte-preserved. Changed non-empty strings are sanitized and validated as one static SVG.
-		 * Sanitization strips unsupported elements and attributes. The remaining markup must be one complete SVG containing only groups, paths, and basic shapes, without text or comments.
-		 * Inline styles, scripts, events, animation, images, references, gradients, masks, and filters are unsupported. Fill and stroke accept flat keywords/named colors, hex, and numeric RGB(A)/HSL(A); CSS escapes, variables, and resource URLs are rejected.
-		 * WooCommerce restores caller-owned root classes and decorative accessibility attributes, but the replacement owns its geometry and paint.
-		 * Use `currentColor` to inherit the control color. To retain an explicit Mini-Cart icon color, read it from the supplied block attributes and emit it in the replacement.
-		 * Empty or whitespace-only strings remove the icon. Non-string or invalid changed values fall back to the exact default.
+		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
+		 * An empty string removes the icon, and anything invalid falls back to the default. `BlockIconUtils` lists the accepted elements, attributes, and colors.
+		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
-		 * @param string $icon_name       Canonical icon name.
-		 * @param string $block_name      Block name.
-		 * @param array  $block_attributes Caller-local render-time block attributes.
+		 * @param string $icon_name        Icon name: `cart`, `bag`, or `bag-alt` for Mini-Cart and Cart Link; `default`, `line`, or `alt` for Customer Account. More may be added, so check the block name too.
+		 * @param string $block_name       Block name.
+		 * @param array  $block_attributes Block attributes at render time, as the block defines them. To keep a Mini-Cart's custom icon color, read it from here.
 		 *
 		 * @since 11.3.0
 		 */
