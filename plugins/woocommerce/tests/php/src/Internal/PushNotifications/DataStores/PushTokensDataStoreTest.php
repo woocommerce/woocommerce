@@ -963,6 +963,23 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the real totals when the requested page is past the last one.
+	 */
+	public function test_get_tokens_for_roles_reports_totals_for_a_page_past_the_end(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+		$wanted     = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 3, 10, array( 'device_uuid' => $wanted->get_device_uuid() ) );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
+
+	/**
 	 * @testdox Should return only the given user's tokens when filtered by user ID.
 	 */
 	public function test_get_tokens_for_roles_filters_by_user_id(): void {

@@ -505,8 +505,26 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
+			$result = $empty_result;
+
+			// WP_Query skips counting when a page comes back empty, so a page past the end would otherwise report no matches.
+			if ( $paginate && $page > 1 ) {
+				$count_query = new WP_Query(
+					array_merge(
+						$query_args,
+						array(
+							'paged'          => 1,
+							'posts_per_page' => 1,
+						)
+					)
+				);
+
+				$result['total']       = (int) $count_query->found_posts;
+				$result['total_pages'] = (int) ceil( $result['total'] / $per_page );
+			}
+
+			$this->tokens_by_roles_cache[ $cache_key ] = $result;
+			return $result;
 		}
 
 		_prime_post_caches( $post_ids, false, true );
