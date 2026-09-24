@@ -294,6 +294,41 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox A taxonomy cannot claim another filter's parameter.
+	 */
+	public function test_taxonomy_param_collisions_keep_defaults(): void {
+		foreach ( array( 'categories', 'tags', 'min_price', 'max_price', 'rating_filter', 'filter_stock_status', 'filter_color', 'query_type_color' ) as $claimed_param ) {
+			$this->taxonomy_params_filter = static function ( array $params ) use ( $claimed_param ): array {
+				$params['product_brand'] = $claimed_param;
+				return $params;
+			};
+			add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+			$this->assertSame( 'brands', $this->sut->get_param( 'taxonomy' )['product_brand'], "The brand filter must not claim {$claimed_param}." );
+
+			remove_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+			$this->taxonomy_params_filter = null;
+			$this->clear_params_cache();
+		}
+	}
+
+	/**
+	 * @testdox Two taxonomies cannot be renamed to the same new parameter.
+	 */
+	public function test_duplicate_taxonomy_renames_keep_one_default(): void {
+		$this->taxonomy_params_filter = static function ( array $params ): array {
+			$params['product_tag']   = 'wc_shared';
+			$params['product_brand'] = 'wc_shared';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$this->assertSame( 1, array_count_values( $taxonomy_params )['wc_shared'] ?? 0 );
+		$this->assertTrue( 'tags' === $taxonomy_params['product_tag'] || 'brands' === $taxonomy_params['product_brand'], 'A colliding rename must keep its default.' );
+	}
+
+	/**
 	 * @testdox Omitting a taxonomy from the filtered map keeps its default parameter.
 	 */
 	public function test_omitted_taxonomy_param_keeps_default(): void {
