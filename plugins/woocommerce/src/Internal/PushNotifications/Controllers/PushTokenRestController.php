@@ -105,8 +105,9 @@ class PushTokenRestController extends RestApiControllerBase {
 						'device_uuid' => array(
 							'description'       => __( 'Limit results to tokens registered by this device.', 'woocommerce' ),
 							'type'              => 'string',
+							'maxLength'         => PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH,
 							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => array( $this, 'validate_argument' ),
+							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),

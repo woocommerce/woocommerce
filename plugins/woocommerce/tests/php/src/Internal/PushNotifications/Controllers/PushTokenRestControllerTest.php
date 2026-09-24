@@ -1946,6 +1946,19 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a device_uuid that is not a string.
+	 */
+	public function test_index_rejects_a_non_string_device_uuid(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'device_uuid', array( 'filter-device-1' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
 	 * Creates a token for the index filter tests, named so the token and
 	 * device UUID can be asserted on.
 	 *
