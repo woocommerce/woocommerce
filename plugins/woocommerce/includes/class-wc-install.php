@@ -8,7 +8,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
-use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
@@ -361,6 +360,9 @@ class WC_Install {
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
 		),
+		'11.3.0'   => array(
+			'wc_update_1130_set_legacy_variation_price_hash_option',
+		),
 	);
 
 	/**
@@ -402,6 +404,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'disable_legacy_variation_price_hash_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -1278,21 +1281,7 @@ class WC_Install {
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
-		$is_new_install = self::is_new_install();
-
-		// New stores keep the cart through logout; existing stores stay on the behavior they have always
-		// had, and their merchants opt in. This runs here rather than as an update callback so the value
-		// is in place before anything can read it: update callbacks are queued through Action Scheduler,
-		// which would leave a window where the setting is visible but not yet corrected. add_option() is
-		// a no-op once a value exists, so a merchant's own choice is never overwritten.
-		add_option(
-			'woocommerce_cart_behavior_on_logout',
-			$is_new_install ? CartBehaviorOnLogout::PRESERVE : CartBehaviorOnLogout::CLEAR,
-			'',
-			false
-		);
-
-		if ( $is_new_install ) {
+		if ( self::is_new_install() ) {
 			// Define initial tax classes.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
@@ -1386,6 +1375,17 @@ class WC_Install {
 	public static function enable_product_instance_caching_for_newly_installed(): void {
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		$feature_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
+	}
+
+	/**
+	 * Disable the legacy variations price hash algorithm for new stores.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function disable_legacy_variation_price_hash_for_newly_installed(): void {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no', '', true );
 	}
 
 	/**
@@ -3247,9 +3247,9 @@ EOT;
 <!-- wp:woocommerce/empty-cart-block -->
 <div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
-<!-- wp:separator {"className":"is-style-dots"} -->
-<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
-<!-- /wp:separator -->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 

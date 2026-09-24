@@ -4010,3 +4010,14 @@ function wc_update_11203_normalize_stock_notification_emails() {
 
 	return false;
 }
+
+/**
+ * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
+ *
+ * @return void
+ */
+function wc_update_1130_set_legacy_variation_price_hash_option() {
+	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
+	}
+}

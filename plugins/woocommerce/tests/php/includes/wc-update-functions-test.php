@@ -835,4 +835,23 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
 	}
+
+	/**
+	 * @testdox wc_update_1130_set_legacy_variation_price_hash_option sets the option when absent and skips when already set.
+	 */
+	public function test_wc_update_1130_set_legacy_variation_price_hash_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		// When the option does not exist, the migration must create it with 'yes'.
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+		wc_update_1130_set_legacy_variation_price_hash_option();
+		$this->assertSame( 'yes', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must set "yes" for existing stores.' );
+
+		// When the option already exists (e.g. new store set to 'no'), the migration must not overwrite it.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no' );
+		wc_update_1130_set_legacy_variation_price_hash_option();
+		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
+
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+	}
 }

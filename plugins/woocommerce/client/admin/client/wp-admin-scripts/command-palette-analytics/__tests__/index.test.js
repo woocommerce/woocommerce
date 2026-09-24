@@ -49,6 +49,7 @@ describe( 'Analytics Command Palette', () => {
 
 	it.each( [
 		{ caseName: 'missing global', analytics: undefined },
+		{ caseName: 'null global', analytics: null },
 		{ caseName: 'missing reports', analytics: {} },
 		{ caseName: 'non-array reports', analytics: { reports: {} } },
 		{ caseName: 'empty reports', analytics: { reports: [] } },

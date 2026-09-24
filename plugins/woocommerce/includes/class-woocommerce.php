@@ -438,7 +438,6 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Cart\CartLogoutBehavior::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -1599,7 +1598,7 @@ final class WooCommerce {
 	 *
 	 * @param string $old_value The old value for the woocommerce_allow_tracking option.
 	 * @param string $value The current value for the woocommerce_allow_tracking option.
-	 * @since x.x.x
+	 * @since 9.5.2
 	 *
 	 * @return void
 	 */
