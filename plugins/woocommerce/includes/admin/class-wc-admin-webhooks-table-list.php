@@ -206,7 +206,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		return array(
 			'activate'   => __( 'Activate', 'woocommerce' ),
 			'pause'      => __( 'Pause', 'woocommerce' ),
-			'deactivate' => __( 'Deactivate', 'woocommerce' ),
+			'deactivate' => __( 'Disabled', 'woocommerce' ),
 			'delete'     => __( 'Delete permanently', 'woocommerce' ),
 		);
 	}
