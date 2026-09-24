@@ -135,7 +135,7 @@ export interface ProductCollectionQuery {
 	 * filter blocks all agree with the collection. Undefined means the store
 	 * default applies.
 	 */
-	archivePerPage?: number;
+	archivePerPage?: number | undefined;
 }
 
 export type RelatedBy = {

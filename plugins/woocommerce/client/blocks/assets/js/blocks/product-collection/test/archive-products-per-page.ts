@@ -27,9 +27,12 @@ describe( 'archivePerPage', () => {
 
 	it( 'is cleared when the archive control is reset', () => {
 		expect(
-			getUpdatedQuery( getQuery( { inherit: true, archivePerPage: 24 } ), {
-				archivePerPage: undefined,
-			} ).archivePerPage
+			getUpdatedQuery(
+				getQuery( { inherit: true, archivePerPage: 24 } ),
+				{
+					archivePerPage: undefined,
+				}
+			).archivePerPage
 		).toBeUndefined();
 	} );
 
