@@ -239,6 +239,42 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the taxable address unchanged for a products request dispatched from a mini-cart callback.
+	 */
+	public function test_leaves_address_unchanged_for_products_request_dispatched_from_mini_cart(): void {
+		$this->create_billing_country_tax_rate();
+		$this->add_product_to_cart( true );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		$inner_recorded = null;
+
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( &$inner_recorded ): void {
+					$this->register_test_route(
+						'/wc/store/v1/products',
+						function ( $request ) use ( &$inner_recorded ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							$inner_recorded = $this->customer->get_taxable_address();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+				},
+			)
+		);
+		$dispatch_products = function (): void {
+			rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		};
+		add_action( 'woocommerce_before_mini_cart_contents', $dispatch_products );
+
+		ob_start();
+		woocommerce_mini_cart();
+		$mini_cart = (string) ob_get_clean();
+
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $inner_recorded, 'A products request inside the mini-cart should not use the billing address.' );
+		$this->assertMatchesRegularExpression( '#<span class="quantity">1 &times; <span class="woocommerce-Price-amount amount">.*?12\.00</bdi>#s', $mini_cart, 'Mini-cart line prices after the nested request should still include the billing country tax.' );
+	}
+
+	/**
 	 * @testdox Restores the Store API cart request context after nested requests.
 	 *
 	 * Registers real routes and drives them through rest_do_request() so the

@@ -21,9 +21,9 @@ class NonShippingCartTaxLocation {
 	private $dispatch_stack = array();
 
 	/**
-	 * Map of dispatch IDs to their cart/checkout context.
+	 * Map of dispatch IDs to their cart/checkout context and the cart context depth when the dispatch started.
 	 *
-	 * @var array<int, bool>
+	 * @var array<int, array{is_cart_or_checkout: bool, cart_context_depth: int}>
 	 */
 	private $dispatch_contexts = array();
 
@@ -100,7 +100,10 @@ class NonShippingCartTaxLocation {
 		$dispatch_id         = spl_object_id( $request );
 		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
 
-		$this->dispatch_contexts[ $dispatch_id ] = $is_cart_or_checkout;
+		$this->dispatch_contexts[ $dispatch_id ] = array(
+			'is_cart_or_checkout' => $is_cart_or_checkout,
+			'cart_context_depth'  => $this->cart_context_depth,
+		);
 		$this->dispatch_stack[]                  = $dispatch_id;
 
 		return $response;
@@ -219,15 +222,14 @@ class NonShippingCartTaxLocation {
 	 * @return bool True for cart totals, mini-cart renders, the cart and checkout pages, and Store API cart and checkout requests.
 	 */
 	private function is_cart_context(): bool {
-		if ( $this->cart_context_depth > 0 ) {
-			return true;
+		$dispatch_context = empty( $this->dispatch_stack ) ? null : ( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] ?? null );
+
+		if ( null !== $dispatch_context ) {
+			// A cart context started inside this dispatch applies; one inherited from outside it is overridden by the route.
+			return $this->cart_context_depth > $dispatch_context['cart_context_depth'] || $dispatch_context['is_cart_or_checkout'];
 		}
 
-		if ( ! empty( $this->dispatch_stack ) ) {
-			return ! empty( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] );
-		}
-
-		return is_cart() || is_checkout();
+		return $this->cart_context_depth > 0 || is_cart() || is_checkout();
 	}
 
 	/**
