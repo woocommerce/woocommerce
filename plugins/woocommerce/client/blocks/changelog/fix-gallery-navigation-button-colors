@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use global button colors for gallery and carousel navigation while preserving compact sizing and custom colors.
