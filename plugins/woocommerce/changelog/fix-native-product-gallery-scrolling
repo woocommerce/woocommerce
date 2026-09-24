@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve product gallery swiping and keep thumbnails in sync while scrolling.
