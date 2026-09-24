@@ -69,6 +69,21 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	const SPLIT_CURSOR_OPTION = 'woocommerce_order_tax_lookup_split_migration_last_order_id';
 
 	/**
+	 * Option holding the highest order id the lookup table held when the taxable amount split
+	 * update ran.
+	 *
+	 * Every row up to it predates the split. A row whose base nets to zero, such as a negative fee
+	 * offsetting shipping at the same rate, has parts that the base alone does not show, so the
+	 * split pass rebuilds every row up to here that holds no split. Past it, a row with no split
+	 * really did apply to nothing, unless it still carries a base.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string
+	 */
+	const SPLIT_END_OPTION = 'woocommerce_order_tax_lookup_split_migration_end_order_id';
+
+	/**
 	 * How far `get_total_pending_count()` counts before it reports "this many or more".
 	 *
 	 * Nothing indexes the tax order item column, so counting every order left to rebuild reads the
@@ -114,7 +129,8 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * A pass is only offered once the columns it reads are there, so that a store still waiting on
 	 * the schema update counts and rebuilds the rows it can.
 	 *
-	 * @return array[] List of `array( 'condition' => string, 'cursor' => string )`.
+	 * @return array[] List of `array( 'condition' => string, 'values' => int[], 'cursor' => string )`,
+	 *                 the values in the placeholder order of the condition.
 	 */
 	private function get_pending_passes(): array {
 		$passes = array(
@@ -122,6 +138,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			// default of the column.
 			array(
 				'condition' => 'order_item_id = 0',
+				'values'    => array(),
 				'cursor'    => self::CURSOR_OPTION,
 			),
 		);
@@ -129,10 +146,11 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		// The base says a row predates the split, so both it and the split columns have to be
 		// there to tell such a row apart from one that really did apply to nothing.
 		if ( TaxesDataStore::has_taxable_amount_column() && TaxesDataStore::has_taxable_amount_split_columns() ) {
-			// A row holding a base but no split predates the split; one whose base is zero has
-			// nothing to split, so rebuilding it would change nothing and it is left alone.
+			// A row holding a base but no split predates the split. Up to SPLIT_END_OPTION so
+			// does a row with no base, whose parts can offset each other.
 			$passes[] = array(
-				'condition' => 'order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0',
+				'condition' => 'order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND ( taxable_amount <> 0 OR order_id <= %d )',
+				'values'    => array( (int) get_option( self::SPLIT_END_OPTION, 0 ) ),
 				'cursor'    => self::SPLIT_CURSOR_OPTION,
 			);
 		}
@@ -151,7 +169,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		foreach ( $this->get_pending_passes() as $pass ) {
 			$clauses[] = "( order_id > %d AND ( {$pass['condition']} ) )";
-			$values[]  = $this->get_cursor( $pass['cursor'] );
+			$values    = array_merge( $values, array( $this->get_cursor( $pass['cursor'] ) ), $pass['values'] );
 		}
 
 		return array(

@@ -152,7 +152,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return "SUM({$column}) as {$column}";
 		}
 
-		// The same row shape the rebuild counts as pending. See OrderTaxLookupMigrator.
+		// The row shape the rebuild counts as pending, less the rows whose base nets to zero,
+		// which read the same as a rate that applied to nothing. See OrderTaxLookupMigrator.
 		$unsplit_rows = 'SUM( CASE WHEN order_taxable_amount = 0 AND shipping_taxable_amount = 0 AND taxable_amount <> 0 THEN 1 ELSE 0 END )';
 
 		return "CASE WHEN {$unsplit_rows} > 0 THEN NULL ELSE SUM({$column}) END as {$column}";

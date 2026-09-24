@@ -51,6 +51,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
 		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_END_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		$this->sut = wc_get_container()->get( OrderTaxLookupMigrator::class );
@@ -63,6 +64,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
 		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_END_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( OrderTaxLookupMigrator::class );
 
@@ -113,9 +115,10 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	 * Create a completed DE order with two product units, a fee and shipping, all taxed at one
 	 * registered rate, and let the analytics sync record it.
 	 *
+	 * @param string $fee_total Fee total, negative for a discount.
 	 * @return WC_Order
 	 */
-	private function seed_taxed_order(): WC_Order {
+	private function seed_taxed_order( string $fee_total = '10' ): WC_Order {
 		update_option( 'woocommerce_tax_based_on', 'billing' );
 		update_option( 'woocommerce_shipping_tax_class', '' );
 
@@ -145,7 +148,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		$fee = new \WC_Order_Item_Fee();
 		$fee->set_name( 'Handling' );
-		$fee->set_total( '10' );
+		$fee->set_total( $fee_total );
 		$fee->set_tax_status( 'taxable' );
 		$order->add_item( $fee );
 
@@ -631,6 +634,40 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should reach an order the earlier pass has stepped past.' );
 		$this->assertTrue( $batch_processor->is_enqueued( OrderTaxLookupMigrator::class ), 'The update should hand the rebuild to the batch processing controller.' );
 		$this->assertNotSame( $cache_version, ReportsCache::get_version(), 'The update should invalidate the cached report responses, which last a week.' );
+	}
+
+	/**
+	 * @testdox The split pass rebuilds an order whose base nets to zero, up to where the table ended when the update ran.
+	 */
+	public function test_split_pass_rebuilds_a_base_that_nets_to_zero(): void {
+		global $wpdb;
+
+		// A negative fee takes the order part to -5, which offsets the 5 of shipping.
+		$order = $this->seed_taxed_order( '-205' );
+		$this->unsplit_lookup_rows( $order->get_id(), 0.0 );
+
+		wc_update_1130_split_tax_lookup_taxable_amount();
+
+		$later = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $later->get_id(), 0.0 );
+
+		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::SPLIT_END_OPTION ), 'The update should mark the highest order id the table held.' );
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'Only the order recorded before the update should be pending. A later one with no base really did apply to nothing.' );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$table_name = TaxesDataStore::get_db_table_name();
+		$sums       = $wpdb->get_row(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT SUM(order_taxable_amount) AS order_part, SUM(shipping_taxable_amount) AS shipping_part FROM {$table_name} WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertSame( -5.0, (float) $sums->order_part, 'The rebuild should record the order part.' );
+		$this->assertSame( 5.0, (float) $sums->shipping_part, 'The rebuild should record the shipping part.' );
+		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'Nothing should be left pending once the pass is through.' );
 	}
 
 	/**
