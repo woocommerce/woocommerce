@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Stop URL-encoding array event properties twice so Tracks stores the plain comma-joined value.

@@ -222,4 +222,16 @@ class ControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $item, $received_item, 'Filter should receive the original report item as second argument' );
 	}
+
+	/**
+	 * @testdox The collection accepts the location filter parameters, so the report and its export can be narrowed to a region.
+	 */
+	public function test_get_collection_params_registers_the_location_filter(): void {
+		$params = $this->sut->get_collection_params();
+
+		$this->assertArrayHasKey( 'location_includes', $params, 'The report should accept an included location list.' );
+		$this->assertArrayHasKey( 'location_excludes', $params, 'The report should accept an excluded location list.' );
+		$this->assertSame( 'string', $params['location_includes']['type'], 'Locations are passed as a comma separated list.' );
+		$this->assertSame( 'string', $params['location_excludes']['type'], 'Locations are passed as a comma separated list.' );
+	}
 }

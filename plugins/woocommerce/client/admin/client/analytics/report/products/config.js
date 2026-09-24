@@ -75,15 +75,17 @@ const filterConfig = {
 					chartMode: 'item-comparison',
 					path: [ 'select_product' ],
 					settings: {
-						type: 'products',
 						param: 'products',
 						getLabels: getProductLabels,
 						labels: {
+							button: __( 'Single product', 'woocommerce' ),
+						},
+						searchProps: {
+							type: 'products',
 							placeholder: __(
 								'Type to search for a product',
 								'woocommerce'
 							),
-							button: __( 'Single product', 'woocommerce' ),
 						},
 					},
 				},
@@ -94,7 +96,6 @@ const filterConfig = {
 			value: 'compare-products',
 			chartMode: 'item-comparison',
 			settings: {
-				type: 'products',
 				param: 'products',
 				getLabels: getProductLabels,
 				labels: {
@@ -102,12 +103,15 @@ const filterConfig = {
 						'Check at least two products below to compare',
 						'woocommerce'
 					),
+					title: __( 'Compare Products', 'woocommerce' ),
+					update: __( 'Compare', 'woocommerce' ),
+				},
+				searchProps: {
+					type: 'products',
 					placeholder: __(
 						'Search for products to compare',
 						'woocommerce'
 					),
-					title: __( 'Compare Products', 'woocommerce' ),
-					update: __( 'Compare', 'woocommerce' ),
 				},
 				onClick: addCesSurveyForAnalytics,
 			},
@@ -137,15 +141,17 @@ const variationsConfig = {
 					value: 'single_variation',
 					path: [ 'select_variation' ],
 					settings: {
-						type: 'variations',
 						param: 'variations',
 						getLabels: getVariationLabels,
 						labels: {
+							button: __( 'Single variation', 'woocommerce' ),
+						},
+						searchProps: {
+							type: 'variations',
 							placeholder: __(
 								'Type to search for a variation',
 								'woocommerce'
 							),
-							button: __( 'Single variation', 'woocommerce' ),
 						},
 					},
 				},
@@ -156,7 +162,6 @@ const variationsConfig = {
 			chartMode: 'item-comparison',
 			value: 'compare-variations',
 			settings: {
-				type: 'variations',
 				param: 'variations',
 				getLabels: getVariationLabels,
 				labels: {
@@ -164,12 +169,15 @@ const variationsConfig = {
 						'Check at least two variations below to compare',
 						'woocommerce'
 					),
+					title: __( 'Compare Variations', 'woocommerce' ),
+					update: __( 'Compare', 'woocommerce' ),
+				},
+				searchProps: {
+					type: 'variations',
 					placeholder: __(
 						'Search for variations to compare',
 						'woocommerce'
 					),
-					title: __( 'Compare Variations', 'woocommerce' ),
-					update: __( 'Compare', 'woocommerce' ),
 				},
 			},
 		},
