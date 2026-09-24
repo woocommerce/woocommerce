@@ -108,6 +108,53 @@ class ProductsStore {
 	}
 
 	/**
+	 * Returns $value when it is an array, or $fallback otherwise.
+	 *
+	 * Treats a value read out of the externally writable `woocommerce`
+	 * state or the element's context as absent when its shape does not
+	 * match, instead of handing it to an array base or a strictly typed
+	 * array parameter.
+	 *
+	 * @param mixed $value    The value read from seeded state or context.
+	 * @param array $fallback The value to use when $value is not an array.
+	 * @return array $value when it is an array, otherwise $fallback.
+	 */
+	private static function as_array( $value, array $fallback = array() ): array {
+		return is_array( $value ) ? $value : $fallback;
+	}
+
+	/**
+	 * Whether $value can be used as an array offset (a string or an int).
+	 *
+	 * Guards a resolved product ID, cart item ID and scope name before any
+	 * of them indexes into state: PHP throws when an array or object is
+	 * used as an array offset, and a non-integral float offset is
+	 * deprecated, so a float is rejected here too.
+	 *
+	 * @param mixed $value The value to check.
+	 * @return bool Whether $value is a string or an int.
+	 */
+	private static function is_usable_as_array_key( $value ): bool {
+		return is_string( $value ) || is_int( $value );
+	}
+
+	/**
+	 * Returns $value when it is a string, or $fallback otherwise.
+	 *
+	 * Treats a value read out of externally writable state as absent when
+	 * its shape does not match a strictly typed string parameter or
+	 * return, or would otherwise trigger an "Array to string conversion"
+	 * warning.
+	 *
+	 * @param mixed  $value    The value read from seeded state or context.
+	 * @param string $fallback The value to use when $value is not a string.
+	 * @return string $value when it is a string, otherwise $fallback.
+	 */
+	private static function as_string( $value, string $fallback = '' ): string {
+		return is_string( $value ) ? $value : $fallback;
+	}
+
+	/**
 	 * Register the derived-state getters once.
 	 *
 	 * Registers the `productScope` envelope on `woocommerce` and the
@@ -194,36 +241,54 @@ class ProductsStore {
 	/**
 	 * Build the `productScope` envelope for the element currently rendering.
 	 *
-	 * Each member is a closure so directives can read
-	 * `state.productScope.<member>`.
+	 * The `woocommerce` state is writable by any plugin, theme or block, so
+	 * a value of the wrong shape at any depth is treated as absent, and
+	 * resolution continues in the usual order (record, then context, then
+	 * template).
 	 *
 	 * @return array<string, \Closure> The envelope, keyed by member name.
 	 */
 	private static function build_product_scope_envelope(): array {
-		$context  = wp_interactivity_get_context( self::$data_namespace );
-		$state    = wp_interactivity_state( self::$data_namespace );
-		$record   = ( $state['productScopes'] ?? array() )[ $context['scopeName'] ?? '_default' ] ?? array();
-		$template = $state['template'] ?? array();
+		$context        = wp_interactivity_get_context( self::$data_namespace );
+		$state          = wp_interactivity_state( self::$data_namespace );
+		$product_scopes = self::as_array( $state['productScopes'] ?? array() );
+		$scope_key      = $context['scopeName'] ?? '_default';
 
-		$resolve = function ( string $key, $fallback ) use ( $context, $template ) {
-			if ( array_key_exists( $key, $context ) ) {
+		if ( ! self::is_usable_as_array_key( $scope_key ) ) {
+			$scope_key = '_default';
+		}
+
+		$record   = self::as_array( $product_scopes[ $scope_key ] ?? array() );
+		$template = self::as_array( $state['template'] ?? array() );
+
+		$resolve = function ( string $key, $fallback, callable $is_valid ) use ( $context, $template ) {
+			if ( array_key_exists( $key, $context ) && $is_valid( $context[ $key ] ) ) {
 				return $context[ $key ];
 			}
-			return array_key_exists( $key, $template ) ? $template[ $key ] : $fallback;
+			if ( array_key_exists( $key, $template ) && $is_valid( $template[ $key ] ) ) {
+				return $template[ $key ];
+			}
+			return $fallback;
 		};
 
-		$scope_name = function () use ( $context ) {
-			return $context['scopeName'] ?? '_default';
+		$scope_name = function () use ( $scope_key ) {
+			return $scope_key;
 		};
 
-		$record_draft = $record['draftCartItem'] ?? array();
+		$record_draft = self::as_array( $record['draftCartItem'] ?? array() );
 
 		$product_id = function () use ( $record_draft, $resolve ) {
-			return array_key_exists( 'id', $record_draft ) ? $record_draft['id'] : $resolve( 'productId', 0 );
+			if ( array_key_exists( 'id', $record_draft ) && self::is_usable_as_array_key( $record_draft['id'] ) ) {
+				return $record_draft['id'];
+			}
+			return $resolve( 'productId', 0, array( self::class, 'is_usable_as_array_key' ) );
 		};
 
 		$variation = function () use ( $record_draft, $resolve ) {
-			return array_key_exists( 'variation', $record_draft ) ? $record_draft['variation'] : $resolve( 'variation', array() );
+			if ( array_key_exists( 'variation', $record_draft ) && is_array( $record_draft['variation'] ) ) {
+				return $record_draft['variation'];
+			}
+			return $resolve( 'variation', array(), 'is_array' );
 		};
 
 		$base_product = function () use ( $state, $product_id, $variation ) {
@@ -239,11 +304,12 @@ class ProductsStore {
 		};
 
 		$cart_item = function () use ( $state, $context, $product, $product_id, $variation ) {
-			$items = $state['cart']['items'] ?? array();
+			$items = self::as_array( self::as_array( $state['cart'] ?? array() )['items'] ?? array() );
 			$key   = $context['cartItemKey'] ?? null;
 
 			if ( $key ) {
 				foreach ( $items as $item ) {
+					$item = self::as_array( $item );
 					if ( ( $item['key'] ?? null ) === $key ) {
 						return $item;
 					}
@@ -252,7 +318,11 @@ class ProductsStore {
 			}
 
 			$resolved_product = $product();
-			$id               = $resolved_product['id'] ?? $product_id();
+			$id               = $resolved_product['id'] ?? null;
+
+			if ( ! self::is_usable_as_array_key( $id ) ) {
+				$id = $product_id();
+			}
 
 			return self::find_matching_cart_item( $items, $state, $id, $variation() );
 		};
@@ -260,10 +330,10 @@ class ProductsStore {
 		$draft_cart_item = function () use ( $record_draft, $product_id, $variation ) {
 			$draft = $record_draft;
 
-			if ( ! array_key_exists( 'id', $draft ) ) {
+			if ( ! array_key_exists( 'id', $draft ) || ! self::is_usable_as_array_key( $draft['id'] ) ) {
 				$draft['id'] = $product_id();
 			}
-			if ( ! array_key_exists( 'variation', $draft ) ) {
+			if ( ! array_key_exists( 'variation', $draft ) || ! is_array( $draft['variation'] ) ) {
 				$draft['variation'] = $variation();
 			}
 			if ( ! array_key_exists( 'quantity', $draft ) ) {
@@ -299,19 +369,26 @@ class ProductsStore {
 	 * @return array{baseProduct: array|null, productVariation: array|null, product: array|null} The three resolved product members.
 	 */
 	private static function resolve_product_members( array $state, $product_id, array $variation ): array {
-		$product_variations = $state['productVariations'] ?? array();
-		$products           = $state['products'] ?? array();
+		$product_variations = self::as_array( $state['productVariations'] ?? array() );
+		$products           = self::as_array( $state['products'] ?? array() );
 
-		$direct_variation = $product_variations[ $product_id ] ?? null;
+		$direct_variation = self::is_usable_as_array_key( $product_id ) ? ( $product_variations[ $product_id ] ?? null ) : null;
+		$direct_variation = is_array( $direct_variation ) ? $direct_variation : null;
+
 		if ( $direct_variation ) {
+			$parent_id    = $direct_variation['parent'] ?? null;
+			$base_product = self::is_usable_as_array_key( $parent_id ) ? ( $products[ $parent_id ] ?? null ) : null;
+
 			return array(
-				'baseProduct'      => $products[ $direct_variation['parent'] ?? null ] ?? null,
+				'baseProduct'      => is_array( $base_product ) ? $base_product : null,
 				'productVariation' => $direct_variation,
 				'product'          => $direct_variation,
 			);
 		}
 
-		$base_product = $products[ $product_id ] ?? null;
+		$base_product = self::is_usable_as_array_key( $product_id ) ? ( $products[ $product_id ] ?? null ) : null;
+		$base_product = is_array( $base_product ) ? $base_product : null;
+
 		if ( ! $base_product || empty( $variation ) ) {
 			return array(
 				'baseProduct'      => $base_product,
@@ -346,15 +423,24 @@ class ProductsStore {
 	 * @return array|null The matching variation, or null when none matches.
 	 */
 	private static function find_matching_variation( array $base_product, array $product_variations, array $variation ): ?array {
-		$product_attributes = $base_product['attributes'] ?? array();
+		$product_attributes = self::as_array( $base_product['attributes'] ?? array() );
 
-		foreach ( $base_product['variations'] ?? array() as $summary ) {
+		foreach ( self::as_array( $base_product['variations'] ?? array() ) as $summary ) {
 			// The Store API schema builds each variation summary as an object.
-			$candidate = (array) $summary;
+			$candidate            = (array) $summary;
+			$candidate_attributes = self::as_array( $candidate['attributes'] ?? array() );
 
-			if ( self::variation_attributes_match( $product_attributes, $candidate['attributes'] ?? array(), $variation ) ) {
-				return $product_variations[ $candidate['id'] ?? null ] ?? null;
+			if ( ! self::variation_attributes_match( $product_attributes, $candidate_attributes, $variation ) ) {
+				continue;
 			}
+
+			$candidate_id = $candidate['id'] ?? null;
+			if ( ! self::is_usable_as_array_key( $candidate_id ) ) {
+				return null;
+			}
+
+			$matched_variation = $product_variations[ $candidate_id ] ?? null;
+			return is_array( $matched_variation ) ? $matched_variation : null;
 		}
 
 		return null;
@@ -379,10 +465,12 @@ class ProductsStore {
 		}
 
 		foreach ( $candidate_attributes as $attribute ) {
-			$selected = null;
+			$attribute = self::as_array( $attribute );
+			$selected  = null;
 
 			foreach ( $variation as $entry ) {
-				if ( self::attribute_names_match( $attribute['name'] ?? '', $entry['attribute'] ?? '' ) ) {
+				$entry = self::as_array( $entry );
+				if ( self::attribute_names_match( self::as_string( $attribute['name'] ?? '' ), self::as_string( $entry['attribute'] ?? '' ) ) ) {
 					$selected = $entry;
 					break;
 				}
@@ -399,9 +487,9 @@ class ProductsStore {
 				return false;
 			}
 
-			$slug = self::resolve_term_slug( $product_attributes, $attribute['name'] ?? '', $attribute['value'] );
+			$slug = self::resolve_term_slug( $product_attributes, self::as_string( $attribute['name'] ?? '' ), self::as_string( $attribute['value'] ) );
 
-			if ( strtolower( (string) ( $selected['value'] ?? '' ) ) !== strtolower( $slug ) ) {
+			if ( strtolower( self::as_string( $selected['value'] ?? '' ) ) !== strtolower( $slug ) ) {
 				return false;
 			}
 		}
@@ -415,17 +503,28 @@ class ProductsStore {
 	 *
 	 * @param array      $items     The seeded cart lines.
 	 * @param array      $state     The full `woocommerce` state, for attribute matching.
-	 * @param int|string $id        The resolved product's ID (a variation ID when one is selected).
+	 * @param int|string $id        The resolved product's ID (a variation ID when one is selected), already usable as an array key.
 	 * @param array      $variation The resolved selection, as `{ attribute, value }` entries.
 	 * @return array|null The matching cart line, or null when none matches.
 	 */
 	private static function find_matching_cart_item( array $items, array $state, $id, array $variation ): ?array {
+		$id_int = (int) $id;
+
 		foreach ( $items as $item ) {
+			$item = self::as_array( $item );
+
+			if ( ! self::is_usable_as_array_key( $item['id'] ?? null ) ) {
+				continue;
+			}
+
+			$item_id = (int) $item['id'];
+
 			if ( 'variation' === ( $item['type'] ?? null ) ) {
 				$item_variation = $item['variation'] ?? null;
 
 				if (
-					(int) ( $item['id'] ?? 0 ) !== (int) $id
+					! is_array( $item_variation )
+					|| $item_id !== $id_int
 					|| empty( $item_variation )
 					|| empty( $variation )
 					|| count( $item_variation ) !== count( $variation )
@@ -440,7 +539,7 @@ class ProductsStore {
 				continue;
 			}
 
-			if ( (int) ( $item['id'] ?? 0 ) === (int) $id ) {
+			if ( $item_id === $id_int ) {
 				return $item;
 			}
 		}
@@ -466,19 +565,27 @@ class ProductsStore {
 			return false;
 		}
 
-		$parent_id          = $state['productVariations'][ $cart_item['id'] ?? null ]['parent'] ?? null;
-		$product_attributes = $state['products'][ $parent_id ]['attributes'] ?? array();
+		$product_variations = self::as_array( $state['productVariations'] ?? array() );
+		$item_id            = $cart_item['id'] ?? null;
+		$variation_entry    = self::is_usable_as_array_key( $item_id ) ? self::as_array( $product_variations[ $item_id ] ?? array() ) : array();
+		$parent_id          = $variation_entry['parent'] ?? null;
+
+		$products           = self::as_array( $state['products'] ?? array() );
+		$parent_entry       = self::is_usable_as_array_key( $parent_id ) ? self::as_array( $products[ $parent_id ] ?? array() ) : array();
+		$product_attributes = self::as_array( $parent_entry['attributes'] ?? array() );
 
 		foreach ( $cart_item_variation as $entry ) {
-			$attribute = $entry['attribute'] ?? '';
-			$term_name = $entry['value'] ?? '';
+			$entry     = self::as_array( $entry );
+			$attribute = self::as_string( $entry['attribute'] ?? '' );
+			$term_name = self::as_string( $entry['value'] ?? '' );
 			$term_slug = self::resolve_term_slug( $product_attributes, $attribute, $term_name );
 			$matched   = false;
 
 			foreach ( $selected_attributes as $selected ) {
+				$selected = self::as_array( $selected );
 				if (
-					self::attribute_names_match( $selected['attribute'] ?? '', $attribute )
-					&& strtolower( (string) ( $selected['value'] ?? '' ) ) === strtolower( (string) $term_slug )
+					self::attribute_names_match( self::as_string( $selected['attribute'] ?? '' ), $attribute )
+					&& strtolower( self::as_string( $selected['value'] ?? '' ) ) === strtolower( $term_slug )
 				) {
 					$matched = true;
 					break;
@@ -500,22 +607,23 @@ class ProductsStore {
 	 * @param array  $product_attributes The base product's attributes.
 	 * @param string $attribute          The attribute name to look the term up under.
 	 * @param string $term_name          The term's display name.
-	 * @return string The term's slug, or $term_name when no matching term is found.
+	 * @return string The term's slug, or $term_name when no matching term is found or its slug is not a string.
 	 */
 	private static function resolve_term_slug( array $product_attributes, string $attribute, string $term_name ): string {
 		foreach ( $product_attributes as $raw_attribute ) {
 			// The Store API schema builds each attribute, and each of its terms, as an object.
 			$product_attribute = (array) $raw_attribute;
 
-			if ( ! self::attribute_names_match( $attribute, $product_attribute['name'] ?? '' ) ) {
+			if ( ! self::attribute_names_match( $attribute, self::as_string( $product_attribute['name'] ?? '' ) ) ) {
 				continue;
 			}
 
-			foreach ( $product_attribute['terms'] ?? array() as $raw_term ) {
+			foreach ( self::as_array( $product_attribute['terms'] ?? array() ) as $raw_term ) {
 				$term = (array) $raw_term;
 
 				if ( ( $term['name'] ?? null ) === $term_name ) {
-					return $term['slug'] ?? $term_name;
+					$slug = $term['slug'] ?? $term_name;
+					return is_string( $slug ) ? $slug : $term_name;
 				}
 			}
 
