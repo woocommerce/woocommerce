@@ -49,7 +49,7 @@ class NextPreviousButtons extends AbstractBlock {
 			data-wp-bind--hidden="context.hideNextPreviousButtons"
 		>
 			<button
-				class="wc-block-next-previous-buttons__button wp-element-button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.onClickPrevious"
 				data-wp-on--keydown="actions.onKeyDownPrevious"
@@ -72,7 +72,7 @@ class NextPreviousButtons extends AbstractBlock {
 				</svg>
 			</button>
 			<button
-				class="wc-block-next-previous-buttons__button wp-element-button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.onClickNext"
 				data-wp-on--keydown="actions.onKeyDownNext"

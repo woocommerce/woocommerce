@@ -52,7 +52,6 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 
 	const buttonClassName = clsx(
 		'wc-block-next-previous-buttons__button',
-		'wp-element-button',
 		borderProps.className,
 		colorProps.className,
 		spacingProps.className,
