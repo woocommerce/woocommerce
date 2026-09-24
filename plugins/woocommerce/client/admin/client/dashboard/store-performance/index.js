@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
-import { dispatch, select as dataSelect, withSelect } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 import {
 	EllipsisMenu,
 	MenuItem,
@@ -18,7 +18,6 @@ import {
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
-import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,10 +25,7 @@ import { optionsStore } from '@woocommerce/data';
 import './style.scss';
 import { getIndicatorData, getIndicatorValues } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
-import {
-	PERFORMANCE_TOUR_OPTION,
-	PerformanceMetricsTour,
-} from '~/guided-tours/performance-metrics-tour';
+import { PerformanceMetricsTour } from '~/guided-tours/performance-metrics-tour';
 
 const { performanceIndicators: indicators } = getAdminSetting(
 	'dataEndpoints',
@@ -41,27 +37,12 @@ const { performanceIndicators: indicators } = getAdminSetting(
 class StorePerformance extends Component {
 	constructor( props ) {
 		super( props );
-		this.state = { isTourDismissed: false };
-		this.dismissTour = this.dismissTour.bind( this );
+		this.state = { hasOpenedMenu: false };
+		this.onToggleMenu = this.onToggleMenu.bind( this );
 	}
 
-	// Opening the menu counts as seeing the tour. The saved option only
-	// updates once the request returns, so local state hides the tour now.
-	dismissTour() {
-		if ( this.state.isTourDismissed ) {
-			return;
-		}
-
-		this.setState( { isTourDismissed: true } );
-
-		if (
-			dataSelect( optionsStore ).getOption( PERFORMANCE_TOUR_OPTION ) !==
-			'yes'
-		) {
-			dispatch( optionsStore ).updateOptions( {
-				[ PERFORMANCE_TOUR_OPTION ]: 'yes',
-			} );
-		}
+	onToggleMenu() {
+		this.setState( { hasOpenedMenu: true } );
 	}
 
 	renderMenu() {
@@ -81,7 +62,7 @@ class StorePerformance extends Component {
 		return (
 			<EllipsisMenu
 				className="woocommerce-dashboard__performance-menu"
-				onToggle={ this.dismissTour }
+				onToggle={ this.onToggleMenu }
 				label={ __(
 					'Choose which analytics to display and the section name',
 					'woocommerce'
@@ -218,9 +199,9 @@ class StorePerformance extends Component {
 						{ this.renderList() }
 					</div>
 				) }
-				{ ! this.state.isTourDismissed && (
-					<PerformanceMetricsTour onDismiss={ this.dismissTour } />
-				) }
+				<PerformanceMetricsTour
+					hasOpenedMenu={ this.state.hasOpenedMenu }
+				/>
 			</Fragment>
 		);
 	}

@@ -3,30 +3,37 @@
  */
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { optionsStore } from '@woocommerce/data';
-import { createElement } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-
-export const PERFORMANCE_TOUR_OPTION =
-	'woocommerce_analytics_performance_tour_shown';
+import { useUserPreferences } from '@woocommerce/data';
+import { createElement, useEffect } from '@wordpress/element';
 
 export const PerformanceMetricsTour = ( {
-	onDismiss,
+	hasOpenedMenu,
 }: {
-	onDismiss: () => void;
+	hasOpenedMenu: boolean;
 } ) => {
-	const { shouldShowTour, isResolving } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select( optionsStore );
+	const {
+		updateUserPreferences,
+		isRequesting,
+		dashboard_performance_tour_shown: hasShownTour,
+	} = useUserPreferences();
 
-		return {
-			shouldShowTour: getOption( PERFORMANCE_TOUR_OPTION ) !== 'yes',
-			isResolving: ! hasFinishedResolution( 'getOption', [
-				PERFORMANCE_TOUR_OPTION,
-			] ),
-		};
-	}, [] );
+	const shouldShowTour = ! isRequesting && hasShownTour !== 'yes';
 
-	if ( ! shouldShowTour || isResolving ) {
+	const dismissTour = () => {
+		void updateUserPreferences( {
+			dashboard_performance_tour_shown: 'yes',
+		} );
+	};
+
+	// Opening the menu the tour points at counts as seeing it.
+	useEffect( () => {
+		if ( hasOpenedMenu && shouldShowTour ) {
+			dismissTour();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ hasOpenedMenu, shouldShowTour ] );
+
+	if ( ! shouldShowTour || hasOpenedMenu ) {
 		return null;
 	}
 
@@ -55,7 +62,7 @@ export const PerformanceMetricsTour = ( {
 				},
 			},
 		],
-		closeHandler: onDismiss,
+		closeHandler: dismissTour,
 	};
 
 	return <TourKit config={ config } />;

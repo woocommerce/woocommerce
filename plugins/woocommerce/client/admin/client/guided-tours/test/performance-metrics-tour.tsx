@@ -2,19 +2,16 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { useUserPreferences } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import {
-	PERFORMANCE_TOUR_OPTION,
-	PerformanceMetricsTour,
-} from '../performance-metrics-tour';
+import { PerformanceMetricsTour } from '../performance-metrics-tour';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/components', () => ( {
@@ -33,54 +30,83 @@ jest.mock( '@woocommerce/components', () => ( {
 	),
 } ) );
 
-const mockOptionState = ( value: unknown, isResolved = true ) => {
-	( useSelect as jest.Mock ).mockImplementation( ( mapSelect ) =>
-		mapSelect( () => ( {
-			getOption: ( name: string ) =>
-				name === PERFORMANCE_TOUR_OPTION ? value : undefined,
-			hasFinishedResolution: () => isResolved,
-		} ) )
-	);
+const updateUserPreferences = jest.fn();
+
+const mockPreferences = ( hasShownTour?: string, isRequesting = false ) => {
+	( useUserPreferences as jest.Mock ).mockReturnValue( {
+		updateUserPreferences,
+		isRequesting,
+		dashboard_performance_tour_shown: hasShownTour,
+	} );
 };
 
 describe( 'PerformanceMetricsTour', () => {
-	it( 'shows the tour when it has not been seen', () => {
-		mockOptionState( false );
+	beforeEach( () => {
+		updateUserPreferences.mockClear();
+	} );
 
-		render( <PerformanceMetricsTour onDismiss={ jest.fn() } /> );
+	it( 'shows the tour when the user has not seen it', () => {
+		mockPreferences();
+
+		render( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
 
 		expect(
 			screen.getByText( 'Choose which metrics to display' )
 		).toBeInTheDocument();
 	} );
 
-	it( 'does not show the tour once it has been seen', () => {
-		mockOptionState( 'yes' );
+	it( 'does not show the tour once the user has seen it', () => {
+		mockPreferences( 'yes' );
 
 		const { container } = render(
-			<PerformanceMetricsTour onDismiss={ jest.fn() } />
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
 		);
 
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	it( 'does not show the tour while the option is loading', () => {
-		mockOptionState( undefined, false );
+	it( 'does not show the tour while the user preferences are loading', () => {
+		mockPreferences( undefined, true );
 
 		const { container } = render(
-			<PerformanceMetricsTour onDismiss={ jest.fn() } />
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
 		);
 
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	it( 'calls onDismiss when the tour is closed', () => {
-		mockOptionState( false );
-		const onDismiss = jest.fn();
+	it( 'remembers the tour for the user when it is closed', () => {
+		mockPreferences();
 
-		render( <PerformanceMetricsTour onDismiss={ onDismiss } /> );
+		render( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
 		screen.getByRole( 'button', { name: 'Got it' } ).click();
 
-		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_performance_tour_shown: 'yes',
+		} );
+	} );
+
+	it( 'hides and remembers the tour once when the menu is opened', () => {
+		mockPreferences();
+
+		const { container, rerender } = render(
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
+		);
+		rerender( <PerformanceMetricsTour hasOpenedMenu /> );
+		rerender( <PerformanceMetricsTour hasOpenedMenu /> );
+
+		expect( container ).toBeEmptyDOMElement();
+		expect( updateUserPreferences ).toHaveBeenCalledTimes( 1 );
+		expect( updateUserPreferences ).toHaveBeenCalledWith( {
+			dashboard_performance_tour_shown: 'yes',
+		} );
+	} );
+
+	it( 'does not save again when the menu is opened after the tour was seen', () => {
+		mockPreferences( 'yes' );
+
+		render( <PerformanceMetricsTour hasOpenedMenu /> );
+
+		expect( updateUserPreferences ).not.toHaveBeenCalled();
 	} );
 } );
