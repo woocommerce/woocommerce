@@ -40,8 +40,10 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			foreach ( $this->paths as $path ) {
-				if ( file_exists( $path ) ) {
-					wp_delete_file( $path );
+				foreach ( array_merge( array( $path ), glob( $path . '.part*' ) ? glob( $path . '.part*' ) : array() ) as $file ) {
+					if ( file_exists( $file ) ) {
+						wp_delete_file( $file );
+					}
 				}
 			}
 			$this->paths = array();
@@ -132,6 +134,18 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$body = file_exists( $path ) ? file_get_contents( $path ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_operations_file_get_contents
 
 		return '' === trim( (string) $body ) ? array() : explode( "\n", trim( (string) $body ) );
+	}
+
+	/**
+	 * Get the part files an export's batches have written and not yet joined.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return string[]
+	 */
+	private function export_parts( string $export_id ): array {
+		$parts = glob( $this->export_path( $export_id ) . '.part*' );
+
+		return $parts ? $parts : array();
 	}
 
 	/**
@@ -778,6 +792,12 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		ReportExporter::export_report( ...$last );
 
 		$this->assertCount( 7, $this->export_rows( 'outoforder' ), 'Every batch\'s rows must survive, whatever order the batches finish in.' );
+
+		foreach ( $this->queue_stock_export( 'inorder', 0 ) as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		$this->assertSame( $this->export_rows( 'inorder' ), $this->export_rows( 'outoforder' ), 'Rows must be in report order, whatever order the batches finish in.' );
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'outoforder' ), 'An export whose batches have all finished is complete.' );
 		$this->assertCount(
 			1,
@@ -786,6 +806,70 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $exporter->export_file_exists(), 'The finished export must be downloadable, which needs its headers row file.' );
+	}
+
+	/**
+	 * @testdox Each batch writes its own part file, and the batch that finishes the export joins them.
+	 */
+	public function test_batches_write_part_files_that_the_last_batch_joins(): void {
+		$batches = $this->queue_stock_export( 'parts' );
+		$last    = array_pop( $batches );
+
+		foreach ( $batches as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		$this->assertCount( 3, $this->export_parts( 'parts' ), 'Every finished batch must leave its page in its own part file.' );
+		$this->assertFileDoesNotExist( $this->export_path( 'parts' ), 'The export file must not exist while a batch is still to finish.' );
+
+		ReportExporter::export_report( ...$last );
+
+		$this->assertCount( 7, $this->export_rows( 'parts' ) );
+		$this->assertSame( array(), $this->export_parts( 'parts' ), 'The part files must be deleted once they are joined.' );
+	}
+
+	/**
+	 * @testdox A page that is written again replaces its part file instead of adding its rows twice.
+	 */
+	public function test_page_written_again_replaces_its_part_file(): void {
+		$this->queue_stock_export( 'rerun' );
+
+		$exporter = new ReportCSVExporter( 'stock', array( 'page' => 2 ) );
+		$exporter->set_filename( 'wc-stock-report-export-rerun' );
+
+		$exporter->write_export_part( 2 );
+		$exporter->write_export_part( 2 );
+
+		$this->assertTrue( $exporter->assemble_export_file() );
+		$this->assertCount( 2, $this->export_rows( 'rerun' ), 'A page of two rows must still have two rows after it is written again.' );
+	}
+
+	/**
+	 * @testdox Queueing an export deletes the part files an export with the same ID left behind.
+	 */
+	public function test_queueing_an_export_deletes_part_files_left_behind(): void {
+		ReportCSVExporter::maybe_create_directory();
+		$this->write_file( $this->export_path( 'leftover' ) . '.part9', "stale,row\n", 0 );
+
+		foreach ( $this->queue_stock_export( 'leftover' ) as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		$this->assertCount( 7, $this->export_rows( 'leftover' ) );
+		$this->assertEmpty( preg_grep( '/^stale,row$/', $this->export_rows( 'leftover' ) ), 'Rows from an earlier export with the same ID must not end up in this one.' );
+	}
+
+	/**
+	 * @testdox Daily cleanup deletes the part files of an export that never finished.
+	 */
+	public function test_cleanup_deletes_expired_part_files(): void {
+		ReportCSVExporter::maybe_create_directory();
+		$part = $this->export_path( 'abandoned' ) . '.part3';
+		$this->write_file( $part, "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFileDoesNotExist( $part );
 	}
 
 	/**

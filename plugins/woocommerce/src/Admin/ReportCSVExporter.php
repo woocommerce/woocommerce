@@ -58,6 +58,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	private $writing_page = false;
 
 	/**
+	 * Page of the report this exporter writes to its own part file, or 0 for the export file itself.
+	 *
+	 * @var int
+	 */
+	private $part = 0;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -127,7 +134,85 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return string
 	 */
 	protected function get_file_path() {
-		return self::get_reports_directory() . $this->get_filename();
+		$path = self::get_reports_directory() . $this->get_filename();
+
+		return $this->part > 0 ? $path . '.part' . $this->part : $path;
+	}
+
+	/**
+	 * Get the paths of the export's part files, in page order.
+	 *
+	 * @since 11.3.0
+	 * @return string[]
+	 */
+	private function get_part_file_paths() {
+		$paths = glob( self::get_reports_directory() . $this->get_filename() . '.part*' );
+
+		if ( ! $paths ) {
+			return array();
+		}
+
+		natsort( $paths );
+
+		return array_values( $paths );
+	}
+
+	/**
+	 * Write one page of the report to its own part file, replacing one a previous run of that page left.
+	 *
+	 * Pages run in any order and at the same time, so each writes a file no other page touches.
+	 * assemble_export_file() joins them in page order once every page has finished.
+	 *
+	 * @since 11.3.0
+	 * @param int $page Page of the report.
+	 * @return void
+	 */
+	public function write_export_part( $page ) {
+		$this->part = max( 1, (int) $page );
+
+		try {
+			if ( file_exists( $this->get_file_path() ) ) {
+				wp_delete_file( $this->get_file_path() );
+			}
+
+			$this->write_export_page();
+		} finally {
+			$this->part = 0;
+		}
+	}
+
+	/**
+	 * Join the part files into the export file, in page order, and delete them.
+	 *
+	 * The part files are kept when this fails, and the daily cleanup deletes them.
+	 *
+	 * @since 11.3.0
+	 * @return bool Whether the export file was written.
+	 */
+	public function assemble_export_file() {
+		$parts = $this->get_part_file_paths();
+		$out   = fopen( $this->get_file_path(), 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+
+		if ( ! $out ) {
+			return false;
+		}
+
+		$ok = true;
+		foreach ( $parts as $path ) {
+			$in = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+			$ok = $in && false !== stream_copy_to_stream( $in, $out ) && $ok;
+			if ( $in ) {
+				fclose( $in ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+			}
+		}
+
+		$ok = fclose( $out ) && $ok; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+		if ( $ok ) {
+			array_map( 'wp_delete_file', $parts );
+		}
+
+		return $ok;
 	}
 
 	/**
@@ -368,22 +453,17 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Create the export's file, empty, replacing anything an export with the same ID left behind.
-	 *
-	 * ReportExporter calls this when it queues the export, so that every batch only ever appends.
+	 * Delete the files an export with the same ID left behind, so none of them ends up in this one.
 	 *
 	 * @since 11.3.0
 	 * @return void
 	 */
-	public function create_export_file() {
-		foreach ( array( $this->get_file_path(), $this->get_headers_row_file_path() ) as $path ) {
+	public function delete_export_files() {
+		foreach ( array_merge( array( $this->get_file_path(), $this->get_headers_row_file_path() ), $this->get_part_file_paths() ) as $path ) {
 			if ( file_exists( $path ) ) {
 				wp_delete_file( $path );
 			}
 		}
-
-		// The parent has no other way to create the file, and it is empty at this point.
-		$this->get_file();
 	}
 
 	/**
@@ -402,11 +482,10 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Write one page of the report to the export file.
+	 * Append one page of the report to the export file, creating the file if it is not there.
 	 *
 	 * Unlike generate_file(), this never recreates the file on page 1. Action Scheduler runs the
 	 * pages in any order, so page 1 running late would throw away what the pages before it wrote.
-	 * ReportExporter creates the file when it queues the export, and this creates one if it is gone.
 	 *
 	 * @since 11.3.0
 	 * @return void

@@ -187,7 +187,7 @@ class ReportExporter {
 
 		if ( 0 < $num_batches ) {
 			$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-			$exporter->create_export_file();
+			$exporter->delete_export_files();
 
 			self::start_export_progress( $report_type, $export_id, $num_batches );
 
@@ -219,7 +219,13 @@ class ReportExporter {
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0 ) {
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-		$exporter->write_export_page();
+
+		// An export queued before 11.3.0 has no batch count, and its batches append to the export file.
+		if ( null === self::get_pending_batches( $report_type, $export_id ) ) {
+			$exporter->write_export_page();
+		} else {
+			$exporter->write_export_part( $page_number );
+		}
 
 		$remaining = self::record_finished_batch( $report_type, $export_id );
 
@@ -237,18 +243,20 @@ class ReportExporter {
 			return;
 		}
 
-		$finished = self::claim_finished_export( $report_type, $export_id );
-
-		self::update_export_percentage_complete(
-			$report_type,
-			$export_id,
-			$finished ? 100 : self::get_progress_percentage( $exporter, $remaining )
-		);
-
-		if ( ! $finished ) {
+		if ( ! self::claim_finished_export( $report_type, $export_id ) ) {
+			self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $exporter, $remaining ) );
 			return;
 		}
 
+		if ( ! $exporter->assemble_export_file() ) {
+			wc_get_logger()->error(
+				sprintf( 'Could not assemble the %1$s report export %2$s from its parts.', $report_type, $export_id ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			return;
+		}
+
+		self::update_export_percentage_complete( $report_type, $export_id, 100 );
 		$exporter->write_headers_row_file();
 
 		if ( (int) $email_user_id > 0 ) {
