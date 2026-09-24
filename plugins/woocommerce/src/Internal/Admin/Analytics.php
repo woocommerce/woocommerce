@@ -27,6 +27,12 @@ class Analytics {
 	 */
 	const CACHE_TOOL_ID = 'clear_woocommerce_analytics_cache';
 	/**
+	 * Version that changed the Overview page's default performance metrics. Stores installed before it keep the previous defaults.
+	 *
+	 * @since 11.3.0
+	 */
+	const PERFORMANCE_DEFAULTS_VERSION = '11.3.0';
+	/**
 	 * Full refund fix data tool identifier.
 	 *
 	 * @since 10.8.0
@@ -112,6 +118,7 @@ class Analytics {
 
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'handle_woocommerce_admin_shared_settings' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
@@ -186,6 +193,36 @@ class Analytics {
 		}
 
 		return $endpoints;
+	}
+
+	/**
+	 * Handle the woocommerce_admin_shared_settings hook, telling the Overview page which default performance metrics to show.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $settings Settings shared with the admin client.
+	 * @return array
+	 */
+	public function handle_woocommerce_admin_shared_settings( $settings ) {
+		$settings = is_array( $settings ) ? $settings : array();
+
+		$settings['usesLegacyPerformanceDefaults'] = self::uses_legacy_performance_defaults();
+
+		return $settings;
+	}
+
+	/**
+	 * Whether the store was installed before the Overview page's default performance metrics changed.
+	 *
+	 * @return bool
+	 */
+	private static function uses_legacy_performance_defaults(): bool {
+		// Installs older than 9.2.0 never recorded their initial version.
+		$initial_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION );
+
+		return ! is_string( $initial_version ) || '' === $initial_version || version_compare( $initial_version, self::PERFORMANCE_DEFAULTS_VERSION, '<' );
 	}
 
 	/**
