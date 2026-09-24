@@ -37,3 +37,19 @@ _Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()
 This event is the equivalent to the jQuery event `removed_from_cart` triggered by WooCommerce core. It indicates that a product has been removed from the cart.
 
 _Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
+
+### `wc-blocks_product_in_context_changed`
+
+This event is the counterpart of the jQuery events `found_variation` and `reset_data` of the classic variable product form. The variation selector of the Add to Cart + Options block dispatches it when the shopper's selection changes the variation in context, including a change to no variation. It is not dispatched for the selection the page was rendered with.
+
+The event bubbles from the variation selector element, so on a page with several products the target tells which one changed.
+
+_Example usage:_ an analytics extension reports a view of the selected variation with its own ID and price.
+
+#### `detail` parameters
+
+| Parameter     | Type           | Description                                                                                                                              |
+| ------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `productId`   | number         | ID of the variable product.                                                                                                              |
+| `variationId` | number \| null | ID of the selected variation, or `null` when the selection does not resolve to a variation.                                              |
+| `product`     | object         | A copy of the Store API representation of the product in context: the selected variation, or the variable product when `variationId` is `null`. |
