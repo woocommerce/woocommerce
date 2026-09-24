@@ -45,15 +45,17 @@ pnpm test:e2e:core-serial <spec-file>
 # Filter to one test by title
 pnpm test:e2e:core-parallel webhooks.spec.ts --grep "can be activated"
 
-# All Core projects
-pnpm test:e2e:default <spec-file>
+# All Core specs, serial and parallel
+pnpm test:e2e:default --project=core-serial --project=core-parallel
 ```
+
+Plain `pnpm test:e2e:default` runs every project in the config, including API, PayPal, and Blocks. Pass `--project` to limit it.
 
 Extra arguments are passed to `playwright test`, so file filters, `--grep`, and `--workers=1` work as usual.
 
 **Do not call `pnpm playwright test` directly.** The scripts go through `tests/e2e/run-tests-with-env.sh`, which selects the environment config and sets `NODE_OPTIONS=--conditions=wc-source` so workspace packages such as `@woocommerce/e2e-utils-playwright` resolve to their TypeScript source. Without it, Playwright fails with `Cannot find module '.../e2e-utils-playwright/build/index.js'`.
 
-`pnpm test:e2e`, mentioned in older docs, is not a script in `plugins/woocommerce`.
+There is no bare `pnpm test:e2e` script in `plugins/woocommerce`. It was replaced by `test:e2e:core-serial` and `test:e2e:core-parallel` in #65815; some older docs still mention it.
 
 ## Reading Failures
 
