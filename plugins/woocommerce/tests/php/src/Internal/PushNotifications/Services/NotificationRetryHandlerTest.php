@@ -394,7 +394,9 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		$product  = WC_Helper_Product::create_simple_product();
 		$captured = $this->stub_processor_with_successful_dispatch();
 
-		$this->sut->handle_retry(
+		$this->sut->register();
+		do_action(
+			NotificationRetryHandler::RETRY_HOOK,
 			'store_stock',
 			$product->get_id(),
 			1,
