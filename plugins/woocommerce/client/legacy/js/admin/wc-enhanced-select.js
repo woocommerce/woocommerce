@@ -331,9 +331,11 @@ jQuery( function ( $ ) {
 								? true
 								: false,
 							placeholder: $( this ).data( 'placeholder' ),
-							minimumInputLength: $( this ).data(
-								'minimum_input_length'
-							)
+							minimumInputLength:
+								$( this ).data( 'minimum_input_length' ) !==
+									null &&
+								$( this ).data( 'minimum_input_length' ) !==
+									undefined
 								? $( this ).data( 'minimum_input_length' )
 								: '3',
 							escapeMarkup: function ( m ) {

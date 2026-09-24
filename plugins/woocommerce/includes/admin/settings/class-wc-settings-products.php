@@ -90,7 +90,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'           => '',
 					'class'             => 'wc-page-search',
 					'custom_attributes' => array(
-						'data-limit' => 20,
+						'data-limit'               => 20,
+						'data-minimum_input_length' => 0,
 					),
 					'css'               => 'min-width:300px;',
 					'desc_tip'          => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
