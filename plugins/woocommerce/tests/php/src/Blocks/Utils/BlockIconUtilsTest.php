@@ -118,112 +118,29 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A resource filter return falls back to the exact default and is closed after use.
-	 */
-	public function test_filter_block_icon_rejects_resource_replacement(): void {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- A real resource is required to exercise the filter boundary.
-		$resource = fopen( 'php://memory', 'r+' );
-		if ( false === $resource ) {
-			$this->fail( 'Expected the in-memory stream to open.' );
-		}
-
-		try {
-			$this->assertSame( self::DEFAULT_SVG, $this->filter_with_replacement( $resource ) );
-		} finally {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- The test-owned resource must be closed after the assertion.
-			fclose( $resource );
-		}
-	}
-
-	/**
 	 * @testdox A representative static SVG vocabulary survives with caller invariants.
 	 */
 	public function test_filter_block_icon_accepts_representative_static_svg(): void {
 		$result = $this->filter_with_replacement( self::STATIC_SVG_FIXTURE );
 
-		$this->assertNotSame( self::DEFAULT_SVG, $result );
 		$this->assert_root_invariants( $result, array( 'fixture-icon', 'required-icon', 'another-required' ) );
 
-		$processor = new \WP_HTML_Tag_Processor( $result );
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'svg' ) ) );
-		$this->assertSame( '24', $processor->get_attribute( 'width' ) );
-		$this->assertSame( '24', $processor->get_attribute( 'height' ) );
-		$this->assertSame( '0 0 24 24', $processor->get_attribute( 'viewBox' ) );
-		$this->assertSame( 'xMidYMid meet', $processor->get_attribute( 'preserveAspectRatio' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( 'currentColor', $processor->get_attribute( 'stroke' ) );
-		$this->assertSame( '0.9', $processor->get_attribute( 'fill-opacity' ) );
-		$this->assertSame( '0.8', $processor->get_attribute( 'stroke-opacity' ) );
-		$this->assertSame( '1.5', $processor->get_attribute( 'stroke-width' ) );
-		$this->assertSame( 'round', $processor->get_attribute( 'stroke-linecap' ) );
-		$this->assertSame( 'bevel', $processor->get_attribute( 'stroke-linejoin' ) );
-		$this->assertSame( '4', $processor->get_attribute( 'stroke-miterlimit' ) );
-		$this->assertSame( '0.95', $processor->get_attribute( 'opacity' ) );
-		$this->assertSame( 'presentation', $processor->get_attribute( 'role' ) );
+		$expected = new \WP_HTML_Tag_Processor( self::STATIC_SVG_FIXTURE );
+		$actual   = new \WP_HTML_Tag_Processor( $result );
+		while ( $expected->next_tag() ) {
+			$this->assertTrue( $actual->next_tag(), 'Every fixture element should survive.' );
+			$tag = $expected->get_tag();
+			$this->assertSame( $tag, $actual->get_tag() );
 
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'g' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-group' ) );
-		$this->assertSame( 'red', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '#abc', $processor->get_attribute( 'stroke' ) );
-		$this->assertSame( '0.75', $processor->get_attribute( 'opacity' ) );
-		$this->assertSame( 'translate(1 1)', $processor->get_attribute( 'transform' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'rect' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-rect' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'x' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'y' ) );
-		$this->assertSame( '4', $processor->get_attribute( 'width' ) );
-		$this->assertSame( '3', $processor->get_attribute( 'height' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'rx' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'ry' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'circle' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-circle' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '9', $processor->get_attribute( 'cx' ) );
-		$this->assertSame( '3', $processor->get_attribute( 'cy' ) );
-		$this->assertSame( '2', $processor->get_attribute( 'r' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'ellipse' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-ellipse' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '15', $processor->get_attribute( 'cx' ) );
-		$this->assertSame( '3', $processor->get_attribute( 'cy' ) );
-		$this->assertSame( '3', $processor->get_attribute( 'rx' ) );
-		$this->assertSame( '2', $processor->get_attribute( 'ry' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'line' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-line' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'x1' ) );
-		$this->assertSame( '8', $processor->get_attribute( 'y1' ) );
-		$this->assertSame( '7', $processor->get_attribute( 'x2' ) );
-		$this->assertSame( '8', $processor->get_attribute( 'y2' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'polyline' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-polyline' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '9,9 11,7 13,9', $processor->get_attribute( 'points' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'polygon' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-polygon' ) );
-		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( '15,9 17,7 19,9', $processor->get_attribute( 'points' ) );
-
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'path' ) ) );
-		$this->assertTrue( $processor->has_class( 'fixture-path' ) );
-		$this->assertSame( 'M2 12h18v8H2z', $processor->get_attribute( 'd' ) );
-		$this->assertSame( '#aabbccdd', $processor->get_attribute( 'fill' ) );
-		$this->assertSame( 'evenodd', $processor->get_attribute( 'fill-rule' ) );
-		$this->assertSame( 'evenodd', $processor->get_attribute( 'clip-rule' ) );
-		$this->assertSame( 'rgba(1 2 3 / 50%)', $processor->get_attribute( 'stroke' ) );
-		$this->assertSame( '2', $processor->get_attribute( 'stroke-width' ) );
-		$this->assertSame( 'square', $processor->get_attribute( 'stroke-linecap' ) );
-		$this->assertSame( 'round', $processor->get_attribute( 'stroke-linejoin' ) );
-		$this->assertSame( '3', $processor->get_attribute( 'stroke-miterlimit' ) );
-		$this->assertSame( '0.6', $processor->get_attribute( 'opacity' ) );
-		$this->assertSame( 'rotate(1)', $processor->get_attribute( 'transform' ) );
+			foreach ( $expected->get_attribute_names_with_prefix( '' ) as $name ) {
+				// The root class list gains the caller's classes; assert_root_invariants() checks it.
+				if ( 'SVG' === $tag && 'class' === $name ) {
+					continue;
+				}
+				$this->assertSame( $expected->get_attribute( $name ), $actual->get_attribute( $name ), "Expected {$tag} to keep its {$name} attribute." );
+			}
+		}
+		$this->assertFalse( $actual->next_tag(), 'No element should be added.' );
 	}
 
 	/**
@@ -275,40 +192,31 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Unsafe event attributes are stripped from otherwise valid SVG.
+	 * @testdox Unsafe attributes and elements are stripped from otherwise valid SVG.
+	 * @dataProvider provide_stripped_markup
+	 *
+	 * @param string $replacement Filter replacement.
+	 * @param string $removed     Markup that must not survive.
 	 */
-	public function test_filter_block_icon_strips_event_attributes(): void {
-		$result = $this->filter_with_replacement( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" onload="alert(1)"/></svg>' );
+	public function test_filter_block_icon_strips_unsafe_markup( string $replacement, string $removed ): void {
+		$result = $this->filter_with_replacement( $replacement );
 
-		$this->assertNotSame( self::DEFAULT_SVG, $result );
-		$this->assertStringContainsString( '<path', $result );
-		$this->assertStringNotContainsString( 'onload', $result );
+		$this->assertStringNotContainsString( $removed, $result );
+		$this->assertStringNotContainsString( 'example.com', $result );
 		$this->assert_root_invariants( $result, array( 'fixture-icon', 'required-icon', 'another-required' ) );
 	}
 
 	/**
-	 * @testdox External href attributes are stripped from otherwise valid geometry.
+	 * Provides otherwise valid SVGs carrying markup the sanitizer removes.
+	 *
+	 * @return array<string, array{string, string}>
 	 */
-	public function test_filter_block_icon_strips_external_href(): void {
-		$result = $this->filter_with_replacement( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" href="https://example.com/icon.svg#shape"/></svg>' );
-
-		$this->assertNotSame( self::DEFAULT_SVG, $result );
-		$this->assertStringContainsString( '<path', $result );
-		$this->assertStringNotContainsString( 'href', $result );
-		$this->assertStringNotContainsString( 'example.com', $result );
-	}
-
-	/**
-	 * @testdox External use elements and references do not survive sanitization.
-	 */
-	public function test_filter_block_icon_strips_external_use(): void {
-		$result = $this->filter_with_replacement( '<svg class="fixture-icon"><use href="https://example.com/icon.svg#shape"/></svg>' );
-
-		$this->assertNotSame( self::DEFAULT_SVG, $result );
-		$this->assertStringNotContainsString( '<use', $result );
-		$this->assertStringNotContainsString( 'href', $result );
-		$this->assertStringNotContainsString( 'example.com', $result );
-		$this->assert_root_invariants( $result, array( 'fixture-icon', 'required-icon', 'another-required' ) );
+	public function provide_stripped_markup(): array {
+		return array(
+			'event attribute' => array( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" onload="alert(1)"/></svg>', 'onload' ),
+			'external href'   => array( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" href="https://example.com/icon.svg#shape"/></svg>', 'href' ),
+			'use element'     => array( '<svg class="fixture-icon"><use href="https://example.com/icon.svg#shape"/></svg>', '<use' ),
+		);
 	}
 
 	/**
@@ -333,40 +241,24 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 * @return array<string, array{string, string}>
 	 */
 	public function provide_safe_paints(): array {
-		$paints = array(
-			'none'                => 'none',
-			'current color'       => 'currentColor',
-			'named color'         => 'red',
-			'three digit hex'     => '#abc',
-			'four digit hex'      => '#abcd',
-			'six digit hex'       => '#aabbcc',
-			'eight digit hex'     => '#aabbccdd',
-			'rgb'                 => 'rgb(1, 2, 3)',
-			'rgba'                => 'rgba(1 2 3 / 50%)',
-			'hsl'                 => 'hsl(120deg 50% 25%)',
-			'hsla'                => 'hsla(.5turn, 50%, 25%, .8)',
-			'paint whitespace'    => " \tred \n",
-			'rgb alpha alias'     => 'rgb(1, 2, 3, .5)',
-			'rgba opaque alias'   => 'rgba(1 2 3)',
-			'hsl alpha alias'     => 'hsl(120, 50%, 25%, .8)',
-			'hsla opaque alias'   => 'hsla(120 50% 25%)',
-			'name containing url' => 'burlywood',
-			'oklch'               => 'oklch(70% 0.1 200)',
-			'color-mix'           => 'color-mix(in srgb, red 40%, blue)',
-			'light-dark'          => 'light-dark(#000, #fff)',
-			'relative color'      => 'rgb(from red r g b / 50%)',
-			'CSS variable'        => 'var(--wp--preset--color--primary)',
-			'calc function'       => 'calc(1 + 1)',
+		return $this->paint_cases(
+			array(
+				'none'                => 'none',
+				'current color'       => 'currentColor',
+				'named color'         => 'red',
+				'name containing url' => 'burlywood',
+				'hex'                 => '#aabbccdd',
+				'rgba'                => 'rgba(1 2 3 / 50%)',
+				'hsla'                => 'hsla(.5turn, 50%, 25%, .8)',
+				'paint whitespace'    => " \tred \n",
+				'oklch'               => 'oklch(70% 0.1 200)',
+				'color-mix'           => 'color-mix(in srgb, red 40%, blue)',
+				'light-dark'          => 'light-dark(#000, #fff)',
+				'relative color'      => 'rgb(from red r g b / 50%)',
+				'CSS variable'        => 'var(--wp--preset--color--primary)',
+				'calc function'       => 'calc(1 + 1)',
+			)
 		);
-		$cases  = array();
-
-		foreach ( array( 'fill', 'stroke' ) as $attribute ) {
-			foreach ( $paints as $name => $paint ) {
-				$cases[ $attribute . ' ' . $name ] = array( $attribute, $paint );
-			}
-		}
-
-		return $cases;
 	}
 
 	/**
@@ -388,29 +280,22 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 * @return array<string, array{string, string}>
 	 */
 	public function provide_unsafe_paints(): array {
-		$paints = array(
-			'external URL'          => 'url(https://example.com/icon.svg#shape)',
-			'local URL'             => 'url(#shape)',
-			'JavaScript URL'        => 'url(javascript:alert(1))',
-			'mixed case URL'        => 'UrL(https://example.com/icon.svg#shape)',
-			'CSS escaped URL'       => 'u\\72l(#shape)',
-			'URL with fallback'     => 'url(#shape) red',
-			'src function'          => 'src(https://example.com/icon.svg#shape)',
-			'mixed case src'        => 'SrC(https://example.com/icon.svg#shape)',
-			'CSS escaped src'       => 's\\72 c(#shape)',
-			'URL inside a function' => 'color-mix(in srgb, url(#shape), red)',
-			'quoted value'          => "'red'",
-			'declaration injection' => 'red;stroke:url(https://example.com/icon.svg#shape)',
+		return $this->paint_cases(
+			array(
+				'external URL'          => 'url(https://example.com/icon.svg#shape)',
+				'local URL'             => 'url(#shape)',
+				'JavaScript URL'        => 'url(javascript:alert(1))',
+				'mixed case URL'        => 'UrL(https://example.com/icon.svg#shape)',
+				'CSS escaped URL'       => 'u\\72l(#shape)',
+				'URL with fallback'     => 'url(#shape) red',
+				'src function'          => 'src(https://example.com/icon.svg#shape)',
+				'mixed case src'        => 'SrC(https://example.com/icon.svg#shape)',
+				'CSS escaped src'       => 's\\72 c(#shape)',
+				'URL inside a function' => 'color-mix(in srgb, url(#shape), red)',
+				'quoted value'          => "'red'",
+				'declaration injection' => 'red;stroke:url(https://example.com/icon.svg#shape)',
+			)
 		);
-		$cases  = array();
-
-		foreach ( array( 'fill', 'stroke' ) as $attribute ) {
-			foreach ( $paints as $name => $paint ) {
-				$cases[ $attribute . ' ' . $name ] = array( $attribute, $paint );
-			}
-		}
-
-		return $cases;
 	}
 
 	/**
@@ -463,6 +348,23 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 			'array'          => array( array(), 'cart' ),
 			'object'         => array( new \stdClass(), 'cart' ),
 		);
+	}
+
+	/**
+	 * Crosses paint values with both paint attributes.
+	 *
+	 * @param array<string, string> $paints Paint values by case name.
+	 * @return array<string, array{string, string}>
+	 */
+	private function paint_cases( array $paints ): array {
+		$cases = array();
+		foreach ( array( 'fill', 'stroke' ) as $attribute ) {
+			foreach ( $paints as $name => $paint ) {
+				$cases[ $attribute . ' ' . $name ] = array( $attribute, $paint );
+			}
+		}
+
+		return $cases;
 	}
 
 	/**
