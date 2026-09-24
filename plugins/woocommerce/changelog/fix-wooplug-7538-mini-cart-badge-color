@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Mini-Cart badge and Product Filters showing wrong colors, such as bright green, on themes that use color-mix().
