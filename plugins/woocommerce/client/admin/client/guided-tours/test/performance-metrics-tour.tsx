@@ -3,6 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useUserPreferences } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,18 +15,32 @@ jest.mock( '@woocommerce/data', () => ( {
 	useUserPreferences: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
+} ) );
+
 jest.mock( '@woocommerce/components', () => ( {
 	TourKit: ( {
 		config,
 	}: {
 		config: {
 			steps: Array< { meta: { heading: string } } >;
-			closeHandler: () => void;
+			closeHandler: (
+				steps: unknown[],
+				currentStepIndex: number,
+				source: string
+			) => void;
 		};
 	} ) => (
 		<div>
 			{ config.steps[ 0 ].meta.heading }
-			<button onClick={ config.closeHandler }>Got it</button>
+			<button
+				onClick={ () =>
+					config.closeHandler( config.steps, 0, 'done-btn' )
+				}
+			>
+				Got it
+			</button>
 		</div>
 	),
 } ) );
@@ -43,6 +58,7 @@ const mockPreferences = ( hasShownTour?: string, isRequesting = false ) => {
 describe( 'PerformanceMetricsTour', () => {
 	beforeEach( () => {
 		updateUserPreferences.mockClear();
+		( recordEvent as jest.Mock ).mockClear();
 	} );
 
 	it( 'shows the tour when the user has not seen it', () => {
@@ -108,5 +124,69 @@ describe( 'PerformanceMetricsTour', () => {
 		render( <PerformanceMetricsTour hasOpenedMenu /> );
 
 		expect( updateUserPreferences ).not.toHaveBeenCalled();
+	} );
+
+	it( 'records a view once while the tour is shown', () => {
+		mockPreferences();
+
+		const { rerender } = render(
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
+		);
+		rerender( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
+
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'dash_indicators_tour_view'
+		);
+	} );
+
+	it( 'does not record a view when the tour is not shown', () => {
+		mockPreferences( 'yes' );
+		render( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
+
+		mockPreferences( undefined, true );
+		render( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
+
+		expect( recordEvent ).not.toHaveBeenCalled();
+	} );
+
+	it( 'records how the tour was dismissed', () => {
+		mockPreferences();
+
+		render( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
+		screen.getByRole( 'button', { name: 'Got it' } ).click();
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'dash_indicators_tour_dismiss',
+			{ source: 'done-btn' }
+		);
+	} );
+
+	it( 'records a dismissal from the menu once', () => {
+		mockPreferences();
+
+		const { rerender } = render(
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
+		);
+		rerender( <PerformanceMetricsTour hasOpenedMenu /> );
+		rerender( <PerformanceMetricsTour hasOpenedMenu /> );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'dash_indicators_tour_dismiss',
+			{ source: 'menu' }
+		);
+		expect(
+			( recordEvent as jest.Mock ).mock.calls.filter(
+				( [ name ] ) => name === 'dash_indicators_tour_dismiss'
+			)
+		).toHaveLength( 1 );
+	} );
+
+	it( 'records nothing when the menu is opened after the tour was seen', () => {
+		mockPreferences( 'yes' );
+
+		render( <PerformanceMetricsTour hasOpenedMenu /> );
+
+		expect( recordEvent ).not.toHaveBeenCalled();
 	} );
 } );

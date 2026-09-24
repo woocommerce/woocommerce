@@ -4,7 +4,8 @@
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { useUserPreferences } from '@woocommerce/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { createElement, useEffect, useRef } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 export const PerformanceMetricsTour = ( {
 	hasOpenedMenu,
@@ -18,22 +19,32 @@ export const PerformanceMetricsTour = ( {
 	} = useUserPreferences();
 
 	const shouldShowTour = ! isRequesting && hasShownTour !== 'yes';
+	const isTourVisible = shouldShowTour && ! hasOpenedMenu;
+	const hasRecordedView = useRef( false );
 
-	const dismissTour = () => {
+	const dismissTour = ( source: string ) => {
+		recordEvent( 'dash_indicators_tour_dismiss', { source } );
 		void updateUserPreferences( {
 			dashboard_performance_tour_shown: 'yes',
 		} );
 	};
 
+	useEffect( () => {
+		if ( isTourVisible && ! hasRecordedView.current ) {
+			hasRecordedView.current = true;
+			recordEvent( 'dash_indicators_tour_view' );
+		}
+	}, [ isTourVisible ] );
+
 	// Opening the menu the tour points at counts as seeing it.
 	useEffect( () => {
 		if ( hasOpenedMenu && shouldShowTour ) {
-			dismissTour();
+			dismissTour( 'menu' );
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ hasOpenedMenu, shouldShowTour ] );
 
-	if ( ! shouldShowTour || hasOpenedMenu ) {
+	if ( ! isTourVisible ) {
 		return null;
 	}
 
@@ -62,7 +73,8 @@ export const PerformanceMetricsTour = ( {
 				},
 			},
 		],
-		closeHandler: dismissTour,
+		closeHandler: ( steps, currentStepIndex, source ) =>
+			dismissTour( source ),
 		options: {
 			// Setting effects replaces the TourKit defaults, so they are repeated
 			// here alongside autoScroll. Merchants can move the Performance
