@@ -10898,12 +10898,6 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Data_Store\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
 			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10924,12 +10918,6 @@ parameters:
 		-
 			message: '#^Method WC_Data_Store\:\:read_multiple\(\) has parameter \$objects with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
-			message: '#^Method WC_Data_Store\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-data-store.php
 
@@ -16558,13 +16546,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -60067,6 +60055,18 @@ parameters:
 		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
 			identifier: property.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
