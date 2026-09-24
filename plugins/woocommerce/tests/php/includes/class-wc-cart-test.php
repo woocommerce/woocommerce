@@ -2224,6 +2224,385 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox remove_coupon() should refuse to remove a coupon flagged for auto-apply while it is still applied.
+	 */
+	public function test_remove_coupon_refuses_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-apply-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+
+		$removed = WC()->cart->remove_coupon( $coupon->get_code() );
+
+		$this->assertFalse( $removed, 'direct removal of an auto-apply coupon should be refused' );
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should remain applied' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox auto_apply_coupons() should still remove its own auto-apply coupon once it becomes invalid.
+	 */
+	public function test_auto_apply_coupons_can_remove_its_own_invalid_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-apply-min-spend',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '5',
+				'auto_apply'     => 'yes',
+				'minimum_amount' => '15',
+			)
+		);
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 2 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should auto-apply once minimum spend ($20) is met' );
+
+		// Drop quantity to 1 ($10, below the $15 minimum spend), without emptying the cart.
+		WC()->cart->set_quantity( $cart_item_key, 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should be auto-removed once cart drops below minimum spend' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox An individual-use auto-apply coupon yields to the coupon a customer applies themselves.
+	 */
+	public function test_individual_use_auto_apply_coupon_yields_to_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-indiv',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '7',
+				'auto_apply'     => 'yes',
+				'individual_use' => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'customer-choice',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'auto-indiv' ), 'precondition: the auto-apply coupon is applied' );
+
+		// Without the yield the customer would be told the auto-apply coupon "cannot be used in
+		// conjunction with other coupons", with no way to remove it and no way to use their own.
+		WC()->cart->apply_coupon( 'customer-choice' );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'customer-choice' ), "the customer's own coupon should apply" );
+		$this->assertFalse( WC()->cart->has_discount( 'auto-indiv' ), 'the individual-use auto-apply coupon should have yielded' );
+		$this->assertEqualsWithDelta( 30.0, WC()->cart->get_discount_total(), 0.001, 'only the customer coupon should discount the cart' );
+
+		// It must not come back while the customer's coupon is on the cart.
+		WC()->cart->calculate_totals();
+		$this->assertFalse( WC()->cart->has_discount( 'auto-indiv' ), 'the auto-apply coupon should stay off across recalculations' );
+
+		// ...and must return once the customer removes theirs.
+		WC()->cart->remove_coupon( 'customer-choice' );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-indiv' ), 'the auto-apply coupon should return once the cart is free again' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
+	 * @testdox An auto-apply coupon yields to an individual-use coupon the customer applies.
+	 */
+	public function test_auto_apply_coupon_yields_to_individual_use_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-plain',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$indiv   = WC_Helper_Coupon::create_coupon(
+			'customer-indiv',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '25',
+				'individual_use' => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'customer-indiv' );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'customer-indiv' ), 'the individual-use coupon should apply' );
+		$this->assertFalse( WC()->cart->has_discount( 'auto-plain' ), 'individual use must exclude the auto-apply coupon' );
+		$this->assertEqualsWithDelta( 25.0, WC()->cart->get_discount_total(), 0.001, 'the discounts must not stack' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$indiv->delete( true );
+	}
+
+	/**
+	 * @testdox An auto-apply coupon still stacks with an ordinary coupon the customer applies.
+	 */
+	public function test_auto_apply_coupon_stacks_with_ordinary_customer_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-stacks',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'customer-stacks',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '30',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'customer-stacks' );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( 40.0, WC()->cart->get_discount_total(), 0.001, 'both coupons should discount the cart' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
+	 * @testdox is_auto_applied_coupon() reports only coupons the store applied and that are on the cart.
+	 */
+	public function test_is_auto_applied_coupon_distinguishes_refusal_from_absence() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$auto    = WC_Helper_Coupon::create_coupon(
+			'auto-reported',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+		$manual  = WC_Helper_Coupon::create_coupon(
+			'manual-reported',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		WC()->cart->apply_coupon( 'manual-reported' );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( 'manual-reported' ), 'precondition: the ordinary coupon is applied' );
+		$this->assertTrue( WC()->cart->is_auto_applied_coupon( 'auto-reported' ), 'an applied auto-apply coupon is refused' );
+		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'manual-reported' ), 'an applied ordinary coupon is not refused' );
+
+		// Not on the cart, so there is nothing to refuse: callers can tell this apart from a refusal.
+		WC()->cart->empty_cart();
+		$this->assertFalse( WC()->cart->is_auto_applied_coupon( 'auto-reported' ), 'a coupon that is not applied is not refused' );
+
+		$product->delete( true );
+		$auto->delete( true );
+		$manual->delete( true );
+	}
+
+	/**
+	 * @testdox A virtual coupon declaring auto_apply as a yes/no string is read as a boolean.
+	 */
+	public function test_virtual_coupon_auto_apply_string_is_converted_to_boolean() {
+		// The conversion deliberately warns, the same way it does for the other boolean props.
+		$this->setExpectedIncorrectUsage( 'auto_apply' );
+
+		$filter = function () {
+			return array(
+				'discount_type' => 'fixed_cart',
+				'amount'        => '5',
+				// The legacy yes/no form third parties use. Without conversion, (bool) 'no' is
+				// true and the coupon is treated as auto-applied: no remove link, and removal
+				// refused on the cart and over the Store API.
+				'auto_apply'    => 'no',
+			);
+		};
+		add_filter( 'woocommerce_get_shop_coupon_data', $filter );
+
+		try {
+			$coupon = new WC_Coupon( 'virtual-not-auto' );
+			$this->assertFalse( $coupon->get_auto_apply(), "'no' should read as false" );
+		} finally {
+			remove_filter( 'woocommerce_get_shop_coupon_data', $filter, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Auto-apply does nothing while coupons are switched off store-wide.
+	 */
+	public function test_auto_apply_is_skipped_when_coupons_are_disabled() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$default = get_option( 'woocommerce_enable_coupons', 'yes' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-while-disabled',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+
+		try {
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->cart->calculate_totals();
+
+			$this->assertFalse( WC()->cart->has_discount( 'auto-while-disabled' ), 'nothing should auto-apply while coupons are disabled' );
+		} finally {
+			update_option( 'woocommerce_enable_coupons', $default );
+			WC()->cart->empty_cart();
+			$product->delete( true );
+			$coupon->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart validation removes an auto-apply coupon that is no longer valid.
+	 */
+	public function test_cart_validation_removes_invalid_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-goes-invalid',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-goes-invalid' ), 'precondition: the coupon is applied' );
+
+		// Expire it while it is on the cart, so check_cart_coupons() finds it invalid.
+		$coupon->set_date_expires( time() - DAY_IN_SECONDS );
+		$coupon->save();
+
+		WC()->cart->check_cart_coupons();
+
+		// Without the fix the guard refuses this removal, so the coupon is reported as removed
+		// while it stays on the cart.
+		$this->assertFalse( WC()->cart->has_discount( 'auto-goes-invalid' ), 'the invalid coupon should have been removed' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Checkout validation removes an auto-apply coupon the customer is not entitled to.
+	 */
+	public function test_checkout_validation_removes_ineligible_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-email-restricted',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '10',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_discount( 'auto-email-restricted' ), 'precondition: the coupon is applied' );
+
+		// The coupon has to stay valid for the customer on the session, since that is the guard
+		// check_customer_coupons() applies before it looks at the posted address. The reachable
+		// case is a customer whose own email is allowed typing a different one at checkout.
+		$coupon->set_email_restrictions( array( 'allowed@example.com' ) );
+		$coupon->save();
+
+		$original_billing_email = WC()->cart->get_customer()->get_billing_email();
+		WC()->cart->get_customer()->set_billing_email( 'allowed@example.com' );
+
+		try {
+			WC()->cart->check_customer_coupons( array( 'billing_email' => 'someone-else@example.com' ) );
+
+			// Without the fix the guard refuses this removal, so the customer is told the coupon
+			// was removed while it is still discounting their order.
+			$this->assertFalse( WC()->cart->has_discount( 'auto-email-restricted' ), 'the coupon should have been removed' );
+		} finally {
+			// The customer object outlives the test, and an address left on it decides whether
+			// email-restricted coupons validate in whatever runs next.
+			WC()->cart->get_customer()->set_billing_email( $original_billing_email );
+			WC()->cart->empty_cart();
+			$product->delete( true );
+			$coupon->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
 	 */
 	public function test_mini_cart_template_renders_selected_any_values_once(): void {

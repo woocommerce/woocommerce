@@ -320,8 +320,12 @@ class WC_AJAX {
 
 		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
+		} elseif ( WC()->cart->is_auto_applied_coupon( (string) $coupon ) ) {
+			// Refused rather than failed, so say why instead of reporting a generic problem.
+			wc_add_notice( __( 'This coupon is applied automatically and cannot be removed.', 'woocommerce' ), 'error' );
+		} elseif ( ! WC()->cart->remove_coupon( $coupon ) ) {
+			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
-			WC()->cart->remove_coupon( $coupon );
 			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
 		}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Skip the auto-apply coupon pass entirely when coupons are disabled store-wide.

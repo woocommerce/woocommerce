@@ -59,6 +59,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'minimum_amount',
 			'maximum_amount',
 			'email_restrictions',
+			'auto_apply',
 			'used_by',
 			'meta_data',
 		);
