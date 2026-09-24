@@ -57,6 +57,14 @@ class WCEmailTemplateChangeSummary {
 	private const COPY_TRUNCATE_CHARS = 120;
 
 	/**
+	 * Bumped whenever the classification rules change. Cached payloads survive a
+	 * WooCommerce upgrade — the content hashes they are keyed on don't move when
+	 * only this code changes — and a payload classified under the old rules would
+	 * otherwise drive the new apply behaviour.
+	 */
+	private const CLASSIFIER_VERSION = 3;
+
+	/**
 	 * Summary-inversion guard: minimum count of post-side unmatched blocks
 	 * (with no copy changes and a heavily larger post) before we refuse to
 	 * confidently attribute the diff to "core changed."
@@ -376,7 +384,7 @@ class WCEmailTemplateChangeSummary {
 		return sprintf(
 			'wc_email_change_summary_%d_%s',
 			$post_id,
-			md5( $post_hash . '|' . $core_hash . '|' . $base_hash . '|' . $locale )
+			md5( self::CLASSIFIER_VERSION . '|' . $post_hash . '|' . $core_hash . '|' . $base_hash . '|' . $locale )
 		);
 	}
 
@@ -399,7 +407,7 @@ class WCEmailTemplateChangeSummary {
 	 * @param array<int|string>                       $path        Current index path from root.
 	 * @param string|null                             $parent_name Normalized parent block name, null at root.
 	 *
-	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
+	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}>
 	 */
 	public static function flatten_blocks( array $blocks, array $path = array(), ?string $parent_name = null ): array {
 		$records = array();
@@ -410,11 +418,17 @@ class WCEmailTemplateChangeSummary {
 			$name         = self::normalize_block_name( (string) $block['blockName'] );
 			$current_path = array_merge( $path, array( $idx ) );
 
+			$attrs      = $block['attrs'] ?? array();
+			$inner_html = (string) ( $block['innerHTML'] ?? '' );
+
 			$records[] = array(
-				'path'        => $current_path,
-				'parent_name' => $parent_name,
-				'name'        => $name,
-				'inner_text'  => self::clean_inner_text( (string) ( $block['innerHTML'] ?? '' ) ),
+				'path'            => $current_path,
+				'parent_name'     => $parent_name,
+				'name'            => $name,
+				'inner_text'      => self::clean_inner_text( $inner_html ),
+				'attrs_hash'      => self::attrs_hash( is_array( $attrs ) ? $attrs : array() ),
+				'inner_html_hash' => self::inner_html_hash( $inner_html ),
+				'holds_blocks'    => ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ),
 			);
 
 			if ( ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
@@ -425,6 +439,57 @@ class WCEmailTemplateChangeSummary {
 			}
 		}//end foreach
 		return $records;
+	}
+
+	/**
+	 * Hash a block's attributes so two attribute sets can be compared as strings.
+	 * Keys are sorted at every level, so re-serializing a block in a different
+	 * key order does not read as a merchant edit.
+	 *
+	 * @param array<string, mixed> $attrs Block attributes from `parse_blocks()`.
+	 */
+	private static function attrs_hash( array $attrs ): string {
+		self::ksort_recursive( $attrs );
+		$encoded = wp_json_encode( $attrs );
+
+		// An encode failure (invalid UTF-8, or nesting past the depth limit)
+		// would hash every such block alike and read as "unchanged". Fall back
+		// to serialize(), which handles both.
+		return sha1( false === $encoded ? serialize( $attrs ) : $encoded ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Hash input only; never unserialized.
+	}
+
+	/**
+	 * Hash a block's markup. Unlike `inner_text` this keeps inline markup and
+	 * HTML comments, which is how personalization tags (`<!--[woocommerce/…]-->`),
+	 * links and emphasis reach the comparison at all.
+	 *
+	 * Runs of whitespace collapse to one space and the ends are trimmed, so the
+	 * line breaks and indentation a template carries do not read as an edit.
+	 * Spacing next to a tag is left alone: `Read <strong>more</strong> today`
+	 * and `Read<strong>more</strong>today` render differently, so the merchant
+	 * choosing one over the other is an edit. The editor rewrites a block's
+	 * markup only when the merchant actually edits that block, so keeping this
+	 * strict does not turn untouched blocks into conflicts.
+	 *
+	 * @param string $inner_html Raw `innerHTML` string from a parsed block.
+	 */
+	private static function inner_html_hash( string $inner_html ): string {
+		$collapsed = (string) preg_replace( '/\s+/', ' ', $inner_html );
+		return sha1( trim( $collapsed ) );
+	}
+
+	/**
+	 * Sort an array by key at every level, in place.
+	 *
+	 * @param array<string, mixed> $value Array to sort.
+	 */
+	private static function ksort_recursive( array &$value ): void {
+		ksort( $value );
+		foreach ( $value as &$item ) {
+			if ( is_array( $item ) ) {
+				self::ksort_recursive( $item );
+			}
+		}
 	}
 
 	/**
@@ -465,8 +530,8 @@ class WCEmailTemplateChangeSummary {
 	 * RSM-143's selective-merge UI uses `path` to map per-block "Keep yours /
 	 * Use core" choices back to specific blocks during merge.
 	 *
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side.
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $core_records Core side.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $post_records Post side.
 	 *
 	 * @return array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
 	 */
@@ -690,9 +755,9 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @internal
 	 *
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side (current canonical).
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $base_records Base side (canonical at last system write).
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side (merchant's current post_content).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $core_records Core side (current canonical).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $base_records Base side (canonical at last system write).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $post_records Post side (merchant's current post_content).
 	 *
 	 * @return array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
 	 *
@@ -762,11 +827,7 @@ class WCEmailTemplateChangeSummary {
 			$name                      = $core['name'];
 			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
 
-			// Known limitation: comparison is `inner_text` only; block `attrs` (colors,
-			// alignment, etc.) don't register as changes. With `auto_resolvable: true`
-			// the drawer can silently overwrite an attr-only merchant edit. Follow-up
-			// to extend the comparison to a stable hash of `attrs`.
-			$yours_changed = ( $base['inner_text'] !== $post['inner_text'] );
+			$yours_changed = self::merchant_changed( $base, $post );
 			$core_changed  = ( $base['inner_text'] !== $core['inner_text'] );
 
 			if ( ! $yours_changed && ! $core_changed ) {
@@ -774,6 +835,22 @@ class WCEmailTemplateChangeSummary {
 			}
 			if ( ! $core_changed ) {
 				// Yours edited, core didn't — merchant-only edit, preserve silently.
+				continue;
+			}
+
+			// The merchant already has core's version, having typed it themselves.
+			// Offering a choice between two identical blocks reads as a bug, and
+			// it counts as a conflict, which holds up the one-click update.
+			if ( $core['inner_html_hash'] === $post['inner_html_hash']
+				&& $core['attrs_hash'] === $post['attrs_hash']
+			) {
+				continue;
+			}
+
+			// Apply never takes the content of a block holding other blocks, so
+			// listing one here would promise a change that cannot happen. Only
+			// its styling follows core, which needs no decision either way.
+			if ( ( $core['holds_blocks'] ?? false ) || ( $post['holds_blocks'] ?? false ) ) {
 				continue;
 			}
 
@@ -853,6 +930,32 @@ class WCEmailTemplateChangeSummary {
 	}
 
 	/**
+	 * Whether the merchant has touched a block since the base render. Compares
+	 * markup and attributes, not the stripped text: a swapped personalization
+	 * tag, an added link or a colour change are all merchant edits, and a block
+	 * they have edited is never updated without asking them.
+	 *
+	 * Core's side is deliberately compared on `inner_text` alone by the callers.
+	 * A core change the merchant cannot see as a wording change would otherwise
+	 * reach the drawer as an entry whose before and after text are identical.
+	 *
+	 * Public so {@see WCEmailTemplateSelectiveApplier} decides from the same rule
+	 * that produced the summary the merchant reviewed, rather than reading the
+	 * classification back out of a cached payload.
+	 *
+	 * @internal
+	 *
+	 * @param array{inner_text:string, attrs_hash:string, inner_html_hash:string} $base Base-side record.
+	 * @param array{inner_text:string, attrs_hash:string, inner_html_hash:string} $post Post-side record.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function merchant_changed( array $base, array $post ): bool {
+		return $base['inner_html_hash'] !== $post['inner_html_hash']
+			|| $base['attrs_hash'] !== $post['attrs_hash'];
+	}
+
+	/**
 	 * Match each base block to its counterpart in core and in the post. A core
 	 * block and a post block are the same logical block only when both match
 	 * the same base block. `null` means that side no longer has the block.
@@ -862,9 +965,9 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @internal
 	 *
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side (current canonical).
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $base_records Base side (canonical at last system write).
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side (merchant's current post_content).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $core_records Core side (current canonical).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $base_records Base side (canonical at last system write).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $post_records Post side (merchant's current post_content).
 	 *
 	 * @return array<int, array{core:?int, post:?int}> Keyed by base record index; values are core and post record indices.
 	 *
@@ -938,8 +1041,8 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @internal
 	 *
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $a Core records.
-	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $b Post records.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $a Core records.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}> $b Post records.
 	 *
 	 * @return array<int, array{0:int, 1:int}>
 	 */
