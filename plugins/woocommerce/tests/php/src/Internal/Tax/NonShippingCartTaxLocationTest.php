@@ -369,12 +369,21 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
 		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 
-		$calls          = 0;
+		// WC_Cart::needs_shipping() only checks products when a shipping method exists, so count nesting rather than calls.
+		$depth          = 0;
+		$max_depth      = 0;
 		$inner_address  = null;
 		$customer       = $this->customer;
-		$needs_shipping = function ( $needs_shipping ) use ( &$calls, &$inner_address, $customer ) {
-			++$calls;
-			$inner_address = $customer->get_taxable_address();
+		$needs_shipping = function ( $needs_shipping ) use ( &$depth, &$max_depth, &$inner_address, $customer ) {
+			$max_depth = max( $max_depth, ++$depth );
+			try {
+				// Stop at the second level so a missing guard fails the assertion instead of recursing without end.
+				if ( 1 === $depth ) {
+					$inner_address = $customer->get_taxable_address();
+				}
+			} finally {
+				--$depth;
+			}
 			return $needs_shipping;
 		};
 		add_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
@@ -385,7 +394,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
 		}
 
-		$this->assertSame( 1, $calls, 'The needs_shipping callback should run once, without re-entering the check.' );
+		$this->assertSame( 1, $max_depth, 'The needs_shipping callback should not be re-entered from the taxable address lookup.' );
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $inner_address, 'A re-entrant lookup should get the unfiltered taxable address.' );
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'The outer lookup should still use the billing address.' );
 	}
