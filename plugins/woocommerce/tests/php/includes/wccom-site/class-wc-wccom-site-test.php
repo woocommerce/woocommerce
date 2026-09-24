@@ -184,6 +184,18 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave a pretty-permalink request to determine_current_user.
+	 */
+	public function test_authentication_fallback_skips_requests_without_rest_route(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->simulate_request( '/wp-json/wccom-site/v3/status', true );
+		$this->sign_request_for_connected_site( $user_id, '/wp-json/wccom-site/v3/status' );
+
+		$this->assertNull( self::with_rest_route_context( '/wccom-site/v3/status', fn() => WC_WCCOM_Site::authentication_fallback( null ) ) );
+		$this->assertSame( 0, get_current_user_id() );
+	}
+
+	/**
 	 * @testdox Should not authenticate a plain-permalink request with an invalid signature.
 	 */
 	public function test_authentication_fallback_rejects_invalid_signature(): void {

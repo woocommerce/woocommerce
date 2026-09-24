@@ -136,17 +136,17 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Authenticate a WooCommerce.com request that was not recognized during `determine_current_user`.
+	 * Authenticate a WooCommerce.com request that carries `rest_route`.
 	 *
-	 * WordPress determines the current user before it parses the request, so a route carried in
-	 * `rest_route` is only known here.
+	 * WordPress determines the current user before it parses the request, so `authenticate_wccom()` leaves
+	 * these requests alone during `determine_current_user` and they are authenticated here instead.
 	 *
 	 * @since 11.3.0
 	 * @param WP_Error|null|bool $error Error from another authentication handler, null if none.
 	 * @return WP_Error|null|bool
 	 */
 	public static function authentication_fallback( $error ) {
-		if ( ! empty( $error ) || 0 !== get_current_user_id() ) {
+		if ( ! empty( $error ) || 0 !== get_current_user_id() || ! isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return $error;
 		}
 
@@ -191,6 +191,9 @@ class WC_WCCOM_Site {
 
 	/**
 	 * Check if this is a request to WCCOM Site REST API.
+	 *
+	 * Before WordPress parses the request only the URL path is checked. Requests carrying `rest_route`
+	 * return false until then, and `authentication_fallback()` authenticates them once the route is resolved.
 	 *
 	 * @since 3.7.0
 	 * @return bool
