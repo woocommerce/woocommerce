@@ -104,12 +104,19 @@ function isTemplatePostType( postType: string | undefined ): boolean {
 
 // A notice's wording is decided by which post type's labels its content
 // matches, not by whichever post type happens to be current when
-// `getNotices()` runs — see the module docblock above `getNoticeOverrides`.
+// `getNotices()` runs — see the comments inside `getNoticeOverrides` for why.
 interface PostTypeCandidate {
 	postType: string | undefined;
 	labels: PostTypeLabels;
 }
 
+// If both candidates are different post types but happen to share the same
+// text for the matched label (e.g. neither `wp_template` nor the email post
+// type declares `item_published`, so both fall back to WordPress's default
+// "Post published."), there's no way to tell which one produced the notice.
+// The first candidate — the current post type — wins. This is accepted:
+// with identical label text there's nothing left to disambiguate with, and
+// current-first is what makes a first-time template save read correctly.
 function findMatchingCandidate(
 	candidates: PostTypeCandidate[],
 	labelKeys: string[],
@@ -175,12 +182,13 @@ const getNoticesWithOverrides = createSelector(
 		currentPostType: string | undefined,
 		currentLabels: PostTypeLabels,
 		emailPostType: string | undefined,
-		emailLabels: PostTypeLabels
+		emailLabels: PostTypeLabels,
+		isSamePostType: boolean
 	) => {
 		const candidates: PostTypeCandidate[] = [
 			{ postType: currentPostType, labels: currentLabels },
 		];
-		if ( emailPostType !== currentPostType ) {
+		if ( ! isSamePostType ) {
 			candidates.push( { postType: emailPostType, labels: emailLabels } );
 		}
 		return applyOverridesToNotices( notices, candidates );
@@ -190,8 +198,16 @@ const getNoticesWithOverrides = createSelector(
 		currentPostType: string | undefined,
 		currentLabels: PostTypeLabels,
 		emailPostType: string | undefined,
-		emailLabels: PostTypeLabels
-	) => [ notices, currentPostType, currentLabels, emailPostType, emailLabels ]
+		emailLabels: PostTypeLabels,
+		isSamePostType: boolean
+	) => [
+		notices,
+		currentPostType,
+		currentLabels,
+		emailPostType,
+		emailLabels,
+		isSamePostType,
+	]
 );
 
 /**
@@ -240,7 +256,8 @@ export function useNoticeOverrides(): void {
 									undefined,
 									undefined,
 									undefined,
-									undefined
+									undefined,
+									true
 								);
 							}
 
@@ -293,17 +310,24 @@ export function useNoticeOverrides(): void {
 									  }
 									| undefined
 							 )?.getEmailPostType?.();
-							const emailLabels =
-								emailPostType === currentPostType
-									? currentLabels
-									: getLabelsFor( emailPostType );
+							// Single source of truth for "are these the same
+							// post type": both the label lookup below and the
+							// candidate list built inside
+							// `getNoticesWithOverrides` follow from it, so
+							// they can't drift apart.
+							const isSamePostType =
+								emailPostType === currentPostType;
+							const emailLabels = isSamePostType
+								? currentLabels
+								: getLabelsFor( emailPostType );
 
 							return getNoticesWithOverrides(
 								notices,
 								currentPostType,
 								currentLabels,
 								emailPostType,
-								emailLabels
+								emailLabels,
+								isSamePostType
 							);
 						},
 					};

@@ -938,7 +938,11 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
+		// Pins the single "are these the same post type" decision: labels
+		// are looked up once, for the shared post type, not once per
+		// candidate.
 		expect( getPostType ).toHaveBeenCalledTimes( 1 );
+		expect( getPostType ).toHaveBeenCalledWith( 'email' );
 	} );
 
 	it( 'looks up labels for the current post type, not any other cached post type', () => {
