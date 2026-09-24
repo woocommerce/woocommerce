@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 require_once WC_ABSPATH . '/includes/class-wc-brands.php';
@@ -353,6 +354,13 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 			return $taxonomy_params;
 		};
 		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		$params     = wc_get_container()->get( Params::class );
+		$param_keys = $params->get_param_keys();
+		$this->assertSame( 'brands', $params->get_param( 'taxonomy' )['product_brand'], 'Omitting the brand mapping must keep its default.' );
+		$this->assertContains( 'brands', $param_keys, 'The default brand key remains public.' );
+		$this->assertContains( 'categories', $param_keys, 'Unrelated category keys remain public.' );
+		$this->assertContains( 'tags', $param_keys, 'Unrelated tag keys remain public.' );
 
 		list( $where, $posts ) = $this->query_main_products( $this->cat_and_unknown_brand_query_vars() );
 

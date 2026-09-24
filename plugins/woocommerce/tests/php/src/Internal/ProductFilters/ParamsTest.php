@@ -280,6 +280,9 @@ class ParamsTest extends AbstractProductFiltersTest {
 	 */
 	public function test_taxonomy_params_are_filterable_by_rename(): void {
 		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
+			$this->assertSame( 'categories', $taxonomy_params['product_cat'] ?? null, 'The filter receives the default category parameter.' );
+			$this->assertSame( 'tags', $taxonomy_params['product_tag'] ?? null, 'The filter receives the default tag parameter.' );
+			$this->assertSame( 'brands', $taxonomy_params['product_brand'] ?? null, 'The filter receives the default brand parameter.' );
 			$taxonomy_params['product_brand'] = 'wc_brands';
 			return $taxonomy_params;
 		};
@@ -326,47 +329,6 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
 		$this->assertSame( 1, array_count_values( $taxonomy_params )['wc_shared'] ?? 0 );
 		$this->assertTrue( 'tags' === $taxonomy_params['product_tag'] || 'brands' === $taxonomy_params['product_brand'], 'A colliding rename must keep its default.' );
-	}
-
-	/**
-	 * @testdox Omitting a taxonomy from the filtered map keeps its default parameter.
-	 */
-	public function test_omitted_taxonomy_param_keeps_default(): void {
-		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
-			unset( $taxonomy_params['product_brand'] );
-			return $taxonomy_params;
-		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
-
-		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
-		$param_keys      = $this->sut->get_param_keys();
-
-		$this->assertSame( 'brands', $taxonomy_params['product_brand'], 'Omitting a taxonomy must not disable its filter.' );
-		$this->assertContains( 'brands', $param_keys, 'The default brand param must remain registered.' );
-		$this->assertContains( 'categories', $param_keys, 'Unrelated taxonomy params should be unaffected.' );
-		$this->assertContains( 'tags', $param_keys, 'Unrelated taxonomy params should be unaffected.' );
-	}
-
-	/**
-	 * @testdox The woocommerce_product_filter_taxonomy_params filter receives the taxonomy-to-param map.
-	 */
-	public function test_taxonomy_params_filter_receives_expected_shape(): void {
-		$received = null;
-
-		$this->taxonomy_params_filter = function ( array $taxonomy_params ) use ( &$received ): array {
-			if ( null === $received ) {
-				$received = $taxonomy_params;
-			}
-			return $taxonomy_params;
-		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
-
-		$this->sut->get_param( 'taxonomy' );
-
-		$this->assertIsArray( $received, 'The filter should receive an array.' );
-		$this->assertSame( 'categories', $received['product_cat'] ?? null, 'The filter should receive the default product_cat mapping.' );
-		$this->assertSame( 'tags', $received['product_tag'] ?? null, 'The filter should receive the default product_tag mapping.' );
-		$this->assertSame( 'brands', $received['product_brand'] ?? null, 'The filter should receive the default product_brand mapping.' );
 	}
 
 	/**
