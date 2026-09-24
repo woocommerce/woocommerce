@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Correct the refund marker migration docblock to explain which reports remain affected after a database error.

@@ -12,6 +12,7 @@ namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Device_Detection;
 use Automattic\Jetpack\Device_Detection\User_Agent_Info;
+use Automattic\Woocommerce_Analytics;
 use WP_Error;
 
 /**
@@ -459,17 +460,18 @@ class WC_Analytics_Tracking {
 		$blog_details = self::get_blog_details();
 
 		return array(
-			'ui'             => $blog_user_id,
-			'blog_id'        => $blog_details['blog_id'] ?? null,
-			'store_id'       => $blog_details['store_id'] ?? null,
-			'url'            => $blog_details['url'] ?? null,
-			'woo_version'    => $blog_details['wc_version'] ?? null,
-			'wp_version'     => get_bloginfo( 'version' ),
-			'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-			'device'         => self::get_device_type(),
-			'store_currency' => $blog_details['store_currency'] ?? null,
-			'timezone'       => wp_timezone_string(),
-			'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+			'ui'              => $blog_user_id,
+			'blog_id'         => $blog_details['blog_id'] ?? null,
+			'store_id'        => $blog_details['store_id'] ?? null,
+			'url'             => $blog_details['url'] ?? null,
+			'woo_version'     => $blog_details['wc_version'] ?? null,
+			'wp_version'      => get_bloginfo( 'version' ),
+			'store_admin'     => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
+			'device'          => self::get_device_type(),
+			'store_currency'  => $blog_details['store_currency'] ?? null,
+			'timezone'        => wp_timezone_string(),
+			'is_guest'        => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+			'package_version' => Woocommerce_Analytics::PACKAGE_VERSION,
 		);
 	}
 
@@ -698,8 +700,9 @@ class WC_Analytics_Tracking {
 			return '';
 		}
 
+		// Not URL-encoded here: http_build_query() in Pixel_Builder encodes the whole URL, so encoding twice stores `%2F` in Tracks.
 		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
-			return rawurlencode( implode( ',', $value ) );
+			return implode( ',', $value );
 		}
 
 		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
