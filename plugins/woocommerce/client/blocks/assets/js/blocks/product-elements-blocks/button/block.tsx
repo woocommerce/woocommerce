@@ -32,7 +32,7 @@ import type {
 	AddToCartButtonPlaceholderAttributes,
 	AddToCartProductDetails,
 } from './types';
-import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
+import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 
 const getButtonText = ( {
 	cartQuantity,

@@ -12,7 +12,7 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type {
 	Context as AddToCartWithOptionsContext,
 	AddToCartWithOptionsStore,
-} from '../../../../blocks/add-to-cart-with-options/frontend';
+} from '../../add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =

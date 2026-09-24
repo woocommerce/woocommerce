@@ -49271,12 +49271,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AllReviews.php
 
 		-
-			message: '#^Return type \(null\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AtomicBlock\:\:get_block_type_editor_script\(\) should be compatible with return type \(array\|string\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:get_block_type_editor_script\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Blocks/BlockTypes/AtomicBlock.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
