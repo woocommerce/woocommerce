@@ -8,6 +8,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { clearFilters, setFilterValue } from '../../utils/filters';
 
 test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -74,7 +75,7 @@ test.describe( 'Manage webhooks', () => {
 	);
 
 	test(
-		'Webhooks can be activated, paused, and deactivated in bulk',
+		'Webhooks can be activated, paused, and disabled in bulk',
 		async ( { page, restApi } ) => {
 			const response = await restApi.post( `${ WC_API_PATH }/webhooks`, {
 				name: 'Bulk status webhook',
@@ -90,6 +91,13 @@ test.describe( 'Manage webhooks', () => {
 			} );
 			await row.getByRole( 'checkbox' ).check();
 
+			await setFilterValue( page, 'pre_http_request', {
+				headers: {},
+				body: '',
+				response: { code: 200, message: 'OK' },
+				cookies: [],
+				filename: null,
+			} );
 			await page.locator( 'select[name="action"]' ).selectOption( 'activate' );
 			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
 
@@ -101,6 +109,7 @@ test.describe( 'Manage webhooks', () => {
 				`${ WC_API_PATH }/webhooks/${ response.data.id }`
 			);
 			expect( activeWebhook.data.status ).toBe( 'active' );
+			await clearFilters( page );
 
 			await row.getByRole( 'checkbox' ).check();
 			await page.locator( 'select[name="action"]' ).selectOption( 'pause' );
@@ -120,7 +129,7 @@ test.describe( 'Manage webhooks', () => {
 			await page.getByRole( 'button', { name: 'Apply' } ).first().click();
 
 			await expect(
-				page.getByText( '1 webhook deactivated.' )
+				page.getByText( '1 webhook disabled.' )
 			).toBeVisible();
 			await expect( row.getByText( 'Disabled' ) ).toBeVisible();
 			const disabledWebhook = await restApi.get(
