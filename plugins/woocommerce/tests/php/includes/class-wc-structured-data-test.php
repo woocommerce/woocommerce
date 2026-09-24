@@ -728,6 +728,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_refund_returns_page_id', $page_id );
 		$this->go_to( get_permalink( $page_id ) );
 
+		$this->assertSame( 9, has_action( 'wp_footer', array( $this->structured_data, 'generate_online_store_data' ) ), 'Policy data must be generated before the footer output at priority 10.' );
 		$this->assertSame( array(), $this->structured_data->get_structured_data( array( 'onlinestore' ) ), 'Policy data should not be generated before the footer (including in emails).' );
 		$this->structured_data->generate_online_store_data();
 		$this->assertSame(
