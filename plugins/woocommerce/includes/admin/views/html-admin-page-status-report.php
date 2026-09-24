@@ -49,7 +49,7 @@ if ( $remaining_additional_tax_classes ) {
 
 $countries                  = WC()->countries->get_countries();
 $store_base_country         = $settings['store_base_country'];
-$store_base_country_display = isset( $countries[ $store_base_country ] ) ? $countries[ $store_base_country ] . ' (' . $store_base_country . ')' : $store_base_country;
+$store_base_country_display = isset( $countries[ $store_base_country ] ) ? $store_base_country . ' - ' . $countries[ $store_base_country ] : $store_base_country;
 $states                     = WC()->countries->get_states( $store_base_country );
 $store_base_state           = $settings['store_base_state'] ?? '';
 $store_base_state_display   = is_array( $states ) && isset( $states[ $store_base_state ] ) ? $states[ $store_base_state ] . ' (' . $store_base_state . ')' : $store_base_state;
