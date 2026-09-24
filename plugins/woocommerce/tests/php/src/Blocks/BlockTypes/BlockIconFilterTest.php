@@ -26,7 +26,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->reset_cart_checkout_page_cache();
-		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX, 4 );
+		add_filter( 'woocommerce_blocks_decorative_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX, 4 );
 	}
 
 	/**
@@ -181,7 +181,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $this->icon_filter_calls );
 		$this->assert_filtered_icon( $output, 'fixture-unknown-style-icon' );
 
-		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
+		remove_filter( 'woocommerce_blocks_decorative_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
 		$unknown_default_output  = $this->render_block( 'woocommerce/customer-account', $attributes );
 		$attributes['iconStyle'] = 'default';
 		$explicit_default_output = $this->render_block( 'woocommerce/customer-account', $attributes );
@@ -238,7 +238,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	 * @param string $style Customer Account icon style.
 	 */
 	public function test_customer_account_no_op_filter_preserves_icon_output( string $style ): void {
-		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
+		remove_filter( 'woocommerce_blocks_decorative_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
 		$attributes = array(
 			'displayStyle'          => 'icon_and_text',
 			'hasDropdownNavigation' => false,
@@ -249,7 +249,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 
 		$no_op_calls = 0;
 		add_filter(
-			'woocommerce_blocks_icon_svg',
+			'woocommerce_blocks_decorative_icon_svg',
 			static function ( $svg ) use ( &$no_op_calls ) {
 				++$no_op_calls;
 				return $svg;

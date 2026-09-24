@@ -55,7 +55,7 @@ final class BlockIconUtils {
 		 *
 		 * @since 11.3.0
 		 */
-		$filtered_svg = apply_filters( 'woocommerce_blocks_icon_svg', $default_svg, $icon_name, $block_name, $block_attributes );
+		$filtered_svg = apply_filters( 'woocommerce_blocks_decorative_icon_svg', $default_svg, $icon_name, $block_name, $block_attributes );
 
 		if ( ! is_string( $filtered_svg ) || $default_svg === $filtered_svg ) {
 			return $default_svg;

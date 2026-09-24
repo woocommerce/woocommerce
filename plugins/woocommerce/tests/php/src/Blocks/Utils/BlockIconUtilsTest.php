@@ -40,7 +40,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 		$call_count    = 0;
 		$received_args = null;
 		add_filter(
-			'woocommerce_blocks_icon_svg',
+			'woocommerce_blocks_decorative_icon_svg',
 			static function ( ...$args ) use ( &$call_count, &$received_args ) {
 				++$call_count;
 				$received_args = $args;
@@ -290,7 +290,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 		$expected_default = MiniCartUtils::get_svg_icon( $requested_icon, '#123456' );
 		$received_name    = null;
 		add_filter(
-			'woocommerce_blocks_icon_svg',
+			'woocommerce_blocks_decorative_icon_svg',
 			function ( $svg, $icon_name, $block_name, $received_attributes ) use ( &$received_name, $expected_default, $attributes ) {
 				$this->assertSame( $expected_default, $svg );
 				$this->assertSame( 'woocommerce/cart-link', $block_name );
@@ -355,7 +355,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 */
 	private function filter_with_replacement( $replacement ): string {
 		add_filter(
-			'woocommerce_blocks_icon_svg',
+			'woocommerce_blocks_decorative_icon_svg',
 			static function () use ( $replacement ) {
 				return $replacement;
 			}

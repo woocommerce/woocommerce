@@ -23,8 +23,8 @@
 - [woocommerce_adjust_non_base_location_prices](#woocommerce_adjust_non_base_location_prices)
 - [woocommerce_apply_individual_use_coupon](#woocommerce_apply_individual_use_coupon)
 - [woocommerce_apply_with_individual_use_coupon](#woocommerce_apply_with_individual_use_coupon)
+- [woocommerce_blocks_decorative_icon_svg](#woocommerce_blocks_decorative_icon_svg)
 - [woocommerce_blocks_hook_compatibility_additional_data](#woocommerce_blocks_hook_compatibility_additional_data)
-- [woocommerce_blocks_icon_svg](#woocommerce_blocks_icon_svg)
 - [woocommerce_blocks_pre_get_routes_from_namespace](#woocommerce_blocks_pre_get_routes_from_namespace)
 - [woocommerce_blocks_product_filters_selected_items](#woocommerce_blocks_product_filters_selected_items)
 - [woocommerce_blocks_product_grid_add_to_cart_attributes](#woocommerce_blocks_product_grid_add_to_cart_attributes)
@@ -557,6 +557,34 @@ apply_filters( 'woocommerce_apply_with_individual_use_coupon', bool $apply_with_
 
 ---
 
+## woocommerce_blocks_decorative_icon_svg
+
+
+Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
+
+```php
+apply_filters( 'woocommerce_blocks_decorative_icon_svg', string $default_svg, string $icon_name, string $block_name, array $block_attributes )
+```
+
+### Description
+
+Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`. Anything invalid, including an empty string, falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes. Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $default_svg | string | Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks. |
+| $icon_name | string | Icon name: `cart`, `bag`, or `bag-alt` for Mini-Cart and Cart Link; `default`, `line`, or `alt` for Customer Account. More may be added, so check the block name too. |
+| $block_name | string | Block name. |
+| $block_attributes | array | Block attributes at render time, as the block defines them. To keep a Mini-Cart's custom icon color, read it from here. |
+
+### Source
+
+- [Blocks/Utils/BlockIconUtils.php](../../../../../../src/Blocks/Utils/BlockIconUtils.php)
+
+---
+
 ## woocommerce_blocks_hook_compatibility_additional_data
 
 
@@ -597,34 +625,6 @@ Where:
 ### Source
 
 - [Blocks/Templates/AbstractTemplateCompatibility.php](../../../../../../src/Blocks/Templates/AbstractTemplateCompatibility.php)
-
----
-
-## woocommerce_blocks_icon_svg
-
-
-Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
-
-```php
-apply_filters( 'woocommerce_blocks_icon_svg', string $default_svg, string $icon_name, string $block_name, array $block_attributes )
-```
-
-### Description
-
-Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`. Anything invalid, including an empty string, falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes. Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $default_svg | string | Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks. |
-| $icon_name | string | Icon name: `cart`, `bag`, or `bag-alt` for Mini-Cart and Cart Link; `default`, `line`, or `alt` for Customer Account. More may be added, so check the block name too. |
-| $block_name | string | Block name. |
-| $block_attributes | array | Block attributes at render time, as the block defines them. To keep a Mini-Cart's custom icon color, read it from here. |
-
-### Source
-
-- [Blocks/Utils/BlockIconUtils.php](../../../../../../src/Blocks/Utils/BlockIconUtils.php)
 
 ---
 
