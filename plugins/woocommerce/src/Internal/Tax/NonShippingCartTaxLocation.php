@@ -35,19 +35,53 @@ class NonShippingCartTaxLocation {
 	private $is_checking_shipping = false;
 
 	/**
+	 * Nesting depth of cart totals calculations and mini-cart renders, which count as cart context on any page.
+	 *
+	 * @var int
+	 */
+	private $cart_context_depth = 0;
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->dispatch_stack    = array();
-		$this->dispatch_contexts = array();
+		$this->dispatch_stack     = array();
+		$this->dispatch_contexts  = array();
+		$this->cart_context_depth = 0;
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
 		// Register the cart/checkout context only after a route matches, and clear it right
 		// after the callback.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
+		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
+		// so both can happen outside the cart and checkout pages.
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_cart_context_start' ), PHP_INT_MIN, 0 );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_cart_context_end' ), PHP_INT_MAX, 0 );
+		add_action( 'woocommerce_before_mini_cart', array( $this, 'handle_cart_context_start' ), PHP_INT_MIN, 0 );
+		add_action( 'woocommerce_after_mini_cart', array( $this, 'handle_cart_context_end' ), PHP_INT_MAX, 0 );
+	}
+
+	/**
+	 * Start a cart context for a cart totals calculation or a mini-cart render.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 */
+	public function handle_cart_context_start(): void {
+		++$this->cart_context_depth;
+	}
+
+	/**
+	 * End a cart context started by handle_cart_context_start().
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 */
+	public function handle_cart_context_end(): void {
+		$this->cart_context_depth = max( 0, $this->cart_context_depth - 1 );
 	}
 
 	/**
@@ -140,12 +174,7 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		if ( ! empty( $this->dispatch_stack ) ) {
-			$current_dispatch_id = end( $this->dispatch_stack );
-			if ( empty( $this->dispatch_contexts[ $current_dispatch_id ] ) ) {
-				return $taxable_address;
-			}
-		} elseif ( ! is_cart() && ! is_checkout() ) {
+		if ( ! $this->is_cart_context() ) {
 			return $taxable_address;
 		}
 
@@ -180,6 +209,25 @@ class NonShippingCartTaxLocation {
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
 		);
+	}
+
+	/**
+	 * Determine whether the taxable address is being resolved for the cart rather than for catalog prices.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True for cart totals, mini-cart renders, the cart and checkout pages, and Store API cart and checkout requests.
+	 */
+	private function is_cart_context(): bool {
+		if ( $this->cart_context_depth > 0 ) {
+			return true;
+		}
+
+		if ( ! empty( $this->dispatch_stack ) ) {
+			return ! empty( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] );
+		}
+
+		return is_cart() || is_checkout();
 	}
 
 	/**

@@ -189,6 +189,56 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Uses the billing address for cart totals calculated outside the cart and checkout.
+	 */
+	public function test_uses_billing_address_for_cart_totals_outside_cart_and_checkout(): void {
+		$this->create_billing_country_tax_rate();
+		$this->add_product_to_cart( true );
+		$total_tax     = null;
+		$after_address = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$total_tax, &$after_address ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				WC()->cart->calculate_totals();
+				$total_tax     = WC()->cart->get_total_tax();
+				$after_address = $this->customer->get_taxable_address();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertEquals( 2.0, $total_tax, 'Cart totals should include the billing country tax.' );
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once totals are calculated.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address for mini-cart prices rendered outside the cart and checkout.
+	 */
+	public function test_uses_billing_address_for_mini_cart_outside_cart_and_checkout(): void {
+		$this->create_billing_country_tax_rate();
+		$this->add_product_to_cart( true );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		$mini_cart     = '';
+		$after_address = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$mini_cart, &$after_address ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				ob_start();
+				woocommerce_mini_cart();
+				$mini_cart     = (string) ob_get_clean();
+				$after_address = $this->customer->get_taxable_address();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertMatchesRegularExpression( '#<span class="quantity">1 &times; <span class="woocommerce-Price-amount amount">.*?12\.00</bdi>#s', $mini_cart, 'Mini-cart line prices should include the billing country tax.' );
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once the mini-cart is rendered.' );
+	}
+
+	/**
 	 * @testdox Restores the Store API cart request context after nested requests.
 	 *
 	 * Registers real routes and drives them through rest_do_request() so the
@@ -410,6 +460,26 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$product->save();
 
 		WC()->cart->add_to_cart( $product->get_id() );
+	}
+
+	/**
+	 * Enable taxes with a 20% standard rate for the billing country only.
+	 */
+	private function create_billing_country_tax_rate(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'GB',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 	}
 
 	/**
