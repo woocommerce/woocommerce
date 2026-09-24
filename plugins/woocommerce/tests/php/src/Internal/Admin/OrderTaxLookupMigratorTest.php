@@ -687,6 +687,30 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch read before the split update ran does not step the split pass past the orders it left out.
+	 */
+	public function test_batch_in_flight_does_not_step_a_new_pass_past_orders_it_left_out(): void {
+		// Holds no base, so it only becomes pending once the update marks where the old rows end.
+		$left_out = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $left_out->get_id(), 0.0 );
+
+		$in_batch = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $in_batch->get_id(), 0, 0.25 );
+
+		$batch = $this->sut->get_next_batch_to_process( 10 );
+		$this->assertSame( array( $in_batch->get_id() ), $batch, 'Before the update only the order without a tax order item should be pending.' );
+
+		// The split update runs while the batch is in flight.
+		update_option( OrderTaxLookupMigrator::SPLIT_END_OPTION, $in_batch->get_id(), false );
+
+		$this->sut->process_batch( $batch );
+
+		$this->assertSame( $in_batch->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The pass the batch was read for should step past it.' );
+		$this->assertSame( $left_out->get_id() - 1, (int) get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should stop before the order the batch left out.' );
+		$this->assertContains( $left_out->get_id(), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should still reach the order the batch left out.' );
+	}
+
+	/**
 	 * @testdox The tool is disabled on a store with nothing to rebuild.
 	 */
 	public function test_tool_is_disabled_with_nothing_to_rebuild(): void {

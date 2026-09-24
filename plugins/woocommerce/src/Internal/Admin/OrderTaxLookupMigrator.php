@@ -304,7 +304,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 		// Step past every order in the batch, including any that could not be rebuilt, which are
 		// left to the failed import retry. See CURSOR_OPTION.
-		$this->advance_cursors( max( array_map( 'absint', $batch ) ) );
+		$this->advance_cursors( array_map( 'absint', $batch ) );
 
 		ReportsCache::invalidate();
 	}
@@ -316,11 +316,42 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * them all and in order, so a pass whose cursor sits above the batch has been through those
 	 * orders already, and moving it back would hand them to it a second time.
 	 *
-	 * @param int $order_id Highest order id in the batch.
+	 * A pass only steps up to the first order below the end of the batch that it still has to
+	 * rebuild and the batch did not hold. The batch was read with the passes on offer at the time,
+	 * and a pass that came on offer while it was in flight, such as the split pass once its update
+	 * runs, has not been through the orders between the batch ids.
+	 *
+	 * @param non-empty-array<int> $batch Order ids of the batch.
 	 */
-	private function advance_cursors( int $order_id ): void {
+	private function advance_cursors( array $batch ): void {
+		global $wpdb;
+
+		$table_name   = TaxesDataStore::get_db_table_name();
+		$last         = max( $batch );
+		$placeholders = implode( ', ', array_fill( 0, count( $batch ), '%d' ) );
+
 		foreach ( $this->get_pending_passes() as $pass ) {
-			update_option( $pass['cursor'], max( $order_id, $this->get_cursor( $pass['cursor'] ) ), false );
+			$cursor = $this->get_cursor( $pass['cursor'] );
+
+			if ( $cursor >= $last ) {
+				continue;
+			}
+
+			$skipped = $wpdb->get_var(
+				$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The values come as one array.
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input, and the condition and placeholders are built above.
+					"SELECT MIN(order_id) FROM {$table_name} WHERE order_id > %d AND order_id < %d AND order_id NOT IN ( {$placeholders} ) AND ( {$pass['condition']} )",
+					array_merge( array( $cursor, $last ), $batch, $pass['values'] )
+				)
+			);
+
+			// Without an answer there is no telling what the pass would step past, so it keeps its
+			// place and the next batch goes through these orders again.
+			if ( $wpdb->last_error ) {
+				continue;
+			}
+
+			update_option( $pass['cursor'], null === $skipped ? $last : (int) $skipped - 1, false );
 		}
 	}
 
