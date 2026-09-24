@@ -173,6 +173,61 @@ const updateSelectedImage = ( imageId: number ) => {
 	} );
 };
 
+/** Observe every slide and return a function to refresh their visibility. */
+const initSlidesObservers = (
+	container: HTMLElement,
+	observer: IntersectionObserver
+) => {
+	const slides = container.querySelectorAll( SELECTORS.largeImageWrapper );
+	const resetSlidesObservers = () => {
+		observer.disconnect();
+		slides.forEach( ( slide ) => observer.observe( slide ) );
+	};
+	resetSlidesObservers();
+	return resetSlidesObservers;
+};
+
+/** Resume visible-slide selection when user input interrupts navigation. */
+const initInterruptionEvents = (
+	container: HTMLElement,
+	resetSlidesObservers: () => void
+) => {
+	const onUserInput = () => {
+		if ( pendingViewerImages.delete( container ) ) {
+			// The visible slide may have crossed the threshold before the interruption.
+			resetSlidesObservers();
+		}
+	};
+	const events = [ 'pointerdown', 'wheel', 'keydown' ];
+	for ( const event of events ) {
+		container.addEventListener( event, onUserInput, {
+			capture: true,
+			passive: true,
+		} );
+	}
+	return () => {
+		for ( const event of events ) {
+			container.removeEventListener( event, onUserInput, true );
+		}
+	};
+};
+
+/** Reset viewer alignment when its width changes. */
+const initViewerResizeObserver = (
+	container: HTMLElement,
+	resetAlignment: () => void
+) => {
+	let width = container.clientWidth;
+	const observer = new ResizeObserver( () => {
+		if ( width !== container.clientWidth ) {
+			width = container.clientWidth;
+			resetAlignment();
+		}
+	} );
+	observer.observe( container );
+	return () => observer.disconnect();
+};
+
 /** Scroll both the large viewer and the thumbnail strip to the given image. */
 const scrollImageEverywhereIntoView = (
 	imageId: number,
@@ -666,43 +721,25 @@ const productGallery = {
 				} ),
 				{ root: container, threshold: visibilityThreshold }
 			);
-			const slides = container.querySelectorAll(
-				SELECTORS.largeImageWrapper
+			const resetSlidesObservers = initSlidesObservers(
+				container,
+				observer
 			);
-			const observeSlides = () =>
-				slides.forEach( ( slide ) => observer.observe( slide ) );
-			observeSlides();
-			const onUserInput = () => {
-				if ( pendingViewerImages.delete( container ) ) {
-					// The visible slide may have crossed the threshold before the interruption.
-					observer.disconnect();
-					observeSlides();
-				}
-			};
-			for ( const event of [ 'pointerdown', 'wheel', 'keydown' ] ) {
-				container.addEventListener( event, onUserInput, {
-					capture: true,
-					passive: true,
-				} );
-			}
-
-			let width = container.clientWidth;
-			const resizeObserver = new ResizeObserver( () => {
-				if ( width !== container.clientWidth ) {
-					width = container.clientWidth;
-					resetAlignment();
-				}
-			} );
-			resizeObserver.observe( container );
+			const removeInterruptionEvents = initInterruptionEvents(
+				container,
+				resetSlidesObservers
+			);
+			const disconnectResizeObserver = initViewerResizeObserver(
+				container,
+				resetAlignment
+			);
 			resetAlignment();
 
 			return () => {
 				observer.disconnect();
-				for ( const event of [ 'pointerdown', 'wheel', 'keydown' ] ) {
-					container.removeEventListener( event, onUserInput, true );
-				}
+				removeInterruptionEvents();
 				pendingViewerImages.delete( container );
-				resizeObserver.disconnect();
+				disconnectResizeObserver();
 				cancelAnimationFrame( frame );
 			};
 		},
