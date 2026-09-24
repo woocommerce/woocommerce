@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Validate Settings UI schemas and script handles before mounting, with a complete classic fallback for server-side failures.
