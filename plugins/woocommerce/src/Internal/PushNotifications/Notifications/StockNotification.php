@@ -156,8 +156,9 @@ class StockNotification extends Notification {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Without it a rebuilt stock notification falls back to the constructor's
-	 * low_stock default and reads and writes another event's delivery state.
+	 * Without the event type, a rebuilt stock notification falls back to the
+	 * constructor's low_stock default and reads and writes another event's
+	 * delivery state.
 	 *
 	 * @return array{event_type: string}
 	 *
