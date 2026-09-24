@@ -62,10 +62,8 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	justify-content: center;
-	:where(&) {
-		margin: 0 auto;
-		min-height: var(--wc-featured-item-min-height, 500px);
-	}
+	margin: 0 auto;
+	min-height: var(--wc-featured-item-min-height, 500px);
 	overflow: hidden;
 	position: relative;
 	width: 100%;
@@ -151,7 +149,6 @@
 		color: inherit;
 		width: 100%;
 		z-index: 1;
-		position: relative;
 
 		&.is-layout-flex {
 			flex: 1;
@@ -160,11 +157,6 @@
 		&:not(.is-layout-flex) {
 			padding: 0 48px 16px 48px;
 		}
-	}
-
-	&.alignleft,
-	&.alignright {
-		max-width: 50%;
 	}
 
 	&__description {

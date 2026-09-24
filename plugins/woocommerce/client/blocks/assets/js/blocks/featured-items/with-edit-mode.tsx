@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import type { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { usePreviewMode } from '@woocommerce/base-hooks';
@@ -144,7 +145,7 @@ export const withEditMode =
 					{ ...props.blockProps }
 					icon={ <Icon icon={ icon } /> }
 					label={ label }
-					className={ `${ props.blockProps.className } ${ className }` }
+					className={ clsx( props.blockProps.className, className ) }
 				>
 					<HStack alignment="center">
 						{ isDeleted ? (

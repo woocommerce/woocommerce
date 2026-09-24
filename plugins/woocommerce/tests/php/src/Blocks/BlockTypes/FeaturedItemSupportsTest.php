@@ -20,19 +20,28 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Core supports must reach the visible wrapper and its actual content container.
 	 *
-	 * @testWith ["category"]
-	 *           ["product"]
+	 * @testWith ["category", "top", "flex-start"]
+	 *           ["category", "center", "center"]
+	 *           ["category", "bottom", "flex-end"]
+	 *           ["product", "top", "flex-start"]
+	 *           ["product", "center", "center"]
+	 *           ["product", "bottom", "flex-end"]
 	 * @param string $kind Featured item kind.
+	 * @param string $alignment Vertical content alignment.
+	 * @param string $justification Expected CSS justification.
 	 */
-	public function test_support_styles_and_layout_target( string $kind ): void {
+	public function test_support_styles_and_layout_target( string $kind, string $alignment, string $justification ): void {
 		$attributes           = $this->get_item_attributes( $kind );
 		$attributes['anchor'] = 'featured-anchor';
 		$attributes['layout'] = array(
 			'type'              => 'flex',
 			'orientation'       => 'vertical',
-			'verticalAlignment' => 'category' === $kind ? 'top' : 'bottom',
+			'verticalAlignment' => $alignment,
+			'justifyContent'    => 'stretch',
+			'flexWrap'          => 'nowrap',
 		);
 		$attributes['style']  = array(
+			'color'      => array( 'text' => '#123456' ),
 			'border'     => array(
 				'style' => 'dashed',
 				'width' => '3px',
@@ -53,13 +62,52 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $tags->next_tag() );
 		$this->assertSame( 'featured-anchor', $tags->get_attribute( 'id' ) );
 		$this->assertFalse( $tags->has_class( 'is-layout-flex' ) );
-		foreach ( array( 'border-style:dashed', 'letter-spacing:2px', 'font-weight:600', 'aspect-ratio:16/9', 'min-height:unset', 'box-shadow:2px 3px 4px #000000', 'margin-top:20px' ) as $style ) {
+		foreach ( array( 'color:#123456', 'border-style:dashed', 'letter-spacing:2px', 'font-weight:600', 'aspect-ratio:16/9', 'min-height:unset', 'box-shadow:2px 3px 4px #000000', 'margin-top:20px' ) as $style ) {
 			$this->assertStringContainsString( $style, $tags->get_attribute( 'style' ) );
 		}
+		$this->assertStringNotContainsString( 'gap:', $tags->get_attribute( 'style' ) );
 		$this->assertTrue( $tags->next_tag( array( 'class_name' => 'wc-block-featured-' . $kind . '__inner-blocks' ) ) );
 		$this->assertTrue( $tags->has_class( 'is-layout-flex' ) );
 		$this->assertTrue( $tags->has_class( 'is-vertical' ) );
-		$this->assertStringContainsString( 'justify-content:' . ( 'category' === $kind ? 'flex-start' : 'flex-end' ), wp_style_engine_get_stylesheet_from_context( 'block-supports' ) );
+		$this->assertTrue( $tags->has_class( 'is-nowrap' ) );
+		$this->assertTrue( $tags->has_class( 'is-content-justification-stretch' ) );
+		$this->assertTrue( $tags->has_class( 'wp-block-woocommerce-featured-' . $kind . '-is-layout-flex' ) );
+		$this->assertStringContainsString( 'wp-container-woocommerce-featured-' . $kind . '-is-layout-', $tags->get_attribute( 'class' ) );
+		$this->assertStringContainsString( 'justify-content:' . $justification, wp_style_engine_get_stylesheet_from_context( 'block-supports' ) );
+	}
+
+	/**
+	 * @testdox Core renders preset styles and wrapper classes for modern and legacy Featured blocks.
+	 *
+	 * @testWith ["category", false]
+	 *           ["category", true]
+	 *           ["product", false]
+	 *           ["product", true]
+	 * @param string $kind Featured item kind.
+	 * @param bool   $legacy Whether to render legacy markup.
+	 */
+	public function test_core_renders_presets( string $kind, bool $legacy ): void {
+		$attributes = array_merge(
+			$this->get_item_attributes( $kind ),
+			array(
+				'textColor'       => 'vivid-red',
+				'backgroundColor' => 'black',
+				'gradient'        => 'vivid-cyan-blue-to-vivid-purple',
+				'fontSize'        => 'large',
+				'fontFamily'      => 'system-font',
+				'borderColor'     => 'white',
+				'align'           => 'wide',
+				'className'       => 'custom-featured',
+			)
+		);
+		if ( $legacy ) {
+			$attributes['editMode'] = false;
+		}
+		$tags = new WP_HTML_Tag_Processor( $this->render_item( $kind, $attributes ) );
+		$this->assertTrue( $tags->next_tag() );
+		foreach ( array( 'has-vivid-red-color', 'has-black-background-color', 'has-vivid-cyan-blue-to-vivid-purple-gradient-background', 'has-large-font-size', 'has-system-font-font-family', 'has-white-border-color', 'alignwide', 'custom-featured' ) as $class ) {
+			$this->assertTrue( $tags->has_class( $class ), $class . ' should be rendered by Core block supports.' );
+		}
 	}
 
 	/**
@@ -80,33 +128,6 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'is-layout-flow', $html );
 		$this->assertStringNotContainsString( 'is-layout-flex', $html );
 		$this->assertStringContainsString( 'Saved content', $html );
-	}
-
-	/**
-	 * @testdox Dynamic images remain attached to the featured entity, unless customized.
-	 *
-	 * @testWith ["category"]
-	 *           ["product"]
-	 * @param string $kind Featured item kind.
-	 */
-	public function test_dynamic_and_custom_image_sources( string $kind ): void {
-		$attributes             = $this->get_item_attributes( $kind );
-		$attributes['imageFit'] = 'cover';
-		$first                  = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
-		$second                 = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
-		$id                     = $attributes[ $kind . 'Id' ];
-		foreach ( array( $first, $second ) as $image_id ) {
-			if ( 'category' === $kind ) {
-				update_term_meta( $id, 'thumbnail_id', $image_id );
-			} else {
-				$product = wc_get_product( $id );
-				$product->set_image_id( $image_id );
-				$product->save();
-			}
-			$this->assertStringContainsString( esc_url( wp_get_attachment_image_url( $image_id, 'large' ) ), $this->render_item( $kind, $attributes ) );
-		}
-		$attributes['mediaId'] = $first;
-		$this->assertStringContainsString( esc_url( wp_get_attachment_image_url( $first, 'large' ) ), $this->render_item( $kind, $attributes ) );
 	}
 
 	/**

@@ -321,7 +321,7 @@ export const withFeaturedItem =
 		const renderNoItem = () => (
 			<Placeholder
 				{ ...props.blockProps }
-				className={ `${ props.blockProps.className } ${ className }` }
+				className={ clsx( props.blockProps.className, className ) }
 				icon={ <Icon icon={ icon } /> }
 				label={ label }
 			>

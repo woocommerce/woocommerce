@@ -51,7 +51,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Apply Core layout classes to the dynamic inner-block container.
+	 * Apply Core vertical flex layout classes to the dynamic inner-block container.
 	 *
 	 * @internal
 	 * @since 11.3.0
@@ -70,9 +70,17 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			return $content;
 		}
 
-		$classes = array();
+		$layout_classes   = array(
+			'is-layout-flex',
+			'is-vertical',
+			'is-nowrap',
+			'is-content-justification-stretch',
+			'wp-block-woocommerce-' . $this->block_name . '-is-layout-flex',
+		);
+		$container_prefix = 'wp-container-woocommerce-' . $this->block_name . '-is-layout-';
+		$classes          = array();
 		foreach ( explode( ' ', (string) $processor->get_attribute( 'class' ) ) as $class ) {
-			if ( preg_match( '/^(?:is-layout-|wp-container-woocommerce-featured-(?:category|product)-is-layout-|wp-block-woocommerce-featured-(?:category|product)-is-layout-|is-content-justification-)/', $class ) || in_array( $class, array( 'is-vertical', 'is-horizontal', 'is-nowrap', 'has-global-padding' ), true ) ) {
+			if ( in_array( $class, $layout_classes, true ) || 0 === strpos( $class, $container_prefix ) ) {
 				$classes[] = $class;
 			}
 		}
@@ -81,6 +89,8 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		}
 
 		// Legacy blocks render their title and description outside the inner-block container.
+		// Leave Core layout classes removed for them so their existing CSS controls the layout;
+		// only modern blocks receive these classes on the inner-block container.
 		$is_legacy = isset( $block['attrs']['editMode'] ) && is_bool( $block['attrs']['editMode'] );
 		if ( ! $is_legacy && $processor->next_tag( array( 'class_name' => 'wc-block-' . $this->block_name . '__inner-blocks' ) ) ) {
 			foreach ( $classes as $class ) {
@@ -484,41 +494,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Resolve existing preset attributes through the WordPress style engine.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @return array
-	 */
-	private static function get_support_styles( array $attributes ): array {
-		$styles = $attributes['style'] ?? array();
-		foreach ( array(
-			'textColor'       => 'text',
-			'backgroundColor' => 'background',
-			'gradient'        => 'gradient',
-		) as $attribute => $property ) {
-			if ( ! empty( $attributes[ $attribute ] ) ) {
-				$preset                       = 'gradient' === $property ? 'gradient' : 'color';
-				$styles['color'][ $property ] = 'var:preset|' . $preset . '|' . $attributes[ $attribute ];
-			}
-		}
-		foreach ( array(
-			'fontSize'   => 'font-size',
-			'fontFamily' => 'font-family',
-		) as $attribute => $preset ) {
-			if ( ! empty( $attributes[ $attribute ] ) ) {
-				$styles['typography'][ $attribute ] = 'var:preset|' . $preset . '|' . $attributes[ $attribute ];
-			}
-		}
-		if ( ! empty( $attributes['borderColor'] ) ) {
-			$styles['border']['color'] = 'var:preset|color|' . $attributes['borderColor'];
-		}
-		// Layout spacing belongs on the content container, never the image wrapper.
-		unset( $styles['spacing']['blockGap'] );
-		return wp_style_engine_get_styles( $styles );
-	}
-
-	/**
-	 * Get the styles for the wrapper element (background image, color).
+	 * Get Featured-specific height styles for the block wrapper.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
 	 * @return string
@@ -526,31 +502,22 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	public function get_styles( $attributes ) {
 		$style = sprintf( '--wc-featured-item-min-height:%dpx;', wc_get_theme_support( 'featured_block::default_height', 500 ) );
 
-		$min_height = $attributes['minHeight'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
-
 		if ( isset( $attributes['minHeight'] ) ) {
-			$style .= sprintf( 'min-height:%dpx;', intval( $min_height ) );
+			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['minHeight'] ) );
 		}
-
-		$global_style_style = self::get_support_styles( $attributes )['css'] ?? '';
-		$style             .= $global_style_style;
 
 		return $style;
 	}
 
 
 	/**
-	 * Get class names for the block container.
+	 * Get Featured-specific class names for the block container.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
 	 * @return string
 	 */
 	public function get_classes( $attributes ) {
 		$classes = array( 'wc-block-' . $this->block_name );
-
-		if ( isset( $attributes['align'] ) ) {
-			$classes[] = "align{$attributes['align']}";
-		}
 
 		if ( isset( $attributes['dimRatio'] ) && ( 0 !== $attributes['dimRatio'] ) ) {
 			$classes[] = 'has-background-dim';
@@ -562,14 +529,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		if ( isset( $attributes['contentAlign'] ) && 'center' !== $attributes['contentAlign'] ) {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
-		}
-
-		$global_style_classes = self::get_support_styles( $attributes )['classnames'] ?? '';
-
-		$classes[] = $global_style_classes;
-		$classes[] = $attributes['className'] ?? '';
-		if ( ! empty( $attributes['fontSize'] ) ) {
-			$classes[] = 'has-font-size';
 		}
 
 		return implode( ' ', $classes );
