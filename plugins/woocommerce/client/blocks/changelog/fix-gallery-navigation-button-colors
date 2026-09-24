@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use contrasting default colors and consistent disabled styling for gallery and carousel arrows, while preserving custom colors.
