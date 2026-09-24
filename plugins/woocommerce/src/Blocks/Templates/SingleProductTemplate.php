@@ -73,6 +73,21 @@ class SingleProductTemplate extends AbstractTemplate {
 						'variationId' => null,
 					)
 				);
+
+				// Seed the page-level scope every element on the template
+				// resolves when it declares no scope of its own: the `productScope`
+				// closure registered by ProductsStore falls back to
+				// `state.template` once neither a `productScopes` record nor a
+				// declared `woocommerce` context wins.
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'template' => array(
+							'productId' => $product->get_id(),
+							'variation' => array(),
+						),
+					)
+				);
 			}
 		}
 	}

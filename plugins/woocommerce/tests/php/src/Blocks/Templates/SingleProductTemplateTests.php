@@ -571,4 +571,33 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
+
+	/**
+	 * @testdox Should seed state.template's productId and variation in the woocommerce namespace, alongside the existing page-wide productId and variationId in woocommerce/products.
+	 */
+	public function test_render_block_template_seeds_woocommerce_template_state() {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		try {
+			$this->go_to( get_permalink( $product->get_id() ) );
+
+			$single_product_template = new SingleProductTemplate();
+			$single_product_template->render_block_template();
+
+			$state = wp_interactivity_state( 'woocommerce' );
+
+			$this->assertArrayHasKey( 'template', $state );
+			$this->assertSame( $product->get_id(), $state['template']['productId'] );
+			$this->assertSame( array(), $state['template']['variation'] );
+			$this->assertArrayNotHasKey( 'productId', $state );
+			$this->assertArrayNotHasKey( 'variationId', $state );
+
+			$legacy_state = wp_interactivity_state( 'woocommerce/products' );
+			$this->assertSame( $product->get_id(), $legacy_state['productId'], 'The page-wide productId seed in woocommerce/products should keep working unchanged.' );
+			$this->assertArrayHasKey( 'variationId', $legacy_state );
+			$this->assertNull( $legacy_state['variationId'] );
+		} finally {
+			\WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
 }
