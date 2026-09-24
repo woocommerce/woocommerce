@@ -1965,19 +1965,29 @@ function wc_render_product_image_template_for( WC_Product $product ): string {
  *
  * @param WC_Product $product   Product being rendered.
  * @param mixed      $image_ids Image IDs to substitute. Will be normalized.
- * @return string
+ * @return string Rendered gallery HTML, or an empty string for a re-entrant render of the same product.
  */
 function wc_render_product_image_template_for_image_ids( WC_Product $product, $image_ids ): string {
+	static $rendering_product_galleries = array();
+
+	$product_id = $product->get_id();
+	if ( isset( $rendering_product_galleries[ $product_id ] ) ) {
+		return '';
+	}
+
 	$normalized  = array_values( array_unique( array_map( 'intval', array_filter( (array) $image_ids ) ) ) );
 	$featured_id = $normalized[0] ?? 0;
 	$gallery_ids = array_slice( $normalized, 1 );
 
 	$remove_overrides = wc_apply_product_image_overrides( $product, $featured_id, $gallery_ids );
 
+	$rendering_product_galleries[ $product_id ] = true;
+
 	try {
 		return wc_render_product_image_template_for( $product );
 	} finally {
 		$remove_overrides();
+		unset( $rendering_product_galleries[ $product_id ] );
 	}
 }
 
@@ -4281,7 +4291,7 @@ function wc_display_product_attributes( $product ) {
 			foreach ( $attribute_values as $attribute_value ) {
 				$value_name = esc_html( $attribute_value->name );
 
-				if ( $attribute_taxonomy->attribute_public ) {
+				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
 					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
@@ -4466,7 +4476,7 @@ function wc_empty_cart_message() {
 
 	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
+	echo '<div class="woocommerce-notices-wrapper wc-empty-cart-message">' . $notice . '</div>';
 }
 
 /**

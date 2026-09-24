@@ -13,8 +13,6 @@ use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
-use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
@@ -359,14 +357,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and removes the deprecated variation gallery feature option.
+	 * @testdox Migration removes the deprecated variation gallery feature option.
 	 */
 	public function test_wc_update_11101_remove_deprecated_variation_gallery_option(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.1.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11101_remove_deprecated_variation_gallery_option', $db_updates['11.1.0-1'] );
 
 		delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
 		wc_update_11101_remove_deprecated_variation_gallery_option();
@@ -382,14 +376,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and deletes the cached dashboard out-of-stock count.
+	 * @testdox Migration deletes the cached dashboard out-of-stock count.
 	 */
 	public function test_wc_update_1110_delete_dashboard_outofstock_count_transient(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.1.0', $db_updates );
-		$this->assertContains( 'wc_update_1110_delete_dashboard_outofstock_count_transient', $db_updates['11.1.0'] );
 
 		set_transient( 'wc_outofstock_count', 3, DAY_IN_SECONDS );
 		$this->assertSame( 3, get_transient( 'wc_outofstock_count' ) );
@@ -403,10 +393,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_opts_in(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.2.0', $db_updates );
-		$this->assertContains( 'wc_update_1120_migrate_stock_notifications_alpha_constant', $db_updates['11.2.0'] );
 
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
@@ -477,40 +463,95 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
+	 * @testdox Migration sanitizes dirty coupon codes and invalidates every coupon code lookup entry once, on the last batch.
 	 */
-	public function test_wc_update_11201_migrate_tax_lookup_order_items(): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+	public function test_wc_update_450_sanitize_coupons_code_invalidates_the_lookup_cache(): void {
+		global $wpdb;
 
-		$db_updates = WC_Install::get_db_update_callbacks();
-
-		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
-		// it still runs the rebuild.
-		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_migrate_tax_lookup_order_items', $db_updates['11.2.0-1'] );
-
-		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
-		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
-
-		wc_update_11201_migrate_tax_lookup_order_items();
-
-		$this->assertTrue(
-			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
-			'The migration should hand the rebuild to the batch processing controller.'
+		$coupon_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'dirty-code',
+				'post_status' => 'publish',
+			)
 		);
 
-		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+		// The migration exists for titles WordPress would not store today, so write the raw one directly.
+		$wpdb->update( $wpdb->posts, array( 'post_title' => ' dirty-code ' ), array( 'ID' => $coupon_id ) );
+		clean_post_cache( $coupon_id );
+
+		// Start the batch at this coupon, so the assertions do not depend on what else is in the database.
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
+
+		$this->assertTrue( (bool) wc_update_450_sanitize_coupons_code(), 'The migration should ask for another batch while coupons remain.' );
+
+		$this->assertSame( 'dirty-code', get_post( $coupon_id )->post_title, 'The migration should have sanitized the code.' );
+		$this->assertSame( 'yes', get_option( 'woocommerce_update_450_codes_changed' ), 'The rewrite should be recorded for the last batch.' );
+		$this->assertSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'A batch that rewrites a code should not rotate the coupons group on its own.'
+		);
+
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
+
+		$this->assertNotSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'The last batch should strand the lookup entries the rewritten codes were cached under.'
+		);
+		$this->assertFalse( get_option( 'woocommerce_update_450_codes_changed' ), 'The migration should clean up the flag it persisted.' );
 	}
 
 	/**
-	 * @testdox Migration registers for WooCommerce 11.2.0 and deletes the retired Surface Cart and Checkout note.
+	 * @testdox Migration keeps the coupon code lookup cache when there is nothing to sanitize.
+	 */
+	public function test_wc_update_450_sanitize_coupons_code_keeps_the_lookup_cache_when_no_code_changes(): void {
+		$coupon_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'clean-code',
+				'post_status' => 'publish',
+			)
+		);
+
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
+
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
+
+		$this->assertSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'A run that rewrites no code should leave the warm lookup entries alone.'
+		);
+	}
+
+	/**
+	 * Run the 4.5.0 coupon code migration until it reports there is nothing left to process.
+	 *
+	 * @return void
+	 */
+	private function run_wc_update_450_sanitize_coupons_code_to_completion(): void {
+		$batches = 0;
+
+		while ( wc_update_450_sanitize_coupons_code() ) {
+			$this->assertLessThan( 100, ++$batches, 'The coupon code migration should reach its last batch.' );
+		}
+	}
+
+	/**
+	 * @testdox Migration deletes the retired Surface Cart and Checkout note.
 	 */
 	public function test_wc_update_1120_delete_surface_cart_checkout_note(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.2.0', $db_updates );
-		$this->assertContains( 'wc_update_1120_delete_surface_cart_checkout_note', $db_updates['11.2.0'] );
 
 		$note = new Note();
 		$note->set_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME );
@@ -531,42 +572,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration invalidates the Analytics report cache, so a response cached before the update stops being served.
-	 */
-	public function test_wc_update_11201_invalidate_analytics_reports_cache(): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-
-		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
-		// it still drops its stale responses.
-		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_invalidate_analytics_reports_cache', $db_updates['11.2.0-1'] );
-
-		// The cache version is a timestamp, so pin an old one rather than race the clock.
-		set_transient( ReportsCache::VERSION_OPTION . '-transient-version', '1000000000' );
-
-		$key = 'wc_report_products_pre_update';
-		ReportsCache::set( $key, 'pre-update response' );
-		$this->assertSame( 'pre-update response', ReportsCache::get( $key ), 'The response should be served from cache before the update runs' );
-
-		wc_update_11201_invalidate_analytics_reports_cache();
-
-		$this->assertFalse( ReportsCache::get( $key ), 'A response cached before the update should no longer be served' );
-	}
-
-	/**
 	 * @testdox Migration resets stale refund markers in batches and invalidates cached Analytics reports.
 	 */
 	public function test_wc_update_11202_reset_refund_returning_customer_markers(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		// Under its own key, so that a store already past the 11.2.0 batches still resets its markers.
-		$this->assertArrayHasKey( '11.2.0-2', $db_updates );
-		$this->assertContains( 'wc_update_11202_reset_refund_returning_customer_markers', $db_updates['11.2.0-2'] );
 
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
@@ -618,5 +629,229 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
 		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
+	 */
+	public function test_wc_update_1120_removes_variation_thumbnail_duplicating_parent() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images(), 'A batch smaller than the limit should complete in one run.' );
+		$this->assertSame( '', get_post_meta( $variation_id, '_thumbnail_id', true ), 'The duplicated thumbnail should be removed so the variation inherits again.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images keeps a variation thumbnail that diverged from the parent's featured image.
+	 */
+	public function test_wc_update_1120_keeps_diverged_variation_thumbnail() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '88' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '88', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A diverged value may be a deliberate merchant choice and must survive the cleanup.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes only metadata values that duplicate the parent image.
+	 */
+	public function test_wc_update_1120_keeps_other_thumbnail_metadata_values() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+		add_post_meta( $variation_id, '_thumbnail_id', '88' );
+
+		wc_update_1120_cleanup_inherited_variation_images();
+
+		$this->assertSame( array( '88' ), get_post_meta( $variation_id, '_thumbnail_id', false ), 'Only the value duplicating the parent image should be removed.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images never runs again once completed, even if update callbacks are replayed.
+	 */
+	public function test_wc_update_1120_does_not_run_again_after_completion() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		update_option( 'woocommerce_update_1120_completed_at', time() );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching the parent after the one-time cleanup may be deliberate and must survive a replay.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images matches only the parent's canonical thumbnail, not stale duplicate rows.
+	 */
+	public function test_wc_update_1120_ignores_stale_duplicate_parent_thumbnail_rows() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '88', '77' );
+		$parent_id    = wp_get_post_parent_id( $variation_id );
+		add_post_meta( $parent_id, '_thumbnail_id', '77' );
+
+		wc_update_1120_cleanup_inherited_variation_images();
+
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching only a stale duplicate parent row may be deliberate and must survive.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images skips stores upgrading from before the variation gallery existed.
+	 */
+	public function test_wc_update_1120_skips_stores_upgrading_from_before_10_9() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '10.8.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'Stores never exposed to the bug must not be touched.' );
+	}
+
+	/**
+	 * Create a variable product and return its first variation's ID, with the given thumbnail meta on parent and variation.
+	 *
+	 * @param string $parent_thumbnail_id    Meta value for the parent's _thumbnail_id.
+	 * @param string $variation_thumbnail_id Meta value for the variation's _thumbnail_id.
+	 * @return int
+	 */
+	private function create_variation_with_thumbnails( string $parent_thumbnail_id, string $variation_thumbnail_id ): int {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		update_post_meta( $product->get_id(), '_thumbnail_id', $parent_thumbnail_id );
+		update_post_meta( $variation_id, '_thumbnail_id', $variation_thumbnail_id );
+
+		return $variation_id;
+	}
+
+	/**
+	 * @testdox Migration rewrites stored stock notification emails in canonical form and leaves canonical rows alone.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_11203_normalize_stock_notification_emails', $db_updates['11.2.0'] );
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		foreach ( array( 'Legacy@Example.com', " padded@example.com\t", 'canonical@example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+		}
+
+		$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A table smaller than one batch should complete in a single run' );
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared on completion' );
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'legacy@example.com', 'padded@example.com', 'canonical@example.com' ), $emails );
+	}
+
+	/**
+	 * @testdox Migration resumes from the persisted cursor and leaves rows before it untouched.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_resumes_from_cursor(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		$ids   = array();
+		foreach ( array( 'Before@Example.com', 'After@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+			$ids[] = $wpdb->insert_id;
+		}
+
+		update_option( 'woocommerce_update_11203_last_stock_notification_id', $ids[0], false );
+
+		wc_update_11203_normalize_stock_notification_emails();
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'Before@Example.com', 'after@example.com' ), $emails );
+	}
+
+	/**
+	 * @testdox Migration stops at the first failed write, clears its cursor and does not request another run.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_stops_on_failed_write(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		foreach ( array( 'First@Example.com', 'Second@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+		}
+
+		$break_update = function ( $query ) use ( $table ) {
+			return 0 === strpos( $query, "UPDATE `{$table}` SET `user_email`" ) ? "UPDATE `{$table}` SET `no_such_column` = 1" : $query;
+		};
+		add_filter( 'query', $break_update );
+		$suppressed = $wpdb->suppress_errors();
+
+		try {
+			$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A failed write should not request another run' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_update );
+		}
+
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared after a failed write' );
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_set_legacy_variation_price_hash_option sets the option when absent and skips when already set.
+	 */
+	public function test_wc_update_1130_set_legacy_variation_price_hash_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		// When the option does not exist, the migration must create it with 'yes'.
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+		wc_update_1130_set_legacy_variation_price_hash_option();
+		$this->assertSame( 'yes', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must set "yes" for existing stores.' );
+
+		// When the option already exists (e.g. new store set to 'no'), the migration must not overwrite it.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no' );
+		wc_update_1130_set_legacy_variation_price_hash_option();
+		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
+
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
 	}
 }

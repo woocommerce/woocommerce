@@ -138,14 +138,475 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$expired     = $this->create_export( 'wc-orders-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
 		$fresh       = $this->create_export( 'wc-orders-report-export-fresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
 
+		ReportExporter::update_export_percentage_complete( 'orders', 'expired', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'fresh', 100 );
+
 		ReportExporter::delete_expired_exports();
 
 		$this->assertFileDoesNotExist( $reports_dir . $expired, 'An expired export should be deleted.' );
 		$this->assertFileDoesNotExist( $reports_dir . $expired . '.headers', 'An expired export header row should be deleted too.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'expired' ), 'An expired export should not keep its progress option around.' );
 		$this->assertFileExists( $reports_dir . $fresh, 'An export inside the retention period should be kept.' );
 		$this->assertFileExists( $reports_dir . $fresh . '.headers', 'An export header row inside the retention period should be kept.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'fresh' ), 'An export inside the retention period should keep its progress.' );
 		$this->assertFileExists( $reports_dir . '.htaccess', 'Cleanup should not touch the directory guards.' );
 		$this->assertFileExists( $reports_dir . 'index.html', 'Cleanup should not touch the directory guards.' );
+	}
+
+	/**
+	 * @testdox Daily cleanup drops the progress of an expired export of an extension's report type.
+	 */
+	public function test_cleanup_deletes_the_progress_of_an_extension_report_type(): void {
+		$this->create_export( 'wc-stock_notifications-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		ReportExporter::update_export_percentage_complete( 'stock_notifications', 'expired', 100 );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'stock_notifications', 'expired' ), 'Report types registered by extensions are not limited to letters.' );
+	}
+
+	/**
+	 * @testdox Daily cleanup deletes the option every export used to share once its exports can no longer be downloaded.
+	 */
+	public function test_cleanup_deletes_the_shared_status_option_once_its_exports_are_gone(): void {
+		$reports_dir = ReportCSVExporter::get_reports_directory();
+		$expired     = $this->create_export( 'wc-orders-report-export-legacyexpired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		$fresh       = $this->create_export( 'wc-orders-report-export-legacyfresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
+
+		update_option(
+			ReportExporter::EXPORT_STATUS_OPTION,
+			array(
+				'orders:legacyexpired' => 100,
+				'orders:legacyfresh'   => 100,
+				'orders:neverwritten'  => 0,
+			)
+		);
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFileDoesNotExist( $reports_dir . $expired );
+		$this->assertFileExists( $reports_dir . $fresh );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'legacyfresh' ), 'The shared option must stay while one of its exports can still be downloaded.' );
+
+		wp_delete_file( $reports_dir . $fresh );
+		wp_delete_file( $reports_dir . $fresh . '.headers' );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'The shared option should be deleted once none of its exports has a file left.' );
+	}
+
+	/**
+	 * @testdox A report's date range is read from the arguments it was exported with.
+	 *
+	 * @testWith ["2025-06-01T00:00:00", "2025-06-30T23:59:59", "2025-06-01", "2025-06-30"]
+	 *           ["2025-06-01", "2025-06-01", "2025-06-01", "2025-06-01"]
+	 *           ["2024-02-01T00:00:00", "2024-02-29T23:59:59", "2024-02-01", "2024-02-29"]
+	 *
+	 * @param string $after           The export's `after` argument.
+	 * @param string $before          The export's `before` argument.
+	 * @param string $expected_after  Expected first day of the range.
+	 * @param string $expected_before Expected last day of the range.
+	 */
+	public function test_date_range_is_read_from_report_args( string $after, string $before, string $expected_after, string $expected_before ): void {
+		$this->assertSame(
+			array(
+				'after'  => $expected_after,
+				'before' => $expected_before,
+			),
+			ReportExporter::get_export_date_range(
+				array(
+					'after'  => $after,
+					'before' => $before,
+				)
+			),
+			'The range should be the dates the report was run for, as written.'
+		);
+	}
+
+	/**
+	 * @testdox Arguments without a usable date range produce no range.
+	 *
+	 * A date that does not exist counts as unusable. Left alone it would roll over, so an export
+	 * run for June 31 would be labelled and named July 1.
+	 *
+	 * @testWith [{}]
+	 *           [{"after": "2025-06-01T00:00:00"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": ""}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": "last month"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": ["2025-06-30"]}]
+	 *           [{"after": "2025-06-31T00:00:00", "before": "2025-06-30T23:59:59"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": "2025-13-45T00:00:00"}]
+	 *           [{"after": "2025-02-29T00:00:00", "before": "2025-03-01T00:00:00"}]
+	 *
+	 * @param array $report_args Report parameters the export was queued with.
+	 */
+	public function test_report_args_without_a_date_range( array $report_args ): void {
+		$this->assertSame(
+			array(),
+			ReportExporter::get_export_date_range( $report_args ),
+			'A report that is not limited to a period should report no date range.'
+		);
+	}
+
+	/**
+	 * @testdox The date range is labelled in the store's date format.
+	 */
+	public function test_date_range_label_uses_the_store_date_format(): void {
+		update_option( 'date_format', 'F j, Y' );
+
+		$this->assertSame(
+			'June 1, 2025 - June 30, 2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				)
+			),
+			'The label should read as the merchant picked the range.'
+		);
+	}
+
+	/**
+	 * @testdox The date range is labelled in the store's timezone, not in UTC.
+	 *
+	 * A date format that names the timezone should name the merchant's own, and the date itself
+	 * should read the same whichever timezone the store keeps.
+	 *
+	 * @testWith ["Europe/Sofia", "Y-m-d T", "2025-06-01 EEST"]
+	 *           ["America/Los_Angeles", "Y-m-d T", "2025-06-01 PDT"]
+	 *           ["Pacific/Kiritimati", "F j, Y", "June 1, 2025"]
+	 *           ["Pacific/Midway", "F j, Y", "June 1, 2025"]
+	 *
+	 * @param string $timezone Store timezone.
+	 * @param string $format   Store date format.
+	 * @param string $expected Expected label for a one day report.
+	 */
+	public function test_date_range_label_uses_the_store_timezone( string $timezone, string $format, string $expected ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'date_format', $format );
+
+		$this->assertSame(
+			$expected,
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-01T23:59:59',
+				)
+			),
+			'The label should read in the store timezone rather than UTC.'
+		);
+	}
+
+	/**
+	 * @testdox The date range label goes through the WooCommerce date format, so a store can filter it.
+	 */
+	public function test_date_range_label_uses_the_woocommerce_date_format(): void {
+		update_option( 'date_format', 'F j, Y' );
+		add_filter( 'woocommerce_date_format', fn() => 'd/m/Y' );
+
+		$this->assertSame(
+			'01/06/2025 - 30/06/2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				)
+			),
+			'The label should honour woocommerce_date_format like the rest of WooCommerce date output.'
+		);
+	}
+
+	/**
+	 * @testdox A single day range is labelled as one date rather than a range.
+	 */
+	public function test_single_day_date_range_label(): void {
+		update_option( 'date_format', 'F j, Y' );
+
+		$this->assertSame(
+			'June 1, 2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-01T23:59:59',
+				)
+			),
+			'A one day report should not repeat the same date twice.'
+		);
+	}
+
+	/**
+	 * @testdox An export is downloaded under a name that says which period it covers.
+	 */
+	public function test_download_is_named_after_the_period_it_covers(): void {
+		$filename = $this->create_export( 'wc-products-report-export-1234567890' );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( $filename );
+		$exporter->set_download_suffix( '2025-06-01-to-2025-06-30' );
+
+		$this->assertSame(
+			'wc-products-report-export-1234567890-2025-06-01-to-2025-06-30.csv',
+			$exporter->get_download_filename(),
+			'The download should be named after the period the report covers.'
+		);
+		$this->assertSame(
+			$filename,
+			$exporter->get_filename(),
+			'Naming the download should leave the stored export name alone.'
+		);
+		$this->assertTrue(
+			$exporter->export_file_exists(),
+			'The stored export should still be found under the name it was written with.'
+		);
+	}
+
+	/**
+	 * @testdox A download link that names a date range is served under a name that says so.
+	 */
+	public function test_download_request_names_the_download_after_the_date_range(): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request( array( 'date_range' => '2025-06-01-to-2025-06-30' ) ) );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			'wc-products-report-export-1234567890-2025-06-01-to-2025-06-30.csv',
+			$exporter->get_download_filename(),
+			'The date range on the link should reach the name the export is downloaded as.'
+		);
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_filename(),
+			'The date range on the link should never change the name the export is stored under.'
+		);
+	}
+
+	/**
+	 * @testdox A download link without a date range keeps the stored export name.
+	 */
+	public function test_download_request_without_a_date_range(): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request() );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_download_filename(),
+			'A link that names no period should download under the stored name, as it did before.'
+		);
+	}
+
+	/**
+	 * @testdox A hostile date range cannot escape the download name or the reports directory.
+	 *
+	 * @testWith ["../../../../etc/passwd", "wc-products-report-export-1234567890-etcpasswd.csv"]
+	 *           ["a\r\nX-Injected: 1", "wc-products-report-export-1234567890-a-X-Injected-1.csv"]
+	 *           ["setup.bat", "wc-products-report-export-1234567890-setup.bat_.csv"]
+	 *
+	 * @param string $date_range Date range as it arrives on the link.
+	 * @param string $expected   Expected download name.
+	 */
+	public function test_download_request_sanitises_the_date_range( string $date_range, string $expected ): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request( array( 'date_range' => $date_range ) ) );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			$expected,
+			$exporter->get_download_filename(),
+			'The date range only names the download, so it must not carry separators or a second extension.'
+		);
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_filename(),
+			'The date range must never reach the path the export is read from.'
+		);
+	}
+
+	/**
+	 * @testdox A download request is refused without the reports capability.
+	 */
+	public function test_download_request_requires_the_reports_capability(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+
+		$this->assertNull(
+			$this->request_export( $this->download_request() ),
+			'A user who cannot view reports should not be served an export.'
+		);
+	}
+
+	/**
+	 * @testdox Requests that do not ask for an export are left alone.
+	 *
+	 * @testWith [{}]
+	 *           [{"action": "edit", "filename": "wc-products-report-export-1234567890"}]
+	 *           [{"action": "woocommerce_admin_download_report_csv"}]
+	 *           [{"action": "woocommerce_admin_download_report_csv", "filename": ""}]
+	 *           [{"action": "woocommerce_admin_download_report_csv", "filename": ["x"]}]
+	 *
+	 * @param array $request Request parameters, as the download handler reads them.
+	 */
+	public function test_requests_that_do_not_ask_for_an_export( array $request ): void {
+		$this->act_as_reports_user();
+
+		$this->assertNull(
+			$this->request_export( $request ),
+			'The download handler should leave requests that are not report downloads alone.'
+		);
+	}
+
+	/**
+	 * Sign in as a user allowed to view reports.
+	 *
+	 * @return void
+	 */
+	private function act_as_reports_user(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+	}
+
+	/**
+	 * Build the parameters of a valid download link.
+	 *
+	 * @param array $extra Parameters to add to the request.
+	 * @return array
+	 */
+	private function download_request( array $extra = array() ): array {
+		return array_merge(
+			array(
+				'action'   => ReportExporter::DOWNLOAD_EXPORT_ACTION,
+				'filename' => 'wc-products-report-export-1234567890',
+			),
+			$extra
+		);
+	}
+
+	/**
+	 * Build the exporter that a download request would be served by.
+	 *
+	 * Reaches the handler's own reading of the request, so that dropping the date range on the way
+	 * from the link to the download's name fails a test.
+	 *
+	 * @param array $request Request parameters, as the download handler reads them from `$_GET`.
+	 * @return ReportCSVExporter|null
+	 */
+	private function request_export( array $request ) {
+		$method = new \ReflectionMethod( ReportExporter::class, 'get_requested_export' );
+		$method->setAccessible( true );
+
+		return $method->invoke( null, $request );
+	}
+
+	/**
+	 * @testdox The emailed download link names the period the export covers.
+	 */
+	public function test_emailed_link_carries_the_date_range(): void {
+		$sent = $this->email_completed_export(
+			array(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				),
+			)
+		);
+
+		$this->assertStringContainsString(
+			'date_range=2025-06-01-to-2025-06-30',
+			$sent['body'],
+			'The emailed link should name the period the export covers.'
+		);
+	}
+
+	/**
+	 * @testdox An export queued before the date range was added still emails a working link.
+	 */
+	public function test_emailed_link_for_an_export_queued_without_report_args(): void {
+		// Exports queued by an earlier release carry three arguments, not four.
+		$sent = $this->email_completed_export( array() );
+
+		$this->assertStringContainsString(
+			'Your Products Report download is ready',
+			$sent['subject'],
+			'An export queued without report arguments should keep the original subject.'
+		);
+		$this->assertStringContainsString(
+			'action=woocommerce_admin_download_report_csv',
+			$sent['body'],
+			'An export queued without report arguments should still be emailed a download link.'
+		);
+		$this->assertStringNotContainsString(
+			'date_range=',
+			$sent['body'],
+			'An export with no known date range should not claim one.'
+		);
+	}
+
+	/**
+	 * @testdox Progress is stored and read back whatever length the export ID has.
+	 *
+	 * The export ID is filterable and unbounded, while option names are limited to 191 characters.
+	 */
+	public function test_export_progress_survives_a_long_export_id(): void {
+		global $wpdb;
+
+		$export_id = str_repeat( 'jane.doe-orders-2026-01-01-to-2026-03-31-', 5 );
+
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 100 );
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:' . $export_id );
+
+		$this->assertLessThanOrEqual( 191, strlen( $option ) );
+		$this->assertSame( '100', $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option ) ), 'The row should be stored under the full name.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ) );
+	}
+
+	/**
+	 * @testdox An export queued before each export had its own option is still emailed from the shared one.
+	 */
+	public function test_export_queued_before_per_export_options_is_emailed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$mailer  = tests_retrieve_phpmailer_instance();
+
+		update_option( ReportExporter::EXPORT_STATUS_OPTION, array( 'products:legacy' => 100 ) );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'products', 'legacy' ), 'Progress saved in the shared option should still be read.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'products', 'other' ), 'The shared option should only answer for exports it holds.' );
+
+		ReportExporter::email_report_download_link( $user_id, 'legacy', 'products' );
+
+		$sent = end( $mailer->mock_sent );
+		$this->assertIsArray( $sent, 'An export finished before the update should still be emailed after it.' );
+		$this->assertStringContainsString( 'filename=wc-products-report-export-legacy', $sent['body'] );
+	}
+
+	/**
+	 * Email the download link for a finished export and return the message that went out.
+	 *
+	 * Dispatched through the hook Action Scheduler fires, so the number of arguments a queued
+	 * action carries is what decides how the callback is reached.
+	 *
+	 * @param array $queued_args Arguments the queued action carries after the report type.
+	 * @return array The sent message.
+	 */
+	private function email_completed_export( array $queued_args ): array {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = (string) microtime( true );
+		$hook      = ReportExporter::get_action( 'email_report_download_link' );
+		$mailer    = tests_retrieve_phpmailer_instance();
+
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 100 );
+
+		$this->assertNotFalse( has_action( $hook ), 'The export email action should be registered.' );
+
+		do_action_ref_array( $hook, array_merge( array( $user_id, $export_id, 'products' ), $queued_args ) );
+
+		$sent = end( $mailer->mock_sent );
+
+		$this->assertIsArray( $sent, 'A finished export should be emailed to the user who asked for it.' );
+
+		return $sent;
 	}
 
 	/**
@@ -162,5 +623,37 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			has_action( 'admin_init', array( ReportExporter::class, 'download_export_file' ) ),
 			'The download handler should be registered.'
 		);
+	}
+
+	/**
+	 * @testdox Export progress is saved outside the autoloaded options.
+	 */
+	public function test_export_progress_is_not_autoloaded(): void {
+		global $wpdb;
+
+		ReportExporter::update_export_percentage_complete( 'orders', 'current', 50 );
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:current' );
+
+		$this->assertArrayNotHasKey( $option, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
+		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $option ) ) );
+		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', 'current' ) );
+	}
+
+	/**
+	 * @testdox Each export's progress is stored on its own, so saving one export cannot drop another's.
+	 */
+	public function test_export_progress_is_stored_per_export(): void {
+		ReportExporter::update_export_percentage_complete( 'orders', 'first', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'second', 10 );
+
+		// Read back from the database, as the email action and the status endpoint do from their own request.
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:first' ), 'options' );
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:second' ), 'options' );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'first' ), 'Saving a later export must leave an earlier export finished.' );
+		$this->assertSame( 10, ReportExporter::get_export_percentage_complete( 'orders', 'second' ) );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'unknown' ), 'An export that was never queued has no progress.' );
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'Progress must not be written to the option every export used to share.' );
 	}
 }
