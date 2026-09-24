@@ -760,6 +760,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await increaseBeanie.click();
 			await increaseTShirt.click();
 
+			// Arm the wait before the click, and await it before the next
+			// step, so nothing from this add is still in flight when the
+			// next step arms its own wait for the re-add's batch.
+			const firstBatchResponse = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await addToCartButton.click();
 
 			await expect(
@@ -772,6 +779,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 2' )
 			).toBeVisible();
+
+			await firstBatchResponse;
 		} );
 
 		await test.step( 'add the same products again without reloading — should update quantities via batcher', async () => {
@@ -786,29 +795,26 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 				.first();
 
+			// Reloading while the re-add's batch request is still in flight
+			// aborts it, losing the re-add server-side. Wait for the
+			// response before reloading, so the request has settled. The
+			// previous step already awaited its own batch response, so
+			// this wait can only match the re-add's batch, not a leftover
+			// one from the first add.
+			const batchResponse = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await addedToCartButton.click();
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 4' )
 			).toBeVisible();
+
+			await batchResponse;
 		} );
 
 		await test.step( 'verify cart state persists after reload', async () => {
-			// Reloading while a batch request is still in flight aborts it,
-			// losing the re-add server-side.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-				await actions.waitForIdle();
-			} );
-
 			await page.reload();
 
 			await expect(

@@ -16,7 +16,6 @@ import {
 	updateCartItem,
 	batchAddCartItems,
 	refreshCart,
-	waitForIdle,
 } from './cart-actions';
 import { showNoticeError, updateNotices } from './notices';
 import type { Store } from './cart-actions';
@@ -50,7 +49,6 @@ const { actions } = store< Store >(
 			updateCartItem,
 			batchAddCartItems,
 			refreshCart,
-			waitForIdle,
 			*showNoticeError(
 				error: Error | ApiErrorResponse
 			): AsyncAction< void > {
