@@ -834,7 +834,13 @@ const { actions } = store< Store >(
 					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
-						body: itemToSend,
+						body:
+							isUpdate && existingItem
+								? {
+										key: existingItem.key,
+										quantity: targetQuantity,
+								  }
+								: itemToSend,
 						applyOptimistic: () => {
 							if ( existingItem ) {
 								// This in-place bump is render-only. It
