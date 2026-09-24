@@ -120,7 +120,11 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->reset_push_notifications_cache();
+		/**
+		 * The write routes are only registered on an enabled store. Tests that
+		 * need it disabled re-mock the connection, which also resets the cache.
+		 */
+		$this->mock_jetpack_connection_manager_is_connected();
 
 		$this->controller = new PushTokenRestController();
 		$this->server     = $this->create_rest_server_with_routes(
