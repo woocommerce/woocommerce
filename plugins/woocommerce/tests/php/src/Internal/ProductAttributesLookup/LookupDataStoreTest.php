@@ -1458,6 +1458,24 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `create_data_for_product` with optimized db access creates nothing, without failing, for a variable product in a status it doesn't cover.
+	 */
+	public function test_create_data_for_variable_product_in_uncovered_status_creates_nothing(): void {
+		global $wpdb;
+
+		list( $product ) = $this->create_variable_product_with_variations( ProductStatus::PUBLISH, 2 );
+		// Trashing a product through WordPress trashes its variations too, so only the parent status is changed here.
+		$wpdb->update( $wpdb->posts, array( 'post_status' => ProductStatus::TRASH ), array( 'ID' => $product->get_id() ) );
+		clean_post_cache( $product->get_id() );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product->get_id(), true );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The product is not processed as a variation of itself.' );
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
 	 * Create a variable product with a non-variation attribute (self::$attributes[0], first term), a variation
 	 * attribute (self::$attributes[1], all three terms), and published, in-stock variations defined by 'term_2_1'.
 	 *

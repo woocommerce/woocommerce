@@ -944,6 +944,13 @@ class LookupDataStore {
 		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => ProductType::VARIATION !== $item['product_type'] );
 		$is_variation     = empty( $main_product_row );
 
+		// A product in a status not covered above (for example 'trash') still matches its variations through post_parent,
+		// but it isn't a variation itself, so it gets no data.
+		if ( $is_variation && ! in_array( $product_id, array_map( 'intval', array_column( $product_ids_with_stock_status, 'id' ) ), true ) ) {
+			$this->delete_data_for( $product_id );
+			return;
+		}
+
 		$main_product_id =
 			$is_variation ?
 			current( $product_ids_with_stock_status )['parent'] :
