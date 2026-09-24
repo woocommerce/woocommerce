@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Tests\Admin;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
+use Automattic\WooCommerce\Tests\Internal\TransientFiles\TransientFilesTestStreamWrapper;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -168,6 +169,25 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->write_file( $path . '.headers', "id,total\n", $age );
 
 		return $resolved;
+	}
+
+	/**
+	 * Delete a local directory and everything in it.
+	 *
+	 * @param string $dir Directory path.
+	 * @return void
+	 */
+	private function delete_directory( string $dir ): void {
+		foreach ( array_diff( (array) scandir( $dir ), array( '.', '..' ) ) as $name ) {
+			$entry = $dir . '/' . $name;
+			if ( is_dir( $entry ) ) {
+				$this->delete_directory( $entry );
+			} else {
+				wp_delete_file( $entry );
+			}
+		}
+
+		rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 	}
 
 	/**
@@ -837,18 +857,20 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$exporter = new ReportCSVExporter( 'stock', array( 'page' => 2 ) );
 		$exporter->set_filename( 'wc-stock-report-export-rerun' );
 
+		$exporter->write_export_part( 1 );
 		$exporter->write_export_part( 2 );
 		$exporter->write_export_part( 2 );
 
-		$this->assertTrue( $exporter->assemble_export_file() );
-		$this->assertCount( 2, $this->export_rows( 'rerun' ), 'A page of two rows must still have two rows after it is written again.' );
+		$this->assertTrue( $exporter->assemble_export_file( 2 ) );
+		$this->assertCount( 4, $this->export_rows( 'rerun' ), 'Two pages of two rows must still have four rows after one of them is written again.' );
 	}
 
 	/**
-	 * @testdox Queueing an export deletes the part files an export with the same ID left behind.
+	 * @testdox Part files an export with the same ID left behind do not end up in this one.
 	 */
-	public function test_queueing_an_export_deletes_part_files_left_behind(): void {
+	public function test_part_files_left_behind_do_not_end_up_in_the_export(): void {
 		ReportCSVExporter::maybe_create_directory();
+		$this->write_file( $this->export_path( 'leftover' ) . '.part2', "stale,row\n", 0 );
 		$this->write_file( $this->export_path( 'leftover' ) . '.part9', "stale,row\n", 0 );
 
 		foreach ( $this->queue_stock_export( 'leftover' ) as $batch ) {
@@ -857,6 +879,68 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( 7, $this->export_rows( 'leftover' ) );
 		$this->assertEmpty( preg_grep( '/^stale,row$/', $this->export_rows( 'leftover' ) ), 'Rows from an earlier export with the same ID must not end up in this one.' );
+	}
+
+	/**
+	 * @testdox An export with a missing part file is not finished, emailed, or downloadable.
+	 */
+	public function test_export_with_a_missing_part_is_not_finished(): void {
+		$batches = $this->queue_stock_export( 'missingpart' );
+		$last    = array_pop( $batches );
+
+		foreach ( $batches as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		wp_delete_file( $this->export_path( 'missingpart' ) . '.part2' );
+
+		ReportExporter::export_report( ...$last );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-missingpart' );
+
+		$this->assertFileDoesNotExist( $this->export_path( 'missingpart' ), 'A partial export file must not be left where the export belongs.' );
+		$this->assertFalse( $exporter->export_file_exists(), 'An export missing a page must not be downloadable.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'missingpart' ) );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox An export keeps every row when the uploads directory is a stream wrapper.
+	 */
+	public function test_export_on_a_stream_wrapper_uploads_directory(): void {
+		$scheme = 'wcreportexporttest';
+		$root   = sys_get_temp_dir() . '/wc-report-export-' . wp_generate_uuid4();
+		wp_mkdir_p( $root . '/uploads' );
+		TransientFilesTestStreamWrapper::register( $scheme, $root );
+
+		add_filter(
+			'upload_dir',
+			static function ( $dirs ) use ( $scheme ) {
+				$dirs['basedir'] = $scheme . '://uploads';
+
+				return $dirs;
+			}
+		);
+
+		try {
+			foreach ( $this->queue_stock_export( 'wrapped' ) as $batch ) {
+				ReportExporter::export_report( ...$batch );
+			}
+
+			$exporter = new ReportCSVExporter();
+			$exporter->set_filename( 'wc-stock-report-export-wrapped' );
+
+			// glob() finds nothing on a stream wrapper, which used to join no parts into an empty export.
+			$this->assertCount( 7, $this->export_rows( 'wrapped' ) );
+			$this->assertTrue( $exporter->export_file_exists() );
+			$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'wrapped' ) );
+		} finally {
+			// Every path this test wrote is under the wrapper, which is gone by tear down.
+			$this->paths = array();
+			TransientFilesTestStreamWrapper::unregister( $scheme );
+			$this->delete_directory( $root );
+		}
 	}
 
 	/**

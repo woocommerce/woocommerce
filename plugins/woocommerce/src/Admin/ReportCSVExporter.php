@@ -134,27 +134,18 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return string
 	 */
 	protected function get_file_path() {
-		$path = self::get_reports_directory() . $this->get_filename();
-
-		return $this->part > 0 ? $path . '.part' . $this->part : $path;
+		return $this->part > 0 ? $this->get_part_file_path( $this->part ) : self::get_reports_directory() . $this->get_filename();
 	}
 
 	/**
-	 * Get the paths of the export's part files, in page order.
+	 * Get the path of the part file one page of the report is written to.
 	 *
 	 * @since 11.3.0
-	 * @return string[]
+	 * @param int $page Page of the report.
+	 * @return string
 	 */
-	private function get_part_file_paths() {
-		$paths = glob( self::get_reports_directory() . $this->get_filename() . '.part*' );
-
-		if ( ! $paths ) {
-			return array();
-		}
-
-		natsort( $paths );
-
-		return array_values( $paths );
+	private function get_part_file_path( $page ) {
+		return self::get_reports_directory() . $this->get_filename() . '.part' . $page;
 	}
 
 	/**
@@ -184,13 +175,15 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Join the part files into the export file, in page order, and delete them.
 	 *
-	 * The part files are kept when this fails, and the daily cleanup deletes them.
+	 * The parts are opened by page number rather than listed, since glob() finds nothing when the
+	 * uploads directory is a stream wrapper (S3 Uploads, VIP). A missing part fails the whole export.
 	 *
 	 * @since 11.3.0
-	 * @return bool Whether the export file was written.
+	 * @param int $num_parts Number of pages the export was queued in.
+	 * @return bool Whether the export file was written from every part.
 	 */
-	public function assemble_export_file() {
-		$parts = $this->get_part_file_paths();
+	public function assemble_export_file( $num_parts ) {
+		$parts = array_map( array( $this, 'get_part_file_path' ), range( 1, max( 1, (int) $num_parts ) ) );
 		$out   = fopen( $this->get_file_path(), 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 
 		if ( ! $out ) {
@@ -199,20 +192,31 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 
 		$ok = true;
 		foreach ( $parts as $path ) {
-			$in = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-			$ok = $in && false !== stream_copy_to_stream( $in, $out ) && $ok;
-			if ( $in ) {
-				fclose( $in ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+			$in = file_exists( $path ) ? fopen( $path, 'r' ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+			if ( ! $in ) {
+				$ok = false;
+				break;
+			}
+
+			$ok = false !== stream_copy_to_stream( $in, $out );
+			fclose( $in ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+			if ( ! $ok ) {
+				break;
 			}
 		}
 
 		$ok = fclose( $out ) && $ok; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
-		if ( $ok ) {
-			array_map( 'wp_delete_file', $parts );
+		if ( ! $ok ) {
+			// Keep the parts for the daily cleanup, but never leave a partial body where the export belongs.
+			wp_delete_file( $this->get_file_path() );
+			return false;
 		}
 
-		return $ok;
+		array_map( 'wp_delete_file', $parts );
+
+		return true;
 	}
 
 	/**
@@ -453,13 +457,16 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Delete the files an export with the same ID left behind, so none of them ends up in this one.
+	 * Delete the export file and headers row file an export with the same ID left behind.
+	 *
+	 * Part files left behind need no deleting here: each batch replaces its own part, and
+	 * assemble_export_file() only reads the parts of this export's pages.
 	 *
 	 * @since 11.3.0
 	 * @return void
 	 */
 	public function delete_export_files() {
-		foreach ( array_merge( array( $this->get_file_path(), $this->get_headers_row_file_path() ), $this->get_part_file_paths() ) as $path ) {
+		foreach ( array( $this->get_file_path(), $this->get_headers_row_file_path() ) as $path ) {
 			if ( file_exists( $path ) ) {
 				wp_delete_file( $path );
 			}

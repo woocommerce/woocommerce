@@ -196,7 +196,7 @@ class ReportExporter {
 			$email_user_id = $send_email ? get_current_user_id() : 0;
 
 			// Create batches, like initial import.
-			$report_batch_args = array( $export_id, $report_type, $report_args, $email_user_id );
+			$report_batch_args = array( $export_id, $report_type, $report_args, $email_user_id, $num_batches );
 
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 		}
@@ -214,9 +214,11 @@ class ReportExporter {
 	 * @param int    $email_user_id Optional. User to email the download link to once every batch has
 	 *                              finished, or 0 for an export that was not asked to be emailed.
 	 *                              Exports queued before WooCommerce 11.3.0 run without it.
+	 * @param int    $num_batches Optional. Number of batches the export was queued in, which is how many
+	 *                            part files the last batch joins. Exports queued before 11.3.0 run without it.
 	 * @return void
 	 */
-	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0 ) {
+	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 
@@ -244,11 +246,11 @@ class ReportExporter {
 		}
 
 		if ( ! self::claim_finished_export( $report_type, $export_id ) ) {
-			self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $exporter, $remaining ) );
+			self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $num_batches, $remaining ) );
 			return;
 		}
 
-		if ( ! $exporter->assemble_export_file() ) {
+		if ( ! $exporter->assemble_export_file( $num_batches ) ) {
 			wc_get_logger()->error(
 				sprintf( 'Could not assemble the %1$s report export %2$s from its parts.', $report_type, $export_id ),
 				array( 'source' => 'report-csv-exporter' )
@@ -256,8 +258,9 @@ class ReportExporter {
 			return;
 		}
 
-		self::update_export_percentage_complete( $report_type, $export_id, 100 );
+		// Headers row file first: the status endpoint hands out the download link as soon as it reads 100.
 		$exporter->write_headers_row_file();
+		self::update_export_percentage_complete( $report_type, $export_id, 100 );
 
 		if ( (int) $email_user_id > 0 ) {
 			self::schedule_action( 'email_report_download_link', array( (int) $email_user_id, $export_id, $report_type, $report_args ) );
@@ -357,13 +360,12 @@ class ReportExporter {
 	 * Work out how far an export has got from how many of its batches are left.
 	 *
 	 * @since 11.3.0
-	 * @param ReportCSVExporter $exporter Exporter the batch ran with.
-	 * @param int               $remaining Batches still to finish.
+	 * @param int $num_batches Number of batches the export was queued in.
+	 * @param int $remaining Batches still to finish.
 	 * @return int Completion percentage.
 	 */
-	private static function get_progress_percentage( $exporter, $remaining ) {
-		$batch_size  = (int) $exporter->get_limit();
-		$num_batches = $batch_size > 0 ? (int) ceil( (int) $exporter->get_total_rows() / $batch_size ) : 0;
+	private static function get_progress_percentage( $num_batches, $remaining ) {
+		$num_batches = (int) $num_batches;
 
 		if ( $num_batches < 1 ) {
 			return 0;
