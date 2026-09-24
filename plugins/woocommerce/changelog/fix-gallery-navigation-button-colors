@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use contrasting default colors and consistent disabled styling for Product Gallery and Product Collection arrows, while preserving custom colors.
+Fix default arrow contrast and disabled styling in Product Gallery and Product Collection.
