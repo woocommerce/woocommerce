@@ -22,7 +22,16 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The Interactivity API store namespace under test.
+	 * The Interactivity API namespace the raw product and variation data
+	 * is seeded into.
+	 *
+	 * @var string
+	 */
+	protected $data_namespace = 'woocommerce';
+
+	/**
+	 * The Interactivity API store namespace under test for the selection
+	 * state and derived getters.
 	 *
 	 * @var string
 	 */
@@ -81,12 +90,15 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$result = TestedProductsStore::load_product( $this->consent, $product->get_id() );
 
-		$state = wp_interactivity_state( $this->store_namespace );
+		$state = wp_interactivity_state( $this->data_namespace );
 
 		$this->assertArrayHasKey( 'products', $state );
 		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
 		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
+
+		$legacy_state = wp_interactivity_state( $this->store_namespace );
+		$this->assertArrayNotHasKey( 'products', $legacy_state, 'The raw product data should not also be seeded into the legacy woocommerce/products namespace.' );
 
 		$product->delete( true );
 	}
@@ -124,7 +136,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
 
-		$state = wp_interactivity_state( $this->store_namespace );
+		$state = wp_interactivity_state( $this->data_namespace );
 
 		$this->assertArrayHasKey( 'productVariations', $state );
 		$this->assertNotEmpty( $result, 'Should return loaded variations.' );
@@ -297,6 +309,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $result, 'Only purchasable children should be returned.' );
 		$this->assertArrayHasKey( $purchasable->get_id(), $result );
 		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $result );
+
+		$data = wp_interactivity_state( $this->data_namespace );
+		$this->assertArrayHasKey( $purchasable->get_id(), $data['products'] );
+		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $data['products'] );
 
 		$grouped->delete( true );
 		$purchasable->delete( true );

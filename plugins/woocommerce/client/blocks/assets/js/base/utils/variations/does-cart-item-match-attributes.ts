@@ -6,8 +6,8 @@ import type {
 	OptimisticCartItem,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -18,8 +18,10 @@ import { attributeNamesMatch } from './attribute-matching';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+// Catalog data lives in `woocommerce`; import it by module id so it isn't
+// bundled twice.
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -39,10 +41,9 @@ export const doesCartItemMatchAttributes = (
 		return false;
 	}
 
-	const parentProductId =
-		productsState.productVariations[ cartItem.id ]?.parent;
+	const parentProductId = wooState.productVariations[ cartItem.id ]?.parent;
 	const productAttributes =
-		productsState.products[ parentProductId ]?.attributes ?? [];
+		wooState.products[ parentProductId ]?.attributes ?? [];
 
 	return cartItem.variation.every( ( { attribute, value: termName } ) =>
 		selectedAttributes.some( ( selectedAttr: SelectedAttributes ) => {
