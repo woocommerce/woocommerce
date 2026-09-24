@@ -9,23 +9,31 @@ use InvalidArgumentException;
 
 /**
  * Shared store that hydrates the unified `woocommerce` Interactivity API
- * store with product and variation data in Store API format, and exposes
- * that data to the `woocommerce/products` namespace as a view.
+ * store with product and variation data in Store API format, and resolves
+ * the product a scope element is showing.
  *
- * The store exposes two planes:
+ * The store exposes three planes:
  * - Raw data (`products`, `productVariations`) — populated into the
  *   `woocommerce` namespace by the `load_*` methods below, each keyed by
  *   ID.
+ * - The `productScope` envelope, registered on `woocommerce` by
+ *   `register_getters()`, whose `productId`, `variation`, `baseProduct`,
+ *   `productVariation`, `product`, `cartItem` and `draftCartItem` members
+ *   resolve for the scope element the markup declares, from a
+ *   `productScopes` record first, then the element's `woocommerce`
+ *   context, then the seeded `template`.
  * - Selection (`productId`, `variationId`) — set by callers via
  *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) on
  *   the `woocommerce/products` namespace — plus the derived getters
  *   (`mainProductInContext`, `productVariationInContext`,
  *   `productInContext`), also registered on `woocommerce/products` by
- *   `register_getters()`, which read the raw data from `woocommerce`.
+ *   `register_getters()`, which read the raw data from `woocommerce`. This
+ *   plane is temporary: it reads through to the same raw data as
+ *   `productScope` and is removed once every consumer has moved over.
  *
- * The derived getters are mirrored in the JS store
- * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
- * directive bindings like `state.productInContext.sku` resolve during
+ * The `productScope` envelope is mirrored in the JS store
+ * (client/blocks/assets/js/base/stores/woocommerce/scope.ts) so that
+ * directive bindings like `state.productScope.product.sku` resolve during
  * server-side rendering as well as on the client.
  *
  * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
@@ -102,7 +110,9 @@ class ProductsStore {
 	/**
 	 * Register the derived-state getters once.
 	 *
-	 * These closures mirror the JS getters in
+	 * Registers the `productScope` envelope on `woocommerce` and the
+	 * legacy derived getters on `woocommerce/products`. The legacy closures
+	 * mirror the JS getters in
 	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
 	 * directives referencing state.mainProductInContext /
 	 * state.productVariationInContext / state.productInContext resolve
@@ -120,6 +130,15 @@ class ProductsStore {
 		}
 
 		self::$getters_registered = true;
+
+		wp_interactivity_state(
+			self::$data_namespace,
+			array(
+				'productScope' => function () {
+					return self::build_product_scope_envelope();
+				},
+			)
+		);
 
 		wp_interactivity_state(
 			self::$store_namespace,
@@ -170,6 +189,368 @@ class ProductsStore {
 				},
 			)
 		);
+	}
+
+	/**
+	 * Build the `productScope` envelope for the element currently rendering.
+	 *
+	 * Each member is a closure so directives can read
+	 * `state.productScope.<member>`.
+	 *
+	 * @return array<string, \Closure> The envelope, keyed by member name.
+	 */
+	private static function build_product_scope_envelope(): array {
+		$context  = wp_interactivity_get_context( self::$data_namespace );
+		$state    = wp_interactivity_state( self::$data_namespace );
+		$record   = ( $state['productScopes'] ?? array() )[ $context['scopeName'] ?? '_default' ] ?? array();
+		$template = $state['template'] ?? array();
+
+		$resolve = function ( string $key, $fallback ) use ( $context, $template ) {
+			if ( array_key_exists( $key, $context ) ) {
+				return $context[ $key ];
+			}
+			return array_key_exists( $key, $template ) ? $template[ $key ] : $fallback;
+		};
+
+		$scope_name = function () use ( $context ) {
+			return $context['scopeName'] ?? '_default';
+		};
+
+		$record_draft = $record['draftCartItem'] ?? array();
+
+		$product_id = function () use ( $record_draft, $resolve ) {
+			return array_key_exists( 'id', $record_draft ) ? $record_draft['id'] : $resolve( 'productId', 0 );
+		};
+
+		$variation = function () use ( $record_draft, $resolve ) {
+			return array_key_exists( 'variation', $record_draft ) ? $record_draft['variation'] : $resolve( 'variation', array() );
+		};
+
+		$base_product = function () use ( $state, $product_id, $variation ) {
+			return self::resolve_product_members( $state, $product_id(), $variation() )['baseProduct'];
+		};
+
+		$product_variation = function () use ( $state, $product_id, $variation ) {
+			return self::resolve_product_members( $state, $product_id(), $variation() )['productVariation'];
+		};
+
+		$product = function () use ( $state, $product_id, $variation ) {
+			return self::resolve_product_members( $state, $product_id(), $variation() )['product'];
+		};
+
+		$cart_item = function () use ( $state, $context, $product, $product_id, $variation ) {
+			$items = $state['cart']['items'] ?? array();
+			$key   = $context['cartItemKey'] ?? null;
+
+			if ( $key ) {
+				foreach ( $items as $item ) {
+					if ( ( $item['key'] ?? null ) === $key ) {
+						return $item;
+					}
+				}
+				return null;
+			}
+
+			$resolved_product = $product();
+			$id               = $resolved_product['id'] ?? $product_id();
+
+			return self::find_matching_cart_item( $items, $state, $id, $variation() );
+		};
+
+		$draft_cart_item = function () use ( $record_draft, $product_id, $variation ) {
+			$draft = $record_draft;
+
+			if ( ! array_key_exists( 'id', $draft ) ) {
+				$draft['id'] = $product_id();
+			}
+			if ( ! array_key_exists( 'variation', $draft ) ) {
+				$draft['variation'] = $variation();
+			}
+			if ( ! array_key_exists( 'quantity', $draft ) ) {
+				$draft['quantity'] = 1;
+			}
+
+			return $draft;
+		};
+
+		return array(
+			'scopeName'        => $scope_name,
+			'productId'        => $product_id,
+			'variation'        => $variation,
+			'baseProduct'      => $base_product,
+			'productVariation' => $product_variation,
+			'product'          => $product,
+			'cartItem'         => $cart_item,
+			'draftCartItem'    => $draft_cart_item,
+		);
+	}
+
+	/**
+	 * Resolve a scope's `baseProduct`, `productVariation` and `product`
+	 * together, the way `scope.ts`'s `resolveProductMembers` does: when
+	 * `productId` is itself a loaded variation's id, that variation is
+	 * `productVariation` and `product`, and its parent is `baseProduct`.
+	 * Otherwise `productId` is looked up as a top-level product and, when a
+	 * selection is given, matched against its variations.
+	 *
+	 * @param array      $state      The full `woocommerce` state.
+	 * @param int|string $product_id The scope's resolved product id.
+	 * @param array      $variation  The scope's resolved selected variation attributes.
+	 * @return array{baseProduct: array|null, productVariation: array|null, product: array|null} The three resolved product members.
+	 */
+	private static function resolve_product_members( array $state, $product_id, array $variation ): array {
+		$product_variations = $state['productVariations'] ?? array();
+		$products           = $state['products'] ?? array();
+
+		$direct_variation = $product_variations[ $product_id ] ?? null;
+		if ( $direct_variation ) {
+			return array(
+				'baseProduct'      => $products[ $direct_variation['parent'] ?? null ] ?? null,
+				'productVariation' => $direct_variation,
+				'product'          => $direct_variation,
+			);
+		}
+
+		$base_product = $products[ $product_id ] ?? null;
+		if ( ! $base_product || empty( $variation ) ) {
+			return array(
+				'baseProduct'      => $base_product,
+				'productVariation' => null,
+				'product'          => $base_product,
+			);
+		}
+
+		$product_variation = self::find_matching_variation( $base_product, $product_variations, $variation );
+
+		return array(
+			'baseProduct'      => $base_product,
+			'productVariation' => $product_variation,
+			'product'          => $product_variation ?? $base_product,
+		);
+	}
+
+	/**
+	 * Find the loaded variation matching a resolved selection, the way
+	 * `scope.ts`'s `findMatchingVariationId` does: a candidate summary
+	 * matches when it has the same attribute count as the selection and,
+	 * for each of its attributes, the selection carries an entry whose
+	 * value equals the attribute's term slug, case-insensitively (an "Any"
+	 * attribute needs only a non-null selected value). The matched
+	 * summary's ID is then looked up in the full loaded variations —
+	 * `state.productVariations` itself carries no attributes to match
+	 * against.
+	 *
+	 * @param array $base_product       The base product.
+	 * @param array $product_variations Variations keyed by ID, as held in state.
+	 * @param array $variation          The resolved selection, as `{ attribute, value }` entries.
+	 * @return array|null The matching variation, or null when none matches.
+	 */
+	private static function find_matching_variation( array $base_product, array $product_variations, array $variation ): ?array {
+		$product_attributes = $base_product['attributes'] ?? array();
+
+		foreach ( $base_product['variations'] ?? array() as $summary ) {
+			// The Store API schema builds each variation summary as an object.
+			$candidate = (array) $summary;
+
+			if ( self::variation_attributes_match( $product_attributes, $candidate['attributes'] ?? array(), $variation ) ) {
+				return $product_variations[ $candidate['id'] ?? null ] ?? null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check a variation summary's `attributes` (each `{ name, value }`)
+	 * against a resolved selection: the counts must match, and every
+	 * attribute needs a selected entry whose value equals the attribute's
+	 * term slug (resolved via `resolve_term_slug()`), case-insensitively —
+	 * except a null attribute value, which only needs any selected entry
+	 * for that attribute to be present.
+	 *
+	 * @param array $product_attributes   The base product's attributes, for slug resolution.
+	 * @param array $candidate_attributes The variation summary's attributes, each `{ name, value }`.
+	 * @param array $variation            The resolved selection, as `{ attribute, value }` entries.
+	 * @return bool Whether every attribute is satisfied by the selection.
+	 */
+	private static function variation_attributes_match( array $product_attributes, array $candidate_attributes, array $variation ): bool {
+		if ( count( $candidate_attributes ) !== count( $variation ) ) {
+			return false;
+		}
+
+		foreach ( $candidate_attributes as $attribute ) {
+			$selected = null;
+
+			foreach ( $variation as $entry ) {
+				if ( self::attribute_names_match( $attribute['name'] ?? '', $entry['attribute'] ?? '' ) ) {
+					$selected = $entry;
+					break;
+				}
+			}
+
+			if ( null === ( $attribute['value'] ?? null ) ) {
+				if ( null === $selected || null === ( $selected['value'] ?? null ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			if ( null === $selected ) {
+				return false;
+			}
+
+			$slug = self::resolve_term_slug( $product_attributes, $attribute['name'] ?? '', $attribute['value'] );
+
+			if ( strtolower( (string) ( $selected['value'] ?? '' ) ) !== strtolower( $slug ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Find the cart line matching a resolved product ID and variation
+	 * selection, the way `cart.ts`'s `findItemInCart` does.
+	 *
+	 * @param array      $items     The seeded cart lines.
+	 * @param array      $state     The full `woocommerce` state, for attribute matching.
+	 * @param int|string $id        The resolved product's ID (a variation ID when one is selected).
+	 * @param array      $variation The resolved selection, as `{ attribute, value }` entries.
+	 * @return array|null The matching cart line, or null when none matches.
+	 */
+	private static function find_matching_cart_item( array $items, array $state, $id, array $variation ): ?array {
+		foreach ( $items as $item ) {
+			if ( 'variation' === ( $item['type'] ?? null ) ) {
+				$item_variation = $item['variation'] ?? null;
+
+				if (
+					(int) ( $item['id'] ?? 0 ) !== (int) $id
+					|| empty( $item_variation )
+					|| empty( $variation )
+					|| count( $item_variation ) !== count( $variation )
+				) {
+					continue;
+				}
+
+				if ( self::does_cart_item_match_attributes( $item, $variation, $state ) ) {
+					return $item;
+				}
+
+				continue;
+			}
+
+			if ( (int) ( $item['id'] ?? 0 ) === (int) $id ) {
+				return $item;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check a cart line's `variation` (label values) against a resolved
+	 * selection (slug values), resolving each label to the parent
+	 * product's matching term slug, the way
+	 * base/utils/variations/does-cart-item-match-attributes.ts does.
+	 *
+	 * @param array $cart_item           The cart line, carrying a `variation` list of `{ attribute, value }` labels.
+	 * @param array $selected_attributes The resolved selection, as `{ attribute, value }` entries.
+	 * @param array $state               The full `woocommerce` state, to look up the parent product's attributes.
+	 * @return bool Whether every one of the cart line's attributes is satisfied by the selection.
+	 */
+	private static function does_cart_item_match_attributes( array $cart_item, array $selected_attributes, array $state ): bool {
+		$cart_item_variation = $cart_item['variation'] ?? null;
+
+		if ( ! is_array( $cart_item_variation ) || count( $cart_item_variation ) !== count( $selected_attributes ) ) {
+			return false;
+		}
+
+		$parent_id          = $state['productVariations'][ $cart_item['id'] ?? null ]['parent'] ?? null;
+		$product_attributes = $state['products'][ $parent_id ]['attributes'] ?? array();
+
+		foreach ( $cart_item_variation as $entry ) {
+			$attribute = $entry['attribute'] ?? '';
+			$term_name = $entry['value'] ?? '';
+			$term_slug = self::resolve_term_slug( $product_attributes, $attribute, $term_name );
+			$matched   = false;
+
+			foreach ( $selected_attributes as $selected ) {
+				if (
+					self::attribute_names_match( $selected['attribute'] ?? '', $attribute )
+					&& strtolower( (string) ( $selected['value'] ?? '' ) ) === strtolower( (string) $term_slug )
+				) {
+					$matched = true;
+					break;
+				}
+			}
+
+			if ( ! $matched ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Resolve a term's display name to its slug, using a product's
+	 * `attributes` (Store API format, each carrying a `terms` list).
+	 *
+	 * @param array  $product_attributes The base product's attributes.
+	 * @param string $attribute          The attribute name to look the term up under.
+	 * @param string $term_name          The term's display name.
+	 * @return string The term's slug, or $term_name when no matching term is found.
+	 */
+	private static function resolve_term_slug( array $product_attributes, string $attribute, string $term_name ): string {
+		foreach ( $product_attributes as $raw_attribute ) {
+			// The Store API schema builds each attribute, and each of its terms, as an object.
+			$product_attribute = (array) $raw_attribute;
+
+			if ( ! self::attribute_names_match( $attribute, $product_attribute['name'] ?? '' ) ) {
+				continue;
+			}
+
+			foreach ( $product_attribute['terms'] ?? array() as $raw_term ) {
+				$term = (array) $raw_term;
+
+				if ( ( $term['name'] ?? null ) === $term_name ) {
+					return $term['slug'] ?? $term_name;
+				}
+			}
+
+			break;
+		}
+
+		return $term_name;
+	}
+
+	/**
+	 * Check whether two attribute names refer to the same attribute,
+	 * matching a Store API label (e.g. "Color") against a meta-style slug
+	 * (e.g. "attribute_pa_color"), the way attribute-matching.ts does.
+	 *
+	 * @param string $a The first attribute name.
+	 * @param string $b The second attribute name.
+	 * @return bool Whether the names match once normalized.
+	 */
+	private static function attribute_names_match( string $a, string $b ): bool {
+		return self::normalize_attribute_name( $a ) === self::normalize_attribute_name( $b );
+	}
+
+	/**
+	 * Normalize an attribute name: strip a leading `attribute_` or
+	 * `attribute_pa_` prefix, replace hyphens with spaces, and lowercase
+	 * it, so a slug and a label for the same attribute compare equal.
+	 *
+	 * @param string $name The attribute name.
+	 * @return string The normalized name.
+	 */
+	private static function normalize_attribute_name( string $name ): string {
+		$name = (string) preg_replace( '/^attribute_(pa_)?/', '', $name );
+		$name = str_replace( '-', ' ', $name );
+
+		return strtolower( $name );
 	}
 
 	/**
