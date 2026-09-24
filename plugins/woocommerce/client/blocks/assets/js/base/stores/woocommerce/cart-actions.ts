@@ -54,15 +54,29 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItem = Omit<
-	OptimisticCartItem,
-	'variation' | 'quantity'
-> & {
+/**
+ * The payload `addCartItem()` posts to the Store API's `add-item` endpoint.
+ * `quantity` is the amount added to a matching existing line — or the new
+ * line's quantity when none matches — never an absolute value. Defaults to
+ * `1` when omitted.
+ */
+export type AddCartItemPayload = {
+	id: number;
 	variation?: SelectedAttributes[];
-	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
 	quantity?: number;
-	/** Optional: add this delta to current quantity instead of setting absolute quantity */
-	quantityToAdd?: number;
+};
+
+/**
+ * A `batchAddCartItems()` item. With `key`, it targets that cart line via
+ * the `update-item` endpoint and `quantity` is the absolute value to set.
+ * Without `key`, it behaves like `AddCartItemPayload`: posted to `add-item`
+ * with `quantity` as the delta to add.
+ */
+export type ClientCartItem = {
+	key?: string;
+	id: number;
+	variation?: SelectedAttributes[];
+	quantity?: number;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -111,15 +125,19 @@ export type Store = {
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
-			args: ClientCartItem,
+			args: AddCartItemPayload,
 			options?: CartUpdateOptions
 		) => Promise< AddCartItemOutcome >;
+		updateCartItem: ( args: {
+			key: string;
+			quantity: number;
+		} ) => Promise< void >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
 		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
+		refreshCart: () => Promise< void >;
 		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
@@ -144,11 +162,11 @@ type CartMutationMeta = {
 	/** The quantity changes this single mutation contributes, if it succeeds. */
 	quantityChanges: QuantityChanges;
 	/**
-	 * Whether this mutation was issued by an add-style action (`addCartItem`
-	 * or `batchAddCartItems`, regardless of whether it hit the `add-item` or
-	 * `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
-	 * successes trigger the legacy added-to-cart event and the screen-reader
-	 * announcement.
+	 * Whether this mutation was issued by an add-style action (`addCartItem`,
+	 * `updateCartItem`, or `batchAddCartItems`, regardless of whether it hit
+	 * the `add-item` or `update-item` endpoint) or by `removeCartItem`. Only
+	 * `'add'`-origin successes trigger the legacy added-to-cart event and the
+	 * screen-reader announcement.
 	 */
 	origin: 'add' | 'remove';
 };
@@ -487,118 +505,35 @@ export function* removeCartItem( key: string ): AsyncAction< void > {
 }
 
 export function* addCartItem(
-	{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
+	{ id, quantity, variation }: AddCartItemPayload,
 	{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 ): AsyncAction< AddCartItemOutcome > {
-	if ( quantity !== undefined && quantityToAdd !== undefined ) {
-		throw new Error(
-			'addCartItem: pass either quantity or quantityToAdd, not both.'
-		);
-	}
-
-	// Keyless-requires-delta invariant. A keyless add always issues
-	// `add-item`, whose quantity is a delta added to the existing
-	// line; rapid-click compounding relies on that — each click sends
-	// its own delta and the server sums them (N -> N+1 -> N+2). An
-	// absolute `quantity` on a keyless add would be misread as a delta
-	// and corrupt that compounding, so keyless callers must pass
-	// `quantityToAdd`. An absolute `quantity` is legitimate only when
-	// paired with an explicit `key`: that is the keyed-stepper path
-	// (mini-cart / cart-block quantity controls), which targets one
-	// known line via `update-item` and sets its quantity outright.
-	// Those keyed callers are intentionally exempt from this guard.
-	if (
-		key === undefined &&
-		quantity !== undefined &&
-		quantityToAdd === undefined
-	) {
-		throw new Error(
-			'addCartItem: a keyless add must pass quantityToAdd (a delta), not an absolute quantity.'
-		);
-	}
-
 	preloadA11y();
 
+	// The amount to post to add-item: a delta added to any matching
+	// existing line, never an absolute quantity. Defaults to 1.
+	const delta = typeof quantity === 'number' ? quantity : 1;
+
 	// Find existing item
-	const existingItem = state.findItemInCart( {
+	const existingItem = state.findItemInCart( { id, variation } );
+
+	const quantityChanges: QuantityChanges = { productsPendingAdd: [ id ] };
+
+	const itemToSend = {
 		id,
-		key,
-		variation,
-	} );
-
-	// Determine the target quantity.
-	// If quantityToAdd is provided, calculate target based on current
-	// cart state (which includes optimistic updates from previous clicks).
-	// This ensures rapid clicks compound correctly.
-	let targetQuantity: number;
-	if ( typeof quantityToAdd === 'number' ) {
-		const currentQuantity = existingItem?.quantity ?? 0;
-		targetQuantity = currentQuantity + quantityToAdd;
-	} else if ( typeof quantity === 'number' ) {
-		targetQuantity = quantity;
-	} else {
-		// Neither provided - default to 1
-		targetQuantity = 1;
-	}
-
-	// Endpoint selection is a pure function of the caller-supplied
-	// `key`, never of a line matched by id/variation. A keyless add
-	// always issues `add-item` with a delta, even when an existing
-	// line (including a server-keyed one) matches by product id, so
-	// the server owns cart-line identity for adds. Only an explicit
-	// caller `key` targets a specific line via `update-item`.
-	const isUpdate = !! key;
-	const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-	// Track what changes we're making for notice comparison.
-	const quantityChanges: QuantityChanges = isUpdate
-		? {
-				cartItemsPendingQuantity: existingItem?.key
-					? [ existingItem.key ]
-					: [],
-		  }
-		: { productsPendingAdd: [ id ] };
-
-	// Prepare the item to send.
-	let itemToSend: OptimisticCartItem;
-	if ( isUpdate && existingItem ) {
-		// Caller-keyed update: target the exact line by key and send
-		// the absolute target quantity to the update-item endpoint.
-		itemToSend = { ...existingItem, quantity: targetQuantity };
-	} else {
-		// Keyless add: build a fresh payload for the add-item
-		// endpoint and never copy the matched line's key. The amount
-		// sent is always a delta — add-item adds to the existing
-		// quantity rather than setting it — so a match (by
-		// id/variation, possibly carrying a server key) only tells us
-		// how much delta is already accounted for in the running
-		// optimistic total; with no match we post the full target
-		// quantity. The matched line is never sent as an absolute
-		// quantity: the posted amount is a function of the delta,
-		// not of the match.
-		const quantityToSend = existingItem
-			? targetQuantity - existingItem.quantity
-			: targetQuantity;
-
-		itemToSend = {
-			id,
-			quantity: quantityToSend,
-			...( variation && { variation } ),
-		} as OptimisticCartItem;
-	}
+		quantity: delta,
+		...( variation && { variation } ),
+	} as OptimisticCartItem;
 
 	// Capture cart state after optimistic updates for notice comparison.
 	let cartAfterOptimistic: typeof state.cart | null = null;
 
-	// Per-product capture for the keyless-add exactness test.
-	// On the keyless path (!isUpdate), capture by value — before the
-	// optimistic bump mutates `existingItem.quantity` in place — the
-	// set of pre-existing matching line keys and their summed quantity.
+	// Per-product capture for the add exactness test. Capture by value —
+	// before the optimistic bump mutates `existingItem.quantity` in place —
+	// the set of pre-existing matching line keys and their summed quantity.
 	// This is the single error-prone hotspot: `existingItem` is a live
-	// reference into `state.cart.items`; reading `.quantity` after the
-	// bump yields the post-bump value and silently corrupts the math.
-	// Stays empty on the keyed `update-item` path so the "your change
-	// was undone" notice keeps firing for steppers.
+	// reference into `state.cart.items`; reading `.quantity` after the bump
+	// yields the post-bump value and silently corrupts the math.
 	type ProductCapture = {
 		id: number;
 		variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
@@ -606,36 +541,24 @@ export function* addCartItem(
 		deltaTotal: number;
 		preExistingKeys: string[];
 	};
-	const productCaptures: ProductCapture[] = [];
-	if ( ! isUpdate ) {
-		// Sum all pre-add quantities across every cart line matching
-		// this product (id + variation). A single product can occupy
-		// multiple lines (e.g. a meta line ordered before a standalone
-		// line). The per-product total lets us verify exactness even
-		// when the server grows a different line than the one the
-		// client bumped optimistically.
-		const preExistingKeys: string[] = [];
-		let preAddTotal = 0;
-		for ( const cartLine of state.cart.items ) {
-			if ( lineMatchesProduct( cartLine, id, variation ) ) {
-				preAddTotal += cartLine.quantity;
-				if ( cartLine.key ) {
-					preExistingKeys.push( cartLine.key );
-				}
+	// Sum all pre-add quantities across every cart line matching this
+	// product (id + variation). A single product can occupy multiple lines
+	// (e.g. a meta line ordered before a standalone line). The per-product
+	// total lets us verify exactness even when the server grows a different
+	// line than the one the client bumped optimistically.
+	const preExistingKeys: string[] = [];
+	let preAddTotal = 0;
+	for ( const cartLine of state.cart.items ) {
+		if ( lineMatchesProduct( cartLine, id, variation ) ) {
+			preAddTotal += cartLine.quantity;
+			if ( cartLine.key ) {
+				preExistingKeys.push( cartLine.key );
 			}
 		}
-		// `itemToSend.quantity` is the posted delta (quantityToSend
-		// computed above). It is already computed before this capture
-		// block and does not depend on the optimistic state, so it is
-		// safe to read here.
-		productCaptures.push( {
-			id,
-			variation,
-			preAddTotal,
-			deltaTotal: itemToSend.quantity,
-			preExistingKeys,
-		} );
 	}
+	const productCaptures: ProductCapture[] = [
+		{ id, variation, preAddTotal, deltaTotal: delta, preExistingKeys },
+	];
 
 	// Captured at the request-settlement boundary (the line right
 	// after the request-sending yield resolves/throws) and never
@@ -646,29 +569,20 @@ export function* addCartItem(
 
 	try {
 		const result = ( yield sendCartRequest( state, {
-			path: `/wc/store/v1/cart/${ endpoint }`,
+			path: '/wc/store/v1/cart/add-item',
 			method: 'POST',
 			body: itemToSend,
 			applyOptimistic: () => {
 				if ( existingItem ) {
-					// This in-place bump is render-only. It
-					// makes the common re-add flicker-free, but it must
-					// never feed back into endpoint selection or the
-					// posted amount — those are already fixed above as a
-					// pure function of key-presence and the delta. On a
-					// keyless add the match may bump a server-keyed line's
-					// rendered quantity (the accepted, self-correcting
-					// meta-only blip the server reconciles away); it must
-					// not flip the add into `update-item` or supply an
-					// absolute quantity. A future edit that lets this
-					// match drive the endpoint or the posted amount
-					// resurrects the original "cannot update bundle item"
-					// / wrong-line bug.
+					// This in-place bump is render-only, for a
+					// flicker-free re-add. The posted amount is always
+					// `delta`, fixed above, regardless of whether this
+					// match bumps a server-keyed line's rendered quantity.
 					const isSoldIndividually =
 						isCartItem( existingItem ) &&
 						existingItem.sold_individually;
 					if ( ! isSoldIndividually ) {
-						existingItem.quantity = targetQuantity;
+						existingItem.quantity = existingItem.quantity + delta;
 					}
 				} else {
 					// No existing item: push new optimistic item.
@@ -688,7 +602,7 @@ export function* addCartItem(
 		// downgrade it to a failure.
 		outcome = { success: true };
 
-		// Success - handle side effects that don't trigger refreshCartItems
+		// Success - handle side effects that don't trigger refreshCart
 		const cart = result.data as Cart;
 
 		// Show notices if enabled
@@ -736,6 +650,76 @@ export function* addCartItem(
 	return outcome as AddCartItemOutcome;
 }
 
+/**
+ * `updateCartItem( { key, quantity } )` sets one cart line's absolute
+ * quantity via the Store API's `update-item` endpoint. Used by Mini-Cart's
+ * quantity stepper, which targets one known line and sets its quantity
+ * outright, unlike `addCartItem`, whose `quantity` is always a delta.
+ *
+ * @param args          The line to update.
+ * @param args.key      The cart line's key.
+ * @param args.quantity The absolute quantity to set.
+ */
+export function* updateCartItem( {
+	key,
+	quantity,
+}: {
+	key: string;
+	quantity: number;
+} ): AsyncAction< void > {
+	preloadA11y();
+
+	const existingItem = state.cart.items.find( ( item ) => item.key === key );
+
+	const quantityChanges: QuantityChanges = {
+		cartItemsPendingQuantity: existingItem?.key ? [ existingItem.key ] : [],
+	};
+
+	const itemToSend = (
+		existingItem ? { ...existingItem, quantity } : { key, quantity }
+	) as OptimisticCartItem;
+
+	// Capture cart state after optimistic updates for notice comparison.
+	let cartAfterOptimistic: typeof state.cart | null = null;
+
+	try {
+		const result = ( yield sendCartRequest( state, {
+			path: '/wc/store/v1/cart/update-item',
+			method: 'POST',
+			body: itemToSend,
+			applyOptimistic: () => {
+				if ( existingItem ) {
+					const isSoldIndividually =
+						isCartItem( existingItem ) &&
+						existingItem.sold_individually;
+					if ( ! isSoldIndividually ) {
+						existingItem.quantity = quantity;
+					}
+				}
+				cartAfterOptimistic = JSON.parse(
+					JSON.stringify( state.cart )
+				);
+			},
+			meta: { quantityChanges, origin: 'add' },
+		} ) ) as TypeYield< typeof sendCartRequest >;
+
+		const cart = result.data as Cart;
+		if ( cart && cartAfterOptimistic ) {
+			const infoNotices = getInfoNoticesFromCartUpdates(
+				cartAfterOptimistic,
+				cart
+			);
+			const errorNotices = cart.errors.map( generateErrorNotice );
+			yield actions.updateNotices(
+				[ ...infoNotices, ...errorNotices ],
+				true
+			);
+		}
+	} catch ( error ) {
+		void actions.showNoticeError( error as Error );
+	}
+}
+
 export function* batchAddCartItems(
 	items: ClientCartItem[],
 	{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
@@ -768,13 +752,6 @@ export function* batchAddCartItems(
 				variation: item.variation,
 			} );
 
-			let quantity: number;
-			if ( typeof item.quantityToAdd === 'number' ) {
-				const currentQuantity = existingItem?.quantity ?? 0;
-				quantity = currentQuantity + item.quantityToAdd;
-			} else {
-				quantity = item.quantity ?? 1;
-			}
 			// Endpoint selection is a pure function of the
 			// caller-supplied `key`, never of a line matched by
 			// id/variation. This mirrors the single-item
@@ -789,10 +766,15 @@ export function* batchAddCartItems(
 
 			let itemToSend: OptimisticCartItem;
 			let itemMeta: CartMutationMeta;
+			// The bumped absolute quantity applied to an in-place
+			// optimistic update (render-only), computed per branch below.
+			let bumpedQuantity = 0;
 			if ( isUpdate && existingItem ) {
 				// Caller-keyed update: target the exact line by key
-				// and send the absolute target quantity to the
-				// update-item endpoint.
+				// and send the absolute quantity to the update-item
+				// endpoint.
+				const quantity = item.quantity ?? 1;
+				bumpedQuantity = quantity;
 				itemToSend = {
 					key: existingItem.key,
 					id: existingItem.id,
@@ -811,17 +793,14 @@ export function* batchAddCartItems(
 				// endpoint and never copy the matched line's key. As in
 				// addCartItem, the amount sent is always a delta —
 				// add-item adds to the existing quantity rather than
-				// setting it — so a match (by id/variation, possibly
-				// carrying a server key) only tells us how much delta is
-				// already accounted for; with no match we post the full
-				// target quantity. The matched line is never sent as an
+				// setting it. The matched line is never sent as an
 				// absolute quantity.
-				const quantityToSend = existingItem
-					? quantity - existingItem.quantity
-					: quantity;
+				const delta =
+					typeof item.quantity === 'number' ? item.quantity : 1;
+				bumpedQuantity = ( existingItem?.quantity ?? 0 ) + delta;
 				itemToSend = {
 					id: item.id,
-					quantity: quantityToSend,
+					quantity: delta,
 					...( item.variation && {
 						variation: item.variation,
 					} ),
@@ -862,14 +841,14 @@ export function* batchAddCartItems(
 						id: item.id,
 						variation: item.variation,
 						preAddTotal,
-						deltaTotal: quantityToSend,
+						deltaTotal: delta,
 						preExistingKeys,
 					} );
 				} else {
 					// Same product seen again in this batch — add delta.
 					const capture = batchProductCaptures.get( token );
 					if ( capture ) {
-						capture.deltaTotal += quantityToSend;
+						capture.deltaTotal += delta;
 					}
 				}
 			}
@@ -890,7 +869,7 @@ export function* batchAddCartItems(
 						// must not flip the add into `update-item` or post an
 						// absolute quantity. Letting this match drive the
 						// endpoint or amount reintroduces the bug.
-						existingItem.quantity = quantity;
+						existingItem.quantity = bumpedQuantity;
 					} else {
 						state.cart.items.push( itemToSend );
 					}
@@ -955,7 +934,7 @@ export function* batchAddCartItems(
 	}
 }
 
-export function* refreshCartItems(): AsyncAction< void > {
+export function* refreshCart(): AsyncAction< void > {
 	// Skip if queue is processing - it will apply server state when done
 	if ( cartQueue?.getStatus().isProcessing ) {
 		return;
@@ -1003,7 +982,7 @@ export function* refreshCartItems(): AsyncAction< void > {
 		refreshTimeout = 3000;
 	} catch {
 		// Tries again after the timeout.
-		setTimeout( actions.refreshCartItems, refreshTimeout );
+		setTimeout( actions.refreshCart, refreshTimeout );
 
 		// Increases the timeout exponentially.
 		refreshTimeout *= 2;

@@ -189,15 +189,13 @@ describe( 'Add to Cart + Options grouped product selector store', () => {
 			[
 				{
 					id: 11,
-					quantityToAdd: 2,
+					quantity: 2,
 					variation: mockContext.selectedAttributes,
-					type: 'simple',
 				},
 				{
 					id: 13,
-					quantityToAdd: 1,
+					quantity: 1,
 					variation: mockContext.selectedAttributes,
-					type: 'simple',
 				},
 			],
 			{ showCartUpdatesNotices: false }

@@ -115,9 +115,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 					addedItems.push( {
 						id: Number( childProductId ),
-						quantityToAdd: quantity[ childProductId ],
+						quantity: quantity[ childProductId ],
 						variation: selectedAttributes,
-						type: product.type,
 					} );
 				}
 

@@ -13,8 +13,9 @@ import {
 	findItemInCart,
 	removeCartItem,
 	addCartItem,
+	updateCartItem,
 	batchAddCartItems,
-	refreshCartItems,
+	refreshCart,
 	waitForIdle,
 } from './cart-actions';
 import { showNoticeError, updateNotices } from './notices';
@@ -25,6 +26,7 @@ export type {
 	WooCommerceConfig,
 	SelectedAttributes,
 	OptimisticCartItem,
+	AddCartItemPayload,
 	ClientCartItem,
 	AddCartItemError,
 	AddCartItemOutcome,
@@ -45,8 +47,9 @@ const { actions } = store< Store >(
 		actions: {
 			removeCartItem,
 			addCartItem,
+			updateCartItem,
 			batchAddCartItems,
-			refreshCartItems,
+			refreshCart,
 			waitForIdle,
 			*showNoticeError(
 				error: Error | ApiErrorResponse
@@ -62,7 +65,7 @@ const { actions } = store< Store >(
 bindCartActions( state, actions );
 
 // Trigger initial cart refresh.
-void actions.refreshCartItems();
+void actions.refreshCart();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
@@ -72,7 +75,7 @@ window.addEventListener(
 			id: number;
 		} >;
 		if ( customEvent.detail.type === 'from_@wordpress/data' ) {
-			void actions.refreshCartItems();
+			void actions.refreshCart();
 		}
 	}
 );
