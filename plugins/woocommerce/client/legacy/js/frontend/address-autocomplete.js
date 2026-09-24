@@ -462,6 +462,10 @@ if (
 							'Invalid suggestions response - not an array'
 						);
 						hideSuggestions( type );
+						enableBrowserAutofill(
+							addressInput,
+							document.activeElement === addressInput
+						);
 						return;
 					}
 
@@ -474,6 +478,10 @@ if (
 
 					if ( safeSuggestions.length === 0 ) {
 						hideSuggestions( type );
+						enableBrowserAutofill(
+							addressInput,
+							document.activeElement === addressInput
+						);
 						return;
 					}
 
