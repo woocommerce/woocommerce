@@ -76,7 +76,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $page_queries, 'Rendering must not enumerate the site pages.' );
 		$this->assertStringContainsString( 'Selected shop', $output );
 		$this->assertStringNotContainsString( 'Unselected page', $output );
-		$this->assertStringContainsString( 'data-pagination="true"', $output );
+		$this->assertStringContainsString( 'data-limit="20"', $output );
 		$this->assertSame( 2, substr_count( $output, '<option ' ), 'Only the empty option and saved page should be rendered.' );
 
 		WC_Admin_Settings::save_fields( $fields, array( 'woocommerce_shop_page_id' => '' ) );

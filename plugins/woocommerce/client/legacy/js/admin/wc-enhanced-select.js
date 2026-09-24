@@ -326,25 +326,17 @@ jQuery( function ( $ ) {
 				$( ':input.wc-page-search' )
 					.filter( ':not(.enhanced)' )
 					.each( function () {
-						var paginated = $( this ).data( 'pagination' ) === true;
-						var minimumInputLength = $( this ).data(
-							'minimum_input_length'
-						);
 						var select2_args = {
 							allowClear: $( this ).data( 'allow_clear' )
 								? true
 								: false,
 							placeholder: $( this ).data( 'placeholder' ),
-							minimumInputLength: paginated
-								? 0
-								: minimumInputLength || 3,
+							minimumInputLength: $( this ).data(
+								'minimum_input_length'
+							)
+								? $( this ).data( 'minimum_input_length' )
+								: '3',
 							escapeMarkup: function ( m ) {
-								if ( paginated ) {
-									var element =
-										document.createElement( 'span' );
-									element.textContent = m;
-									return element.innerHTML;
-								}
 								return m;
 							},
 							ajax: {
@@ -352,7 +344,7 @@ jQuery( function ( $ ) {
 								dataType: 'json',
 								delay: 250,
 								data: function ( params ) {
-									var request = {
+									return {
 										term: params.term,
 										action:
 											$( this ).data( 'action' ) ||
@@ -364,16 +356,9 @@ jQuery( function ( $ ) {
 											$( this ).data( 'post_status' ),
 										limit: $( this ).data( 'limit' ),
 									};
-									if ( paginated ) {
-										request.page = params.page || 1;
-									}
-									return request;
 								},
 								processResults: function ( data ) {
 									var terms = [];
-									var more =
-										paginated && data.pagination.more;
-									data = paginated ? data.results : data;
 									if ( data ) {
 										$.each( data, function ( id, text ) {
 											terms.push( {
@@ -384,7 +369,6 @@ jQuery( function ( $ ) {
 									}
 									return {
 										results: terms,
-										pagination: { more: more },
 									};
 								},
 								cache: true,
