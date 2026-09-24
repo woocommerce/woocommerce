@@ -593,6 +593,222 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $diff['copy_changes'] );
 		$this->assertSame( 'Hi.', $diff['copy_changes'][0]['before'] );
 		$this->assertSame( 'Hello.', $diff['copy_changes'][0]['after'] );
+		$this->assertTrue(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'A block the merchant never touched must stay auto-resolvable — the applier takes core\'s version from this flag.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a merchant edit to a block's attributes alone makes core's text change a conflict.
+	 */
+	public function test_three_way_attribute_only_merchant_edit_is_a_conflict(): void {
+		$merchant_attrs = 'attrs-merchant-red';
+
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hello.',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+					'attrs_hash' => $merchant_attrs,
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertFalse(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'A colour-only merchant edit is still a merchant edit; applying core over it must be the merchant\'s call.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a merchant edit to a block's markup alone, such as swapping a personalization tag, makes core's text change a conflict.
+	 */
+	public function test_three_way_markup_only_merchant_edit_is_a_conflict(): void {
+		// Both texts strip to "Hi , thanks" — the swapped tag lives only in the markup.
+		$base = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hi , thanks',
+					'inner_html_hash' => 'html-first-name-tag',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hey , thanks',
+					'inner_html_hash' => 'html-core-reworded',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hi , thanks',
+					'inner_html_hash' => 'html-full-name-tag',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertFalse(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'Swapping a personalization tag is a merchant edit even though the stripped text is unchanged.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: no entry when the merchant already wrote what core now says, so the drawer never offers a choice between two identical blocks.
+	 */
+	public function test_three_way_merchant_already_matches_core_yields_no_entry(): void {
+		$base            = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+				),
+			)
+		);
+		$already_updated = array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => 'Hello.',
+			),
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way(
+			self::records( $already_updated ),
+			$base,
+			self::records( $already_updated )
+		);
+
+		$this->assertSame(
+			array(),
+			$diff['copy_changes'],
+			'Both sides already read the same; a conflict here would be a no-op the merchant still has to clear before the one-click update.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a block holding other blocks produces no entry, because apply never takes its content.
+	 */
+	public function test_three_way_block_holding_other_blocks_yields_no_entry(): void {
+		$quote = static fn( string $text ): array => array(
+			array(
+				'name'         => 'core/quote',
+				'inner_text'   => $text,
+				'holds_blocks' => true,
+			),
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way(
+			self::records( $quote( 'A word from us.' ) ),
+			self::records( $quote( 'A note from us.' ) ),
+			self::records( $quote( 'A note from us.' ) )
+		);
+
+		$this->assertSame(
+			array(),
+			$diff['copy_changes'],
+			'Apply leaves the content of such a block alone, so listing it would promise a change that never happens.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: an attribute-only core change produces no entry, so the drawer never shows a change with identical text on both sides.
+	 *
+	 * Guards the deliberate asymmetry: the merchant's side is compared on markup
+	 * and attributes, core's on text alone. Making the two sides symmetric with
+	 * `merchant_changed()` is the tempting cleanup this test exists to stop. The
+	 * applier still syncs such a change on a block the merchant never touched —
+	 * it simply never reaches the drawer.
+	 */
+	public function test_three_way_attribute_only_core_change_yields_no_entry(): void {
+		$unchanged = array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => 'Hi.',
+			),
+		);
+
+		$base = self::records( $unchanged );
+		$post = self::records( $unchanged );
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+					'attrs_hash' => 'attrs-core-renamed-block',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertSame( array(), $diff['copy_changes'], 'Core styling a block is not a wording change; it must not reach the drawer as one.' );
+	}
+
+	/**
+	 * @testdox flatten_blocks hashes attributes ignoring key order, and hashes markup that inner_text discards.
+	 */
+	public function test_flatten_blocks_hashes_attributes_and_markup(): void {
+		$record = static fn( string $markup ): array => WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $markup ) )[0];
+
+		// Order differs at the top level and inside `color`, because real block
+		// attributes nest two or three deep.
+		$red_then_size = '<!-- wp:paragraph {"style":{"color":{"text":"#ff0000","background":"#ffffff"}},"fontSize":"large"} --><p>Hi.</p><!-- /wp:paragraph -->';
+		$size_then_red = '<!-- wp:paragraph {"fontSize":"large","style":{"color":{"background":"#ffffff","text":"#ff0000"}}} --><p>Hi.</p><!-- /wp:paragraph -->';
+		$blue          = '<!-- wp:paragraph {"style":{"color":{"text":"#0000ff","background":"#ffffff"}},"fontSize":"large"} --><p>Hi.</p><!-- /wp:paragraph -->';
+
+		$this->assertSame( $record( $red_then_size )['attrs_hash'], $record( $size_then_red )['attrs_hash'], 'Attribute order must not read as a change, at any depth.' );
+		$this->assertNotSame( $record( $red_then_size )['attrs_hash'], $record( $blue )['attrs_hash'], 'A changed attribute value must read as a change.' );
+
+		$first_name = '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-first-name]-->, thanks</p><!-- /wp:paragraph -->';
+		$full_name  = '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-full-name]-->, thanks</p><!-- /wp:paragraph -->';
+		$respaced   = "<!-- wp:paragraph --><p>Hi\n  <!--[woocommerce/customer-first-name]-->, thanks</p><!-- /wp:paragraph -->";
+
+		$this->assertSame(
+			$record( $first_name )['inner_text'],
+			$record( $full_name )['inner_text'],
+			'Fixture check: stripping tags hides the swapped personalization tag, which is why the markup hash exists.'
+		);
+		$this->assertNotSame( $record( $first_name )['inner_html_hash'], $record( $full_name )['inner_html_hash'], 'A swapped personalization tag must read as a change.' );
+		$this->assertSame( $record( $first_name )['inner_html_hash'], $record( $respaced )['inner_html_hash'], 'Whitespace from re-serialization must not read as a change.' );
+
+		// Spacing next to a tag is content: these two render differently.
+		$spaced   = '<!-- wp:paragraph --><p>Read <strong>more</strong> today</p><!-- /wp:paragraph -->';
+		$unspaced = '<!-- wp:paragraph --><p>Read<strong>more</strong>today</p><!-- /wp:paragraph -->';
+
+		$this->assertNotSame(
+			$record( $spaced )['inner_html_hash'],
+			$record( $unspaced )['inner_html_hash'],
+			'Spacing around inline markup changes what the merchant sees, so it counts as their edit.'
+		);
 	}
 
 	/**
@@ -1117,19 +1333,28 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
-	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
+	 * Each record gets a top-level path (`[$idx]`) and a null parent_name. `attrs_hash` is
+	 * optional and defaults to the hash of an empty attribute set.
 	 *
-	 * @param array<int, array{name:string, inner_text:string}> $simple Simple record specs.
-	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
+	 * The two hashes are opaque tokens to the diff, which only compares them, so
+	 * fixtures pass literals rather than real hashes. `inner_html_hash` defaults
+	 * to one derived from `inner_text`, so a record's markup moves with its text
+	 * unless a test pins it separately.
+	 *
+	 * @param array<int, array{name:string, inner_text:string, attrs_hash?:string, inner_html_hash?:string, holds_blocks?:bool}> $simple Simple record specs.
+	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}>
 	 */
 	private static function records( array $simple ): array {
 		$out = array();
 		foreach ( $simple as $i => $r ) {
 			$out[] = array(
-				'path'        => array( $i ),
-				'parent_name' => null,
-				'name'        => $r['name'],
-				'inner_text'  => $r['inner_text'],
+				'path'            => array( $i ),
+				'parent_name'     => null,
+				'name'            => $r['name'],
+				'inner_text'      => $r['inner_text'],
+				'attrs_hash'      => $r['attrs_hash'] ?? 'attrs-default',
+				'inner_html_hash' => $r['inner_html_hash'] ?? 'html-of:' . $r['inner_text'],
+				'holds_blocks'    => $r['holds_blocks'] ?? false,
 			);
 		}
 		return $out;

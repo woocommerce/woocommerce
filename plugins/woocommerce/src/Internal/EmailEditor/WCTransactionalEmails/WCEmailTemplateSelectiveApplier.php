@@ -17,11 +17,13 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  *
  * V1 algorithm (spine = the merchant's post):
  *
- * - **`copy_changes`** (matched pair, different inner_text): default decision
- *   is `keep_yours`. When the merchant explicitly opts into `use_core`, the
- *   matched block's `innerHTML` / `innerContent` is replaced with core's
- *   version. Block `attrs` are preserved from the post side (no attribute
- *   diff in v1).
+ * - **`copy_changes`** (matched pair, different inner_text): the default is
+ *   `use_core` for a block only core changed and `keep_yours` for one the
+ *   merchant also touched. An explicit choice overrides either. Applying
+ *   `use_core` replaces the matched block's `innerHTML` / `innerContent` with
+ *   core's version, and takes core's `attrs` too on the auto-resolved path,
+ *   where the merchant's still match the base. An explicit `use_core` over the
+ *   merchant's own styling keeps their `attrs`.
  * - **`added_blocks`** (in core, not in post): always applied. Inserted at
  *   the equivalent position from core's path; if the path can't be navigated
  *   in the post tree, falls back to appending at the closest level.
@@ -36,21 +38,23 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * subsequent apply overwrites the snapshot. {@see self::undo()} restores from
  * the snapshot when the supplied `revision_id` matches.
  *
- * Three-way payload consumption (since 10.9.0): when the post has
+ * Three-way merge (since 10.9.0): when the post has
  * {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta,
- * `apply_selectively()` passes the change-summary's payload through to
- * `merge()`, together with that base render:
+ * `apply_selectively()` hands that base render to `merge()`:
  *
- * - Core and post blocks are paired through the base, exactly as the summary
- *   pairs them, so the merge writes what the merchant reviewed. Blocks the
- *   merchant deleted are not re-inserted.
- * - Matched pairs whose paths are NOT in `copy_changes` are silently
- *   preserved (yours-only edits aren't conflicts; the `use_core` decision
- *   is ignored on those paths).
+ * - Core and post blocks are paired through the base, exactly as the change
+ *   summary pairs them, so the merge writes what the merchant reviewed. Blocks
+ *   the merchant deleted are not re-inserted.
+ * - Each pair is classified with the summary's own rule
+ *   ({@see WCEmailTemplateChangeSummary::merchant_changed()}) rather than read
+ *   back out of the cached summary payload, so an apply can't act on a
+ *   classification the merchant was never shown.
+ * - A block only the merchant changed is preserved silently — it isn't a
+ *   conflict, and a `use_core` decision for it is ignored.
  *
  * Posts without the meta keep the legacy two-way behavior — `merge()` runs
- * its own LCS and treats every text-divergent matched pair as a candidate
- * for `use_core`.
+ * its own LCS, treats every text-divergent matched pair as a candidate for
+ * `use_core`, and defaults each to `keep_yours`.
  *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  * @since   10.9.0
@@ -89,7 +93,7 @@ class WCEmailTemplateSelectiveApplier {
 	 * Apply the selected set of core template changes to a `woo_email` post.
 	 *
 	 * @param int                                                        $post_id The `woo_email` post ID.
-	 * @param array<int, array{path:array<int|string>, decision:string}> $choices Per-conflict choices keyed implicitly by `path`. `decision` is `'keep_yours'` (default if absent) or `'use_core'`. Choices for paths that don't correspond to a `copy_changes` entry are ignored — auto-resolved entries are non-overridable in v1.
+	 * @param array<int, array{path:array<int|string>, decision:string}> $choices Per-conflict choices keyed implicitly by `path`. `decision` is `'keep_yours'` or `'use_core'`. A path with no choice falls back to the summary's classification: `use_core` when only core changed the block, `keep_yours` otherwise. Choices for paths that don't correspond to a `copy_changes` entry are ignored — added, removed and structural entries cannot be overridden.
 	 *
 	 * @return array<string, mixed>|\WP_Error On success, an array with keys
 	 *                                        `merged_content`, `revision_id`,
@@ -187,13 +191,12 @@ class WCEmailTemplateSelectiveApplier {
 			);
 		}//end try
 
-		// When the post has `last_core_render` meta, the change-summary already classified
-		// each block via three-way attribution (yours-vs-base, core-vs-base). The merge pairs
-		// blocks through the same base and only accepts use_core on the summary's conflicts.
+		// When the post has `last_core_render` meta, the merge pairs blocks through that base
+		// and classifies each pair with the same rule the change summary used, so it applies
+		// what the merchant reviewed rather than reading a cached payload back.
 		$base_render_for_merge = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
-		$summary_for_merge     = '' !== $base_render_for_merge ? $summary : null;
 
-		$merged_result      = self::merge( $post_content, $core_content, $choices, $summary_for_merge, $base_render_for_merge );
+		$merged_result      = self::merge( $post_content, $core_content, $choices, $base_render_for_merge );
 		$merged_content     = $merged_result['content'];
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
@@ -451,29 +454,34 @@ class WCEmailTemplateSelectiveApplier {
 	 * Compute the merged block tree, starting from the merchant's post and
 	 * layering on core's changes per the v1 algorithm.
 	 *
-	 * When `$precomputed_summary` is provided (the caller's `last_core_render`
-	 * meta was set, so the change-summary ran three-way attribution), core and
-	 * post blocks are paired through `$base_content` with
+	 * With `$base_content` (the caller's `last_core_render` meta was set), core
+	 * and post blocks are paired through the base with
 	 * {@see WCEmailTemplateChangeSummary::align_to_base()}, the same pairing the
-	 * summary shown to the merchant uses:
+	 * summary shown to the merchant uses, and each pair is classified with
+	 * {@see WCEmailTemplateChangeSummary::merchant_changed()}, the same rule:
 	 *
-	 * - Only pairs whose path is in `copy_changes` accept `use_core`; yours-only
-	 *   edits are preserved even if a `use_core` decision was passed.
+	 * - A block only core changed defaults to `use_core` — the drawer lists it as
+	 *   auto-resolved and states it will apply — and takes core's `attrs` too,
+	 *   since the merchant's match the base by definition. This holds for a
+	 *   styling or markup change the drawer cannot describe as a wording change:
+	 *   the merchant never touched the block, so it follows core rather than
+	 *   drifting out of step with the base for good.
+	 * - A block the merchant also changed defaults to `keep_yours` and keeps its
+	 *   `attrs` when an explicit `use_core` is passed for it.
 	 * - Core blocks the merchant deleted are not re-inserted.
 	 *
-	 * Without `$precomputed_summary` (legacy two-way fallback), core and post
-	 * are paired with a direct LCS and every matched pair with differing
-	 * inner_text is eligible for `use_core`.
+	 * Without `$base_content` (legacy two-way fallback), core and post are paired
+	 * with a direct LCS, every matched pair with differing inner_text is eligible
+	 * for `use_core`, and the default stays `keep_yours`.
 	 *
-	 * @param string                                                     $post_content        Merchant's current `post_content`.
-	 * @param string                                                     $core_content        Canonical core render.
-	 * @param array<int, array{path:array<int|string>, decision:string}> $choices             Per-conflict choices.
-	 * @param array<string, mixed>|null                                  $precomputed_summary Optional three-way summary payload from {@see WCEmailTemplateChangeSummary::summarize()}; pass `null` to use the legacy two-way merge.
-	 * @param string                                                     $base_content        The `last_core_render` the summary was computed against. Used only with `$precomputed_summary`.
+	 * @param string                                                     $post_content Merchant's current `post_content`.
+	 * @param string                                                     $core_content Canonical core render.
+	 * @param array<int, array{path:array<int|string>, decision:string}> $choices      Per-conflict choices.
+	 * @param string                                                     $base_content The `last_core_render`, or `''` for the legacy two-way merge.
 	 *
 	 * @return array{content:string, structural_skipped:bool, aliases_migrated:string[]}
 	 */
-	private static function merge( string $post_content, string $core_content, array $choices, ?array $precomputed_summary = null, string $base_content = '' ): array {
+	private static function merge( string $post_content, string $core_content, array $choices, string $base_content = '' ): array {
 		$post_blocks = parse_blocks( $post_content );
 		$core_blocks = parse_blocks( $core_content );
 
@@ -488,11 +496,13 @@ class WCEmailTemplateSelectiveApplier {
 		$post_records = WCEmailTemplateChangeSummary::flatten_blocks( $post_blocks );
 		$core_records = WCEmailTemplateChangeSummary::flatten_blocks( $core_blocks );
 
+		$three_way                 = '' !== $base_content;
 		$merchant_removed_core_set = array();
-		if ( null !== $precomputed_summary ) {
+		$base_of_post              = array();
+		if ( $three_way ) {
 			$base_records = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $base_content ) );
 			$matches      = array();
-			foreach ( WCEmailTemplateChangeSummary::align_to_base( $core_records, $base_records, $post_records ) as $sides ) {
+			foreach ( WCEmailTemplateChangeSummary::align_to_base( $core_records, $base_records, $post_records ) as $base_idx => $sides ) {
 				if ( null === $sides['core'] ) {
 					continue;
 				}
@@ -500,7 +510,8 @@ class WCEmailTemplateSelectiveApplier {
 					$merchant_removed_core_set[ $sides['core'] ] = true;
 					continue;
 				}
-				$matches[] = array( $sides['core'], $sides['post'] );
+				$matches[]                      = array( $sides['core'], $sides['post'] );
+				$base_of_post[ $sides['post'] ] = $base_records[ $base_idx ];
 			}
 		} else {
 			$matches = WCEmailTemplateChangeSummary::lcs_matches( $core_records, $post_records );
@@ -516,17 +527,6 @@ class WCEmailTemplateSelectiveApplier {
 				continue;
 			}
 			$choice_map[ self::path_key( $choice['path'] ) ] = $decision;
-		}
-
-		// `null` signals the legacy two-way path (every differing pair is eligible).
-		$copy_change_paths = null;
-		if ( null !== $precomputed_summary ) {
-			$copy_change_paths = array();
-			foreach ( $precomputed_summary['copy_changes'] ?? array() as $cc ) {
-				if ( isset( $cc['path'] ) && is_array( $cc['path'] ) ) {
-					$copy_change_paths[ self::path_key( $cc['path'] ) ] = true;
-				}
-			}
 		}
 
 		// Pass 1: matched pairs. Apply use_core decisions on copy changes;
@@ -547,27 +547,75 @@ class WCEmailTemplateSelectiveApplier {
 				$structural_skipped = true;
 			}
 
-			if ( $core_rec['inner_text'] === $post_rec['inner_text'] ) {
+			$core_block = self::block_at_path( $core_blocks, $core_rec['path'] );
+			$post_block = self::block_at_path( $post_blocks, $post_rec['path'] );
+			if ( null === $core_block || null === $post_block ) {
 				continue;
 			}
 
-			// Three-way gate: only paths the summary surfaced as `copy_changes`
-			// are eligible for `use_core`. Yours-only edits are silently
-			// preserved — they aren't conflicts.
-			if ( null !== $copy_change_paths && ! isset( $copy_change_paths[ $post_key ] ) ) {
+			// A block holding other blocks never takes core's content: that would
+			// replace `innerBlocks` wholesale and discard merchant edits this same
+			// pass is preserving, since the children are paired separately and each
+			// gets its own turn. The quote in the customer-note template is one.
+			// Its own `attrs` are still safe to follow — they say nothing about
+			// what is inside — so a restyled container is handled below.
+			$holds_blocks = ! empty( $core_block['innerBlocks'] ) || ! empty( $post_block['innerBlocks'] );
+
+			$auto_resolvable = false;
+			if ( $three_way ) {
+				// Markup and attributes, not stripped text: a merchant who arrived
+				// at core's wording but linked or emphasised part of it still has
+				// something to replace.
+				if ( $core_rec['inner_html_hash'] === $post_rec['inner_html_hash']
+					&& $core_rec['attrs_hash'] === $post_rec['attrs_hash']
+				) {
+					continue;
+				}
+
+				$base_rec = $base_of_post[ $pair[1] ];
+
+				// A block the merchant never touched follows core, whatever moved
+				// in it. Styling and markup changes never reach the drawer — their
+				// before and after text read identically — so leaving them would
+				// strand the block: the stored base advances to core's version on
+				// the next apply, and from then on the block looks merchant-edited
+				// and can never auto-resolve again.
+				$auto_resolvable = ! WCEmailTemplateChangeSummary::merchant_changed( $base_rec, $post_rec );
+
+				if ( ! $auto_resolvable && $base_rec['inner_text'] === $core_rec['inner_text'] ) {
+					// Core never reworded it, so the difference is the merchant's
+					// own edit. Not a conflict, nothing to offer.
+					continue;
+				}
+
+				if ( $holds_blocks ) {
+					// Follow core's styling on a container the merchant left alone,
+					// and leave its children to their own turns. Skipping it instead
+					// would strand it: the stored base advances to core's version
+					// regardless, so the block would look merchant-edited for good.
+					if ( $auto_resolvable ) {
+						$post_blocks = self::replace_block_attrs_at_path( $post_blocks, $post_rec['path'], $core_block );
+					}
+					continue;
+				}
+			} elseif ( $core_rec['inner_text'] === $post_rec['inner_text'] || $holds_blocks ) {
 				continue;
 			}
 
-			$decision = $choice_map[ $post_key ] ?? 'keep_yours';
+			// A block only core changed is listed in the drawer as auto-resolved,
+			// stating the update will apply, and no choice is sent for it — by the
+			// drawer or by a bulk or CLI caller — so the default has to carry it.
+			// A choice, when one is sent, still wins.
+			$decision = $choice_map[ $post_key ] ?? ( $auto_resolvable ? 'use_core' : 'keep_yours' );
 			if ( 'use_core' !== $decision ) {
 				continue;
 			}
 
-			$core_block = self::block_at_path( $core_blocks, $core_rec['path'] );
-			if ( null === $core_block ) {
-				continue;
-			}
-			$post_blocks = self::replace_block_content_at_path( $post_blocks, $post_rec['path'], $core_block );
+			// Core's `attrs` come along only on the auto-resolved path, where the
+			// merchant's match the base and there is nothing of theirs to lose.
+			// An explicit `use_core` over their own styling keeps their `attrs`,
+			// at the cost of the block reading as merchant-edited from then on.
+			$post_blocks = self::replace_block_content_at_path( $post_blocks, $post_rec['path'], $core_block, $auto_resolvable );
 		}//end foreach
 
 		// Pass 2: unmatched core records. Insert non-structural blocks at
@@ -710,22 +758,66 @@ class WCEmailTemplateSelectiveApplier {
 	}
 
 	/**
-	 * Replace the block at the given path with another block's content.
-	 * Preserves the post block's `attrs` (no attribute-level apply in v1);
-	 * copies the source block's `innerHTML`, `innerContent`, and
-	 * `innerBlocks` over the target.
+	 * Replace the block at the given path with another block's content: the
+	 * source block's `innerHTML`, `innerContent` and `innerBlocks`, plus its
+	 * `attrs` when `$copy_attrs` is set.
 	 *
 	 * @param array<int|string, array<string, mixed>> $blocks       Mutable block tree.
 	 * @param array<int|string>                       $path         Index path through `parse_blocks` output.
 	 * @param array<string, mixed>                    $source_block The block whose content to copy in.
+	 * @param bool                                    $copy_attrs   Whether to take the source block's `attrs` as well.
 	 *
 	 * @return array<int|string, array<string, mixed>>
 	 */
-	private static function replace_block_content_at_path( array $blocks, array $path, array $source_block ): array {
+	private static function replace_block_content_at_path( array $blocks, array $path, array $source_block, bool $copy_attrs = false ): array {
 		if ( empty( $path ) ) {
 			return $blocks;
 		}
-		return self::replace_recursive( $blocks, array_values( $path ), 0, $source_block );
+		return self::replace_recursive( $blocks, array_values( $path ), 0, $source_block, $copy_attrs );
+	}
+
+	/**
+	 * Replace only the `attrs` of the block at the given path, leaving its
+	 * content and children untouched. Used for a block that holds other blocks,
+	 * where taking core's content would discard what the merchant put inside.
+	 *
+	 * @param array<int|string, array<string, mixed>> $blocks       Mutable block tree.
+	 * @param array<int|string>                       $path         Index path through `parse_blocks` output.
+	 * @param array<string, mixed>                    $source_block The block whose `attrs` to copy in.
+	 *
+	 * @return array<int|string, array<string, mixed>>
+	 */
+	private static function replace_block_attrs_at_path( array $blocks, array $path, array $source_block ): array {
+		if ( empty( $path ) ) {
+			return $blocks;
+		}
+		return self::replace_attrs_recursive( $blocks, array_values( $path ), 0, $source_block['attrs'] ?? array() );
+	}
+
+	/**
+	 * Recursive worker for {@see self::replace_block_attrs_at_path()}.
+	 *
+	 * @param array<int|string, array<string, mixed>> $blocks Current level of the tree.
+	 * @param array<int|string>                       $path   Path indices.
+	 * @param int                                     $depth  Current depth.
+	 * @param array<string, mixed>                    $attrs  Attributes to write.
+	 *
+	 * @return array<int|string, array<string, mixed>>
+	 */
+	private static function replace_attrs_recursive( array $blocks, array $path, int $depth, array $attrs ): array {
+		$idx = (int) $path[ $depth ];
+		if ( ! isset( $blocks[ $idx ] ) ) {
+			return $blocks;
+		}
+
+		if ( count( $path ) - 1 === $depth ) {
+			$blocks[ $idx ]['attrs'] = $attrs;
+			return $blocks;
+		}
+
+		$inner                         = $blocks[ $idx ]['innerBlocks'] ?? array();
+		$blocks[ $idx ]['innerBlocks'] = self::replace_attrs_recursive( is_array( $inner ) ? $inner : array(), $path, $depth + 1, $attrs );
+		return $blocks;
 	}
 
 	/**
@@ -735,24 +827,31 @@ class WCEmailTemplateSelectiveApplier {
 	 * @param array<int|string>                       $path         Path indices.
 	 * @param int                                     $depth        Current depth.
 	 * @param array<string, mixed>                    $source_block Source block to copy content from.
+	 * @param bool                                    $copy_attrs   Whether to take the source block's `attrs` as well.
 	 *
 	 * @return array<int|string, array<string, mixed>>
 	 */
-	private static function replace_recursive( array $blocks, array $path, int $depth, array $source_block ): array {
+	private static function replace_recursive( array $blocks, array $path, int $depth, array $source_block, bool $copy_attrs = false ): array {
 		$idx = (int) $path[ $depth ];
 		if ( ! isset( $blocks[ $idx ] ) ) {
 			return $blocks;
 		}
 
 		if ( count( $path ) - 1 === $depth ) {
+			// Callers keep blocks holding other blocks away from here: this
+			// replaces `innerBlocks` wholesale, which would discard whatever the
+			// merchant had inside.
 			$blocks[ $idx ]['innerHTML']    = $source_block['innerHTML'] ?? '';
 			$blocks[ $idx ]['innerContent'] = $source_block['innerContent'] ?? array();
 			$blocks[ $idx ]['innerBlocks']  = $source_block['innerBlocks'] ?? array();
+			if ( $copy_attrs ) {
+				$blocks[ $idx ]['attrs'] = $source_block['attrs'] ?? array();
+			}
 			return $blocks;
 		}
 
 		$inner                         = $blocks[ $idx ]['innerBlocks'] ?? array();
-		$blocks[ $idx ]['innerBlocks'] = self::replace_recursive( is_array( $inner ) ? $inner : array(), $path, $depth + 1, $source_block );
+		$blocks[ $idx ]['innerBlocks'] = self::replace_recursive( is_array( $inner ) ? $inner : array(), $path, $depth + 1, $source_block, $copy_attrs );
 		return $blocks;
 	}
 

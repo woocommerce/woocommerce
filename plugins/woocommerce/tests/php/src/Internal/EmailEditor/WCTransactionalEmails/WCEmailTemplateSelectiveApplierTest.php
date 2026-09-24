@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTem
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSelectiveApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 /**
@@ -404,8 +405,9 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Three-way: when the merchant deleted one block and core edited another, apply updates the right block and adds no duplicate.
 	 *
-	 * @testWith [[], ["OLD BLOCK A", "MERCHANT EDITED C"]]
+	 * @testWith [[], ["NEW CORE A", "MERCHANT EDITED C"]]
 	 *           [[{"path": [0], "decision": "use_core"}], ["NEW CORE A", "MERCHANT EDITED C"]]
+	 *           [[{"path": [0], "decision": "keep_yours"}], ["OLD BLOCK A", "MERCHANT EDITED C"]]
 	 *
 	 * @param array<int, array{path:array<int>, decision:string}> $choices  Choices sent to apply.
 	 * @param string[]                                            $expected Paragraph texts expected in the merged content, in order.
@@ -426,6 +428,238 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertSame( $expected, $this->paragraph_texts( $result['merged_content'] ) );
+	}
+
+	/**
+	 * @testdox Three-way: a block only core changed takes core's text when no choice is sent for it.
+	 */
+	public function test_apply_selectively_three_way_applies_auto_resolvable_change_without_a_choice(): void {
+		$email_id = 'sa_three_way_auto_resolvable';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_post = $this->paragraphs( array( 'Thanks for your order.', 'We will be in touch.' ) );
+
+		$this->use_canonical_content( $email_id, $this->paragraphs( array( 'Thanks for your order.', 'We will email you when it ships.' ) ) );
+		$post_id = $this->create_woo_email_post( $email_id, $base_and_post );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$base_and_post
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			array( 'Thanks for your order.', 'We will email you when it ships.' ),
+			$this->paragraph_texts( $result['merged_content'] ),
+			'The drawer lists this block as auto-resolved, so Apply must take core\'s text.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: a merchant edit to a block's attributes alone is never auto-applied over, and an explicit use_core keeps their styling.
+	 *
+	 * @testWith [[], "Thanks for your order."]
+	 *           [[{"path": [0], "decision": "use_core"}], "Thanks for shopping with us."]
+	 *
+	 * @param array<int, array{path:array<int>, decision:string}> $choices       Choices sent to apply.
+	 * @param string                                              $expected_text Paragraph text expected after the apply.
+	 */
+	public function test_apply_selectively_three_way_attribute_only_merchant_edit( array $choices, string $expected_text ): void {
+		$email_id = 'sa_three_way_attr_only_edit';
+		$this->register_fixture_email( $email_id );
+
+		// The merchant's attribute has to be one that does not render into the
+		// markup, or the markup would differ too and this would no longer test
+		// the attribute comparison.
+		$base = "<!-- wp:paragraph -->\n<p>Thanks for your order.</p>\n<!-- /wp:paragraph -->";
+		$core = "<!-- wp:paragraph -->\n<p>Thanks for shopping with us.</p>\n<!-- /wp:paragraph -->";
+		$post = "<!-- wp:paragraph {\"metadata\":{\"name\":\"Greeting\"}} -->\n<p>Thanks for your order.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core );
+		$post_id = $this->create_woo_email_post( $email_id, $post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, $choices );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			array( $expected_text ),
+			$this->paragraph_texts( $result['merged_content'] ),
+			'A block the merchant changed takes core\'s text only when they ask for it.'
+		);
+		$this->assertStringContainsString(
+			'"name":"Greeting"',
+			$result['merged_content'],
+			'The merchant\'s attribute must survive either way; only they can drop it.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: a styling change to a block the merchant never touched is applied, even though the drawer cannot describe it as a wording change.
+	 */
+	public function test_apply_selectively_three_way_applies_core_styling_to_untouched_block(): void {
+		$email_id = 'sa_three_way_core_styling_only';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_post = "<!-- wp:paragraph -->\n<p>Thanks for your order.</p>\n<!-- /wp:paragraph -->";
+		$core          = "<!-- wp:paragraph {\"fontSize\":\"large\"} -->\n<p>Thanks for your order.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core );
+		$post_id = $this->create_woo_email_post( $email_id, $base_and_post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_post );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertStringContainsString(
+			'"fontSize":"large"',
+			$result['merged_content'],
+			'Leaving it behind would strand the block: the base advances to core anyway, and it would read as merchant-edited from then on.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: apply follows the blocks themselves, not a cached summary that says there is nothing to do.
+	 */
+	public function test_apply_selectively_three_way_ignores_stale_cached_summary(): void {
+		$email_id = 'sa_three_way_stale_summary';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_post = $this->paragraphs( array( 'We will be in touch.' ) );
+		$core_content  = $this->paragraphs( array( 'We will email you when it ships.' ) );
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $base_and_post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_post );
+
+		// A payload from before the classification rules changed: it reports the
+		// block as nothing to act on. The merge must not take its word for it.
+		$summary                 = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$summary['copy_changes'] = array();
+		$this->prime_change_summary_cache( $post_id, $summary );
+
+		$this->assertTrue(
+			WCEmailTemplateChangeSummary::summarize( $post_id )['cache_hit'],
+			'Fixture check: the stale payload has to be the one the apply reads, or this test proves nothing.'
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			array( 'We will email you when it ships.' ),
+			$this->paragraph_texts( $result['merged_content'] ),
+			'The merge classifies the blocks it holds; a cached payload cannot talk it out of an update.'
+		);
+	}
+
+	/**
+	 * @testdox The change-summary cache key carries a classifier version, so a payload cached under the previous rules is never served.
+	 */
+	public function test_change_summary_cache_key_is_versioned(): void {
+		$cache_key = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'cache_key' );
+		$cache_key->setAccessible( true );
+
+		$key = $cache_key->invoke( null, 12, 'post-hash', 'core-hash', 'base-hash', 'en_US' );
+
+		$unversioned = sprintf( 'wc_email_change_summary_%d_%s', 12, md5( 'post-hash|core-hash|base-hash|en_US' ) );
+
+		$this->assertNotSame(
+			$unversioned,
+			$key,
+			'Content hashes do not move when only the classification code changes, so without a version in the key a payload cached under the old rules would survive the upgrade and drive the new behaviour.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: a merchant edit visible only in the markup, such as a swapped personalization tag, is not auto-applied over.
+	 */
+	public function test_apply_selectively_three_way_preserves_markup_only_merchant_edit(): void {
+		$email_id = 'sa_three_way_markup_only_edit';
+		$this->register_fixture_email( $email_id );
+
+		$base = "<!-- wp:paragraph -->\n<p>Hi <!--[woocommerce/customer-first-name]-->, thanks.</p>\n<!-- /wp:paragraph -->";
+		$core = "<!-- wp:paragraph -->\n<p>Hey <!--[woocommerce/customer-first-name]-->, thanks a lot.</p>\n<!-- /wp:paragraph -->";
+		$post = "<!-- wp:paragraph -->\n<p>Hi <!--[woocommerce/customer-full-name]-->, thanks.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core );
+		$post_id = $this->create_woo_email_post( $email_id, $post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertStringContainsString(
+			'woocommerce/customer-full-name',
+			$result['merged_content'],
+			'The merchant chose the full-name tag; an update they never reviewed must not swap it back.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: when core changes a block's text and its styling, an auto-resolved apply takes both.
+	 */
+	public function test_apply_selectively_three_way_auto_resolved_takes_core_attributes(): void {
+		$email_id = 'sa_three_way_core_text_and_attrs';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_post = "<!-- wp:paragraph -->\n<p>Thanks for your order.</p>\n<!-- /wp:paragraph -->";
+		$core          = "<!-- wp:paragraph {\"style\":{\"color\":{\"text\":\"#0000ff\"}}} -->\n<p class=\"has-text-color\" style=\"color:#0000ff\">Thanks for shopping with us.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core );
+		$post_id = $this->create_woo_email_post( $email_id, $base_and_post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_post );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( array( 'Thanks for shopping with us.' ), $this->paragraph_texts( $result['merged_content'] ) );
+		$this->assertStringContainsString(
+			'"color":{"text":"#0000ff"}',
+			$result['merged_content'],
+			'Core\'s attributes must land with its text: leaving the old ones behind makes the block read as merchant-edited on every later update.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way: restyling a block that holds other blocks never discards what the merchant put inside it.
+	 *
+	 * Shape taken from the customer-note template, which wraps an editable
+	 * paragraph in a locked quote.
+	 */
+	public function test_apply_selectively_three_way_keeps_children_of_a_restyled_container(): void {
+		$email_id = 'sa_three_way_container_children';
+		$this->register_fixture_email( $email_id );
+
+		$quote = static fn( string $attrs, string $paragraph ): string =>
+			"<!-- wp:quote {$attrs}-->\n<blockquote class=\"wp-block-quote\">\n"
+			. "<!-- wp:paragraph -->\n<p>{$paragraph}</p>\n<!-- /wp:paragraph -->\n"
+			. "</blockquote>\n<!-- /wp:quote -->";
+
+		$base = $quote( '', 'Order note goes here.' );
+		$post = $quote( '', 'Our note to you.' );
+		// Core restyles the quote itself and leaves its paragraph alone.
+		$core = $quote( '{"fontSize":"large"} ', 'Order note goes here.' );
+
+		$this->use_canonical_content( $email_id, $core );
+		$post_id = $this->create_woo_email_post( $email_id, $post );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			array( 'Our note to you.' ),
+			$this->paragraph_texts( $result['merged_content'] ),
+			'The merchant edited the paragraph inside the quote; restyling the quote must not take it away.'
+		);
+		$this->assertStringContainsString(
+			'wp:quote {"fontSize":"large"}',
+			$result['merged_content'],
+			'The quote itself was untouched by the merchant, so its styling follows core.'
+		);
 	}
 
 	/**
@@ -1139,6 +1373,42 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Write a change-summary payload into the transient the class would read for
+	 * this post. Reaches the private key builder by reflection so the test can't
+	 * drift from the real key format.
+	 *
+	 * @param int                  $post_id The `woo_email` post ID.
+	 * @param array<string, mixed> $payload The payload to cache.
+	 */
+	private function prime_change_summary_cache( int $post_id, array $payload ): void {
+		$post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $post );
+
+		$email = WCTransactionalEmailPostsManager::get_instance()->get_email_by_id(
+			(string) WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( $post_id )
+		);
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$base = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+
+		$cache_key = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'cache_key' );
+		$cache_key->setAccessible( true );
+
+		set_transient(
+			$cache_key->invoke(
+				null,
+				$post_id,
+				sha1( (string) $post->post_content ),
+				sha1( WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ) ),
+				'' !== $base ? sha1( $base ) : '',
+				get_locale()
+			),
+			$payload,
+			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
 	 * Build block markup with one paragraph block per text.
 	 *
 	 * @param string[] $texts Paragraph texts.
@@ -1155,16 +1425,29 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Extract the text of each top-level paragraph block, in order.
+	 * Extract the text of every paragraph block, nested ones included, in order.
 	 *
 	 * @param string $content Serialized block markup.
 	 * @return string[] Paragraph texts.
 	 */
 	private function paragraph_texts( string $content ): array {
+		return $this->collect_paragraph_texts( parse_blocks( $content ) );
+	}
+
+	/**
+	 * Recursive worker for {@see self::paragraph_texts()}.
+	 *
+	 * @param array<int, array<string, mixed>> $blocks Parsed blocks.
+	 * @return string[] Paragraph texts.
+	 */
+	private function collect_paragraph_texts( array $blocks ): array {
 		$texts = array();
-		foreach ( parse_blocks( $content ) as $block ) {
+		foreach ( $blocks as $block ) {
 			if ( 'core/paragraph' === $block['blockName'] ) {
 				$texts[] = trim( wp_strip_all_tags( (string) $block['innerHTML'] ) );
+			}
+			if ( ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
+				$texts = array_merge( $texts, $this->collect_paragraph_texts( $block['innerBlocks'] ) );
 			}
 		}
 		return $texts;
