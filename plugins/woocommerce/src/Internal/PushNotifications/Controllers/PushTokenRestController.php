@@ -138,8 +138,8 @@ class PushTokenRestController extends RestApiControllerBase {
 
 	/**
 	 * Returns all push tokens for roles that can receive push notifications,
-	 * along with when each token was registered and when the app last
-	 * confirmed it.
+	 * along with when each token was registered, when the app last confirmed
+	 * it, and the username and email of the account it belongs to.
 	 *
 	 * @since 10.8.0
 	 *
@@ -169,12 +169,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		}
 
 		$response = new WP_REST_Response(
-			array(
-				'tokens' => array_map(
-					fn ( $token ) => $token->to_rest_format(),
-					$result['tokens']
-				),
-			),
+			array( 'tokens' => $this->prepare_tokens_for_response( $result['tokens'] ) ),
 			WP_Http::OK
 		);
 
@@ -182,6 +177,59 @@ class PushTokenRestController extends RestApiControllerBase {
 		$response->header( 'X-WP-TotalPages', (string) $result['total_pages'] );
 
 		return $response;
+	}
+
+	/**
+	 * Formats tokens for the index response.
+	 *
+	 * The account fields are added here rather than in
+	 * {@see PushToken::to_rest_format()}, so the users for a whole page are
+	 * loaded in one query rather than one per token.
+	 *
+	 * Requesting three named columns rather than user objects skips loading
+	 * usermeta, and keeps WP_User_Query's result cache on.
+	 *
+	 * @param PushToken[] $tokens The tokens to format.
+	 * @return array[]
+	 */
+	private function prepare_tokens_for_response( array $tokens ): array {
+		$user_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( fn ( PushToken $token ) => $token->get_user_id(), $tokens )
+				)
+			)
+		);
+
+		if ( ! $user_ids ) {
+			return array();
+		}
+
+		$users = array_column(
+			get_users(
+				array(
+					'include' => $user_ids,
+					'fields'  => array( 'ID', 'user_login', 'user_email' ),
+				)
+			),
+			null,
+			'ID'
+		);
+
+		return array_map(
+			function ( PushToken $token ) use ( $users ) {
+				$user = $users[ $token->get_user_id() ] ?? null;
+
+				return array_merge(
+					$token->to_rest_format(),
+					array(
+						'user_login' => $user ? $user->user_login : null,
+						'user_email' => $user ? $user->user_email : null,
+					)
+				);
+			},
+			$tokens
+		);
 	}
 
 	/**
@@ -308,6 +356,18 @@ class PushTokenRestController extends RestApiControllerBase {
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
+					'user_login'            => array(
+						'description' => __( 'The username of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'user_email'            => array(
+						'description' => __( 'The email address of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 					'token'                 => array(
 						'description' => __( 'The push token issued by Apple or Google.', 'woocommerce' ),
 						'type'        => 'string',
@@ -355,6 +415,13 @@ class PushTokenRestController extends RestApiControllerBase {
 					),
 					'last_confirmed_at_gmt' => array(
 						'description' => __( 'The date the app last registered this token, as GMT. The app re-sends the token periodically, not only when the token value changes, so this shows how recently the app read the token from the device. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'last_sent_at_gmt'      => array(
+						'description' => __( 'The date a notification for this token was last sent to WordPress.com, as GMT. This records that WordPress.com accepted the payload, not that the device received it. Null when no send has been recorded, which also covers a send whose record failed.', 'woocommerce' ),
 						'type'        => array( 'string', 'null' ),
 						'format'      => 'date-time',
 						'context'     => array( 'view' ),

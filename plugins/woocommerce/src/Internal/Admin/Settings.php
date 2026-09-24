@@ -339,6 +339,7 @@ class Settings {
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
+			$settings['couponTypes']               = wc_get_coupon_types();
 		}
 
 		// The separator used for attributes found in Variation titles.

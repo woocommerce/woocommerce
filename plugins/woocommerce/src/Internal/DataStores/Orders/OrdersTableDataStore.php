@@ -2347,17 +2347,12 @@ FROM $order_meta_table
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
 		$data = array(
-			'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-			'post_status' => 'draft',
-			'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+			'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+			'post_status'   => 'draft',
+			'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 		);
-
-		// An order with no created date leaves the post dates to WordPress rather than failing the whole sync batch.
-		$date_created = $order->get_date_created( 'edit' );
-		if ( ! is_null( $date_created ) ) {
-			$data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
-			$data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
-		}
 
 		if ( 'backfill' === $context ) {
 			if ( ! $order->get_id() ) {
