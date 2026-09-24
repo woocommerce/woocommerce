@@ -244,6 +244,8 @@ class OrdersScheduler extends ImportScheduler {
 			)";
 		}
 
+		$where_clause .= self::get_import_where_clause( $wpdb->posts );
+
 		$count = $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
@@ -300,6 +302,8 @@ class OrdersScheduler extends ImportScheduler {
 					)
 				";
 		}
+
+		$where_clause .= self::get_import_where_clause( 'orders' );
 
 		$count = $wpdb->get_var(
 			"
@@ -397,6 +401,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				sprintf( 'Skipping test order #%d from analytics import.', $order_id ),
 				array( 'source' => 'wc-analytics-order-import' )
 			);
+			return;
+		}
+
+		if ( self::is_excluded_from_import( (int) $order_id ) ) {
+			// The record can never finish importing, so keep it off the list Analytics settings retries.
+			self::clear_failed_order_import( $order_id );
 			return;
 		}
 
@@ -772,14 +782,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	private static function get_orders_since_from_orders_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
 		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$import_where = self::get_import_where_clause( 'orders' );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, date_updated_gmt
-				FROM {$orders_table}
+				FROM {$orders_table} AS orders
 				WHERE type IN ('shop_order', 'shop_order_refund')
 				AND status NOT IN ('wc-auto-draft', 'auto-draft')
+				{$import_where}
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
@@ -809,13 +821,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	private static function get_orders_since_from_posts_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
+		$import_where = self::get_import_where_clause( $wpdb->posts );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
 				AND post_status NOT IN ('wc-auto-draft', 'auto-draft')
+				{$import_where}
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)
@@ -828,6 +843,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$limit
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -870,6 +886,69 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @since 10.7.0
 		 */
 		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
+	}
+
+	/**
+	 * Build the extra SQL conditions extensions add to the Analytics order import.
+	 *
+	 * @since 11.3.0
+	 * @param string $table_alias Table name or alias to prefix column names with.
+	 * @return string Empty string, or conditions starting with ' AND ' ready to append to a WHERE clause.
+	 */
+	private static function get_import_where_clause( string $table_alias ): string {
+		/**
+		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
+		 *
+		 * The same conditions apply to the "Import historical data" count and pages, to the
+		 * scheduled import query and to each single import, so an excluded record is neither
+		 * imported nor shown as pending. Prefix column names with $table_alias: under HPOS it is
+		 * `orders` (columns `type`, `status`, `parent_order_id`), otherwise it is the posts table
+		 * name (`post_type`, `post_status`, `post_parent`). Refunds keep their order in the parent
+		 * column, so a plain "parent is 0" condition drops refunds along with child orders.
+		 * Records already imported before a condition excludes them are left in place; delete and
+		 * re-import historical data to remove them.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string[] $clauses     SQL conditions, joined with AND. Empty by default.
+		 * @param string   $table_alias Table name or alias to prefix column names with.
+		 */
+		$clauses = apply_filters( 'woocommerce_analytics_orders_import_where_clauses', array(), $table_alias );
+		$clauses = array_filter( array_map( 'trim', array_filter( is_array( $clauses ) ? $clauses : array(), 'is_string' ) ) );
+
+		return $clauses ? ' AND ( ' . implode( ' ) AND ( ', $clauses ) . ' )' : '';
+	}
+
+	/**
+	 * Whether the conditions from the `woocommerce_analytics_orders_import_where_clauses` filter exclude a record.
+	 *
+	 * Costs nothing while the filter is unused and one primary-key probe otherwise.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @param int $order_id Order or refund ID.
+	 * @return bool
+	 */
+	public static function is_excluded_from_import( int $order_id ): bool {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$from        = OrdersTableDataStore::get_orders_table_name() . ' AS orders';
+			$table_alias = 'orders';
+			$id_column   = 'orders.id';
+		} else {
+			$from        = $wpdb->posts;
+			$table_alias = $wpdb->posts;
+			$id_column   = "{$wpdb->posts}.ID";
+		}
+
+		$where = self::get_import_where_clause( $table_alias );
+		if ( '' === $where ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and filtered SQL conditions are interpolated; the ID is prepared.
+		return null === $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$from} WHERE {$id_column} = %d {$where} LIMIT 1", $order_id ) );
 	}
 
 	/**
