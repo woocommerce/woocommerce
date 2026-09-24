@@ -8,9 +8,16 @@ import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
 
 /**
+ * Internal dependencies
+ */
+import { storeName as emailEditorStoreName } from '../store/constants';
+
+/**
  * Store name of the WordPress editor store.
- * Using a hardcoded string allows us to avoid the import.
- * See: https://github.com/woocommerce/woocommerce/issues/47831
+ * Importing `@wordpress/editor` pulls in `@wordpress/block-editor`'s
+ * `transform-styles` util, which depends on the ESM-only `parsel-js`
+ * package — Jest can't transform it, so unit tests fail to load. The
+ * hardcoded string avoids that dependency chain.
  */
 const CORE_EDITOR_STORE = 'core/editor';
 
@@ -95,10 +102,30 @@ function isTemplatePostType( postType: string | undefined ): boolean {
 	return !! postType && TEMPLATE_POST_TYPES.includes( postType );
 }
 
+// A notice's wording is decided by which post type's labels its content
+// matches, not by whichever post type happens to be current when
+// `getNotices()` runs — see the module docblock above `getNoticeOverrides`.
+interface PostTypeCandidate {
+	postType: string | undefined;
+	labels: PostTypeLabels;
+}
+
+function findMatchingCandidate(
+	candidates: PostTypeCandidate[],
+	labelKeys: string[],
+	content: string
+): PostTypeCandidate | undefined {
+	return candidates.find( ( candidate ) =>
+		labelKeys.some(
+			( key ) =>
+				candidate.labels?.[ key ] && candidate.labels[ key ] === content
+		)
+	);
+}
+
 function transformNotice(
 	notice: Notice,
-	labels: PostTypeLabels,
-	postType: string | undefined
+	candidates: PostTypeCandidate[]
 ): Notice {
 	const overrides = getNoticeOverrides();
 	// A plain lookup would resolve ids like `constructor` or `toString` to
@@ -108,14 +135,19 @@ function transformNotice(
 	}
 	const override = overrides[ notice.id ];
 
-	const rewriteText =
-		! override.labelKeys ||
-		override.labelKeys.some(
-			( key ) => labels?.[ key ] && labels[ key ] === notice.content
-		);
+	const matchedCandidate = override.labelKeys
+		? findMatchingCandidate(
+				candidates,
+				override.labelKeys,
+				notice.content
+		  )
+		: undefined;
+
+	const rewriteText = ! override.labelKeys || !! matchedCandidate;
 
 	const content =
-		notice.id === 'editor-save' && isTemplatePostType( postType )
+		notice.id === 'editor-save' &&
+		isTemplatePostType( matchedCandidate?.postType )
 			? EMAIL_DESIGN_UPDATED_MESSAGE
 			: override.content;
 
@@ -128,12 +160,9 @@ function transformNotice(
 
 function applyOverridesToNotices(
 	notices: Notice[],
-	labels: PostTypeLabels,
-	postType: string | undefined
+	candidates: PostTypeCandidate[]
 ): Notice[] {
-	return notices.map( ( notice ) =>
-		transformNotice( notice, labels, postType )
-	);
+	return notices.map( ( notice ) => transformNotice( notice, candidates ) );
 }
 
 function getStoreName( namespace: string | { name: string } ): string {
@@ -143,14 +172,26 @@ function getStoreName( namespace: string | { name: string } ): string {
 const getNoticesWithOverrides = createSelector(
 	(
 		notices: Notice[],
-		labels: PostTypeLabels,
-		postType: string | undefined
-	) => applyOverridesToNotices( notices, labels, postType ),
+		currentPostType: string | undefined,
+		currentLabels: PostTypeLabels,
+		emailPostType: string | undefined,
+		emailLabels: PostTypeLabels
+	) => {
+		const candidates: PostTypeCandidate[] = [
+			{ postType: currentPostType, labels: currentLabels },
+		];
+		if ( emailPostType !== currentPostType ) {
+			candidates.push( { postType: emailPostType, labels: emailLabels } );
+		}
+		return applyOverridesToNotices( notices, candidates );
+	},
 	(
 		notices: Notice[],
-		labels: PostTypeLabels,
-		postType: string | undefined
-	) => [ notices, labels, postType ]
+		currentPostType: string | undefined,
+		currentLabels: PostTypeLabels,
+		emailPostType: string | undefined,
+		emailLabels: PostTypeLabels
+	) => [ notices, currentPostType, currentLabels, emailPostType, emailLabels ]
 );
 
 /**
@@ -197,16 +238,35 @@ export function useNoticeOverrides(): void {
 								return getNoticesWithOverrides(
 									notices,
 									undefined,
+									undefined,
+									undefined,
 									undefined
 								);
 							}
 
-							// Read the post type currently being edited, not the one
-							// the email editor was opened on: navigating from an
-							// email into its template (without a page reload)
-							// changes what's on screen without touching the
-							// email editor store's own post type.
-							const postType = (
+							const getLabelsFor = (
+								postType: string | undefined
+							): PostTypeLabels =>
+								postType
+									? (
+											originalSelect( coreStore ) as
+												| {
+														getPostType: (
+															postType: string
+														) => {
+															labels?: PostTypeLabels;
+														};
+												  }
+												| undefined
+									   )?.getPostType( postType )?.labels
+									: undefined;
+
+							// The post type currently being edited: navigating
+							// from an email into its template (without a page
+							// reload) changes what's on screen without
+							// touching the email editor store's own post
+							// type, so this can differ from the one below.
+							const currentPostType = (
 								originalSelect( CORE_EDITOR_STORE ) as
 									| {
 											getCurrentPostType?: () =>
@@ -215,24 +275,35 @@ export function useNoticeOverrides(): void {
 									  }
 									| undefined
 							 )?.getCurrentPostType?.();
-							const labels = postType
-								? (
-										originalSelect( coreStore ) as
-											| {
-													getPostType: (
-														postType: string
-													) => {
-														labels?: PostTypeLabels;
-													};
-											  }
-											| undefined
-								   )?.getPostType( postType )?.labels
-								: undefined;
+							const currentLabels =
+								getLabelsFor( currentPostType );
+
+							// The post type the email editor was opened on. A
+							// notice's text is written when the save happens,
+							// from the labels of the post type being saved —
+							// matching it against both candidates keeps the
+							// wording correct regardless of which one is
+							// current by the time this selector re-runs.
+							const emailPostType = (
+								originalSelect( emailEditorStoreName ) as
+									| {
+											getEmailPostType?: () =>
+												| string
+												| undefined;
+									  }
+									| undefined
+							 )?.getEmailPostType?.();
+							const emailLabels =
+								emailPostType === currentPostType
+									? currentLabels
+									: getLabelsFor( emailPostType );
 
 							return getNoticesWithOverrides(
 								notices,
-								labels,
-								postType
+								currentPostType,
+								currentLabels,
+								emailPostType,
+								emailLabels
 							);
 						},
 					};
