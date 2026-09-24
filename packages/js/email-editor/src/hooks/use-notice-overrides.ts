@@ -8,9 +8,11 @@ import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
 
 /**
- * Internal dependencies
+ * Store name of the WordPress editor store.
+ * Using a hardcoded string allows us to avoid the import.
+ * See: https://github.com/woocommerce/woocommerce/issues/47831
  */
-import { storeName } from '../store/constants';
+const CORE_EDITOR_STORE = 'core/editor';
 
 /**
  * Wraps the `getNotices` selector on the notices store so that specific
@@ -199,11 +201,20 @@ export function useNoticeOverrides(): void {
 								);
 							}
 
+							// Read the post type currently being edited, not the one
+							// the email editor was opened on: navigating from an
+							// email into its template (without a page reload)
+							// changes what's on screen without touching the
+							// email editor store's own post type.
 							const postType = (
-								originalSelect( storeName ) as
-									| { getEmailPostType?: () => string }
+								originalSelect( CORE_EDITOR_STORE ) as
+									| {
+											getCurrentPostType?: () =>
+												| string
+												| undefined;
+									  }
 									| undefined
-							 )?.getEmailPostType?.();
+							 )?.getCurrentPostType?.();
 							const labels = postType
 								? (
 										originalSelect( coreStore ) as

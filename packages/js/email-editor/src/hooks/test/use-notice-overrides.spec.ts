@@ -9,6 +9,8 @@ import { renderHook } from '@testing-library/react';
 import { useNoticeOverrides } from '../use-notice-overrides';
 import { storeName as EMAIL_EDITOR_STORE_NAME } from '../../store/constants';
 
+const CORE_EDITOR_STORE = 'core/editor';
+
 // Keep a reference to the plugin callback registered via `use()`.
 let capturedPlugin: ( registry: {
 	select: ( namespace: string ) => unknown;
@@ -82,17 +84,17 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 	 * selector objects so the hook's cross-store label lookup can be
 	 * exercised.
 	 *
-	 * @param notices  Notices `core/notices`' `getNotices` should return.
-	 * @param labels   Labels `core`'s `getPostType` should return, keyed by
-	 *                 post type. `undefined` means the post type isn't
-	 *                 loaded yet.
-	 * @param postType Post type the email editor store's
-	 *                 `getEmailPostType` should return.
+	 * @param notices         Notices `core/notices`' `getNotices` should return.
+	 * @param labels          Labels `core`'s `getPostType` should return, keyed by
+	 *                        post type. `undefined` means the post type isn't
+	 *                        loaded yet.
+	 * @param currentPostType Post type `core/editor`'s `getCurrentPostType`
+	 *                        should return — the post actually being edited.
 	 */
 	function buildSelectOverride(
 		notices: Notice[],
 		labels?: Labels,
-		postType = 'email'
+		currentPostType = 'email'
 	) {
 		const originalGetNotices = jest.fn().mockReturnValue( notices );
 		const noticesSelectors = { getNotices: originalGetNotices };
@@ -102,8 +104,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			.mockReturnValue( labels === undefined ? undefined : { labels } );
 		const coreSelectors = { getPostType };
 
-		const getEmailPostType = jest.fn().mockReturnValue( postType );
-		const emailEditorSelectors = { getEmailPostType };
+		const getCurrentPostType = jest.fn().mockReturnValue( currentPostType );
+		const editorSelectors = { getCurrentPostType };
 
 		const originalSelect = jest
 			.fn()
@@ -115,8 +117,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				return undefined;
 			} );
@@ -129,7 +131,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			originalSelect,
 			originalGetNotices,
 			getPostType,
-			getEmailPostType,
+			getCurrentPostType,
 		};
 	}
 
@@ -157,8 +159,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				labels: { item_updated: 'Post updated.' },
 			} ),
 		};
-		const emailEditorSelectors = {
-			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
+		const editorSelectors = {
+			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
 		};
 		const originalSelect = jest
 			.fn()
@@ -170,8 +172,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				return undefined;
 			} );
@@ -204,8 +206,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			.fn()
 			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
 		const coreSelectors = { getPostType };
-		const emailEditorSelectors = {
-			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
+		const editorSelectors = {
+			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
 		};
 		const originalSelect = jest
 			.fn()
@@ -217,8 +219,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				return undefined;
 			} );
@@ -455,7 +457,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
 
-	it( 'skips the postType/labels lookup when the email post type is not set yet, but still removes the action', () => {
+	it( 'skips the postType/labels lookup when the current post type is not set yet, but still removes the action', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
@@ -469,8 +471,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			.fn()
 			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
 		const coreSelectors = { getPostType };
-		const getEmailPostType = jest.fn().mockReturnValue( undefined );
-		const emailEditorSelectors = { getEmailPostType };
+		const getCurrentPostType = jest.fn().mockReturnValue( undefined );
+		const editorSelectors = { getCurrentPostType };
 
 		const originalSelect = jest
 			.fn()
@@ -482,8 +484,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				return undefined;
 			} );
@@ -500,7 +502,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( getPostType ).not.toHaveBeenCalled();
 	} );
 
-	it( 'leaves notices unchanged without throwing when the email editor store is not registered', () => {
+	it( 'leaves notices unchanged without throwing when the core/editor store is not registered', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
@@ -526,7 +528,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				// Email editor store not registered.
+				// core/editor store not registered.
 				return undefined;
 			} );
 
@@ -552,8 +554,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
 		const noticesSelectors = { getNotices: originalGetNotices };
-		const emailEditorSelectors = {
-			getEmailPostType: jest.fn().mockReturnValue( 'email' ),
+		const editorSelectors = {
+			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
 		};
 
 		const originalSelect = jest
@@ -563,8 +565,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				// Core store not resolvable in this registry.
 				return undefined;
@@ -591,8 +593,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
 		const noticesSelectors = { getNotices: originalGetNotices };
-		const getEmailPostType = jest.fn().mockReturnValue( 'email' );
-		const emailEditorSelectors = { getEmailPostType };
+		const getCurrentPostType = jest.fn().mockReturnValue( 'email' );
+		const editorSelectors = { getCurrentPostType };
 		const getPostType = jest
 			.fn()
 			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
@@ -608,8 +610,8 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				if ( name === 'core' ) {
 					return coreSelectors;
 				}
-				if ( name === EMAIL_EDITOR_STORE_NAME ) {
-					return emailEditorSelectors;
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
 				}
 				return undefined;
 			} );
@@ -622,7 +624,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const result = selectors.getNotices();
 
 		expect( result[ 0 ] ).toBe( originalNotice );
-		expect( getEmailPostType ).not.toHaveBeenCalled();
+		expect( getCurrentPostType ).not.toHaveBeenCalled();
 		expect( getPostType ).not.toHaveBeenCalled();
 	} );
 
@@ -712,5 +714,152 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 
 		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
+	} );
+
+	it( "uses the currently edited post type, not the email editor store's post type, when they diverge", () => {
+		// In-app navigation case: the editor was opened on an email (the
+		// email editor store still reports the email post type), but the
+		// user has since navigated into that email's template without a
+		// page reload, so `core/editor`'s `getCurrentPostType` reports
+		// `wp_template`. Gutenberg built the notice from the template's own
+		// labels, so only the template's labels can match it.
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Template updated.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const originalGetNotices = jest
+			.fn()
+			.mockReturnValue( [ originalNotice ] );
+		const noticesSelectors = { getNotices: originalGetNotices };
+		const getPostType = jest.fn().mockReturnValue( {
+			labels: { item_updated: 'Template updated.' },
+		} );
+		const coreSelectors = { getPostType };
+		const getCurrentPostType = jest.fn().mockReturnValue( 'wp_template' );
+		const editorSelectors = { getCurrentPostType };
+		const getEmailPostType = jest.fn().mockReturnValue( 'email' );
+		const emailEditorSelectors = { getEmailPostType };
+
+		const originalSelect = jest
+			.fn()
+			.mockImplementation( ( ns: string | { name: string } ) => {
+				const name = resolveStoreName( ns );
+				if ( name === 'core/notices' ) {
+					return noticesSelectors;
+				}
+				if ( name === 'core' ) {
+					return coreSelectors;
+				}
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
+				}
+				if ( name === EMAIL_EDITOR_STORE_NAME ) {
+					return emailEditorSelectors;
+				}
+				return undefined;
+			} );
+
+		renderHook( () => useNoticeOverrides() );
+		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
+		expect( result[ 0 ].spokenMessage ).toBe( 'Email design updated.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+		// The email editor store's post type is never consulted — only what
+		// is currently being edited matters.
+		expect( getEmailPostType ).not.toHaveBeenCalled();
+	} );
+
+	it( 'transforms an editor-save notice for the current email post type when it differs from a template', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Post updated.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const { pluginResult } = buildSelectOverride(
+			[ originalNotice ],
+			{ item_updated: 'Post updated.' },
+			'email'
+		);
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+	} );
+
+	it( 'looks up labels for the current post type, not any other cached post type', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Template updated.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const { pluginResult, getPostType } = buildSelectOverride(
+			[ originalNotice ],
+			{ item_updated: 'Template updated.' },
+			'wp_template'
+		);
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		selectors.getNotices();
+
+		expect( getPostType ).toHaveBeenCalledWith( 'wp_template' );
+	} );
+
+	it( 'does not throw and still removes actions when getCurrentPostType is unavailable', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Post updated.',
+			actions: [ { label: 'View', url: '#' } ],
+		} );
+		const originalGetNotices = jest
+			.fn()
+			.mockReturnValue( [ originalNotice ] );
+		const noticesSelectors = { getNotices: originalGetNotices };
+		const getPostType = jest
+			.fn()
+			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
+		const coreSelectors = { getPostType };
+		// `core/editor` is registered, but returns no selector for
+		// `getCurrentPostType` (e.g. an older Gutenberg version).
+		const editorSelectors = {};
+
+		const originalSelect = jest
+			.fn()
+			.mockImplementation( ( ns: string | { name: string } ) => {
+				const name = resolveStoreName( ns );
+				if ( name === 'core/notices' ) {
+					return noticesSelectors;
+				}
+				if ( name === 'core' ) {
+					return coreSelectors;
+				}
+				if ( name === CORE_EDITOR_STORE ) {
+					return editorSelectors;
+				}
+				return undefined;
+			} );
+
+		renderHook( () => useNoticeOverrides() );
+		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+
+		expect( () => selectors.getNotices() ).not.toThrow();
+		const result = selectors.getNotices();
+		expect( result[ 0 ].content ).toBe( 'Post updated.' );
+		expect( result[ 0 ].actions ).toEqual( [] );
+		expect( getPostType ).not.toHaveBeenCalled();
 	} );
 } );
