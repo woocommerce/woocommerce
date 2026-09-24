@@ -4,44 +4,9 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * AtomicBlock class.
  *
+ * Do not delete this file until https://github.com/woocommerce/woocommerce/issues/52311 is resolved.
+ * The upgrade flow can still load stale autoloader manifests that point to this file.
+ *
  * @internal
  */
-class AtomicBlock extends AbstractBlock {
-	/**
-	 * Get the editor script data for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return null
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the editor style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_editor_style() {
-		return null;
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-}
+class AtomicBlock extends AbstractBlock {}
