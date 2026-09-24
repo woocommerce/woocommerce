@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use global button colors for gallery and carousel navigation while preserving compact sizing and custom colors.
+Use dark arrows on a white background by default for gallery and carousel navigation, while preserving custom colors.

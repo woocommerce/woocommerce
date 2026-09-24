@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use global button styles for Product Gallery and Product Collection navigation buttons.
+Use dark arrows on a white background by default for Product Gallery and Product Collection navigation, while preserving custom colors.
