@@ -234,7 +234,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$this->assertMatchesRegularExpression( '#<span class="quantity">1 &times; <span class="woocommerce-Price-amount amount">.*?12\.00</bdi>#s', $mini_cart, 'Mini-cart line prices should include the billing country tax.' );
+		$this->assertStringContainsString( '<span class="quantity">1 &times; ' . wc_price( 12 ) . '</span>', $mini_cart, 'Mini-cart line prices should include the billing country tax.' );
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once the mini-cart is rendered.' );
 	}
 
@@ -271,7 +271,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		$mini_cart = (string) ob_get_clean();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $inner_recorded, 'A products request inside the mini-cart should not use the billing address.' );
-		$this->assertMatchesRegularExpression( '#<span class="quantity">1 &times; <span class="woocommerce-Price-amount amount">.*?12\.00</bdi>#s', $mini_cart, 'Mini-cart line prices after the nested request should still include the billing country tax.' );
+		$this->assertStringContainsString( '<span class="quantity">1 &times; ' . wc_price( 12 ) . '</span>', $mini_cart, 'Mini-cart line prices after the nested request should still include the billing country tax.' );
 	}
 
 	/**
