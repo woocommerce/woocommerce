@@ -371,8 +371,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		try {
 			wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
 
-			( new PushNotifications() )->on_init();
-
 			$server = $this->create_rest_server_with_routes(
 				array( array( new PushTokenRestController(), 'register_routes' ) ),
 				true
