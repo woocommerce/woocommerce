@@ -4,9 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
 use Automattic\WooCommerce\Blocks\BlockTypesController;
-<<<<<<< HEAD
-=======
-use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\EmailEditor\Bootstrap as EmailEditorBootstrap;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
@@ -14,7 +11,6 @@ use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package as EmailEditorPackage;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
->>>>>>> 4e122e7856 (Show product blocks in block editor emails sent in the background (#69003))
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -430,36 +426,6 @@ HTML;
 			'Block types should remain registered and must not be re-registered on demand.'
 		);
 	}
-<<<<<<< HEAD
-=======
-
-	/**
-	 * @testdox The init registration is a no-op after a description registered the block types on demand before init.
-	 */
-	public function test_register_blocks_is_a_no_op_after_on_demand_registration(): void {
-		$registry   = WP_Block_Type_Registry::get_instance();
-		$controller = Package::container()->get( BlockTypesController::class );
-		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should start unregistered.' );
-
-		// An extension renders a description before init on a request where register_blocks() is queued on init.
-		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
-		$this->assertTrue( $controller->register_blocks_has_run(), 'The filter should have run register_blocks() on demand.' );
-		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'The filter should register block types on demand.' );
-		$hooked_block_instances = $this->count_block_editor_asset_callbacks();
-		$this->assertGreaterThan( 0, $hooked_block_instances, 'Each registered block instance should have hooked its editor assets.' );
-
-		// Then the queued init callback fires. The registry rejects duplicate block types with a doing_it_wrong
-		// notice (a test failure), but a second run would still construct every block class again and hook each
-		// new instance a second time.
-		$controller->register_blocks();
-
-		$this->assertSame(
-			$hooked_block_instances,
-			$this->count_block_editor_asset_callbacks(),
-			'A second register_blocks() call must not construct the block types again and hook duplicate callbacks.'
-		);
-		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'Block types should remain registered.' );
-	}
 
 	/**
 	 * @testdox Starting an email render registers missing block types with their email renderers.
@@ -644,24 +610,4 @@ HTML;
 		);
 		$this->assertStringNotContainsString( 'data-block-name=', $rendered_email, 'Block attributes should not be added to the email as data attributes.' );
 	}
-
-	/**
-	 * Count the callbacks hooked to enqueue_block_editor_assets.
-	 *
-	 * Every block instance that register_blocks() constructs hooks its enqueue_editor_assets method there, so
-	 * the count grows by one per block type each time the registration runs.
-	 *
-	 * @return int Number of hooked callbacks.
-	 */
-	private function count_block_editor_asset_callbacks(): int {
-		global $wp_filter;
-
-		$count = 0;
-		foreach ( $wp_filter['enqueue_block_editor_assets']->callbacks ?? array() as $callbacks_at_priority ) {
-			$count += count( $callbacks_at_priority );
-		}
-
-		return $count;
-	}
->>>>>>> 4e122e7856 (Show product blocks in block editor emails sent in the background (#69003))
 }
