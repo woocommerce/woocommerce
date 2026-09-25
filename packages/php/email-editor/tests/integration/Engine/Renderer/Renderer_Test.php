@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Utils;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
@@ -681,5 +683,63 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			return is_string( $result ) ? $result : null;
 		}
 		return null;
+	}
+
+	/**
+	 * Placeholders are numbered, so PERSONALIZATION_TAG_PLACEHOLDER_1 is a prefix of _10, _11 and so
+	 * on. Restoring them one at a time in ascending order rewrote every tag from the eleventh onward
+	 * into tag #1 followed by a stray digit, corrupting the plain-text body of any email that uses
+	 * more than ten personalization tags.
+	 *
+	 * Each tag is rendered alongside literal text because the text renderer drops blocks whose
+	 * content is only a personalization tag -- a token-only paragraph would make this test pass or
+	 * fail for an unrelated reason.
+	 */
+	public function testItRestoresMoreThanTenPersonalizationTagsInTextVersion(): void {
+		$registry = $this->di_container->get( Personalization_Tags_Registry::class );
+
+		$paragraphs = array();
+		$expected   = array();
+		for ( $i = 0; $i < 14; $i++ ) {
+			$token = 'renderer-test/tag-' . $i;
+			$registry->register(
+				new Personalization_Tag(
+					'Renderer Test Tag ' . $i,
+					$token,
+					'Renderer Test',
+					function () use ( $i ) {
+						return 'value-' . $i;
+					}
+				)
+			);
+			$paragraphs[] = '<!-- wp:paragraph --><p>Field ' . $i . ': <!--[' . $token . ']--></p><!-- /wp:paragraph -->';
+			$expected[]   = '<!--[' . $token . ']-->';
+		}
+
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-personalization-tags',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+
+		$rendered = $this->renderer->render_from_content(
+			implode( '', $paragraphs ),
+			'test-email-template-personalization-tags',
+			'Subject',
+			'Preheader content'
+		);
+
+		// A tag followed by a stray digit is the signature of the collision. Asserting it before the
+		// per-tag checks names the defect instead of leaving a reader to spot one stray character.
+		$this->assertDoesNotMatchRegularExpression( '/\]-->\d/', $rendered['text'] );
+
+		foreach ( $expected as $index => $token ) {
+			$this->assertStringContainsString( $token, $rendered['text'], "Tag {$index} was not restored in the text version." );
+			$this->assertStringContainsString( $token, $rendered['html'], "Tag {$index} was not restored in the HTML version." );
+		}
 	}
 }
