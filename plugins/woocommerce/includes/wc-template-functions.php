@@ -3796,7 +3796,21 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				foreach ( $options as $option ) {
 					// This handles < 2.4.0 bw compatibility where text attributes were not sanitized.
 					$selected = sanitize_title( $args['selected'] ) === $args['selected'] ? selected( $args['selected'], sanitize_title( $option ), false ) : selected( $args['selected'], $option, false );
-					$html    .= '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute, $product ) ) . '</option>';
+
+					/**
+					 * Filter the variation option name displayed for a custom (non-taxonomy) attribute.
+					 *
+					 * @since 2.5.0
+					 * @param string     $option_name Option name to display.
+					 * @param null       $term        Null because this is not a taxonomy attribute.
+					 * @param string     $attribute   Attribute name.
+					 * @param WC_Product $product     Product object.
+					 */
+					$option_name = apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute, $product );
+
+					// Custom option values can be stored URL-encoded; decode the label so it reads the same
+					// as the cart and order, while the value attribute stays raw so the posted value matches.
+					$html .= '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( rawurldecode( (string) $option_name ) ) . '</option>';
 				}
 			}
 		}
