@@ -183,10 +183,16 @@ class WC_Admin_Webhooks {
 	/**
 	 * Bulk update webhook status.
 	 *
+	 * @since 11.3.0
 	 * @param array  $webhooks List of webhook IDs.
 	 * @param string $status   Webhook status.
+	 * @return void
 	 */
-	public static function bulk_update_status( $webhooks, $status ) {
+	public static function bulk_update_status( $webhooks, $status ): void {
+		if ( ! wc_is_webhook_valid_status( $status ) ) {
+			return;
+		}
+
 		$qty = 0;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$filter_status = isset( $_GET['status'] ) ? '&status=' . sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
@@ -194,7 +200,7 @@ class WC_Admin_Webhooks {
 		foreach ( $webhooks as $webhook_id ) {
 			$webhook = new WC_Webhook( (int) $webhook_id );
 
-			if ( ! $webhook->get_id() ) {
+			if ( ! $webhook->get_id() || $status === $webhook->get_status() ) {
 				continue;
 			}
 
@@ -302,7 +308,7 @@ class WC_Admin_Webhooks {
 				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook paused.', '%d webhooks paused.', $updated, 'woocommerce' ), $updated ) );
 			} elseif ( 'disabled' === $updated_status ) {
 				/* translators: %d: count */
-				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook deactivated.', '%d webhooks deactivated.', $updated, 'woocommerce' ), $updated ) );
+				WC_Admin_Settings::add_message( sprintf( _n( '%d webhook disabled.', '%d webhooks disabled.', $updated, 'woocommerce' ), $updated ) );
 			}
 		}
 
