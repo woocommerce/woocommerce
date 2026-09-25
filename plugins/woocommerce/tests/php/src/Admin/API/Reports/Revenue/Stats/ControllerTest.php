@@ -53,6 +53,91 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_export_columns does not add core schema fields that the export leaves out.
+	 */
+	public function test_get_export_columns_skips_unexported_core_fields(): void {
+		$columns = $this->sut->get_export_columns();
+
+		foreach ( array( 'num_items_sold', 'coupons_count', 'products', 'segments' ) as $key ) {
+			$this->assertArrayNotHasKey( $key, $columns, "Core field {$key} must not be treated as an extension column" );
+		}
+	}
+
+	/**
+	 * @testdox Export includes scalar fields that extensions add to the report schema.
+	 */
+	public function test_export_includes_fields_added_to_schema(): void {
+		$this->add_extension_schema_fields();
+
+		$columns = $this->sut->get_export_columns();
+
+		$this->assertSame( 'Cost of goods', $columns['cost_of_goods'] ?? null, 'The description should be the label, without its trailing period' );
+		$this->assertSame( 'Profitable days', $columns['profitable_days'] ?? null, 'The title should be preferred over the description' );
+		$this->assertSame( 'Margin', $columns['cogs_margin'] ?? null, 'Fields only declared on the interval subtotals should be exported too' );
+		$this->assertArrayNotHasKey( 'cogs_breakdown', $columns, 'Object fields cannot be written to a CSV cell' );
+		$this->assertSame( 'Date', $columns['date'], 'An extension field must not replace a core export column' );
+		$this->assertSame( array( 'cost_of_goods', 'profitable_days', 'cogs_margin' ), array_slice( array_keys( $columns ), -3 ), 'Extension columns should follow the core columns' );
+
+		$item                                 = $this->get_report_item();
+		$item['subtotals']['cost_of_goods']   = '12.5';
+		$item['subtotals']['profitable_days'] = 3;
+		$item['subtotals']['cogs_margin']     = 0.25;
+		$item['subtotals']['cogs_breakdown']  = array( 'a' => 1 );
+		$item['subtotals']['date']            = 'not a date';
+
+		$export_item = $this->sut->prepare_item_for_export( $item );
+
+		$this->assertSame( '12.50', $export_item['cost_of_goods'], 'Currency fields should use the store precision' );
+		$this->assertSame( 3, $export_item['profitable_days'], 'Other numeric fields should be exported as-is' );
+		$this->assertSame( 0.25, $export_item['cogs_margin'] );
+		$this->assertArrayNotHasKey( 'cogs_breakdown', $export_item );
+		$this->assertSame( '2024-01-01', $export_item['date'] );
+	}
+
+	/**
+	 * @testdox Export leaves an extension column empty when an interval has no usable value for it.
+	 */
+	public function test_prepare_item_for_export_leaves_unusable_extension_values_empty(): void {
+		$this->add_extension_schema_fields();
+
+		$item                                 = $this->get_report_item();
+		$item['subtotals']['profitable_days'] = array( 3 );
+
+		$export_item = $this->sut->prepare_item_for_export( $item );
+
+		$this->assertArrayHasKey( 'cost_of_goods', $export_item );
+		$this->assertNull( $export_item['cost_of_goods'], 'A missing value should leave the cell empty' );
+		$this->assertNull( $export_item['profitable_days'], 'A non-scalar value should leave the cell empty' );
+	}
+
+	/**
+	 * @testdox Export filters can still relabel and override extension columns.
+	 */
+	public function test_export_filters_override_extension_columns(): void {
+		$this->add_extension_schema_fields();
+		add_filter(
+			'woocommerce_report_revenue_stats_export_columns',
+			function ( $columns ) {
+				$columns['cost_of_goods'] = 'COGS';
+				return $columns;
+			}
+		);
+		add_filter(
+			'woocommerce_report_revenue_stats_prepare_export_item',
+			function ( $export_item ) {
+				$export_item['cost_of_goods'] = 'custom';
+				return $export_item;
+			}
+		);
+
+		$columns     = $this->sut->get_export_columns();
+		$export_item = $this->sut->prepare_item_for_export( $this->get_report_item() );
+
+		$this->assertSame( 'COGS', $columns['cost_of_goods'] );
+		$this->assertSame( 'custom', $export_item['cost_of_goods'] );
+	}
+
+	/**
 	 * @testdox get_export_columns allows adding a column via filter.
 	 */
 	public function test_get_export_columns_filter_can_add_column(): void {
@@ -178,5 +263,62 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$this->sut->prepare_item_for_export( $item );
 
 		$this->assertSame( $item, $received_item, 'Filter should receive the original report item as second argument' );
+	}
+
+	/**
+	 * Add report fields to the totals schema the way the Cost of Goods extension does.
+	 */
+	private function add_extension_schema_fields(): void {
+		add_filter(
+			'woocommerce_rest_report_revenue_stats_schema',
+			function ( $properties ) {
+				$properties['totals']['properties'] += array(
+					'cost_of_goods'   => array(
+						'description' => 'Cost of goods.',
+						'type'        => 'number',
+						'format'      => 'currency',
+					),
+					'profitable_days' => array(
+						'title'       => 'Profitable days',
+						'description' => 'Number of days with a profit.',
+						'type'        => 'integer',
+					),
+					'cogs_breakdown'  => array(
+						'description' => 'Cost breakdown.',
+						'type'        => 'object',
+					),
+					'date'            => array(
+						'description' => 'Date the costs were last updated.',
+						'type'        => 'string',
+					),
+				);
+				$properties['intervals']['items']['properties']['subtotals']['properties']['cogs_margin'] = array(
+					'title' => 'Margin',
+					'type'  => 'number',
+				);
+				return $properties;
+			}
+		);
+	}
+
+	/**
+	 * Get a report interval with only the core subtotals.
+	 *
+	 * @return array
+	 */
+	private function get_report_item(): array {
+		return array(
+			'date_start' => '2024-01-01',
+			'subtotals'  => array(
+				'orders_count' => 1,
+				'gross_sales'  => 50.00,
+				'refunds'      => 0.00,
+				'coupons'      => 0.00,
+				'net_revenue'  => 50.00,
+				'taxes'        => 5.00,
+				'shipping'     => 5.00,
+				'total_sales'  => 50.00,
+			),
+		);
 	}
 }

@@ -36,6 +36,13 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	protected $rest_base = 'reports/revenue/stats';
 
 	/**
+	 * Extension-added report fields to export, built on first use.
+	 *
+	 * @var array<string, array{label: string, format: string}>|null
+	 */
+	private $extension_export_properties = null;
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -282,6 +289,10 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'total_sales'  => __( 'Total sales', 'woocommerce' ),
 		);
 
+		foreach ( $this->get_extension_export_properties() as $key => $property ) {
+			$export_columns[ $key ] = $property['label'];
+		}
+
 		/**
 		 * Filter to add or remove column names from the revenue stats report for
 		 * export.
@@ -313,6 +324,18 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
 		);
 
+		foreach ( $this->get_extension_export_properties() as $key => $property ) {
+			$value = $subtotals[ $key ] ?? null;
+
+			if ( 'currency' === $property['format'] && is_numeric( $value ) ) {
+				$value = self::csv_number_format( (float) $value );
+			} elseif ( ! is_scalar( $value ) ) {
+				$value = null;
+			}
+
+			$export_item[ $key ] = $value;
+		}
+
 		/**
 		 * Filter to prepare extra columns in the export item for the revenue
 		 * stats report.
@@ -322,5 +345,49 @@ class Controller extends GenericStatsController implements ExportableInterface {
 		 * @param array $item        The original report item.
 		 */
 		return apply_filters( 'woocommerce_report_revenue_stats_prepare_export_item', $export_item, $item );
+	}
+
+	/**
+	 * Get the scalar report fields that extensions add to the schema, so emailed exports include them.
+	 *
+	 * Extensions add these through `woocommerce_rest_report_revenue_stats_schema`, but only
+	 * JavaScript knows their table columns, and emailed exports run without it.
+	 *
+	 * @return array<string, array{label: string, format: string}> Field key => export label and format.
+	 */
+	private function get_extension_export_properties() {
+		if ( null !== $this->extension_export_properties ) {
+			return $this->extension_export_properties;
+		}
+
+		$this->extension_export_properties = array();
+
+		$schema     = $this->get_item_schema();
+		$core_keys  = array_merge( array_keys( $this->get_item_properties_schema() ), array( 'segments', 'products', 'date' ) );
+		$properties = array_merge(
+			(array) ( $schema['properties']['totals']['properties'] ?? array() ),
+			(array) ( $schema['properties']['intervals']['items']['properties']['subtotals']['properties'] ?? array() )
+		);
+
+		foreach ( $properties as $key => $property ) {
+			if ( ! is_string( $key ) || in_array( $key, $core_keys, true ) || ! is_array( $property ) ) {
+				continue;
+			}
+
+			$types = (array) ( $property['type'] ?? array() );
+			if ( ! array_intersect( $types, array( 'number', 'integer', 'string', 'boolean' ) ) ) {
+				continue;
+			}
+
+			$label = $property['title'] ?? $property['description'] ?? '';
+			$label = is_string( $label ) && '' !== trim( $label ) ? rtrim( trim( $label ), '.' ) : $key;
+
+			$this->extension_export_properties[ $key ] = array(
+				'label'  => $label,
+				'format' => is_string( $property['format'] ?? null ) ? $property['format'] : '',
+			);
+		}
+
+		return $this->extension_export_properties;
 	}
 }
