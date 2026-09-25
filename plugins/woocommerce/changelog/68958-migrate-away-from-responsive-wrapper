@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace the deprecated ResponsiveWrapper component in the product usage notice modal with CSS aspect-ratio.

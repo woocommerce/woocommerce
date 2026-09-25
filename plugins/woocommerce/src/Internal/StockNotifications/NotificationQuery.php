@@ -95,6 +95,23 @@ class NotificationQuery {
 	}
 
 	/**
+	 * Get the ID of the active or pending notification matching an identity, product and posted
+	 * attribute set.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param int    $user_id The user ID, or 0 to match on the email instead.
+	 * @param string $user_email The email address, used when no user ID is given.
+	 * @param array  $posted_attributes The posted attributes to match.
+	 * @return int The notification ID, or 0 when nothing matches.
+	 */
+	public static function get_matching_notification_id( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ): int {
+		$data_store = self::load_data_store();
+
+		// @phpstan-ignore method.notFound (the call is proxied by WC_Data_Store::__call())
+		return $data_store ? absint( $data_store->get_matching_notification_id( $product_id, $user_id, $user_email, $posted_attributes ) ) : 0;
+	}
+
+	/**
 	 * Get a notification by user ID.
 	 *
 	 * @param int $product_id The product ID.

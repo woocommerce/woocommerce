@@ -2853,4 +2853,25 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'The next batch must not be primed while the first batch is processing.'
 		);
 	}
+
+	/**
+	 * @testdox wc_get_formatted_variation resolves taxonomy term slugs to human-readable names via the prefetch cache.
+	 */
+	public function test_wc_get_formatted_variation_resolves_taxonomy_term_names(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'Dark Blue', 'Light Green' ) );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'dark-blue' ) );
+		$variation->save();
+
+		$this->assertSame( 'color: Dark Blue', wc_get_formatted_variation( wc_get_product( $variation->get_id() ), true ) );
+
+		$product->delete( true );
+	}
 }

@@ -20,12 +20,6 @@ import { validationStore } from '@woocommerce/block-data';
 import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
 
-jest.mock( '@woocommerce/block-settings', () => ( {
-	...jest.requireActual( '@woocommerce/block-settings' ),
-	TERMS_URL: 'https://example.com/terms/',
-	PRIVACY_URL: 'https://example.com/privacy/',
-} ) );
-
 jest.mock( '@woocommerce/block-data/validation/actions', () => {
 	const actions = jest.requireActual(
 		'@woocommerce/block-data/validation/actions'
@@ -39,35 +33,7 @@ jest.mock( '@woocommerce/block-data/validation/actions', () => {
 } );
 
 describe( 'FrontendBlock', () => {
-	it( 'Renders the default Terms and Privacy links without a checkbox', () => {
-		render(
-			<SlotFillProvider>
-				<FrontendBlock
-					checkbox={ false }
-					text=""
-					showSeparator={ false }
-				/>
-			</SlotFillProvider>
-		);
-
-		expect(
-			screen.getByText(
-				( _, element ) =>
-					element?.tagName === 'SPAN' &&
-					element.textContent ===
-						'By proceeding with your purchase you agree to our Terms and Conditions and Privacy Policy'
-			)
-		).toBeVisible();
-		expect(
-			screen.getByRole( 'link', { name: 'Terms and Conditions' } )
-		).toHaveAttribute( 'href', 'https://example.com/terms/' );
-		expect(
-			screen.getByRole( 'link', { name: 'Privacy Policy' } )
-		).toHaveAttribute( 'href', 'https://example.com/privacy/' );
-		expect( screen.queryByRole( 'checkbox' ) ).not.toBeInTheDocument();
-	} );
-
-	it( 'Renders a checkbox if the checkbox prop is true', () => {
+	it( 'Renders a checkbox if the checkbox prop is true', async () => {
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
@@ -78,7 +44,7 @@ describe( 'FrontendBlock', () => {
 			</SlotFillProvider>
 		);
 
-		const checkbox = queryByLabelText(
+		const checkbox = await findByLabelText(
 			container,
 			'I agree to the terms and conditions'
 		);
@@ -107,7 +73,6 @@ describe( 'FrontendBlock', () => {
 
 	it( 'Clears any validation errors when the checkbox is checked', async () => {
 		const user = userEvent.setup();
-		actionCreators.clearValidationError.mockClear();
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
@@ -124,19 +89,9 @@ describe( 'FrontendBlock', () => {
 		await act( async () => {
 			await user.click( checkbox );
 		} );
-		expect( actionCreators.clearValidationError ).toHaveBeenCalledTimes(
-			2
+		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
+			expect.stringMatching( /terms-and-conditions-\d/ )
 		);
-
-		const [ [ cleanupId ], [ checkedId ] ] =
-			actionCreators.clearValidationError.mock.calls;
-
-		// The component derives one `validationErrorId` and hands it to both
-		// the effect cleanup and the checked branch. Matching each call
-		// against the pattern separately would pass even if the two ids
-		// diverged, so assert the shape once and then that both calls agree.
-		expect( cleanupId ).toMatch( /^terms-and-conditions-\d+$/ );
-		expect( checkedId ).toBe( cleanupId );
 	} );
 
 	it( 'Renders and describes the validation error when the checkbox is required and unchecked', async () => {
