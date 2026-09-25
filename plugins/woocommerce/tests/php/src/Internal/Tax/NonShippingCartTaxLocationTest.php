@@ -4,8 +4,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Tax;
 
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Internal\Tax\NonShippingCartTaxLocation;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Tests for the NonShippingCartTaxLocation class.
@@ -236,6 +239,42 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( '<span class="quantity">1 &times; ' . wc_price( 12 ) . '</span>', $mini_cart, 'Mini-cart line prices should include the billing country tax.' );
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once the mini-cart is rendered.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address for a cart request loaded through Blocks hydration.
+	 *
+	 * Hydration runs during front-end renders, outside the cart and checkout pages, and calls
+	 * the cart route callback directly, so the context is registered from the hydration
+	 * filters instead of rest_request_before_callbacks. The non-cart Store API request models
+	 * a render outside the cart and checkout: is_checkout() is unreliable in CI because legacy
+	 * tests define the WOOCOMMERCE_CHECKOUT constant for the rest of the process.
+	 */
+	public function test_uses_billing_address_for_cart_loaded_through_hydration(): void {
+		$this->create_billing_country_tax_rate();
+		$this->add_product_to_cart( true );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		$item_price    = null;
+		$after_address = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$item_price, &$after_address ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				StoreApi::container();
+				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
+				$result    = $hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+
+				$item_price    = $result['body']['items'][0]['prices']->price ?? null;
+				$after_address = $this->customer->get_taxable_address();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		// Store API prices are strings in the currency's minor unit: 12.00 becomes '1200'.
+		$this->assertSame( '1200', $item_price, 'A hydrated cart item price should include the billing country tax.' );
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once hydration is done.' );
+		$this->assert_dispatch_stack_empty( 'A completed hydration should not leave a context on the stack.' );
 	}
 
 	/**

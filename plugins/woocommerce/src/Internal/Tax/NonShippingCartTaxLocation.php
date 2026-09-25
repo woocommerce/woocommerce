@@ -56,6 +56,10 @@ class NonShippingCartTaxLocation {
 		// after the callback.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
+		// Blocks hydration calls cart and checkout route callbacks directly, without the REST dispatch
+		// lifecycle, so the context is registered from its own before/after filters instead.
+		add_filter( 'woocommerce_hydration_dispatch_request', array( $this, 'handle_hydration_dispatch_request' ), 10, 3 );
+		add_filter( 'woocommerce_hydration_request_after_callbacks', array( $this, 'handle_hydration_request_after_callbacks' ), 10, 3 );
 		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
 		// so both can happen outside the cart and checkout pages.
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_cart_context_start' ), PHP_INT_MIN, 0 );
@@ -97,14 +101,49 @@ class NonShippingCartTaxLocation {
 	 * @return mixed The response.
 	 */
 	public function handle_rest_request_before_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$dispatch_id         = spl_object_id( $request );
-		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $request->get_route() );
+		$this->register_dispatch_context( $request, $request->get_route() );
 
-		$this->dispatch_contexts[ $dispatch_id ] = array(
-			'is_cart_or_checkout' => $is_cart_or_checkout,
-			'cart_context_depth'  => $this->cart_context_depth,
-		);
-		$this->dispatch_stack[]                  = $dispatch_id;
+		return $response;
+	}
+
+	/**
+	 * Register Store API cart and checkout context for a route hydrated by Blocks hydration.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param mixed $hydration_result Result of the hydration. If not null, it is used as the response.
+	 * @param mixed $request          Request used to generate the response.
+	 * @param mixed $path             Request path matched for the request.
+	 * @return mixed The hydration result.
+	 */
+	public function handle_hydration_dispatch_request( $hydration_result, $request, $path ) {
+		if ( ! $request instanceof \WP_REST_Request ) {
+			return $hydration_result;
+		}
+
+		$this->register_dispatch_context( $request, is_string( $path ) ? (string) strtok( $path, '?' ) : $request->get_route() );
+
+		return $hydration_result;
+	}
+
+	/**
+	 * Clear the hydration context after the hydrated route callback runs.
+	 *
+	 * Paired with the woocommerce_hydration_dispatch_request filter inside Hydration::get_response_from_controller().
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param mixed $response Result to send to the client.
+	 * @param mixed $handler  Route handler used for the request.
+	 * @param mixed $request  Request used to generate the response.
+	 * @return mixed The response.
+	 */
+	public function handle_hydration_request_after_callbacks( $response, $handler, $request ) {
+		if ( $request instanceof \WP_REST_Request ) {
+			$this->clear_dispatch_context( $request );
+		}
 
 		return $response;
 	}
@@ -128,6 +167,27 @@ class NonShippingCartTaxLocation {
 		$this->clear_dispatch_context( $request );
 
 		return $response;
+	}
+
+	/**
+	 * Register a Store API dispatch context on the stack.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param \WP_REST_Request $request    Request used to generate the response.
+	 * @param string           $route_path Route path the request was matched to.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function register_dispatch_context( \WP_REST_Request $request, string $route_path ): void {
+		$dispatch_id         = spl_object_id( $request );
+		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $route_path );
+
+		$this->dispatch_contexts[ $dispatch_id ] = array(
+			'is_cart_or_checkout' => $is_cart_or_checkout,
+			'cart_context_depth'  => $this->cart_context_depth,
+		);
+		$this->dispatch_stack[]                  = $dispatch_id;
 	}
 
 	/**
