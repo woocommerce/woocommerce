@@ -129,6 +129,33 @@ class WC_Customer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_full_shipping_address() does not recurse when a default address fields callback calls it while the locale settings are being built.
+	 */
+	public function test_has_full_shipping_address_does_not_recurse_through_default_address_fields_callback(): void {
+		$sut    = $this->get_customer_without_shipping_postcode();
+		$calls  = 0;
+		$nested = null;
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) use ( $sut, &$calls, &$nested ) {
+				++$calls;
+				// Stop a runaway recursion so a regression fails the assertion below instead of exhausting the process.
+				if ( $calls <= 10 ) {
+					// The outermost check finishes last, so its result is the one kept.
+					$nested = $sut->has_full_shipping_address();
+				}
+				return $fields;
+			}
+		);
+		WC()->countries->locale = array();
+
+		WC()->countries->get_country_locale();
+
+		$this->assertSame( 2, $calls, 'The default address fields filter should run once for the locale build and once for the nested shipping address check.' );
+		$this->assertFalse( $nested, 'The outermost nested check should still treat a missing postcode as incomplete.' );
+	}
+
+	/**
 	 * Get a customer whose US shipping address has everything but a postcode.
 	 *
 	 * @return WC_Customer
