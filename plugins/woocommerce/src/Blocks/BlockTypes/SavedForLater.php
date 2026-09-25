@@ -532,9 +532,9 @@ final class SavedForLater extends AbstractBlock {
 	 * Get the frontend style handle for this block type.
 	 *
 	 * Returning null lets WP use the `style` array from block.json, which
-	 * lists this block's own stylesheet plus the atomic
+	 * lists this block's own stylesheet plus the product element
 	 * product-image / product-price / product-button stylesheets we
-	 * borrow class names from. We can't render those atomic blocks as
+	 * borrow class names from. We can't render those product element blocks as
 	 * inner blocks (they rely on WP_Query / $post loop context, which
 	 * this block doesn't have — it hydrates from a Store API call), so
 	 * declaring them as style dependencies is the only way to get WP

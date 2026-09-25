@@ -86,13 +86,13 @@ class MenusController {
 	/**
 	 * Save screen options.
 	 *
-	 * @param int    $status The status of the screen option.
-	 * @param string $option The option name.
-	 * @param int    $value The value of the screen option.
+	 * @param bool|int $status The status of the screen option.
+	 * @param string   $option The option name.
+	 * @param int      $value The value of the screen option.
 	 *
-	 * @return int
+	 * @return bool|int
 	 */
-	public function set_screen_option( $status, $option, $value ): int {
+	public function set_screen_option( $status, $option, $value ) {
 		if ( 'stock_notifications_per_page' === $option ) {
 			return (int) $value;
 		}

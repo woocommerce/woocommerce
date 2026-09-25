@@ -546,6 +546,18 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Every event, page-embedded or server-fired, carries the package version so
+	 * malformed events in Tracks can be attributed to the release that sent them.
+	 */
+	public function test_package_version_is_sent_as_common_property(): void {
+		$page_properties   = WC_Analytics_Tracking::get_page_common_properties();
+		$server_properties = WC_Analytics_Tracking::get_common_properties();
+
+		$this->assertSame( Woocommerce_Analytics::PACKAGE_VERSION, $page_properties['package_version'] ?? null );
+		$this->assertSame( Woocommerce_Analytics::PACKAGE_VERSION, $server_properties['package_version'] ?? null );
+	}
+
+	/**
 	 * Test version option constant is defined.
 	 */
 	public function test_version_option_constant_is_defined(): void {
