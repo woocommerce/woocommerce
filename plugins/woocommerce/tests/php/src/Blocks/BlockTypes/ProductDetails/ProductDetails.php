@@ -32,7 +32,7 @@ class ProductDetails extends \WP_UnitTestCase {
 		parent::setUpBeforeClass();
 
 		self::$product = WC_Helper_Product::create_simple_product( false );
-		WC_Helper_Product::create_product_review( self::$product );
+		WC_Helper_Product::create_product_review( self::$product->get_id() );
 
 		self::$page_id = wp_insert_post(
 			array(

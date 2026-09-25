@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
@@ -540,5 +541,52 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user );
 		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by admins." );
 		$this->assertFalse( $product->is_publicly_viewable(), "A $status product is never publicly viewable, even for admins." );
+	}
+
+	/**
+	 * @testdox A missing or non-product parent doesn't affect visibility, but an unpublished product parent hides the product from the public.
+	 * @testWith ["missing", true]
+	 *           ["draft_page", true]
+	 *           ["draft_product", false]
+	 *           ["published_product", true]
+	 * @param string $parent_kind        Kind of post the parent ID points at.
+	 * @param bool   $visible_logged_out Whether the product should be visible to a logged-out user.
+	 */
+	public function test_is_viewable_with_parent( $parent_kind, $visible_logged_out ) {
+		switch ( $parent_kind ) {
+			case 'missing':
+				$parent_id = 987654321;
+				break;
+			case 'draft_page':
+				$parent_id = self::factory()->post->create(
+					array(
+						'post_type'   => 'page',
+						'post_status' => 'draft',
+					)
+				);
+				break;
+			case 'draft_product':
+			case 'published_product':
+				$parent = WC_Helper_Product::create_simple_product();
+				$parent->set_status( 'draft_product' === $parent_kind ? ProductStatus::DRAFT : ProductStatus::PUBLISH );
+				$parent->save();
+				$parent_id = $parent->get_id();
+				break;
+			default:
+				$this->fail( "Unhandled parent kind: $parent_kind." );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_parent_id( $parent_id );
+		$product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $visible_logged_out, $product->is_viewable(), "A product with a $parent_kind parent has unexpected is_viewable() when logged out." );
+		$this->assertSame( $visible_logged_out, $product->is_publicly_viewable(), "A product with a $parent_kind parent has unexpected is_publicly_viewable()." );
+		$this->assertSame( $visible_logged_out, $product->is_visible(), "A product with a $parent_kind parent has unexpected is_visible() when logged out." );
+		$this->assertSame( $visible_logged_out, $product->is_purchasable(), "A product with a $parent_kind parent has unexpected is_purchasable() when logged out." );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), "A product with a $parent_kind parent is viewable by admins." );
 	}
 }

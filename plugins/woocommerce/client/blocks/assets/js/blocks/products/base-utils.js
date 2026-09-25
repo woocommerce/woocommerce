@@ -6,7 +6,7 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import addToCartButtonMetadata from '../../atomic/blocks/product-elements/button/block.json';
+import addToCartButtonMetadata from '../product-elements-blocks/button/block.json';
 
 /**
  * The default layout built from the default template.

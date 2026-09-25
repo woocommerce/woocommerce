@@ -214,7 +214,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
-		if ( ! $this->is_post_id( $arg ) ) {
+		if ( ( ! is_int( $arg ) && ! ( is_string( $arg ) && ctype_digit( $arg ) ) ) || 0 >= (int) $arg ) {
 			return false;
 		}
 
@@ -233,16 +233,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Checks that a hook argument is a positive integer ID, before absint() coerces true, arrays or objects to 1.
-	 *
-	 * @param  mixed $arg First hook argument.
-	 * @return bool       True if the argument is a post ID.
-	 */
-	private function is_post_id( $arg ) {
-		return ( is_int( $arg ) || ( is_string( $arg ) && ctype_digit( $arg ) ) ) && 0 < (int) $arg;
-	}
-
-	/**
 	 * Validates permanent deletions for product webhooks: only products and variations, skipping those already reported.
 	 *
 	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
@@ -257,15 +247,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return true;
 		}
 
-		if ( ! $this->is_post_id( $arg ) ) {
+		if ( ! $this->is_valid_post_action( $arg ) ) {
 			return false;
 		}
 
 		$post_id = absint( $arg );
-
-		if ( ! in_array( get_post_type( $post_id ), array( 'product', 'product_variation' ), true ) ) {
-			return false;
-		}
 
 		return ProductStatus::TRASH !== get_post_status( $post_id ) || ! metadata_exists( 'post', $post_id, '_wp_trash_meta_status' );
 	}

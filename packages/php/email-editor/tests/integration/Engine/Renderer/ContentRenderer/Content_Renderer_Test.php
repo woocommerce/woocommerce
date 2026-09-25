@@ -124,6 +124,62 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the render start and end actions fire once each, in order, per content render.
+	 */
+	public function testItFiresRenderStartAndEndActionsOncePerRender(): void {
+		$fired = array();
+		$track = function () use ( &$fired ) {
+			$fired[] = current_action();
+		};
+		add_action( 'woocommerce_email_editor_render_start', $track );
+		add_action( 'woocommerce_email_editor_render_end', $track );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$this->renderer->render_without_css_inline( $this->email_post, $template );
+
+		remove_action( 'woocommerce_email_editor_render_start', $track );
+		remove_action( 'woocommerce_email_editor_render_end', $track );
+
+		$this->assertSame(
+			array( 'woocommerce_email_editor_render_start', 'woocommerce_email_editor_render_end' ),
+			$fired,
+			'Each render should fire the start action and then the end action, once each.'
+		);
+	}
+
+	/**
+	 * Test the render end action fires when the render throws, so integrations can restore what they changed.
+	 */
+	public function testItFiresTheRenderEndActionWhenTheRenderThrows(): void {
+		$ended = 0;
+		$count = function () use ( &$ended ) {
+			++$ended;
+		};
+		$fail  = function (): void {
+			throw new \RuntimeException( 'Rendering failed' );
+		};
+		add_action( 'woocommerce_email_editor_render_end', $count );
+		add_action( 'woocommerce_email_editor_render_start', $fail );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+			$this->fail( 'The render should have thrown.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Rendering failed', $e->getMessage() );
+		} finally {
+			remove_action( 'woocommerce_email_editor_render_start', $fail );
+			remove_action( 'woocommerce_email_editor_render_end', $count );
+		}
+
+		$this->assertSame( 1, $ended, 'The end action should fire even when the render throws.' );
+	}
+
+	/**
 	 * Test render_without_css_inline applies email context once per content render.
 	 */
 	public function testRenderWithoutCssInlineAppliesEmailContextOnce(): void {

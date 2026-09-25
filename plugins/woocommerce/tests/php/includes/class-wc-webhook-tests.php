@@ -114,6 +114,38 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Permanent-delete validation rejects a non-ID argument even when the global post is a variation.
+	 *
+	 * @testWith [0]
+	 *           ["abc"]
+	 *
+	 * @param mixed $arg Hook argument that is not a valid post ID.
+	 */
+	public function test_is_valid_permanent_delete_action_rejects_non_id_with_global_variation( $arg ): void {
+		$had_global_post = array_key_exists( 'post', $GLOBALS );
+		$original_post   = $GLOBALS['post'] ?? null;
+		$product         = WC_Helper_Product::create_variation_product();
+		$webhook         = new WC_Webhook();
+		$webhook->set_topic( 'product.deleted' );
+		$call_is_valid_permanent_delete_action = function ( $arg ) {
+			return $this->is_valid_permanent_delete_action( $arg );
+		};
+
+		try {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test isolates arbitrary global request state.
+			$GLOBALS['post'] = get_post( $product->get_children()[0] );
+			$this->assertFalse( $call_is_valid_permanent_delete_action->call( $webhook, $arg ) );
+		} finally {
+			if ( $had_global_post ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global request state changed for this test.
+				$GLOBALS['post'] = $original_post;
+			} else {
+				unset( $GLOBALS['post'] );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Post-action validation rejects non-ID values before coercion.
 	 */
 	public function test_is_valid_post_action_rejects_non_id_values_before_coercion(): void {
