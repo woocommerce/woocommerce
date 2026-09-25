@@ -6,6 +6,8 @@ use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
+require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+
 /**
  * Tests related to Counts service.
  */
@@ -59,6 +61,41 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$this->test_get_filtered_price_with( $wp_query );
+	}
+
+	/**
+	 * @testdox Changing the taxonomy URL map cannot reuse filter-data or product-ID cache entries.
+	 */
+	public function test_taxonomy_param_map_changes_filter_data_cache_keys(): void {
+		\WC_Brands::init_taxonomy();
+		$this->clear_params_cache();
+
+		$brand = wp_insert_term( 'Cache key brand', 'product_brand' );
+		$this->assertIsArray( $brand );
+		wp_set_object_terms( $this->products[0]->get_id(), (int) $brand['term_id'], 'product_brand' );
+
+		$query_vars = array(
+			'post_type'   => 'product',
+			'product_cat' => 'cat-1',
+			'brands'      => get_term( (int) $brand['term_id'], 'product_brand' )->slug,
+		);
+		$key_method = new \ReflectionMethod( $this->sut, 'get_transient_key' );
+
+		$rename = static function ( array $params ): array {
+			$params['product_brand'] = 'wc_brands';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+
+		$renamed_key = $key_method->invoke( $this->sut, $query_vars, 'price' );
+		$unfiltered  = (array) $this->sut->get_filtered_price( $query_vars );
+
+		remove_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		$this->clear_params_cache();
+
+		$this->assertNotSame( $renamed_key, $key_method->invoke( $this->sut, $query_vars, 'price' ) );
+		$this->assertGreaterThan( 10, (float) $unfiltered['max_price'] );
+		$this->assertSame( 10.0, (float) $this->sut->get_filtered_price( $query_vars )['max_price'] );
 	}
 
 	/**
