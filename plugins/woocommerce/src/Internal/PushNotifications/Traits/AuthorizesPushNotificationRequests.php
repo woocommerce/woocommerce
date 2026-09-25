@@ -88,12 +88,12 @@ trait AuthorizesPushNotificationRequests {
 	}
 
 	/**
-	 * Checks the caller is either WPCOM or an allowed user.
+	 * Allows WPCOM whatever the module's state, and allowed users only while
+	 * the module is enabled.
 	 *
-	 * WPCOM is allowed while the module is disabled, so a token can be removed
-	 * before the store is switched back on and starts sending to it again. Users
-	 * get the missing-route 404 the apps read as push notifications being
-	 * unavailable.
+	 * WPCOM can remove a token before the store is switched back on and starts
+	 * sending to it again. Users of a disabled store get the missing-route 404
+	 * the apps read as push notifications being unavailable.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -101,12 +101,8 @@ trait AuthorizesPushNotificationRequests {
 	 *
 	 * @since 11.3.0
 	 */
-	public function authorize_as_from_wpcom_or_authenticated( WP_REST_Request $request ) {
-		if ( $this->is_signed_with_blog_token() ) {
-			return true;
-		}
-
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
+	public function authorize_wpcom_or_allowed_user_while_enabled( WP_REST_Request $request ) {
+		if ( ! $this->is_signed_with_blog_token() && ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return new WP_Error(
 				'rest_no_route',
 				__( 'No route was found matching the URL and request method.', 'woocommerce' ),
@@ -114,7 +110,7 @@ trait AuthorizesPushNotificationRequests {
 			);
 		}
 
-		return $this->authorize_as_authenticated_ignoring_enablement( $request );
+		return $this->authorize_as_from_wpcom_or_allowed_user( $request );
 	}
 
 	/**
