@@ -22,11 +22,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping location before the test, restored at teardown.
+	 * Customer shipping address before the test, restored at teardown.
 	 *
-	 * @var string[]
+	 * @var array<string, string>
 	 */
-	private $previous_shipping_location = array();
+	private $previous_shipping_address = array();
 
 	/**
 	 * Called before every test.
@@ -37,13 +37,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixtures->shipping_add_flat_rate();
 
 		// Several tests change the shipping address on WC()->customer, which outlives a test.
-		$customer                         = WC()->customer;
-		$this->previous_shipping_location = array(
-			$customer->get_shipping_country( 'edit' ),
-			$customer->get_shipping_state( 'edit' ),
-			$customer->get_shipping_postcode( 'edit' ),
-			$customer->get_shipping_city( 'edit' ),
-		);
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -53,7 +47,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		WC()->customer->set_is_vat_exempt( false );
-		WC()->customer->set_shipping_location( ...$this->previous_shipping_location );
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 		WC()->session->set( 'wc_notices', null );
 
 		// The parent teardown only clears chosen_shipping_methods, through

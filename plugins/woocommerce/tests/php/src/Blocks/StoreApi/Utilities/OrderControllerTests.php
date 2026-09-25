@@ -22,11 +22,11 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Customer shipping location before the test, restored at teardown.
+	 * Customer shipping address before the test, restored at teardown.
 	 *
-	 * @var string[]
+	 * @var array<string, string>
 	 */
-	private $previous_shipping_location = array();
+	private $previous_shipping_address = array();
 
 	/**
 	 * Set up before test.
@@ -45,14 +45,8 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		// The invalid-address tests need shipping rates for the cart, and the cart ships to
 		// WC()->customer, which outlives a test. Other classes leave its address blank, so set
 		// the store's own location here instead of reading whatever the test before left on it.
-		$customer                         = WC()->customer;
-		$this->previous_shipping_location = array(
-			$customer->get_shipping_country( 'edit' ),
-			$customer->get_shipping_state( 'edit' ),
-			$customer->get_shipping_postcode( 'edit' ),
-			$customer->get_shipping_city( 'edit' ),
-		);
-		$customer->set_shipping_location( 'US', 'CA' );
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		WC()->customer->set_shipping_location( 'US', 'CA' );
 
 		$this->sut = new class() extends OrderController {
 			/**
@@ -73,7 +67,9 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			WC()->customer->set_shipping_location( ...$this->previous_shipping_location );
+			foreach ( $this->previous_shipping_address as $key => $value ) {
+				WC()->customer->{"set_shipping_{$key}"}( $value );
+			}
 		} finally {
 			parent::tearDown();
 		}

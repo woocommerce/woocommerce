@@ -13,11 +13,11 @@
 class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 	/**
-	 * Customer shipping location before the test, restored at teardown.
+	 * Customer shipping address before the test, restored at teardown.
 	 *
-	 * @var string[]
+	 * @var array<string, string>
 	 */
-	private $previous_shipping_location = array();
+	private $previous_shipping_address = array();
 
 	/**
 	 * Sets up the test class.
@@ -26,13 +26,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// WC()->customer outlives a test, so keep its location to restore at teardown.
-		$customer                         = WC()->customer;
-		$this->previous_shipping_location = array(
-			$customer->get_shipping_country( 'edit' ),
-			$customer->get_shipping_state( 'edit' ),
-			$customer->get_shipping_postcode( 'edit' ),
-			$customer->get_shipping_city( 'edit' ),
-		);
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 
 		// Set a valid address for the customer so shipping rates will calculate.
 		WC()->customer->set_shipping_country( 'US' );
@@ -46,7 +40,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		WC()->cart->remove_coupons();
 		\Automattic\Jetpack\Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
-		WC()->customer->set_shipping_location( ...$this->previous_shipping_location );
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 
 		parent::tearDown();
 	}
