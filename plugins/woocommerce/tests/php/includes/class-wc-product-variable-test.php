@@ -175,17 +175,17 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		}
 
 		$instantiated_ids = array();
-		$tracker          = function ( $visible, $variation_id ) use ( &$instantiated_ids ) {
-			$instantiated_ids[] = $variation_id;
-			return $visible;
+		$tracker          = function ( $class, $product_type, $product_id ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $product_id;
+			return $class;
 		};
-		add_filter( 'woocommerce_variation_is_visible', $tracker, 10, 2 );
+		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		$this->assertEmpty( $product->get_available_variations( 'objects' ) );
-		$this->assertCount( 1, $instantiated_ids, 'Single variation object should be instantiated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
+		$this->assertCount( 1, $instantiated_ids, 'Only the probe variation should be instantiated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
 
-		remove_filter( 'woocommerce_variation_is_visible', $tracker, 10 );
+		remove_filter( 'woocommerce_product_class', $tracker, 10 );
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
 		$product->delete( true );
 	}
@@ -200,16 +200,16 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		}
 
 		$instantiated_ids = array();
-		$tracker          = function ( $purchasable, $variation ) use ( &$instantiated_ids ) {
-			$instantiated_ids[] = $variation->get_id();
-			return $purchasable;
+		$tracker          = function ( $class, $product_type, $product_id ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $product_id;
+			return $class;
 		};
-		add_filter( 'woocommerce_is_purchasable', $tracker, 10, 2 );
+		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
 
 		$this->assertFalse( $product->has_purchasable_variations() );
-		$this->assertCount( 1, $instantiated_ids, 'Single variation object should be instantiated when all are out-of-stock and no stock filter is active.' );
+		$this->assertCount( 1, $instantiated_ids, 'Only the probe variation should be instantiated when all are out-of-stock and no stock filter is active.' );
 
-		remove_filter( 'woocommerce_is_purchasable', $tracker, 10 );
+		remove_filter( 'woocommerce_product_class', $tracker, 10 );
 		$product->delete( true );
 	}
 
