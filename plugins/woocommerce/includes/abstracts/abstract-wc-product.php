@@ -1617,6 +1617,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$product_id = $this->get_id();
 		$deleted    = parent::delete( $force_delete );
 
+		// WC_Data::delete() clears the ID even when the data store only moves the post to trash.
+		if ( $deleted && ! $force_delete && $product_id && 'trash' === get_post_status( $product_id ) ) {
+			$this->set_id( $product_id );
+		}
+
 		if ( $deleted ) {
 			$this->maybe_defer_product_sync();
 			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $product_id );
