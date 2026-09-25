@@ -352,10 +352,10 @@ class WC_Product_Variable extends WC_Product {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
-			$precheck_with_meta = $hide_out_of_stock_items && ! has_filter( 'woocommerce_product_is_in_stock' );
+			$run_meta_prechecks = $hide_out_of_stock_items && ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
 				// Performance note: inactive optimization for most of stores; see details in has_purchasable_variations method.
-				if ( $precheck_with_meta ) {
+				if ( $run_meta_prechecks ) {
 					$skip = ProductStockStatus::OUT_OF_STOCK === get_post_meta( $variation_id, '_stock_status', true ) ||
 							ProductStatus::PUBLISH !== get_post_status( $variation_id );
 					if ( $skip ) {
@@ -421,10 +421,10 @@ class WC_Product_Variable extends WC_Product {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
-			$precheck_with_meta = ! has_filter( 'woocommerce_product_is_in_stock' );
+			$run_meta_prechecks = ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
 				// Performance note: applicable to estimated 90% of stores; leverage lightweight primed data read before constructing product object.
-				if ( $precheck_with_meta ) {
+				if ( $run_meta_prechecks ) {
 					$skip = ProductStockStatus::OUT_OF_STOCK === get_post_meta( $variation_id, '_stock_status', true ) ||
 							ProductStatus::PUBLISH !== get_post_status( $variation_id );
 					if ( $skip ) {
