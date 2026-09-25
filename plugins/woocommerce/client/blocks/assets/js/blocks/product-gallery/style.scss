@@ -286,6 +286,10 @@ $dialog-padding: 20px;
 	outline-offset: -2px;
 }
 
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image):focus:not(:focus-visible) {
+	outline: none;
+}
+
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
 	pointer-events: none;
 	cursor: default;
