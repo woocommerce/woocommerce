@@ -14,7 +14,7 @@ declare( strict_types = 1 );
  */
 function purple_get_woocommerce_notice(): string {
 	$screen = get_current_screen();
-	if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', 'themes', 'plugins', 'update-core' ), true ) ) {
+	if ( ! current_user_can( 'manage_options' ) || ! $screen || 'themes' !== $screen->id ) {
 		return '';
 	}
 
