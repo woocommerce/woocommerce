@@ -229,7 +229,7 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	public function test_page_output_retains_store_properties(): void {
 		$output = $this->render_analytics_data();
 
-		foreach ( array( 'timezone', 'wp_version', 'store_currency' ) as $property ) {
+		foreach ( array( 'timezone', 'wp_version', 'store_currency', 'package_version' ) as $property ) {
 			$this->assertStringContainsString(
 				'"' . $property . '"',
 				$output,
@@ -310,6 +310,18 @@ class Universal_Page_Output_Test extends BaseTestCase {
 			$output,
 			'Proxy mode should send no common properties to the client.'
 		);
+	}
+
+	/**
+	 * Test that the page output always starts `window.wcAnalytics` from a fresh
+	 * object. A `window.wcAnalytics || {}` fallback keeps a same-named DOM element
+	 * alive, and the assignments that follow silently fail to land on it.
+	 */
+	public function test_page_output_initializes_config_from_a_fresh_object(): void {
+		$output = $this->render_analytics_data();
+
+		$this->assertStringContainsString( 'window.wcAnalytics = {};', $output );
+		$this->assertStringNotContainsString( 'window.wcAnalytics ||', $output );
 	}
 
 	/**

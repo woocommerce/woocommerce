@@ -179,6 +179,9 @@ class FeaturePlugin {
 			CategoryLookup::instance()->init();
 			// Initialize Reports exporter.
 			ReportExporter::init();
+		} else {
+			// Already generated exports still need serving and expiring.
+			ReportExporter::init_export_files();
 		}
 
 		// Admin note providers.

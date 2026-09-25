@@ -115,6 +115,18 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Simulate the value wp_is_rest_endpoint() should report for the current test.
+	 *
+	 * @param bool $dispatching Whether wp_is_rest_endpoint() should return true.
+	 * @return void
+	 */
+	private function simulate_rest_dispatching( bool $dispatching ): void {
+		remove_filter( 'wp_is_rest_endpoint', '__return_true' );
+		remove_filter( 'wp_is_rest_endpoint', '__return_false' );
+		add_filter( 'wp_is_rest_endpoint', $dispatching ? '__return_true' : '__return_false' );
+	}
+
+	/**
 	 * Put WC_REST_Authentication into the state it reaches after an API key authenticates a request.
 	 *
 	 * @param int    $user_id     User the key belongs to.
@@ -141,6 +153,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	 * @param bool   $expected    Expected result.
 	 */
 	public function test_is_request_to_rest_api_checks_path_only( string $request_uri, bool $expected ): void {
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
 		$this->assertSame( $expected, $this->is_request_to_rest_api() );
@@ -175,6 +188,141 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			// WordPress routes this request to /wp/v2/users. Sanitizing the URI first would drop the '^'
 			// and change which parameter wins, so the route has to be read from the raw URI.
 			'decoy parameter that sanitizing would merge' => array( '/?rest_route=/wp/v2/users&rest_rou^te=/wc/v3/products', false ),
+		);
+	}
+
+	/**
+	 * @testdox Should identify a WooCommerce REST request by the route WordPress resolved.
+	 *
+	 * @dataProvider provider_resolved_routes_for_rest_api_detection
+	 *
+	 * @param string $request_uri    Request URI.
+	 * @param string $resolved_route Route WordPress resolved for the request.
+	 * @param bool   $expected       Expected result.
+	 */
+	public function test_is_request_to_rest_api_checks_resolved_route( string $request_uri, string $resolved_route, bool $expected ): void {
+		global $wp;
+
+		$this->simulate_rest_dispatching( true );
+		$_SERVER['REQUEST_URI']       = $request_uri;
+		$wp->query_vars['rest_route'] = $resolved_route;
+
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * Data provider for resolved REST routes.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_resolved_routes_for_rest_api_detection(): array {
+		return array(
+			'language-prefixed woocommerce route' => array( '/en/wp-json/wc/v3/products', '/wc/v3/products', true ),
+			'route differs from resolved route'   => array( '/en/wp-json/wc/v3/products', '/wp/v2/users', false ),
+			'custom rewrite without REST prefix'  => array( '/shop-api/products', '/wc/v3/products', true ),
+			'resolved route overrides URI route'  => array( '/wp-json/wp/v2/users', '/wc/v3/products', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should not trust a rest_route query parameter unless WordPress is dispatching the request as REST.
+	 *
+	 * @dataProvider provider_request_uris_with_rest_route_query_param
+	 *
+	 * @param string $request_uri Request URI.
+	 */
+	public function test_is_request_to_rest_api_trusts_query_string_route_only_when_dispatching( string $request_uri ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A rest_route query parameter on a request WordPress is not dispatching as REST must not authenticate a key.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'The same route must still be recognized once WordPress is genuinely dispatching it as REST.'
+		);
+	}
+
+	/**
+	 * Data provider for URIs that carry a route only in their query string.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_request_uris_with_rest_route_query_param(): array {
+		return array(
+			'plain permalink route'                  => array( '/?rest_route=/wc/v3/products' ),
+			'unrelated endpoint, query string route' => array( '/wp-admin/admin-ajax.php?action=whoami&rest_route=/wc/v3' ),
+			'unrelated endpoint, rewritten path'     => array( '/wc-auth/v1/authorize?rest_route=/wc/v3/products' ),
+		);
+	}
+
+	/**
+	 * @testdox Should not fall back to the path route when a query string names a different route.
+	 *
+	 * @dataProvider provider_conflicting_path_and_query_string_routes
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param bool   $expected    Expected result once WordPress is genuinely dispatching.
+	 */
+	public function test_is_request_to_rest_api_ignores_path_when_query_string_names_another_route( string $request_uri, bool $expected ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A path naming a WooCommerce route must not authenticate a key while a query string names a different route and dispatch is not yet confirmed.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * @return array[]
+	 */
+	public static function provider_conflicting_path_and_query_string_routes(): array {
+		return array(
+			'query string names a foreign route'           => array( '/wp-json/wc/v3/products?rest_route=/wp/v2/users', false ),
+			'query string names another woocommerce route' => array( '/wp-json/wc/v3/products?rest_route=/wc/v3/orders', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should not fall back to the path route when a query string route is not a string.
+	 */
+	public function test_is_request_to_rest_api_ignores_path_when_query_string_route_is_not_a_string(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products?rest_route[]=/wp/v2/users';
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse( $this->is_request_to_rest_api() );
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertFalse( $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * @testdox Should not trust the route WordPress resolved unless WordPress is dispatching the request as REST.
+	 */
+	public function test_is_request_to_rest_api_trusts_resolved_route_only_when_dispatching(): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = '/wc-auth/v1/authorize';
+		$wp->query_vars['rest_route'] = '/wc/v3/products';
+
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'A resolved route on a request WordPress is not dispatching as REST must not authenticate a key.'
+		);
+
+		$this->simulate_rest_dispatching( true );
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'The same resolved route must still be recognized once WordPress is genuinely dispatching it as REST.'
 		);
 	}
 
@@ -465,9 +613,15 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let the authentication fallback through for a WooCommerce route.
+	 * @testdox Should let the authentication fallback through for an in-scope WooCommerce route.
+	 *
+	 * @testWith ["/wp-json/wc/v3/products"]
+	 *           ["/ja/wp-json/wc/v3/products"]
+	 *           ["/shop-api/products"]
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback(): void {
+	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback( string $request_uri ): void {
 		global $wp, $wpdb;
 
 		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
@@ -485,10 +639,11 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->simulate_rest_dispatching( true );
 		$_SERVER['HTTPS']             = 'on';
 		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
 		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
-		$_SERVER['REQUEST_URI']       = '/wp-json/wc/v3/products';
+		$_SERVER['REQUEST_URI']       = $request_uri;
 		$wp->query_vars['rest_route'] = '/wc/v3/products';
 
 		wp_set_current_user( 0 );

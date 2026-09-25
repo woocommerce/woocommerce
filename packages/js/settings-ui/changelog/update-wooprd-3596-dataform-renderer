@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render Settings UI pages through DataForm. Registered settings components now receive the DataForm control props.

@@ -14,6 +14,7 @@
 		"displayLayout",
 		"templateSlug",
 		"postId",
+		"singleProduct",
 		"queryContextIncludes",
 		"collection",
 		"__privateProductCollectionPreviewState"

@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
@@ -772,10 +772,25 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_price_hash includes callback signatures via CallbackUtil when the legacy algorithm is disabled.
+	 * Data provider for falsy values that should disable the legacy algorithm.
 	 */
-	public function test_get_price_hash_uses_callback_util_when_legacy_algorithm_is_disabled(): void {
-		add_filter( 'woocommerce_use_legacy_get_variations_price_hash', '__return_false' );
+	public function woocommerce_use_legacy_get_variations_price_hash_disabled_values_provider(): array {
+		return array(
+			'false'        => array( false ),
+			'zero'         => array( 0 ),
+			'empty_string' => array( '' ),
+			'empty_array'  => array( array() ),
+		);
+	}
+
+	/**
+	 * @testdox get_price_hash includes callback signatures via CallbackUtil when the filter returns $falsy_value.
+	 * @dataProvider woocommerce_use_legacy_get_variations_price_hash_disabled_values_provider
+	 * @param mixed $falsy_value The falsy value to inject via the filter.
+	 */
+	public function test_get_price_hash_uses_callback_util_when_legacy_algorithm_is_disabled( $falsy_value ): void {
+		$filter = fn() => $falsy_value;
+		add_filter( 'woocommerce_use_legacy_get_variations_price_hash', $filter );
 
 		$product             = WC_Helper_Product::create_variation_product();
 		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
@@ -792,7 +807,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertNotSame( $hash_without_callback, $hash_with_callback );
 
 		remove_filter( 'woocommerce_variation_prices_price', $callback );
-		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', '__return_false' );
+		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', $filter );
 
 		$product->delete();
 	}
@@ -1991,5 +2006,38 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
 
 		$product->delete( true );
+	}
+
+
+	/**
+	 * @testdox get_price_hash respects the woocommerce_use_legacy_get_variations_price_hash option.
+	 */
+	public function test_get_price_hash_respects_legacy_price_hash_option(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$captured       = null;
+		$capture_filter = function ( $use_legacy ) use ( &$captured ) {
+			$captured = $use_legacy;
+			return $use_legacy;
+		};
+		add_filter( 'woocommerce_use_legacy_get_variations_price_hash', $capture_filter );
+
+		// Option 'yes' → legacy enabled → filter receives true.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertTrue( $captured, 'Option "yes" must dispatch true (legacy enabled) into the filter.' );
+
+		// Option 'no' → legacy disabled → filter receives false.
+		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertFalse( $captured, 'Option "no" must dispatch false (legacy disabled) into the filter.' );
+
+		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+		$this->get_data_store_with_public_get_price_hash()->get_price_hash( $product, false );
+		$this->assertTrue( $captured, 'Missing option must dispatch true (legacy enabled) into the filter.' );
+
+		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', $capture_filter );
+
+		$product->delete();
 	}
 }

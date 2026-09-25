@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal TypeError in Product Price Filter when prices are entered excluding tax and displayed including tax with standard tax class.
