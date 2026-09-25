@@ -183,7 +183,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		$this->assertEmpty( $product->get_available_variations( 'objects' ) );
-		$this->assertEmpty( $instantiated_ids, 'No variation should be hydrated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
+		$this->assertEmpty( $instantiated_ids, 'No variation objects should be instantiated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
 
 		remove_filter( 'woocommerce_variation_is_visible', $tracker, 10 );
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
@@ -207,7 +207,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_is_purchasable', $tracker, 10, 2 );
 
 		$this->assertFalse( $product->has_purchasable_variations() );
-		$this->assertEmpty( $instantiated_ids, 'No variation should be hydrated when all are out-of-stock and no stock filter is active.' );
+		$this->assertEmpty( $instantiated_ids, 'No variation objects should be instantiated when all are out-of-stock and no stock filter is active.' );
 
 		remove_filter( 'woocommerce_is_purchasable', $tracker, 10 );
 		$product->delete( true );
