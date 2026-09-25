@@ -40,13 +40,51 @@ test.describe( 'Shopper → Extensibility', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 	} );
-
 	test.describe( 'extensionCartUpdate', () => {
-		test( 'Unpushed customer data is kept or overwritten depending on overwriteDirtyCustomerData, and extension data reaches the cart', async ( {
+		test( 'Response is not undefined in any code path', async ( {
 			checkoutPageObject,
 		} ) => {
-			const { page } = checkoutPageObject;
+			// With no additional args.
+			let response = await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } ).then( ( response ) => response );"
+			);
+			let resolvedResponse = await Promise.resolve( response );
+			expect( resolvedResponse ).not.toBeUndefined();
+			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
 
+			// With overwriteDirtyCustomerData true.
+			response = await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } ).then( ( response ) => response );"
+			);
+			resolvedResponse = await Promise.resolve( response );
+			expect( resolvedResponse ).not.toBeUndefined();
+			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
+
+			// With overwriteDirtyCustomerData false.
+			response = await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: false } ).then( ( response ) => response );"
+			);
+			resolvedResponse = await Promise.resolve( response );
+			expect( resolvedResponse ).not.toBeUndefined();
+			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
+
+			// With a dirty customer object.
+			await checkoutPageObject.page
+				.getByLabel( 'Country/Region' )
+				.selectOption( 'United Kingdom (UK)' );
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).toHaveValue( 'GB' );
+			response = await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } ).then( ( response ) => response );"
+			);
+			resolvedResponse = await Promise.resolve( response );
+			expect( resolvedResponse ).not.toBeUndefined();
+			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
+		} );
+		test( 'Unpushed data is/is not overwritten depending on arg', async ( {
+			checkoutPageObject,
+		} ) => {
 			// Fill in the address, then wait until it has reached the server. The dirty flag is
 			// not enough on its own: it is cleared by whichever push finishes first, which can
 			// be an earlier one that did not carry the address.
@@ -54,7 +92,7 @@ test.describe( 'Shopper → Extensibility', () => {
 			await expect
 				.poll(
 					async () =>
-						page.evaluate( async () => {
+						checkoutPageObject.page.evaluate( async () => {
 							const response = await fetch(
 								'/wp-json/wc/store/v1/cart'
 							);
@@ -72,49 +110,54 @@ test.describe( 'Shopper → Extensibility', () => {
 				.toBe( '90210' );
 
 			// A postcode that fails validation is never pushed, so it only exists in the browser.
-			// A country change is not usable here: picking one pushes straight away so shipping
-			// can be recalculated, which would leave nothing unpushed to overwrite.
-			const postcode = page.locator( '#shipping-postcode' );
+			const postcode =
+				checkoutPageObject.page.locator( '#shipping-postcode' );
 			await postcode.fill( 'ABCDEF' );
 			await postcode.blur();
-			await page.waitForFunction( () => {
-				return (
+			await checkoutPageObject.page.waitForFunction(
+				() =>
 					window.localStorage.getItem(
 						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 					) === 'true'
-				);
-			} );
+			);
 
 			// Without the arg, the unpushed postcode is kept.
-			await page.evaluate( () =>
-				window.wc.blocksCheckout.extensionCartUpdate( {
-					namespace: 'woocommerce-blocks-test-extension-cart-update',
-				} )
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } )"
 			);
 			await expect( postcode ).toHaveValue( 'ABCDEF' );
 
 			// With overwriteDirtyCustomerData, the address from the server replaces it.
-			const overwriteResponse = await page.evaluate( () =>
-				window.wc.blocksCheckout.extensionCartUpdate( {
-					namespace: 'woocommerce-blocks-test-extension-cart-update',
-					overwriteDirtyCustomerData: true,
-				} )
-			);
-			expect( overwriteResponse.shipping_address.postcode ).toBe(
-				'90210'
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
 			await expect( postcode ).toHaveValue( '90210' );
 
-			await page.evaluate( () =>
-				window.wc.blocksCheckout.extensionCartUpdate( {
-					namespace: 'woocommerce-blocks-test-extension-cart-update',
-					data: { 'test-name-change': true },
-					overwriteDirtyCustomerData: true,
-				} )
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
-			await expect( page.getByLabel( 'First name' ) ).toHaveValue(
-				'Mr. Test'
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).toHaveValue( 'US' );
+			await expect( postcode ).toHaveValue( '90210' );
+		} );
+		test( 'Cart data can be modified by extensions', async ( {
+			checkoutPageObject,
+		} ) => {
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.page.waitForFunction( () => {
+				return (
+					window.localStorage.getItem(
+						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
+					) === 'false'
+				);
+			} );
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', data: { 'test-name-change': true } } )"
 			);
+			await expect(
+				checkoutPageObject.page.getByLabel( 'First name' )
+			).toHaveValue( 'Mr. Test' );
 		} );
 	} );
 } );

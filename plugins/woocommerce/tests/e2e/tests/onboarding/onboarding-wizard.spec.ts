@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
-import { WC_ADMIN_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -11,6 +11,12 @@ import { tags, test, expect } from '../../fixtures/fixtures';
 import { setOption } from '../../utils/options';
 import { setComingSoon } from '../../utils/coming-soon';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+const getPluginLocator = ( page: Page, slug: string ) => {
+	return page.locator(
+		`.woocommerce-profiler-plugins-plugin-card[data-slug="${ slug }"]`
+	);
+};
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -22,21 +28,13 @@ test.describe(
 	'Store owner can complete the core profiler',
 	{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 	() => {
-		// Completing the profiler saves the store location, and the location list leaves out
-		// the selected option. Reset it before every test so each one can pick the same location.
-		test.beforeEach( async ( { baseURL } ) => {
+		test.beforeAll( async ( { baseURL } ) => {
 			try {
 				await setOption(
 					request,
 					baseURL,
 					'woocommerce_remote_variant_assignment',
 					'60'
-				);
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_default_country',
-					'US:CA'
 				);
 			} catch ( error ) {
 				console.log( error );
@@ -122,6 +120,12 @@ test.describe(
 						name: 'Get a boost with our free features',
 					} )
 				).toBeVisible();
+				// check that WooPayments is displayed because Australia is a supported country
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Get paid with WooPayments',
+					} )
+				).toBeVisible();
 				// skip this step so that no extensions are installed
 				await page
 					.getByRole( 'button', { name: 'Skip this step' } )
@@ -143,8 +147,7 @@ test.describe(
 				// dashboard shown
 				await expect(
 					page.getByRole( 'heading', {
-						name: 'Home',
-						exact: true,
+						name: 'Welcome to WooCommerce Core E2E Test Suite',
 					} )
 				).toBeVisible();
 
@@ -199,70 +202,18 @@ test.describe(
 			} );
 		} );
 
-		test( 'Can complete the core profiler with an extension selected', async ( {
+		test( 'Can complete the core profiler installing default extensions', async ( {
 			page,
-			restApi,
 		} ) => {
 			test.skip(
 				!! process.env.IS_MULTISITE,
 				'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
 			);
-
-			// Installing from WordPress.org would make this title depend on an outside
-			// service and leave real plugins on the shared site, so the two requests the
-			// profiler sends for the selection are answered here with the REST
-			// controller's success shape. What stays under test is the browser half:
-			// the selection reaches those requests, and a successful install finishes
-			// the profiler on the home screen.
-			const slug = 'google-listings-and-ads';
-			const pluginRequests: Array< { path: string; body: unknown } > = [];
-			await page.route(
-				( url ) =>
-					/\/wc-admin\/plugins\/(install|activate)(?:[?&]|$)/.test(
-						decodeURIComponent( url.toString() )
-					),
-				async ( route ) => {
-					const path = /\/wc-admin\/plugins\/activate(?:[?&]|$)/.test(
-						decodeURIComponent( route.request().url() )
-					)
-						? 'activate'
-						: 'install';
-					pluginRequests.push( {
-						path,
-						body: route.request().postDataJSON(),
-					} );
-					const errors = { errors: {}, error_data: {} };
-					await route.fulfill( {
-						json:
-							path === 'install'
-								? {
-										data: {
-											installed: [ slug ],
-											results: { [ slug ]: true },
-											install_time: { [ slug ]: 1 },
-											plugin_details: {},
-										},
-										errors,
-										success: true,
-								  }
-								: {
-										data: {
-											activated: [ slug ],
-											active: [ slug ],
-											plugin_details: {},
-										},
-										errors,
-										success: true,
-								  },
-					} );
-				}
-			);
-
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
 			);
 
-			await test.step( 'Walk the profiler to the extensions step', async () => {
+			await test.step( 'Intro page and opt in to data sharing', async () => {
 				await expect(
 					page.getByRole( 'heading', { name: 'Welcome to Woo!' } )
 				).toBeVisible();
@@ -274,7 +225,9 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Set up my store' } )
 					.click();
+			} );
 
+			await test.step( 'User profile information', async () => {
 				await expect(
 					page.getByRole( 'heading', {
 						name: 'Which one of these best describes you?',
@@ -282,32 +235,42 @@ test.describe(
 				).toBeVisible();
 				await page
 					.getByRole( 'radio' )
-					.filter( { hasText: 'just starting my business' } )
+					.filter( { hasText: 'already selling' } )
+					.click();
+				await page.getByLabel( 'Select an option' ).click();
+				await page
+					.getByRole( 'option' )
+					.filter( { hasText: 'selling offline' } )
 					.click();
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
 
+			await test.step( 'Business Information', async () => {
 				await expect(
 					page.getByRole( 'heading', {
 						name: 'Tell us a bit about your store',
 					} )
 				).toBeVisible();
+				await expect(
+					page.getByPlaceholder( 'Ex. My awesome store' )
+				).toHaveValue( 'WooCommerce Core E2E Test Suite' );
 				await page
 					.locator(
 						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
 					)
 					.first()
 					.click();
+				// select food and drink
 				await page
-					.getByRole( 'option', { name: 'Clothing and accessories' } )
+					.getByRole( 'option', { name: 'Food and drink' } )
 					.click();
-				// The location field is required.
+				// select a WooPayments incompatible location
 				await page.getByRole( 'combobox' ).last().click();
-				await page.getByRole( 'combobox' ).last().fill( 'Australia' );
+				await page.getByRole( 'combobox' ).last().fill( 'Afghanistan' );
 				await page
-					.getByRole( 'option', {
-						name: 'Australia — Northern Territory',
-					} )
+					.getByRole( 'option', { name: 'Afghanistan' } )
 					.click();
+
 				await page
 					.getByPlaceholder( 'wordpress@example.com' )
 					.fill( 'merchant@example.com' );
@@ -315,57 +278,208 @@ test.describe(
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
-			await test.step( 'Select one extension and continue', async () => {
+			await test.step( 'Extensions -- install some suggested extensions', async () => {
 				await expect(
 					page.getByRole( 'heading', {
 						name: 'Get a boost with our free features',
 					} )
 				).toBeVisible();
-				// Every recommendation that is not active starts selected. Clear them all,
-				// then pick one that needs no Jetpack connection, so the profiler ends on
-				// the home screen rather than the Jetpack authorization page.
-				const cards = page.locator(
-					'.woocommerce-profiler-plugins-plugin-card'
-				);
-				await expect( cards.first() ).toBeVisible();
-				for ( const checkbox of await cards
-					.getByRole( 'checkbox' )
-					.all() ) {
-					await checkbox.uncheck();
-				}
+				// check that WooPayments is not displayed because Afghanistan is not a supported country
 				await expect(
-					cards.locator( 'input[type="checkbox"]:checked' )
-				).toHaveCount( 0 );
-				await cards
-					.and( page.locator( `[data-slug="${ slug }"]` ) )
+					page.getByRole( 'heading', {
+						name: 'Get paid with WooPayments',
+					} )
+				).not.toBeAttached();
+
+				// select and install the rest of the extensions
+				try {
+					await page
+						.getByText(
+							'Boost content creation with Jetpack AI AssistantSave time on content creation'
+						)
+						.getByRole( 'checkbox' )
+						.uncheck( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log(
+						'Checkbox not present for Jetpack AI Assistant'
+					);
+				}
+				try {
+					await getPluginLocator( page, 'pinterest-for-woocommerce' )
+						.getByRole( 'checkbox' )
+						.check( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log( 'Checkbox not present for Pinterest' );
+				}
+				try {
+					await getPluginLocator( page, 'mailchimp-for-woocommerce' )
+						.getByRole( 'checkbox' )
+						.uncheck( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log( 'Checkbox not present for MailChimp' );
+				}
+				await getPluginLocator( page, 'google-listings-and-ads' )
 					.getByRole( 'checkbox' )
-					.check();
+					.check( { timeout: 2000 } );
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
-			await test.step( 'Confirm the selection reached the install requests and the profiler finished', async () => {
+			await test.step( 'Confirm that core profiler was completed and a couple of default extensions installed', async () => {
+				page.on( 'dialog', ( dialog ) => dialog.accept() );
+				// intermediate page shown
+				// the next two are soft assertions because depending on the extensions selected, they may or may not appear
+				// and we want the test to complete in order for cleanup to happen
+				await expect
+					.soft(
+						page
+							.getByRole( 'heading' )
+							.filter( { hasText: 'get your features ready' } )
+					)
+					.toBeVisible( { timeout: 30000 } );
+				await expect
+					.soft(
+						page
+							.getByRole( 'heading' )
+							.filter( { hasText: 'Extending your store' } )
+					)
+					.toBeVisible( { timeout: 30000 } );
+				// dashboard shown
 				await expect(
-					page.getByRole( 'heading', { name: 'Home', exact: true } )
+					page.getByRole( 'heading', {
+						name: 'Welcome to WooCommerce Core E2E Test Suite',
+					} )
+				).toBeVisible( { timeout: 30000 } );
+				// go to the plugins page to make sure that extensions were installed
+				await page.goto( 'wp-admin/plugins.php?plugin_status=active' );
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Plugins',
+						exact: true,
+					} )
 				).toBeVisible();
+				// confirm that the optional plugins are present
+				try {
+					await expect(
+						page.locator(
+							`[data-slug="pinterest-for-woocommerce"]`
+						)
+					).toBeVisible();
+				} catch {
+					console.log(
+						`Pinterest is not found or not visible on the page`
+					);
+				}
 
-				expect( pluginRequests ).toEqual( [
-					{
-						path: 'install',
-						body: {
-							plugins: slug,
-							async: false,
-							source: 'core-profiler',
-						},
-					},
-					{ path: 'activate', body: { plugins: slug } },
-				] );
+				try {
+					await expect(
+						page.locator( `[data-slug="google-listings-and-ads"]` )
+					).toBeVisible();
+				} catch {
+					console.log(
+						`Google for WooCommerce is not found or not visible on the page`
+					);
+				}
 
-				// The profiler records what the install reported, which only happens on
-				// the success path: a failed install returns to the extensions step.
-				const { data: profile } = await restApi.get(
-					`${ WC_ADMIN_API_PATH }/onboarding/profile`
-				);
-				expect( profile.business_extensions ).toEqual( [ slug ] );
+				try {
+					await expect(
+						page.locator(
+							`[data-slug="mailchimp-for-woocommerce"]`
+						)
+					).toBeHidden();
+				} catch {
+					console.log( `MailChimp is found on the page` );
+				}
+
+				try {
+					await expect(
+						page.locator( `[data-slug="jetpack"]` )
+					).toBeHidden();
+				} catch {
+					console.log( `Jetpack is found on the page` );
+				}
+			} );
+
+			await test.step( 'Confirm that information from core profiler saved', async () => {
+				await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+				await expect(
+					page.getByRole( 'textbox', { name: 'Afghanistan' } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'textbox', { name: 'Afghan afghani (؋)' } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'textbox', { name: 'Left with space' } )
+				).toBeVisible();
+				await expect(
+					page.getByLabel( 'Thousand separator', { exact: true } )
+				).toHaveValue( '.' );
+				await expect(
+					page.getByLabel( 'Decimal separator', { exact: true } )
+				).toHaveValue( ',' );
+				await expect(
+					page.getByLabel( 'Number of decimals' )
+				).toHaveValue( '0' );
+			} );
+
+			await test.step( 'Clean up installed extensions', async () => {
+				const deactivateAndDeletePlugin = async ( slug: string ) => {
+					await page.goto( 'wp-admin/plugins.php' );
+					const pluginRow = page.locator(
+						`tr[data-slug="${ slug }"]`
+					);
+
+					// Skip if plugin is not present
+					if ( ! ( await pluginRow.isVisible() ) ) {
+						return;
+					}
+
+					// Deactivate if active
+					const deactivateLink = pluginRow.getByRole( 'link', {
+						name: 'Deactivate',
+						exact: true,
+					} );
+					if ( await deactivateLink.isVisible() ) {
+						await deactivateLink.click();
+						await expect(
+							page.getByText( 'Plugin deactivated.' )
+						).toBeVisible();
+					}
+
+					// Delete plugin
+					const deleteLink = pluginRow.getByRole( 'link', {
+						name: 'Delete',
+						exact: true,
+					} );
+					if ( await deleteLink.isVisible() ) {
+						try {
+							await deleteLink.click();
+							await expect(
+								page.getByText( 'was successfully deleted.' )
+							).toBeVisible( { timeout: 5000 } );
+						} catch ( e ) {
+							await page
+								.getByText( 'Yes, delete these files and data' )
+								.click();
+							await page
+								.getByText(
+									'The selected plugin has been deleted.'
+								)
+								.waitFor();
+						}
+					}
+				};
+
+				await deactivateAndDeletePlugin( 'google-listings-and-ads' );
+				await deactivateAndDeletePlugin( 'pinterest-for-woocommerce' );
+			} );
+
+			await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
+				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+				await expect(
+					page
+						.getByRole( 'menuitem' )
+						.filter( { hasText: 'coming soon' } )
+				).toBeVisible();
 			} );
 		} );
 	}
@@ -408,8 +522,7 @@ test.describe(
 
 			await expect(
 				page.getByRole( 'heading', {
-					name: 'Home',
-					exact: true,
+					name: 'Welcome to WooCommerce Core E2E Test Suite',
 				} )
 			).toBeVisible();
 

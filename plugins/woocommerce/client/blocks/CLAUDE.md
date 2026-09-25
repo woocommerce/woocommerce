@@ -17,10 +17,10 @@
 
 # Test
 pnpm --filter=@woocommerce/block-library test:js                      # Jest unit tests
-pnpm --filter=@woocommerce/block-library test:js -- path/to/test      # Specific test file
-pnpm --filter=@woocommerce/block-library test:watch                   # Jest watch mode
+pnpm --filter=@woocommerce/block-library test:js path/to/test         # Specific test file
+pnpm --filter=@woocommerce/block-library test:js --watch              # Jest watch mode
 pnpm --filter=@woocommerce/block-library test:update                  # Update snapshots
-pnpm --filter=@woocommerce/block-library test:e2e                     # Playwright E2E tests
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks         # Playwright E2E tests (needs env:start:blocks)
 
 # Lint (target specific files only)
 pnpm --filter=@woocommerce/block-library lint:js path/to/file.tsx --fix  # Fix JS/TS file (path relative to client/blocks; --fix after the path)
@@ -28,8 +28,9 @@ pnpm --filter=@woocommerce/block-library lint:css                      # Styleli
 pnpm --filter=@woocommerce/block-library ts:check                     # TypeScript type checking
 
 # Environment
-pnpm --filter=@woocommerce/block-library env:start                    # Start wp-env + setup
-pnpm --filter=@woocommerce/block-library env:restart                  # Clean restart
+pnpm --filter=@woocommerce/plugin-woocommerce env:dev                 # Start wp-env at localhost:8888
+pnpm --filter=@woocommerce/plugin-woocommerce env:dev:restart         # Clean restart
+pnpm --filter=@woocommerce/plugin-woocommerce env:start:blocks        # Start + seed the E2E env
 
 # Analysis
 pnpm --filter=@woocommerce/block-library knip                         # Find unused code (dead code detector)
@@ -43,13 +44,13 @@ pnpm --filter=@woocommerce/block-library analyze-bundles              # Webpack 
 ```text
 client/blocks/
 ├── assets/js/
-│   ├── blocks/              # ~56 block implementations (cart, checkout, product-*, filter-*)
-│   ├── atomic/              # Atomic/primitive blocks (product elements)
+│   ├── blocks/              # Block implementations (cart, checkout, filters, products)
+│   │   └── product-elements-blocks/ # Reusable product element blocks
 │   ├── base/                # Shared components, context, hooks, stores
 │   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
-│   └── utils/               # Utility functions
+│   └── utils/               # Shared utility functions
 ├── packages/
 │   ├── public-api/          # Supported package-root extension contracts
 │   │   ├── block-data/      # WordPress @data stores
