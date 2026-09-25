@@ -1872,8 +1872,9 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @param bool          $expected_has_errors Expected error flag.
 	 * @param bool          $reload_checkout     Whether the callback requests a checkout reload.
 	 * @param string[]|null $rendered_types      Notice types a `woocommerce_notice_types` filter keeps, or null for no filter. An empty list suppresses every notice, the way Funnel Builder does on AJAX requests.
+	 * @param bool          $as_iterator         Whether the filter returns the types as an `ArrayIterator` instead of an array.
 	 */
-	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, ?array $rendered_types = null ): void {
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, ?array $rendered_types = null, bool $as_iterator = false ): void {
 		$product            = null;
 		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
 		$original_customer  = clone WC()->customer;
@@ -1912,8 +1913,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			if ( null !== $rendered_types ) {
 				add_filter(
 					'woocommerce_notice_types',
-					static function () use ( $rendered_types ) {
-						return $rendered_types;
+					static function () use ( $rendered_types, $as_iterator ) {
+						return $as_iterator ? new ArrayIterator( $rendered_types ) : $rendered_types;
 					}
 				);
 			}
@@ -2076,6 +2077,20 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				false,
 				false,
 				array( 'success', 'notice' ),
+			),
+			'error notice through a filter returning an iterator' => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+				array( 'error', 'success', 'notice' ),
+				true,
 			),
 		);
 	}

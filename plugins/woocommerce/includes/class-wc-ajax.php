@@ -484,7 +484,8 @@ class WC_AJAX {
 			// Capture the error count before printing, because wc_print_notices() clears the queue.
 			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
 			// flag only reports errors that were rendered. Record the types that filter settles on
-			// rather than applying it a second time.
+			// rather than applying it a second time; a non-array iterable can't be inspected after
+			// wc_print_notices() consumes it, so it falls back to trusting the rendered output.
 			$error_notice_count = wc_notice_count( 'error' );
 			$rendered_types     = array();
 			$record_types       = static function ( $types ) use ( &$rendered_types ) {
@@ -494,7 +495,7 @@ class WC_AJAX {
 			add_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
 			$messages = wc_print_notices( true );
 			remove_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
-			$has_error_notices = 0 < $error_notice_count && is_array( $rendered_types ) && in_array( 'error', $rendered_types, true ) && '' !== $messages;
+			$has_error_notices = 0 < $error_notice_count && ( ! is_array( $rendered_types ) || in_array( 'error', $rendered_types, true ) ) && '' !== $messages;
 		} else {
 			$has_error_notices = false;
 			$messages          = '';
