@@ -10,6 +10,7 @@ import './checkout-billing-address-block';
 import './checkout-actions-block';
 import './checkout-additional-information-block';
 import './checkout-order-note-block';
+import './checkout-order-summary-mobile-block';
 import './checkout-order-summary-block';
 import './checkout-payment-block';
 import './checkout-express-payment-block';

@@ -125,6 +125,11 @@ const settings = {
 											[]
 									  )
 									: false,
+								createBlock(
+									'woocommerce/checkout-order-summary-mobile-block',
+									{ lock: { remove: true } },
+									[]
+								),
 								showPolicyLinks
 									? createBlock(
 											'woocommerce/checkout-terms-block',

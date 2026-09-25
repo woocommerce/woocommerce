@@ -1,0 +1,23 @@
+{
+	"name": "woocommerce/checkout-order-summary-mobile-block",
+	"version": "1.0.0",
+	"title": "Order summary (mobile)",
+	"description": "Choose where the order summary appears on smaller screens.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"lock": false
+	},
+	"attributes": {
+		"lock": {
+			"type": "object"
+		}
+	},
+	"parent": [ "woocommerce/checkout-fields-block" ],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3
+}

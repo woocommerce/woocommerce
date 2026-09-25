@@ -143,6 +143,12 @@ const renderInnerBlocks = ( {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
+	const siblingBlockNames = Array.from( children )
+		.map( ( node: Node ) =>
+			node instanceof HTMLElement ? node.dataset.blockName : undefined
+		)
+		.filter( ( blockName ): blockName is string => Boolean( blockName ) );
+
 	return Array.from( children ).map( ( node: Node, index: number ) => {
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot
@@ -230,6 +236,7 @@ const renderInnerBlocks = ( {
 					<InnerBlockComponent
 						key={ componentKey }
 						{ ...componentProps }
+						siblingBlockNames={ siblingBlockNames }
 					>
 						{
 							/**

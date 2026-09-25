@@ -32,6 +32,7 @@ import OrderNote from '../inner-blocks/checkout-order-note-block/block';
 import Terms from '../inner-blocks/checkout-terms-block/frontend';
 import { termsCheckboxDefaultText } from '../inner-blocks/checkout-terms-block/constants';
 import Actions from '../inner-blocks/checkout-actions-block/frontend';
+import MobileOrderSummary from '../inner-blocks/checkout-order-summary-mobile-block/frontend';
 import Totals from '../inner-blocks/checkout-totals-block/frontend';
 import OrderSummary from '../inner-blocks/checkout-order-summary-block/frontend';
 import CartItems from '../inner-blocks/checkout-order-summary-cart-items/frontend';
@@ -110,12 +111,19 @@ const CheckoutBlock = () => {
 				<AdditionalInformation />
 				<Payment />
 				<OrderNote />
+				<MobileOrderSummary />
 				<Terms
 					checkbox={ true }
 					showSeparator={ false }
 					text={ termsCheckboxDefaultText }
 				/>
-				<Actions />
+				<Actions
+					siblingBlockNames={ [
+						'woocommerce/checkout-order-summary-mobile-block',
+						'woocommerce/checkout-terms-block',
+						'woocommerce/checkout-actions-block',
+					] }
+				/>
 			</Fields>
 			<Totals>
 				<OrderSummary>
@@ -167,6 +175,25 @@ describe( 'Testing Checkout', () => {
 
 	afterEach( () => {
 		// MSW handlers are reset automatically in the global setup
+	} );
+
+	it( 'renders the mobile order summary before terms', async () => {
+		const { container } = render( <CheckoutBlock /> );
+
+		await waitFor( () => {
+			const mobileOrderSummary = container.querySelector(
+				'.checkout-order-summary-block-fill-wrapper'
+			);
+			const terms = container.querySelector(
+				'.wc-block-checkout__terms'
+			);
+
+			expect( mobileOrderSummary ).toBeInTheDocument();
+			expect( terms ).toBeInTheDocument();
+			expect(
+				mobileOrderSummary?.compareDocumentPosition( terms as Node )
+			).toBe( Node.DOCUMENT_POSITION_FOLLOWING );
+		} );
 	} );
 
 	it( 'Renders checkout if there are items in the cart', async () => {

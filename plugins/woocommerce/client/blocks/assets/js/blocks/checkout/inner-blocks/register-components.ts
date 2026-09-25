@@ -25,6 +25,7 @@ import CheckoutOrderNoteBlock from './checkout-order-note-block/block';
 import CheckoutTermsBlock from './checkout-terms-block/frontend';
 import CheckoutActionsBlock from './checkout-actions-block/frontend';
 import CheckoutTotalsBlock from './checkout-totals-block/frontend';
+import CheckoutOrderSummaryMobileBlock from './checkout-order-summary-mobile-block/frontend';
 import CheckoutOrderSummaryBlock from './checkout-order-summary-block/frontend';
 import CheckoutOrderSummaryCartItemsBlock from './checkout-order-summary-cart-items/frontend';
 import CheckoutOrderSummarySubtotalBlock from './checkout-order-summary-subtotal/frontend';
@@ -103,6 +104,12 @@ registerCheckoutBlock( {
 registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_ACTIONS,
 	component: CheckoutActionsBlock,
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CHECKOUT_ORDER_SUMMARY_MOBILE,
+	component: CheckoutOrderSummaryMobileBlock,
+	force: false,
 } );
 
 registerCheckoutBlock( {
