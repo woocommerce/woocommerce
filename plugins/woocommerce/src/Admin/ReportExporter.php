@@ -229,16 +229,26 @@ class ReportExporter {
 	 * @param int    $num_batches Optional. Number of batches the export was queued in, which is how many
 	 *                            part files the last batch joins. Exports queued before 11.3.0 run without it.
 	 * @return void
+	 * @throws \Throwable When the page cannot be written, so Action Scheduler marks the batch failed.
 	 */
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 
-		// An export queued before 11.3.0 has no batch count, and its batches append to the export file.
-		if ( null === self::get_pending_batches( $report_type, $export_id ) ) {
-			$exporter->write_export_page();
-		} else {
-			$exporter->write_export_part( $page_number );
+		try {
+			// An export queued before 11.3.0 has no batch count, and its batches append to the export file.
+			if ( null === self::get_pending_batches( $report_type, $export_id ) ) {
+				$exporter->write_export_page();
+			} else {
+				$exporter->write_export_part( $page_number );
+			}
+		} catch ( \Throwable $e ) {
+			// A page that fails never counts down, so the export is never finished or emailed. Say why here.
+			wc_get_logger()->error(
+				sprintf( 'Could not write page %1$d of the %2$s report export %3$s: %4$s', $page_number, $report_type, $export_id, $e->getMessage() ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			throw $e;
 		}
 
 		$remaining = self::record_finished_batch( $report_type, $export_id );
@@ -264,7 +274,10 @@ class ReportExporter {
 		}
 
 		if ( ! self::claim_finished_export( $report_type, $export_id ) ) {
-			self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $num_batches, $remaining ) );
+			// At zero another batch claimed the export first, and it sets 100 once the file is written.
+			if ( $remaining > 0 ) {
+				self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $num_batches, $remaining ) );
+			}
 			return;
 		}
 

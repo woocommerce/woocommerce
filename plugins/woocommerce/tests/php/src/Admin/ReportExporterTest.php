@@ -960,6 +960,79 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch that loses the claim to another batch does not report the export finished.
+	 */
+	public function test_batch_that_loses_the_claim_does_not_report_the_export_finished(): void {
+		global $wpdb;
+
+		$batches = $this->queue_stock_export( 'lostclaim' );
+		$last    = array_pop( $batches );
+
+		foreach ( $batches as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		// Another batch claims the export after this one reads the count as zero, and before this one claims it.
+		$option  = ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:lostclaim' );
+		$claimed = false;
+		add_filter(
+			'query',
+			function ( $query ) use ( &$claimed, $option, $wpdb ) {
+				if ( ! $claimed && false !== strpos( $query, "SET option_value = '-1'" ) && false !== strpos( $query, $option ) ) {
+					$claimed = true;
+					$wpdb->update( $wpdb->options, array( 'option_value' => '-1' ), array( 'option_name' => $option ) );
+				}
+
+				return $query;
+			}
+		);
+
+		ReportExporter::export_report( ...$last );
+
+		$this->assertTrue( $claimed, 'The other batch should have claimed the export.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'lostclaim' ), 'The status endpoint hands out the download link at 100.' );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox A page that fails to write is logged, and the failure still reaches the scheduler.
+	 */
+	public function test_page_that_fails_to_write_is_logged(): void {
+		$batches = $this->queue_stock_export( 'failedpage' );
+
+		add_filter(
+			'woocommerce_export_admin_stock_report_row_data',
+			static function () {
+				throw new \RuntimeException( 'Report query failed.' );
+			}
+		);
+
+		$logged = array();
+		add_filter(
+			'woocommerce_logger_log_message',
+			function ( $message, $level ) use ( &$logged ) {
+				$logged[] = $level . ': ' . $message;
+
+				return $message;
+			},
+			10,
+			2
+		);
+
+		try {
+			ReportExporter::export_report( ...$batches[1] );
+			$this->fail( 'The failure must reach Action Scheduler, so the batch is marked failed.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Report query failed.', $e->getMessage() );
+		}
+
+		$this->assertNotEmpty(
+			preg_grep( '/^error: Could not write page 2 of the stock report export failedpage: Report query failed\.$/', $logged ),
+			'The failed page must be logged, since the export is then never finished or emailed.'
+		);
+	}
+
+	/**
 	 * @testdox Cleanup deletes the options of an export that only left part files behind.
 	 */
 	public function test_cleanup_deletes_options_of_an_export_that_left_only_part_files(): void {
