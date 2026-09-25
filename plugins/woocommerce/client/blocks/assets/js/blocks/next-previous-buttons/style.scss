@@ -46,7 +46,6 @@
 	outline-offset: -2px;
 }
 
-:where(.wc-block-next-previous-buttons__button:disabled),
 :where(.wc-block-next-previous-buttons__button[aria-disabled="true"]) {
 	:where(.wc-block-next-previous-buttons__icon) {
 		opacity: 30%;
