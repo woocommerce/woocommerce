@@ -825,4 +825,40 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		// The tool still offers to run, rather than reporting that nothing was found.
 		$this->assertStringContainsString( 'Check and fix', $this->get_tool()['button'] );
 	}
+
+	/**
+	 * @testdox Keeps the previous Overview performance defaults only for stores installed before 11.3.0.
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           ["11.2.0", true]
+	 *           ["11.3.0-dev", true]
+	 *           ["11.3.0", false]
+	 *           ["11.4.0", false]
+	 *
+	 * @param string|null $initial_version Initial installed version, or null when not recorded.
+	 * @param bool        $expected        Whether the previous defaults are kept.
+	 */
+	public function test_performance_defaults_depend_on_initial_installed_version( ?string $initial_version, bool $expected ): void {
+		if ( null === $initial_version ) {
+			delete_option( \WC_Install::INITIAL_INSTALLED_VERSION );
+		} else {
+			update_option( \WC_Install::INITIAL_INSTALLED_VERSION, $initial_version );
+		}
+
+		$settings = $this->sut->handle_woocommerce_admin_shared_settings( array( 'currency' => 'USD' ) );
+
+		$this->assertSame( $expected, $settings['usesLegacyPerformanceDefaults'] );
+		$this->assertSame( 'USD', $settings['currency'], 'Existing shared settings should be kept' );
+	}
+
+	/**
+	 * @testdox Adds the performance defaults flag when another callback returned something other than an array.
+	 */
+	public function test_performance_defaults_flag_is_added_to_non_array_settings(): void {
+		update_option( \WC_Install::INITIAL_INSTALLED_VERSION, '11.3.0' );
+
+		$settings = $this->sut->handle_woocommerce_admin_shared_settings( null );
+
+		$this->assertSame( array( 'usesLegacyPerformanceDefaults' => false ), $settings );
+	}
 }
