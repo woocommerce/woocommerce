@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Tests\Admin;
 
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Testing\Tools\FakeQueue;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -26,17 +28,150 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	private $paths = array();
 
 	/**
-	 * Remove files that the database transaction does not roll back.
+	 * Queue the scheduler records its actions in, for the tests that run an export's pages.
+	 *
+	 * @var FakeQueue|null
+	 */
+	private $queue = null;
+
+	/**
+	 * Number of the recorded export pages a test has run.
+	 *
+	 * @var int
+	 */
+	private $pages_run = 0;
+
+	/**
+	 * Remove files and the scheduler queue, which the database transaction does not roll back.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->paths as $path ) {
-			if ( file_exists( $path ) ) {
-				wp_delete_file( $path );
+		try {
+			foreach ( $this->paths as $path ) {
+				if ( file_exists( $path ) ) {
+					wp_delete_file( $path );
+				}
+			}
+			$this->paths = array();
+
+			if ( $this->queue ) {
+				ReportExporter::set_queue( null );
+				$this->queue = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Queue a stock report export, recording its actions instead of scheduling them.
+	 *
+	 * The report is exported two rows at a time, so seven products span four pages.
+	 *
+	 * @param string $export_id  Export ID.
+	 * @param bool   $send_email Whether the export is emailed.
+	 * @param bool   $signed_in  Whether a merchant is signed in when the export is queued. The email is addressed to them.
+	 * @return void
+	 */
+	private function queue_stock_export( string $export_id, bool $send_email = true, bool $signed_in = true ): void {
+		wp_set_current_user( $signed_in ? $this->factory->user->create( array( 'role' => 'administrator' ) ) : 0 );
+
+		for ( $i = 0; $i < 7; $i++ ) {
+			WC_Helper_Product::create_simple_product();
+		}
+
+		add_filter(
+			'woocommerce_admin_stock_report_export_batch_limit',
+			static function () {
+				return 2;
+			}
+		);
+
+		$this->queue = new FakeQueue();
+		ReportExporter::set_queue( $this->queue );
+
+		ReportExporter::queue_report_export( $export_id, 'stock', array(), $send_email );
+
+		$this->paths[] = $this->export_path( $export_id );
+		$this->paths[] = $this->export_path( $export_id ) . '.headers';
+	}
+
+	/**
+	 * Run the export pages that have been queued and not run yet, in the order they were queued.
+	 *
+	 * @param int $count Number of pages to run, or 0 to run until no queued page is left.
+	 * @return void
+	 */
+	private function run_queued_pages( int $count = 0 ): void {
+		for ( $run = 0; 0 === $count || $run < $count; $run++ ) {
+			$pages = $this->recorded_actions( ReportExporter::get_action( 'export_report' ) );
+
+			if ( ! isset( $pages[ $this->pages_run ] ) ) {
+				return;
+			}
+
+			ReportExporter::export_report( ...$pages[ $this->pages_run++ ] );
+		}
+	}
+
+	/**
+	 * Get the arguments of every action of one hook that the scheduler recorded.
+	 *
+	 * @param string $hook Action hook name.
+	 * @return array[]
+	 */
+	private function recorded_actions( string $hook ): array {
+		$recorded = array();
+
+		foreach ( $this->queue->get_methods_called() as $call ) {
+			if ( isset( $call['hook'] ) && $hook === $call['hook'] ) {
+				$recorded[] = $call['args'];
 			}
 		}
-		$this->paths = array();
 
-		parent::tearDown();
+		return $recorded;
+	}
+
+	/**
+	 * Get the path an export's file is written to.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return string
+	 */
+	private function export_path( string $export_id ): string {
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-stock-report-export-{$export_id}" );
+
+		return ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+	}
+
+	/**
+	 * Read back the SKU of each row an export has written.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return string[]
+	 */
+	private function exported_skus( string $export_id ): array {
+		$path = $this->export_path( $export_id );
+		$rows = file_exists( $path ) ? file( $path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) : array();
+
+		return array_map(
+			static function ( $row ) {
+				return str_getcsv( $row, ',', '"', '\\' )[1];
+			},
+			(array) $rows
+		);
+	}
+
+	/**
+	 * Get the SKUs of the stock report, in the order one request to the report returns them.
+	 *
+	 * @return string[]
+	 */
+	private function report_skus(): array {
+		$request = new \WP_REST_Request( 'GET', '/wc-analytics/reports/stock' );
+		$request->set_param( 'per_page', 100 );
+
+		return array_column( rest_do_request( $request )->get_data(), 'sku' );
 	}
 
 	/**
@@ -655,5 +790,195 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertSame( 10, ReportExporter::get_export_percentage_complete( 'orders', 'second' ) );
 		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'unknown' ), 'An export that was never queued has no progress.' );
 		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'Progress must not be written to the option every export used to share.' );
+	}
+
+	/**
+	 * @testdox An export queues its pages one at a time, so they run in order and every row is kept in report order.
+	 */
+	public function test_pages_run_one_at_a_time_in_report_order(): void {
+		$this->queue_stock_export( 'chain' );
+		$export_hook = ReportExporter::get_action( 'export_report' );
+
+		$this->assertCount( 1, $this->recorded_actions( $export_hook ), 'Only the first page is queued up front.' );
+
+		$progress = array();
+		for ( $page = 1; $page <= 4; $page++ ) {
+			$this->run_queued_pages( 1 );
+			$progress[] = ReportExporter::get_export_percentage_complete( 'stock', 'chain' );
+		}
+
+		$this->assertSame( array( 25, 50, 75, 100 ), $progress );
+		$this->assertCount( 4, $this->recorded_actions( $export_hook ), 'The last page must not queue another one.' );
+		$this->assertSame( $this->report_skus(), $this->exported_skus( 'chain' ), 'Every row must be exported, in report order.' );
+
+		$next_pages = wp_list_filter( $this->queue->get_methods_called(), array( 'hook' => $export_hook ) );
+		$this->assertSame(
+			array( 'schedule_single', 'add', 'add', 'add' ),
+			array_values( wp_list_pluck( $next_pages, 'method' ) ),
+			'Later pages are queued to run now, so the runner that wrote a page picks up the next one in the same run.'
+		);
+	}
+
+	/**
+	 * @testdox The last page makes the export downloadable and schedules the email once.
+	 */
+	public function test_last_page_finishes_the_export(): void {
+		$this->queue_stock_export( 'finish' );
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-finish' );
+
+		$this->run_queued_pages( 3 );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export with a page still to run must not be downloadable.' );
+		$this->assertCount( 0, $this->recorded_actions( $email_hook ), 'The email must wait for the last page.' );
+
+		$this->run_queued_pages();
+
+		$this->assertTrue( $exporter->export_file_exists() );
+		$this->assertSame(
+			array( array( get_current_user_id(), 'finish', 'stock', array() ) ),
+			$this->recorded_actions( $email_hook ),
+			'The email is addressed to the user who asked for the export, with the arguments the report was queued with.'
+		);
+	}
+
+	/**
+	 * @testdox An export still finishes when rows are added to the report while its pages run.
+	 */
+	public function test_export_finishes_when_rows_are_added_during_the_export(): void {
+		$this->queue_stock_export( 'grew' );
+
+		$this->run_queued_pages( 3 );
+
+		// The last page now counts 9 rows but writes up to row 8, which the parent exporter reads as 88%.
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_simple_product();
+
+		$this->run_queued_pages();
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-grew' );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The last page must write the headers row file whatever the rows add up to.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'grew' ) );
+		$this->assertCount( 1, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox An export schedules no email when it was not asked to be emailed, or when no user asked for it.
+	 * @testWith [false, true]
+	 *           [true, false]
+	 *
+	 * @param bool $send_email Whether the export is asked to be emailed.
+	 * @param bool $signed_in  Whether a merchant is signed in when the export is queued.
+	 */
+	public function test_export_without_a_recipient_schedules_no_email( bool $send_email, bool $signed_in ): void {
+		$this->queue_stock_export( 'noemail', $send_email, $signed_in );
+
+		$this->run_queued_pages();
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'noemail' ) );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox An export runs every page and sends the email in the same request when Action Scheduler is not used.
+	 */
+	public function test_export_runs_inline_without_action_scheduler(): void {
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		reset_phpmailer_instance();
+
+		$stack_depths = array();
+		add_filter(
+			'woocommerce_csv_exporter_fopen_mode',
+			static function ( $mode ) use ( &$stack_depths ) {
+				$stack_depths[] = count( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Measures how deep each page is written.
+
+				return $mode;
+			}
+		);
+
+		$this->queue_stock_export( 'inline' );
+
+		$this->assertSame( $this->report_skus(), $this->exported_skus( 'inline' ) );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'inline' ) );
+		$this->assertCount( 1, tests_retrieve_phpmailer_instance()->mock_sent, 'The email must be sent once the last page is written.' );
+		$this->assertSame( array(), $this->queue->get_methods_called(), 'Nothing is queued when Action Scheduler is not used.' );
+		$this->assertCount( 1, array_unique( $stack_depths ), 'Every page must be written at the same stack depth, or a long export runs out of stack.' );
+	}
+
+	/**
+	 * @testdox An email queued before 11.3.0 waits while a page of its export is still pending.
+	 */
+	public function test_email_queued_before_pages_were_chained_waits_for_its_pages(): void {
+		$user_id    = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+		$email_args = array( $user_id, 'waiting', 'stock', array() );
+		reset_phpmailer_instance();
+
+		// Before 11.3.0 the pages could run out of order, so a later page can report 100% while page 1 is still pending.
+		ReportExporter::update_export_percentage_complete( 'stock', 'waiting', 100 );
+		as_schedule_single_action( time(), ReportExporter::get_action( 'export_report' ), array( 1, 'waiting', 'stock', array() ), ReportExporter::$group );
+
+		do_action_ref_array( $email_hook, $email_args );
+
+		$this->assertEmpty( tests_retrieve_phpmailer_instance()->mock_sent, 'The email must not go out while a page of its export is pending.' );
+		$this->assertNotFalse( as_next_scheduled_action( $email_hook, $email_args, ReportExporter::$group ), 'The email must be queued again to run after the page.' );
+	}
+
+	/**
+	 * @testdox A page of an export queued before 11.3.0 writes its rows and reports its own position, and queues nothing.
+	 */
+	public function test_page_of_an_export_queued_before_pages_were_chained(): void {
+		$this->paths[] = $this->export_path( 'preupgrade' );
+		$this->paths[] = $this->export_path( 'preupgrade' ) . '.headers';
+
+		$this->queue = new FakeQueue();
+		ReportExporter::set_queue( $this->queue );
+
+		WC_Helper_Product::create_simple_product();
+
+		// Four arguments, the way the pages of an export queued before 11.3.0 still call it.
+		ReportExporter::export_report( 1, 'preupgrade', 'stock', array() );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-preupgrade' );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'preupgrade' ) );
+		$this->assertTrue( $exporter->export_file_exists(), 'The last page must still write the headers row file, or the emailed link is not downloadable.' );
+		$this->assertSame( array(), $this->queue->get_methods_called(), 'Its other pages and its email were queued with it, so it must queue nothing.' );
+	}
+
+	/**
+	 * @testdox An export that never finished is not emailed, and says so in the log.
+	 */
+	public function test_unfinished_export_is_not_emailed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		reset_phpmailer_instance();
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$logged = array();
+		add_filter(
+			'woocommerce_logger_log_message',
+			function ( $message, $level ) use ( &$logged ) {
+				$logged[] = $level . ': ' . $message;
+
+				return $message;
+			},
+			10,
+			2
+		);
+
+		ReportExporter::update_export_percentage_complete( 'stock', 'unfinished', 40 );
+
+		ReportExporter::email_report_download_link( $user_id, 'unfinished', 'stock', array() );
+
+		$this->assertEmpty( $mailer->mock_sent, 'An export that never finished must not be emailed.' );
+		$this->assertNotEmpty(
+			preg_grep( '/^warning: Not emailing the stock report export unfinished/', $logged ),
+			'The skipped email must be logged, since the scheduler records the action as complete.'
+		);
 	}
 }
