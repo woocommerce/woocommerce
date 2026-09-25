@@ -2021,7 +2021,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				'name'                                 => 'New Product Attempt That Fails',
 				'sku'                                  => $original_product_sku,
 				// Duplicate SKU.
-												'type' => 'simple',
+				'type'                                 => 'simple',
 				'regular_price'                        => '20',
 				'images'                               => array(
 					array(
