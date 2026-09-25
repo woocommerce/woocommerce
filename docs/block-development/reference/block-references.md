@@ -681,6 +681,16 @@ Shows the cart fee row.
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
+## Order summary (mobile) - woocommerce/checkout-order-summary-mobile-block
+
+Choose where the order summary appears on smaller screens.
+
+- **Name:** woocommerce/checkout-order-summary-mobile-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
+- **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Attributes:** lock
+
 ## Shipping - woocommerce/checkout-order-summary-shipping-block
 
 Shows the cart shipping row.

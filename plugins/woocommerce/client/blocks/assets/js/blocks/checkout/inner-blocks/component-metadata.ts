@@ -16,6 +16,7 @@ import CHECKOUT_PICKUP_LOCATION from './checkout-pickup-options-block/block.json
 import CHECKOUT_TERMS from './checkout-terms-block/block.json';
 import CHECKOUT_TOTALS from './checkout-totals-block/block.json';
 import CHECKOUT_ORDER_SUMMARY from './checkout-order-summary-block/block.json';
+import CHECKOUT_ORDER_SUMMARY_MOBILE from './checkout-order-summary-mobile-block/block.json';
 import CHECKOUT_ORDER_SUMMARY_SUBTOTAL from './checkout-order-summary-subtotal/block.json';
 import CHECKOUT_ORDER_SUMMARY_FEE from './checkout-order-summary-fee/block.json';
 import CHECKOUT_ORDER_SUMMARY_DISCOUNT from './checkout-order-summary-discount/block.json';
@@ -41,6 +42,7 @@ export default {
 	CHECKOUT_TERMS,
 	CHECKOUT_TOTALS,
 	CHECKOUT_ORDER_SUMMARY,
+	CHECKOUT_ORDER_SUMMARY_MOBILE,
 	CHECKOUT_ORDER_SUMMARY_SUBTOTAL,
 	CHECKOUT_ORDER_SUMMARY_FEE,
 	CHECKOUT_ORDER_SUMMARY_DISCOUNT,

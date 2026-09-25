@@ -29,6 +29,7 @@ export type BlockAttributes = {
 	placeOrderButtonLabel: string;
 	priceSeparator: string;
 	returnToCartButtonLabel: string;
+	siblingBlockNames?: string[];
 };
 
 const Block = ( {
@@ -38,6 +39,7 @@ const Block = ( {
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
+	siblingBlockNames = [],
 }: BlockAttributes ) => {
 	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
 		useCheckoutSubmit();
@@ -65,10 +67,13 @@ const Block = ( {
 	const shouldShowReturnToCart = cartLink && showReturnToCart;
 
 	const showPrice = className?.includes( 'is-style-with-price' ) || false;
+	const hasMobileOrderSummaryBlock = siblingBlockNames.includes(
+		'woocommerce/checkout-order-summary-mobile-block'
+	);
 
 	return (
 		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
-			<CheckoutOrderSummarySlot />
+			{ ! hasMobileOrderSummaryBlock && <CheckoutOrderSummarySlot /> }
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>
