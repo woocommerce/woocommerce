@@ -36,6 +36,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	protected $processed = array();
 
 	/**
+	 * IDs of orders currently being permanently deleted, keyed by order ID.
+	 *
+	 * @var array<int, true>
+	 */
+	private static $orders_being_deleted = array();
+
+	/**
 	 * Stores webhook data.
 	 *
 	 * @var array
@@ -98,9 +105,77 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		if ( is_array( $hooks ) && ! empty( $url ) ) {
 			foreach ( $hooks as $hook ) {
-				add_action( $hook, array( $this, 'process' ) );
+				if ( 'order.updated' === $this->get_topic() && 'woocommerce_delete_order_refund' === $hook ) {
+					remove_action( $hook, array( $this, 'process' ), 10 );
+					add_action( $hook, array( $this, 'process_refund_deleted' ), 10, 2 );
+					add_action( 'woocommerce_before_delete_order', array( self::class, 'handle_woocommerce_before_delete_order' ) );
+					add_action( 'woocommerce_delete_order', array( self::class, 'handle_woocommerce_delete_order' ) );
+				} else {
+					add_action( $hook, array( $this, 'process' ) );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Process a refund deletion as an update to its parent order.
+	 *
+	 * Must be public for action dispatch via add_action() in enqueue().
+	 * Compatibility signature: process_refund_deleted($refund_id, $order_id = 0).
+	 * The optional second argument preserves existing one-argument action calls.
+	 *
+	 * @since 11.3.0
+	 * @param int $refund_id Deleted refund ID.
+	 * @param int $order_id  Parent order ID. Optional to maintain backward compatibility.
+	 */
+	public function process_refund_deleted( $refund_id, $order_id = 0 ): void {
+		unset( $refund_id );
+
+		if (
+			! is_int( $order_id )
+			&& ! ( is_string( $order_id ) && ctype_digit( $order_id ) )
+		) {
+			return;
+		}
+
+		$order_id = filter_var( $order_id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+		if ( false === $order_id ) {
+			return;
+		}
+
+		// Refunds deleted along with their parent order would deliver an update for an order that no longer exists.
+		if ( isset( self::$orders_being_deleted[ $order_id ] ) ) {
+			return;
+		}
+
+		$this->process( (int) $order_id );
+	}
+
+	/**
+	 * Handle the woocommerce_before_delete_order hook.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 * @param mixed $order_id ID of the order about to be deleted.
+	 */
+	public static function handle_woocommerce_before_delete_order( $order_id ): void {
+		$order_id = absint( $order_id );
+		if ( $order_id > 0 ) {
+			self::$orders_being_deleted[ $order_id ] = true;
+		}
+	}
+
+	/**
+	 * Handle the woocommerce_delete_order hook.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 * @param mixed $order_id ID of the order that has been deleted.
+	 */
+	public static function handle_woocommerce_delete_order( $order_id ): void {
+		unset( self::$orders_being_deleted[ absint( $order_id ) ] );
 	}
 
 	/**
@@ -1023,6 +1098,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'order.updated'     => array(
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
+				'woocommerce_delete_order_refund',
 			),
 			'order.deleted'     => array(
 				'wp_trash_post',

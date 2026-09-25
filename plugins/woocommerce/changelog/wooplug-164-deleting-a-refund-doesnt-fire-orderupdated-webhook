@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+`order.updated` webhook should be triggered when refund is deleted on an order.
