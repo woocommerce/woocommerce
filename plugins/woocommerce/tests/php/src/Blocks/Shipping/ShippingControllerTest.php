@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 /**
  * Unit tests for the PatternRegistry class.
  */
-class ShippingControllerTest extends \WP_UnitTestCase {
+class ShippingControllerTest extends \WC_Unit_Test_Case {
 	/**
 	 * The registry instance.
 	 *
@@ -52,7 +52,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Setup mock logger.
@@ -92,7 +92,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		global $woocommerce;
 
 		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
