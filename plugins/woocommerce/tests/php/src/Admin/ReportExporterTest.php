@@ -906,6 +906,46 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch that runs again after the export was claimed does not report it finished.
+	 */
+	public function test_batch_running_again_does_not_report_an_unwritten_export_finished(): void {
+		$batches = $this->queue_stock_export( 'ranagain' );
+		$last    = array_pop( $batches );
+
+		// The first page runs twice, so the count reaches zero before the last page has run.
+		ReportExporter::export_report( ...$batches[0] );
+		foreach ( $batches as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		ReportExporter::export_report( ...$last );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-ranagain' );
+
+		$this->assertFalse( $exporter->export_file_exists() );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'ranagain' ), 'The status endpoint hands out the download link at 100.' );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox Cleanup deletes the options of an export that only left part files behind.
+	 */
+	public function test_cleanup_deletes_options_of_an_export_that_left_only_part_files(): void {
+		$batches = $this->queue_stock_export( 'onlyparts' );
+		ReportExporter::export_report( ...$batches[0] );
+
+		$part = $this->export_path( 'onlyparts' ) . '.part1';
+		touch( $part, time() - ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFileDoesNotExist( $part );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'stock', 'onlyparts' ) );
+		$this->assertNull( get_option( ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:onlyparts' ), null ) );
+	}
+
+	/**
 	 * @testdox An export keeps every row when the uploads directory is a stream wrapper.
 	 */
 	public function test_export_on_a_stream_wrapper_uploads_directory(): void {

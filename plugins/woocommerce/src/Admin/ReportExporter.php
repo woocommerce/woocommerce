@@ -156,13 +156,14 @@ class ReportExporter {
 	/**
 	 * Delete the stored progress of an export whose file has been deleted.
 	 *
-	 * @param string $path Path of the deleted export body or its `.headers` companion.
+	 * @param string $path Path of the deleted export body, its `.headers` companion, or one of its part files.
 	 * @return void
 	 */
 	private static function delete_export_status( $path ) {
 		$filename = basename( $path );
 
-		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
+		// A failed export leaves only its part files, so those have to delete its options too.
+		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers|\.part\d+)?$/', $filename, $matches ) ) {
 			delete_option( self::get_status_option_name( $matches[1], $matches[2] ) );
 			delete_option( self::get_pending_batches_option_name( $matches[1], $matches[2] ) );
 		}
@@ -242,6 +243,12 @@ class ReportExporter {
 			}
 
 			self::update_export_percentage_complete( $report_type, $export_id, $percent_complete );
+			return;
+		}
+
+		// Below zero means the export was already claimed, and this batch ran again after that. Its
+		// progress would read past 100 and report a finished export that may never have been written.
+		if ( $remaining < 0 ) {
 			return;
 		}
 
