@@ -325,10 +325,18 @@ test.describe( `${ blockData.name }`, () => {
 
 			await admin.createNewPost();
 			await editor.openGlobalBlockInserter();
-			productGalleryBlockOption = page
-				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.title } );
+			const wooBlockList = page.getByRole( 'listbox', {
+				name: 'WooCommerce',
+			} );
+			productGalleryBlockOption = wooBlockList.getByRole( 'option', {
+				name: blockData.title,
+			} );
 
+			// Wait for the WooCommerce list to render before reading it, so the
+			// absence below is the block's own, not a list that has yet to load.
+			await expect(
+				wooBlockList.getByRole( 'option' ).first()
+			).toBeVisible();
 			await expect( productGalleryBlockOption ).toBeHidden();
 
 			await editor.insertBlockUsingGlobalInserter( 'Product' );

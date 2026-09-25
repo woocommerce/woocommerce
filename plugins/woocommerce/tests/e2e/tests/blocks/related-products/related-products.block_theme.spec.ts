@@ -39,5 +39,12 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect(
 			await editor.getBlockByName( blockData.slug )
 		).toBeHidden();
+
+		// The inserter item carries the related variation, not a bare collection.
+		const blocks = await editor.getBlocks();
+		expect( blocks[ 0 ].name ).toBe( 'woocommerce/product-collection' );
+		expect( blocks[ 0 ].attributes.collection ).toBe(
+			'woocommerce/product-collection/related'
+		);
 	} );
 } );

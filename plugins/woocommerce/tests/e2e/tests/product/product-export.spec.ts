@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { readFile } from 'node:fs/promises';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -68,7 +69,7 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Product > Export Selected Products', () => {
-	test( 'preserves multiple selection through export and clear', async ( {
+	test( 'carries a multi-product selection into the export and the generated CSV, then clears it', async ( {
 		page,
 		productsFixture,
 	} ) => {
@@ -129,6 +130,41 @@ test.describe( 'Product > Export Selected Products', () => {
 			).toHaveText(
 				'This tool allows you to generate and download a CSV file containing the selected products.'
 			);
+		} );
+
+		await test.step( 'Generate the CSV and verify it holds only the selected products', async () => {
+			const downloadPromise = page.waitForEvent( 'download' );
+			await page.getByRole( 'button', { name: 'Generate CSV' } ).click();
+			const download = await downloadPromise;
+			const csv = await readFile( await download.path(), 'utf8' );
+
+			// Keep only rows that start with an id, so a quoted field holding a
+			// newline cannot be read as a row of its own.
+			const dataRows = csv
+				.trim()
+				.split( '\n' )
+				.slice( 1 )
+				.filter( ( row ) => /^\d+,/.test( row ) );
+			const parentIds = dataRows
+				.map( ( row ) => row.split( ',' ) )
+				.filter(
+					( columns ) =>
+						// The Type column is a quoted list for a variation that
+						// is also virtual or downloadable.
+						! columns[ 1 ]
+							.replace( /^"/, '' )
+							.startsWith( 'variation' )
+				)
+				.map( ( columns ) => columns[ 0 ] );
+
+			expect( parentIds.toSorted() ).toEqual(
+				[
+					String( simpleProduct.id ),
+					String( variableProduct.id ),
+				].toSorted()
+			);
+			expect( csv ).toContain( simpleProduct.name );
+			expect( csv ).toContain( variableProduct.name );
 		} );
 
 		await test.step( 'Clear the selected products', async () => {

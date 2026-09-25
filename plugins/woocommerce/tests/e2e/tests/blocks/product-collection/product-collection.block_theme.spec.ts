@@ -62,11 +62,31 @@ test.describe( 'Product Collection', () => {
 		).toBeVisible();
 	} );
 
+	/**
+	 * The suite's only browser proof that each Product Element renders its own
+	 * product's content — SKU, summary, terms, rating and stock status — rather
+	 * than a shared or empty value.
+	 */
 	test( 'renders all Product Elements after save, reload, and frontend navigation', async ( {
 		page,
 		editor,
 		pageObject,
 	} ) => {
+		// Belt is the out-of-stock product on the first catalog page, so the
+		// Stock Indicator has something to say.
+		const beltIdOutput = await wpCLI(
+			'post list --title="Belt" --post_type=product --field=ID'
+		);
+		// npm writes its own banner to stdout, so the ID is the line that holds
+		// nothing but digits.
+		const beltId = beltIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
+		if ( ! beltId ) {
+			throw new Error( `Failed to find Belt: ${ beltIdOutput.stdout }` );
+		}
+		await wpCLI(
+			`eval '$product = wc_get_product( ${ beltId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
+		);
+
 		await pageObject.createNewPostAndInsertBlock();
 		await expect(
 			editor.canvas.locator( '[data-testid="product-image"]:visible' )
@@ -81,6 +101,28 @@ test.describe( 'Product Collection', () => {
 		await pageObject.refreshLocators( 'editor' );
 		await expect( pageObject.products ).toHaveCount( 9 );
 
+		// One instance per visible product card. The editor also keeps a hidden
+		// template instance, which the visible filter leaves out.
+		for ( const blockLabel of [
+			'Block: Product Rating',
+			'Block: Product Stock Indicator',
+		] ) {
+			await expect(
+				editor.canvas.getByLabel( blockLabel ).locator( 'visible=true' )
+			).toHaveCount( 9 );
+		}
+
+		// The SKU and the On-Sale Badge render nothing a card shows in the
+		// editor, so they are asserted present rather than counted.
+		for ( const blockLabel of [
+			'Block: Product SKU',
+			'Block: On-Sale Badge',
+		] ) {
+			await expect(
+				editor.canvas.getByLabel( blockLabel ).first()
+			).toBeAttached();
+		}
+
 		await page.goto( `/?p=${ postId }` );
 		await pageObject.refreshLocators( 'frontend' );
 
@@ -90,11 +132,14 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.productPrices ).toHaveCount( 9 );
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 
-		const beanie = pageObject.products.filter( {
-			has: page
-				.locator( SELECTORS.productTitle )
-				.filter( { hasText: /^Beanie$/ } ),
-		} );
+		const productCard = ( name: string ) =>
+			pageObject.products.filter( {
+				has: page
+					.locator( SELECTORS.productTitle )
+					.getByText( name, { exact: true } ),
+			} );
+
+		const beanie = productCard( 'Beanie' );
 		await expect( beanie ).toHaveCount( 1 );
 		await expect(
 			beanie.locator( SELECTORS.productImage.onFrontend )
@@ -114,6 +159,20 @@ test.describe( 'Product Collection', () => {
 		] ) {
 			await expect( beanie ).toContainText( content );
 		}
+
+		const hoodie = productCard( 'Hoodie' );
+		await expect( hoodie ).toHaveCount( 1 );
+		await expect(
+			// Matches "Rated 4.5 out of 5" and "Rated 4.50 out of 5": the
+			// trailing zero depends on how the average is formatted.
+			hoodie.getByRole( 'img', { name: /^Rated 4\.50? out of 5$/ } )
+		).toBeVisible();
+
+		const belt = productCard( 'Belt' );
+		await expect( belt ).toHaveCount( 1 );
+		await expect(
+			belt.locator( '.wc-block-components-product-stock-indicator' )
+		).toHaveText( 'Out of stock' );
 	} );
 
 	// The suite's only browser proof that an empty collection renders nothing on a
@@ -153,7 +212,12 @@ test.describe( 'Product Collection', () => {
 
 		const content = page.locator( 'main' );
 		await expect( content ).not.toContainText( 'Featured products' );
-		await expect( content ).not.toContainText( 'No products to display' );
+
+		// Only the collection with a No Results block reaches the page; the
+		// empty one renders no markup at all.
+		await expect(
+			content.locator( '.wp-block-woocommerce-product-collection' )
+		).toHaveCount( 1 );
 		await expect( page.getByText( 'No results found' ) ).toBeVisible();
 	} );
 
@@ -262,7 +326,7 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	test( 'resolves specific product and taxonomy requests', async ( {
+	test( 'sends the product and taxonomy location ids in the editor product request', async ( {
 		admin,
 		page,
 		pageObject,
