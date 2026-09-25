@@ -21,10 +21,6 @@ function purple_get_woocommerce_notice(): string {
 		return '';
 	}
 
-	if ( get_user_option( 'purple_woocommerce_notice_dismissed' ) ) {
-		return '';
-	}
-
 	// Read the parent theme directly: WooCommerce may not be loaded to register its custom header.
 	$headers = get_file_data( get_template_directory() . '/style.css', array( 'minimum_wc' => 'WC requires at least' ) );
 	$minimum = $headers['minimum_wc'];
@@ -133,58 +129,10 @@ function purple_woocommerce_admin_notice(): void {
 		wp_admin_notice(
 			$notice,
 			array(
-				'id'          => 'purple-woocommerce-notice',
-				'type'        => 'warning',
-				'dismissible' => true,
+				'id'   => 'purple-woocommerce-notice',
+				'type' => 'warning',
 			)
 		);
 	}
 }
 add_action( 'admin_notices', 'purple_woocommerce_admin_notice' );
-
-/**
- * Load dismissal handling only on screens displaying the notice.
- *
- * @internal
- *
- * @return void
- */
-function purple_woocommerce_notice_scripts(): void {
-	if ( '' === purple_get_woocommerce_notice() ) {
-		return;
-	}
-
-	wp_enqueue_script(
-		'purple-woocommerce-notice',
-		get_template_directory_uri() . '/assets/js/woocommerce-notice.js',
-		array( 'jquery' ),
-		wp_get_theme( get_template() )->get( 'Version' ),
-		true
-	);
-	wp_localize_script(
-		'purple-woocommerce-notice',
-		'purpleWooCommerceNotice',
-		array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'purple_dismiss_woocommerce_notice' ),
-		)
-	);
-}
-add_action( 'admin_enqueue_scripts', 'purple_woocommerce_notice_scripts' );
-
-/**
- * Remember dismissal for the current user on the current site.
- *
- * @internal
- *
- * @return void
- */
-function purple_dismiss_woocommerce_notice(): void {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( null, 403 );
-	}
-	check_ajax_referer( 'purple_dismiss_woocommerce_notice', 'nonce' );
-	update_user_option( get_current_user_id(), 'purple_woocommerce_notice_dismissed', true );
-	wp_send_json_success();
-}
-add_action( 'wp_ajax_purple_dismiss_woocommerce_notice', 'purple_dismiss_woocommerce_notice' );
