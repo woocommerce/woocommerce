@@ -1115,7 +1115,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$logger_mock->expects( $this->once() )
 			->method( 'info' )
 			->with(
-				'Push token deleted by WordPress.com.',
+				'Push token deleted by WordPress.com support.',
 				array(
 					'source'   => PushNotifications::FEATURE_NAME,
 					'token_id' => $push_token->get_id(),

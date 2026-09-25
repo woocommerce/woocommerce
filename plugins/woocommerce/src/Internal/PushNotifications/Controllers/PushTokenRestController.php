@@ -356,7 +356,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					->get( LegacyProxy::class )
 					->call_function( 'wc_get_logger' )
 					->info(
-						'Push token deleted by WordPress.com.',
+						'Push token deleted by WordPress.com support.',
 						array(
 							'source'   => PushNotifications::FEATURE_NAME,
 							'token_id' => $id,
