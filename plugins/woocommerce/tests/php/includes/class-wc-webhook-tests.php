@@ -430,12 +430,8 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_all_actions( 'before_delete_post' );
 		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
 
-		try {
-			foreach ( array( true, array( $product_id ), 'not-an-id' ) as $invalid_id ) {
-				do_action( 'before_delete_post', $invalid_id, get_post( $product_id ) );
-			}
-		} finally {
-			wp_cache_delete( 1, 'posts' );
+		foreach ( array( true, array( $product_id ), '1.5' ) as $invalid_id ) {
+			do_action( 'before_delete_post', $invalid_id, get_post( $product_id ) );
 		}
 
 		$this->assertSame( array(), $delivered_ids );
