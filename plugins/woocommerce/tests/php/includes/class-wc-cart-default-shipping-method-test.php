@@ -20,6 +20,13 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	private $zone;
 
 	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -37,6 +44,9 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 		// Set block checkout context (not shortcode).
 		WC()->cart->cart_context = 'store-api';
+
+		// Tests clear or set the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -46,6 +56,9 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->zone->delete( true );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		WC()->cart->cart_context = 'shortcode';
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 		parent::tearDown();
 	}
 

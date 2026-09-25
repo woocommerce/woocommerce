@@ -245,6 +245,9 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	 * Test that variations with "Any" attributes return user-selected values.
 	 */
 	public function test_get_item_response_any_variation_returns_user_selected_values(): void {
+		// Register the pa_size taxonomy so the attribute label resolves the same way in any test order.
+		\WC_Helper_Product::create_attribute( 'size', array() );
+
 		$variable_product = new \WC_Product_Variable();
 		$variable_product->set_name( 'Test Variable Product' );
 
@@ -305,6 +308,9 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	 * Test variations with mixed global and custom "Any" attributes.
 	 */
 	public function test_get_item_response_any_variation_with_mixed_attributes(): void {
+		// Register the pa_size taxonomy so the attribute label resolves the same way in any test order.
+		\WC_Helper_Product::create_attribute( 'size', array() );
+
 		$variable_product = new \WC_Product_Variable();
 		$variable_product->set_name( 'Test Variable Product with Mixed Attributes' );
 

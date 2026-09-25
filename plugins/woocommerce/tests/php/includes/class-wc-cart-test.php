@@ -22,12 +22,22 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
+
+		// Several tests change the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -37,6 +47,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		WC()->customer->set_is_vat_exempt( false );
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 		WC()->session->set( 'wc_notices', null );
 
 		// The parent teardown only clears chosen_shipping_methods, through
@@ -785,6 +798,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * Test show shipping.
 	 */
 	public function test_show_shipping() {
+		// Start from a customer without an address; WC()->customer outlives a test.
+		WC()->customer->set_shipping_location( '', '', '', '' );
+
 		// Test with an empty cart.
 		$this->assertFalse( WC()->cart->show_shipping() );
 
