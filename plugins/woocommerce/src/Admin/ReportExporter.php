@@ -66,6 +66,17 @@ class ReportExporter {
 	}
 
 	/**
+	 * Add action dependencies.
+	 *
+	 * @return array
+	 */
+	public static function get_dependencies() {
+		return array(
+			'email_report_download_link' => self::get_action( 'export_report' ),
+		);
+	}
+
+	/**
 	 * Hook in action methods.
 	 */
 	public static function init() {
@@ -258,6 +269,9 @@ class ReportExporter {
 		}
 
 		if ( ! $exporter->assemble_export_file( $num_batches ) ) {
+			// Hand the claim back, so the export finishes when a batch runs again, such as the one whose part is missing.
+			update_option( self::get_pending_batches_option_name( $report_type, $export_id ), 0, false );
+
 			wc_get_logger()->error(
 				sprintf( 'Could not assemble the %1$s report export %2$s from its parts.', $report_type, $export_id ),
 				array( 'source' => 'report-csv-exporter' )
@@ -328,7 +342,17 @@ class ReportExporter {
 	 * @return int|null Batches still to finish, or null for an export queued before 11.3.0, which has no count.
 	 */
 	private static function get_pending_batches( $report_type, $export_id ) {
-		$remaining = get_option( self::get_pending_batches_option_name( $report_type, $export_id ), null );
+		global $wpdb;
+
+		// Read from the database, not the option cache: with a persistent object cache, another batch can put back
+		// a count it read before this one moved it, and then no batch sees the count reach zero.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$remaining = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				self::get_pending_batches_option_name( $report_type, $export_id )
+			)
+		);
 
 		return null === $remaining ? null : (int) $remaining;
 	}
@@ -336,7 +360,7 @@ class ReportExporter {
 	/**
 	 * Claim the job of finishing an export, once every one of its batches has finished.
 	 *
-	 * Only the update that moves the count from 0 to -1 changes a row, so exactly one batch ever
+	 * Only the update that moves the count from 0 to -1 changes a row, so only one batch at a time
 	 * claims an export however many of them finish at the same moment.
 	 *
 	 * @since 11.3.0
@@ -478,12 +502,13 @@ class ReportExporter {
 		}
 
 		// No row to move: the export is either already this far along or has no row of its own, which
-		// is the case for one queued before 11.3.0.
+		// is the case for one queued before 11.3.0. Only create a missing row here. Writing an existing
+		// one would put back a percentage read before another batch moved it up.
 		$stored = self::get_export_percentage_complete( $report_type, $export_id );
 
 		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
 		// request, which left the email action reading an old percentage and never sending the download link.
-		update_option( $option_name, false === $stored ? $percentage : max( (int) $stored, $percentage ), false );
+		add_option( $option_name, false === $stored ? $percentage : max( (int) $stored, $percentage ), '', false );
 	}
 
 	/**

@@ -209,7 +209,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		$ok = fclose( $out ) && $ok; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		if ( ! $ok ) {
-			// Keep the parts for the daily cleanup, but never leave a partial body where the export belongs.
+			// Keep the parts for a batch that runs again, but never leave a partial body where the export belongs.
 			wp_delete_file( $this->get_file_path() );
 			return false;
 		}

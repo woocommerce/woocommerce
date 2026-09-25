@@ -882,7 +882,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An export with a missing part file is not finished, emailed, or downloadable.
+	 * @testdox An export with a missing part file is not finished, emailed, or downloadable until that page runs again.
 	 */
 	public function test_export_with_a_missing_part_is_not_finished(): void {
 		$batches = $this->queue_stock_export( 'missingpart' );
@@ -903,12 +903,19 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $exporter->export_file_exists(), 'An export missing a page must not be downloadable.' );
 		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'missingpart' ) );
 		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+
+		ReportExporter::export_report( ...$batches[1] );
+
+		$this->assertCount( 7, $this->export_rows( 'missingpart' ), 'Running the page again must finish the export.' );
+		$this->assertTrue( $exporter->export_file_exists() );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'missingpart' ) );
+		$this->assertCount( 1, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
 	}
 
 	/**
-	 * @testdox A batch that runs again after the export was claimed does not report it finished.
+	 * @testdox A page that runs twice does not finish the export before the last page has run.
 	 */
-	public function test_batch_running_again_does_not_report_an_unwritten_export_finished(): void {
+	public function test_page_running_twice_does_not_finish_the_export_early(): void {
 		$batches = $this->queue_stock_export( 'ranagain' );
 		$last    = array_pop( $batches );
 
@@ -918,13 +925,37 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			ReportExporter::export_report( ...$batch );
 		}
 
-		ReportExporter::export_report( ...$last );
-
 		$exporter = new ReportCSVExporter();
 		$exporter->set_filename( 'wc-stock-report-export-ranagain' );
 
 		$this->assertFalse( $exporter->export_file_exists() );
 		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'ranagain' ), 'The status endpoint hands out the download link at 100.' );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+
+		ReportExporter::export_report( ...$last );
+
+		$this->assertCount( 7, $this->export_rows( 'ranagain' ), 'The export must finish once the last page has run.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'ranagain' ) );
+		$this->assertCount( 1, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox A batch that runs while another batch holds the claim does not report the export finished.
+	 */
+	public function test_batch_running_while_the_export_is_claimed_does_not_report_it_finished(): void {
+		$batches = $this->queue_stock_export( 'claimed' );
+		$last    = array_pop( $batches );
+
+		foreach ( $batches as $batch ) {
+			ReportExporter::export_report( ...$batch );
+		}
+
+		// Another batch has claimed the export and is still joining the parts.
+		update_option( ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:claimed' ), -1, false );
+
+		ReportExporter::export_report( ...$last );
+
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'claimed' ), 'The status endpoint hands out the download link at 100.' );
 		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
 	}
 
@@ -1069,6 +1100,35 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch does not write back progress it read before another batch finished the export.
+	 */
+	public function test_progress_is_not_written_back_over_a_finished_export(): void {
+		global $wpdb;
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'stock:race' );
+		ReportExporter::update_export_percentage_complete( 'stock', 'race', 83 );
+
+		// Another batch finishes the export right after this one reads the progress.
+		$finished = false;
+		add_filter(
+			"option_{$option}",
+			function ( $value ) use ( &$finished, $option, $wpdb ) {
+				if ( ! $finished ) {
+					$finished = true;
+					$wpdb->update( $wpdb->options, array( 'option_value' => '100' ), array( 'option_name' => $option ) );
+				}
+
+				return $value;
+			}
+		);
+
+		ReportExporter::update_export_percentage_complete( 'stock', 'race', 58 );
+
+		$this->assertTrue( $finished, 'The progress should have been read after the first update.' );
+		$this->assertSame( '100', $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option ) ) );
+	}
+
+	/**
 	 * @testdox An export queued before batches were counted still reports the page that ran last.
 	 */
 	public function test_export_queued_before_batches_were_counted(): void {
@@ -1123,5 +1183,23 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			preg_grep( '/^warning: Not emailing the stock report export unfinished/', $logged ),
 			'The skipped email must be logged, since the scheduler records the action as complete.'
 		);
+	}
+
+	/**
+	 * @testdox The batch count is read from the database, not from a stale cached copy.
+	 */
+	public function test_batch_count_is_read_from_the_database(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$mailer  = tests_retrieve_phpmailer_instance();
+		$option  = ReportExporter::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( 'stock:cachedcount' );
+
+		// Every batch has finished, but a persistent object cache still holds a count from before that.
+		add_option( $option, -1, '', false );
+		wp_cache_set( $option, '2', 'options' );
+
+		ReportExporter::email_report_download_link( $user_id, 'cachedcount', 'stock', array() );
+
+		$sent = end( $mailer->mock_sent );
+		$this->assertIsArray( $sent, 'A finished export must be emailed even when the cache holds an old count.' );
 	}
 }
