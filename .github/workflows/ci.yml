@@ -296,9 +296,26 @@ jobs:
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
+      # Local-first CI: when the contributor already ran this exact job with
+      # `gh local-ci` and published a receipt on the head commit, skip the
+      # install and the tests. Every doubt runs them. Trust fields come from
+      # `.github/local-ci.json` on the base branch; `enabled: false` there or
+      # the `LOCAL_CI_RECEIPTS_DISABLED=1` repository variable turns this off
+      # for every job. Full rollback: revert the commit that added this step
+      # and the two `if:` guards below.
+      - uses: './.github/actions/local-ci-receipt'
+        name: 'Look for a local CI receipt'
+        id: 'local-ci-receipt'
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          job-name: ${{ matrix.name }}
+          github-token: ${{ github.token }}
+          disabled: ${{ vars.LOCAL_CI_RECEIPTS_DISABLED }}
+
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
         id: 'install-monorepo'
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
@@ -419,6 +436,7 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}

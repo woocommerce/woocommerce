@@ -1,0 +1,44 @@
+{
+  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup step in ci.yml (consumer). CI reads the trust fields from trunk's copy of this file; a PR that changes it gets a full CI run.",
+  "version": 1,
+  "host": "github.com",
+  "repository": "woocommerce/woocommerce",
+  "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
+  "baseBranch": "trunk",
+  "receiptPrefix": "local-ci/v1: ",
+
+  "enabled": false,
+  "rollout": { "authors": [ "MrJnrman" ], "label": "local-ci" },
+
+  "plan": {
+    "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT.",
+    "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --base-ref {mergeBase} --event pull_request" ],
+    "output": "github-output",
+    "fields": { "name": "name", "project": "projectName", "command": "command", "type": "testType" }
+  },
+
+  "eligible": [
+    {
+      "type": "unit",
+      "namePrefix": "JavaScript",
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies. Re-validate and update mirrors.sha256 when that action changes.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "clean": [ "plugins/woocommerce/assets/client/blocks" ],
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--if-present", "--workspace-concurrency=Infinity", "--stream", "{projects:--filter=%s^...}", "/^build:project:.*$/" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "c4addf99d0d021ffb735583040817fa71c15b5a7ce0cb2b3567c3926b1deb16c"
+        }
+      },
+      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation; with 8 jobs in flight that oversubscribes the machine. CI's 4-core runners give jest 3 workers, so 2 here is close to parity.",
+      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=2" ]
+    }
+  ],
+
+  "lockfile": "pnpm-lock.yaml"
+}

@@ -1,0 +1,41 @@
+name: 'Look for a local CI receipt'
+description: 'Decides whether a check run published by `gh local-ci` on the pull request head allows this job to skip its install and test steps. Every path other than a verified, matching, successful receipt yields `substituted=false` with a reason, so uncertainty never skips a test. Trust fields are read from `.github/local-ci.json` on the base branch, never from the pull request.'
+
+inputs:
+  job-name:
+    description: 'The matrix job name. The receipt is the check run named `receiptPrefix + job-name`.'
+    required: true
+  github-token:
+    description: 'Token used to read the base-branch config and the check runs on the head commit. `github.token` is enough.'
+    required: true
+  disabled:
+    description: 'Kill switch. Pass the `LOCAL_CI_RECEIPTS_DISABLED` repository variable; `1` disables substitution for every job with no commit.'
+    required: false
+    default: ''
+
+outputs:
+  substituted:
+    description: '`true` when a receipt vouches for this job and the install and test steps may be skipped.'
+    value: ${{ steps.lookup.outputs.substituted }}
+  reason:
+    description: 'Why the decision went the way it did, for the job log and for metrics.'
+    value: ${{ steps.lookup.outputs.reason }}
+  spot-check:
+    description: '`true` when a valid receipt existed but this job was chosen to run anyway as a deterministic spot check.'
+    value: ${{ steps.lookup.outputs.spot-check }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Look up the receipt
+      id: lookup
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        JOB_NAME: ${{ inputs.job-name }}
+        DISABLED: ${{ inputs.disabled }}
+        SCRIPT: ${{ github.action_path }}/receipt.js
+      with:
+        github-token: ${{ inputs.github-token }}
+        retries: 2
+        script: |
+          await require( process.env.SCRIPT ).lookup( { github, context, core } );
