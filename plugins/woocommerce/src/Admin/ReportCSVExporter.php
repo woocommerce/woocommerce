@@ -51,20 +51,6 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $download_suffix = '';
 
 	/**
-	 * Whether a batch is writing its page of the report right now.
-	 *
-	 * @var bool
-	 */
-	private $writing_page = false;
-
-	/**
-	 * Page of the report this exporter writes to its own part file, or 0 for the export file itself.
-	 *
-	 * @var int
-	 */
-	private $part = 0;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -134,89 +120,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return string
 	 */
 	protected function get_file_path() {
-		return $this->part > 0 ? $this->get_part_file_path( $this->part ) : self::get_reports_directory() . $this->get_filename();
-	}
-
-	/**
-	 * Get the path of the part file one page of the report is written to.
-	 *
-	 * @since 11.3.0
-	 * @param int $page Page of the report.
-	 * @return string
-	 */
-	private function get_part_file_path( $page ) {
-		return self::get_reports_directory() . $this->get_filename() . '.part' . $page;
-	}
-
-	/**
-	 * Write one page of the report to its own part file, replacing one a previous run of that page left.
-	 *
-	 * Pages run in any order and at the same time, so each writes a file no other page touches.
-	 * assemble_export_file() joins them in page order once every page has finished.
-	 *
-	 * @since 11.3.0
-	 * @param int $page Page of the report.
-	 * @return void
-	 */
-	public function write_export_part( $page ) {
-		$this->part = max( 1, (int) $page );
-
-		try {
-			if ( file_exists( $this->get_file_path() ) ) {
-				wp_delete_file( $this->get_file_path() );
-			}
-
-			$this->write_export_page();
-		} finally {
-			$this->part = 0;
-		}
-	}
-
-	/**
-	 * Join the part files into the export file, in page order, and delete them.
-	 *
-	 * The parts are opened by page number rather than listed, since glob() finds nothing when the
-	 * uploads directory is a stream wrapper (S3 Uploads, VIP). A missing part fails the whole export.
-	 *
-	 * @since 11.3.0
-	 * @param int $num_parts Number of pages the export was queued in.
-	 * @return bool Whether the export file was written from every part.
-	 */
-	public function assemble_export_file( $num_parts ) {
-		$parts = array_map( array( $this, 'get_part_file_path' ), range( 1, max( 1, (int) $num_parts ) ) );
-		$out   = fopen( $this->get_file_path(), 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-
-		if ( ! $out ) {
-			return false;
-		}
-
-		$ok = true;
-		foreach ( $parts as $path ) {
-			$in = file_exists( $path ) ? fopen( $path, 'r' ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-			if ( ! $in ) {
-				$ok = false;
-				break;
-			}
-
-			$ok = false !== stream_copy_to_stream( $in, $out );
-			fclose( $in ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-
-			if ( ! $ok ) {
-				break;
-			}
-		}
-
-		$ok = fclose( $out ) && $ok; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-
-		if ( ! $ok ) {
-			// Keep the parts for a batch that runs again, but never leave a partial body where the export belongs.
-			wp_delete_file( $this->get_file_path() );
-			return false;
-		}
-
-		array_map( 'wp_delete_file', $parts );
-
-		return true;
+		return self::get_reports_directory() . $this->get_filename();
 	}
 
 	/**
@@ -447,38 +351,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return int Percent complete.
 	 */
 	public function get_percent_complete() {
-		// Held back while a batch writes, so the parent does not take the page reaching the end of the
-		// report for the export being finished and write the headers row file early.
-		if ( $this->writing_page ) {
-			return 99;
-		}
-
 		return intval( parent::get_percent_complete() );
-	}
-
-	/**
-	 * Delete the export file and headers row file an export with the same ID left behind.
-	 *
-	 * Part files left behind need no deleting here: each batch replaces its own part, and
-	 * assemble_export_file() only reads the parts of this export's pages.
-	 *
-	 * @since 11.3.0
-	 * @return void
-	 */
-	public function delete_export_files() {
-		foreach ( array( $this->get_file_path(), $this->get_headers_row_file_path() ) as $path ) {
-			if ( file_exists( $path ) ) {
-				wp_delete_file( $path );
-			}
-		}
 	}
 
 	/**
 	 * Write the headers row file, which is what marks an export complete and downloadable.
 	 *
-	 * The parent writes it from whichever batch reports 100%, which is that page's own position in
-	 * the report rather than whether every other page has finished.
-	 *
+	 * @internal
 	 * @since 11.3.0
 	 * @return void
 	 */
@@ -486,31 +365,6 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
 		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-	}
-
-	/**
-	 * Append one page of the report to the export file, creating the file if it is not there.
-	 *
-	 * Unlike generate_file(), this never recreates the file on page 1. Action Scheduler runs the
-	 * pages in any order, so page 1 running late would throw away what the pages before it wrote.
-	 *
-	 * @since 11.3.0
-	 * @return void
-	 */
-	public function write_export_page() {
-		if ( ! file_exists( $this->get_file_path() ) ) {
-			$this->get_file();
-		}
-
-		$this->prepare_data_to_export();
-
-		$this->writing_page = true;
-
-		try {
-			$this->write_csv_data( $this->get_csv_data() );
-		} finally {
-			$this->writing_page = false;
-		}
 	}
 
 	/**

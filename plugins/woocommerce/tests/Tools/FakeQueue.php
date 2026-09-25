@@ -36,7 +36,7 @@ class FakeQueue implements \WC_Queue_Interface {
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 	public function add( $hook, $args = array(), $group = '' ) {
-		// TODO: Implement add() method.
+		$this->add_to_methods_called( 'add', $args, $group, array( 'hook' => $hook ) );
 	}
 
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {

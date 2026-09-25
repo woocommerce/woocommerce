@@ -36,13 +36,6 @@ class ReportExporter {
 	const EXPORT_STATUS_OPTION = 'woocommerce_admin_report_export_status';
 
 	/**
-	 * Option prefix under which an export's outstanding batch count is kept.
-	 *
-	 * @since 11.3.0
-	 */
-	const EXPORT_PENDING_BATCHES_OPTION = 'woocommerce_admin_report_export_pending_batches';
-
-	/**
 	 * Export file download action.
 	 */
 	const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
@@ -167,16 +160,15 @@ class ReportExporter {
 	/**
 	 * Delete the stored progress of an export whose file has been deleted.
 	 *
-	 * @param string $path Path of the deleted export body, its `.headers` companion, or one of its part files.
+	 * @param string $path Path of the deleted export body or its `.headers` companion.
 	 * @return void
 	 */
 	private static function delete_export_status( $path ) {
 		$filename = basename( $path );
 
-		// A failed export leaves only its part files, so those have to delete its options too.
-		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers|\.part\d+)?$/', $filename, $matches ) ) {
-			delete_option( self::get_status_option_name( $matches[1], $matches[2] ) );
-			delete_option( self::get_pending_batches_option_name( $matches[1], $matches[2] ) );
+		if ( preg_match( '/^wc-(.+?)-report-export-(.+)\.csv(?:\.headers)?$/', $filename, $matches ) ) {
+			$option_name = self::get_status_option_name( $matches[1], $matches[2] );
+			delete_option( $option_name );
 		}
 	}
 
@@ -198,19 +190,10 @@ class ReportExporter {
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 
 		if ( 0 < $num_batches ) {
-			$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-			$exporter->delete_export_files();
-
-			self::start_export_progress( $report_type, $export_id, $num_batches );
-
-			// The email is scheduled by the batch that finishes last, since Action Scheduler runs the
-			// batches in any order and that is the only point the export is known to be complete.
 			$email_user_id = $send_email ? get_current_user_id() : 0;
 
-			// Create batches, like initial import.
-			$report_batch_args = array( $export_id, $report_type, $report_args, $email_user_id, $num_batches );
-
-			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
+			// Only the first page is queued. Each page queues the next one, so the pages run one at a time and in order.
+			self::schedule_action( 'export_report', array( 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
 		}
 
 		return $total_rows;
@@ -223,219 +206,61 @@ class ReportExporter {
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
-	 * @param int    $email_user_id Optional. User to email the download link to once every batch has
-	 *                              finished, or 0 for an export that was not asked to be emailed.
-	 *                              Exports queued before WooCommerce 11.3.0 run without it.
-	 * @param int    $num_batches Optional. Number of batches the export was queued in, which is how many
-	 *                            part files the last batch joins. Exports queued before 11.3.0 run without it.
+	 * @param int    $email_user_id Optional. User to email the download link to once the last page is written, or 0 for none.
+	 * @param int    $num_batches Optional. Number of pages in the export. Exports queued before 11.3.0 run without it.
 	 * @return void
-	 * @throws \Throwable When the page cannot be written, so Action Scheduler marks the batch failed.
 	 */
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+		$exporter->generate_file();
 
-		try {
-			// An export queued before 11.3.0 has no batch count, and its batches append to the export file.
-			if ( null === self::get_pending_batches( $report_type, $export_id ) ) {
-				$exporter->write_export_page();
-			} else {
-				$exporter->write_export_part( $page_number );
-			}
-		} catch ( \Throwable $e ) {
-			// A page that fails never counts down, so the export is never finished or emailed. Say why here.
-			wc_get_logger()->error(
-				sprintf( 'Could not write page %1$d of the %2$s report export %3$s: %4$s', $page_number, $report_type, $export_id, $e->getMessage() ),
-				array( 'source' => 'report-csv-exporter' )
-			);
-			throw $e;
-		}
-
-		$remaining = self::record_finished_batch( $report_type, $export_id );
-
-		if ( null === $remaining ) {
-			// An export queued before 11.3.0 has no batch count, so it keeps reporting the position of
-			// whichever page ran last and is emailed by the action queued alongside its batches. The last
-			// page still writes the headers row file, as generate_file() did, so the emailed link works.
-			$percent_complete = $exporter->get_percent_complete();
-
-			if ( 100 === $percent_complete ) {
-				$exporter->write_headers_row_file();
-			}
-
-			self::update_export_percentage_complete( $report_type, $export_id, $percent_complete );
+		// An export queued before 11.3.0 queued all its pages at once, and its email with them.
+		if ( ! $num_batches ) {
+			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
 			return;
 		}
 
-		// Below zero means the export was already claimed, and this batch ran again after that. Its
-		// progress would read past 100 and report a finished export that may never have been written.
-		if ( $remaining < 0 ) {
+		if ( $page_number < $num_batches ) {
+			self::update_export_percentage_complete( $report_type, $export_id, (int) floor( $page_number / $num_batches * 100 ) );
+			self::queue_next_page( array( $page_number + 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
 			return;
 		}
 
-		if ( ! self::claim_finished_export( $report_type, $export_id ) ) {
-			// At zero another batch claimed the export first, and it sets 100 once the file is written.
-			if ( $remaining > 0 ) {
-				self::update_export_percentage_complete( $report_type, $export_id, self::get_progress_percentage( $num_batches, $remaining ) );
-			}
-			return;
-		}
-
-		if ( ! $exporter->assemble_export_file( $num_batches ) ) {
-			// Hand the claim back, so the export finishes when a batch runs again, such as the one whose part is missing.
-			update_option( self::get_pending_batches_option_name( $report_type, $export_id ), 0, false );
-
-			wc_get_logger()->error(
-				sprintf( 'Could not assemble the %1$s report export %2$s from its parts.', $report_type, $export_id ),
-				array( 'source' => 'report-csv-exporter' )
-			);
-			return;
-		}
-
-		// Headers row file first: the status endpoint hands out the download link as soon as it reads 100.
+		// The parent only writes the headers row file when the rows it counted on this page add up to 100%,
+		// which they do not when rows are added to the report during the export.
 		$exporter->write_headers_row_file();
 		self::update_export_percentage_complete( $report_type, $export_id, 100 );
 
-		if ( (int) $email_user_id > 0 ) {
+		if ( $email_user_id > 0 ) {
 			self::schedule_action( 'email_report_download_link', array( (int) $email_user_id, $export_id, $report_type, $report_args ) );
 		}
 	}
 
 	/**
-	 * Start tracking a new export, replacing anything left by an export with the same ID.
+	 * Queue the next page of an export.
 	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @param int    $num_batches Number of batches the export was queued in.
+	 * The page is due now, not in 5 seconds as schedule_action() queues it, so the runner that wrote this
+	 * page writes the next one in the same run instead of the export waiting for the next runner.
+	 *
+	 * @param array $args Arguments for export_report().
 	 * @return void
 	 */
-	private static function start_export_progress( $report_type, $export_id, $num_batches ) {
-		// Set directly: update_export_percentage_complete() only ever moves progress forwards.
-		update_option( self::get_status_option_name( $report_type, $export_id ), 0, false );
-		update_option( self::get_pending_batches_option_name( $report_type, $export_id ), $num_batches, false );
-	}
-
-	/**
-	 * Record that one of an export's batches has finished.
-	 *
-	 * One UPDATE, because Action Scheduler can run batches at the same time on more than one runner
-	 * and a read-modify-write on the option would lose whichever update landed in between.
-	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return int|null Batches still to finish, or null for an export queued before 11.3.0, which has no count.
-	 */
-	private static function record_finished_batch( $report_type, $export_id ) {
-		global $wpdb;
-
-		$option_name = self::get_pending_batches_option_name( $report_type, $export_id );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = option_value - 1 WHERE option_name = %s AND option_value > 0", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$option_name
-			)
-		);
-
-		// The direct write leaves the option cache stale.
-		wp_cache_delete( $option_name, 'options' );
-
-		return self::get_pending_batches( $report_type, $export_id );
-	}
-
-	/**
-	 * Get how many of an export's batches have still to finish.
-	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return int|null Batches still to finish, or null for an export queued before 11.3.0, which has no count.
-	 */
-	private static function get_pending_batches( $report_type, $export_id ) {
-		global $wpdb;
-
-		// Read from the database, not the option cache: with a persistent object cache, another batch can put back
-		// a count it read before this one moved it, and then no batch sees the count reach zero.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$remaining = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				self::get_pending_batches_option_name( $report_type, $export_id )
-			)
-		);
-
-		return null === $remaining ? null : (int) $remaining;
-	}
-
-	/**
-	 * Claim the job of finishing an export, once every one of its batches has finished.
-	 *
-	 * Only the update that moves the count from 0 to -1 changes a row, so only one batch at a time
-	 * claims an export however many of them finish at the same moment.
-	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return bool Whether this is the batch that finished the export.
-	 */
-	private static function claim_finished_export( $report_type, $export_id ) {
-		global $wpdb;
-
-		$option_name = self::get_pending_batches_option_name( $report_type, $export_id );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$claimed = $wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = '-1' WHERE option_name = %s AND option_value = '0'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$option_name
-			)
-		);
-
-		// The direct write leaves the option cache stale.
-		wp_cache_delete( $option_name, 'options' );
-
-		return 1 === $claimed;
-	}
-
-	/**
-	 * Work out how far an export has got from how many of its batches are left.
-	 *
-	 * @since 11.3.0
-	 * @param int $num_batches Number of batches the export was queued in.
-	 * @param int $remaining Batches still to finish.
-	 * @return int Completion percentage.
-	 */
-	private static function get_progress_percentage( $num_batches, $remaining ) {
-		$num_batches = (int) $num_batches;
-
-		if ( $num_batches < 1 ) {
-			return 0;
+	private static function queue_next_page( $args ) {
+		/**
+		 * This filter is documented in includes/wc-update-functions.php
+		 *
+		 * @since 4.0.0
+		 */
+		if ( ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false ) ) {
+			self::export_report( ...$args );
+			return;
 		}
 
-		return (int) floor( ( ( $num_batches - $remaining ) / $num_batches ) * 100 );
-	}
-
-	/**
-	 * Check whether every one of an export's batches has finished.
-	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return bool
-	 */
-	private static function export_is_complete( $report_type, $export_id ) {
-		$remaining = self::get_pending_batches( $report_type, $export_id );
-
-		if ( null !== $remaining ) {
-			return $remaining < 1;
-		}
-
-		// An export queued before 11.3.0, or one whose count has already been cleaned up, only has the
-		// progress percentage to go on.
-		return 100 === self::get_export_percentage_complete( $report_type, $export_id );
+		// SchedulerTraits types the queue without a leading backslash, so PHPStan cannot resolve it.
+		/** @var \WC_Queue_Interface $queue */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$queue = self::queue();
+		$queue->add( (string) self::get_action( 'export_report' ), $args, (string) self::$group );
 	}
 
 	/**
@@ -465,24 +290,7 @@ class ReportExporter {
 	}
 
 	/**
-	 * Get the name of the option an export's outstanding batch count is stored under.
-	 *
-	 * @since 11.3.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @return string Option name.
-	 */
-	protected static function get_pending_batches_option_name( $report_type, $export_id ) {
-		$status_key = self::get_status_key( $report_type, $export_id );
-
-		return self::EXPORT_PENDING_BATCHES_OPTION . '_' . md5( $status_key );
-	}
-
-	/**
 	 * Update the completion percentage of a report export.
-	 *
-	 * Progress only ever moves forwards. Batches finish in any order and each one reports how far the
-	 * export had got when it looked, so a lower percentage arriving late is stale, not a correction.
 	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
@@ -490,38 +298,11 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
-		global $wpdb;
-
 		$option_name = self::get_status_option_name( $report_type, $export_id );
-		$percentage  = min( 100, max( 0, (int) $percentage ) );
-
-		// One UPDATE, because batches run at the same time on more than one runner and a
-		// read-modify-write would let one write back a percentage it read before another moved it up.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$moved_forwards = $wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = %s AND option_value < %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$percentage,
-				$option_name,
-				$percentage
-			)
-		);
-
-		// The direct write leaves the option cache stale.
-		wp_cache_delete( $option_name, 'options' );
-
-		if ( $moved_forwards ) {
-			return;
-		}
-
-		// No row to move: the export is either already this far along or has no row of its own, which
-		// is the case for one queued before 11.3.0. Only create a missing row here. Writing an existing
-		// one would put back a percentage read before another batch moved it up.
-		$stored = self::get_export_percentage_complete( $report_type, $export_id );
 
 		// Not autoloaded: a persistent object cache can write back a stale copy of the autoloaded options from another
 		// request, which left the email action reading an old percentage and never sending the download link.
-		add_option( $option_name, false === $stored ? $percentage : max( (int) $stored, $percentage ), '', false );
+		update_option( $option_name, $percentage, false );
 	}
 
 	/**
@@ -746,9 +527,8 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
-		if ( ! self::export_is_complete( $report_type, $export_id ) ) {
-			// Say so rather than finishing quietly: the scheduler records this action as complete
-			// either way, which is what made the missing email hard to account for.
+		if ( 100 !== self::get_export_percentage_complete( $report_type, $export_id ) ) {
+			// Say so rather than finishing quietly: the scheduler records this action as complete either way.
 			wc_get_logger()->warning(
 				sprintf( 'Not emailing the %1$s report export %2$s: it never reported itself complete.', $report_type, $export_id ),
 				array( 'source' => 'report-csv-exporter' )
