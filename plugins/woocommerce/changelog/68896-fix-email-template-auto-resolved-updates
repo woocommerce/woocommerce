@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Email editor: template updates listed as applying automatically are now applied, while any block you edited — its wording, styling or personalization tags — waits for your decision.

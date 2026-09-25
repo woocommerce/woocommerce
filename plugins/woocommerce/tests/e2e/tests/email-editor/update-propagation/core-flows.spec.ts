@@ -148,11 +148,24 @@ test.describe( 'Update propagation — core flows', () => {
 			firstRadioGroup.getByRole( 'radio', { name: /use core/i } )
 		).toHaveAttribute( 'aria-checked', 'true' );
 
+		// B and C were changed by core only. Assert the drawer's promise about
+		// them before applying, so the claim and the result stay tied together.
+		await expect(
+			drawer.getByText(
+				/your version was unchanged, so the update will apply/i
+			)
+		).toHaveCount( 2 );
+
 		await drawer.getByRole( 'button', { name: /^apply/i } ).click();
 		await expect( drawer ).toBeHidden( { timeout: 15000 } );
 
 		const content = await getWooEmailPostContent( postId );
 		expect( content ).toContain( 'NEW CORE A' );
 		expect( content ).not.toContain( 'MERCHANT EDITED A' );
+
+		expect( content ).toContain( 'NEW CORE B' );
+		expect( content ).toContain( 'NEW CORE C' );
+		expect( content ).not.toContain( 'OLD BLOCK B' );
+		expect( content ).not.toContain( 'OLD BLOCK C' );
 	} );
 } );
