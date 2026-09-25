@@ -145,14 +145,30 @@ test.describe( 'Product Reviews', () => {
 			const trashed = reviews[ 1 ];
 
 			const rowFor = ( id: number ) => page.locator( `#comment-${ id }` );
-			const moderate = async ( id: number, action: string ) => {
-				const response = page.waitForResponse(
-					( candidate ) =>
-						candidate.url().includes( 'admin-ajax.php' ) &&
-						/action=(dim|delete)-comment/.test(
-							candidate.request().postData() ?? ''
-						)
-				);
+			const moderate = async (
+				id: number,
+				action: 'Unapprove' | 'Approve' | 'Spam' | 'Trash'
+			) => {
+				const expectedFields = {
+					id: `${ id }`,
+					...{
+						Unapprove: { action: 'dim-comment', new: 'unapproved' },
+						Approve: { action: 'dim-comment', new: 'approved' },
+						Spam: { action: 'delete-comment', spam: '1' },
+						Trash: { action: 'delete-comment', trash: '1' },
+					}[ action ],
+				};
+				const response = page.waitForResponse( ( candidate ) => {
+					if ( ! candidate.url().includes( 'admin-ajax.php' ) ) {
+						return false;
+					}
+					const fields = new URLSearchParams(
+						candidate.request().postData() ?? ''
+					);
+					return Object.entries( expectedFields ).every(
+						( [ key, value ] ) => fields.get( key ) === value
+					);
+				} );
 				await rowFor( id ).hover();
 				await rowFor( id )
 					.getByRole( 'button', { name: action } )
