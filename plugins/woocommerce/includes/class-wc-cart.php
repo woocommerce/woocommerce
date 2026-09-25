@@ -1645,14 +1645,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1673,6 +1673,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**

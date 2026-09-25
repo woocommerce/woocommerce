@@ -22,6 +22,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
+	 * Customer shipping address to restore after a test that changes it, keyed by prop name.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private $original_shipping_address = null;
+
+	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
@@ -38,6 +45,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		if ( null !== $this->original_shipping_address ) {
+			WC()->customer->set_props( $this->original_shipping_address );
+			$this->original_shipping_address = null;
+			// The checkout fields were built while the test's filters were attached.
+			$this->clear_checkout_fields();
+		}
 
 		// The parent teardown only clears chosen_shipping_methods, through
 		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
@@ -966,6 +980,64 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_pickup_location_settings', $default_pickup_location_settings );
 		$product->delete( true );
 		WC()->cart->cart_context = 'shortcode'; // Reset to default.
+	}
+
+	/**
+	 * @testdox calculate_totals() leaves out shipping that a nested totals calculation added while the Store API checked shipping.
+	 */
+	public function test_calculate_totals_leaves_out_shipping_added_by_a_nested_calculation(): void {
+		$this->add_product_for_an_address_without_postcode();
+		WC()->cart->cart_context = 'store-api';
+		$calls                   = 0;
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 10 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+		// Build the country locale during the calculation, as the first shipping check of a request does.
+		WC()->countries->locale = array();
+
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'A missing postcode should keep shipping uncalculated.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_total(), 'A missing postcode should leave the shipping total at zero.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal(), (float) WC()->cart->get_total( 'edit' ), 'The total should not include shipping.' );
+	}
+
+	/**
+	 * Add a product to the cart and give the customer a US shipping address without a postcode, with shipping costs hidden until an address is entered.
+	 */
+	private function add_product_for_an_address_without_postcode(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_state( 'NY' );
+		$customer->set_shipping_city( 'New York' );
+		$customer->set_shipping_postcode( '' );
+		$this->clear_checkout_fields();
+	}
+
+	/**
+	 * Clear the checkout fields that WC_Checkout keeps after first building them, so the next read builds them through the filters again.
+	 */
+	private function clear_checkout_fields(): void {
+		$fields = new ReflectionProperty( WC_Checkout::class, 'fields' );
+		$fields->setAccessible( true );
+		$fields->setValue( WC()->checkout(), null );
 	}
 
 	/**
