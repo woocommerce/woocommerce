@@ -61172,12 +61172,6 @@ parameters:
 			path: src/Internal/Features/FeaturesController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:register_additional_features\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
 			message: '#^Parameter \#3 \$autoload of function update_option expects bool\|null, string given\.$#'
 			identifier: argument.type
 			count: 1

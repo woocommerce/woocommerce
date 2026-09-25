@@ -30,12 +30,6 @@ defined( 'ABSPATH' ) || exit;
  * Class to define the WooCommerce features that can be enabled and disabled by admin users,
  * provides also a mechanism for WooCommerce plugins to declare that they are compatible
  * (or incompatible) with a given feature.
- *
- * Note: the 'woocommerce_register_feature_definitions' hook allows registering new features
- * externally. This hook is deprecated, features should be registered from within get_feature_definitions.
- * However, in case you use it for testing purposes, keep in mind that the hook is fired from inside 'init';
- * therefore, features that need to be queried, enabled, or disabled before 'init' (e.g. during WP CLI initialization)
- * can't be registered using the hook.
  */
 class FeaturesController {
 
@@ -110,14 +104,6 @@ class FeaturesController {
 
 	/**
 	 * Flag indicating if additional features have been registered already
-	 * via woocommerce_register_feature_definitions action.
-	 *
-	 * @var bool
-	 */
-	private bool $registered_additional_features_via_action = false;
-
-	/**
-	 * Flag indicating if additional features have been registered already
 	 * via calls to other classes.
 	 *
 	 * @var bool
@@ -142,21 +128,6 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		// In principle, register_additional_features is triggered manually from within class-woocommerce
-		// right before before_woocommerce_init is fired (this is needed for the features to be visible
-		// to plugins executing declare_compatibility).
-		// However we add additional checks/hookings here to support unit tests and possible overlooked/future
-		// DI container/class instantiation nuances.
-		if ( ! $this->registered_additional_features_via_action ) {
-			if ( did_action( 'before_woocommerce_init' ) ) {
-				// Needed for unit tests, where 'before_woocommerce_init' will have been fired already at this point.
-				$this->register_additional_features();
-			} else {
-				// This needs to have a higher $priority than the 'before_woocommerce_init' hooked by plugins that declare compatibility.
-				add_filter( 'before_woocommerce_init', array( $this, 'register_additional_features' ), -9999, 0 );
-			}
-		}
-
 		if ( did_action( 'init' ) ) {
 			// Needed for unit tests, where 'init' will have been fired already at this point.
 			$this->start_listening_for_option_changes();
@@ -181,9 +152,6 @@ class FeaturesController {
 
 	/**
 	 * Register a feature.
-	 *
-	 * This used to be called during the `woocommerce_register_feature_definitions` action hook,
-	 * now it's called directly from get_feature_definitions as needed.
 	 *
 	 * @param string $slug The ID slug of the feature.
 	 * @param string $name The name of the feature that will appear on the Features screen and elsewhere.
@@ -274,9 +242,7 @@ class FeaturesController {
 			// to prevent infinite loops in case one of these calls ends up calling here again.
 			$this->registered_additional_features_via_class_calls = true;
 
-			// Additional feature definitions.
-			// These used to be tied to the now deprecated woocommerce_register_feature_definitions action,
-			// and aren't processed in init_feature_definitions to avoid circular calls in the dependency injection container.
+			// These aren't processed in init_feature_definitions to avoid circular calls in the dependency injection container.
 			$container = wc_get_container();
 			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
 			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
@@ -306,9 +272,7 @@ class FeaturesController {
 
 	/**
 	 * Initialize the hardcoded feature definitions array.
-	 * This doesn't include:
-	 * - Features that get initialized via the (deprecated) woocommerce_register_feature_definitions.
-	 * - Features whose definition comes from another class. These are initialized directly in get_feature_definitions
+	 * This doesn't include features whose definition comes from another class. These are initialized directly in get_feature_definitions
 	 *   to avoid circular calls in the dependency injection container.
 	 */
 	private function init_feature_definitions(): void {
@@ -789,38 +753,6 @@ class FeaturesController {
 		);
 
 		return $base_description . $documentation_link;
-	}
-
-	/**
-	 * Function to trigger the (now deprecated) 'woocommerce_register_feature_definitions' hook.
-	 *
-	 * This function must execute immediately before the 'before_woocommerce_init'
-	 * action is fired, so that feature compatibility declarations happening
-	 * in that action find all the features properly declared already.
-	 *
-	 * @internal
-	 */
-	public function register_additional_features() {
-		if ( $this->registered_additional_features_via_action ) {
-			return;
-		}
-
-		$this->maybe_init_feature_definitions();
-
-		/**
-		 * The action for registering features.
-		 *
-		 * @since 8.3.0
-		 *
-		 * @param FeaturesController $features_controller The instance of FeaturesController.
-		 *
-		 * @deprecated 9.9.0 Features should be defined directly in get_feature_definitions.
-		 */
-		do_action( 'woocommerce_register_feature_definitions', $this );
-
-		$this->init_compatibility_info_by_feature();
-
-		$this->registered_additional_features_via_action = true;
 	}
 
 	/**
