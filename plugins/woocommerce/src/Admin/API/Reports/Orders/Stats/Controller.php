@@ -83,6 +83,8 @@ class Controller extends GenericStatsController {
 			$args['customer_type'] = $request['customer'];
 		}
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 
@@ -376,7 +378,8 @@ class Controller extends GenericStatsController {
 				'category',
 				'variation',
 				'coupon',
-				'customer_type', // new vs returning.
+				'customer_type',
+		// new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

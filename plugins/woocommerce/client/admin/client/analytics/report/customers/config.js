@@ -10,6 +10,7 @@ import { NAMESPACE, COUNTRIES_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
+import { getFreeOrdersFilter } from '../free-orders-filter';
 import {
 	getCustomerLabels,
 	getRequestByIdString,
@@ -71,9 +72,9 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 			},
 		],
 	},
+	getFreeOrdersFilter(),
 ] );
 
-/*eslint-disable max-len*/
 /**
  * Customers Report Advanced Filters.
  *
@@ -504,4 +505,3 @@ export const advancedFilters = applyFilters(
 		},
 	}
 );
-/*eslint-enable max-len*/

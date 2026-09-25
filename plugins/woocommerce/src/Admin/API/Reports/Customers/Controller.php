@@ -111,6 +111,8 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args = self::consolidate_customer_id_filters( $args );
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 
