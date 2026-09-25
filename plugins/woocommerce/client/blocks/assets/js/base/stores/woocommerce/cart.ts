@@ -1166,6 +1166,19 @@ const { actions } = store< Store >(
 			},
 
 			*refreshCartItems(): AsyncAction< void > {
+				// Skip when the server did not provide the interactivity
+				// state this store needs, e.g. when a block imports this
+				// store without loading the shared cart state. Release
+				// pending mutations so they fail visibly instead of
+				// waiting forever for a nonce that will never arrive.
+				if ( ! state.restUrl ) {
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
+					return;
+				}
+
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
