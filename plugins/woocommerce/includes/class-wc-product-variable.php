@@ -354,7 +354,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$precheck_with_meta = $hide_out_of_stock_items && ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
-				// Performance note: inactive optimization for most of stores; see details in has_purchasable_variations method.
+				// Performance note: inactive optimization for most of stores; leverage lightweight primed dat read before constructing product object.
 				if ( $precheck_with_meta && ProductStockStatus::OUT_OF_STOCK === get_post_meta( $variation_id, '_stock_status', true ) ) {
 					continue;
 				}
