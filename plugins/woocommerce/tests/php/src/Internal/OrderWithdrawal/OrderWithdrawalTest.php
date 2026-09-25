@@ -423,9 +423,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$second_state         = $this->sut->process_current_request();
 			$second_error_notices = wc_get_notices( 'error' );
 
-			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
-			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
-			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should remain on the review screen when rate limited.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the rate-limit error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $second_error_notices[0]['notice'], 'Duplicate matched submissions should remain rate limited.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -835,7 +835,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'review', $state->screen, 'Email failures should keep the submitted details on the review screen.' );
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
-			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request. Please try again in 30 seconds or contact us if the problem continues.', $error_notices[0]['notice'], 'The error notice should tell the user when they can retry the submission.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Email failures should not add a retryable request to the order notes.' );
 
 			$updated_order = wc_get_order( $order->get_id() );
@@ -857,10 +857,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$second_state         = $this->sut->process_current_request();
 			$second_error_notices = wc_get_notices( 'error' );
 
-			$this->assertSame( 'review', $second_state->screen, 'Email failures should not leave behind a rate limit.' );
-			$this->assertCount( 4, $capture['captures'], 'The second failed submission should attempt notification emails again.' );
-			$this->assertNotEmpty( $second_error_notices, 'The second email failure should add an error notice.' );
-			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $second_error_notices[0]['notice'], 'The released rate limit should allow email delivery to be attempted again.' );
+			$this->assertSame( 'review', $second_state->screen, 'Rate-limited submissions should remain on the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate limit should prevent another email delivery attempt.' );
+			$this->assertNotEmpty( $second_error_notices, 'The rate-limited submission should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $second_error_notices[0]['notice'], 'The rate limit should prevent an immediate retry.' );
 		} finally {
 			$capture['remove']();
 		}

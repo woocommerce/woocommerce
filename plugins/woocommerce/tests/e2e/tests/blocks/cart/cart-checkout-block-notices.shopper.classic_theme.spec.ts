@@ -6,14 +6,19 @@ import {
 	test as base,
 	wpCLI,
 	CLASSIC_THEME_SLUG,
+	CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
 	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
+	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import { CheckoutPage } from '../checkout/checkout.page';
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import {
+	REGULAR_PRICED_PRODUCT_NAME,
+	INVALID_COUPON,
+} from '../checkout/constants';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
@@ -23,23 +28,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 		await use( pageObject );
 	},
 } );
-
-const setProductOutOfStock = async ( productName: string ) => {
-	const productIdOutput = await wpCLI(
-		`post list --title="${ productName }" --post_type=product --field=ID`
-	);
-	// npm writes its own banner to stdout, so the ID is the line that holds
-	// nothing but digits.
-	const productId = productIdOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-	if ( ! productId ) {
-		throw new Error(
-			`Failed to find ${ productName }: ${ productIdOutput.stdout }`
-		);
-	}
-	await wpCLI(
-		`eval '$product = wc_get_product( ${ productId } ); $product->set_stock_status( "outofstock" ); $product->save();'`
-	);
-};
 
 test.describe( 'Shopper → Notice Templates', () => {
 	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
@@ -58,7 +46,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 	} );
 
-	test( 'success and error notices use the classic templates on a classic theme', async ( {
+	test( 'default classic notice templates, except for coupon errors, are visible', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -67,23 +55,152 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
+			page.getByText( 'Coupon code applied successfully.', {
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-message' )
-		).toContainText( 'Coupon code applied successfully.' );
+		).toBeVisible();
 
-		await setProductOutOfStock( REGULAR_PRICED_PRODUCT_NAME );
 		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
+		await expect(
+			page.getByText( 'Coupon code "testcoupon" already applied!', {
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
-		).toContainText(
-			`Sorry, "${ REGULAR_PRICED_PRODUCT_NAME }" is not in stock.`
-		);
+		).toBeHidden();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
 		await expect(
-			page.locator( '.wc-block-components-notice-banner' )
-		).toHaveCount( 0 );
+			page.getByText( 'Your cart is currently empty.', { exact: true } )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-info' )
+		).toBeVisible();
 	} );
 
-	test( 'success and error notices use the block templates when a classic theme opts in', async ( {
+	test( 'custom classic notice templates, except for coupon errors, are visible by template overwrite', async ( {
+		requestUtils,
+		frontendUtils,
+		page,
+	} ) => {
+		await requestUtils.activateTheme(
+			CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'CLASSIC SUCCESS NOTICE: Coupon code applied successfully.'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-message' )
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'CLASSIC ERROR NOTICE: Coupon code "testcoupon" already applied!'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
+		).toBeHidden();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
+		await expect(
+			page.getByText(
+				'CLASSIC INFO NOTICE: Your cart is currently empty.'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-info' )
+		).toBeVisible();
+
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
+	test( 'custom block notice templates, except for coupon errors, are visible by template overwrite', async ( {
+		requestUtils,
+		frontendUtils,
+		page,
+	} ) => {
+		await requestUtils.activateTheme(
+			CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'BLOCK SUCCESS NOTICE: Coupon code applied successfully.'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'BLOCK ERROR NOTICE: Coupon code "testcoupon" already applied!'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeHidden();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
+		await expect(
+			page.getByText( 'BLOCK INFO NOTICE: Your cart is currently empty.' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
+	test( 'default block notice templates, except for coupon errors, are visible by filter', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -99,6 +216,8 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await expect(
 			page.getByText( 'Coupon code applied successfully.' )
 		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
@@ -111,27 +230,47 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.getByText( 'Coupon code "testcoupon" already applied!' )
 		).toBeVisible();
 
-		// A non-coupon error: the cart holds a product the store has run out of.
-		await setProductOutOfStock( REGULAR_PRICED_PRODUCT_NAME );
-		await page.reload();
-
-		const errorBanner = page.locator(
-			'.wc-block-components-notice-banner.is-error'
-		);
-		await expect( errorBanner ).toContainText(
-			`Sorry, "${ REGULAR_PRICED_PRODUCT_NAME }" is not in stock.`
-		);
-		await expect( errorBanner.locator( 'svg' ) ).toBeVisible();
+		// We're explicitly checking the CSS classes and that the SVG is hidden.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
 		await expect(
 			page.getByText( 'Your cart is currently empty.' )
 		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
+	test( 'coupon inline notice is visible', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( INVALID_COUPON );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				`Coupon "${ INVALID_COUPON }" cannot be applied because it does not exist.`,
+				{
+					exact: true,
+				}
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeHidden();
+
+		await expect( page.locator( '.coupon-error-notice' ) ).toBeVisible();
 	} );
 } );
