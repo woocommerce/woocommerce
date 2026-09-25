@@ -2,6 +2,7 @@
 /**
  * WooCommerce compatibility notices.
  *
+ * @internal
  * @package purple
  */
 
@@ -9,6 +10,8 @@ declare( strict_types = 1 );
 
 /**
  * Build a notice when WooCommerce does not meet the theme's requirements.
+ *
+ * @internal
  *
  * @return string Notice HTML, or an empty string when no notice is needed.
  */
@@ -45,6 +48,8 @@ function purple_get_woocommerce_notice(): string {
 /**
  * Build the update notice when the active WooCommerce version is too old.
  *
+ * @internal
+ *
  * @param string $minimum Minimum required WooCommerce version.
  * @param string $current Active WooCommerce version.
  * @return string Notice HTML, or an empty string for a compatible version.
@@ -72,6 +77,8 @@ function purple_get_woocommerce_outdated_notice( string $minimum, string $curren
 /**
  * Build the activation notice for an installed but inactive WooCommerce plugin.
  *
+ * @internal
+ *
  * @param string $minimum Minimum required WooCommerce version.
  * @return string Notice HTML.
  */
@@ -92,6 +99,8 @@ function purple_get_woocommerce_inactive_notice( string $minimum ): string {
 
 /**
  * Build the installation notice when WooCommerce is missing.
+ *
+ * @internal
  *
  * @param string $minimum Minimum required WooCommerce version.
  * @return string Notice HTML.
@@ -114,6 +123,8 @@ function purple_get_woocommerce_missing_notice( string $minimum ): string {
 /**
  * Display the compatibility warning using the standard WordPress notice UI.
  *
+ * @internal
+ *
  * @return void
  */
 function purple_woocommerce_admin_notice(): void {
@@ -133,6 +144,8 @@ add_action( 'admin_notices', 'purple_woocommerce_admin_notice' );
 
 /**
  * Load dismissal handling only on screens displaying the notice.
+ *
+ * @internal
  *
  * @return void
  */
@@ -161,6 +174,8 @@ add_action( 'admin_enqueue_scripts', 'purple_woocommerce_notice_scripts' );
 
 /**
  * Remember dismissal for the current user on the current site.
+ *
+ * @internal
  *
  * @return void
  */
