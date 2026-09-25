@@ -27,6 +27,8 @@ class CartItemSchema extends ItemSchema {
 	/**
 	 * Get the cart item schema properties.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @return array
 	 */
 	public function get_properties() {
@@ -105,6 +107,8 @@ class CartItemSchema extends ItemSchema {
 
 	/**
 	 * Get a cart line's declared parent key.
+	 *
+	 * @since 11.3.0
 	 *
 	 * @param array $cart_item Cart item array.
 	 * @return string|null Parent cart item key, or null when not declared.
