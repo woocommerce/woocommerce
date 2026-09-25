@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNoti
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\TestNotification;
 use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
@@ -262,6 +263,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 			'store_order'  => array( fn() => new NewOrderNotification( 42 ), false, array( 'store_order', 42 ) ),
 			'store_review' => array( fn() => new NewReviewNotification( 42 ), false, array( 'store_review', 42 ) ),
 			'store_stock'  => array( fn( int $volatile ) => new StockNotification( 42, StockNotification::EVENT_LOW_STOCK, $volatile ), true, array( 'store_stock', 42, array( 'event_type' => StockNotification::EVENT_LOW_STOCK ) ) ),
+			'store_test'   => array( fn() => new TestNotification( 42, 7 ), false, array( 'store_test', 42, array( 'token_id' => 7 ) ) ),
 		);
 	}
 }

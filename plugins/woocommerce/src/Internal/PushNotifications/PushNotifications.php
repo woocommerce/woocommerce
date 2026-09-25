@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPr
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\TestNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -96,6 +97,7 @@ class PushNotifications {
 
 		( new PushNotificationRestController() )->register();
 		( new NotificationPreferencesRestController() )->register();
+		wc_get_container()->get( TestNotificationRestController::class )->register();
 		( new NewOrderNotificationTrigger() )->register();
 		( new NewReviewNotificationTrigger() )->register();
 		( new StockNotificationTrigger() )->register();

@@ -62,6 +62,13 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave test notifications out of the preferences a user can change.
+	 */
+	public function test_get_defaults_excludes_test_notifications(): void {
+		$this->assertArrayNotHasKey( 'store_test', $this->sut->get_defaults() );
+	}
+
+	/**
 	 * @testdox Should overlay stored preferences on top of defaults.
 	 */
 	public function test_get_preferences_returns_saved_preferences_overlaid_on_defaults(): void {

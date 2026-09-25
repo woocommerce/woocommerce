@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\TestNotification;
 
 /**
  * Manages per-user push notification preferences.
@@ -105,6 +106,7 @@ class NotificationPreferencesService {
 	 * can be added without bumping the schema version. The keyset is derived from
 	 * `Notification::NOTIFICATION_CLASSES` so adding a new notification type
 	 * automatically opts it into preferences — no parallel list to keep in sync.
+	 * Test notifications are left out, because nothing is shown to the user.
 	 *
 	 * @return array<string, array<string, mixed>> Map of preference key => default sub-options.
 	 *
@@ -113,6 +115,10 @@ class NotificationPreferencesService {
 	public function get_defaults(): array {
 		$defaults = array();
 		foreach ( array_keys( Notification::NOTIFICATION_CLASSES ) as $type ) {
+			if ( TestNotification::TYPE === $type ) {
+				continue;
+			}
+
 			$defaults[ $type ] = array( 'enabled' => true );
 		}
 

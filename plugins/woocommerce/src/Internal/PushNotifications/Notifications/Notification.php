@@ -27,6 +27,7 @@ abstract class Notification {
 		'store_order'  => NewOrderNotification::class,
 		'store_review' => NewReviewNotification::class,
 		'store_stock'  => StockNotification::class,
+		'store_test'   => TestNotification::class,
 	);
 
 	/**
@@ -341,6 +342,18 @@ abstract class Notification {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Returns the ID of the only push token this notification may be sent to,
+	 * or null to send it to every eligible token.
+	 *
+	 * @return int|null
+	 *
+	 * @since 11.3.0
+	 */
+	public function get_target_token_id(): ?int {
+		return null;
 	}
 
 	/**
