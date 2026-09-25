@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the woocommerce_analytics_orders_import_where_clauses filter so extensions can keep particular orders, such as marketplace child orders, out of the Analytics import and its pending counts.
