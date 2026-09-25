@@ -519,6 +519,7 @@ export const getDefaultQueryForSettingsSection = (
 	perPage: DEFAULT_QUERY.perPage,
 	offset: DEFAULT_QUERY.offset,
 	pages: DEFAULT_QUERY.pages,
+	archivePerPage: DEFAULT_QUERY.archivePerPage,
 } );
 
 export const getDefaultDisplayLayout = () =>
