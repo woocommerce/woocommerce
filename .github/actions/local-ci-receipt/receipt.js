@@ -20,6 +20,7 @@ const crypto = require( 'crypto' );
 
 const CONFIG_PATH = '.github/local-ci.json';
 const TRUSTED_ASSOCIATIONS = [ 'MEMBER', 'OWNER' ];
+const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
 const RECEIPT_VERSION = 'v1';
 const API_TIMEOUT_MS = 20000;
 
@@ -43,6 +44,18 @@ function parseExternalId( externalId ) {
 		}
 	}
 	return meta;
+}
+
+/**
+ * Whether the kill switch is set. Any value other than an explicit "off"
+ * disables substitution, so an operator typing `true` or `yes` during an
+ * incident gets what they meant rather than a silent no-op.
+ *
+ * @param {*} value
+ * @return {boolean}
+ */
+function killSwitchSet( value ) {
+	return ! OFF_VALUES.includes( String( value === undefined || value === null ? '' : value ).trim().toLowerCase() );
 }
 
 /**
@@ -102,8 +115,8 @@ function ruleFor( config, jobName ) {
 function decide( input ) {
 	const no = ( reason ) => ( { substituted: false, reason, spotCheck: false } );
 
-	if ( String( input.disabled ) === '1' ) {
-		return no( 'kill switch LOCAL_CI_RECEIPTS_DISABLED=1' );
+	if ( killSwitchSet( input.disabled ) ) {
+		return no( `kill switch LOCAL_CI_RECEIPTS_DISABLED=${ input.disabled }` );
 	}
 	if ( input.eventName !== 'pull_request' || ! input.pullRequest ) {
 		return no( `event is ${ input.eventName }, receipts apply to pull_request only` );
@@ -116,6 +129,13 @@ function decide( input ) {
 	const config = input.baseConfig.parsed;
 	if ( config.enabled !== true ) {
 		return no( 'local CI receipts are not enabled on the base branch' );
+	}
+	// The trusted config is whatever the PR targets; only the configured
+	// base branch's copy counts, so a PR opened against some other branch
+	// (a release branch, or one carrying its own config) runs in full.
+	const baseRef = pr.base && pr.base.ref;
+	if ( baseRef !== config.baseBranch ) {
+		return no( `pull request targets ${ baseRef }, receipts apply to ${ config.baseBranch } only` );
 	}
 	if ( input.headConfigRaw !== input.baseConfig.raw ) {
 		return no( `${ CONFIG_PATH } differs between the pull request and the base branch; config changes always get full CI` );
@@ -240,7 +260,13 @@ async function lookup( { github, context, core } ) {
 			headConfigRaw: null,
 			checkRuns: [],
 		};
-		if ( pr ) {
+		// Fetch only as much as the decision needs: with the kill switch set,
+		// on a non-PR event, or while the feature is off on the base branch,
+		// every test job would otherwise spend three API calls to learn
+		// nothing. decide() refuses on those grounds before it reads what
+		// was not fetched.
+		const wanted = ! killSwitchSet( input.disabled ) && input.eventName === 'pull_request' && pr;
+		if ( wanted ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
 			const baseRaw = await rawFile( github, repo, pr.base.sha );
 			if ( baseRaw !== null ) {
@@ -249,17 +275,20 @@ async function lookup( { github, context, core } ) {
 					parsed: JSON.parse( baseRaw ),
 					sha256: crypto.createHash( 'sha256' ).update( baseRaw ).digest( 'hex' ),
 				};
-				input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
-				input.checkRuns = await within(
-					github.paginate( github.rest.checks.listForRef, {
-						...repo,
-						ref: pr.head.sha,
-						app_id: Number( input.baseConfig.parsed.app && input.baseConfig.parsed.app.appId ),
-						per_page: 100,
-					} ),
-					'listing check runs'
-				);
 			}
+		}
+		if ( wanted && input.baseConfig && input.baseConfig.parsed.enabled === true ) {
+			const repo = { owner: context.repo.owner, repo: context.repo.repo };
+			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
+			input.checkRuns = await within(
+				github.paginate( github.rest.checks.listForRef, {
+					...repo,
+					ref: pr.head.sha,
+					app_id: Number( input.baseConfig.parsed.app && input.baseConfig.parsed.app.appId ),
+					per_page: 100,
+				} ),
+				'listing check runs'
+			);
 		}
 		result = decide( input );
 	} catch ( e ) {
@@ -272,4 +301,4 @@ async function lookup( { github, context, core } ) {
 	return result;
 }
 
-module.exports = { decide, lookup, parseExternalId, sampleBucket, ruleFor, CONFIG_PATH };
+module.exports = { decide, lookup, parseExternalId, sampleBucket, ruleFor, killSwitchSet, CONFIG_PATH };

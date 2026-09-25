@@ -307,6 +307,9 @@ jobs:
         name: 'Look for a local CI receipt'
         id: 'local-ci-receipt'
         if: ${{ github.event_name == 'pull_request' }}
+        # A broken lookup must never fail the job: with no output the guards
+        # below read '' != 'true' and the job runs as it always did.
+        continue-on-error: true
         with:
           job-name: ${{ matrix.name }}
           github-token: ${{ github.token }}

@@ -5,6 +5,7 @@ on:
         paths:
             - '.github/actions/**'
             - '.github/*.json'
+            - '.github/workflows/ci.yml'
             - '.github/workflows/pr-check-local-actions.yml'
 
 permissions:
@@ -62,5 +63,14 @@ jobs:
                     }
                     if ( c.repository !== process.env.GITHUB_REPOSITORY ) throw new Error( "local-ci.json repository is " + c.repository + ", not " + process.env.GITHUB_REPOSITORY );
                     if ( typeof c.app.appId !== "number" ) throw new Error( "app.appId must be a number" );
+                    if ( typeof c.enabled !== "boolean" ) throw new Error( "enabled must be a boolean" );
+                    const crypto = require( "crypto" );
+                    for ( const r of c.eligible ) {
+                      if ( r.sampleRate !== undefined && ( r.sampleRate < 0 || r.sampleRate > 100 ) ) throw new Error( r.type + ": sampleRate must be 0..100" );
+                      const m = r.prepare && r.prepare.mirrors;
+                      if ( ! m ) continue;
+                      const actual = crypto.createHash( "sha256" ).update( require( "fs" ).readFileSync( m.action ) ).digest( "hex" );
+                      if ( actual !== m.sha256 ) throw new Error( r.type + ": " + m.action + " changed (sha256 " + actual.slice( 0, 12 ) + "…); re-validate its prepare steps and update mirrors.sha256" );
+                    }
                     console.log( "local-ci.json ok: enabled=" + c.enabled + ", rules=" + c.eligible.map( ( r ) => r.type ).join( "," ) );
                   '

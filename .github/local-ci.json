@@ -32,7 +32,7 @@
         ],
         "mirrors": {
           "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
-          "sha256": "c4addf99d0d021ffb735583040817fa71c15b5a7ce0cb2b3567c3926b1deb16c"
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
         }
       },
       "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation; with 8 jobs in flight that oversubscribes the machine. CI's 4-core runners give jest 3 workers, so 2 here is close to parity.",
