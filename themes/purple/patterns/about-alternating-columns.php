@@ -12,8 +12,8 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"categories":["about","purple"],"name":"About section with alternating columns","patternName":"purple/about-alternating-columns","description":"A section with alternating columns of text and an image."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
-<div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--140);padding-bottom:var(--wp--preset--spacing--140)"><!-- wp:columns {"verticalAlignment":"top","align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|20"}}}} -->
+<!-- wp:group {"metadata":{"categories":["about","purple"],"name":"About section with alternating columns","patternName":"purple/about-alternating-columns","description":"A section with alternating columns of text and an image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--140);padding-bottom:var(--wp--preset--spacing--140)"><!-- wp:columns {"verticalAlignment":"top","align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|20"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-top"><!-- wp:column {"verticalAlignment":"top","width":"50%","layout":{"type":"constrained","contentSize":"520px"}} -->
 <div class="wp-block-column is-vertically-aligned-top" style="flex-basis:50%"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Wool', 'purple' ); ?></h2>
