@@ -406,7 +406,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	private function reset_scripts(): void {
 		$wp_scripts = wp_scripts();
 
-		$wp_scripts->queue     = array();
+		// dequeue() also clears the cached dependency list that wp_script_is( ..., 'enqueued' ) reads.
+		$wp_scripts->dequeue( $wp_scripts->queue );
 		$wp_scripts->to_do     = array();
 		$wp_scripts->done      = array();
 		$wp_scripts->groups    = array();
