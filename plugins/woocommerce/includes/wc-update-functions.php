@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -4020,4 +4021,99 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
 	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
 		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
 	}
+}
+
+/**
+ * Delete the product attributes lookup rows of variations that are not published.
+ *
+ * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
+ * counted terms that only a disabled variation carried. Rows are now only written for published variations
+ * and a status change refreshes them, but rows written before that are never revisited.
+ *
+ * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it. A database error, or a
+ * progress cursor that can't be saved, is logged and stops the migration without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is left to process, false when done or stopped.
+ */
+function wc_update_1130_delete_unpublished_variation_lookup_rows() {
+	global $wpdb;
+
+	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_unpublished_variation_id';
+	$lookup_table   = $lookup_data_store->get_lookup_table_name();
+
+	// Driving from the posts side keeps the batch bounded by unpublished variations, which are the selective
+	// set here, and lets the query use the post_type/post_status index instead of scanning the lookup table.
+	$variation_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID > %d AND post_type = 'product_variation' AND post_status != %s
+			ORDER BY ID ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 ),
+			ProductStatus::PUBLISH
+		)
+	);
+
+	if ( '' === $wpdb->last_error && ! empty( $variation_ids ) ) {
+		$variation_ids   = array_map( 'intval', $variation_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough. The
+		// status is checked again here: with direct updates on, a variation re-enabled since the batch was
+		// selected already has its rows back, and they must stay.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE lookup FROM {$lookup_table} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+				WHERE lookup.product_id IN ( {$id_placeholders} ) AND posts.post_status != %s",
+				array_merge( $variation_ids, array( ProductStatus::PUBLISH ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		if ( false !== $deleted ) {
+			// A concurrent run (the queue plus `wp wc update`) may already have saved this id or a later one, and update_option()
+			// reports that as false just like a failed write. It can also replace a later cursor with this one, which only makes a
+			// run reselect variations whose rows are already gone. The variations stay unpublished, so without a saved cursor the
+			// next run would pick the same batch again.
+			$cursor = end( $variation_ids );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
+				return true;
+			}
+			// Re-read from the database. If the other run created the option after this process found it missing, the stale
+			// "missing" entry sits in 'notoptions', not under the option's own key.
+			wp_cache_delete( $last_id_option, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
+				return true;
+			}
+			wc_get_logger()->error(
+				'Stopped deleting the lookup rows of unpublished variations: the progress cursor could not be saved.',
+				array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+			);
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped deleting the lookup rows of unpublished variations: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The layered nav counts cached from the deleted rows would otherwise be served until they expire, a day later.
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+
+	return false;
 }
