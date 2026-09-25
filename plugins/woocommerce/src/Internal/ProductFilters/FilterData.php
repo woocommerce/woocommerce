@@ -495,6 +495,7 @@ class FilterData {
 				wp_json_encode(
 					array(
 						'query_vars'  => $this->normalize_query_vars( $query_vars ),
+						'taxonomy'    => $this->get_taxonomy_params_for_cache(),
 						'extra'       => $extra,
 						'filter_type' => $filter_type,
 					)
@@ -546,6 +547,18 @@ class FilterData {
 		}
 
 		return $query_vars;
+	}
+
+	/**
+	 * Get the effective taxonomy parameter map in a stable order for cache keys.
+	 *
+	 * @return array Taxonomy names mapped to URL parameter names.
+	 */
+	private function get_taxonomy_params_for_cache(): array {
+		$taxonomy_params = $this->params->get_param( 'taxonomy' );
+		ksort( $taxonomy_params );
+
+		return $taxonomy_params;
 	}
 
 	/**
@@ -646,7 +659,14 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $this->normalize_query_vars( $query_vars ) ) );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
+			wp_json_encode(
+				array(
+					'query_vars' => $this->normalize_query_vars( $query_vars ),
+					'taxonomy'   => $this->get_taxonomy_params_for_cache(),
+				)
+			)
+		);
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
