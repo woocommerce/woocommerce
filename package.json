@@ -3,7 +3,7 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
-	"packageManager": "pnpm@10.33.0",
+	"packageManager": "pnpm@12.4.2",
 	"engines": {
 		"node": "^24.15.0"
 	},
@@ -18,7 +18,7 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"build": "pnpm -r --stream '/^build:project:.*$/'",
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
