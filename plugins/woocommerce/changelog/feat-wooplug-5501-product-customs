@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add optional commodity code, country of origin, and customs description fields to products for international shipping.

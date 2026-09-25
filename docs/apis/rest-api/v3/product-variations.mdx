@@ -23,6 +23,9 @@ The product variations API allows you to create, view, update, and delete indivi
 | `permalink`             | string          | Variation URL. `READ-ONLY`                                                            |
 | `sku`                   | string          | Unique identifier.                                                                                                  |
 | `global_unique_id`      | string          | GTIN, UPC, EAN or ISBN. A global unique identifier for the variation.                                               |
+| `customs_commodity_code` | string, null | Customs code containing 6–14 digits after spaces and punctuation are removed. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
+| `customs_country_of_origin` | string, null | Two-letter ISO country of origin code. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
+| `customs_description` | string, null | Plain-text customs description, up to 35 characters, without emoji or special symbols such as `™`. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
 | `price`                 | string          | Current variation price. `READ-ONLY`                                                  |
 | `regular_price`         | string          | Variation regular price.                                                                                            |
 | `sale_price`            | string          | Variation sale price.                                                                                               |
