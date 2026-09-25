@@ -106,7 +106,7 @@
 <!-- /wp:accordion --></div>
 <!-- /wp:woocommerce/product-filter-status -->
 
-<!-- wp:woocommerce/product-filter-active -->
+<!-- wp:woocommerce/product-filter-active {"metadata":{"blockVisibility":{"viewport":{"mobile":false,"tablet":false}}}} -->
 <div class="wp-block-woocommerce-product-filter-active"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
 <!-- /wp:woocommerce/product-filter-removable-chips -->
@@ -123,7 +123,27 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"88%"} -->
-<div class="wp-block-column" style="flex-basis:88%"><!-- wp:woocommerce/product-collection {"queryId":27,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
+<div class="wp-block-column" style="flex-basis:88%">
+<?php // Keep the legacy drawer attribute for WooCommerce 11.1 compatibility. ?>
+<!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"metadata":{"name":"Active filters on small screens","blockVisibility":{"viewport":{"desktop":false}}}} -->
+<div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled">
+<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} -->
+<div class="wp-block-woocommerce-product-filter-active" style="margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-filter-removable-chips -->
+<div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
+<!-- /wp:woocommerce/product-filter-removable-chips -->
+
+<!-- wp:woocommerce/product-filter-clear-button -->
+<!-- wp:buttons {"layout":{"type":"flex","verticalAlignment":"stretched"}} -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline","textAlign":"center"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-background has-text-align-center has-medium-font-size has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e( 'Clear filters', 'purple' );?></a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+<!-- /wp:woocommerce/product-filter-clear-button --></div>
+<!-- /wp:woocommerce/product-filter-active -->
+</div>
+<!-- /wp:woocommerce/product-filters -->
+
+<!-- wp:woocommerce/product-collection {"queryId":27,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide">
 <!-- wp:group {"className":"alignwide","style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group alignwide" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-results-count {"metadata":{"blockVisibility":{"viewport":{"mobile":false}}}} /-->
