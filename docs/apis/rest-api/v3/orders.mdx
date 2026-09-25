@@ -1509,6 +1509,19 @@ woocommerce.put("orders/727", data).parsed_response
   </TabItem>
 </Tabs>
 
+### Remove a coupon from an order
+
+To remove an applied coupon, update the order with a `coupon_lines` array containing every coupon code that should remain. Any applied coupon omitted from the array is removed from the order. For example, if the order has `10per` and `20off`, this request removes `20off`:
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v3/orders/727 \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{"coupon_lines":[{"code":"10per"}]}'
+```
+
+To remove all applied coupons, send `{"coupon_lines":[]}`. Coupon line IDs are read-only; do not send an ID with a null code to remove a coupon. This changes the coupons applied to the order, not the coupon codes available in the store.
+
 ## Delete an order
 
 This API helps you delete an order.

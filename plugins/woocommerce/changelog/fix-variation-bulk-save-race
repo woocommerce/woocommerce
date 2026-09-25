@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent bulk variation edits from racing unsaved variation changes.
