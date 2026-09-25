@@ -455,7 +455,8 @@ function wc_is_attribute_in_product_name( $attribute, $name, $product = null ) {
 	$attributes_area = $name;
 
 	if ( $product instanceof WC_Product && $product->is_type( ProductType::VARIATION ) ) {
-		$parent_name = $product->get_title();
+		// The raw parent title, as the name is built from it without the `woocommerce_product_title` filter.
+		$parent_name = $product->get_parent_data()['title'] ?? '';
 
 		// Callers may pass the name raw or entity-decoded, so try both forms of the parent name.
 		foreach ( array_unique( array( $parent_name, wp_specialchars_decode( $parent_name, ENT_QUOTES ) ) ) as $prefix ) {

@@ -121,6 +121,38 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_is_attribute_in_product_name() should match the parent name when a filter changes the product title.
+	 */
+	public function test_wc_is_attribute_in_product_name_ignores_the_product_title_filter(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		$append_badge = function ( $title ) {
+			return $title . ' (New)';
+		};
+		add_filter( 'woocommerce_product_title', $append_badge );
+
+		try {
+			$this->assertFalse( wc_is_attribute_in_product_name( 'Black', 'Vienna Black', $variation ) );
+		} finally {
+			remove_filter( 'woocommerce_product_title', $append_badge );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * Test wc_get_attribute_taxonomy_ids() function.
 	 * Even empty arrays should be cached.
 	 */
