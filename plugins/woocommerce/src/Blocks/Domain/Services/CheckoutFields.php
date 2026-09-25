@@ -923,7 +923,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Get additional fields for an order.
+	 * Get saved additional fields for an order without applying checkout defaults.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $location The location to get fields for (address|contact|order).
@@ -933,21 +933,13 @@ class CheckoutFields {
 	 */
 	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'other', string $context = 'edit' ) {
 
-		// Because the Additional Checkout Fields API only applies to orders created with Store API, we should not
-		// return any values unless it was created using Store API. This is mainly to prevent "empty" checkbox values
-		// from being shown on the order confirmation page for orders placed using the shortcode. It's rare that this
-		// will happen but not impossible.
-		if ( 'store-api' !== $order->get_created_via() ) {
-			return [];
-		}
-
 		$location           = $this->prepare_location_name( $location );
 		$group              = $this->prepare_group_name( $group );
 		$fields             = $this->get_fields_for_location( $location );
 		$fields_with_values = [];
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $this->get_field_from_object( $field_key, $order, $group );
+			$value = $this->get_field_from_object( $field_key, $order, $group, false );
 
 			if ( '' === $value || null === $value ) {
 				continue;
