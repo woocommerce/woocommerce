@@ -247,6 +247,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return true;
 		}
 
+		if ( ! $this->is_valid_post_action( $arg ) ) {
+			return false;
+		}
+
 		$variation_id = absint( $arg );
 
 		if ( 'product_variation' !== get_post_type( $variation_id ) ) {
