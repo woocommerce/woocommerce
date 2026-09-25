@@ -223,13 +223,21 @@ test.describe( 'Product Reviews', () => {
 				'wp-admin/edit.php?post_type=product&page=product-reviews'
 			);
 
-			// Handle notice if present
-			await page.addLocatorHandler(
-				page.getByRole( 'link', { name: 'Dismiss' } ),
-				async () => {
-					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
+			const dismissLinks = page.getByRole( 'link', {
+				name: 'Dismiss',
+				exact: true,
+			} );
+			await page.addLocatorHandler( dismissLinks.first(), async () => {
+				// Extensions can each add a notice, so dismiss all of them.
+				let remainingNotices = await dismissLinks.count();
+				while ( remainingNotices > 0 ) {
+					await dismissLinks.first().click();
+					await expect
+						.poll( () => dismissLinks.count() )
+						.toBeLessThan( remainingNotices );
+					remainingNotices = await dismissLinks.count();
 				}
-			);
+			} );
 
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
