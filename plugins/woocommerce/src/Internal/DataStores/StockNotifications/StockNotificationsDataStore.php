@@ -295,10 +295,6 @@ CREATE TABLE $meta_table_name (
 			if ( false === $result ) {
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
-
-			if ( 0 === $result ) {
-				return new \WP_Error( 'db_update_error', 'Invalid notification ID.' );
-			}
 		}
 
 		$notification->save_meta_data();
@@ -603,6 +599,60 @@ CREATE TABLE $meta_table_name (
 			array( $table, $product_id, $user_id, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
 		);
 		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Get the ID of the active or pending notification matching an identity, product and posted
+	 * attribute set.
+	 *
+	 * The posted attributes are matched as the serialized string they are stored as, so the
+	 * comparison is exact and case sensitive, but not sensitive to key order: both sides are
+	 * sorted by key. An empty set matches any sign-up for the identity.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param int    $user_id The user ID, or 0 to match on the email instead.
+	 * @param string $user_email The email address, used when no user ID is given.
+	 * @param array  $posted_attributes The posted attributes to match.
+	 * @return int The notification ID, or 0 when nothing matches.
+	 */
+	public function get_matching_notification_id( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ): int {
+
+		if ( empty( $product_id ) ) {
+			return 0;
+		}
+
+		if ( empty( $user_id ) ) {
+			$user_email = EmailNormalizer::normalize( $user_email );
+			if ( ! is_email( $user_email ) ) {
+				return 0;
+			}
+		}
+
+		global $wpdb;
+
+		$table          = $this->get_table_name();
+		$identity_where = empty( $user_id ) ? 'user_email = %s' : 'user_id = %d';
+		$identity_value = empty( $user_id ) ? $user_email : $user_id;
+
+		if ( empty( $posted_attributes ) ) {
+			$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				"SELECT id FROM $table WHERE product_id = %d AND $identity_where AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array( $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+			);
+
+			return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		}
+
+		// Sort by key so the serialized blob is the same whatever order the caller built the set in.
+		ksort( $posted_attributes );
+
+		$meta_table = $this->get_meta_table_name();
+		$sql        = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			"SELECT notifications.id FROM $table AS notifications INNER JOIN $meta_table AS meta ON meta.notification_id = notifications.id AND meta.meta_key = %s WHERE notifications.product_id = %d AND notifications.$identity_where AND notifications.status IN (%s, %s) AND BINARY meta.meta_value = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( 'posted_attributes', $product_id, $identity_value, NotificationStatus::ACTIVE, NotificationStatus::PENDING, maybe_serialize( $posted_attributes ) )
+		);
+
+		return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
