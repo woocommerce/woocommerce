@@ -802,6 +802,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * Test show shipping.
 	 */
 	public function test_show_shipping() {
+		// Start from a customer without an address; WC()->customer outlives a test.
+		WC()->customer->set_shipping_location( '', '', '', '' );
+
 		// Test with an empty cart.
 		$this->assertFalse( WC()->cart->show_shipping() );
 
