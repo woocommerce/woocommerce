@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotif
 use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Data_Exception;
 use WP_REST_Server;
@@ -64,13 +65,14 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
-	 * The token list is registered whatever the module's state. The write
-	 * endpoints are only registered while it is enabled, because the apps read
-	 * the 404 for a missing route as push notifications being unavailable.
-	 * Once the apps read that from {@see PushNotificationStatusRestController}
-	 * instead, the write endpoints can be registered unconditionally again and
-	 * left to their permission callbacks. Registering a second handler on an
-	 * existing route adds to it.
+	 * The token list and token deletion are available whatever the module's
+	 * state. Token registration is only added while the module is enabled,
+	 * because the apps read the 404 for a missing route as push notifications
+	 * being unavailable; deletion returns that same 404 to users from its
+	 * permission callback. Once the apps read this from
+	 * {@see PushNotificationStatusRestController} instead, registration can be
+	 * added unconditionally too. Registering a second handler on an existing
+	 * route adds to it.
 	 *
 	 * @since 10.6.0
 	 *
@@ -137,6 +139,20 @@ class PushTokenRestController extends RestApiControllerBase {
 			)
 		);
 
+		register_rest_route(
+			$this->route_namespace,
+			$this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
+					'args'                => $this->get_args( 'delete' ),
+					'permission_callback' => array( $this, 'authorize_wpcom_or_allowed_user_while_enabled' ),
+				),
+				'schema' => array( $this, 'get_schema' ),
+			)
+		);
+
 		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return;
 		}
@@ -151,20 +167,6 @@ class PushTokenRestController extends RestApiControllerBase {
 					'args'                => $this->get_args( 'create' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 				),
-			)
-		);
-
-		register_rest_route(
-			$this->route_namespace,
-			$this->rest_base . '/(?P<id>[\d]+)',
-			array(
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
-					'args'                => $this->get_args( 'delete' ),
-					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-				),
-				'schema' => array( $this, 'get_schema' ),
 			)
 		);
 	}
@@ -317,6 +319,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Deletes a push token record.
 	 *
+	 * Users can only delete their own tokens. WPCOM can delete any token, so
+	 * support can stop notifications to a device its owner can no longer reach
+	 * from the app.
+	 *
 	 * @since 10.6.0
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -328,10 +334,11 @@ class PushTokenRestController extends RestApiControllerBase {
 	public function delete( WP_REST_Request $request ) {
 		try {
 			$id         = (int) $request->get_param( 'id' );
+			$from_wpcom = $this->is_signed_with_blog_token();
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );
 			$push_token = $data_store->read( $id );
 
-			if ( $push_token->get_user_id() !== get_current_user_id() ) {
+			if ( ! $from_wpcom && $push_token->get_user_id() !== get_current_user_id() ) {
 				throw new PushTokenNotFoundException();
 			}
 
@@ -343,6 +350,21 @@ class PushTokenRestController extends RestApiControllerBase {
 					'The push token could not be deleted.',
 					WP_Http::INTERNAL_SERVER_ERROR
 				);
+			}
+
+			if ( $from_wpcom ) {
+				wc_get_container()
+					->get( LegacyProxy::class )
+					->call_function( 'wc_get_logger' )
+					->info(
+						'Push token deleted by WordPress.com support. The device it was registered from will no longer receive push notifications from this store.',
+						array(
+							'source'   => PushNotifications::FEATURE_NAME,
+							'token_id' => $id,
+							'user_id'  => $push_token->get_user_id(),
+							'platform' => $push_token->get_platform(),
+						)
+					);
 			}
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
