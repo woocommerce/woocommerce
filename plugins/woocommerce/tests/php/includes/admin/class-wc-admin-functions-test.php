@@ -613,6 +613,49 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_save_order_items() should store the expected shipping cost after an admin edit.
+	 *
+	 * @dataProvider shipping_cost_data_provider
+	 * @param string $posted_cost The submitted shipping cost.
+	 * @param string $expected_cost The cost expected after saving.
+	 */
+	public function test_wc_save_order_items_saves_shipping_cost( string $posted_cost, string $expected_cost ): void {
+		$order         = WC_Helper_Order::create_order();
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_order_id( $order->get_id() );
+		$shipping_item->set_total( '10' );
+		$item_id = $shipping_item->save();
+
+		$items = array(
+			'shipping_method_id'    => array( $item_id ),
+			'shipping_method'       => array( $item_id => 'flat_rate' ),
+			'shipping_method_title' => array( $item_id => 'Flat rate' ),
+			'shipping_cost'         => array( $item_id => $posted_cost ),
+			'shipping_taxes'        => array( $item_id => array() ),
+		);
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		$saved_item = new WC_Order_Item_Shipping( $item_id );
+		$this->assertSame( $expected_cost, $saved_item->get_total(), 'The saved shipping total should match the submitted cost' );
+	}
+
+	/**
+	 * Shipping cost inputs and their expected stored values.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function shipping_cost_data_provider(): array {
+		return array(
+			'empty'       => array( '', '0' ),
+			'whitespace'  => array( ' ', '0' ),
+			'nonnumeric'  => array( 'abc', '0' ),
+			'normal cost' => array( '12.50', '12.50' ),
+			'zero cost'   => array( '0', '0' ),
+		);
+	}
+
+	/**
 	 * @testdox wc_save_order_items() should preserve an existing shipping line named Shipping.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/66847
