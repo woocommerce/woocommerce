@@ -397,6 +397,51 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product deletion webhooks are not delivered when a pre_delete_post filter cancels the product deletion.
+	 */
+	public function test_product_deletion_webhook_skips_product_deletion_cancelled_by_pre_delete_post(): void {
+		$product_id    = WC_Helper_Product::create_simple_product()->get_id();
+		$delivered_ids = array();
+		add_filter(
+			'pre_delete_post',
+			function ( $check, $post ) use ( $product_id ) {
+				return $product_id === $post->ID ? false : $check;
+			},
+			10,
+			2
+		);
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wp_delete_post( $product_id, true );
+
+		$this->assertNotNull( get_post( $product_id ), 'The filter should have kept the product' );
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered for a before_delete_post argument that is not a post ID.
+	 */
+	public function test_product_deletion_webhook_rejects_non_id_values_before_coercion(): void {
+		$product_id      = WC_Helper_Product::create_simple_product()->get_id();
+		$delivered_ids   = array();
+		$post_at_one     = clone get_post( $product_id );
+		$post_at_one->ID = 1;
+		wp_cache_set( 1, $post_at_one, 'posts' );
+		remove_all_actions( 'before_delete_post' );
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		try {
+			foreach ( array( true, array( $product_id ), 'not-an-id' ) as $invalid_id ) {
+				do_action( 'before_delete_post', $invalid_id, get_post( $product_id ) );
+			}
+		} finally {
+			wp_cache_delete( 1, 'posts' );
+		}
+
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
 	 * @testdox Product deletion webhooks are delivered for a product moved to trash without wp_trash_post().
 	 */
 	public function test_product_deletion_webhook_delivers_for_product_trashed_without_wp_trash_post(): void {
