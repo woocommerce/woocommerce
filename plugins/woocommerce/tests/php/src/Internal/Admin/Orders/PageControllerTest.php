@@ -45,9 +45,11 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 		 * Tear down class fixtures.
 		 */
 		public static function tearDownAfterClass(): void {
-			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
-				OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
-			}
+			// The tests switch storage inside a transaction, so the rolled back option value stays in
+			// the object cache. Flush it first, or update_option() compares against the cached value
+			// and skips the write, then restore unconditionally.
+			wp_cache_flush();
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
 
 			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
