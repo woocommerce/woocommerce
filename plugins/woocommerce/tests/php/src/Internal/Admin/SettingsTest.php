@@ -290,6 +290,25 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The preloaded component settings expose the filtered defaults so "Reset defaults" can restore them.
+	 */
+	public function test_component_settings_expose_filtered_defaults(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		// The settings are only injected in admin; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+
+		$settings = $this->sut->add_component_settings( array() );
+
+		$this->assertArrayHasKey( 'wcAdminSettingsDefaults', $settings, 'Defaults should be preloaded alongside wcAdminSettings.' );
+		$this->assertContains( 'refunded', $settings['wcAdminSettingsDefaults']['woocommerce_actionable_order_statuses'], 'The filtered default should reach the client.' );
+		$this->assertSame(
+			array( 'pending', 'cancelled', 'failed' ),
+			$settings['wcAdminSettingsDefaults']['woocommerce_excluded_report_order_statuses'],
+			'An unfiltered setting should keep its built-in default.'
+		);
+	}
+
+	/**
 	 * @testdox The preloaded component settings expose coupon discount types, including ones added by extensions.
 	 */
 	public function test_component_settings_expose_coupon_types(): void {
