@@ -342,15 +342,15 @@ class WC_Product_Variable extends WC_Product {
 	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
-		$variations              = array();
-		$product_id              = $this->get_id();
-		$variation_ids           = $this->get_children();
-		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$variations    = array();
+		$variation_ids = $this->get_children();
 
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
+			$product_id              = $this->get_id();
+			$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 			// Performance note: pre-check is feasible only if no woocommerce_product_is_in_stock hooks can affect is_in_stock call results.
 			$precheck_with_meta = $hide_out_of_stock_items && ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
