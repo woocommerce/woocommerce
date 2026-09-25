@@ -358,6 +358,8 @@ class WC_Shipping {
 				}
 			}
 
+			$unfiltered_rates = $package['rates'];
+
 			// Hide shipping rates when free shipping is available.
 			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
 				$free_shipping = array();
@@ -384,10 +386,13 @@ class WC_Shipping {
 			 *
 			 * @see https://gist.github.com/woogists/271654709e1d27648546e83253c1a813 for cache invalidation methods.
 			 * @since 2.0.0
+			 * @since 11.3.0 Added the $unfiltered_rates parameter.
+			 *
 			 * @param array $package['rates'] Package rates.
 			 * @param array $package Package of cart items.
+			 * @param array $unfiltered_rates All calculated package rates, before hiding rates when free shipping is available.
 			 */
-			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
+			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package, $unfiltered_rates );
 
 			// Package rates should be an array, if it was filtered into a non-array, reset it. Don't reset to the
 			// unfiltered value, as e.g. a 3pd could have set it to "false" to remove rates.
