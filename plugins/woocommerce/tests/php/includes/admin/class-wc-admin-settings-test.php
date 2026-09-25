@@ -30,6 +30,33 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not use the global post as the selection when a searchable page setting is empty.
+	 */
+	public function test_empty_page_search_does_not_select_global_post(): void {
+		$page_id = self::factory()->post->create( array( 'post_title' => 'Unrelated global post' ) );
+		$this->go_to( get_permalink( $page_id ) );
+		the_post();
+		$fields = array(
+			array(
+				'id'    => 'empty_page',
+				'type'  => 'single_select_page_with_search',
+				'value' => 0,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $fields );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertStringNotContainsString( 'Unrelated global post', $output );
+		$this->assertSame( 1, substr_count( $output, '<option ' ) );
+	}
+
+	/**
 	 * @testdox Should preserve percent-encoded sequences in password fields.
 	 */
 	public function test_save_fields_preserves_percent_encoded_chars_in_password_fields(): void {

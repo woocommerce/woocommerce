@@ -2749,12 +2749,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Cannot access property \$post_title on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Cannot call method remove_help_tabs\(\) on WP_Screen\|null\.$#'
 			identifier: method.nonObject
 			count: 1
