@@ -26,7 +26,7 @@ final class ViewConfig {
 	 * @since 11.2.0
 	 */
 	public function __construct() {
-		add_filter( 'get_entity_view_config_woo_settings_product', array( $this, 'handle_get_entity_view_config_woo_settings_product' ) );
+		add_filter( 'get_entity_view_config_woo_settings_products', array( $this, 'handle_get_entity_view_config_woo_settings_product' ) );
 	}
 
 	/**

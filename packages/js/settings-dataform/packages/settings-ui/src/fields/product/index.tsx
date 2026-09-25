@@ -76,21 +76,18 @@ const fields = [
 	attributeLookupOptimizedUpdates,
 	productMatchFeaturedImageBySku,
 ];
-let areProductFieldsRegistered = false;
+const registeredProductEntities = new Set< string >();
 
-export function registerProductFields() {
-	if ( areProductFieldsRegistered ) {
+export function registerProductFields( entity = SETTINGS_ENTITY ) {
+	const entityKey = JSON.stringify( [ entity.kind, entity.name ] );
+	if ( registeredProductEntities.has( entityKey ) ) {
 		return;
 	}
 
 	const { registerEntityField } = unlock( dispatch( editorStore ) );
 
 	fields.forEach( ( field ) => {
-		registerEntityField(
-			SETTINGS_ENTITY.kind,
-			SETTINGS_ENTITY.name,
-			field
-		);
+		registerEntityField( entity.kind, entity.name, field );
 	} );
-	areProductFieldsRegistered = true;
+	registeredProductEntities.add( entityKey );
 }
