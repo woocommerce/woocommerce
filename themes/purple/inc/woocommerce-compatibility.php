@@ -84,7 +84,7 @@ function purple_get_woocommerce_inactive_notice( string $minimum ): string {
 		)
 	);
 	if ( current_user_can( 'activate_plugins' ) ) {
-		$notice .= ' <a href="' . esc_url( self_admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Manage plugins', 'purple' ) . '</a>';
+		$notice .= ' <a href="' . esc_url( self_admin_url( 'plugins.php?plugin_status=inactive' ) ) . '">' . esc_html__( 'Manage plugins', 'purple' ) . '</a>';
 	}
 
 	return $notice;
