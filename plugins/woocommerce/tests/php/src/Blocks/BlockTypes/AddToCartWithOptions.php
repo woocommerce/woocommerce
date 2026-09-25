@@ -305,7 +305,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 *
 	 * @param string $product_type Product type under test.
 	 */
-	public function test_legacy_form_fields_for_product_types( string $product_type ): void {
+	public function test_legacy_form_exposes_required_fields_for_each_product_type( string $product_type ): void {
 		global $product;
 
 		$previous_product  = $product;

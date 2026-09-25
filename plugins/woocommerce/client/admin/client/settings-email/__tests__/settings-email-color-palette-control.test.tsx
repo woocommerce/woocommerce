@@ -157,7 +157,7 @@ describe( 'ResetStylesControl', () => {
 			.jQuery;
 	} );
 
-	it( 'shows sync and undo controls after a color change', () => {
+	it( 'turns off auto-sync and offers Sync and Undo after a color change', () => {
 		renderWithThemeDefaults();
 		changeAccent();
 

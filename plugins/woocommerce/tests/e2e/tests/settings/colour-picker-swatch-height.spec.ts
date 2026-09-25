@@ -7,7 +7,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 test.describe( 'Colour picker swatch height on Email settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test( 'colour swatch is correctly sized with WP 7.0 body class', async ( {
+	test( 'colour swatch paints 32px without the WP 7.0 body class and 40px with it', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
