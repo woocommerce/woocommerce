@@ -32,9 +32,9 @@ class Params implements FilterUrlParam {
 		}
 
 		$keys = array();
-		foreach ( self::$params as $taxonomy => $params ) {
+		foreach ( self::$params as $type => $params ) {
 			$keys = array_merge( $keys, array_values( $params ) );
-			if ( 'attribute' === $taxonomy ) {
+			if ( 'attribute' === $type ) {
 				$query_type_params = array_map(
 					function ( $param ) {
 						return 'query_type_' . $param;
@@ -63,12 +63,26 @@ class Params implements FilterUrlParam {
 	}
 
 	/**
+	 * Get the complete effective parameter map.
+	 *
+	 * @since 11.3.0
+	 * @return array Filter types mapped to their URL parameters.
+	 */
+	public function get_params(): array {
+		if ( empty( self::$params ) ) {
+			$this->init_params();
+		}
+
+		return self::$params;
+	}
+
+	/**
 	 * Initialize the params.
 	 *
 	 * @return void
 	 */
 	private function init_params(): void {
-		self::$params = array(
+		$params             = array(
 			'price'     => array(
 				'min_price',
 				'max_price',
@@ -80,8 +94,9 @@ class Params implements FilterUrlParam {
 				'filter_stock_status',
 			),
 			'attribute' => $this->get_attribute_params(),
-			'taxonomy'  => $this->get_taxonomy_params(),
 		);
+		$params['taxonomy'] = $this->get_taxonomy_params( $params );
+		self::$params       = $params;
 	}
 
 	/**
@@ -101,9 +116,10 @@ class Params implements FilterUrlParam {
 	/**
 	 * Get the taxonomy params.
 	 *
+	 * @param array $other_params Params claimed by other filter types.
 	 * @return array
 	 */
-	private function get_taxonomy_params(): array {
+	private function get_taxonomy_params( array $other_params ): array {
 		$public_product_taxonomies = get_taxonomies(
 			array(
 				'public'  => true,
@@ -112,8 +128,7 @@ class Params implements FilterUrlParam {
 			'objects'
 		);
 
-		// We have control over built-in taxonomies, so we can use prettier names.
-		$map = array(
+		$built_in_taxonomies = array(
 			'product_cat'   => 'categories',
 			'product_tag'   => 'tags',
 			'product_brand' => 'brands',
@@ -123,7 +138,38 @@ class Params implements FilterUrlParam {
 
 		foreach ( $public_product_taxonomies as $taxonomy ) {
 			if ( is_array( $taxonomy->object_type ) && in_array( 'product', $taxonomy->object_type, true ) ) {
-				$params[ $taxonomy->name ] = $map[ $taxonomy->name ] ?? "filter_$taxonomy->name";
+				$params[ $taxonomy->name ] = $built_in_taxonomies[ $taxonomy->name ] ?? "filter_$taxonomy->name";
+			}
+		}
+
+		/**
+		 * Filters product taxonomy URL parameters: `product_cat` => `categories`, `product_tag` => `tags`,
+		 * `product_brand` => `brands`; other product taxonomies use `filter_{taxonomy}`.
+		 * Rename with a non-empty, unused parameter name; omitted or invalid entries keep their defaults.
+		 * Register callbacks before Params is first read; the map is cached per request.
+		 *
+		 * @hook woocommerce_product_filter_taxonomy_params
+		 * @since 11.3.0
+		 *
+		 * @param array $params Map of taxonomy name to URL parameter name.
+		 * @return array Map of taxonomy name to URL parameter name.
+		 */
+		$filtered = apply_filters( 'woocommerce_product_filter_taxonomy_params', $params );
+
+		if ( ! is_array( $filtered ) ) {
+			return $params;
+		}
+
+		$used_params = array_merge( array_values( $params ), ...array_values( $other_params ) );
+		foreach ( array_keys( $other_params['attribute'] ) as $attribute ) {
+			$used_params[] = 'query_type_' . $attribute;
+		}
+
+		foreach ( $params as $taxonomy => $default_param ) {
+			$param = $filtered[ $taxonomy ] ?? null;
+			if ( is_string( $param ) && '' !== $param && ( $param === $default_param || ! in_array( $param, $used_params, true ) ) ) {
+				$params[ $taxonomy ] = $param;
+				$used_params[]       = $param;
 			}
 		}
 
