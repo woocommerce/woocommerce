@@ -470,6 +470,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {
+			$tax_class             = (string) $tax_class;
 			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
 			$or_queries[]          = $wpdb->prepare(
 				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
