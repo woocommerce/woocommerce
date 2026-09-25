@@ -723,8 +723,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$response_data       = $this->server->response_to_data( $response, false );
 		$encoded_data_string = wp_json_encode( $response_data );
-		$decoded_data_object = json_decode( $encoded_data_string, false );
-		// Ensure object instead of associative array.
+		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
@@ -2018,12 +2017,11 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$create_request_for_failure = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$create_request_for_failure->set_body_params(
 			array(
-				'name'                                 => 'New Product Attempt That Fails',
-				'sku'                                  => $original_product_sku,
-				// Duplicate SKU.
-				'type'                                 => 'simple',
-				'regular_price'                        => '20',
-				'images'                               => array(
+				'name'          => 'New Product Attempt That Fails',
+				'sku'           => $original_product_sku, // Duplicate SKU.
+				'type'          => 'simple',
+				'regular_price' => '20',
+				'images'        => array(
 					array(
 						'src' => $shared_image_src,
 						'alt' => 'New Image To Be Cleaned Up',
