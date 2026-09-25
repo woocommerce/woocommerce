@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Stop scheduling Pattern Fetcher jobs.

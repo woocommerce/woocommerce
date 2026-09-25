@@ -351,6 +351,8 @@ class WC_Install {
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
 		'11.2.0'   => array(
+			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_delete_surface_cart_checkout_note',

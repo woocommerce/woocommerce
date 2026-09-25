@@ -104,17 +104,14 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an action if it's not already pending.
+	 * Retained for existing callers. Pattern fetch jobs are no longer scheduled.
 	 *
-	 * @param string $action The action name to schedule.
+	 * @param string $action The action name.
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( ActionSchedulerUtil::has_scheduled_action( $action, array(), 'woocommerce' ) ) {
-			return;
-		}
-
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
+		// Keep all scheduling paths disabled, including calls made before Action Scheduler initializes.
+		unset( $action );
 	}
 
 	/**
