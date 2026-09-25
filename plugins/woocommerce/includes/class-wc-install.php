@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
@@ -1852,6 +1853,8 @@ class WC_Install {
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
 
+		$pos_cash_sessions_table_schema = wc_get_container()->get( CashSessionsDataStore::class )->get_database_schema();
+
 		$order_stats_table_schema = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
@@ -2201,6 +2204,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$pos_cash_sessions_table_schema;
 		";
 
 		return $tables;
@@ -2240,6 +2244,9 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_pos_cash_sessions",
+			"{$wpdb->prefix}wc_pos_cash_movements",
+			"{$wpdb->prefix}wc_pos_cash_drawer_events",
 
 			/*
 			 * No longer created: the abandoned cart recovery feature that owned this table was
