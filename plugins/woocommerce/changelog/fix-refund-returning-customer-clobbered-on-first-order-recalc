@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep refund rows' returning_customer NULL when a customer's first order is recalculated, so Analytics > Orders keeps reporting refunds with the refunded order's customer type

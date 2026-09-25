@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve classic setting names, values, and visibility rules while canonicalizing typed Settings UI fields.

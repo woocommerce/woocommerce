@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update npm dependencies and remove unused build tools to close more Dependabot alerts.

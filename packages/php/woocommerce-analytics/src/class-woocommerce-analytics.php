@@ -20,7 +20,9 @@ use Composer\InstalledVersions;
  */
 class Woocommerce_Analytics {
 	/**
-	 * Package version.
+	 * Package version, also the key that triggers the proxy speed module refresh. Rewritten from
+	 * composer.json by tasks/build-package.sh when the package is published, so bumping it here
+	 * does not refresh published copies. Bump the version in composer.json instead.
 	 */
 	const PACKAGE_VERSION = '0.18.0';
 

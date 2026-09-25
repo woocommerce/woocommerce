@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { queueRecordEvent } from '@woocommerce/tracks';
 
 jest.mock( '@woocommerce/navigation', () => ( {
 	getNewPath: jest.fn( () => '/new-path' ),
@@ -14,6 +15,12 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 	queueRecordEvent: jest.fn(),
 } ) );
+
+// The preview modal loads its own data; these tests only care about the card.
+jest.mock(
+	'../../product-preview-modal/product-preview-modal',
+	() => () => null
+);
 
 jest.mock( '@woocommerce/data', () => ( {
 	useUser: jest.fn( () => ( {
@@ -66,12 +73,18 @@ const product: Product = {
 	hasQualityBadge: true,
 };
 
-function renderCard( cardType: ProductCardType ) {
+function renderCard(
+	cardType: ProductCardType,
+	productOverrides: Partial< Product > = {},
+	contextOverrides: Partial< MarketplaceContextType > = {}
+) {
 	return render(
-		<MarketplaceContext.Provider value={ context }>
+		<MarketplaceContext.Provider
+			value={ { ...context, ...contextOverrides } }
+		>
 			<ProductCard
 				type={ ProductType.extension }
-				product={ product }
+				product={ { ...product, ...productOverrides } }
 				cardType={ cardType }
 				tracksData={ { position: 1 } }
 			/>
@@ -122,16 +135,9 @@ describe( 'ProductCard quality badge placement', () => {
 	} );
 
 	it( 'renders no badge when the product does not have one', () => {
-		const { container } = render(
-			<MarketplaceContext.Provider value={ context }>
-				<ProductCard
-					type={ ProductType.extension }
-					product={ { ...product, hasQualityBadge: false } }
-					cardType={ ProductCardType.compact }
-					tracksData={ {} }
-				/>
-			</MarketplaceContext.Provider>
-		);
+		const { container } = renderCard( ProductCardType.compact, {
+			hasQualityBadge: false,
+		} );
 
 		expect( getBadge( container ) ).toBeNull();
 	} );
@@ -150,16 +156,7 @@ describe( 'ProductCard sponsored label', () => {
 		cardType: ProductCardType,
 		overrides: Partial< Product > = {}
 	) {
-		return render(
-			<MarketplaceContext.Provider value={ context }>
-				<ProductCard
-					type={ ProductType.extension }
-					product={ { ...sponsoredProduct, ...overrides } }
-					cardType={ cardType }
-					tracksData={ {} }
-				/>
-			</MarketplaceContext.Provider>
-		);
+		return renderCard( cardType, { ...sponsoredProduct, ...overrides } );
 	}
 
 	function getSponsoredLabel( view: ReturnType< typeof render > ) {
@@ -216,5 +213,93 @@ describe( 'ProductCard sponsored label', () => {
 				'.woocommerce-marketplace__product-card__vendor-details'
 			)
 		).toBeNull();
+	} );
+} );
+
+describe( 'ProductCard click tracking', () => {
+	beforeEach( () => {
+		jest.mocked( queueRecordEvent ).mockClear();
+	} );
+
+	function clickCard(
+		productOverrides: Partial< Product > = {},
+		contextOverrides: Partial< MarketplaceContextType > = {}
+	) {
+		const view = renderCard(
+			ProductCardType.regular,
+			productOverrides,
+			contextOverrides
+		);
+
+		fireEvent.click( view.getByRole( 'link' ) );
+	}
+
+	// A click records exactly one event, and the mock is cleared before each test.
+	function cardClickEvents() {
+		return jest.mocked( queueRecordEvent ).mock.calls;
+	}
+
+	it( 'reports the badge when the card shows one', () => {
+		clickCard();
+
+		expect( cardClickEvents() ).toEqual( [
+			[
+				'marketplace_product_card_clicked',
+				expect.objectContaining( {
+					product_id: 1,
+					has_quality_badge: true,
+				} ),
+			],
+		] );
+	} );
+
+	it( 'reports no badge when the product does not have one', () => {
+		clickCard( { hasQualityBadge: false } );
+
+		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
+			has_quality_badge: false,
+		} );
+	} );
+
+	it( 'reports no badge when the badge is disabled for the store', () => {
+		clickCard(
+			{},
+			{
+				iamSettings: {
+					...context.iamSettings,
+					quality_badge: {
+						...context.iamSettings.quality_badge,
+						enabled: false,
+					},
+				},
+			}
+		);
+
+		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
+			has_quality_badge: false,
+		} );
+	} );
+
+	it( 'reports no badge on business service cards, which cannot show one', () => {
+		clickCard( { type: ProductType.businessService } );
+
+		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
+			product_type: ProductType.businessService,
+			has_quality_badge: false,
+		} );
+	} );
+
+	it( 'records the click once when the card opens a preview modal', () => {
+		clickCard(
+			{},
+			{
+				iamSettings: {
+					...context.iamSettings,
+					product_previews: 'modal',
+				},
+			}
+		);
+
+		expect( cardClickEvents() ).toHaveLength( 1 );
 	} );
 } );

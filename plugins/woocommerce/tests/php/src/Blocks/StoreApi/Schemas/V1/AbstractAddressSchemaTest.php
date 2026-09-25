@@ -34,10 +34,29 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The id of the additional address field registered for these tests.
+	 *
+	 * @var string
+	 */
+	private $field_id = 'plugin-namespace/delivery-notes';
+
+	/**
 	 * Set up before test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $this->field_id,
+				'label'    => 'Delivery notes',
+				'location' => 'address',
+				'type'     => 'text',
+				'required' => false,
+			)
+		);
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -47,6 +66,16 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 		$extend            = new ExtendSchema( $formatters );
 		$schema_controller = new SchemaController( $extend );
 		$this->sut         = $schema_controller->get( BillingAddressSchema::IDENTIFIER );
+	}
+
+	/**
+	 * Tear down after test.
+	 */
+	public function tearDown(): void {
+		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
+		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -172,5 +201,104 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 			$result['email'],
 			'Billing email addresses should be returned as raw data, not typographic display text.'
 		);
+	}
+
+	/**
+	 * @testdox Should collapse embedded line breaks in a free-text field like classic checkout does.
+	 */
+	public function test_collapses_line_breaks_in_first_name(): void {
+		$address = $this->make_address( array( 'first_name' => "Foo\r\nBcc: attacker@example.test\r\nX-Injected:" ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'Foo Bcc: attacker@example.test X-Injected:', $result['first_name'] );
+	}
+
+	/**
+	 * @testdox Should collapse each kind of line break to a single space.
+	 * @testWith ["\n"]
+	 *           ["\r\n"]
+	 *           ["\r"]
+	 *
+	 * @param string $line_break The line break variant being tested.
+	 */
+	public function test_collapses_line_breaks_in_free_text_fields( string $line_break ): void {
+		$address = $this->make_address(
+			array(
+				'last_name' => 'Doe' . $line_break . 'Smith',
+				'company'   => 'Acme' . $line_break . 'Inc',
+				'address_1' => '123 Main' . $line_break . 'Street',
+				'address_2' => 'Suite' . $line_break . '100',
+				'city'      => 'New' . $line_break . 'York',
+			)
+		);
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'Doe Smith', $result['last_name'] );
+		$this->assertSame( 'Acme Inc', $result['company'] );
+		$this->assertSame( '123 Main Street', $result['address_1'] );
+		$this->assertSame( 'Suite 100', $result['address_2'] );
+		$this->assertSame( 'New York', $result['city'] );
+	}
+
+	/**
+	 * @testdox Should keep accented and apostrophe characters verbatim.
+	 */
+	public function test_keeps_accented_and_apostrophe_names_verbatim(): void {
+		$address = $this->make_address(
+			array(
+				'first_name' => 'María',
+				'last_name'  => "O'Brien",
+			)
+		);
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'María', $result['first_name'] );
+		$this->assertSame( "O'Brien", $result['last_name'] );
+	}
+
+	/**
+	 * @testdox Should sanitize a free-text field the same way classic checkout's wc_clean() would.
+	 */
+	public function test_sanitizes_address_2_like_classic_checkout(): void {
+		$address = $this->make_address( array( 'address_2' => 'Suite%20100' ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( sanitize_text_field( 'Suite%20100' ), $result['address_2'] );
+	}
+
+	/**
+	 * @testdox Should not run an additional address field through sanitize_text_field.
+	 *
+	 * Additional fields are sanitized by their own field type (sanitize_field()), not by the
+	 * core-field sanitization added to the default case of the switch above. A text field's
+	 * default sanitize() is a no-op, so a percent-encoded run untouched by wp_kses() is
+	 * evidence the new sanitize_text_field() call was skipped for this key.
+	 */
+	public function test_does_not_sanitize_additional_address_field_like_a_core_field(): void {
+		$address = $this->make_address( array( $this->field_id => 'Suite%20100' ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'Suite%20100', $result[ $this->field_id ] );
+	}
+
+	/**
+	 * @testdox Should not run email through sanitize_text_field before sanitize_email.
+	 *
+	 * sanitize_text_field() strips percent-encoded octets like "%41" out of a string. A local
+	 * part such as "user%41b" is valid per is_email() and untouched by sanitize_email(), so
+	 * running it through sanitize_text_field() first would silently change the address.
+	 */
+	public function test_does_not_mangle_email_with_percent_encoded_characters(): void {
+		$email   = 'user%41b@example.com';
+		$address = $this->make_address( array( 'email' => $email ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( sanitize_email( $email ), $result['email'] );
 	}
 }

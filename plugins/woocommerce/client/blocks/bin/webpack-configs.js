@@ -58,7 +58,9 @@ const getSharedPlugins = ( {
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					// This plugin calls exclude.test() directly, so it must be a
+					// single RegExp, not the array webpack's module rules accept.
+					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )
@@ -860,7 +862,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					},
 					base: {
 						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
-						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]|atomic[\\/]utils/,
+						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]/,
 						name: 'wc-cart-checkout-base',
 						chunks: 'all',
 						enforce: true,

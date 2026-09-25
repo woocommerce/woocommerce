@@ -109,7 +109,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 				).toBeVisible();
 
 				await expect(
-					page.getByText( 'Your cart is currently empty!' )
+					page.getByText( 'Your cart is empty' )
 				).toBeVisible();
 			}
 		);

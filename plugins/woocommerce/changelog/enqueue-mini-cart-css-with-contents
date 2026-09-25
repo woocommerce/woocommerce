@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent unstyled Mini Cart drawer contents from appearing below the footer when the Mini Cart block is hidden.

@@ -921,24 +921,24 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( ! $admin_features_disabled ) {
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
-					$formatted_analytics_reports = array_map( function( $report ) {
+					// Append so the reports stay a sequential list; wp_localize_script() encodes a gapped array as a JSON object the command palette ignores.
+					$formatted_analytics_reports = array();
+					foreach ( $analytics_reports as $report ) {
 						if ( ! is_array( $report ) ) {
-							return null;
+							continue;
 						}
-						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
-						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
-						if (
-							is_string( $title ) && $title !== "" &&
-							is_string( $path ) && $path !== ""
-						) {
-							return array(
-								'title' => wp_strip_all_tags( $title ),
-								'path' => $path,
-							);
+
+						$title = $report['title'] ?? '';
+						$path  = $report['path'] ?? '';
+						if ( ! is_string( $title ) || '' === $title || ! is_string( $path ) || '' === $path ) {
+							continue;
 						}
-						return null;
-					}, $analytics_reports );
-					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+
+						$formatted_analytics_reports[] = array(
+							'title' => wp_strip_all_tags( $title ),
+							'path'  => $path,
+						);
+					}
 
 					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(

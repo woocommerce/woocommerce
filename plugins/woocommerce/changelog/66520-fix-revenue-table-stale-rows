@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Analytics Revenue table rows keeping the first dataset loaded when an extension report filter changes.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Recalculate shipping options as soon as the country is changed at checkout, instead of keeping the previous country's options until the rest of the address is filled in.

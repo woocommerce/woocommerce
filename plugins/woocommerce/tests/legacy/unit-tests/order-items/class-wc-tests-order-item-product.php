@@ -250,7 +250,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	/**
 	 * Test the get_formatted_meta_data method.
 	 *
-	 * @since x.x.x
+	 * @since 6.4.0
 	 */
 	public function test_get_all_formatted_meta_data() {
 		$parent_product = new WC_Product_Variable();

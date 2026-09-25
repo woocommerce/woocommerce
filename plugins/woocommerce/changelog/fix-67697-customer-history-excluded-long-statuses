@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect excluded order statuses in the Customer History metabox when a custom status slug exceeds the 20-character storage limit

@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -12,6 +13,15 @@ use WC_Unit_Test_Case;
  * Tests for the NewOrderNotification class.
  */
 class NewOrderNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return a payload with all required keys for an existing order.
 	 */
@@ -89,6 +99,33 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewOrderNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
+	}
+
+	/**
+	 * @testdox Should use the recorded trigger time for the payload timestamp.
+	 */
+	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) self::TRIGGERED_AT );
+		$order->save_meta_data();
+
+		$payload = $notification->to_payload();
+
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the current time when no trigger time is recorded.
+	 */
+	public function test_to_payload_timestamp_falls_back_to_current_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$payload = $notification->to_payload();
+
+		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
 	}
 
 	/**

@@ -2,19 +2,15 @@
  * External dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
 domReady( () => {
-	const renewSubscriptionLink = document.querySelectorAll(
-		'.woocommerce-renew-subscription'
+	trackPluginNoticeLinks(
+		'.woocommerce-renew-subscription',
+		'woo_renew_subscription_in_plugins'
 	);
-
-	if ( renewSubscriptionLink.length > 0 ) {
-		recordEvent( 'woo_renew_subscription_in_plugins_shown' );
-		renewSubscriptionLink.forEach( ( link ) => {
-			link.addEventListener( 'click', function () {
-				recordEvent( 'woo_renew_subscription_in_plugins_clicked' );
-			} );
-		} );
-	}
 } );

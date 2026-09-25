@@ -334,7 +334,7 @@ class WC_Template_Loader {
 	/**
 	 * Add theme support for Product page gallery.
 	 *
-	 * @since x.x.x
+	 * @since 6.0.0
 	 */
 	private static function add_support_for_product_page_gallery() {
 		add_theme_support( 'wc-product-gallery-zoom' );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the cart, checkout and mini-cart blocks from crashing when the cached cart data in localStorage is corrupt. The persistence layer now drops the bad cache and re-fetches instead of throwing.

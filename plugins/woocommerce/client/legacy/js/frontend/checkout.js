@@ -876,7 +876,7 @@ jQuery( function ( $ ) {
 					// Add notices returned by this event.
 					if ( rendersNotices ) {
 						$form.prepend(
-							'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+							'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
 								data.messages +
 								'</div>'
 						); // eslint-disable-line max-len
@@ -1140,7 +1140,7 @@ jQuery( function ( $ ) {
 				'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message, .is-error, .is-success'
 			).remove();
 			wc_checkout_form.$checkout_form.prepend(
-				'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
+				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
 					error_message +
 					'</div>'
 			); // eslint-disable-line max-len

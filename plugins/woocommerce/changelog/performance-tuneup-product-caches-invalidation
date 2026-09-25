@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Tune terms and post meta cache invalidation during product saving.

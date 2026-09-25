@@ -6,7 +6,16 @@ import { Button, Dropdown } from '@wordpress/components';
 import { focus } from '@wordpress/dom';
 import clsx from 'clsx';
 import { createElement, Component } from '@wordpress/element';
-import { find, partial, last, get, includes } from 'lodash';
+import deprecated from '@wordpress/deprecated';
+import {
+	find,
+	partial,
+	last,
+	get,
+	includes,
+	omitBy,
+	isUndefined,
+} from 'lodash';
 import PropTypes from 'prop-types';
 import { Icon, chevronLeft } from '@wordpress/icons';
 import {
@@ -23,6 +32,37 @@ import DropdownButton from '../dropdown-button';
 import Search from '../search';
 
 export const DEFAULT_FILTER = 'all';
+
+/**
+ * Get the props to forward to the `Search` component of a filter.
+ * The deprecated `type`, `autocompleter`, and `labels.placeholder` settings take precedence over `settings.searchProps`,
+ * so extensions that change them on core filters keep working.
+ *
+ * @param {Object} settings The `settings` of a filter with a `component`.
+ * @return {Object} Props for the `Search` component.
+ */
+function getSearchProps( settings ) {
+	const { type, autocompleter, labels = {}, searchProps = {} } = settings;
+	const legacySearchProps = omitBy(
+		{ type, autocompleter, placeholder: labels.placeholder },
+		isUndefined
+	);
+
+	if ( Object.keys( legacySearchProps ).length > 0 ) {
+		deprecated(
+			'Passing `type`, `autocompleter`, or `labels.placeholder` in the `settings` of a FilterPicker filter',
+			{
+				since: '14.2.0',
+				version: '15.0.0',
+				alternative: '`settings.searchProps`',
+				link: 'https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/filter-picker/README.md',
+				plugin: '@woocommerce/components',
+			}
+		);
+	}
+
+	return { ...searchProps, ...legacySearchProps };
+}
 
 /**
  * Modify a url query parameter via a dropdown selection of configurable options.
@@ -202,7 +242,7 @@ class FilterPicker extends Component {
 
 	renderButton( filter, onClose, config ) {
 		if ( filter.component ) {
-			const { type, labels, autocompleter } = filter.settings;
+			const searchProps = getSearchProps( filter.settings );
 			const persistedFilter = this.getFilter();
 			const selectedTag =
 				persistedFilter.value === filter.value
@@ -211,10 +251,11 @@ class FilterPicker extends Component {
 
 			return (
 				<Search
-					autocompleter={ autocompleter }
-					className="woocommerce-filters-filter__search"
-					type={ type }
-					placeholder={ labels.placeholder }
+					{ ...searchProps }
+					className={ clsx(
+						'woocommerce-filters-filter__search',
+						searchProps.className
+					) }
 					selected={ selectedTag ? [ selectedTag ] : [] }
 					onChange={ partial(
 						this.onTagChange,
@@ -411,6 +452,45 @@ FilterPicker.propTypes = {
 				 * An array representing the "path" to this filter, if nested.
 				 */
 				path: PropTypes.string,
+				/**
+				 * Settings for a filter with a `component`, or for a comparison filter.
+				 */
+				settings: PropTypes.shape( {
+					/**
+					 * The url parameter the selected value is stored in.
+					 */
+					param: PropTypes.string,
+					/**
+					 * Function used to fetch labels for the selected values, returns a Promise.
+					 */
+					getLabels: PropTypes.func,
+					/**
+					 * Object of localized labels. `button` is shown in the dropdown button next to the selected value.
+					 */
+					labels: PropTypes.shape( {
+						button: PropTypes.string,
+						/**
+						 * @deprecated Use `searchProps.placeholder` instead.
+						 */
+						placeholder: PropTypes.string,
+					} ),
+					/**
+					 * Props forwarded to the `Search` component, except `selected`, `onChange`, `inlineTags`, and `staticResults`.
+					 */
+					searchProps: PropTypes.shape( {
+						type: PropTypes.string,
+						autocompleter: PropTypes.object,
+						placeholder: PropTypes.string,
+					} ),
+					/**
+					 * @deprecated Use `searchProps.type` instead.
+					 */
+					type: PropTypes.string,
+					/**
+					 * @deprecated Use `searchProps.autocompleter` instead.
+					 */
+					autocompleter: PropTypes.object,
+				} ),
 				/**
 				 * An array of more filter objects that act as "children" to this item.
 				 * This set of filters is shown if the parent filter is clicked.

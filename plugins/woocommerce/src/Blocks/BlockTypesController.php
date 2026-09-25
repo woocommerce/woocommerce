@@ -21,6 +21,11 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 final class BlockTypesController {
 
 	/**
+	 * Priority of the add_data_attributes render_block filter.
+	 */
+	private const DATA_ATTRIBUTES_PRIORITY = 10;
+
+	/**
 	 * Instance of the asset API.
 	 *
 	 * @var AssetApi
@@ -54,13 +59,6 @@ final class BlockTypesController {
 	private static $register_blocks_has_run = false;
 
 	/**
-	 * Whether WooCommerce block styles should be enqueued on demand for classic themes.
-	 *
-	 * @var bool|null
-	 */
-	private $should_enqueue_block_style_for_classic_themes = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -79,7 +77,7 @@ final class BlockTypesController {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
-		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
@@ -145,6 +143,55 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Prepare block rendering for an email, and register the blocks if this request skipped that.
+	 *
+	 * Registration runs third-party code, and an error there must not stop the email from being sent.
+	 *
+	 * @internal
+	 */
+	public function register_blocks_for_email(): void {
+		$this->suspend_data_attributes_for_email_render();
+
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		try {
+			$this->register_blocks();
+		} catch ( \Throwable $e ) {
+			wc_caught_exception( $e, __METHOD__ );
+		}
+	}
+
+	/**
+	 * Stop adding data- attributes to blocks until the email render ends.
+	 *
+	 * No block that can appear in an email reads the attributes back, so in email HTML they are only weight. A
+	 * filter an extension removed is left alone.
+	 */
+	private function suspend_data_attributes_for_email_render(): void {
+		$data_attributes_callback = array( $this, 'add_data_attributes' );
+		if ( self::DATA_ATTRIBUTES_PRIORITY !== has_filter( 'render_block', $data_attributes_callback ) ) {
+			return;
+		}
+
+		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+	}
+
+	/**
+	 * Add the data- attributes filter back once the email render has ended.
+	 *
+	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 *
+	 * @internal
+	 */
+	public function restore_data_attributes_after_email_render(): void {
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
 	}
 
 	/**
@@ -260,7 +307,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center","className":"wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a></div><!-- /wp:button --></div><!-- /wp:buttons -->',
 			)
 		);
 		register_block_pattern(
@@ -622,16 +669,17 @@ final class BlockTypesController {
 	 */
 	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
 
-		// Repeatedly checking the theme is expensive. Cache this logic result and remove the filter if not needed.
-		if ( null === $this->should_enqueue_block_style_for_classic_themes ) {
-			$this->should_enqueue_block_style_for_classic_themes = ! (
+		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
+		static $should_enqueue_block_style_for_classic_themes = null;
+		if ( null === $should_enqueue_block_style_for_classic_themes ) {
+			$should_enqueue_block_style_for_classic_themes = ! (
 				is_admin() ||
 				wp_is_block_theme() ||
 				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
 				wp_should_load_separate_core_block_assets()
 			);
 		}
-		if ( ! $this->should_enqueue_block_style_for_classic_themes ) {
+		if ( ! $should_enqueue_block_style_for_classic_themes ) {
 			remove_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10 );
 
 			return $args;

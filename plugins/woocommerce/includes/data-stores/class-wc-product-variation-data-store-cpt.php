@@ -88,14 +88,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		$updates = array();
-		/**
-		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
-		 */
-		$new_title = $this->generate_product_title( $product );
 
+		// If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
+		// This also covers edge-cases such as term name changes, or extensions bypassing product APIs and manipulating product data directly.
+		// Originally introduced in v2.7, this workaround still holds for v11.2 - with all filters added over years we are hardlocked now to keep it.
+		$new_title = $this->generate_product_title( $product );
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+			$updates['post_title'] = $new_title;
 		}
 
 		if ( ! empty( $updates ) ) {
