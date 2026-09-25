@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -181,7 +182,7 @@ class PendingNotificationStore {
 
 		$this->record_trigger_times();
 
-		$this->dispatcher->dispatch( array_values( $this->pending ) );
+		$this->dispatcher->dispatch( $this->sort_with_new_orders_first( array_values( $this->pending ) ) );
 
 		$this->enabled = false;
 		$this->pending = array();
@@ -235,6 +236,33 @@ class PendingNotificationStore {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Moves new order notifications to the front of the batch.
+	 *
+	 * Android only plays a sound for the first notification of a burst, and
+	 * stock is reduced before the order notification is queued, so the order
+	 * must go first for its sound to play.
+	 *
+	 * @param Notification[] $notifications The notifications about to be dispatched.
+	 * @return Notification[]
+	 *
+	 * @since 11.3.0
+	 */
+	private function sort_with_new_orders_first( array $notifications ): array {
+		$new_orders = array();
+		$others     = array();
+
+		foreach ( $notifications as $notification ) {
+			if ( NewOrderNotification::TYPE === $notification->get_type() ) {
+				$new_orders[] = $notification;
+			} else {
+				$others[] = $notification;
+			}
+		}
+
+		return array_merge( $new_orders, $others );
 	}
 
 	/**
