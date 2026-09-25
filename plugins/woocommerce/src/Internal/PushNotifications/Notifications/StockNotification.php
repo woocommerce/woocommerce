@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 use WC_Product;
 
@@ -155,27 +156,16 @@ class StockNotification extends Notification {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Appends `event_type` because it is part of this notification's identity
-	 * (see {@see self::get_identifier()}): the same product can have distinct
-	 * low_stock / out_of_stock / on_backorder safety nets pending at once, and
-	 * the callback needs it to reconstruct the correct subtype.
+	 * Without the event type, a rebuilt stock notification falls back to the
+	 * constructor's low_stock default and reads and writes another event's
+	 * delivery state.
 	 *
-	 * `stock_quantity_at_trigger` is deliberately omitted — it is volatile
-	 * payload data, not identity, and does not round-trip through every cancel
-	 * path, so including it in the match key would risk breaking cancellation.
-	 * The safety-net fallback message reads current product stock when it is
-	 * absent (see {@see self::build_message()}).
+	 * @return array{event_type: string}
 	 *
-	 * @return array<int, mixed>
-	 *
-	 * @since 10.9.0
+	 * @since 11.2.0
 	 */
-	public function get_safety_net_args(): array {
-		return array(
-			$this->get_type(),
-			$this->get_resource_id(),
-			array( 'event_type' => $this->event_type ),
-		);
+	public function get_identity_data(): array {
+		return array( 'event_type' => $this->event_type );
 	}
 
 	/**
@@ -226,7 +216,7 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->format_triggered_timestamp( (string) $product->get_meta( $this->meta_key( NotificationProcessor::TRIGGERED_META_KEY ) ) ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
 			'message'     => $this->build_message( $product_name, $site_title, $product ),
@@ -266,7 +256,7 @@ class StockNotification extends Notification {
 	 */
 	public function has_meta( string $key ): bool {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
-		return $product instanceof WC_Product && $product->meta_exists( $key . '_' . $this->event_type );
+		return $product instanceof WC_Product && $product->meta_exists( $this->meta_key( $key ) );
 	}
 
 	/**
@@ -274,11 +264,23 @@ class StockNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {
+	public function read_meta( string $key ): string {
+		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
+
+		return $product instanceof WC_Product ? (string) $product->get_meta( $this->meta_key( $key ) ) : '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
+	 */
+	public function write_meta( string $key, ?int $timestamp = null ): void {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->update_meta_data( $key . '_' . $this->event_type, (string) time() );
+			$product->update_meta_data( $this->meta_key( $key ), (string) ( $timestamp ?? time() ) );
 			$product->save_meta_data();
 		}
 	}
@@ -292,9 +294,25 @@ class StockNotification extends Notification {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->delete_meta_data( $key . '_' . $this->event_type );
+			$product->delete_meta_data( $this->meta_key( $key ) );
 			$product->save_meta_data();
 		}
+	}
+
+	/**
+	 * Scopes a delivery state meta key to this notification's stock event.
+	 *
+	 * The same product can have low_stock, out_of_stock and on_backorder
+	 * notifications in flight at once, so each event type needs its own
+	 * claimed, sent and triggered markers.
+	 *
+	 * @param string $key The unscoped meta key.
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	private function meta_key( string $key ): string {
+		return $key . '_' . $this->event_type;
 	}
 
 	/**

@@ -339,6 +339,7 @@ class Settings {
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
+			$settings['couponTypes']               = wc_get_coupon_types();
 		}
 
 		// The separator used for attributes found in Variation titles.
@@ -521,6 +522,10 @@ class Settings {
 	/**
 	 * Gets custom settings used for WC Admin.
 	 *
+	 * Exposes the current values as `wcAdminSettings` and the resolved defaults as
+	 * `wcAdminSettingsDefaults`, so the client can reset to the same (possibly filtered)
+	 * defaults the REST endpoint reports instead of a hardcoded copy.
+	 *
 	 * @param array $settings Array of settings to merge into.
 	 * @return array
 	 */
@@ -528,10 +533,15 @@ class Settings {
 		$wc_rest_settings_options_controller = new \WC_REST_Setting_Options_Controller();
 		$wc_admin_group_settings             = $wc_rest_settings_options_controller->get_group_settings( 'wc_admin' );
 		$settings['wcAdminSettings']         = array();
+		$settings['wcAdminSettingsDefaults'] = array();
 
 		foreach ( $wc_admin_group_settings as $setting ) {
-			if ( ! empty( $setting['id'] ) ) {
-				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+			$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( array_key_exists( 'default', $setting ) ) {
+				$settings['wcAdminSettingsDefaults'][ $setting['id'] ] = $setting['default'];
 			}
 		}
 		return $settings;
