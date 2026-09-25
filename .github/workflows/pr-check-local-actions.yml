@@ -66,7 +66,7 @@ jobs:
                     if ( typeof c.enabled !== "boolean" ) throw new Error( "enabled must be a boolean" );
                     const crypto = require( "crypto" );
                     for ( const r of c.eligible ) {
-                      if ( r.sampleRate !== undefined && ( r.sampleRate < 0 || r.sampleRate > 100 ) ) throw new Error( r.type + ": sampleRate must be 0..100" );
+                      if ( r.sampleRate !== undefined && ( typeof r.sampleRate !== "number" || r.sampleRate < 0 || r.sampleRate > 100 ) ) throw new Error( r.type + ": sampleRate must be a number 0..100" );
                       const m = r.prepare && r.prepare.mirrors;
                       if ( ! m ) continue;
                       const actual = crypto.createHash( "sha256" ).update( require( "fs" ).readFileSync( m.action ) ).digest( "hex" );

@@ -21,6 +21,10 @@ const crypto = require( 'crypto' );
 const CONFIG_PATH = '.github/local-ci.json';
 const TRUSTED_ASSOCIATIONS = [ 'MEMBER', 'OWNER' ];
 const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
+// Job types whose skipped steps ci.yml actually guards. A config may declare
+// more rules than this; substitution for any other type is refused until the
+// workflow guards that type's environment and artifact steps too.
+const SUBSTITUTABLE_TYPES = [ 'unit' ];
 const RECEIPT_VERSION = 'v1';
 const API_TIMEOUT_MS = 20000;
 
@@ -73,6 +77,17 @@ function sampleBucket( headSha, jobName ) {
 }
 
 /**
+ * The `[type]` suffix of a job name, or "" when there is none.
+ *
+ * @param {string} jobName
+ * @return {string}
+ */
+function jobType( jobName ) {
+	const m = /\[([^\]]+)\]\s*(\(optional\))?\s*$/.exec( jobName );
+	return m ? m[ 1 ] : '';
+}
+
+/**
  * Finds the eligibility rule the tool would have used for this job, the way
  * the tool does: the job type is the `[type]` suffix of the name, the rule's
  * optional namePrefix must prefix the name, and no exclude may match.
@@ -82,8 +97,7 @@ function sampleBucket( headSha, jobName ) {
  * @return {Object|null}
  */
 function ruleFor( config, jobName ) {
-	const m = /\[([^\]]+)\]\s*(\(optional\))?\s*$/.exec( jobName );
-	const type = m ? m[ 1 ] : '';
+	const type = jobType( jobName );
 	for ( const rule of config.eligible || [] ) {
 		if ( rule.type !== type ) {
 			continue;
@@ -183,8 +197,14 @@ function decide( input ) {
 	if ( ! rule ) {
 		return no( 'no eligibility rule for this job in the base config' );
 	}
+	if ( ! SUBSTITUTABLE_TYPES.includes( jobType( input.jobName ) ) ) {
+		return no( `ci.yml does not guard the steps a ${ jobType( input.jobName ) } job needs; only ${ SUBSTITUTABLE_TYPES.join( '/' ) } jobs may be substituted` );
+	}
 	const bucket = sampleBucket( pr.head.sha, input.jobName );
-	if ( bucket < Number( rule.sampleRate || 0 ) ) {
+	// A rate that is not a number fails closed: spot-check everything rather
+	// than nothing.
+	const rate = rule.sampleRate === undefined ? 0 : Number( rule.sampleRate );
+	if ( ! Number.isFinite( rate ) || bucket < rate ) {
 		return {
 			substituted: false,
 			spotCheck: true,
@@ -280,19 +300,32 @@ async function lookup( { github, context, core } ) {
 		if ( wanted && input.baseConfig && input.baseConfig.parsed.enabled === true ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
 			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
-			input.checkRuns = await within(
-				github.paginate( github.rest.checks.listForRef, {
+			// One call, for the one name this job cares about: the API filters
+			// by name and app, and `all` keeps every attempt so the newest can
+			// be chosen here rather than trusting the API's idea of latest.
+			const listed = await within(
+				github.rest.checks.listForRef( {
 					...repo,
 					ref: pr.head.sha,
+					check_name: String( input.baseConfig.parsed.receiptPrefix || '' ) + input.jobName,
 					app_id: Number( input.baseConfig.parsed.app && input.baseConfig.parsed.app.appId ),
+					filter: 'all',
 					per_page: 100,
 				} ),
 				'listing check runs'
 			);
+			input.checkRuns = ( listed.data && listed.data.check_runs ) || [];
 		}
 		result = decide( input );
 	} catch ( e ) {
 		result = { substituted: false, spotCheck: false, reason: `lookup failed, running normally: ${ e && e.message ? e.message : e }` };
+	}
+	if ( result.spotCheck ) {
+		// An annotation, not a log line: a spot check that then fails is the
+		// one signal that a receipt was wrong, and it has to be findable.
+		core.notice( `local-ci spot check: ${ result.reason }` );
+	} else if ( /lookup failed/.test( result.reason ) ) {
+		core.warning( `local-ci: ${ result.reason }` );
 	}
 	core.info( `substituted=${ result.substituted } reason=${ result.reason }` );
 	core.setOutput( 'substituted', String( result.substituted ) );
@@ -301,4 +334,4 @@ async function lookup( { github, context, core } ) {
 	return result;
 }
 
-module.exports = { decide, lookup, parseExternalId, sampleBucket, ruleFor, killSwitchSet, CONFIG_PATH };
+module.exports = { decide, lookup, parseExternalId, sampleBucket, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES };

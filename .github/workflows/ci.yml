@@ -303,6 +303,14 @@ jobs:
       # the `LOCAL_CI_RECEIPTS_DISABLED=1` repository variable turns this off
       # for every job. Full rollback: revert the commit that added this step
       # and the two `if:` guards below.
+      #
+      # Trust boundary: on pull_request events this workflow, this action and
+      # the guards all come from the pull request's own tree, so a PR can edit
+      # them — the same way it could delete the tests. That edit is in the
+      # diff a reviewer sees; nothing here pretends otherwise. What a PR cannot
+      # do is manufacture a receipt: check runs from the App need write access
+      # and the App's authorisation, and the trust fields are read from the
+      # base branch's config.
       - uses: './.github/actions/local-ci-receipt'
         name: 'Look for a local CI receipt'
         id: 'local-ci-receipt'

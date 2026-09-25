@@ -12,7 +12,7 @@ const crypto = require( 'crypto' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const { decide, lookup, parseExternalId, sampleBucket, ruleFor, killSwitchSet, CONFIG_PATH } = require( './receipt.js' );
+const { decide, lookup, parseExternalId, sampleBucket, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES } = require( './receipt.js' );
 
 const ran = [];
 const check = ( name, run ) => ran.push( { name, run } );
@@ -259,6 +259,22 @@ check( 'ci.yml wires the action once and guards install and tests on its output'
 	assert.ok( /^\s+substituted:\n\s+description:.*\n\s+value: \$\{\{ steps\.lookup\.outputs\.substituted \}\}/m.test( action ), 'action.yml must expose the substituted output' );
 } );
 
+check( 'only job types whose steps ci.yml guards may be substituted, whatever the config says', () => {
+	assert.deepStrictEqual( SUBSTITUTABLE_TYPES, [ 'unit' ], 'extend this list only together with the ci.yml guards' );
+	const cfg = baseConfig( { eligible: [ { type: 'unit', run: [ 'x' ] }, { type: 'e2e', run: [ 'y' ] } ] } );
+	const name = 'Core e2e 1/10 - @acme/w [e2e]';
+	refuses( decide( input( { baseConfig: cfg, headConfigRaw: cfg.raw, jobName: name, checkRuns: [ receipt( cfg, { name: 'local-ci/v1: ' + name } ) ] } ) ), 'does not guard the steps' );
+	assert.strictEqual( jobType( name ), 'e2e' );
+	assert.strictEqual( jobType( 'no type here' ), '' );
+} );
+
+check( 'a sampleRate that is not a number spot-checks everything rather than nothing', () => {
+	const cfg = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 'ten', run: [ 'x' ] } ] } );
+	const r = decide( input( { baseConfig: cfg, headConfigRaw: cfg.raw, checkRuns: [ receipt( cfg ) ] } ) );
+	assert.strictEqual( r.substituted, false );
+	assert.strictEqual( r.spotCheck, true, r.reason );
+} );
+
 check( 'deterministic spot check: the bucket decides, and the same pair always lands in the same bucket', () => {
 	const bucket = sampleBucket( HEAD, JOB );
 	assert.strictEqual( sampleBucket( HEAD, JOB ), bucket );
@@ -313,15 +329,17 @@ const fakeGithub = ( { baseRaw, headRaw, pages } ) => {
 					return { data: raw };
 				},
 			},
-			checks: { listForRef: 'listForRef' },
-		},
-		paginate: async ( fn, params ) => {
-			calls.push( [ 'paginate', params.ref ] );
-			assert.strictEqual( fn, 'listForRef' );
-			assert.strictEqual( params.ref, HEAD, 'check runs must be listed on the head commit' );
-			assert.strictEqual( params.app_id, 4830646 );
-			assert.strictEqual( params.per_page, 100 );
-			return pages.flat();
+			checks: {
+				listForRef: async ( params ) => {
+					calls.push( [ 'listForRef', params.ref, params.check_name ] );
+					assert.strictEqual( params.ref, HEAD, 'check runs must be listed on the head commit' );
+					assert.strictEqual( params.app_id, 4830646 );
+					assert.strictEqual( params.filter, 'all', 'every attempt must be listed so the newest wins here' );
+					assert.strictEqual( params.per_page, 100 );
+					const runs = pages.flat().filter( ( r ) => r.name === params.check_name );
+					return { data: { total_count: runs.length, check_runs: runs } };
+				},
+			},
 		},
 	};
 };
@@ -330,8 +348,20 @@ const prContext = () => ( { eventName: 'pull_request', payload: { pull_request: 
 
 const fakeCore = () => {
 	const outputs = {};
-	return { outputs, info: () => {}, setOutput: ( k, v ) => ( outputs[ k ] = v ) };
+	const notices = [];
+	const warnings = [];
+	return { outputs, notices, warnings, info: () => {}, notice: ( m ) => notices.push( m ), warning: ( m ) => warnings.push( m ), setOutput: ( k, v ) => ( outputs[ k ] = v ) };
 };
+
+check( 'lookup annotates a spot check so a failing one can be found', async () => {
+	const everything = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 100, run: [ 'x' ] } ] } );
+	process.env.JOB_NAME = JOB;
+	process.env.DISABLED = '';
+	const core = fakeCore();
+	await lookup( { github: fakeGithub( { baseRaw: everything.raw, headRaw: everything.raw, pages: [ [ receipt( everything ) ] ] } ), context: prContext(), core } );
+	assert.strictEqual( core.outputs[ 'spot-check' ], 'true' );
+	assert.ok( core.notices.some( ( n ) => n.includes( 'spot check' ) && n.includes( 'runs/100' ) ), core.notices );
+} );
 
 check( 'lookup reads base and head config, pages check runs on the head, and writes outputs', async () => {
 	const cfg = baseConfig();
@@ -343,7 +373,7 @@ check( 'lookup reads base and head config, pages check runs on the head, and wri
 	await lookup( { github, context: prContext(), core } );
 	assert.strictEqual( core.outputs.substituted, 'true', core.outputs.reason );
 	assert.strictEqual( core.outputs[ 'spot-check' ], 'false' );
-	assert.deepStrictEqual( github.calls, [ [ 'getContent', BASE, CONFIG_PATH ], [ 'getContent', HEAD, CONFIG_PATH ], [ 'paginate', HEAD ] ] );
+	assert.deepStrictEqual( github.calls, [ [ 'getContent', BASE, CONFIG_PATH ], [ 'getContent', HEAD, CONFIG_PATH ], [ 'listForRef', HEAD, 'local-ci/v1: ' + JOB ] ] );
 } );
 
 check( 'lookup reads the head config from the head, so a PR that edits it is caught', async () => {
@@ -413,7 +443,7 @@ check( 'lookup with no base config refuses without calling for check runs', asyn
 	process.env.DISABLED = '';
 	const core = fakeCore();
 	const github = fakeGithub( { baseRaw: null, headRaw: null, pages: [] } );
-	github.paginate = async () => assert.fail( 'must not list check runs without a base config' );
+	github.rest.checks.listForRef = async () => assert.fail( 'must not list check runs without a base config' );
 	await lookup( { github, context: prContext(), core } );
 	assert.strictEqual( core.outputs.substituted, 'false' );
 	assert.ok( core.outputs.reason.includes( 'no .github/local-ci.json on the base branch' ), core.outputs.reason );
@@ -424,10 +454,11 @@ check( 'lookup never throws: an API failure runs the job normally', async () => 
 	process.env.DISABLED = '';
 	const core = fakeCore();
 	const github = fakeGithub( { baseRaw: baseConfig().raw, headRaw: baseConfig().raw, pages: [] } );
-	github.paginate = async () => { throw new Error( 'boom 502' ); };
+	github.rest.checks.listForRef = async () => { throw new Error( 'boom 502' ); };
 	await lookup( { github, context: prContext(), core } );
 	assert.strictEqual( core.outputs.substituted, 'false' );
 	assert.ok( core.outputs.reason.includes( 'lookup failed' ) && core.outputs.reason.includes( 'boom 502' ), core.outputs.reason );
+	assert.ok( core.warnings.some( ( w ) => w.includes( 'boom 502' ) ), 'an API failure must be a visible warning, not just a log line' );
 } );
 
 check( 'lookup on a push event refuses without touching the API', async () => {
