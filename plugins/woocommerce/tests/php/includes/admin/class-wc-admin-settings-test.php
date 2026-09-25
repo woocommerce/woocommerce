@@ -554,6 +554,106 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render each stored General setting back into its own form field.
+	 */
+	public function test_output_fields_renders_stored_general_setting_values(): void {
+		$store_address = '123 "Evergreen" & Terrace';
+
+		update_option( 'woocommerce_store_address', $store_address );
+		update_option( 'woocommerce_price_num_decimals', '3' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		update_option( 'woocommerce_currency_pos', 'right_space' );
+
+		$output = $this->render_settings_section( new WC_Settings_General(), '' );
+
+		$this->assertSame( $store_address, $this->get_rendered_input_attribute( $output, 'woocommerce_store_address', 'value' ) );
+		$this->assertStringContainsString( '123 &quot;Evergreen&quot; &amp; Terrace', $output, 'The stored value should reach the markup escaped for an attribute.' );
+		$this->assertSame( '3', $this->get_rendered_input_attribute( $output, 'woocommerce_price_num_decimals', 'value' ) );
+		$this->assertSame( '.', $this->get_rendered_input_attribute( $output, 'woocommerce_price_thousand_sep', 'value' ) );
+		$this->assertSame( 'right_space', $this->get_selected_option( $output, 'woocommerce_currency_pos' ), 'The stored option should be the selected one.' );
+	}
+
+	/**
+	 * @testdox Should tick only the checkbox settings that are stored as enabled.
+	 */
+	public function test_output_fields_renders_stored_checkbox_state(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$output = $this->render_settings_section( new WC_Settings_Advanced(), 'woocommerce_com' );
+
+		$this->assertSame( 'checked', $this->get_rendered_input_attribute( $output, 'woocommerce_allow_tracking', 'checked' ), 'The enabled setting should render a ticked checkbox.' );
+		$this->assertNull( $this->get_rendered_input_attribute( $output, 'woocommerce_show_marketplace_suggestions', 'checked' ), 'The disabled setting should render an unticked checkbox.' );
+	}
+
+	/**
+	 * Render the fields of a settings section.
+	 *
+	 * @param WC_Settings_Page $settings_page Settings page holding the section.
+	 * @param string           $section_id    Section to render, an empty string for the default section.
+	 * @return string
+	 */
+	private function render_settings_section( WC_Settings_Page $settings_page, string $section_id ): string {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $settings_page->get_settings_for_section( $section_id ) );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Get an attribute of a rendered input, or null when the attribute is absent.
+	 *
+	 * @param string $html      Rendered settings markup.
+	 * @param string $input_id  ID of the input to read.
+	 * @param string $attribute Attribute to read.
+	 * @return string|bool|null
+	 */
+	private function get_rendered_input_attribute( string $html, string $input_id, string $attribute ) {
+		$tags = new WP_HTML_Tag_Processor( $html );
+
+		while ( $tags->next_tag( array( 'tag_name' => 'INPUT' ) ) ) {
+			if ( $input_id === $tags->get_attribute( 'id' ) ) {
+				return $tags->get_attribute( $attribute );
+			}
+		}
+
+		$this->fail( "The settings form should render an input with the ID {$input_id}." );
+	}
+
+	/**
+	 * Get the value of the selected option of a rendered select, or null when no option is selected.
+	 *
+	 * @param string $html      Rendered settings markup.
+	 * @param string $select_id ID of the select to read.
+	 * @return string|null
+	 */
+	private function get_selected_option( string $html, string $select_id ): ?string {
+		$tags = new WP_HTML_Tag_Processor( $html );
+
+		while ( $tags->next_tag( array( 'tag_name' => 'SELECT' ) ) ) {
+			if ( $select_id !== $tags->get_attribute( 'id' ) ) {
+				continue;
+			}
+
+			$selected = null;
+			while ( null === $selected && $tags->next_tag() && 'OPTION' === $tags->get_tag() ) {
+				if ( null !== $tags->get_attribute( 'selected' ) ) {
+					$selected = $tags->get_attribute( 'value' );
+				}
+			}
+
+			return $selected;
+		}
+
+		$this->fail( "The settings form should render a select with the ID {$select_id}." );
+	}
+
+	/**
 	 * Prepare globals used by WC_Admin_Settings::save().
 	 *
 	 * @param string|null $redirect_to Requested redirect target, or null to omit the Settings UI redirect field.
