@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only use the order being paid to evaluate the offline gateways' shipping method restrictions when the order-pay query var resolves to an order, falling back to the cart otherwise.

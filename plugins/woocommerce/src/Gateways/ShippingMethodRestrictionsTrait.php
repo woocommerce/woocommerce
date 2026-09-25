@@ -90,7 +90,7 @@ trait ShippingMethodRestrictionsTrait {
 	 * Check If The Gateway Is Available For Use.
 	 *
 	 * @since 10.7.0 Added early return when gateway is disabled.
-	 * @since 11.3.0 Moved here from WC_Gateway_COD.
+	 * @since 11.3.0 Moved here from WC_Gateway_COD. Only uses the order-pay context when the order exists.
 	 *
 	 * @return bool
 	 */
@@ -102,10 +102,12 @@ trait ShippingMethodRestrictionsTrait {
 		$is_virtual       = true;
 		$shipping_methods = array();
 
-		// Get shipping methods from the cart or order.
-		if ( is_wc_endpoint_url( 'order-pay' ) ) {
-			$order            = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
-			$shipping_methods = $order ? $order->get_shipping_methods() : array();
+		// Get shipping methods from the order being paid, or from the cart. The order-pay query var can be
+		// set by the client, so only use the order context when it resolves to a real order.
+		$order = is_wc_endpoint_url( 'order-pay' ) ? wc_get_order( absint( get_query_var( 'order-pay' ) ) ) : false;
+
+		if ( $order ) {
+			$shipping_methods = $order->get_shipping_methods();
 			$is_virtual       = ! count( $shipping_methods );
 		} elseif ( WC()->cart && WC()->cart->needs_shipping() ) {
 			$shipping_methods = WC()->cart->get_shipping_methods();
