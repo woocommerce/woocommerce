@@ -885,7 +885,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_payment_gateway_details fills in suggestion details.
+	 * @testdox Suggestion metadata does not replace the gateway title or description.
 	 */
 	public function test_get_payment_gateway_details_fills_in_suggestion_details() {
 		// Arrange.
@@ -946,9 +946,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
 		$this->assertSame( 'stripe', $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
 
-		// Verify title and description are filled in from suggestion.
-		$this->assertSame( 'Stripe - Suggestion Title', $gateway_details['title'], 'Title should be filled from suggestion' );
-		$this->assertSame( 'Stripe - Suggestion Description', $gateway_details['description'], 'Description should be filled from suggestion' );
+		$this->assertSame( 'Basic Gateway Method Title', $gateway_details['title'] );
+		$this->assertSame( 'Basic gateway description', $gateway_details['description'] );
 
 		// Verify icon and image are filled in from suggestion.
 		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
@@ -1235,9 +1234,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_payment_gateway_details does not override title for excluded gateways.
+	 * @testdox PayPal retains its gateway copy and links alongside suggestion metadata.
 	 */
-	public function test_get_payment_gateway_details_does_not_override_excluded_gateway_titles() {
+	public function test_get_payment_gateway_details_preserves_paypal_gateway_details() {
 		// Arrange.
 		$plugin_slug   = 'woocommerce-gateway-paypal';
 		$gateway_links = array(
@@ -1260,7 +1259,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		// Mock a PayPal full-stack suggestion (which is in the exclusion list).
 		$suggestion = array(
 			'id'          => ExtensionSuggestions::PAYPAL_FULL_STACK,
 			'_priority'   => 1,
@@ -1289,7 +1287,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Act.
 		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
 
-		// Assert that title and description are NOT overridden for excluded gateways.
 		$this->assertSame( 'PayPal Gateway Original Method Title', $gateway_details['title'], 'Title should NOT be overridden for PayPal full-stack' );
 		$this->assertSame( 'PayPal gateway original description', $gateway_details['description'], 'Description should NOT be overridden for PayPal full-stack' );
 
@@ -1306,6 +1303,48 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// And suggestion ID should be attached.
 		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
 		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * @testdox Gateway copy is preserved with or without catalog text, including an empty description.
+	 * @testWith [true, "Card payments powered by Acme"]
+	 *           [true, ""]
+	 *           [false, "Card payments powered by Acme"]
+	 *           [false, ""]
+	 *
+	 * @param bool   $has_suggestion Whether catalog text exists.
+	 * @param string $description   The gateway's admin description.
+	 */
+	public function test_get_payment_gateway_details_preserves_gateway_copy( bool $has_suggestion, string $description ): void {
+		$gateway    = new FakePaymentGateway(
+			'acme_card',
+			array(
+				'plugin_slug'        => 'acme-payments',
+				'method_title'       => 'Acme - Card',
+				'method_description' => $description,
+				'description'        => '',
+			)
+		);
+		$suggestion = $has_suggestion ? array(
+			'id'          => 'acme',
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'Acme Payments',
+			'description' => 'Generic extension marketing copy.',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'acme-payments',
+			),
+		) : null;
+		$this->mock_extension_suggestions
+			->method( 'get_by_plugin_slug' )
+			->with( 'acme-payments' )
+			->willReturn( $suggestion );
+
+		$details = $this->sut->get_payment_gateway_details( $gateway, 0, 'US' );
+
+		$this->assertSame( 'Acme - Card', $details['title'] );
+		$this->assertSame( $description, $details['description'] );
 	}
 
 	/**
