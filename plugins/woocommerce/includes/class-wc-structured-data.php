@@ -608,7 +608,7 @@ class WC_Structured_Data {
 				'@type'    => 'ListItem',
 				'position' => $key + 1,
 				'item'     => array(
-					'name' => $crumb[0],
+					'name' => html_entity_decode( $crumb[0], ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				),
 			);
 
