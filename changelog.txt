@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 11.1.2 2026-09-22 =
+
+**WooCommerce**
+
+* Fix - Prevent variation gallery rendering from recursively requesting variation data. [#68965](https://github.com/woocommerce/woocommerce/pull/68965)
+* Fix - Route order review submissions through WordPress's comment pipeline so they receive the same filtering and moderation as other comments. [#68961](https://github.com/woocommerce/woocommerce/pull/68961)
+
+
 = 11.1.1 2026-09-18 =
 
 **WooCommerce**
