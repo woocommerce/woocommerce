@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
@@ -124,25 +125,13 @@ class WC_Product_Factory {
 	}
 
 	/**
-	 * Get the product ID depending on what was passed.
+	 * Get the product ID from a product reference.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
-	 * @return int|bool false on failure
+	 * @since 3.0.0
+	 * @param mixed $product Product reference or false to use the global post.
+	 * @return int|float|string|false Product ID, or false when no ID is available.
 	 */
 	private function get_product_id( $product ) {
-		global $post;
-
-		if ( false === $product && isset( $post, $post->ID ) && 'product' === get_post_type( $post->ID ) ) {
-			return absint( $post->ID );
-		} elseif ( is_numeric( $product ) ) {
-			return $product;
-		} elseif ( $product instanceof WC_Product ) {
-			return $product->get_id();
-		} elseif ( ! empty( $product->ID ) ) {
-			return $product->ID;
-		} else {
-			return false;
-		}
+		return wc_get_container()->get( ProductUtil::class )->get_product_id( $product );
 	}
 }

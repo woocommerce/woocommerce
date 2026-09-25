@@ -24,6 +24,31 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * Passing false uses the global product post, matching the product factory.
+	 *
+	 * @since 11.3.0
+	 * @param mixed $product Product reference or false to use the global post.
+	 * @return int|float|string|false Product ID, or false when no ID is available.
+	 */
+	public function get_product_id( $product ) {
+		global $post;
+
+		if ( false === $product && isset( $post, $post->ID ) && 'product' === get_post_type( $post->ID ) ) {
+			return absint( $post->ID );
+		} elseif ( is_numeric( $product ) ) {
+			return $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return $product->get_id();
+		} elseif ( ! empty( $product->ID ) ) {
+			return $product->ID;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
