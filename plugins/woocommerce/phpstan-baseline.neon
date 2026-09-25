@@ -10898,12 +10898,6 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Data_Store\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
 			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10924,12 +10918,6 @@ parameters:
 		-
 			message: '#^Method WC_Data_Store\:\:read_multiple\(\) has parameter \$objects with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
-			message: '#^Method WC_Data_Store\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-data-store.php
 
@@ -16558,13 +16546,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -30593,12 +30581,6 @@ parameters:
 			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
 
 		-
-			message: '#^Function remove_shortcode invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
-
-		-
 			message: '#^Method WC_Shipping_Flat_Rate\:\:calculate_shipping\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -35785,12 +35767,6 @@ parameters:
 		-
 			message: '#^Action callback returns array but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/wccom-site/class-wc-wccom-site.php
-
-		-
-			message: '#^Method WC_WCCOM_Site\:\:authenticate_wccom\(\) should return int\|false but returns WP_User\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/wccom-site/class-wc-wccom-site.php
 
@@ -49283,12 +49259,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AllReviews.php
 
 		-
-			message: '#^Return type \(null\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AtomicBlock\:\:get_block_type_editor_script\(\) should be compatible with return type \(array\|string\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:get_block_type_editor_script\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Blocks/BlockTypes/AtomicBlock.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -60071,6 +60041,18 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
+			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
 			message: '#^Cannot call method get_download_permissions_granted\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -69454,30 +69436,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Call to method get_id\(\) on an unknown class WC_Token\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:get_saved_payment_methods\(\) should return array but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Parameter \$token of method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:include_token_id_with_payment_methods\(\) has invalid type WC_Token\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/StoreApi/Utilities/PaymentUtils.php
 

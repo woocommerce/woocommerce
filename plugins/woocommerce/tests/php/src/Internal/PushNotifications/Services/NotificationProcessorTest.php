@@ -142,6 +142,71 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
 		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
+
+	/**
+	 * The sent marker is the idempotency guard, so it must survive the cleanup
+	 * that clears the claimed and triggered markers.
+	 *
+	 * @testdox Should keep the sent meta when clearing the delivery state.
+	 */
+	public function test_reset_processing_meta_keeps_the_sent_marker(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+		$notification->write_meta( NotificationProcessor::SENT_META_KEY );
+		$notification->write_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$notification->write_meta( NotificationProcessor::TRIGGERED_META_KEY );
+
+		$notification->reset_processing_meta();
+
+		$this->assertTrue( $notification->has_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox Should record the last sent time against the dispatched tokens on success.
+	 */
+	public function test_process_records_last_sent_at_on_success(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'record_last_sent_at' )
+			->with(
+				$this->callback(
+					function ( array $tokens ) {
+						return 1 === count( $tokens ) && 'test-token' === $tokens[0]->get_token();
+					}
+				)
+			);
+
+		$this->sut->process( new NewOrderNotification( $this->order_id ) );
+	}
+
+	/**
+	 * @testdox Should not record a last sent time when the dispatch fails.
+	 *
+	 * The stamp means "WPCOM accepted a payload containing this token", so
+	 * recording it on a failed send would make a device that has never been
+	 * successfully targeted look as though it had.
+	 */
+	public function test_process_does_not_record_last_sent_at_on_failure(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => false,
+				'retry_after' => null,
+			)
+		);
+
+		$this->data_store->expects( $this->never() )->method( 'record_last_sent_at' );
+
+		$this->sut->process( new NewOrderNotification( $this->order_id ) );
 	}
 
 	/**
@@ -259,6 +324,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $this->order_id );
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
 	}
 
 	/**
@@ -491,6 +558,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					'to_payload',
 					'has_meta',
 					'write_meta',
+					'read_meta',
 					'delete_meta',
 					'should_send_to_user',
 				)
