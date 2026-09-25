@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Queue\OptionsAwareActionQueue;
+
 /**
  * A class of utilities for dealing with Action Scheduler across the versions of it that may be loaded.
  */
@@ -21,6 +23,9 @@ class ActionSchedulerUtil {
 	 * A caller that treats a negative answer as licence to discard state should check
 	 * {@see self::can_check_scheduled_actions()} first.
 	 *
+	 * Delegates to the stock queue, which owns this logic; new code should use
+	 * Automattic\WooCommerce\Queue\Scheduler::has_scheduled_action() instead.
+	 *
 	 * @since 11.2.0
 	 *
 	 * @param string     $hook  The hook of the action.
@@ -30,23 +35,7 @@ class ActionSchedulerUtil {
 	 * @return bool True if a matching action is scheduled, false otherwise.
 	 */
 	public static function has_scheduled_action( string $hook, ?array $args = null, string $group = '' ): bool {
-		foreach ( array( 'as_has_scheduled_action', 'as_next_scheduled_action' ) as $function ) {
-			// PHPStan sees the Action Scheduler copy bundled with WooCommerce and concludes both functions
-			// always exist. The runtime case this guard exists for is precisely the one it cannot see.
-			// @phpstan-ignore-next-line function.alreadyNarrowedType -- see comment above.
-			if ( function_exists( $function ) ) {
-				// `as_next_scheduled_action` returns the timestamp of the next pending action, hence the cast.
-				return (bool) $function( $hook, $args, $group );
-			}
-		}
-
-		wc_doing_it_wrong(
-			__METHOD__,
-			'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.',
-			'11.2.0'
-		);
-
-		return false;
+		return ( new OptionsAwareActionQueue() )->has_scheduled_action( $hook, $args, $group );
 	}
 
 	/**

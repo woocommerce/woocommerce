@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Automattic\WooCommerce\Queue\Scheduler as the entry point for scheduling background work, with priority, unique and strict options, OptionsAwareQueueInterface so custom queues can receive them, OptionsAwareActionQueue as the default queue, and a background scheduling row in the system status report.

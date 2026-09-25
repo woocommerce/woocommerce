@@ -75,18 +75,18 @@ interface WC_Queue_Interface {
 	 *
 	 * Any recurring actions with a matching hook should also be cancelled, not just the next scheduled action.
 	 *
-	 * @param string $hook The hook that the job will trigger.
-	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group The group the job is assigned to (if any).
+	 * @param string     $hook  The hook that the job will trigger.
+	 * @param array|null $args  Args that would have been passed to the job. Null matches any args.
+	 * @param string     $group The group the job is assigned to (if any).
 	 */
 	public function cancel( $hook, $args = array(), $group = '' );
 
 	/**
 	 * Dequeue all actions with a matching hook (and optionally matching args and group) so no matching actions are ever run.
 	 *
-	 * @param string $hook The hook that the job will trigger.
-	 * @param array  $args Args that would have been passed to the job.
-	 * @param string $group The group the job is assigned to (if any).
+	 * @param string     $hook  The hook that the job will trigger.
+	 * @param array|null $args  Args that would have been passed to the job. Null matches any args.
+	 * @param string     $group The group the job is assigned to (if any).
 	 */
 	public function cancel_all( $hook, $args = array(), $group = '' );
 
