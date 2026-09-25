@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the woocommerce_email_editor_render_end action, fired when rendering an email has finished, so integrations can restore state they changed for the render.

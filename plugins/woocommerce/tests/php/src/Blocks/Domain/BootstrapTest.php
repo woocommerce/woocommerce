@@ -4,6 +4,17 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+<<<<<<< HEAD
+=======
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\EmailEditor\Bootstrap as EmailEditorBootstrap;
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\Package as EmailEditorPackage;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+>>>>>>> 4e122e7856 (Show product blocks in block editor emails sent in the background (#69003))
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -13,7 +24,7 @@ use WP_Block_Type_Registry;
  * Product and variation descriptions are run through do_blocks on the woocommerce_short_description filter in
  * contexts where eager block registration is skipped (the products REST endpoints, the Store API schemas, the
  * variation AJAX endpoint and product webhooks). Bootstrap registers block types on demand there so those blocks
- * do not render empty.
+ * do not render empty. Emails rendered by the email editor package get the same on-demand registration.
  */
 class BootstrapTest extends WC_Unit_Test_Case {
 
@@ -86,6 +97,57 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		$property = new \ReflectionProperty( BlockTypesController::class, 'register_blocks_has_run' );
 		$property->setAccessible( true );
 		$property->setValue( null, $has_run );
+	}
+
+	/**
+	 * The priority the data attributes filter is hooked at, or false when it is not hooked.
+	 *
+	 * The controller instance is not used to look it up: another test class resets the Blocks container mid-suite
+	 * (see Blocks\Bootstrap\MainFile), so the instance this test would fetch is not the one Bootstrap uses.
+	 *
+	 * @return int|false
+	 */
+	private function data_attributes_filter_priority() {
+		$hooked = $this->find_data_attributes_filter();
+
+		return null === $hooked ? false : $hooked['priority'];
+	}
+
+	/**
+	 * Remove the data attributes filter, the way an extension would.
+	 */
+	private function remove_data_attributes_filter(): void {
+		$hooked = $this->find_data_attributes_filter();
+		if ( null !== $hooked ) {
+			remove_filter( 'render_block', $hooked['callback'], $hooked['priority'] );
+		}
+	}
+
+	/**
+	 * Find the hooked BlockTypesController::add_data_attributes callback, whichever instance owns it.
+	 *
+	 * @return array{callback: callable, priority: int}|null
+	 */
+	private function find_data_attributes_filter(): ?array {
+		global $wp_filter;
+
+		foreach ( $wp_filter['render_block']->callbacks ?? array() as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$function = $callback['function'] ?? null;
+				if (
+					is_array( $function )
+					&& ( $function[0] ?? null ) instanceof BlockTypesController
+					&& 'add_data_attributes' === ( $function[1] ?? '' )
+				) {
+					return array(
+						'callback' => $function,
+						'priority' => (int) $priority,
+					);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -368,4 +430,238 @@ HTML;
 			'Block types should remain registered and must not be re-registered on demand.'
 		);
 	}
+<<<<<<< HEAD
+=======
+
+	/**
+	 * @testdox The init registration is a no-op after a description registered the block types on demand before init.
+	 */
+	public function test_register_blocks_is_a_no_op_after_on_demand_registration(): void {
+		$registry   = WP_Block_Type_Registry::get_instance();
+		$controller = Package::container()->get( BlockTypesController::class );
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should start unregistered.' );
+
+		// An extension renders a description before init on a request where register_blocks() is queued on init.
+		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
+		$this->assertTrue( $controller->register_blocks_has_run(), 'The filter should have run register_blocks() on demand.' );
+		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'The filter should register block types on demand.' );
+		$hooked_block_instances = $this->count_block_editor_asset_callbacks();
+		$this->assertGreaterThan( 0, $hooked_block_instances, 'Each registered block instance should have hooked its editor assets.' );
+
+		// Then the queued init callback fires. The registry rejects duplicate block types with a doing_it_wrong
+		// notice (a test failure), but a second run would still construct every block class again and hook each
+		// new instance a second time.
+		$controller->register_blocks();
+
+		$this->assertSame(
+			$hooked_block_instances,
+			$this->count_block_editor_asset_callbacks(),
+			'A second register_blocks() call must not construct the block types again and hook duplicate callbacks.'
+		);
+		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'Block types should remain registered.' );
+	}
+
+	/**
+	 * @testdox Starting an email render registers missing block types with their email renderers.
+	 */
+	public function test_email_render_start_registers_missing_block_types(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+		Email_Editor_Container::container()->get( EmailEditorBootstrap::class )->init();
+		$this->assertFalse( $registry->is_registered( 'woocommerce/product-collection' ), 'Blocks should start unregistered.' );
+
+		do_action( 'woocommerce_email_editor_render_start' );
+
+		$block_type = $registry->get_registered( 'woocommerce/product-collection' );
+		$this->assertNotNull( $block_type, 'Block types should be registered on demand when an email render starts.' );
+		$this->assertTrue( isset( $block_type->render_email_callback ), 'Block types registered on demand should get an email renderer.' );
+		$this->assertIsCallable( $block_type->render_email_callback, 'The email renderer should be callable.' );
+	}
+
+	/**
+	 * @testdox An error thrown while registering block types for an email is caught and reported.
+	 */
+	public function test_email_render_start_catches_registration_errors(): void {
+		add_filter(
+			'woocommerce_get_block_types',
+			function () {
+				throw new \Error( 'Broken block integration' );
+			}
+		);
+		$caught = null;
+		add_action(
+			'woocommerce_caught_exception',
+			function ( $exception ) use ( &$caught ) {
+				$caught = $exception;
+			}
+		);
+
+		do_action( 'woocommerce_email_editor_render_start' );
+
+		$this->assertInstanceOf( \Error::class, $caught, 'The registration error should be reported instead of stopping the email render.' );
+	}
+
+	/**
+	 * @testdox The data attributes filter is suspended even when the blocks were registered earlier in the request.
+	 */
+	public function test_email_render_start_suspends_data_attributes_when_blocks_are_already_registered(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+		foreach ( $this->registered_woo_blocks as $block_type ) {
+			$registry->register( $block_type );
+		}
+		$this->set_register_blocks_has_run_flag( true );
+
+		do_action( 'woocommerce_email_editor_render_start' );
+
+		$this->assertFalse(
+			$this->data_attributes_filter_priority(),
+			'Most emails are sent from requests that registered the blocks eagerly, and they need the filter suspended too.'
+		);
+	}
+
+	/**
+	 * @testdox The data attributes filter is put back when the email render ends.
+	 */
+	public function test_data_attributes_filter_is_restored_after_the_email_render(): void {
+		do_action( 'woocommerce_email_editor_render_start' );
+		$this->assertFalse( $this->data_attributes_filter_priority(), 'The filter should be suspended for the render.' );
+
+		do_action( 'woocommerce_email_editor_render_end' );
+
+		$this->assertSame(
+			10,
+			$this->data_attributes_filter_priority(),
+			'Later front-end rendering in the same request still needs the data attributes filter.'
+		);
+	}
+
+	/**
+	 * @testdox A render whose end action never reaches the restore is repaired by the next render.
+	 */
+	public function test_data_attributes_filter_is_restored_by_a_later_render(): void {
+		$throwing_callback = function () {
+			throw new \RuntimeException( 'Another plugin failed to clean up' );
+		};
+
+		add_action( 'woocommerce_email_editor_render_end', $throwing_callback, 5 );
+		do_action( 'woocommerce_email_editor_render_start' );
+		try {
+			do_action( 'woocommerce_email_editor_render_end' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Another plugin failed to clean up', $e->getMessage() );
+		} finally {
+			remove_action( 'woocommerce_email_editor_render_end', $throwing_callback, 5 );
+		}
+
+		do_action( 'woocommerce_email_editor_render_start' );
+		do_action( 'woocommerce_email_editor_render_end' );
+
+		$this->assertSame(
+			10,
+			$this->data_attributes_filter_priority(),
+			'A later render should put back a filter an earlier render left suspended.'
+		);
+	}
+
+	/**
+	 * @testdox An email render does not restore a data attributes filter that an extension removed.
+	 */
+	public function test_email_render_does_not_restore_a_removed_data_attributes_filter(): void {
+		$this->remove_data_attributes_filter();
+
+		do_action( 'woocommerce_email_editor_render_start' );
+		do_action( 'woocommerce_email_editor_render_end' );
+
+		$this->assertFalse(
+			$this->data_attributes_filter_priority(),
+			'A filter an extension removed must stay removed.'
+		);
+	}
+
+	/**
+	 * @testdox An email rendered while block types are unregistered shows product blocks without data attributes.
+	 *
+	 * The store notices block has no email renderer, so the fallback renderer keeps the markup it was given. It is
+	 * the kind of block whose data- attributes would otherwise reach the sent email.
+	 */
+	public function test_email_rendered_without_registered_blocks_contains_product_collection(): void {
+		if ( ! Email_Editor_Container::container()->get( Dependency_Check::class )->are_dependencies_met() ) {
+			$this->markTestSkipped( 'The test environment does not meet the block email editor requirements.' );
+		}
+
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'Email collection product' );
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		wc_get_container()->get( EmailEditorPackage::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
+		$email_editor_bootstrap = Email_Editor_Container::container()->get( EmailEditorBootstrap::class );
+		$email_editor_bootstrap->init();
+		$email_editor_bootstrap->initialize();
+
+		$email_post = $this->factory()->post->create_and_get(
+			array(
+				'post_name'    => 'test_email',
+				'post_type'    => Integration::EMAIL_POST_TYPE,
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:woocommerce/product-collection {"queryId":1,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3},"collection":"woocommerce/product-collection/product-catalog"} -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true} /-->
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection -->
+<!-- wp:woocommerce/store-notices /-->',
+			)
+		);
+		WCTransactionalEmailPostsManager::get_instance()->save_email_template_post_id( 'test_email', $email_post->ID );
+
+		$wc_email     = $this->createMock( \WC_Email::class );
+		$wc_email->id = 'test_email';
+		$wc_email->method( 'get_recipient' )->willReturn( 'customer@example.com' );
+		$wc_email->method( 'get_subject' )->willReturn( 'Test subject' );
+		$wc_email->method( 'get_preheader' )->willReturn( '' );
+		$wc_email->method( 'get_block_editor_email_template_content' )->willReturn( 'Order details' );
+
+		try {
+			$rendered_email = wc_get_container()->get( BlockEmailRenderer::class )->maybe_render_block_email( $wc_email );
+		} finally {
+			// Process singleton: its post id cache outlives the transaction rollback.
+			WCTransactionalEmailPostsManager::get_instance()->clear_caches();
+		}
+
+		$this->assertIsString( $rendered_email, 'The block email should render.' );
+		$this->assertSame(
+			10,
+			$this->data_attributes_filter_priority(),
+			'The renderer should fire the render end action, which puts the data attributes filter back.'
+		);
+		$this->assertStringContainsString( 'Email collection product', $rendered_email, 'The product collection should list the product.' );
+		$this->assertStringContainsString(
+			'woocommerce-notices-wrapper',
+			$rendered_email,
+			'The store notices block has to render markup, or the data attribute assertion below passes for the wrong reason.'
+		);
+		$this->assertStringNotContainsString( 'data-block-name=', $rendered_email, 'Block attributes should not be added to the email as data attributes.' );
+	}
+
+	/**
+	 * Count the callbacks hooked to enqueue_block_editor_assets.
+	 *
+	 * Every block instance that register_blocks() constructs hooks its enqueue_editor_assets method there, so
+	 * the count grows by one per block type each time the registration runs.
+	 *
+	 * @return int Number of hooked callbacks.
+	 */
+	private function count_block_editor_asset_callbacks(): int {
+		global $wp_filter;
+
+		$count = 0;
+		foreach ( $wp_filter['enqueue_block_editor_assets']->callbacks ?? array() as $callbacks_at_priority ) {
+			$count += count( $callbacks_at_priority );
+		}
+
+		return $count;
+	}
+>>>>>>> 4e122e7856 (Show product blocks in block editor emails sent in the background (#69003))
 }
