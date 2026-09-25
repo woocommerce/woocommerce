@@ -794,7 +794,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Verifies whether get_available_variations/has_purchasable_variations methods can use meta lookup optimization.
 	 * Our target is default variation class, without hooks affecting result returned by '$product->is_in_stock()'.
 	 *
-	 * @param false|WC_Product $probe Variation object for applicability verification.
+	 * @param mixed $probe Variation object for applicability verification.
 	 * @return bool
 	 */
 	private function should_check_stock_status_meta_first( $probe ): bool {
