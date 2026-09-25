@@ -68,6 +68,7 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'maybe_remove_php81_required_notice' ) );
 		add_action( 'wp_ajax_woocommerce_hide_notice', array( __CLASS__, 'ajax_hide_notice' ) );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
@@ -166,7 +167,60 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function reset_admin_notices() {
+		self::maybe_add_php81_required_notice();
 	}
+
+	// phpcs:disable Generic.Commenting.Todo.TaskFound
+
+	/**
+	 * Add an admin notice about the bump of the required PHP version in WooCommerce 11.6
+	 * if the current PHP version is known to be older than 8.1.
+	 *
+	 * TODO: Remove this method in WooCommerce 11.6.
+	 *
+	 * @return void
+	 */
+	private static function maybe_add_php81_required_notice() {
+		if ( ! function_exists( 'phpversion' ) || version_compare( phpversion(), '8.1', '>=' ) ) {
+			return;
+		}
+
+		self::add_custom_notice(
+			'php81_required_in_woo_116',
+			sprintf(
+				'<h4>%s</h4>%s',
+				esc_html__( 'PHP version requirements will change soon', 'woocommerce' ),
+				wpautop(
+					wp_kses_data(
+						sprintf(
+							/* translators: 1: The PHP version the server is currently running. 2: URL of the announcement post. */
+							__( 'WooCommerce 11.6, planned for release in <b>February 2027</b>, will require PHP 8.1 or newer to work. Your server is currently running PHP %1$s, so this change will impact your store. Please contact your hosting provider to upgrade to PHP 8.1 or newer (at least PHP 8.3 is recommended). <b><a href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ),
+							phpversion(),
+							esc_url( 'https://developer.woocommerce.com/2026/09/08/from-php-7-4-to-8-1/' )
+						)
+					)
+				)
+			)
+		);
+	}
+
+	/**
+	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 11.6
+	 * if the current PHP version is no longer known to be older than 8.1.
+	 *
+	 * TODO: Remove this method in WooCommerce 11.6.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public static function maybe_remove_php81_required_notice() {
+		if ( self::has_notice( 'php81_required_in_woo_116' ) && ( ! function_exists( 'phpversion' ) || version_compare( phpversion(), '8.1', '>=' ) ) ) {
+			self::remove_notice( 'php81_required_in_woo_116' );
+		}
+	}
+
+	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.

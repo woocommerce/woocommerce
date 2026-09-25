@@ -106,6 +106,47 @@ class WC_Admin_Notices_Test extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should not add the PHP 8.1 requirement notice when resetting notices on PHP 8.1 or newer.
+	 */
+	public function test_reset_admin_notices_does_not_add_php81_notice_on_supported_php(): void {
+		if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
+			$this->markTestSkipped( 'Requires PHP 8.1 or newer.' );
+		}
+
+		WC_Admin_Notices::reset_admin_notices();
+
+		$this->assertFalse( WC_Admin_Notices::has_notice( 'php81_required_in_woo_116' ) );
+	}
+
+	/**
+	 * @testdox Should add the PHP 8.1 requirement notice when resetting notices on PHP older than 8.1.
+	 */
+	public function test_reset_admin_notices_adds_php81_notice_on_old_php(): void {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Requires PHP older than 8.1.' );
+		}
+
+		WC_Admin_Notices::reset_admin_notices();
+
+		$this->assertTrue( WC_Admin_Notices::has_notice( 'php81_required_in_woo_116' ) );
+	}
+
+	/**
+	 * @testdox Should remove an existing PHP 8.1 requirement notice on PHP 8.1 or newer.
+	 */
+	public function test_maybe_remove_php81_required_notice_removes_notice_on_supported_php(): void {
+		if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
+			$this->markTestSkipped( 'Requires PHP 8.1 or newer.' );
+		}
+
+		WC_Admin_Notices::add_notice( 'php81_required_in_woo_116' );
+
+		WC_Admin_Notices::maybe_remove_php81_required_notice();
+
+		$this->assertFalse( WC_Admin_Notices::has_notice( 'php81_required_in_woo_116' ) );
+	}
+
+	/**
 	 * Triggers an ajax endpoint and captures the JSON response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
