@@ -63,7 +63,7 @@ export const PerformanceMetricsTour = ( {
 					),
 					descriptions: {
 						desktop: __(
-							'Select which key metrics to display in the Performance section.',
+							'Some are hidden by default. Add or remove them from this menu.',
 							'woocommerce'
 						),
 					},
