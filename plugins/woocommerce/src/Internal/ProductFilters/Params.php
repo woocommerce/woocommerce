@@ -63,6 +63,20 @@ class Params implements FilterUrlParam {
 	}
 
 	/**
+	 * Get the complete effective parameter map.
+	 *
+	 * @since 11.3.0
+	 * @return array Filter types mapped to their URL parameters.
+	 */
+	public function get_params(): array {
+		if ( empty( self::$params ) ) {
+			$this->init_params();
+		}
+
+		return self::$params;
+	}
+
+	/**
 	 * Initialize the params.
 	 *
 	 * @return void

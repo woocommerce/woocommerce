@@ -98,6 +98,7 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$params = $this->sut->get_param( $type );
 
 		$this->assertIsArray( $params );
+		$this->assertSame( $params, $this->sut->get_params()[ $type ] ?? array() );
 
 		if ( ! empty( $expected_structure ) ) {
 			foreach ( $expected_structure as $expected_param ) {

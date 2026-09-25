@@ -26,6 +26,16 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Full effective parameter map returned by the Params stub.
+	 *
+	 * @var array
+	 */
+	private $cache_params = array(
+		'price'    => array( 'min_price', 'max_price' ),
+		'taxonomy' => self::TAXONOMY_PARAMS,
+	);
+
+	/**
 	 * The private method under test, exposed via reflection.
 	 *
 	 * @var \ReflectionMethod
@@ -54,6 +64,11 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 				return 'taxonomy' === $type ? self::TAXONOMY_PARAMS : array();
 			}
 		);
+		$params->method( 'get_params' )->willReturnCallback(
+			function (): array {
+				return $this->cache_params;
+			}
+		);
 
 		$this->sut = new FilterData( $query_clauses, $taxonomy_hierarchy_data, $params );
 
@@ -70,6 +85,22 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	 */
 	private function normalize( array $query_vars ): array {
 		return $this->normalize->invoke( $this->sut, $query_vars );
+	}
+
+	/**
+	 * @testdox Cache keys depend on all filter params, not only taxonomy names or registration order.
+	 */
+	public function test_cache_key_uses_complete_parameter_map(): void {
+		$key_method = new \ReflectionMethod( $this->sut, 'get_transient_key' );
+		$query_vars = array( 'post_type' => 'product' );
+		$initial    = $key_method->invoke( $this->sut, $query_vars, 'price' );
+
+		$this->cache_params             = array_reverse( $this->cache_params, true );
+		$this->cache_params['taxonomy'] = array_reverse( $this->cache_params['taxonomy'], true );
+		$this->assertSame( $initial, $key_method->invoke( $this->sut, $query_vars, 'price' ) );
+
+		$this->cache_params['price'][0] = 'custom_min_price';
+		$this->assertNotSame( $initial, $key_method->invoke( $this->sut, $query_vars, 'price' ) );
 	}
 
 	/**
