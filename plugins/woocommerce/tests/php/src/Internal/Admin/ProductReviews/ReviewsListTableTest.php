@@ -23,6 +23,49 @@ use WC_Unit_Test_Case;
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Presence and value of the comment view globals before the test.
+	 *
+	 * @var array<string, array{present: bool, value: mixed}>
+	 */
+	private $original_comment_globals = array();
+
+	/**
+	 * Start every test from an unset comment view.
+	 *
+	 * The list table reads the current view from `$comment_status` and `$comment_type`, and WordPress
+	 * teardown does not reset either one, so a test that leaves one set decides what the next test sees.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		foreach ( array( 'comment_status', 'comment_type' ) as $global_name ) {
+			$this->original_comment_globals[ $global_name ] = array(
+				'present' => array_key_exists( $global_name, $GLOBALS ),
+				'value'   => $GLOBALS[ $global_name ] ?? null,
+			);
+
+			unset( $GLOBALS[ $global_name ] );
+		}
+	}
+
+	/**
+	 * Restore the comment view globals.
+	 */
+	public function tearDown(): void {
+		try {
+			foreach ( $this->original_comment_globals as $global_name => $global ) {
+				if ( $global['present'] ) {
+					$GLOBALS[ $global_name ] = $global['value']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test comment view global.
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * Returns a new instance of the {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
@@ -138,10 +181,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `handle_row_actions` displays admin action links pertaining each review or comment.
+	 * @testdox `handle_row_actions` displays the admin action links for a review in a status-filtered view.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::handle_row_actions()
-	 * @dataProvider data_provider_test_handle_row_actions
+	 * @dataProvider data_provider_test_handle_row_actions_in_a_status_filtered_view
 	 *
 	 * @param string $review_status  The review status.
 	 * @param string $column_name    The current column name being output.
@@ -151,7 +194,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_handle_row_actions( string $review_status, string $column_name, string $primary_column, bool $user_can_edit ): void {
+	public function test_handle_row_actions_in_a_status_filtered_view( string $review_status, string $column_name, string $primary_column, bool $user_can_edit ): void {
 		global $comment_status;
 
 		$comment_status = 'test'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -270,14 +313,103 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertSame( $expected[ $review_status ], $actual );
 	}
 
-	/** @see test_handle_row_actions */
-	public function data_provider_test_handle_row_actions(): Generator {
+	/** @see test_handle_row_actions_in_a_status_filtered_view */
+	public function data_provider_test_handle_row_actions_in_a_status_filtered_view(): Generator {
 		yield 'Not the primary column'   => array( 'foo', 'bar', 'baz', true );
 		yield 'User cannot edit reviews' => array( 'test', 'foo', 'foo', false );
 		yield 'Approved review'          => array( '1', 'foo', 'foo', true );
 		yield 'Unapproved review'        => array( '0', 'foo', 'foo', true );
 		yield 'Trashed review'           => array( 'trash', 'foo', 'foo', true );
 		yield 'Spam review'              => array( 'spam', 'foo', 'foo', true );
+	}
+
+	/**
+	 * @testdox `handle_row_actions` offers both Approve and Unapprove for a review in the all reviews view.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::handle_row_actions()
+	 * @dataProvider data_provider_test_handle_row_actions_in_the_all_view
+	 *
+	 * @param string|null $view          Value of the `$comment_status` global, or null to leave the view unset.
+	 * @param string      $review_status Stored approval flag of the review.
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_handle_row_actions_in_the_all_view( ?string $view, string $review_status ): void {
+		if ( null !== $view ) {
+			$GLOBALS['comment_status'] = $view; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- tearDown restores the pre-test comment view global.
+		}
+
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method     = $reflection->getMethod( 'handle_row_actions' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_user_can_edit_review' );
+		$property->setAccessible( true );
+		$property->setValue( $list_table, true );
+
+		$review = $this->factory()->comment->create_and_get(
+			array(
+				'comment_approved' => $review_status,
+			)
+		);
+
+		$links = $this->get_row_action_links( $method->invokeArgs( $list_table, array( $review, 'comment', 'comment' ) ) );
+
+		$this->assertArrayHasKey( 'approvecomment', $links, 'The all view should offer the Approve action.' );
+		$this->assertSame( 'Approve', $links['approvecomment']['text'] );
+		$this->assertSame( 'Approve this review', $links['approvecomment']['aria_label'] );
+		$this->assertSame(
+			"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved",
+			$links['approvecomment']['wp_lists'],
+			'The all view Approve action should dim the row in place instead of removing it.'
+		);
+
+		$this->assertArrayHasKey( 'unapprovecomment', $links, 'The all view should offer the Unapprove action.' );
+		$this->assertSame( 'Unapprove', $links['unapprovecomment']['text'] );
+		$this->assertSame( 'Unapprove this review', $links['unapprovecomment']['aria_label'] );
+		$this->assertSame(
+			"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved",
+			$links['unapprovecomment']['wp_lists'],
+			'The all view Unapprove action should dim the row in place instead of removing it.'
+		);
+	}
+
+	/** @see test_handle_row_actions_in_the_all_view */
+	public function data_provider_test_handle_row_actions_in_the_all_view(): Generator {
+		yield 'All view, unapproved review'     => array( 'all', '0' );
+		yield 'All view, approved review'       => array( 'all', '1' );
+		yield 'View not set, unapproved review' => array( null, '0' );
+	}
+
+	/**
+	 * Map the rendered row action links by the `action` query argument of their URL.
+	 *
+	 * @param string $actions Rendered row actions.
+	 * @return array<string, array{text: string, aria_label: string, wp_lists: string}>
+	 */
+	private function get_row_action_links( string $actions ): array {
+		$document = new DOMDocument();
+		$errors   = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!doctype html><html><body>' . $actions . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $errors );
+
+		$links = array();
+
+		foreach ( $document->getElementsByTagName( 'a' ) as $link ) {
+			$query = array();
+			parse_str( (string) wp_parse_url( $link->getAttribute( 'href' ), PHP_URL_QUERY ), $query );
+
+			$links[ (string) ( $query['action'] ?? '' ) ] = array(
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM API property name.
+				'text'       => trim( $link->textContent ),
+				'aria_label' => $link->getAttribute( 'aria-label' ),
+				'wp_lists'   => $link->getAttribute( 'data-wp-lists' ),
+			);
+		}
+
+		return $links;
 	}
 
 	/**
@@ -1907,8 +2039,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_views(): void {
-		global $comment_status;
+		global $comment_status, $comment_type;
 		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$comment_type   = 'other'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
 		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
