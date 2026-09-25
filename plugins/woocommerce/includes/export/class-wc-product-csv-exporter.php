@@ -172,6 +172,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
+		$default_columns['customs_commodity_code']    = __( 'Commodity code (HS code)', 'woocommerce' );
+		$default_columns['customs_country_of_origin'] = __( 'Country of origin', 'woocommerce' );
+		$default_columns['customs_description']       = __( 'Customs description', 'woocommerce' );
+
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
 			$default_columns['cogs_value'] = __( 'Cost of goods', 'woocommerce' );
 		}

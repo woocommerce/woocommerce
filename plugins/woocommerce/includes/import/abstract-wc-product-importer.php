@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -298,6 +299,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			do_action( 'woocommerce_product_import_before_process_item', $data );
 			$data = apply_filters( 'woocommerce_product_import_process_item_data', $data );
 
+			if ( ! is_array( $data ) ) {
+				throw new Exception( __( 'Invalid product import data.', 'woocommerce' ) );
+			}
+
+			$customs_data = CustomsDataValidator::normalize_fields( $data );
+			$data         = array_replace( $data, $customs_data );
+
 			// Get product ID from SKU if created during the importation.
 			if ( empty( $data['id'] ) && ! empty( $data['sku'] ) ) {
 				$product_id = wc_get_product_id_by_sku( $data['sku'] );
@@ -341,7 +349,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['cogs_value'] );
 			}
 
-			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
+			// set_props() skips null, but null must still clear customs values.
+			foreach ( $customs_data as $key => $value ) {
+				$object->{"set_$key"}( $value );
+			}
+
+			$result = $object->set_props( array_diff_key( $data, $customs_data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
