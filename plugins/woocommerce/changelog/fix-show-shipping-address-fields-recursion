@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix cart and checkout crashes, and early shipping charges, when a checkout field plugin recalculates the cart.
