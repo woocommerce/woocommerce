@@ -105,7 +105,7 @@ function purple_get_woocommerce_missing_notice( string $minimum ): string {
 		)
 	);
 	if ( current_user_can( 'install_plugins' ) ) {
-		$notice .= ' <a href="' . esc_url( self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=woocommerce' ) ) . '">' . esc_html__( 'Install WooCommerce', 'purple' ) . '</a>';
+		$notice .= ' <a href="' . esc_url( self_admin_url( 'plugin-install.php?s=WooCommerce&tab=search&type=term' ) ) . '">' . esc_html__( 'Install WooCommerce', 'purple' ) . '</a>';
 	}
 
 	return $notice;
