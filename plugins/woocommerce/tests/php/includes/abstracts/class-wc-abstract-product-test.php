@@ -541,4 +541,66 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by admins." );
 		$this->assertFalse( $product->is_publicly_viewable(), "A $status product is never publicly viewable, even for admins." );
 	}
+
+	/**
+	 * @testdox Should persist normalized customs values as internal product data and remove cleared metadata.
+	 * @testWith ["customs_commodity_code", "01.02-03", "010203"]
+	 *           ["customs_country_of_origin", " ro ", "RO"]
+	 *           ["customs_description", " <b>Cotton</b> shirt ", "Cotton shirt"]
+	 * @param string $field Property name.
+	 * @param string $input Input value.
+	 * @param string $expected Stored value.
+	 */
+	public function test_customs_properties_persist_and_clear( string $field, string $input, string $expected ): void {
+		$sut = new WC_Product_Simple();
+		$this->assertNull( $sut->{"get_$field"}(), 'New products should not have customs data.' );
+		$sut->{"set_$field"}( $input );
+		$product_id = $sut->save();
+		$sut        = new WC_Product_Simple( $product_id );
+
+		$this->assertSame( $expected, $sut->{"get_$field"}( 'edit' ), 'Customs data should round-trip through the product data store.' );
+		$this->assertSame( $expected, get_post_meta( $product_id, '_' . $field, true ), 'The underscore-prefixed metadata should contain the normalized value.' );
+		$this->assertNotContains( '_' . $field, wp_list_pluck( $sut->get_meta_data(), 'key' ), 'Customs fields should be internal metadata.' );
+
+		$sut->{"set_$field"}( null );
+		$sut->save();
+		$sut = new WC_Product_Simple( $product_id );
+
+		$this->assertNull( $sut->{"get_$field"}( 'edit' ), 'Cleared customs properties should reload as null.' );
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_' . $field ), 'Clearing customs data should remove its metadata row.' );
+	}
+
+	/**
+	 * @testdox Should preserve a product value when a customs setter receives invalid data.
+	 * @testWith ["customs_country_of_origin", "RO", "ZZ"]
+	 * @param string $field Property name.
+	 * @param string $valid Original value.
+	 * @param string $invalid Invalid value.
+	 */
+	public function test_customs_setters_reject_invalid_updates( string $field, string $valid, string $invalid ): void {
+		$sut = new WC_Product_Simple();
+		$sut->{"set_$field"}( $valid );
+
+		try {
+			$sut->{"set_$field"}( $invalid );
+			$this->fail( 'An invalid update should throw a data exception.' );
+		} catch ( WC_Data_Exception $exception ) {
+			$this->assertSame( $valid, $sut->{"get_$field"}( 'edit' ), 'Validation should happen before changing the product.' );
+		}
+	}
+
+	/**
+	 * @testdox Should load invalid stored customs metadata as-is.
+	 */
+	public function test_customs_invalid_stored_values_are_read_without_validation(): void {
+		$description = str_repeat( 'a', 40 );
+		$product_id  = ( new WC_Product_Simple() )->save();
+		update_post_meta( $product_id, '_customs_country_of_origin', 'ZZ' );
+		update_post_meta( $product_id, '_customs_description', $description );
+
+		$sut = new WC_Product_Simple( $product_id );
+
+		$this->assertSame( 'ZZ', $sut->get_customs_country_of_origin( 'edit' ), 'An invalid stored country should be read without throwing.' );
+		$this->assertSame( $description, $sut->get_customs_description( 'edit' ), 'An over-long stored description should be read without throwing.' );
+	}
 }
