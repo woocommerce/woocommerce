@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Tests for WC_Product_Variable.
  */
@@ -161,6 +163,54 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$has_purchasable_variations = $product->has_purchasable_variations();
 		$this->assertIsBool( $has_purchasable_variations );
 		$this->assertFalse( $has_purchasable_variations );
+	}
+
+	/**
+	 * @testdox 'get_available_variations' skips wc_get_product for out-of-stock variations when hide out-of-stock is enabled and no stock filter is active.
+	 */
+	public function test_get_available_variations_skips_object_creation_for_out_of_stock_variations(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $child_id ) {
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		}
+
+		$instantiated_ids = array();
+		$tracker          = function ( $class_name, $product_type, $product_id ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $product_id;
+			return $class_name;
+		};
+		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$this->assertEmpty( $product->get_available_variations( 'objects' ) );
+		$this->assertCount( 1, $instantiated_ids, 'Only the probe variation should be instantiated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
+
+		remove_filter( 'woocommerce_product_class', $tracker, 10 );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox 'has_purchasable_variations' skips wc_get_product for out-of-stock variations when no stock filter is active.
+	 */
+	public function test_has_purchasable_variations_skips_object_creation_for_out_of_stock_variations(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $child_id ) {
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		}
+
+		$instantiated_ids = array();
+		$tracker          = function ( $class_name, $product_type, $product_id ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $product_id;
+			return $class_name;
+		};
+		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
+
+		$this->assertFalse( $product->has_purchasable_variations() );
+		$this->assertCount( 1, $instantiated_ids, 'Only the probe variation should be instantiated when all are out-of-stock and no stock filter is active.' );
+
+		remove_filter( 'woocommerce_product_class', $tracker, 10 );
+		$product->delete( true );
 	}
 
 	/**
