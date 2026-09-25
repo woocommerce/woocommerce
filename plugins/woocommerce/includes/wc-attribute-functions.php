@@ -271,7 +271,7 @@ function wc_get_attribute_taxonomy_names() {
  */
 function wc_get_attribute_types() {
 	$attribute_types = array(
-		'select' => __( 'Text', 'woocommerce' ),
+		'select' => __( 'Select', 'woocommerce' ),
 	);
 
 	$allow_visual_attribute_type =

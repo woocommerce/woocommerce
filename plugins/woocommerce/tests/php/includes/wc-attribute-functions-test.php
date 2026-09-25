@@ -506,6 +506,17 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test default attribute types and labels.
+	 *
+	 * @testdox Should register default `select` attribute type labeled as 'Select'.
+	 */
+	public function test_wc_get_attribute_types_defaults() {
+		$types = wc_get_attribute_types();
+		$this->assertArrayHasKey( 'select', $types, 'The default `select` attribute type should be registered.' );
+		$this->assertSame( 'Select', $types['select'], 'The `select` attribute type label should be "Select".' );
+	}
+
+	/**
 	 * Test visual attribute feature setting visibility.
 	 *
 	 * @testdox Should show the `wc-visual` feature setting only for block themes.
