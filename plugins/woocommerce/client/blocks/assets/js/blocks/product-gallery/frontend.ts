@@ -37,6 +37,7 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 } );
 
 const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
+const pendingViewerImages = new WeakMap< HTMLElement, number >();
 
 const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
 	const height =
@@ -163,20 +164,74 @@ const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
 	return getArrowsState( index, imageData.length );
 };
 
-/** Scroll both the large viewer and the thumbnail strip to the given image. */
-const scrollImageEverywhereIntoView = (
-	imageId: number,
-	behavior: ScrollBehavior = 'smooth'
+/** Update the selected image and arrow states without scrolling. */
+const updateSelectedImage = ( imageId: number ) => {
+	const context = getContext();
+	Object.assign( context, {
+		selectedImageId: imageId,
+		...computeArrowsState( context.imageData, imageId ),
+	} );
+};
+
+/** Observe every slide and return a function to refresh their visibility. */
+const initSlidesObservers = (
+	container: HTMLElement,
+	observer: IntersectionObserver
 ) => {
-	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId );
+	const slides = container.querySelectorAll( SELECTORS.largeImageWrapper );
+	const resetSlidesObservers = () => {
+		observer.disconnect();
+		slides.forEach( ( slide ) => observer.observe( slide ) );
+	};
+	resetSlidesObservers();
+	return resetSlidesObservers;
+};
+
+/** Resume visible-slide selection when user input interrupts navigation. */
+const initInterruptionEvents = (
+	container: HTMLElement,
+	resetSlidesObservers: () => void
+) => {
+	const onUserInput = () => {
+		if ( pendingViewerImages.delete( container ) ) {
+			// The visible slide may have crossed the threshold before the interruption.
+			resetSlidesObservers();
+		}
+	};
+	const events = [ 'pointerdown', 'wheel', 'keydown' ];
+	for ( const event of events ) {
+		container.addEventListener( event, onUserInput, {
+			capture: true,
+			passive: true,
+		} );
+	}
+	return () => {
+		for ( const event of events ) {
+			container.removeEventListener( event, onUserInput, true );
+		}
+	};
+};
+
+/** Reset viewer alignment when its width changes. */
+const initViewerResizeObserver = (
+	container: HTMLElement,
+	resetAlignment: () => void
+) => {
+	let width = container.clientWidth;
+	const observer = new ResizeObserver( () => {
+		if ( width !== container.clientWidth ) {
+			width = container.clientWidth;
+			resetAlignment();
+		}
+	} );
+	observer.observe( container );
+	return () => observer.disconnect();
 };
 
 /**
- * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores the parent product's gallery from the iAPI
- * config. Also recomputes arrow states and scrolls the active slot into
- * view.
+ * Update the image set, selection, arrows and thumbnail position.
+ * Empty input restores the parent gallery from the iAPI config.
+ * The viewer watcher resets alignment after the slide layout updates.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
@@ -190,22 +245,16 @@ const updateVisibleImageSet = (
 		nextImageData,
 		selectedImageId
 	);
-	const arrowsState = computeArrowsState(
-		nextImageData,
-		nextSelectedImageId
-	);
-
-	context.imageData = nextImageData;
-	context.selectedImageId = nextSelectedImageId;
+	// A reset must rerun the viewer watcher even when the image list is unchanged.
+	context.imageData = [ ...nextImageData ];
 	context.hideNextPreviousButtons = nextImageData.length <= 1;
-	context.isDisabledPrevious = arrowsState.isDisabledPrevious;
-	context.isDisabledNext = arrowsState.isDisabledNext;
+	updateSelectedImage( nextSelectedImageId );
 
 	if ( nextSelectedImageId === -1 ) {
 		return;
 	}
 
-	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
+	scrollThumbnailIntoView( nextSelectedImageId );
 };
 
 /**
@@ -289,9 +338,21 @@ const scrollImageIntoView = (
 		return;
 	}
 
+	const direction =
+		getComputedStyle( scrollableContainer ).direction === 'rtl' ? -1 : 1;
+	const left = imageIndex * scrollableContainer.clientWidth * direction;
+	if ( Math.abs( scrollableContainer.scrollLeft - left ) > 1 ) {
+		pendingViewerImages.set( scrollableContainer, imageId );
+	} else {
+		pendingViewerImages.delete( scrollableContainer );
+	}
+
 	scrollableContainer.scrollTo( {
-		left: imageIndex * scrollableContainer.clientWidth,
-		behavior,
+		left,
+		behavior: window.matchMedia( '(prefers-reduced-motion: reduce)' )
+			.matches
+			? 'instant'
+			: behavior,
 	} );
 };
 
@@ -393,14 +454,7 @@ const productGallery = {
 			}
 
 			const imageId = imageData[ newImageIndex ];
-			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
-				newImageIndex,
-				imageData.length
-			);
-
-			context.isDisabledPrevious = isDisabledPrevious;
-			context.isDisabledNext = isDisabledNext;
-			context.selectedImageId = imageId;
+			updateSelectedImage( imageId );
 
 			if ( imageId !== -1 ) {
 				scrollImageIntoView( imageId );
@@ -430,19 +484,7 @@ const productGallery = {
 			if ( Number.isNaN( imageId ) ) {
 				return;
 			}
-			const context = getContext();
-			const newImageIndex = context.imageData.indexOf( imageId );
-
-			context.selectedImageId = imageId;
-
-			if ( newImageIndex >= 0 ) {
-				const arrowsState = getArrowsState(
-					newImageIndex,
-					context.imageData.length
-				);
-				context.isDisabledPrevious = arrowsState.isDisabledPrevious;
-				context.isDisabledNext = arrowsState.isDisabledNext;
-			}
+			updateSelectedImage( imageId );
 
 			scrollImageIntoView( imageId );
 			scrollThumbnailIntoView( imageId );
@@ -472,7 +514,7 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
+		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
 			if ( event.key === 'Enter' || event.key === ' ' ) {
 				if ( event.key === ' ' ) {
 					event.preventDefault();
@@ -481,13 +523,15 @@ const productGallery = {
 			}
 
 			if ( event.key === 'ArrowRight' ) {
+				event.preventDefault();
 				actions.selectNextImage();
 			}
 
 			if ( event.key === 'ArrowLeft' ) {
+				event.preventDefault();
 				actions.selectPreviousImage();
 			}
-		},
+		} ),
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'Escape' ) {
 				actions.closeDialog();
@@ -547,52 +591,6 @@ const productGallery = {
 			context.isDialogOpen = false;
 			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
-		onTouchStart: ( event: TouchEvent ) => {
-			const context = getContext();
-			const { clientX } = event.touches[ 0 ];
-			context.touchStartX = clientX;
-			context.touchCurrentX = clientX;
-			context.isDragging = true;
-		},
-		onTouchMove: ( event: TouchEvent ) => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-			const { clientX } = event.touches[ 0 ];
-			context.touchCurrentX = clientX;
-
-			// Only prevent default if there's significant horizontal movement
-			const delta = clientX - context.touchStartX;
-			if ( Math.abs( delta ) > 10 ) {
-				event.preventDefault();
-			}
-		},
-		onTouchEnd: () => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-
-			const SNAP_THRESHOLD = 0.2;
-			const delta = context.touchCurrentX - context.touchStartX;
-			const element = getElement()?.ref as HTMLElement;
-			const imageWidth = element?.offsetWidth || 0;
-
-			// Only trigger swipe actions if there was significant movement
-			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.isDisabledPrevious ) {
-					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.isDisabledNext ) {
-					actions.selectNextImage();
-				}
-			}
-
-			// Reset touch state
-			context.isDragging = false;
-			context.touchStartX = 0;
-			context.touchCurrentX = 0;
-		},
 		onScroll: () => {
 			const scrollableElement = getElement()?.ref;
 			if ( ! scrollableElement ) {
@@ -650,6 +648,92 @@ const productGallery = {
 		},
 	},
 	callbacks: {
+		/**
+		 * Keep thumbnails and arrows in sync with the visible slide:
+		 * - Update thumbnail selection during native swipes and trackpad scrolling.
+		 * - Keep the thumbnail clicked by the user selected unless interrupted by another user input.
+		 * - Reset the selected image's alignment after variation or gallery width changes.
+		 */
+		watchViewerScroll: () => {
+			const container = getElement()?.ref;
+			if ( ! ( container instanceof HTMLElement ) ) {
+				return;
+			}
+
+			// Reset alignment after variation changes, once slide visibility and order have updated.
+			const { imageData } = getContext();
+			let frame = 0;
+			const alignSelectedImage = withScope( () => {
+				scrollImageIntoView( getContext().selectedImageId, 'instant' );
+				frame = 0;
+			} );
+			const resetAlignment = () => {
+				cancelAnimationFrame( frame );
+				frame = requestAnimationFrame( alignSelectedImage );
+			};
+			// Avoid two slides qualifying when both are exactly half visible.
+			const visibilityThreshold = 0.51;
+			const observer = new IntersectionObserver(
+				withScope( ( entries: IntersectionObserverEntry[] ) => {
+					const context = getContext();
+					if ( frame || context.imageData !== imageData ) {
+						return;
+					}
+
+					const visibleSlide = entries.find(
+						( entry ) =>
+							entry.intersectionRatio >= visibilityThreshold
+					);
+					const image =
+						visibleSlide?.target.querySelector< HTMLElement >(
+							'[data-image-id]'
+						);
+					const imageId = Number( image?.dataset.imageId );
+					const index = imageData.indexOf( imageId );
+					if ( index < 0 ) {
+						return;
+					}
+
+					const pendingImage = pendingViewerImages.get( container );
+					// Keep the clicked thumbnail selected while scrolling past intermediate images.
+					if (
+						pendingImage !== undefined &&
+						imageId !== pendingImage
+					) {
+						return;
+					}
+					pendingViewerImages.delete( container );
+					if ( imageId === context.selectedImageId ) {
+						return;
+					}
+
+					updateSelectedImage( imageId );
+					scrollThumbnailIntoView( imageId );
+				} ),
+				{ root: container, threshold: visibilityThreshold }
+			);
+			const resetSlidesObservers = initSlidesObservers(
+				container,
+				observer
+			);
+			const removeInterruptionEvents = initInterruptionEvents(
+				container,
+				resetSlidesObservers
+			);
+			const disconnectResizeObserver = initViewerResizeObserver(
+				container,
+				resetAlignment
+			);
+			resetAlignment();
+
+			return () => {
+				observer.disconnect();
+				removeInterruptionEvents();
+				pendingViewerImages.delete( container );
+				disconnectResizeObserver();
+				cancelAnimationFrame( frame );
+			};
+		},
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
