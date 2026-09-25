@@ -80,7 +80,7 @@ class StorePerformance extends Component {
 								),
 								descriptions: {
 									desktop: __(
-										'Open this menu to show or hide any of the metrics available for your store.',
+										'Some are hidden by default. Add or remove them from this menu.',
 										'woocommerce'
 									),
 								},
