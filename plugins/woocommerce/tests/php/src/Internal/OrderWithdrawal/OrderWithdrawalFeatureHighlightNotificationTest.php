@@ -18,6 +18,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	private const ALLOWED_COUNTRIES_OPTION    = 'woocommerce_allowed_countries';
 	private const ALL_EXCEPT_COUNTRIES_OPTION = 'woocommerce_all_except_countries';
 	private const SPECIFIC_COUNTRIES_OPTION   = 'woocommerce_specific_allowed_countries';
+	private const ENDPOINT_OPTION             = 'woocommerce_myaccount_order_withdrawal_endpoint';
 	private const MISSING_OPTION_MARK         = '__woocommerce_order_withdrawal_missing_option__';
 
 	private const OPTION_NAMES = array(
@@ -26,7 +27,9 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		self::ALLOWED_COUNTRIES_OPTION,
 		self::ALL_EXCEPT_COUNTRIES_OPTION,
 		self::SPECIFIC_COUNTRIES_OPTION,
+		self::ENDPOINT_OPTION,
 		OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION,
+		OrderWithdrawalFeatureHighlightNotification::ENABLED_CREATED_OPTION,
 	);
 
 	/**
@@ -111,6 +114,68 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 			1,
 			$this->get_notification_note_ids(),
 			'Repeated attempts should not create duplicate notifications.'
+		);
+	}
+
+	/**
+	 * @testdox Should add a notification with the configured withdrawal page when the feature is enabled.
+	 */
+	public function test_possibly_add_enabled_note_adds_notification_with_configured_page_url(): void {
+		update_option( self::ENDPOINT_OPTION, 'request-withdrawal' );
+
+		$this->sut->possibly_add_enabled_note( 'order_withdrawal', true );
+
+		$note = Notes::get_note_by_name( OrderWithdrawalFeatureHighlightNotification::ENABLED_NOTE_NAME );
+
+		$this->assertInstanceOf( Note::class, $note, 'Enabling order withdrawal should create an inbox notification.' );
+		$this->assertSame( 'The order withdrawal feature is enabled', $note->get_title(), 'The notification should have the expected title.' );
+		$this->assertSame( 'This gives customers a simple, self-serve way to request a withdrawal during the applicable period, generally 14 days from delivery for goods or from when a service contract is agreed.', $note->get_content(), 'The notification should explain the enabled feature.' );
+
+		$actions = $note->get_actions();
+
+		$this->assertCount( 2, $actions, 'The notification should include view page and learn more actions.' );
+		$this->assertSame( 'view-page', $actions[0]->name, 'The primary action should view the withdrawal page.' );
+		$this->assertSame( wc_get_endpoint_url( 'request-withdrawal', '', wc_get_page_permalink( 'myaccount' ) ), $actions[0]->query, 'The view page action should use the configured endpoint.' );
+		$this->assertSame( 'learn-more', $actions[1]->name, 'The secondary action should link to documentation.' );
+		$this->assertSame( 'https://woocommerce.com/document/customer-order-withdrawal/', $actions[1]->query, 'The learn more action should use the order withdrawal documentation URL.' );
+	}
+
+	/**
+	 * @testdox Should only create the enabled notification once.
+	 */
+	public function test_possibly_add_enabled_note_prevents_duplicates(): void {
+		$this->sut->possibly_add_enabled_note( 'order_withdrawal', true );
+		$this->sut->possibly_add_enabled_note( 'order_withdrawal', true );
+
+		$this->assertCount(
+			1,
+			$this->get_enabled_notification_note_ids(),
+			'Repeated enable events should not create duplicate notifications.'
+		);
+	}
+
+	/**
+	 * @testdox Should not add the enabled notification for unrelated or disabled features.
+	 * @dataProvider provide_ignored_feature_changes
+	 *
+	 * @param string $feature_id Feature being toggled.
+	 * @param bool   $enabled    Whether the feature was enabled.
+	 */
+	public function test_possibly_add_enabled_note_ignores_other_feature_changes( string $feature_id, bool $enabled ): void {
+		$this->sut->possibly_add_enabled_note( $feature_id, $enabled );
+
+		$this->assertFalse( Notes::get_note_by_name( OrderWithdrawalFeatureHighlightNotification::ENABLED_NOTE_NAME ), 'An irrelevant feature change should not create the notification.' );
+	}
+
+	/**
+	 * Data provider for ignored feature changes.
+	 *
+	 * @return array<string,array{0:string,1:bool}>
+	 */
+	public function provide_ignored_feature_changes(): array {
+		return array(
+			'order withdrawal disabled' => array( 'order_withdrawal', false ),
+			'unrelated feature enabled' => array( 'other_feature', true ),
 		);
 	}
 
@@ -206,8 +271,14 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	 */
 	private function delete_notification_state(): void {
 		delete_option( OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION );
+		delete_option( OrderWithdrawalFeatureHighlightNotification::ENABLED_CREATED_OPTION );
 
-		foreach ( $this->get_notification_note_ids() as $note_id ) {
+		$note_ids = array_merge(
+			$this->get_notification_note_ids(),
+			$this->get_enabled_notification_note_ids()
+		);
+
+		foreach ( $note_ids as $note_id ) {
 			$note = Notes::get_note( $note_id );
 
 			if ( $note instanceof Note ) {
@@ -227,6 +298,20 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		return array_map(
 			'absint',
 			$data_store->get_notes_with_name( OrderWithdrawalFeatureHighlightNotification::NOTE_NAME )
+		);
+	}
+
+	/**
+	 * Get enabled notification note IDs.
+	 *
+	 * @return int[]
+	 */
+	private function get_enabled_notification_note_ids(): array {
+		$data_store = Notes::load_data_store();
+
+		return array_map(
+			'absint',
+			$data_store->get_notes_with_name( OrderWithdrawalFeatureHighlightNotification::ENABLED_NOTE_NAME )
 		);
 	}
 

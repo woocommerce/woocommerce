@@ -73,6 +73,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this->feature_highlight_notification, 'possibly_add_enabled_note' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_feature_hooks' ), 0, 0 );
 	}
 
