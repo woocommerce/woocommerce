@@ -417,6 +417,59 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Permanently deleting an order with HPOS does not deliver order.updated for its deleted refunds.
+	 */
+	public function test_order_deletion_with_hpos_does_not_deliver_order_updated_for_refunds(): void {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		try {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+
+			$order    = WC_Helper_Order::create_order();
+			$order_id = $order->get_id();
+			$refund   = wc_create_refund(
+				array(
+					'order_id'       => $order_id,
+					'amount'         => 1,
+					'refund_payment' => false,
+				)
+			);
+
+			$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+
+			$refund_deleted_count = did_action( 'woocommerce_delete_order_refund' );
+			$delivered_ids        = array();
+			$webhook              = $this->create_active_webhook( 'order.updated' );
+
+			remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+			add_action(
+				'woocommerce_webhook_process_delivery',
+				function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+					if ( $webhook === $delivering_webhook ) {
+						$delivered_ids[] = $arg;
+					}
+				},
+				10,
+				2
+			);
+			$webhook->enqueue();
+
+			wc_get_order( $order_id )->delete( true );
+
+			$this->assertSame( $refund_deleted_count + 1, did_action( 'woocommerce_delete_order_refund' ), 'The refund should be deleted along with the order.' );
+			$this->assertSame( array(), $delivered_ids, 'The webhook should not be delivered for an order that is being deleted.' );
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
 	 * Create an active webhook for integration tests.
 	 *
 	 * @param string $topic Webhook topic.
