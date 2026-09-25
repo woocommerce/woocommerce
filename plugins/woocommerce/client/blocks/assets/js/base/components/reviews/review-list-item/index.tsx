@@ -24,14 +24,17 @@ function getReviewImage(
 			<div className="wc-block-review-list-item__image wc-block-components-review-list-item__image" />
 		);
 	}
+	const productImage = review.product_image;
+	const thumbnailSrcSet = productImage?.thumbnail_srcset || undefined;
 
 	return (
 		<div className="wc-block-review-list-item__image wc-block-components-review-list-item__image">
 			{ imageType === 'product' ? (
 				<img
 					aria-hidden="true"
-					alt={ review.product_image?.alt || '' }
-					src={ review.product_image?.thumbnail || '' }
+					alt={ productImage?.alt || '' }
+					src={ productImage?.thumbnail || '' }
+					srcSet={ thumbnailSrcSet }
 				/>
 			) : (
 				// The alt text is left empty on purpose, as it's considered a decorative image.
