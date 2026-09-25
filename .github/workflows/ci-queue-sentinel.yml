@@ -136,10 +136,13 @@ jobs:
 
   notify-failure:
     name: 'Notify Slack on failure'
-    needs: [ evaluate ]
+    needs: [ evaluate, freshness ]
     # failure() and not cancelled(): the concurrency group now cancels older
     # runs on purpose. A separate job so an evaluate job that fails before any
-    # step runs (for example, no runner assigned) still alerts.
+    # step runs (for example, no runner assigned) still alerts. `freshness` is
+    # a dependency because a freshness check that dies on an API error writes
+    # no outputs and skips its own Slack step, which would leave the sentinel
+    # unwatched and quiet about it.
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -165,5 +168,7 @@ jobs:
         env:
           SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
           SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+          EVALUATE_RESULT: ${{ needs.evaluate.result }}
+          FRESHNESS_RESULT: ${{ needs.freshness.result }}
         run: |
-          pnpm utils slack ":warning: CI Queue Sentinel failed. The CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
+          pnpm utils slack ":warning: CI Queue Sentinel failed (evaluate: $EVALUATE_RESULT, freshness: $FRESHNESS_RESULT). A failed evaluate can strand the CI_QUEUE_OVERFLOW switch in its last state; a failed freshness check means nothing is watching for a quiet sentinel.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"

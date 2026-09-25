@@ -52,17 +52,29 @@ test( 'the window boundary is not stale', () => {
 	assert.equal( evaluateFreshness( [ run( 1, 'success', 60.1 ) ], nowMs, 60, 15, '99' ).stale, true );
 } );
 
-test( 'alerts once per window rather than on every tick', () => {
+test( 'alerts at the top of a window rather than on every tick', () => {
 	const alertsAt = ( ageMin ) => evaluateFreshness( [ run( 1, 'success', ageMin ) ], nowMs, 60, 15, '99' ).alert;
 
-	// First tick past the hour alerts, the next three stay quiet, the tick
-	// crossing two hours alerts again.
+	// On-time ticks: the first two past the hour alert, the rest of the window
+	// stays quiet, and the next window alerts again.
 	assert.equal( alertsAt( 61 ), true );
-	assert.equal( alertsAt( 75 ), false );
-	assert.equal( alertsAt( 90 ), false );
-	assert.equal( alertsAt( 105 ), false );
+	assert.equal( alertsAt( 76 ), true );
+	assert.equal( alertsAt( 91 ), false );
+	assert.equal( alertsAt( 106 ), false );
 	assert.equal( alertsAt( 121 ), true );
-	assert.equal( alertsAt( 135 ), false );
+	assert.equal( alertsAt( 151 ), false );
+} );
+
+test( 'a late tick still alerts on its first stale run', () => {
+	const alertsAt = ( ageMin ) => evaluateFreshness( [ run( 1, 'success', ageMin ) ], nowMs, 60, 15, '99' ).alert;
+
+	// Scheduled runs drift, so the previous tick cannot be assumed to sit one
+	// cadence back. A first stale tick anywhere in the first two cadences of
+	// the window still alerts, including one that skipped a whole window.
+	assert.equal( alertsAt( 75 ), true );
+	assert.equal( alertsAt( 79 ), true );
+	assert.equal( alertsAt( 89 ), true );
+	assert.equal( alertsAt( 130 ), true );
 } );
 
 test( 'a stale run still reports stale on the quiet ticks', () => {

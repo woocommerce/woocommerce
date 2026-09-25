@@ -85,8 +85,12 @@ const fetchRecentSuccesses = async () => {
  *
  * Staleness persists until someone fixes it, so alerting on every tick would
  * post four times an hour for as long as the outage lasts. `alert` is true
- * only on the tick that crosses a multiple of the window, which makes it
- * hourly at the default settings.
+ * only for a tick landing in the first two cadences of a window, so an outage
+ * is reported on the first stale tick and at most twice an hour after that.
+ * Inferring the previous tick from `ageMin - cadenceMin` would be tidier, but
+ * scheduled runs drift and a delayed tick would then wait a full window for
+ * its first alert. The window must stay several cadences wide for this to
+ * hold.
  *
  * @param {Object[]}      runs          Runs from the workflow runs API.
  * @param {number}        nowMs
@@ -115,8 +119,8 @@ const evaluateFreshness = ( runs, nowMs, freshAfterMin, cadenceMin, currentRunId
 
 	const ageMin = ( nowMs - lastSuccess.finishedMs ) / 60000;
 	const stale = ageMin > freshAfterMin;
-	const crossed = Math.floor( ageMin / freshAfterMin ) > Math.floor( ( ageMin - cadenceMin ) / freshAfterMin );
-	return { stale, alert: stale && crossed, ageMin, lastSuccess };
+	const intoWindowMin = ageMin % freshAfterMin;
+	return { stale, alert: stale && intoWindowMin < cadenceMin * 2, ageMin, lastSuccess };
 };
 
 const summarize = ( lines ) => {
