@@ -228,20 +228,10 @@ const initViewerResizeObserver = (
 	return () => observer.disconnect();
 };
 
-/** Scroll both the large viewer and the thumbnail strip to the given image. */
-const scrollImageEverywhereIntoView = (
-	imageId: number,
-	behavior: ScrollBehavior = 'smooth'
-) => {
-	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId );
-};
-
 /**
- * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores the parent product's gallery from the iAPI
- * config. Also recomputes arrow states and scrolls the active slot into
- * view.
+ * Update the image set, selection, arrows and thumbnail position.
+ * Empty input restores the parent gallery from the iAPI config.
+ * The viewer watcher resets alignment after the slide layout updates.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
@@ -255,7 +245,8 @@ const updateVisibleImageSet = (
 		nextImageData,
 		selectedImageId
 	);
-	context.imageData = nextImageData;
+	// A reset must rerun the viewer watcher even when the image list is unchanged.
+	context.imageData = [ ...nextImageData ];
 	context.hideNextPreviousButtons = nextImageData.length <= 1;
 	updateSelectedImage( nextSelectedImageId );
 
@@ -263,7 +254,7 @@ const updateVisibleImageSet = (
 		return;
 	}
 
-	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
+	scrollThumbnailIntoView( nextSelectedImageId );
 };
 
 /**
