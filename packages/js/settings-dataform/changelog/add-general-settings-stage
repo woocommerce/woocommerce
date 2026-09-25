@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Implement the General settings stage with the admin-ui Page component, DataForm, View Config layouts, and WooCommerce settings persistence. Ignore generated route entry files in the Core watcher to prevent rebuild loops.

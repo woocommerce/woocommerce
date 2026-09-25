@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Provide the General settings form layout through the PHP View Config API for the woo_settings/product entity.

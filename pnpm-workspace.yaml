@@ -78,11 +78,14 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        '@wordpress/build': 0.23.0
         postcss: ^8.5.26
         webpack: 5.97.x
 
 packages:
     - 'packages/js/*'
+    - 'packages/js/settings-dataform/packages/*'
+    - 'packages/js/settings-dataform/routes/*'
     - 'packages/php/*'
     - 'plugins/*'
     - 'plugins/woocommerce/client/admin'

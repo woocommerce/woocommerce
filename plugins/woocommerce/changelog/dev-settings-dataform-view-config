@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Load the Settings DataForm package's PHP View Config on REST requests as well as admin requests.
