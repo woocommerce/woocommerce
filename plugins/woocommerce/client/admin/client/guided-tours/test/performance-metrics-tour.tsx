@@ -19,30 +19,34 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+type MockTourConfig = {
+	steps: Array< { meta: { heading: string } } >;
+	closeHandler: (
+		steps: unknown[],
+		currentStepIndex: number,
+		source: string
+	) => void;
+	options?: { effects?: { autoScroll?: unknown } };
+};
+
+const mockRenderedConfigs: MockTourConfig[] = [];
+
 jest.mock( '@woocommerce/components', () => ( {
-	TourKit: ( {
-		config,
-	}: {
-		config: {
-			steps: Array< { meta: { heading: string } } >;
-			closeHandler: (
-				steps: unknown[],
-				currentStepIndex: number,
-				source: string
-			) => void;
-		};
-	} ) => (
-		<div>
-			{ config.steps[ 0 ].meta.heading }
-			<button
-				onClick={ () =>
-					config.closeHandler( config.steps, 0, 'done-btn' )
-				}
-			>
-				Got it
-			</button>
-		</div>
-	),
+	TourKit: ( { config }: { config: MockTourConfig } ) => {
+		mockRenderedConfigs.push( config );
+		return (
+			<div>
+				{ config.steps[ 0 ].meta.heading }
+				<button
+					onClick={ () =>
+						config.closeHandler( config.steps, 0, 'done-btn' )
+					}
+				>
+					Got it
+				</button>
+			</div>
+		);
+	},
 } ) );
 
 const updateUserPreferences = jest.fn();
@@ -59,6 +63,7 @@ describe( 'PerformanceMetricsTour', () => {
 	beforeEach( () => {
 		updateUserPreferences.mockClear();
 		( recordEvent as jest.Mock ).mockClear();
+		mockRenderedConfigs.length = 0;
 	} );
 
 	it( 'shows the tour when the user has not seen it', () => {
@@ -89,6 +94,21 @@ describe( 'PerformanceMetricsTour', () => {
 		);
 
 		expect( container ).toBeEmptyDOMElement();
+	} );
+
+	it( 'keeps the same scroll options across re-renders', () => {
+		mockPreferences();
+
+		const { rerender } = render(
+			<PerformanceMetricsTour hasOpenedMenu={ false } />
+		);
+		rerender( <PerformanceMetricsTour hasOpenedMenu={ false } /> );
+
+		// TourKit scrolls to the menu again whenever autoScroll changes.
+		expect( mockRenderedConfigs ).toHaveLength( 2 );
+		expect( mockRenderedConfigs[ 1 ].options?.effects?.autoScroll ).toBe(
+			mockRenderedConfigs[ 0 ].options?.effects?.autoScroll
+		);
 	} );
 
 	it( 'remembers the tour for the user when it is closed', () => {

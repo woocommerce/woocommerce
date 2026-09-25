@@ -7,6 +7,32 @@ import { useUserPreferences } from '@woocommerce/data';
 import { createElement, useEffect, useRef } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
+// Setting effects replaces the TourKit defaults, so they are repeated here
+// alongside autoScroll. Merchants can move the Performance section below the
+// fold, and the spotlight would then lock a page whose tour sits off-screen.
+// Kept outside the component because TourKit scrolls again whenever the
+// autoScroll object changes.
+const TOUR_OPTIONS: TourKitTypes.WooOptions = {
+	effects: {
+		spotlight: {
+			interactivity: {
+				enabled: true,
+				rootElementSelector: '#wpwrap',
+			},
+		},
+		arrowIndicator: true,
+		autoScroll: {
+			behavior: 'auto',
+			block: 'center',
+		},
+		liveResize: {
+			mutation: true,
+			resize: true,
+			rootElementSelector: '#wpwrap',
+		},
+	},
+};
+
 export const PerformanceMetricsTour = ( {
 	hasOpenedMenu,
 }: {
@@ -75,30 +101,7 @@ export const PerformanceMetricsTour = ( {
 		],
 		closeHandler: ( steps, currentStepIndex, source ) =>
 			dismissTour( source ),
-		options: {
-			// Setting effects replaces the TourKit defaults, so they are repeated
-			// here alongside autoScroll. Merchants can move the Performance
-			// section below the fold, and the spotlight would then lock a page
-			// whose tour sits off-screen.
-			effects: {
-				spotlight: {
-					interactivity: {
-						enabled: true,
-						rootElementSelector: '#wpwrap',
-					},
-				},
-				arrowIndicator: true,
-				autoScroll: {
-					behavior: 'auto',
-					block: 'center',
-				},
-				liveResize: {
-					mutation: true,
-					resize: true,
-					rootElementSelector: '#wpwrap',
-				},
-			},
-		},
+		options: TOUR_OPTIONS,
 	};
 
 	return <TourKit config={ config } />;
