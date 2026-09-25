@@ -99,6 +99,10 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		wp_delete_post( $this->block_checkout_page_id );
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 		$woocommerce = $this->backup_wc;
+		// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
+		// and register a lone pickup method on the shared WC_Shipping. Undo both.
+		unset( WC()->shipping );
+		WC()->shipping()->unregister_shipping_methods();
 		parent::tearDown();
 	}
 
