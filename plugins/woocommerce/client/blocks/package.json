@@ -19,7 +19,7 @@
 	"sideEffects": [
 		"*.css",
 		"*.scss",
-		"./assets/js/atomic/blocks/**",
+		"./assets/js/blocks/product-elements-blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/middleware/**",
 		"./packages/public-api/types/**",
@@ -308,8 +308,8 @@
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
-						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}",
+						"assets/**/*.{js,jsx,ts,tsx,scss,json}",
+						"packages/**/*.{js,jsx,ts,tsx,scss,json}",
 						"tests/js/**/*.{js,ts,tsx,scss,json}",
 						"tests/integration/**/*.{js,ts,tsx,scss,json}",
 						"tests/utils/**/*.{js,ts,tsx,scss,json}"
