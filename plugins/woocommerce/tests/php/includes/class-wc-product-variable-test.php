@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Tests for WC_Product_Variable.
  */
@@ -161,6 +163,54 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$has_purchasable_variations = $product->has_purchasable_variations();
 		$this->assertIsBool( $has_purchasable_variations );
 		$this->assertFalse( $has_purchasable_variations );
+	}
+
+	/**
+	 * @testdox 'get_available_variations' skips wc_get_product for out-of-stock variations when hide out-of-stock is enabled and no stock filter is active.
+	 */
+	public function test_get_available_variations_skips_object_creation_for_out_of_stock_variations(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $child_id ) {
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		}
+
+		$instantiated_ids = array();
+		$tracker          = function ( $visible, $variation_id ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $variation_id;
+			return $visible;
+		};
+		add_filter( 'woocommerce_variation_is_visible', $tracker, 10, 2 );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$this->assertEmpty( $product->get_available_variations( 'objects' ) );
+		$this->assertEmpty( $instantiated_ids, 'No variation should be hydrated when all are out-of-stock, hide out-of-stock is enabled, and no stock filter is active.' );
+
+		remove_filter( 'woocommerce_variation_is_visible', $tracker, 10 );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox 'has_purchasable_variations' skips wc_get_product for out-of-stock variations when no stock filter is active.
+	 */
+	public function test_has_purchasable_variations_skips_object_creation_for_out_of_stock_variations(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $child_id ) {
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		}
+
+		$instantiated_ids = array();
+		$tracker          = function ( $purchasable, $variation ) use ( &$instantiated_ids ) {
+			$instantiated_ids[] = $variation->get_id();
+			return $purchasable;
+		};
+		add_filter( 'woocommerce_is_purchasable', $tracker, 10, 2 );
+
+		$this->assertFalse( $product->has_purchasable_variations() );
+		$this->assertEmpty( $instantiated_ids, 'No variation should be hydrated when all are out-of-stock and no stock filter is active.' );
+
+		remove_filter( 'woocommerce_is_purchasable', $tracker, 10 );
+		$product->delete( true );
 	}
 
 	/**
