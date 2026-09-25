@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update several WC_Object_Data_Store_Interface doc blocks to fix delete() and delete_meta() return types
