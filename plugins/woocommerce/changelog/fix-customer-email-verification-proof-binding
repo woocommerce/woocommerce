@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Bind customer email verification to the address that was actually proven, so a completed password reset or key confirmation can no longer verify or link guest orders for an address swapped into the account mid-flow. Pending password-reset keys are now revoked when the account email changes.

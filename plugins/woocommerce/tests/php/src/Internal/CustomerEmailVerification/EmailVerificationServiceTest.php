@@ -52,7 +52,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_customer_email_verified', $listener );
 
-		$this->sut->mark_verified( $user_id );
+		$this->sut->mark_verified( $user_id, 'b@example.com' );
 
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified after mark_verified()' );
 		$this->assertSame( 1, $hook_calls, 'Hook should fire exactly once' );
@@ -93,7 +93,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$user_id = wc_create_new_customer( 'single@example.com', 'singleuser', 'pw' );
 		$key     = $this->sut->create_verification_key( $user_id );
 
-		$this->sut->mark_verified( $user_id );
+		$this->sut->mark_verified( $user_id, 'single@example.com' );
 
 		$this->assertFalse( $this->sut->has_pending_key( $user_id ), 'Verifying should consume the pending key' );
 		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ), 'A consumed key must not re-validate' );
@@ -155,12 +155,42 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox mark_verified() does not verify an account email that differs from the proven email.
+	 */
+	public function test_mark_verified_rejects_changed_email(): void {
+		$user_id    = wc_create_new_customer( 'expected@example.com', 'expecteduser', 'pw' );
+		$key        = $this->sut->create_verification_key( $user_id );
+		$hook_calls = 0;
+		$listener   = static function () use ( &$hook_calls ) {
+			++$hook_calls;
+		};
+		add_action( 'woocommerce_customer_email_verified', $listener );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed@example.com',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		$this->sut->mark_verified( $user_id, 'expected@example.com' );
+
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'A different current account email must not be marked as verified' );
+		$this->assertSame( 0, $hook_calls, 'A mismatched email must not fire the verification hook' );
+		$this->assertTrue( $this->sut->has_pending_key( $user_id ), 'A mismatched email must not consume the pending key' );
+		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ), 'The key must remain bound to the original email' );
+
+		remove_action( 'woocommerce_customer_email_verified', $listener );
+	}
+
+	/**
 	 * @testdox Clearing verification should reset the user's verified status.
 	 */
 	public function test_clear_verification_resets_status(): void {
 		$user_id = wc_create_new_customer( 'e@example.com', 'usere', 'pw' );
 
-		$this->sut->mark_verified( $user_id );
+		$this->sut->mark_verified( $user_id, 'e@example.com' );
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified before clearing' );
 
 		$this->sut->clear_verification( $user_id );
@@ -174,7 +204,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	public function test_is_verified_false_after_email_change(): void {
 		$user_id = wc_create_new_customer( 'before-change@example.com', 'changeuser', 'pw' );
 
-		$this->sut->mark_verified( $user_id );
+		$this->sut->mark_verified( $user_id, 'before-change@example.com' );
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified for their current email' );
 
 		wp_update_user(
@@ -194,7 +224,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	public function test_is_verified_preserved_after_non_email_change(): void {
 		$user_id = wc_create_new_customer( 'keep-verified@example.com', 'keepuser', 'pw' );
 
-		$this->sut->mark_verified( $user_id );
+		$this->sut->mark_verified( $user_id, 'keep-verified@example.com' );
 
 		wp_update_user(
 			array(
