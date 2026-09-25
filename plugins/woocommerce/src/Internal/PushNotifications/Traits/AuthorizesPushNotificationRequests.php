@@ -87,6 +87,24 @@ trait AuthorizesPushNotificationRequests {
 	}
 
 	/**
+	 * Checks the caller is either WPCOM or an allowed user, and that the module
+	 * is enabled.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error
+	 *
+	 * @since 11.3.0
+	 */
+	public function authorize_as_from_wpcom_or_authenticated( WP_REST_Request $request ) {
+		if ( $this->is_signed_with_blog_token() ) {
+			return wc_get_container()->get( PushNotifications::class )->should_be_enabled();
+		}
+
+		return $this->authorize_as_authenticated( $request );
+	}
+
+	/**
 	 * Checks the user is authenticated and holds at least one role allowed to
 	 * interact with push notifications.
 	 *

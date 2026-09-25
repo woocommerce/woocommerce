@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Allow support to stop push notifications to a device on a merchant's request, when the device owner can no longer remove it from the app.
