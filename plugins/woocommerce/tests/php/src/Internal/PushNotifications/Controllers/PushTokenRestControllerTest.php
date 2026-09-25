@@ -17,6 +17,7 @@ use RuntimeException;
 use ReflectionClass;
 use stdClass;
 use WC_Data_Exception;
+use WC_Logger;
 use WC_Unit_Test_Case;
 use WP_Error;
 use WP_Http;
@@ -1096,6 +1097,95 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let WPCOM delete a token belonging to any user, and log the deletion.
+	 */
+	public function test_wpcom_can_delete_another_users_push_token(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->other_shop_manager_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-revoked-by-wpcom',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->once() )
+			->method( 'info' )
+			->with(
+				'Push token deleted by WordPress.com.',
+				array(
+					'source'   => PushNotifications::FEATURE_NAME,
+					'token_id' => $push_token->get_id(),
+					'user_id'  => $this->other_shop_manager_id,
+					'platform' => PushToken::PLATFORM_APPLE,
+				)
+			);
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
+
+		$server   = $this->create_rest_server_with_routes(
+			array( array( $this->create_blog_token_controller(), 'register_routes' ) ),
+			true
+		);
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $server->dispatch( $request );
+
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+		$this->assertNull( get_post( $push_token->get_id() ), 'The token should be deleted' );
+	}
+
+	/**
+	 * @testdox Should not log when a user deletes their own token.
+	 */
+	public function test_it_does_not_log_when_a_user_deletes_their_own_push_token(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-deleted-by-owner',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->never() )->method( 'info' );
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
+
+		wp_set_current_user( $this->user_id );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Should refuse WPCOM token deletion when push notifications are disabled.
+	 */
+	public function test_authorize_as_from_wpcom_or_authenticated_rejects_blog_token_when_disabled(): void {
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+
+		$this->assertFalse( $this->create_blog_token_controller()->authorize_as_from_wpcom_or_authenticated( $request ) );
+	}
+
+	/**
+	 * @testdox Should still require an allowed role when the request is not from WPCOM.
+	 */
+	public function test_authorize_as_from_wpcom_or_authenticated_rejects_user_without_role(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+
+		$this->assertFalse( $this->controller->authorize_as_from_wpcom_or_authenticated( $request ) );
+	}
+
+	/**
 	 * @testdox Test authorize returns false when push notifications are
 	 * disabled.
 	 */
@@ -1420,7 +1510,19 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	public function test_authorize_as_from_wpcom_allows_blog_token_when_disabled(): void {
 		$this->mock_jetpack_connection_manager_is_connected( false );
 
-		$controller = new class() extends PushTokenRestController {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$this->assertTrue( $this->create_blog_token_controller()->authorize_as_from_wpcom( $request ) );
+	}
+
+	/**
+	 * Returns a controller that treats every request as signed by WPCOM with
+	 * the Jetpack blog token.
+	 *
+	 * @return PushTokenRestController
+	 */
+	private function create_blog_token_controller(): PushTokenRestController {
+		return new class() extends PushTokenRestController {
 			/**
 			 * Stands in for a request WPCOM signed with the Jetpack blog token.
 			 *
@@ -1430,10 +1532,6 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				return true;
 			}
 		};
-
-		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
-
-		$this->assertTrue( $controller->authorize_as_from_wpcom( $request ) );
 	}
 
 	/**

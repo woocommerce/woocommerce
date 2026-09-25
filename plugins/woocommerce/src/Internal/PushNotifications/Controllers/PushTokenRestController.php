@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotif
 use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Data_Exception;
 use WP_REST_Server;
@@ -162,7 +163,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'args'                => $this->get_args( 'delete' ),
-					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
+					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_authenticated' ),
 				),
 				'schema' => array( $this, 'get_schema' ),
 			)
@@ -317,6 +318,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Deletes a push token record.
 	 *
+	 * Users can only delete their own tokens. WPCOM can delete any token, so
+	 * support can stop notifications to a device its owner can no longer reach
+	 * from the app.
+	 *
 	 * @since 10.6.0
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -328,10 +333,11 @@ class PushTokenRestController extends RestApiControllerBase {
 	public function delete( WP_REST_Request $request ) {
 		try {
 			$id         = (int) $request->get_param( 'id' );
+			$from_wpcom = $this->is_signed_with_blog_token();
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );
 			$push_token = $data_store->read( $id );
 
-			if ( $push_token->get_user_id() !== get_current_user_id() ) {
+			if ( ! $from_wpcom && $push_token->get_user_id() !== get_current_user_id() ) {
 				throw new PushTokenNotFoundException();
 			}
 
@@ -343,6 +349,21 @@ class PushTokenRestController extends RestApiControllerBase {
 					'The push token could not be deleted.',
 					WP_Http::INTERNAL_SERVER_ERROR
 				);
+			}
+
+			if ( $from_wpcom ) {
+				wc_get_container()
+					->get( LegacyProxy::class )
+					->call_function( 'wc_get_logger' )
+					->info(
+						'Push token deleted by WordPress.com.',
+						array(
+							'source'   => PushNotifications::FEATURE_NAME,
+							'token_id' => $id,
+							'user_id'  => $push_token->get_user_id(),
+							'platform' => $push_token->get_platform(),
+						)
+					);
 			}
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
