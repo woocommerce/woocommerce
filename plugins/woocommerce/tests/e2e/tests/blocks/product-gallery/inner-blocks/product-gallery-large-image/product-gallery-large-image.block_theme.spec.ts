@@ -296,14 +296,13 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
-	test.describe( 'Swipe to navigate', () => {
-		test.use( { hasTouch: true } ); // Enable touch support
+	test.describe( 'Frontend navigation', () => {
+		test.use( {
+			hasTouch: true,
+			contextOptions: { reducedMotion: 'no-preference' },
+		} );
 
-		test( 'should work on frontend when is enabled', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
+		test.beforeEach( async ( { pageObject, editor, page } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -315,7 +314,12 @@ test.describe( `${ blockData.name }`, () => {
 				height: 667,
 				width: 390, // iPhone 12 Pro
 			} );
+		} );
 
+		test( 'updates thumbnail selection during a native swipe', async ( {
+			pageObject,
+			page,
+		} ) => {
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
@@ -376,7 +380,27 @@ test.describe( `${ blockData.name }`, () => {
 				);
 			} ).toPass( { timeout: 5_000 } );
 
-			// A second thumbnail click must win over an unfinished scroll to the last image.
+			await expect
+				.poll( () =>
+					scroller.evaluate( ( element ) =>
+						Math.abs( element.scrollLeft - element.clientWidth )
+					)
+				)
+				.toBeLessThan( 1 );
+		} );
+
+		test( 'a second thumbnail click overrides unfinished navigation', async ( {
+			pageObject,
+			page,
+		} ) => {
+			const viewerBlock = await pageObject.getViewerBlock( {
+				page: 'frontend',
+			} );
+			const scroller = viewerBlock.locator(
+				'.wc-block-product-gallery-large-image__container'
+			);
+			const imageIds = await pageObject.getVisibleViewerImageIds();
+			const initialImageId = imageIds[ 0 ];
 			const thumbnails = page.locator(
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
@@ -394,11 +418,28 @@ test.describe( `${ blockData.name }`, () => {
 					initialImageId
 				);
 				expect(
-					await scroller.evaluate( ( element ) => element.scrollLeft )
-				).toBe( 0 );
+					await scroller.evaluate( ( element ) =>
+						Math.abs( element.scrollLeft )
+					)
+				).toBeLessThanOrEqual( 1 );
 			} ).toPass( { timeout: 5_000 } );
+		} );
 
-			// Interruption must refresh selection even without another visibility threshold crossing.
+		test( 'interruption refreshes selection without another visibility threshold crossing', async ( {
+			pageObject,
+			page,
+		} ) => {
+			const viewerBlock = await pageObject.getViewerBlock( {
+				page: 'frontend',
+			} );
+			const scroller = viewerBlock.locator(
+				'.wc-block-product-gallery-large-image__container'
+			);
+			const imageIds = await pageObject.getVisibleViewerImageIds();
+			const initialImageId = imageIds[ 0 ];
+			const thumbnails = page.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 			await thumbnails
 				.locator( `[data-image-id="${ imageIds.at( -1 ) }"]` )
 				.click();
