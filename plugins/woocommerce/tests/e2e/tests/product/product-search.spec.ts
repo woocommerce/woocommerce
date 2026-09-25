@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -11,7 +12,13 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 
 let productId: number;
-const testProduct = getFakeProduct( { regular_price: '9.99' } );
+const fakeProduct = getFakeProduct( { regular_price: '9.99' } );
+// Other specs generate product names the same way, so a suffix keeps this
+// spec's exact-name match to its own product.
+const testProduct = {
+	...fakeProduct,
+	name: `${ fakeProduct.name } ${ faker.string.alphanumeric( 6 ) }`,
+};
 
 test.describe( 'Products > Search and View a product', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
