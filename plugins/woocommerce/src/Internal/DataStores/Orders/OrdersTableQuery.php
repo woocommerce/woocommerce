@@ -352,7 +352,7 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// For backwards compat (see https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date)
+			// For backwards compat (see https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
 			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
@@ -385,7 +385,7 @@ class OrdersTableQuery {
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
 		$result = array();
 
-		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date only date is relevant (time is ignored).
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
@@ -501,7 +501,7 @@ class OrdersTableQuery {
 				$date_key = $local_to_gmt_date_keys[ $date_key ];
 
 				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
-					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date.
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date.
 					$date_queries[] = array_merge(
 						array(
 							'column' => $date_key,

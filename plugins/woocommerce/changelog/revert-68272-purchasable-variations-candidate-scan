@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Revert the faster purchasable-variation check for variable products so it can get more testing before it ships again.
