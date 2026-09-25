@@ -495,7 +495,7 @@ class FilterData {
 				wp_json_encode(
 					array(
 						'query_vars'  => $this->normalize_query_vars( $query_vars ),
-						'taxonomy'    => $this->get_taxonomy_params_for_cache(),
+						'params'      => $this->get_params_for_cache(),
 						'extra'       => $extra,
 						'filter_type' => $filter_type,
 					)
@@ -550,15 +550,19 @@ class FilterData {
 	}
 
 	/**
-	 * Get the effective taxonomy parameter map in a stable order for cache keys.
+	 * Get the complete parameter map in a stable order for cache keys.
 	 *
-	 * @return array Taxonomy names mapped to URL parameter names.
+	 * @return array Filter types mapped to their URL parameters.
 	 */
-	private function get_taxonomy_params_for_cache(): array {
-		$taxonomy_params = $this->params->get_param( 'taxonomy' );
-		ksort( $taxonomy_params );
+	private function get_params_for_cache(): array {
+		$params = $this->params->get_params();
+		foreach ( $params as &$type_params ) {
+			ksort( $type_params );
+		}
+		unset( $type_params );
+		ksort( $params );
 
-		return $taxonomy_params;
+		return $params;
 	}
 
 	/**
@@ -663,7 +667,7 @@ class FilterData {
 			wp_json_encode(
 				array(
 					'query_vars' => $this->normalize_query_vars( $query_vars ),
-					'taxonomy'   => $this->get_taxonomy_params_for_cache(),
+					'params'     => $this->get_params_for_cache(),
 				)
 			)
 		);
