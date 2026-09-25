@@ -7,11 +7,13 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\AuthorizationFailureReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Exception;
+use WC_Rate_Limiter;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
@@ -32,6 +34,27 @@ class PushNotificationRestController {
 	 * The route namespace, shared with PushTokenRestController.
 	 */
 	const ROUTE_NAMESPACE = 'wc-push-notifications';
+
+	/**
+	 * Rate limit key for the refused loopback line. One key for the whole store,
+	 * since an unauthenticated caller can vary anything of its own for free.
+	 */
+	const AUTH_FAILURE_LOG_RATE_LIMIT_ID = 'push_notification_auth_failure_log';
+
+	/**
+	 * Seconds between refused loopback lines.
+	 */
+	const AUTH_FAILURE_LOG_RATE_LIMIT_SECONDS = 60;
+
+	/**
+	 * The response message for each authorization failure.
+	 */
+	const AUTH_FAILURE_MESSAGES = array(
+		AuthorizationFailureReason::CREDENTIAL_MISSING => 'Missing credential: no Authorization header and no token query parameter.',
+		AuthorizationFailureReason::TOKEN_INVALID      => 'Invalid or expired token.',
+		AuthorizationFailureReason::ISSUER_INVALID     => 'Invalid token issuer.',
+		AuthorizationFailureReason::BODY_HASH_MISMATCH => 'Body hash mismatch.',
+	);
 
 	/**
 	 * Registers the REST API route on the rest_api_init hook.
@@ -80,10 +103,14 @@ class PushNotificationRestController {
 		$notifications    = is_array( $body ) ? ( $body['notifications'] ?? array() ) : array();
 		$success_response = new WP_REST_Response( array( 'success' => true ), WP_Http::OK );
 
+		$step_logger = wc_get_container()->get( NotificationStepLogger::class );
+
 		if ( empty( $notifications ) || ! is_array( $notifications ) ) {
-			wc_get_logger()->warning(
-				'Loopback endpoint received empty or missing notifications array.',
-				array( 'source' => PushNotifications::FEATURE_NAME )
+			$step_logger->log_unattributed_failure(
+				'received',
+				'malformed_body',
+				'warning',
+				'Loopback endpoint received empty or missing notifications array.'
 			);
 
 			return $success_response;
@@ -94,11 +121,31 @@ class PushNotificationRestController {
 		foreach ( $notifications as $data ) {
 			try {
 				$notification = Notification::from_array( $data );
+			} catch ( Exception $e ) {
+				$step_logger->log_unattributed_failure(
+					'received',
+					'invalid_notification',
+					'error',
+					sprintf( 'Failed to process notification: %s', $e->getMessage() ),
+					array(
+						'type'        => is_array( $data ) ? (string) ( $data['type'] ?? '' ) : '',
+						'resource_id' => is_array( $data ) ? (int) ( $data['resource_id'] ?? 0 ) : 0,
+					)
+				);
+				continue;
+			}
+
+			$step_logger->log_notification_step( $notification, 'received', 'ok' );
+
+			try {
 				$processor->process( $notification );
 			} catch ( Exception $e ) {
-				wc_get_logger()->error(
-					sprintf( 'Failed to process notification: %s', $e->getMessage() ),
-					array( 'source' => PushNotifications::FEATURE_NAME )
+				$step_logger->log_failure(
+					$notification,
+					'processing',
+					'exception',
+					'error',
+					sprintf( 'Failed to process notification: %s', $e->getMessage() )
 				);
 			}
 		}
@@ -118,6 +165,29 @@ class PushNotificationRestController {
 	 * @since 10.7.0
 	 */
 	public function authorize( WP_REST_Request $request ) {
+		$reason = $this->find_authorization_failure( $request );
+
+		if ( null === $reason ) {
+			return true;
+		}
+
+		$this->log_authorization_failure( $request, $reason );
+
+		return new WP_Error(
+			'woocommerce_rest_unauthorized',
+			self::AUTH_FAILURE_MESSAGES[ $reason ],
+			array( 'status' => WP_Http::UNAUTHORIZED )
+		);
+	}
+
+	/**
+	 * Checks the JWT from the Authorization header against the request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return string|null One of the AuthorizationFailureReason constants, or null when authorized.
+	 */
+	private function find_authorization_failure( WP_REST_Request $request ): ?string {
 		$header = trim( (string) $request->get_header( 'authorization' ) );
 
 		if ( '' !== $header ) {
@@ -127,42 +197,69 @@ class PushNotificationRestController {
 		}
 
 		if ( '' === $token ) {
-			return new WP_Error(
-				'woocommerce_rest_unauthorized',
-				'Missing credential: no Authorization header and no token query parameter.',
-				array( 'status' => WP_Http::UNAUTHORIZED )
-			);
+			return AuthorizationFailureReason::CREDENTIAL_MISSING;
 		}
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
-			return new WP_Error(
-				'woocommerce_rest_unauthorized',
-				'Invalid or expired token.',
-				array( 'status' => WP_Http::UNAUTHORIZED )
-			);
+			return AuthorizationFailureReason::TOKEN_INVALID;
 		}
 
 		$parts = JsonWebToken::get_parts( $token );
 
 		if ( ! isset( $parts->payload->iss ) || get_site_url() !== $parts->payload->iss ) {
-			return new WP_Error(
-				'woocommerce_rest_unauthorized',
-				'Invalid token issuer.',
-				array( 'status' => WP_Http::UNAUTHORIZED )
-			);
+			return AuthorizationFailureReason::ISSUER_INVALID;
 		}
 
 		$body_hash = hash( 'sha256', $request->get_body() );
 
 		if ( ! isset( $parts->payload->body_hash ) || ! hash_equals( (string) $parts->payload->body_hash, $body_hash ) ) {
-			return new WP_Error(
-				'woocommerce_rest_unauthorized',
-				'Body hash mismatch.',
-				array( 'status' => WP_Http::UNAUTHORIZED )
-			);
+			return AuthorizationFailureReason::BODY_HASH_MISMATCH;
 		}
 
-		return true;
+		return null;
+	}
+
+	/**
+	 * Records a refused loopback request, but only when the body looks like
+	 * one of ours.
+	 *
+	 * The route is public until authorization passes, so logging every refused
+	 * request would let anyone write to the store's log by POSTing here. A
+	 * stripped header or an expired token still arrives with our body; a
+	 * scanner never does.
+	 *
+	 * The body check alone is not enough, since the source is public and the
+	 * route is unauthenticated, so the line is also rate limited store-wide. A
+	 * genuine incident still records a line a minute and a flood costs one.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @param string          $reason  One of the AuthorizationFailureReason constants.
+	 * @return void
+	 */
+	private function log_authorization_failure( WP_REST_Request $request, string $reason ): void {
+		$body = json_decode( $request->get_body(), true );
+
+		if ( ! is_array( $body ) || ! array_key_exists( 'notifications', $body ) ) {
+			return;
+		}
+
+		if ( WC_Rate_Limiter::retried_too_soon( self::AUTH_FAILURE_LOG_RATE_LIMIT_ID ) ) {
+			return;
+		}
+
+		WC_Rate_Limiter::set_rate_limit( self::AUTH_FAILURE_LOG_RATE_LIMIT_ID, self::AUTH_FAILURE_LOG_RATE_LIMIT_SECONDS );
+
+		wc_get_container()->get( NotificationStepLogger::class )->log_unattributed_failure(
+			'received',
+			'auth_failed',
+			'warning',
+			sprintf( 'Loopback request refused: %s', self::AUTH_FAILURE_MESSAGES[ $reason ] ),
+			array(
+				'reason'        => $reason,
+				'notifications' => is_array( $body['notifications'] ) ? count( $body['notifications'] ) : 0,
+			)
+		);
 	}
 
 	/**

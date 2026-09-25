@@ -314,13 +314,13 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when enabled and event sub-flag is true.
+	 * @testdox get_suppression_reason should return null when enabled and event sub-flag is true.
 	 */
-	public function test_should_send_to_user_when_enabled_and_sub_flag_true(): void {
+	public function test_suppression_reason_when_enabled_and_sub_flag_true(): void {
 		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'   => true,
 					'low_stock' => true,
@@ -330,13 +330,13 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when enabled but event sub-flag is false.
+	 * @testdox get_suppression_reason should return a reason when enabled but event sub-flag is false.
 	 */
 	public function test_should_not_send_to_user_when_sub_flag_false(): void {
 		$notification = new StockNotification( 1, StockNotification::EVENT_ON_BACKORDER );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'      => true,
 					'on_backorder' => false,
@@ -346,13 +346,13 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when notification is disabled regardless of sub-flags.
+	 * @testdox get_suppression_reason should return a reason when notification is disabled regardless of sub-flags.
 	 */
 	public function test_should_not_send_to_user_when_disabled(): void {
 		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'   => false,
 					'low_stock' => true,
@@ -362,23 +362,23 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should default to true when event sub-flag key is missing.
+	 * @testdox get_suppression_reason should default to null when event sub-flag key is missing.
 	 */
-	public function test_should_send_to_user_when_sub_flag_missing(): void {
+	public function test_suppression_reason_when_sub_flag_missing(): void {
 		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
 
-		$this->assertTrue(
-			$notification->should_send_to_user( array( 'enabled' => true ) )
+		$this->assertNull(
+			$notification->get_suppression_reason( array( 'enabled' => true ) )
 		);
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when pref_value is null.
+	 * @testdox get_suppression_reason should return null when pref_value is null.
 	 */
-	public function test_should_send_to_user_when_pref_null(): void {
+	public function test_suppression_reason_when_pref_null(): void {
 		$notification = new StockNotification( 1 );
 
-		$this->assertTrue( $notification->should_send_to_user( null ) );
+		$this->assertNull( $notification->get_suppression_reason( null ) );
 	}
 
 	/**

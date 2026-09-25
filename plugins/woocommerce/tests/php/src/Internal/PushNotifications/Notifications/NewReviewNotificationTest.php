@@ -169,15 +169,15 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when rating is below max_rating.
+	 * @testdox get_suppression_reason should return null when rating is below max_rating.
 	 */
-	public function test_should_send_to_user_when_rating_below_max(): void {
+	public function test_suppression_reason_when_rating_below_max(): void {
 		$comment_id = $this->create_review_with_rating( 3 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => 4,
@@ -187,15 +187,15 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when rating equals max_rating.
+	 * @testdox get_suppression_reason should return null when rating equals max_rating.
 	 */
-	public function test_should_send_to_user_when_rating_equals_max(): void {
+	public function test_suppression_reason_when_rating_equals_max(): void {
 		$comment_id = $this->create_review_with_rating( 3 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => 3,
@@ -205,15 +205,15 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when rating is above max_rating.
+	 * @testdox get_suppression_reason should return a reason when rating is above max_rating.
 	 */
 	public function test_should_not_send_to_user_when_rating_above_max(): void {
 		$comment_id = $this->create_review_with_rating( 5 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => 3,
@@ -223,28 +223,28 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when max_rating key is missing (backwards compat).
+	 * @testdox get_suppression_reason should return null when max_rating key is missing (backwards compat).
 	 */
-	public function test_should_send_to_user_when_max_rating_missing(): void {
+	public function test_suppression_reason_when_max_rating_missing(): void {
 		$comment_id = $this->create_review_with_rating( 5 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertTrue(
-			$notification->should_send_to_user( array( 'enabled' => true ) )
+		$this->assertNull(
+			$notification->get_suppression_reason( array( 'enabled' => true ) )
 		);
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when max_rating is null (threshold disabled).
+	 * @testdox get_suppression_reason should return null when max_rating is null (threshold disabled).
 	 */
-	public function test_should_send_to_user_when_max_rating_null(): void {
+	public function test_suppression_reason_when_max_rating_null(): void {
 		$comment_id = $this->create_review_with_rating( 5 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => null,
@@ -254,15 +254,15 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when notification is disabled, regardless of rating.
+	 * @testdox get_suppression_reason should return a reason when notification is disabled, regardless of rating.
 	 */
 	public function test_should_not_send_to_user_when_disabled(): void {
 		$comment_id = $this->create_review_with_rating( 1 );
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => false,
 					'max_rating' => null,
@@ -272,13 +272,13 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when the comment no longer exists.
+	 * @testdox get_suppression_reason should return a reason when the comment no longer exists.
 	 */
 	public function test_should_not_send_to_user_when_comment_deleted(): void {
 		$notification = new NewReviewNotification( 999999 );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => 3,
@@ -288,9 +288,9 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when the review has no rating meta.
+	 * @testdox get_suppression_reason should return null when the review has no rating meta.
 	 */
-	public function test_should_send_to_user_when_no_rating_meta(): void {
+	public function test_suppression_reason_when_no_rating_meta(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 
@@ -299,8 +299,8 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 
 		$notification = new NewReviewNotification( $comment_id );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'max_rating' => 3,

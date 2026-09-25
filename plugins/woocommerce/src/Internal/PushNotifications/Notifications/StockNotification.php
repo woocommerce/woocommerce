@@ -234,34 +234,22 @@ class StockNotification extends Notification {
 	 * Extends the base enabled-toggle check with per-event sub-flag filtering.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
 	 * @since 10.9.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return false;
+	public function get_suppression_reason( $pref_value ): ?string {
+		$reason = parent::get_suppression_reason( $pref_value );
+
+		if ( null !== $reason ) {
+			return $reason;
 		}
 
 		if ( ! is_array( $pref_value ) || ! array_key_exists( $this->event_type, $pref_value ) ) {
-			return true;
+			return null;
 		}
 
-		return (bool) $pref_value[ $this->event_type ];
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return string
-	 */
-	public function get_suppression_reason( $pref_value ): string {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return SuppressionReason::TYPE_DISABLED;
-		}
-
-		return SuppressionReason::EVENT_TYPE_DISABLED;
+		return $pref_value[ $this->event_type ] ? null : SuppressionReason::EVENT_TYPE_DISABLED;
 	}
 
 	/**

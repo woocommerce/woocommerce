@@ -340,8 +340,8 @@ abstract class Notification {
 	}
 
 	/**
-	 * Decide whether this notification should be delivered to a user given
-	 * their stored preference value for {@see static::get_type()}.
+	 * Returns which preference stops this notification reaching a user, or null
+	 * where it should reach them.
 	 *
 	 * `$pref_value` is whatever the user has stored under this notification
 	 * type's preference key, or `null` if they have nothing stored. The
@@ -353,45 +353,48 @@ abstract class Notification {
 	 *
 	 * Default: read the universal `enabled` sub-field, defaulting to `true`
 	 * when the value is missing or has no `enabled` key (so newly-added
-	 * notification types are opt-in by default). Subclasses override to
-	 * read richer sub-fields and to consult their own resource (e.g.
-	 * compare an order total to the user's `min_value`).
+	 * notification types are opt-in by default). Subclasses override to read
+	 * richer sub-fields and to consult their own resource, returning the first
+	 * reason that applies.
 	 *
-	 * Subclasses must keep this side-effect-free — the {@see NotificationProcessor}
-	 * may call it once per recipient user per notification.
+	 * Subclasses must keep this side-effect-free, since the
+	 * {@see NotificationProcessor} may call it once per recipient user per
+	 * notification.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool True if this notification should be sent to that user.
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
+	public function get_suppression_reason( $pref_value ): ?string {
 		if ( null === $pref_value ) {
-			return true;
+			return null;
 		}
 
 		if ( is_array( $pref_value ) ) {
-			return (bool) ( $pref_value['enabled'] ?? true );
+			return ( $pref_value['enabled'] ?? true ) ? null : SuppressionReason::TYPE_DISABLED;
 		}
 
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
-		return (bool) $pref_value;
+		return $pref_value ? null : SuppressionReason::TYPE_DISABLED;
 	}
 
 	/**
-	 * Returns which preference stopped this notification going to a user.
+	 * Whether this notification should be delivered to a user.
 	 *
-	 * Only meaningful after {@see should_send_to_user()} returned false for the
-	 * same value. Subclasses re-run their checks in the same order and return
-	 * the first one that fails, so the reason matches the decision.
+	 * Kept so a request that loaded older code during a plugin update does not
+	 * fatal on a call that has moved. Nothing in the plugin calls it; use
+	 * {@see get_suppression_reason()}, which also names why not.
+	 *
+	 * @deprecated 11.3.0 Use get_suppression_reason() instead.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return string One of the SuppressionReason constants.
+	 * @return bool
 	 *
-	 * @since 11.3.0
+	 * @since 10.9.0
 	 */
-	public function get_suppression_reason( $pref_value ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Subclasses read it.
-		return SuppressionReason::TYPE_DISABLED;
+	public function should_send_to_user( $pref_value ): bool {
+		return null === $this->get_suppression_reason( $pref_value );
 	}
 }

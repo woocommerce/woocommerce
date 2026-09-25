@@ -65,12 +65,17 @@ class NotificationProcessor {
 	const SENT_META_KEY = '_wc_push_notification_sent';
 
 	/**
-	 * Above this many eligible tokens, per-device log lines are skipped and only
-	 * the counts on the notification line are written. A per-device line is a
-	 * file per token per day, and a store with thousands of tokens would
-	 * otherwise create that many files for every notification.
+	 * Above this many recipients, per-device log lines are skipped and only the
+	 * counts on the notification line are written. A per-device line is a file
+	 * per token per day, and a store with thousands of recipients would
+	 * otherwise create that many files for every notification. Devices that were
+	 * held back share one store-wide source, so they are not capped.
+	 *
+	 * Set to the number the Remote Push Notification Proxy delivers to, since it
+	 * drops everything after the first 100 tokens in a request. A lower cap
+	 * would hide devices WordPress.com did send to.
 	 */
-	const TOKEN_LINE_CAP = 50;
+	const TOKEN_LINE_CAP = 100;
 
 	/**
 	 * The WPCOM dispatcher.
@@ -196,13 +201,15 @@ class NotificationProcessor {
 		/**
 		 * Filter out tokens whose owning user does not want this notification.
 		 * The decision is delegated to the notification itself via
-		 * {@see Notification::should_send_to_user()} so per-type preference
+		 * {@see Notification::get_suppression_reason()} so per-type preference
 		 * shapes (simple bool today, parametrized arrays in the future) stay
 		 * encapsulated alongside the type's resource access.
 		 */
-		list( $tokens, $held_back ) = $this->filter_tokens_by_preferences( $eligible_tokens, $notification );
+		list( $tokens, $suppression_reasons ) = $this->filter_tokens_by_preferences( $eligible_tokens, $notification );
 
-		$this->log_recipients( $notification, $eligible_tokens, $tokens, $held_back, $step_context );
+		$write_token_lines = count( $tokens ) <= self::TOKEN_LINE_CAP;
+
+		$this->log_recipients( $notification, $eligible_tokens, $tokens, $suppression_reasons, $write_token_lines, $step_context );
 
 		/**
 		 * There are no recipients to send to (either no tokens at all, or
@@ -218,6 +225,8 @@ class NotificationProcessor {
 		}
 
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
+
+		$this->log_send_outcome( $notification, $tokens, $result, $write_token_lines, $step_context );
 
 		if ( ! empty( $result['success'] ) ) {
 			// Success only, for the reason {@see PushToken::get_last_sent_at_gmt()} gives.
@@ -238,7 +247,7 @@ class NotificationProcessor {
 	/**
 	 * Returns the subset of $tokens whose owning user wants $notification.
 	 *
-	 * The decision is delegated to {@see Notification::should_send_to_user()}
+	 * The decision is delegated to {@see Notification::get_suppression_reason()}
 	 * so per-type preference shapes (simple bool today, parametrized arrays
 	 * in the future) stay encapsulated alongside the type's resource access.
 	 * Tokens with no owning user are dropped — there are no preferences to
@@ -255,65 +264,63 @@ class NotificationProcessor {
 	 * @param PushToken[]  $tokens       The tokens to filter.
 	 * @param Notification $notification The notification being processed.
 	 *
-	 * @return array{0: PushToken[], 1: array<int, string>} The tokens whose owner wants the notification, and the dropped tokens as token ID => reason.
+	 * @return array{0: PushToken[], 1: array<int, string>} The tokens whose owner wants the notification, and the reason each dropped token was held back, as token ID => reason.
 	 *
 	 * @since 10.9.0
 	 */
 	private function filter_tokens_by_preferences( array $tokens, Notification $notification ): array {
-		$type           = $notification->get_type();
-		$decision_cache = array();
-		$kept           = array();
-		$held_back      = array();
+		$type                = $notification->get_type();
+		$decision_cache      = array();
+		$kept                = array();
+		$suppression_reasons = array();
 
 		foreach ( $tokens as $token ) {
 			$user_id = $token->get_user_id();
 			if ( ! $user_id ) {
-				$held_back[ (int) $token->get_id() ] = SuppressionReason::NO_USER;
+				$suppression_reasons[ (int) $token->get_id() ] = SuppressionReason::NO_USER;
 				continue;
 			}
 
 			if ( ! array_key_exists( $user_id, $decision_cache ) ) {
-				$pref_value = $this->preferences_service->get_preferences( $user_id )[ $type ] ?? null;
-
-				$decision_cache[ $user_id ] = $notification->should_send_to_user( $pref_value )
-					? null
-					: $notification->get_suppression_reason( $pref_value );
+				$pref_value                 = $this->preferences_service->get_preferences( $user_id )[ $type ] ?? null;
+				$decision_cache[ $user_id ] = $notification->get_suppression_reason( $pref_value );
 			}
 
 			if ( null === $decision_cache[ $user_id ] ) {
 				$kept[] = $token;
 			} else {
-				$held_back[ (int) $token->get_id() ] = $decision_cache[ $user_id ];
+				$suppression_reasons[ (int) $token->get_id() ] = $decision_cache[ $user_id ];
 			}
 		}
 
-		return array( $kept, $held_back );
+		return array( $kept, $suppression_reasons );
 	}
 
 	/**
 	 * Writes the recipient decision to the step log: one notification line
 	 * with the counts, and one line per device while under the cap.
 	 *
-	 * @param Notification       $notification    The notification being processed.
-	 * @param PushToken[]        $eligible_tokens Tokens whose owner has a role that receives push notifications.
-	 * @param PushToken[]        $recipients      The tokens the notification will be sent to.
-	 * @param array<int, string> $held_back       Dropped tokens as token ID => reason.
-	 * @param array              $step_context    Fields shared by every line of this attempt.
+	 * @param Notification       $notification      The notification being processed.
+	 * @param PushToken[]        $eligible_tokens   Tokens whose owner has a role that receives push notifications.
+	 * @param PushToken[]        $recipients        The tokens the notification will be sent to.
+	 * @param array<int, string> $suppression_reasons The reason each dropped token was held back, as token ID => reason.
+	 * @param bool               $write_token_lines Whether per-device recipient lines are written for this attempt.
+	 * @param array              $step_context      Fields shared by every line of this attempt.
 	 * @return void
 	 */
 	private function log_recipients(
 		Notification $notification,
 		array $eligible_tokens,
 		array $recipients,
-		array $held_back,
+		array $suppression_reasons,
+		bool $write_token_lines,
 		array $step_context
 	): void {
 		if ( ! $this->step_logger->is_active() ) {
 			return;
 		}
 
-		$write_token_lines = count( $eligible_tokens ) <= self::TOKEN_LINE_CAP;
-		$recipient_ids     = array_map( fn( PushToken $token ) => (int) $token->get_id(), $recipients );
+		$recipient_ids = array_map( fn( PushToken $token ) => (int) $token->get_id(), $recipients );
 
 		$context = array_merge(
 			$step_context,
@@ -321,8 +328,8 @@ class NotificationProcessor {
 				'tokens_total'      => $this->data_store->count_tokens(),
 				'tokens_eligible'   => count( $eligible_tokens ),
 				'recipients'        => count( $recipients ),
-				'held_back'         => count( $held_back ),
-				'held_back_reasons' => array_count_values( $held_back ),
+				'held_back'         => count( $suppression_reasons ),
+				'held_back_reasons' => array_count_values( $suppression_reasons ),
 				'token_lines'       => $write_token_lines ? 'written' : 'skipped_over_cap',
 			)
 		);
@@ -338,17 +345,13 @@ class NotificationProcessor {
 			$this->step_logger->log_notification_step( $notification, 'cleared_to_send', 'ok', $context );
 		}
 
-		if ( ! $write_token_lines ) {
-			return;
-		}
-
 		$tokens_by_id = array();
 		foreach ( $eligible_tokens as $token ) {
 			$tokens_by_id[ (int) $token->get_id() ] = $token;
 		}
 
-		foreach ( $held_back as $token_id => $reason ) {
-			$this->step_logger->log_token_step(
+		foreach ( $suppression_reasons as $token_id => $reason ) {
+			$this->step_logger->log_suppressed_token_step(
 				$notification,
 				$token_id,
 				(int) $tokens_by_id[ $token_id ]->get_user_id(),
@@ -358,6 +361,10 @@ class NotificationProcessor {
 			);
 		}
 
+		if ( ! $write_token_lines ) {
+			return;
+		}
+
 		foreach ( $recipients as $token ) {
 			$this->step_logger->log_token_step(
 				$notification,
@@ -365,6 +372,43 @@ class NotificationProcessor {
 				(int) $token->get_user_id(),
 				'cleared_to_send',
 				'ok',
+				$step_context
+			);
+		}
+	}
+
+	/**
+	 * Writes one per-device line with the send outcome WPCOM reported. A token
+	 * WPCOM refused is marked as invalid; the rest carry the batch outcome.
+	 *
+	 * @param Notification $notification      The notification being processed.
+	 * @param PushToken[]  $recipients        The tokens the notification was sent to.
+	 * @param array        $result            The dispatcher's return value.
+	 * @param bool         $write_token_lines Whether per-device recipient lines are written for this attempt.
+	 * @param array        $step_context      Fields shared by every line of this attempt.
+	 * @return void
+	 */
+	private function log_send_outcome(
+		Notification $notification,
+		array $recipients,
+		array $result,
+		bool $write_token_lines,
+		array $step_context
+	): void {
+		if ( ! $write_token_lines || ! $this->step_logger->is_active() ) {
+			return;
+		}
+
+		$outcome        = (string) ( $result['outcome'] ?? ( empty( $result['success'] ) ? 'failed' : 'accepted' ) );
+		$invalid_tokens = array_flip( $result['invalid_tokens'] ?? array() );
+
+		foreach ( $recipients as $token ) {
+			$this->step_logger->log_token_step(
+				$notification,
+				(int) $token->get_id(),
+				(int) $token->get_user_id(),
+				'send',
+				isset( $invalid_tokens[ $token->get_token() ] ) ? 'invalid_token' : $outcome,
 				$step_context
 			);
 		}
@@ -420,19 +464,30 @@ class NotificationProcessor {
 
 			$notification = Notification::from_array( $data );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_unattributed_failure(
+				'safety_net',
+				'invalid_notification',
+				'error',
 				sprintf( 'Safety net failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+				)
 			);
 			return;
 		}
 
+		$this->step_logger->log_notification_step( $notification, 'safety_net', 'fired' );
+
 		try {
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
-				sprintf( 'Safety net failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+			$this->step_logger->log_failure(
+				$notification,
+				'safety_net',
+				'exception',
+				'error',
+				sprintf( 'Safety net failed: %s', $e->getMessage() )
 			);
 			$this->retry_handler->schedule( $notification, null, 0 );
 		}

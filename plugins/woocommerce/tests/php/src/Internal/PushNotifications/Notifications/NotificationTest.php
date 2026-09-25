@@ -107,45 +107,58 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Default `should_send_to_user` should:
-	 *  - treat `null` (no stored value) as opt-in,
-	 *  - read `enabled` from the array shape today's storage produces,
-	 *  - default to `true` when the array shape is missing the `enabled`
-	 *    key (so newly-added notification types are opt-in by default),
-	 *  - and fall back to a defensive bool cast for unexpected scalars.
-	 *
-	 * @return array<string, array<mixed>>
+	 * @testdox should_send_to_user should answer from the reason, for code that loaded before an update.
 	 */
-	public function provider_should_send_to_user_default(): array {
-		return array(
-			'null pref means opt-in by default'         => array( null, true ),
-			'array with enabled true'                   => array( array( 'enabled' => true ), true ),
-			'array with enabled false'                  => array( array( 'enabled' => false ), false ),
-			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), true ),
-			'empty array defaults to true'              => array( array(), true ),
-			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), true ),
-			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), false ),
-			'scalar bool true (defensive fallback)'     => array( true, true ),
-			'scalar bool false (defensive fallback)'    => array( false, false ),
-			'scalar truthy string (defensive fallback)' => array( '1', true ),
-			'scalar empty string (defensive fallback)'  => array( '', false ),
-		);
-	}
-
-	/**
-	 * @testdox Default should_send_to_user with $_dataName returns $expected.
-	 * @dataProvider provider_should_send_to_user_default
-	 *
-	 * @param mixed $pref_value The stored preference value.
-	 * @param bool  $expected   The expected decision.
-	 */
-	public function test_should_send_to_user_default_behavior( $pref_value, bool $expected ): void {
+	public function test_should_send_to_user_answers_from_the_reason(): void {
 		$notification = $this->getMockBuilder( NewOrderNotification::class )
 			->setConstructorArgs( array( 1 ) )
 			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
 			->getMock();
 
-		$this->assertSame( $expected, $notification->should_send_to_user( $pref_value ) );
+		$this->assertTrue( $notification->should_send_to_user( array( 'enabled' => true ) ) );
+		$this->assertFalse( $notification->should_send_to_user( array( 'enabled' => false ) ) );
+	}
+
+	/**
+	 * Default `get_suppression_reason` should:
+	 *  - treat `null` (no stored value) as opt-in,
+	 *  - read `enabled` from the array shape today's storage produces,
+	 *  - return null when the array shape is missing the `enabled`
+	 *    key (so newly-added notification types are opt-in by default),
+	 *  - and fall back to a defensive bool cast for unexpected scalars.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_suppression_reason_default(): array {
+		return array(
+			'null pref means opt-in by default'         => array( null, null ),
+			'array with enabled true'                   => array( array( 'enabled' => true ), null ),
+			'array with enabled false'                  => array( array( 'enabled' => false ), SuppressionReason::TYPE_DISABLED ),
+			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), null ),
+			'empty array defaults to true'              => array( array(), null ),
+			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), null ),
+			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), SuppressionReason::TYPE_DISABLED ),
+			'scalar bool true (defensive fallback)'     => array( true, null ),
+			'scalar bool false (defensive fallback)'    => array( false, SuppressionReason::TYPE_DISABLED ),
+			'scalar truthy string (defensive fallback)' => array( '1', null ),
+			'scalar empty string (defensive fallback)'  => array( '', SuppressionReason::TYPE_DISABLED ),
+		);
+	}
+
+	/**
+	 * @testdox Default get_suppression_reason with $_dataName returns $expected.
+	 * @dataProvider provider_suppression_reason_default
+	 *
+	 * @param mixed       $pref_value The stored preference value.
+	 * @param string|null $expected   The expected reason, or null to send.
+	 */
+	public function test_suppression_reason_default_behavior( $pref_value, ?string $expected ): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( $expected, $notification->get_suppression_reason( $pref_value ) );
 	}
 
 	/**

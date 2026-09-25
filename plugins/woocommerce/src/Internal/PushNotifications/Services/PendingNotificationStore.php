@@ -62,18 +62,44 @@ class PendingNotificationStore {
 	private bool $shutdown_registered = false;
 
 	/**
+	 * Notification types that have already recorded that the store holds no tokens.
+	 *
+	 * A bulk stock write fires a notification per product and the answer is the
+	 * same for all of them, so one line per type answers the whole request.
+	 * Keyed by type rather than a single flag, because each type writes to its
+	 * own log source and a type that recorded nothing would read as never
+	 * having been triggered.
+	 *
+	 * @var array<string, true>
+	 */
+	private array $logged_no_tokens = array();
+
+	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
-	 * @param PushTokensDataStore            $data_store The push tokens data store.
+	 * @param InternalNotificationDispatcher $dispatcher  The dispatcher to use on shutdown.
+	 * @param PushTokensDataStore            $data_store  The push tokens data store.
+	 * @param NotificationStepLogger         $step_logger The step logger.
 	 *
 	 * @since 10.7.0
 	 */
-	final public function init( InternalNotificationDispatcher $dispatcher, PushTokensDataStore $data_store ): void {
-		$this->dispatcher = $dispatcher;
-		$this->data_store = $data_store;
+	final public function init(
+		InternalNotificationDispatcher $dispatcher,
+		PushTokensDataStore $data_store,
+		NotificationStepLogger $step_logger
+	): void {
+		$this->dispatcher  = $dispatcher;
+		$this->data_store  = $data_store;
+		$this->step_logger = $step_logger;
 	}
 
 	/**
@@ -109,12 +135,20 @@ class PendingNotificationStore {
 		}
 
 		if ( ! $this->data_store->has_tokens() ) {
+			$type = $notification->get_type();
+
+			if ( ! isset( $this->logged_no_tokens[ $type ] ) ) {
+				$this->step_logger->log_notification_step( $notification, 'triggered', 'no_tokens' );
+				$this->logged_no_tokens[ $type ] = true;
+			}
+
 			return;
 		}
 
 		$key = $notification->get_identifier();
 
 		if ( isset( $this->pending[ $key ] ) ) {
+			$this->step_logger->log_notification_step( $notification, 'triggered', 'duplicate_in_request' );
 			return;
 		}
 
@@ -126,7 +160,9 @@ class PendingNotificationStore {
 		// $order->save() on an order whose line items have not been written yet.
 		$notification->set_triggered_at( time() );
 
-		$this->schedule_safety_net( $notification );
+		$safety_net = $this->schedule_safety_net( $notification ) ? 'scheduled' : 'already_scheduled';
+
+		$this->step_logger->log_notification_step( $notification, 'triggered', 'queued', array( 'safety_net' => $safety_net ) );
 
 		if ( ! $this->shutdown_registered ) {
 			add_action( 'shutdown', array( $this, 'dispatch_all' ) );
@@ -141,18 +177,18 @@ class PendingNotificationStore {
 	 * guarantees the notification is still processed.
 	 *
 	 * @param Notification $notification The notification to schedule.
-	 * @return void
+	 * @return bool True if a job was scheduled, false if one was already pending.
 	 *
 	 * @since 10.7.0
 	 */
-	private function schedule_safety_net( Notification $notification ): void {
+	private function schedule_safety_net( Notification $notification ): bool {
 		// Canonical, identity-keyed args shared with NotificationProcessor::cancel_safety_net().
 		// Action Scheduler matches stored args by exact equality, so both sides must derive
 		// them from the same place; see Notification::get_safety_net_args().
 		$args = $notification->get_safety_net_args();
 
 		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
-			return;
+			return false;
 		}
 
 		as_schedule_single_action(
@@ -162,6 +198,8 @@ class PendingNotificationStore {
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
 			true
 		);
+
+		return true;
 	}
 
 	/**

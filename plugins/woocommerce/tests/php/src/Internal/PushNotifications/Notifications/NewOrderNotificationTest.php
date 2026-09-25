@@ -131,15 +131,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when order total exceeds min_amount.
+	 * @testdox get_suppression_reason should return null when order total exceeds min_amount.
 	 */
-	public function test_should_send_to_user_when_order_total_above_threshold(): void {
+	public function test_suppression_reason_when_order_total_above_threshold(): void {
 		$order = $this->create_order_with_total( 100 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -149,15 +149,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when order total equals min_amount.
+	 * @testdox get_suppression_reason should return null when order total equals min_amount.
 	 */
-	public function test_should_send_to_user_when_order_total_equals_threshold(): void {
+	public function test_suppression_reason_when_order_total_equals_threshold(): void {
 		$order = $this->create_order_with_total( 50 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -167,15 +167,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when order total is below min_amount.
+	 * @testdox get_suppression_reason should return a reason when order total is below min_amount.
 	 */
 	public function test_should_not_send_to_user_when_order_total_below_threshold(): void {
 		$order = $this->create_order_with_total( 30 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -185,15 +185,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when min_amount is null (no threshold).
+	 * @testdox get_suppression_reason should return null when min_amount is null (no threshold).
 	 */
-	public function test_should_send_to_user_when_min_amount_is_null(): void {
+	public function test_suppression_reason_when_min_amount_is_null(): void {
 		$order = $this->create_order_with_total( 1 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => null,
@@ -203,15 +203,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when notification is disabled, regardless of amount.
+	 * @testdox get_suppression_reason should return a reason when notification is disabled, regardless of amount.
 	 */
 	public function test_should_not_send_to_user_when_disabled(): void {
 		$order = $this->create_order_with_total( 1000 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => false,
 					'min_amount' => null,
@@ -221,15 +221,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when min_amount key is missing (backwards compat).
+	 * @testdox get_suppression_reason should return null when min_amount key is missing (backwards compat).
 	 */
-	public function test_should_send_to_user_when_min_amount_missing(): void {
+	public function test_suppression_reason_when_min_amount_missing(): void {
 		$order = $this->create_order_with_total( 1 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user( array( 'enabled' => true ) )
+		$this->assertNull(
+			$notification->get_suppression_reason( array( 'enabled' => true ) )
 		);
 	}
 
