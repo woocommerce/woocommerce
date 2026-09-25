@@ -82,6 +82,10 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		}
 		$this->created_zones = array();
 
+		// A test loads a custom method into the shared WC_Shipping list. The hook restore drops
+		// its filter but not the loaded list, so reset the list to load again on next use.
+		WC()->shipping()->unregister_shipping_methods();
+
 		parent::tearDown();
 	}
 
