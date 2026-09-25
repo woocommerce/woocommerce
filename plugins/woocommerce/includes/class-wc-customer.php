@@ -74,6 +74,13 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected $is_vat_exempt = false;
 
 	/**
+	 * Whether has_full_shipping_address() is loading the default address fields, so a nested call from a filter callback does not load them again.
+	 *
+	 * @var bool
+	 */
+	private static $loading_default_address_fields = false;
+
+	/**
 	 * Stores if user has calculated shipping in this session.
 	 *
 	 * @var bool
@@ -297,8 +304,24 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		$address_fields = WC()->countries->get_country_locale();
 		$locale_key     = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
-		$default_locale = $address_fields['default'];
+		$default_locale = $address_fields['default'] ?? null;
 		$country_locale = $address_fields[ $locale_key ] ?? array();
+
+		// The default entry is missing while the locale settings are first built, and a locale filter callback can drop or replace it.
+		// Country rules are not available during that build, so the default fields apply to every country until it finishes.
+		if ( ! is_array( $default_locale ) ) {
+			$default_locale = array();
+
+			// A woocommerce_default_address_fields callback can call this method again, so the nested call skips the filter and applies no rules.
+			if ( ! self::$loading_default_address_fields ) {
+				self::$loading_default_address_fields = true;
+				try {
+					$default_locale = WC()->countries->get_default_address_fields();
+				} finally {
+					self::$loading_default_address_fields = false;
+				}
+			}
+		}
 
 		/**
 		 * Checks all shipping address fields against the country's locale settings.
