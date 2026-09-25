@@ -73,4 +73,4 @@ jobs:
           SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
           SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
         run: |
-          pnpm utils slack ":warning: CI Queue Sentinel failed — the CI_QUEUE_OVERFLOW switch may be stranded in its last state.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
+          pnpm utils slack ":warning: CI Queue Sentinel failed — ${SENTINEL_FAILURE:-the CI_QUEUE_OVERFLOW switch may be stranded in its last state}.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View workflow run>"
