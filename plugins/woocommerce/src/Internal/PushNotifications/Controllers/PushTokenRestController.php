@@ -65,13 +65,14 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
-	 * The token list is registered whatever the module's state. The write
-	 * endpoints are only registered while it is enabled, because the apps read
-	 * the 404 for a missing route as push notifications being unavailable.
-	 * Once the apps read that from {@see PushNotificationStatusRestController}
-	 * instead, the write endpoints can be registered unconditionally again and
-	 * left to their permission callbacks. Registering a second handler on an
-	 * existing route adds to it.
+	 * The token list and token deletion are available whatever the module's
+	 * state. Token registration is only added while the module is enabled,
+	 * because the apps read the 404 for a missing route as push notifications
+	 * being unavailable; deletion returns that same 404 to users from its
+	 * permission callback. Once the apps read this from
+	 * {@see PushNotificationStatusRestController} instead, registration can be
+	 * added unconditionally too. Registering a second handler on an existing
+	 * route adds to it.
 	 *
 	 * @since 10.6.0
 	 *
@@ -138,6 +139,20 @@ class PushTokenRestController extends RestApiControllerBase {
 			)
 		);
 
+		register_rest_route(
+			$this->route_namespace,
+			$this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
+					'args'                => $this->get_args( 'delete' ),
+					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_authenticated' ),
+				),
+				'schema' => array( $this, 'get_schema' ),
+			)
+		);
+
 		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return;
 		}
@@ -152,20 +167,6 @@ class PushTokenRestController extends RestApiControllerBase {
 					'args'                => $this->get_args( 'create' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 				),
-			)
-		);
-
-		register_rest_route(
-			$this->route_namespace,
-			$this->rest_base . '/(?P<id>[\d]+)',
-			array(
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
-					'args'                => $this->get_args( 'delete' ),
-					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_authenticated' ),
-				),
-				'schema' => array( $this, 'get_schema' ),
 			)
 		);
 	}
@@ -356,7 +357,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					->get( LegacyProxy::class )
 					->call_function( 'wc_get_logger' )
 					->info(
-						'Push token deleted by WordPress.com support.',
+						'Push token deleted by WordPress.com support. The device it was registered from will no longer receive push notifications from this store.',
 						array(
 							'source'   => PushNotifications::FEATURE_NAME,
 							'token_id' => $id,

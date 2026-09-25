@@ -1115,7 +1115,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$logger_mock->expects( $this->once() )
 			->method( 'info' )
 			->with(
-				'Push token deleted by WordPress.com support.',
+				'Push token deleted by WordPress.com support. The device it was registered from will no longer receive push notifications from this store.',
 				array(
 					'source'   => PushNotifications::FEATURE_NAME,
 					'token_id' => $push_token->get_id(),
@@ -1164,14 +1164,32 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse WPCOM token deletion when push notifications are disabled.
+	 * @testdox Should let WPCOM delete a token while push notifications are disabled, so it is not
+	 * used again when the store is switched back on.
 	 */
-	public function test_authorize_as_from_wpcom_or_authenticated_rejects_blog_token_when_disabled(): void {
+	public function test_wpcom_can_delete_a_push_token_when_disabled(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->other_shop_manager_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-revoked-while-disabled',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
 		$this->mock_jetpack_connection_manager_is_connected( false );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$server   = $this->create_rest_server_with_routes(
+			array( array( $this->create_blog_token_controller(), 'register_routes' ) ),
+			true
+		);
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $server->dispatch( $request );
 
-		$this->assertFalse( $this->create_blog_token_controller()->authorize_as_from_wpcom_or_authenticated( $request ) );
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+		$this->assertNull( get_post( $push_token->get_id() ), 'The token should be deleted' );
 	}
 
 	/**
