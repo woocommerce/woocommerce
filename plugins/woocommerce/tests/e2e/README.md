@@ -37,7 +37,7 @@ Start in the repository root folder:
 - `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 - `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
 - `pnpm env:e2e` (starts the `wp-env` based E2E test environment)
-- `pnpm test:e2e` (runs all the tests in headless mode)
+- `pnpm test:e2e:default --project=core-serial --project=core-parallel` (runs all the Core tests in headless mode)
 
 To re-create the environment for a fresh state:
 
@@ -50,12 +50,15 @@ for managing the `wp-env` environment.
 
 Other ways of running tests (make sure you are in the `plugins/woocommerce` folder):
 
-- `pnpm test:e2e` (usual, headless run)
-- `pnpm test:e2e --headed` (headed -- displaying browser window and test interactions)
-- `pnpm test:e2e --debug` (runs tests in debug mode)
-- `pnpm test:e2e page-loads.spec.ts` (runs a single test file - `page-loads.spec.ts` in this case)
-- `pnpm test:e2e ./tests/e2e/tests/merchant` (runs all tests that are found in the `merchant` folder)
-- `pnpm test:e2e --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)).
+- `pnpm test:e2e:core-parallel` (usual, headless run of the specs that run in parallel)
+- `pnpm test:e2e:core-serial` (headless run of the specs listed in `serialRunSpecs` in `playwright.config.ts`)
+- `pnpm test:e2e:core-parallel --headed` (headed -- displaying browser window and test interactions)
+- `pnpm test:e2e:core-parallel --debug` (runs tests in debug mode)
+- `pnpm test:e2e:core-parallel page-loads.spec.ts` (runs a single test file - `page-loads.spec.ts` in this case)
+- `pnpm test:e2e:core-parallel ./tests/e2e/tests/basic` (runs all tests that are found in the `basic` folder)
+- `pnpm test:e2e:core-parallel --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)).
+
+Use `test:e2e:core-serial` instead of `test:e2e:core-parallel` when the spec is listed in `serialRunSpecs`.
 
 To see all the Playwright options, make sure you are in the `plugins/woocommerce` folder and
 run `pnpm playwright test --help`
@@ -103,9 +106,10 @@ CUSTOMER_PASSWORD='customer.password'
 ```
 
 > [!WARNING]
-> Running the tests using the `test:e2e` command will overwrite the `.env` file! If you want to use your own custom `.env` 
+> Running the tests using the `test:e2e:*` commands will overwrite the `.env` file! If you want to use your own custom `.env` 
 > file you should read further on how to create an alternative env, or you should run the tests using the raw Playwright 
-> command: `pnpm playwright ...`
+> command: `NODE_OPTIONS=--conditions=wc-source pnpm playwright test --config=tests/e2e/playwright.config.ts ...`
+> (without `NODE_OPTIONS`, workspace packages such as `@woocommerce/e2e-utils-playwright` must be built first)
 
 There are some pre-defined environments set in the `tests/e2e/envs` path.
 Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an
@@ -125,7 +129,7 @@ pnpm test:e2e:with-env gutenberg-stable
 # The envs/default-pressable/.env.enc file will be decrypted into .env and used to set the required environment variables
 pnpm test:e2e:with-env default-pressable
 
-# Runs all the tests with the default environment. `pnpm test:e2e` already does that, but only runs e2e, ignoring the API tests.
+# Runs all the tests with the default environment. `pnpm test:e2e:core-parallel` and `pnpm test:e2e:core-serial` already do that, but only for their Core project.
 pnpm test:e2e:with-env default 
 ```
 
