@@ -54,13 +54,6 @@ final class BlockTypesController {
 	private static $register_blocks_has_run = false;
 
 	/**
-	 * Whether WooCommerce block styles should be enqueued on demand for classic themes.
-	 *
-	 * @var bool|null
-	 */
-	private $should_enqueue_block_style_for_classic_themes = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -131,8 +124,11 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
-		// Set before registering rather than after: it guards against re-entry through the on-demand
-		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		// Set before registering rather than after, so a registration failure is not retried on a later call.
 		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
@@ -257,7 +253,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center","className":"wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a></div><!-- /wp:button --></div><!-- /wp:buttons -->',
 			)
 		);
 		register_block_pattern(
@@ -266,6 +262,23 @@ final class BlockTypesController {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		// This heading is what a merchant sees above the cart cross-sells, so it has to match what the
+		// editor inserts: the same markup and the same string as the heading in
+		// client/blocks/assets/js/blocks/product-collection/collections/cross-sells.tsx. The installed
+		// Cart page only stores this pattern's slug, so this content is the single definition of it.
+		//
+		// The literal '…' is that shared msgid. The classic template templates/cart/cross-sells.php uses
+		// the '&hellip;' spelling, which gettext treats as a separate string; bg_BG, mk_MK and th have
+		// translated only that one, so they render this heading in English until they translate the
+		// literal form — as they already do for an editor-inserted cross-sells block.
+		register_block_pattern(
+			'woocommerce/cart-cross-sells-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} --><h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
@@ -602,16 +615,17 @@ final class BlockTypesController {
 	 */
 	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
 
-		// Repeatedly checking the theme is expensive. Cache this logic result and remove the filter if not needed.
-		if ( null === $this->should_enqueue_block_style_for_classic_themes ) {
-			$this->should_enqueue_block_style_for_classic_themes = ! (
+		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
+		static $should_enqueue_block_style_for_classic_themes = null;
+		if ( null === $should_enqueue_block_style_for_classic_themes ) {
+			$should_enqueue_block_style_for_classic_themes = ! (
 				is_admin() ||
 				wp_is_block_theme() ||
 				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
 				wp_should_load_separate_core_block_assets()
 			);
 		}
-		if ( ! $this->should_enqueue_block_style_for_classic_themes ) {
+		if ( ! $should_enqueue_block_style_for_classic_themes ) {
 			remove_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10 );
 
 			return $args;

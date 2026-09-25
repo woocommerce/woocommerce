@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Align E2E PHP coverage across routine and nightly CI checks.
+
+

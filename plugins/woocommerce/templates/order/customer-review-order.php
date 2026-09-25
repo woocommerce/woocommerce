@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 11.3.0
  *
  * @var WC_Order $order Order being reviewed.
  */
@@ -31,6 +31,10 @@ $meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_orde
  * @param WC_Order        $order The order being reviewed.
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
+// The same product can appear on several line items; reviews are stored per
+// product/variation, so collapse to one row per review slot.
+$items = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::unique_slot_items( $items );
 
 // Batched lookup; without this each decide() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );

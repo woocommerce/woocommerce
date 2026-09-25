@@ -40,6 +40,20 @@ class NotificationProcessor {
 	const SAFETY_NET_HOOK = 'wc_push_notification_safety_net';
 
 	/**
+	 * Meta key recording when the notification was triggered.
+	 *
+	 * Captured by {@see PendingNotificationStore::add()} at the moment the store
+	 * event fires, persisted on shutdown, and read back when the payload is
+	 * built, which can happen much later (ActionScheduler safety net, retries).
+	 * Persisting it on the resource means every send path reports the true
+	 * event time. Cleared alongside the claimed marker by
+	 * {@see Notification::reset_processing_meta()} once the notification is finished.
+	 *
+	 * @since 11.2.0
+	 */
+	const TRIGGERED_META_KEY = '_wc_push_notification_triggered';
+
+	/**
 	 * Meta key written before the WPCOM send attempt.
 	 */
 	const CLAIMED_META_KEY = '_wc_push_notification_claimed';
@@ -170,6 +184,7 @@ class NotificationProcessor {
 		 */
 		if ( empty( $tokens ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
+			$notification->reset_processing_meta();
 			$this->cancel_safety_net( $notification );
 			return true;
 		}
@@ -177,8 +192,11 @@ class NotificationProcessor {
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
 
 		if ( ! empty( $result['success'] ) ) {
+			// Success only, for the reason {@see PushToken::get_last_sent_at_gmt()} gives.
+			$this->data_store->record_last_sent_at( $tokens );
+
 			$notification->write_meta( self::SENT_META_KEY );
-			$notification->delete_meta( self::CLAIMED_META_KEY );
+			$notification->reset_processing_meta();
 			$this->cancel_safety_net( $notification );
 			return true;
 		}
@@ -266,7 +284,7 @@ class NotificationProcessor {
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
-	 * @param array  $extra       Optional subclass-specific extras (e.g. event_type, stock_quantity_at_trigger).
+	 * @param array  $extra       Identity fields from {@see Notification::get_identity_data()}.
 	 *                            Empty for notification types whose state is fully described by type + resource_id.
 	 * @return void
 	 *

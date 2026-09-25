@@ -132,7 +132,7 @@ test.describe( 'Shopper → Cart block', () => {
 		// Verify cart is empty
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
+				name: 'Your cart is empty',
 			} )
 		).toBeVisible();
 	} );
@@ -151,7 +151,7 @@ test.describe( 'Shopper → Cart block', () => {
 		// Verify product is removed from the cart'
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
+				name: 'Your cart is empty',
 			} )
 		).toBeVisible();
 	} );
