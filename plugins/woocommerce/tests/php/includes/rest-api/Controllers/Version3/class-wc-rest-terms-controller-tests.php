@@ -275,6 +275,17 @@ class WC_REST_Terms_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 		}
 
+		$response = $this->do_rest_request( $route . '/' . $fourth_id );
+		$term     = get_term( $fourth_id, $taxonomy );
+		$this->assertSame( 200, $response->get_status(), 'The batch-created product term should be retrievable.' );
+		$this->assertInstanceOf( WP_Term::class, $term, 'The batch-created product term should be persisted.' );
+		/** @var WP_Term $term */
+		$this->assertSame(
+			array( $fourth_id, $name_prefix . ' four', $name_prefix . ' four' ),
+			array( $response->get_data()['id'], $response->get_data()['name'], $term->name ),
+			'The batch-created product term should be returned by a fresh GET and persisted in the taxonomy.'
+		);
+
 		$response = $this->do_rest_request( $route . '/' . $third_id );
 		$this->assertSame( 404, $response->get_status(), 'The batch-deleted product term should no longer be retrievable.' );
 	}
