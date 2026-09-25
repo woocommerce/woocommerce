@@ -48,11 +48,33 @@ test.describe( 'ProductButton cart count excludes declared child lines', () => {
 		);
 		expect( Number.isInteger( variationId ) ).toBe( true );
 
-		await seedDeclaredChildLine(
-			page,
-			variationId,
-			'parent-key-that-is-not-in-the-cart'
+		const parentItemKey = 'parent-key-that-is-not-in-the-cart';
+		await seedDeclaredChildLine( page, variationId, parentItemKey );
+		const readCartItems = async () => {
+			const cartResponse = await page.evaluate( async () => {
+				const response = await fetch( '/wp-json/wc/store/v1/cart' );
+				return {
+					ok: response.ok,
+					items: ( await response.json() ).items,
+				};
+			} );
+			expect( cartResponse.ok ).toBe( true );
+			return cartResponse.items;
+		};
+
+		const seededCartItems = await readCartItems();
+		expect( seededCartItems ).toHaveLength( 1 );
+		const declaredChildLine = seededCartItems.find(
+			( item ) =>
+				item.id === variationId &&
+				item.parent_item_key === parentItemKey
 		);
+		expect( declaredChildLine ).toMatchObject( {
+			id: variationId,
+			quantity: 1,
+			parent_item_key: parentItemKey,
+			key: expect.any( String ),
+		} );
 
 		const readServerRenderedButtonText = async () => {
 			const response = await page.request.get( postUrl );
@@ -98,8 +120,32 @@ test.describe( 'ProductButton cart count excludes declared child lines', () => {
 			page.locator( '.wc-block-components-notice-banner.is-error' )
 		).toHaveCount( 0 );
 
-		expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
+		const updatedCartItems = await readCartItems();
+		expect( updatedCartItems ).toHaveLength( 2 );
+		const preservedChildLine = updatedCartItems.find(
+			( item ) =>
+				item.id === variationId &&
+				item.parent_item_key === parentItemKey
+		);
+		expect( preservedChildLine ).toMatchObject( {
+			key: declaredChildLine.key,
+			id: variationId,
+			quantity: 1,
+			parent_item_key: parentItemKey,
+		} );
+		const standaloneLines = updatedCartItems.filter(
+			( item ) => item.id === variationId && item.parent_item_key === null
+		);
+		expect( standaloneLines ).toHaveLength( 1 );
+		expect( standaloneLines[ 0 ] ).toMatchObject( {
+			id: variationId,
+			quantity: 1,
+			parent_item_key: null,
+		} );
+		expect( standaloneLines[ 0 ].key ).not.toBe( declaredChildLine.key );
+
 		await page.reload();
+		expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 } );
