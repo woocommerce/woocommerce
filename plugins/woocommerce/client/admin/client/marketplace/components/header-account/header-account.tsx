@@ -99,7 +99,9 @@ export default function HeaderAccount( {
 
 		return (
 			<span className="woocommerce-marketplace__header-account-trigger">
-				{ avatar() }
+				<span className="woocommerce-marketplace__header-account-trigger__avatar">
+					{ avatar() }
+				</span>
 				<span
 					className="woocommerce-marketplace__header-account-trigger__email"
 					title={
