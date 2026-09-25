@@ -175,9 +175,9 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		}
 
 		$instantiated_ids = array();
-		$tracker          = function ( $class, $product_type, $product_id ) use ( &$instantiated_ids ) {
+		$tracker          = function ( $class_name, $product_type, $product_id ) use ( &$instantiated_ids ) {
 			$instantiated_ids[] = $product_id;
-			return $class;
+			return $class_name;
 		};
 		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
@@ -200,9 +200,9 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		}
 
 		$instantiated_ids = array();
-		$tracker          = function ( $class, $product_type, $product_id ) use ( &$instantiated_ids ) {
+		$tracker          = function ( $class_name, $product_type, $product_id ) use ( &$instantiated_ids ) {
 			$instantiated_ids[] = $product_id;
-			return $class;
+			return $class_name;
 		};
 		add_filter( 'woocommerce_product_class', $tracker, 10, 3 );
 
