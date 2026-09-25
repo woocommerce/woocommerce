@@ -31,7 +31,7 @@ class Analytics {
 	 *
 	 * @since 11.3.0
 	 */
-	const PERFORMANCE_DEFAULTS_VERSION = '11.3.0';
+	private const PERFORMANCE_DEFAULTS_VERSION = '11.3.0';
 	/**
 	 * Full refund fix data tool identifier.
 	 *
