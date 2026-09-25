@@ -23,13 +23,23 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 	protected $block;
 
 	/**
+	 * The original block type registry entry for the block.
+	 *
+	 * @var \WP_Block_Type|null
+	 */
+	private $original_block_type;
+
+	/**
 	 * Setup test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$registry = \WP_Block_Type_Registry::get_instance();
+
+		$this->original_block_type = null;
 		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
+			$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart-footer-block' );
 			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
 		}
 
@@ -47,6 +57,9 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 		$registry = \WP_Block_Type_Registry::get_instance();
 		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
 			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
+		}
+		if ( $this->original_block_type ) {
+			$registry->register( $this->original_block_type );
 		}
 		unset( $this->block );
 		parent::tearDown();
