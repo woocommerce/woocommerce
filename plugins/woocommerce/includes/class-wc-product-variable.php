@@ -351,6 +351,7 @@ class WC_Product_Variable extends WC_Product {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
+			// Performance note: pre-check is feasible only if no woocommerce_product_is_in_stock hooks can affect is_in_stock call results.
 			$precheck_with_meta = $hide_out_of_stock_items && ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
 				// Performance note: inactive optimization for most of stores; leverage lightweight primed data read before constructing product object.
@@ -416,6 +417,7 @@ class WC_Product_Variable extends WC_Product {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
+			// Performance note: pre-check is feasible only if no woocommerce_product_is_in_stock hooks can affect is_in_stock call results.
 			$precheck_with_meta = ! has_filter( 'woocommerce_product_is_in_stock' );
 			foreach ( $variation_ids as $variation_id ) {
 				// Performance note: applicable to estimated 90% of stores; leverage lightweight primed data read before constructing product object.
