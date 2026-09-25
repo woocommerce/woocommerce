@@ -23,32 +23,4 @@ export class ShippingUtils {
 	async saveShippingSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
 	}
-
-	async enableShippingCostsRequireAddress() {
-		await this.openShippingSettings();
-
-		const hide = this.page.getByLabel(
-			'Hide shipping costs until an address is entered'
-		);
-
-		if ( ! ( await hide.isChecked() ) ) {
-			await hide.check();
-
-			await this.saveShippingSettings();
-		}
-	}
-
-	async disableShippingCostsRequireAddress() {
-		await this.openShippingSettings();
-
-		const hide = this.page.getByLabel(
-			'Hide shipping costs until an address is entered'
-		);
-
-		if ( await hide.isChecked() ) {
-			await hide.uncheck();
-
-			await this.saveShippingSettings();
-		}
-	}
 }

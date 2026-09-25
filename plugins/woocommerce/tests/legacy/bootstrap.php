@@ -324,7 +324,6 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-order.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php';
-		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-reports.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-admin-notes.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-test-action-queue.php';
