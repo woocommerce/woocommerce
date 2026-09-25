@@ -30,11 +30,36 @@ function wc_webhook_execute_queue() {
 				'arg'        => $data['arg'],
 			);
 
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+			$scheduler           = wc_get_container()->get( \Automattic\WooCommerce\Queue\Scheduler::class );
+			$next_scheduled_date = $scheduler->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
 			if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
-				WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+				$options = array();
+
+				if ( $scheduler->supports( \Automattic\WooCommerce\Enums\QueueCapability::PRIORITY ) ) {
+					/**
+					 * Filters the priority of a webhook delivery.
+					 *
+					 * Lower values run first. The queue applies its own range and default: the stock
+					 * queue clamps to Action Scheduler's 0-255 and defaults to 10. A non-numeric or
+					 * non-finite value is ignored and the default applies. Only fires when the active
+					 * queue supports priorities natively, which the default queue does; see
+					 * Automattic\WooCommerce\Queue\Scheduler::supports().
+					 *
+					 * @since 11.3.0
+					 *
+					 * @param int        $priority The delivery priority. Default 10.
+					 * @param WC_Webhook $webhook  The webhook being delivered.
+					 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
+					 */
+					$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
+					if ( is_numeric( $priority ) && is_finite( (float) $priority ) ) {
+						$options['priority'] = $priority;
+					}
+				}
+
+				$scheduler->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', $options );
 			}
 		} else {
 			// Deliver immediately.
