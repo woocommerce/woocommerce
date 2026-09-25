@@ -8,8 +8,9 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SendOutcome;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Jetpack_Options;
 use WP_Error;
 use WP_Http;
@@ -43,11 +44,44 @@ class WpcomNotificationDispatcher {
 	const REQUEST_TIMEOUT = 15;
 
 	/**
+	 * Error code WPCOM returns when it refused the batch for a rejected token.
+	 */
+	const WPCOM_ERROR_INVALID_TOKENS = 'invalid_tokens';
+
+	/**
+	 * Error code WPCOM returns when the notification itself failed validation.
+	 */
+	const WPCOM_ERROR_INVALID_PARAM = 'rest_invalid_param';
+
+	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationStepLogger $step_logger The step logger.
+	 *
+	 * @since 11.3.0
+	 */
+	final public function init( NotificationStepLogger $step_logger ): void {
+		$this->step_logger = $step_logger;
+	}
+
+	/**
 	 * Dispatches a notification with push tokens to WPCOM.
+	 *
+	 * `invalid_tokens` holds the token strings WPCOM refused, exactly as sent,
+	 * when the outcome is a token rejection; it is empty otherwise.
 	 *
 	 * @param Notification $notification The notification to send.
 	 * @param PushToken[]  $tokens       The push tokens to send to.
-	 * @return array{success: bool, retry_after: int|null}
+	 * @return array{success: bool, retry_after: int|null, outcome: string, invalid_tokens: string[]}
 	 *
 	 * @since 10.7.0
 	 */
@@ -55,74 +89,130 @@ class WpcomNotificationDispatcher {
 		$site_id = class_exists( Jetpack_Options::class ) ? Jetpack_Options::get_option( 'id' ) : null;
 
 		if ( empty( $site_id ) ) {
-			wc_get_logger()->error(
-				'Cannot send push notifications: Jetpack site ID unavailable.',
-				array( 'source' => PushNotifications::FEATURE_NAME )
+			$this->step_logger->log_failure(
+				$notification,
+				'send',
+				SendOutcome::SITE_ID_MISSING,
+				'error',
+				'Cannot send push notifications: Jetpack site ID unavailable.'
 			);
 
-			return array(
-				'success'     => false,
-				'retry_after' => null,
-			);
+			return self::failure( SendOutcome::SITE_ID_MISSING );
 		}
 
 		$payload = $notification->to_payload();
 
 		if ( null === $payload ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'send',
+				SendOutcome::RESOURCE_MISSING,
+				'error',
 				sprintf(
 					'Cannot send push notification: resource no longer exists (type=%s, resource_id=%d).',
 					$notification->get_type(),
 					$notification->get_resource_id()
-				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				)
 			);
 
-			return array(
-				'success'     => false,
-				'retry_after' => null,
-			);
+			return self::failure( SendOutcome::RESOURCE_MISSING );
 		}
 
 		$response = $this->make_request( $site_id, $payload, $tokens );
 
 		if ( is_wp_error( $response ) ) {
-			wc_get_logger()->error(
-				sprintf(
-					'Push notification request failed: %s',
-					$response->get_error_message()
-				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+			$this->step_logger->log_failure(
+				$notification,
+				'send',
+				SendOutcome::REQUEST_FAILED,
+				'error',
+				sprintf( 'Push notification request failed: %s', $response->get_error_message() ),
+				array( 'error_code' => $response->get_error_code() )
 			);
 
-			return array(
-				'success'     => false,
-				'retry_after' => null,
-			);
+			return self::failure( SendOutcome::REQUEST_FAILED );
 		}
 
 		$status_code = (int) wp_remote_retrieve_response_code( $response );
+		$body        = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$body        = is_array( $body ) ? $body : array();
 
 		if ( WP_Http::OK === $status_code ) {
+			$queued       = (int) ( $body['queued'] ?? 0 );
+			$deduplicated = (int) ( $body['deduplicated'] ?? 0 );
+
+			// The endpoint delivers to the first 100 tokens of a request and drops the rest.
+			$dropped = (int) ( $body['dropped'] ?? 0 );
+
+			$outcome = $queued > 0 ? SendOutcome::ACCEPTED : SendOutcome::DEDUPLICATED;
+
+			$this->step_logger->log_notification_step(
+				$notification,
+				'send',
+				$outcome,
+				array(
+					'recipients'   => count( $tokens ),
+					'queued'       => $queued,
+					'deduplicated' => $deduplicated,
+					'dropped'      => $dropped,
+				)
+			);
+
 			return array(
-				'success'     => true,
-				'retry_after' => null,
+				'success'        => true,
+				'retry_after'    => null,
+				'outcome'        => $outcome,
+				'invalid_tokens' => array(),
 			);
 		}
 
-		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' );
+		$retry_after    = wp_remote_retrieve_header( $response, 'retry-after' );
+		$error_code     = (string) ( $body['code'] ?? '' );
+		$invalid_tokens = array();
+		$outcome        = SendOutcome::FAILED;
 
-		wc_get_logger()->error(
-			sprintf(
-				'Push notification request returned HTTP %d.',
-				$status_code
-			),
-			array( 'source' => PushNotifications::FEATURE_NAME )
+		if ( self::WPCOM_ERROR_INVALID_TOKENS === $error_code ) {
+			$outcome        = SendOutcome::REJECTED_INVALID_TOKEN;
+			$invalid_tokens = array_values( array_filter( (array) ( $body['data']['invalid_tokens'] ?? array() ), 'is_string' ) );
+		} elseif ( self::WPCOM_ERROR_INVALID_PARAM === $error_code ) {
+			$outcome = SendOutcome::REJECTED_INVALID_NOTIFICATION;
+		}
+
+		$this->step_logger->log_failure(
+			$notification,
+			'send',
+			$outcome,
+			'error',
+			sprintf( 'Push notification request returned HTTP %d.', $status_code ),
+			array(
+				'http_status'    => $status_code,
+				'error_code'     => $error_code,
+				'recipients'     => count( $tokens ),
+				'invalid_tokens' => count( $invalid_tokens ),
+				'retry_after'    => '' !== $retry_after ? (int) $retry_after : null,
+			)
 		);
 
 		return array(
-			'success'     => false,
-			'retry_after' => '' !== $retry_after ? (int) $retry_after : null,
+			'success'        => false,
+			'retry_after'    => '' !== $retry_after ? (int) $retry_after : null,
+			'outcome'        => $outcome,
+			'invalid_tokens' => $invalid_tokens,
+		);
+	}
+
+	/**
+	 * Builds the return value for a send that failed before or during the request.
+	 *
+	 * @param string $outcome One of the SendOutcome constants.
+	 * @return array{success: bool, retry_after: int|null, outcome: string, invalid_tokens: string[]}
+	 */
+	private static function failure( string $outcome ): array {
+		return array(
+			'success'        => false,
+			'retry_after'    => null,
+			'outcome'        => $outcome,
+			'invalid_tokens' => array(),
 		);
 	}
 

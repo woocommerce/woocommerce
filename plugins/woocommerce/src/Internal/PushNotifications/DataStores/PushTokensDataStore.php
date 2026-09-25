@@ -435,6 +435,11 @@ class PushTokensDataStore {
 	/**
 	 * Counts every push token on the store, whatever the owner's role.
 	 *
+	 * Registration requires one of the roles that receive push notifications,
+	 * so no token starts out ineligible. A user can lose the role afterwards
+	 * though, and their token stays, which is the difference between this count
+	 * and what get_tokens_for_roles() returns.
+	 *
 	 * @since 11.3.0
 	 * @return int
 	 */

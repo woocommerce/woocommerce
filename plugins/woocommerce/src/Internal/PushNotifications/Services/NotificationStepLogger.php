@@ -36,6 +36,16 @@ class NotificationStepLogger {
 	const TOKEN_SOURCE_PREFIX = 'push-token-';
 
 	/**
+	 * Source for devices a notification was not sent to.
+	 *
+	 * One source for the whole store rather than one per device, because the
+	 * count follows every token the store holds rather than the hundred a
+	 * notification can reach, and a device nobody sent to has a reason rather
+	 * than a delivery history to read.
+	 */
+	const SUPPRESSED_SOURCE = 'push-suppressed';
+
+	/**
 	 * Whether step logging is active for this request, or null until checked.
 	 *
 	 * @var bool|null
@@ -75,6 +85,30 @@ class NotificationStepLogger {
 		$context['user_id']  = $user_id;
 
 		$this->write( $notification, $token_id, $step, $outcome, $context );
+	}
+
+	/**
+	 * Records a step for a device the notification was not sent to.
+	 *
+	 * These go to one store-wide source rather than the device's own, so the
+	 * file count follows the notification types rather than every token the
+	 * store holds.
+	 *
+	 * @param Notification $notification The notification the step belongs to.
+	 * @param int          $token_id     The push token post ID.
+	 * @param int          $user_id      The user who owns the token.
+	 * @param string       $step         Machine-readable step name, e.g. `held_back`.
+	 * @param string       $outcome      Machine-readable outcome, e.g. `type_disabled`.
+	 * @param array        $context      Extra scalar fields to store with the line.
+	 * @return void
+	 *
+	 * @since 11.3.0
+	 */
+	public function log_suppressed_token_step( Notification $notification, int $token_id, int $user_id, string $step, string $outcome, array $context = array() ): void {
+		$context['token_id'] = $token_id;
+		$context['user_id']  = $user_id;
+
+		$this->write( $notification, $token_id, $step, $outcome, $context, true );
 	}
 
 	/**
@@ -157,7 +191,10 @@ class NotificationStepLogger {
 	}
 
 	/**
-	 * Whether step logging is active, decided once per request.
+	 * Whether step logging is active, decided once per logger.
+	 *
+	 * The container resolves one logger per request, so in practice the filter
+	 * runs once a request.
 	 *
 	 * A filter callback that throws turns logging off, since callers outside
 	 * this class read the answer without guarding against it.
@@ -175,8 +212,9 @@ class NotificationStepLogger {
 			/**
 			 * Filters whether push notification step logging is enabled.
 			 *
-			 * Evaluated once per request. Turning it off stops the journey lines
-			 * only; the module's error and warning logging is unaffected.
+			 * Evaluated once per logger, and the container resolves one per
+			 * request. Turning it off stops the journey lines only; the module's
+			 * error and warning logging is unaffected.
 			 *
 			 * @since 11.3.0
 			 *
@@ -203,18 +241,24 @@ class NotificationStepLogger {
 	 * @param string       $step         Machine-readable step name.
 	 * @param string       $outcome      Machine-readable outcome.
 	 * @param array        $context      Extra fields to store with the line.
+	 * @param bool         $suppressed   True to write to the store-wide suppressed source instead of the device's own.
 	 * @return void
 	 */
-	private function write( Notification $notification, ?int $token_id, string $step, string $outcome, array $context ): void {
+	private function write( Notification $notification, ?int $token_id, string $step, string $outcome, array $context, bool $suppressed = false ): void {
 		try {
 			if ( ! $this->is_active() ) {
 				return;
 			}
 
-			$context           = self::identify( $notification, $step, $outcome, $context );
-			$context['source'] = null === $token_id
-				? self::get_notification_source( $notification )
-				: self::get_token_source( $token_id );
+			$context = self::identify( $notification, $step, $outcome, $context );
+
+			if ( $suppressed ) {
+				$context['source'] = self::SUPPRESSED_SOURCE;
+			} elseif ( null === $token_id ) {
+				$context['source'] = self::get_notification_source( $notification );
+			} else {
+				$context['source'] = self::get_token_source( $token_id );
+			}
 
 			wc_get_logger()->info( self::format_message( $step, $outcome ), $context );
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch

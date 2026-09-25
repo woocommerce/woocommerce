@@ -92,41 +92,24 @@ class NewOrderNotification extends Notification {
 	 * in mind.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
 	 * @since 10.9.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return false;
+	public function get_suppression_reason( $pref_value ): ?string {
+		$reason = parent::get_suppression_reason( $pref_value );
+
+		if ( null !== $reason ) {
+			return $reason;
 		}
 
 		if ( ! is_array( $pref_value ) || ! isset( $pref_value['min_amount'] ) ) {
-			return true;
+			return null;
 		}
 
 		$min_amount = (float) $pref_value['min_amount'];
 		if ( $min_amount <= 0 ) {
-			return true;
-		}
-
-		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
-		if ( ! $order instanceof WC_Order ) {
-			return false;
-		}
-
-		return (float) $order->get_total() >= $min_amount;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return string
-	 */
-	public function get_suppression_reason( $pref_value ): string {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return SuppressionReason::TYPE_DISABLED;
+			return null;
 		}
 
 		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
@@ -134,7 +117,7 @@ class NewOrderNotification extends Notification {
 			return SuppressionReason::ORDER_MISSING;
 		}
 
-		return SuppressionReason::BELOW_MIN_AMOUNT;
+		return (float) $order->get_total() >= $min_amount ? null : SuppressionReason::BELOW_MIN_AMOUNT;
 	}
 
 	/**
