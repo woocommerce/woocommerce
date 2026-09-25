@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 use Automattic\WooCommerce\Internal\Admin\Settings;
 use WC_REST_Setting_Options_Controller;
 use WC_Unit_Test_Case;
+use WP_REST_Request;
 
 /**
  * Tests for the Settings class.
@@ -330,6 +331,63 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
 		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
+	 * @testdox Saving an order status list that matches the default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_default_order_statuses_keeps_default_filter_applying(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		// What "Reset defaults" sends: the filtered default, here in a different order.
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'refunded', 'on-hold', 'processing' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'A list matching the default should not be stored.' );
+
+		remove_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( $this, 'add_status_to_defaults' ) );
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['value'], 'A later change to the default should still reach the setting.' );
+	}
+
+	/**
+	 * @testdox Saving an order status list that differs from the default stores it.
+	 */
+	public function test_saving_non_default_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * @testdox Saving an empty order status list stores it, so clearing every status is not undone by the default.
+	 */
+	public function test_saving_empty_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array() );
+
+		$this->assertSame( array(), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * Save a wc_admin setting through the REST settings controller, the path the Analytics settings page uses.
+	 *
+	 * @param string $id    Setting id.
+	 * @param mixed  $value Value to save.
+	 */
+	private function save_wc_admin_setting( string $id, $value ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/settings/wc_admin/' . $id );
+		$request->set_url_params(
+			array(
+				'group_id' => 'wc_admin',
+				'id'       => $id,
+			)
+		);
+		$request->set_param( 'value', $value );
+
+		$response = ( new WC_REST_Setting_Options_Controller() )->update_item( $request );
+
+		$this->assertNotWPError( $response, 'The setting should save without an error' );
 	}
 
 	/**
