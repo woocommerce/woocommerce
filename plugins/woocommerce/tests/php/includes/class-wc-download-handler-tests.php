@@ -27,6 +27,28 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Encoded spaces in a local URL resolve to an existing file with spaces in its name.
+	 */
+	public function test_parse_file_path_for_encoded_space_in_existing_file(): void {
+		$uploads       = wp_upload_dir();
+		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
+		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . rawurlencode( $filename );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
+		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
+
+		try {
+			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
+			$this->assertFalse( $parsed_file_path['remote_file'] );
+			$this->assertSame( $absolute_path, $parsed_file_path['file_path'] );
+		} finally {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
+			unlink( $absolute_path );
+		}
+	}
+
+	/**
 	 * Test for local file with `file` protocol.
 	 */
 	public function test_parse_file_path_for_local_file_protocol() {
