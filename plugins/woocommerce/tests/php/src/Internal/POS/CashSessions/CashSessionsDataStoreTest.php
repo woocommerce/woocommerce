@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS\CashSessions;
 
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsDataStore;
+use RuntimeException;
 use WC_Install;
 use WC_Unit_Test_Case;
 
@@ -81,6 +82,19 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 			'Request IDs are scoped to the session'
 		);
 		$this->assertSame( $session_id, (int) $this->sut->find_movement_by_source( 'order:10' )['session_id'] );
+	}
+
+	/**
+	 * @testdox Should throw for insert failures that are not unique key conflicts.
+	 */
+	public function test_insert_failure_other_than_duplicate_throws(): void {
+		$session_id = $this->sut->insert_session( $this->session_row( 'device-1', 'aaaaaaaa-0000-4000-8000-000000000001' ) );
+		$row        = $this->movement_row( $session_id, null, null );
+
+		$row['no_such_column'] = 1;
+
+		$this->expectException( RuntimeException::class );
+		$this->sut->insert_movement( $row );
 	}
 
 	/**

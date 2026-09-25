@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exceptions become REST error data, never HTML output.
+
+use Automattic\WooCommerce\Enums\OrderStatus;
 use DomainException;
 use InvalidArgumentException;
 use OverflowException;
@@ -42,8 +45,9 @@ class CashSourceResolver {
 	public function resolve_sale( int $order_id, string $currency, int $precision ): array {
 		$order = $this->get_cash_order( $order_id );
 
-		if ( ! $order->is_paid() ) {
-			throw $this->invalid_source( esc_html__( 'The order is not paid.', 'woocommerce' ) );
+		// A fully refunded order was paid; its sale can still be recorded late, after the refund.
+		if ( ! $order->is_paid() && ! $order->has_status( OrderStatus::REFUNDED ) ) {
+			throw $this->invalid_source( __( 'The order is not paid.', 'woocommerce' ) );
 		}
 
 		$this->check_currency( $order->get_currency(), $currency );
@@ -94,15 +98,15 @@ class CashSourceResolver {
 	 */
 	public function check_references( ?int $order_id, ?int $refund_id ): void {
 		if ( null !== $refund_id && null === $order_id ) {
-			throw $this->invalid_reference( esc_html__( 'A refund reference also needs its order ID.', 'woocommerce' ) );
+			throw $this->invalid_reference( __( 'A refund reference also needs its order ID.', 'woocommerce' ) );
 		}
 		if ( null !== $order_id && ! wc_get_order( $order_id ) instanceof WC_Order ) {
-			throw $this->invalid_reference( esc_html__( 'The order does not exist.', 'woocommerce' ) );
+			throw $this->invalid_reference( __( 'The order does not exist.', 'woocommerce' ) );
 		}
 		if ( null !== $refund_id ) {
 			$refund = wc_get_order( $refund_id );
 			if ( ! $refund instanceof WC_Order_Refund || $refund->get_parent_id() !== $order_id ) {
-				throw $this->invalid_reference( esc_html__( 'The refund does not belong to the order.', 'woocommerce' ) );
+				throw $this->invalid_reference( __( 'The refund does not belong to the order.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -117,10 +121,10 @@ class CashSourceResolver {
 	private function get_cash_order( int $order_id ): WC_Order {
 		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
-			throw $this->invalid_source( esc_html__( 'The order does not exist.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The order does not exist.', 'woocommerce' ) );
 		}
 		if ( '' === (string) $order->get_meta( self::CASH_CHANGE_META_KEY, true ) ) {
-			throw $this->invalid_source( esc_html__( 'The order was not paid in cash at the point of sale.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The order was not paid in cash at the point of sale.', 'woocommerce' ) );
 		}
 		return $order;
 	}
@@ -136,7 +140,7 @@ class CashSourceResolver {
 	private function get_refund_of_order( int $refund_id, int $order_id ): WC_Order_Refund {
 		$refund = wc_get_order( $refund_id );
 		if ( ! $refund instanceof WC_Order_Refund || $refund->get_parent_id() !== $order_id ) {
-			throw $this->invalid_source( esc_html__( 'The refund does not belong to the order.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The refund does not belong to the order.', 'woocommerce' ) );
 		}
 		return $refund;
 	}
@@ -152,7 +156,7 @@ class CashSourceResolver {
 		if ( strtoupper( $source_currency ) !== $session_currency ) {
 			throw CashSessionException::invalid(
 				'woocommerce_rest_cash_currency_mismatch',
-				esc_html__( 'The source currency does not match the cash session currency.', 'woocommerce' )
+				__( 'The source currency does not match the cash session currency.', 'woocommerce' )
 			);
 		}
 	}
@@ -171,14 +175,14 @@ class CashSourceResolver {
 		} catch ( DomainException $e ) {
 			throw CashSessionException::invalid(
 				'woocommerce_rest_cash_precision_mismatch',
-				esc_html__( 'The source amount has more decimal places than the cash session currency.', 'woocommerce' )
+				__( 'The source amount has more decimal places than the cash session currency.', 'woocommerce' )
 			);
 		} catch ( InvalidArgumentException | OverflowException $e ) {
-			throw $this->invalid_source( esc_html__( 'The source amount is not a valid cash amount.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The source amount is not a valid cash amount.', 'woocommerce' ) );
 		}
 
 		if ( $amount <= 0 ) {
-			throw $this->invalid_source( esc_html__( 'The source amount must be greater than zero.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The source amount must be greater than zero.', 'woocommerce' ) );
 		}
 		return $amount;
 	}
@@ -192,7 +196,7 @@ class CashSourceResolver {
 	 */
 	private function to_gmt( ?WC_DateTime $date ): string {
 		if ( null === $date ) {
-			throw $this->invalid_source( esc_html__( 'The source has no date.', 'woocommerce' ) );
+			throw $this->invalid_source( __( 'The source has no date.', 'woocommerce' ) );
 		}
 		return gmdate( 'Y-m-d H:i:s', $date->getTimestamp() );
 	}

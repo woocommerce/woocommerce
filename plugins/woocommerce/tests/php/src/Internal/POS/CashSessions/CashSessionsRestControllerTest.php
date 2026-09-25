@@ -549,6 +549,21 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record a late cash sale after the order was fully refunded.
+	 */
+	public function test_sale_recorded_after_full_refund(): void {
+		$session_id = $this->open_session()->get_data()['id'];
+		$order      = $this->create_cash_order( '20.00' );
+		$refund     = $this->create_refund( $order, '20.00' );
+		$this->record_refund( $session_id, $order->get_id(), $refund->get_id() );
+
+		$response = $this->record_sale( $session_id, $order->get_id() );
+
+		$this->assertSame( 201, $response->get_status(), (string) wp_json_encode( $response->get_data() ) );
+		$this->assertSame( '0.00', $this->request( 'GET', self::BASE . "/$session_id" )->get_data()['expected_amount'] );
+	}
+
+	/**
 	 * @testdox Should reject refunds that do not belong to the given order or are not cash.
 	 */
 	public function test_refund_ownership(): void {
@@ -889,6 +904,25 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should replay a drawer event whether the retry names the bound drawer or omits it.
+	 */
+	public function test_drawer_event_replay_with_explicit_binding(): void {
+		$session_id = $this->open_session( array( 'drawer_id' => 'Till' ) )->get_data()['id'];
+		$body       = array(
+			'request_id'  => wp_generate_uuid4(),
+			'type'        => 'opened',
+			'reason'      => 'no_sale',
+			'occurred_at' => '2026-09-25T12:00:00Z',
+		);
+
+		$first = $this->request( 'POST', self::BASE . "/$session_id/drawer-events", $body );
+		$retry = $this->request( 'POST', self::BASE . "/$session_id/drawer-events", array_merge( $body, array( 'drawer_id' => ' TILL ' ) ) );
+
+		$this->assertSame( 201, $first->get_status() );
+		$this->assertSame( 200, $retry->get_status(), (string) wp_json_encode( $retry->get_data() ) );
+	}
+
+	/**
 	 * @testdox Should require authentication on every route, including retries.
 	 */
 	public function test_guest_is_rejected(): void {
@@ -940,7 +974,14 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_get_current_user()->add_cap( Capabilities::CAP_ISSUE_REFUNDS );
 		$this->assertSame( 201, $this->record_refund( $session_id, $order->get_id(), $refund->get_id() )->get_status() );
+
+		$refund_only = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		get_user_by( 'id', $refund_only )->add_cap( Capabilities::CAP_ISSUE_REFUNDS );
+		wp_set_current_user( $refund_only );
+		$second = $this->create_refund( $order, '1.00' );
+		$this->assertSame( 403, $this->record_refund( $session_id, $order->get_id(), $second->get_id() )->get_status(), 'Refund rights alone are not enough' );
 	}
+
 
 	/**
 	 * Build a valid open request body.

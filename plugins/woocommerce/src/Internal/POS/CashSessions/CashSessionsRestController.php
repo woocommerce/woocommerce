@@ -18,7 +18,7 @@ use WP_REST_Server;
  * REST API for POS cash sessions under /wc/pos/v1/cash-sessions.
  *
  * Every route needs an authenticated user with the POS "process sales" capability or manage_woocommerce.
- * Recording a cash refund also needs the POS "issue refunds" capability or manage_woocommerce.
+ * Recording a cash refund additionally needs the POS "issue refunds" capability or manage_woocommerce.
  *
  * @since 11.3.0
  */
@@ -74,9 +74,12 @@ class CashSessionsRestController extends RestApiControllerBase {
 	 */
 	public function register_routes(): void {
 		$permission          = fn() => $this->check_access( Capabilities::CAP_PROCESS_SALES );
-		$movement_permission = fn( WP_REST_Request $request ) => $this->check_access(
-			CashMovementType::CASH_REFUND === $request->get_param( 'type' ) ? Capabilities::CAP_ISSUE_REFUNDS : Capabilities::CAP_PROCESS_SALES
-		);
+		$movement_permission = function ( WP_REST_Request $request ) {
+			$access = $this->check_access( Capabilities::CAP_PROCESS_SALES );
+			return true === $access && CashMovementType::CASH_REFUND === $request->get_param( 'type' )
+				? $this->check_access( Capabilities::CAP_ISSUE_REFUNDS )
+				: $access;
+		};
 		$session_id          = array(
 			'id' => array(
 				'description' => __( 'Cash session ID.', 'woocommerce' ),

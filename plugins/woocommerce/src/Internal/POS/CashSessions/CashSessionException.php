@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exceptions become REST error data, never HTML output.
+
 use Exception;
 use WP_Error;
 
@@ -72,7 +74,7 @@ class CashSessionException extends Exception {
 	 * @return self
 	 */
 	public static function session_not_found(): self {
-		return new self( 'woocommerce_rest_cash_session_not_found', esc_html__( 'Cash session not found.', 'woocommerce' ), 404 );
+		return new self( 'woocommerce_rest_cash_session_not_found', __( 'Cash session not found.', 'woocommerce' ), 404 );
 	}
 
 	/**
@@ -84,7 +86,7 @@ class CashSessionException extends Exception {
 	 * @return self
 	 */
 	public static function session_closed( int $session_id ): self {
-		return new self( 'woocommerce_rest_cash_session_closed', esc_html__( 'The cash session is closed.', 'woocommerce' ), 409, array( 'session_id' => $session_id ) );
+		return new self( 'woocommerce_rest_cash_session_closed', __( 'The cash session is closed.', 'woocommerce' ), 409, array( 'session_id' => $session_id ) );
 	}
 
 	/**
@@ -95,7 +97,7 @@ class CashSessionException extends Exception {
 	 * @return self
 	 */
 	public static function request_conflict(): self {
-		return new self( 'woocommerce_rest_cash_request_conflict', esc_html__( 'This request ID was already used with different data.', 'woocommerce' ), 409 );
+		return new self( 'woocommerce_rest_cash_request_conflict', __( 'This request ID was already used with different data.', 'woocommerce' ), 409 );
 	}
 
 	/**
@@ -108,7 +110,7 @@ class CashSessionException extends Exception {
 	public static function request_in_progress(): self {
 		return new self(
 			'woocommerce_rest_cash_request_in_progress',
-			esc_html__( 'A request with this ID is still being processed. Retry shortly.', 'woocommerce' ),
+			__( 'A request with this ID is still being processed. Retry shortly.', 'woocommerce' ),
 			409,
 			array( 'retry_after_seconds' => 1 )
 		);

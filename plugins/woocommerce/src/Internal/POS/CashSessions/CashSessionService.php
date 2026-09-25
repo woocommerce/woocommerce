@@ -86,7 +86,7 @@ class CashSessionService {
 		if ( $precision < 0 || $precision > CashMoney::MAX_PRECISION ) {
 			throw CashSessionException::invalid(
 				'woocommerce_rest_cash_unsupported_precision',
-				esc_html__( 'The store currency precision is not supported for cash sessions.', 'woocommerce' )
+				__( 'The store currency precision is not supported for cash sessions.', 'woocommerce' )
 			);
 		}
 		$opening_amount = $this->parse_amount( (string) $params['opening_amount'], $precision );
@@ -420,7 +420,7 @@ class CashSessionService {
 					'reason'         => (string) $params['reason'],
 					'occurred_at'    => $occurred_at,
 					'correlation_id' => $correlation,
-					'drawer'         => null === $drawer ? null : DrawerName::key( $drawer ),
+					'drawer'         => null === $drawer ? $session['drawer_key'] : DrawerName::key( $drawer ),
 				)
 			)
 		);
@@ -444,7 +444,7 @@ class CashSessionService {
 		if ( null !== $references['movement_id'] ) {
 			$movement = $this->data_store->get_movement( $references['movement_id'] );
 			if ( null === $movement || (int) $movement['session_id'] !== $session_id ) {
-				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_reference', esc_html__( 'The movement does not belong to this cash session.', 'woocommerce' ) );
+				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_reference', __( 'The movement does not belong to this cash session.', 'woocommerce' ) );
 			}
 		}
 
@@ -600,10 +600,10 @@ class CashSessionService {
 
 		$amount = $this->parse_amount( (string) $params['amount'], $precision );
 		if ( $amount <= 0 ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', esc_html__( 'The amount must be greater than zero.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'The amount must be greater than zero.', 'woocommerce' ) );
 		}
 		if ( '' === $reason ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', esc_html__( 'A reason is required.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', __( 'A reason is required.', 'woocommerce' ) );
 		}
 
 		return array_merge(
@@ -642,19 +642,19 @@ class CashSessionService {
 			),
 		);
 		if ( ! isset( $rules[ $type ] ) ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', esc_html__( 'This movement type cannot be recorded.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', __( 'This movement type cannot be recorded.', 'woocommerce' ) );
 		}
 
 		foreach ( $rules[ $type ]['required'] as $field ) {
 			if ( ! isset( $params[ $field ] ) ) {
 				/* translators: 1: field name, 2: movement type. */
-				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', sprintf( esc_html__( '%1$s is required for %2$s movements.', 'woocommerce' ), esc_html( $field ), esc_html( $type ) ) );
+				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', sprintf( __( '%1$s is required for %2$s movements.', 'woocommerce' ), $field, $type ) );
 			}
 		}
 		foreach ( $rules[ $type ]['forbidden'] as $field ) {
 			if ( isset( $params[ $field ] ) ) {
 				/* translators: 1: field name, 2: movement type. */
-				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', sprintf( esc_html__( '%1$s is not allowed for %2$s movements.', 'woocommerce' ), esc_html( $field ), esc_html( $type ) ) );
+				throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_movement', sprintf( __( '%1$s is not allowed for %2$s movements.', 'woocommerce' ), $field, $type ) );
 			}
 		}
 	}
@@ -672,7 +672,7 @@ class CashSessionService {
 			$sums[ $type ] = CashMoney::add( (int) ( $sums[ $type ] ?? 0 ), $amount );
 			self::compute_totals( $sums );
 		} catch ( OverflowException $e ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', esc_html__( 'The cash session total would be too large.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'The cash session total would be too large.', 'woocommerce' ) );
 		}
 	}
 
@@ -687,10 +687,10 @@ class CashSessionService {
 		$bound_key = null === $session['drawer_key'] ? null : (string) $session['drawer_key'];
 
 		if ( null === $drawer && null === $bound_key ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_required', esc_html__( 'This cash session has no drawer.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_required', __( 'This cash session has no drawer.', 'woocommerce' ) );
 		}
 		if ( null !== $drawer && DrawerName::key( $drawer ) !== $bound_key ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_mismatch', esc_html__( 'The drawer does not match the cash session drawer.', 'woocommerce' ) );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_mismatch', __( 'The drawer does not match the cash session drawer.', 'woocommerce' ) );
 		}
 	}
 
@@ -913,7 +913,7 @@ class CashSessionService {
 	private function already_open( int $session_id ): CashSessionException {
 		return new CashSessionException(
 			'woocommerce_rest_cash_session_already_open',
-			esc_html__( 'This device already has an open cash session.', 'woocommerce' ),
+			__( 'This device already has an open cash session.', 'woocommerce' ),
 			409,
 			array( 'session_id' => $session_id )
 		);
@@ -929,7 +929,7 @@ class CashSessionService {
 	private function revision_conflict( int $session_id, int $current_revision ): CashSessionException {
 		return new CashSessionException(
 			'woocommerce_rest_cash_session_revision_conflict',
-			esc_html__( 'The cash session changed. Review the new totals and count again.', 'woocommerce' ),
+			__( 'The cash session changed. Review the new totals and count again.', 'woocommerce' ),
 			409,
 			array(
 				'session_id'       => $session_id,
@@ -947,7 +947,7 @@ class CashSessionService {
 	private function source_already_recorded( array $movement ): CashSessionException {
 		return new CashSessionException(
 			'woocommerce_rest_cash_source_already_recorded',
-			esc_html__( 'This order or refund is already recorded in a cash session.', 'woocommerce' ),
+			__( 'This order or refund is already recorded in a cash session.', 'woocommerce' ),
 			409,
 			array(
 				'session_id'  => (int) $movement['session_id'],

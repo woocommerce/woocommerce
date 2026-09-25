@@ -518,7 +518,8 @@ CREATE TABLE $drawer_events (
 	 *
 	 * @param string               $table Table name.
 	 * @param array<string, mixed> $row   Column values.
-	 * @return int|null Insert ID, or null on failure.
+	 * @return int|null Insert ID, or null when a unique key rejected the row.
+	 * @throws RuntimeException When the insert fails for another reason.
 	 */
 	private function insert( string $table, array $row ): ?int {
 		global $wpdb;
@@ -527,7 +528,13 @@ CREATE TABLE $drawer_events (
 		$result   = $wpdb->insert( $table, $row );
 		$wpdb->suppress_errors( $suppress );
 
-		return 1 === $result ? (int) $wpdb->insert_id : null;
+		if ( 1 === $result ) {
+			return (int) $wpdb->insert_id;
+		}
+		if ( false !== strpos( (string) $wpdb->last_error, 'Duplicate entry' ) ) {
+			return null;
+		}
+		throw new RuntimeException( 'Could not store the cash session record: ' . esc_html( '' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error' ) );
 	}
 
 	/**
