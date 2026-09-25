@@ -211,14 +211,25 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
-		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
-		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-		$exporter->generate_file();
+		$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
 
 		// An export queued before 11.3.0 queued all its pages at once, and its email with them.
 		if ( ! $num_batches ) {
 			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
 			return;
+		}
+
+		// Without Action Scheduler the other pages run here, in a loop rather than one nested call per page.
+		/**
+		 * This filter is documented in includes/wc-update-functions.php
+		 *
+		 * @since 4.0.0
+		 */
+		if ( ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false ) ) {
+			while ( $page_number < $num_batches ) {
+				++$page_number;
+				$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
+			}
 		}
 
 		if ( $page_number < $num_batches ) {
@@ -238,22 +249,29 @@ class ReportExporter {
 	}
 
 	/**
+	 * Write one page of an export to the export file.
+	 *
+	 * @param int    $page_number Page number.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param array  $report_args Report parameters, passed to data query.
+	 * @return ReportCSVExporter The exporter that wrote the page.
+	 */
+	private static function write_export_page( $page_number, $export_id, $report_type, $report_args ) {
+		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
+		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+		$exporter->generate_file();
+
+		return $exporter;
+	}
+
+	/**
 	 * Queue the next page of an export.
 	 *
 	 * @param array $args Arguments for export_report().
 	 * @return void
 	 */
 	private static function queue_next_page( $args ) {
-		/**
-		 * This filter is documented in includes/wc-update-functions.php
-		 *
-		 * @since 4.0.0
-		 */
-		if ( ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false ) ) {
-			self::export_report( ...$args );
-			return;
-		}
-
 		// SchedulerTraits types the queue without a leading backslash, so PHPStan cannot resolve it.
 		/** @var \WC_Queue_Interface $queue */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$queue = self::queue();

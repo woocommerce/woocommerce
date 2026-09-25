@@ -69,11 +69,11 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $export_id  Export ID.
 	 * @param bool   $send_email Whether the export is emailed.
+	 * @param bool   $signed_in  Whether a merchant is signed in when the export is queued. The email is addressed to them.
 	 * @return void
 	 */
-	private function queue_stock_export( string $export_id, bool $send_email = true ): void {
-		// The export route only runs for a signed-in merchant, and the email is addressed to them.
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+	private function queue_stock_export( string $export_id, bool $send_email = true, bool $signed_in = true ): void {
+		wp_set_current_user( $signed_in ? $this->factory->user->create( array( 'role' => 'administrator' ) ) : 0 );
 
 		for ( $i = 0; $i < 7; $i++ ) {
 			WC_Helper_Product::create_simple_product();
@@ -867,10 +867,15 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An export that was not asked to be emailed schedules no email.
+	 * @testdox An export schedules no email when it was not asked to be emailed, or when no user asked for it.
+	 * @testWith [false, true]
+	 *           [true, false]
+	 *
+	 * @param bool $send_email Whether the export is asked to be emailed.
+	 * @param bool $signed_in  Whether a merchant is signed in when the export is queued.
 	 */
-	public function test_export_without_email_schedules_no_email(): void {
-		$this->queue_stock_export( 'noemail', false );
+	public function test_export_without_a_recipient_schedules_no_email( bool $send_email, bool $signed_in ): void {
+		$this->queue_stock_export( 'noemail', $send_email, $signed_in );
 
 		$this->run_queued_pages();
 
@@ -885,12 +890,42 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
 		reset_phpmailer_instance();
 
+		$stack_depths = array();
+		add_filter(
+			'woocommerce_csv_exporter_fopen_mode',
+			static function ( $mode ) use ( &$stack_depths ) {
+				$stack_depths[] = count( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Measures how deep each page is written.
+
+				return $mode;
+			}
+		);
+
 		$this->queue_stock_export( 'inline' );
 
 		$this->assertSame( $this->report_skus(), $this->exported_skus( 'inline' ) );
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'inline' ) );
 		$this->assertCount( 1, tests_retrieve_phpmailer_instance()->mock_sent, 'The email must be sent once the last page is written.' );
 		$this->assertSame( array(), $this->queue->get_methods_called(), 'Nothing is queued when Action Scheduler is not used.' );
+		$this->assertCount( 1, array_unique( $stack_depths ), 'Every page must be written at the same stack depth, or a long export runs out of stack.' );
+	}
+
+	/**
+	 * @testdox An email queued before 11.3.0 waits while a page of its export is still pending.
+	 */
+	public function test_email_queued_before_pages_were_chained_waits_for_its_pages(): void {
+		$user_id    = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+		$email_args = array( $user_id, 'waiting', 'stock', array() );
+		reset_phpmailer_instance();
+
+		// Before 11.3.0 the pages could run out of order, so a later page can report 100% while page 1 is still pending.
+		ReportExporter::update_export_percentage_complete( 'stock', 'waiting', 100 );
+		as_schedule_single_action( time(), ReportExporter::get_action( 'export_report' ), array( 1, 'waiting', 'stock', array() ), ReportExporter::$group );
+
+		do_action_ref_array( $email_hook, $email_args );
+
+		$this->assertEmpty( tests_retrieve_phpmailer_instance()->mock_sent, 'The email must not go out while a page of its export is pending.' );
+		$this->assertNotFalse( as_next_scheduled_action( $email_hook, $email_args, ReportExporter::$group ), 'The email must be queued again to run after the page.' );
 	}
 
 	/**
