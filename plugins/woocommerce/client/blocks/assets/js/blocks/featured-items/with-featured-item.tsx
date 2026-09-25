@@ -3,11 +3,18 @@
  */
 import type { BlockAlignment } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import type { ComponentType, Dispatch, SetStateAction } from 'react';
+import type {
+	ComponentType,
+	Dispatch,
+	SetStateAction,
+	CSSProperties,
+} from 'react';
+import { getSetting } from '@woocommerce/settings';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import clsx from 'clsx';
+import { useMergeRefs } from '@wordpress/compose';
 import {
 	useCallback,
 	useState,
@@ -16,8 +23,11 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
-import { useStyleProps } from '@woocommerce/base-hooks';
-import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
+import {
+	BlockContextProvider,
+	useInnerBlocksProps,
+	useBlockProps,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -57,7 +67,12 @@ export interface FeaturedItemRequiredAttributes {
 	showDesc: boolean;
 	showPrice: boolean;
 	backgroundColor: string | undefined;
-	style: { color: { background: string } };
+	style: {
+		color: { background: string };
+		dimensions?: { aspectRatio?: string; minHeight?: string };
+		spacing?: { blockGap?: string | { top?: string; left?: string } };
+	};
+	allowedBlocks?: string[];
 	backgroundColorVisibilityStatus: {
 		isBackgroundVisible: boolean;
 		message?: string | null;
@@ -78,6 +93,7 @@ interface FeaturedProductRequiredAttributes
 }
 
 interface FeaturedItemRequiredProps< T > {
+	blockProps: ReturnType< typeof useBlockProps >;
 	attributes: (
 		| FeaturedCategoryRequiredAttributes
 		| FeaturedProductRequiredAttributes
@@ -111,6 +127,29 @@ interface FeaturedProductProps< T > extends FeaturedItemRequiredProps< T > {
 type FeaturedItemProps< T extends EditorBlock< T > > =
 	| ( T & FeaturedCategoryProps< T > )
 	| ( T & FeaturedProductProps< T > );
+
+function FeaturedItemInnerBlocks( {
+	className,
+	template,
+	attributes,
+}: {
+	className: string;
+	template: NonNullable<
+		Parameters< typeof useInnerBlocksProps >[ 1 ]
+	>[ 'template' ];
+	attributes: FeaturedItemRequiredAttributes;
+} ) {
+	const innerProps = useInnerBlocksProps(
+		{ className },
+		{
+			template,
+			templateLock: false,
+			allowedBlocks: attributes.allowedBlocks,
+			orientation: 'vertical',
+		}
+	);
+	return <div { ...innerProps } />;
+}
 
 export const withFeaturedItem =
 	( {
@@ -148,6 +187,10 @@ export const withFeaturedItem =
 			blockName: name,
 		} );
 		const featuredProductParentRef = useRef( null );
+		const containerRef = useMergeRefs( [
+			props.blockProps.ref,
+			featuredProductParentRef,
+		] );
 		const [ parentContainerDimension, setParentContainerDimension ] =
 			useState< BgImageDimensions >( { height: 0, width: 0 } );
 
@@ -242,12 +285,11 @@ export const withFeaturedItem =
 							product={ product }
 							isLoading={ isLoading }
 						>
-							<div className={ `${ className }__inner-blocks` }>
-								<InnerBlocks
-									template={ innerBlocksTemplate }
-									templateLock={ false }
-								/>
-							</div>
+							<FeaturedItemInnerBlocks
+								className={ `${ className }__inner-blocks` }
+								template={ innerBlocksTemplate }
+								attributes={ attributes }
+							/>
 						</ProductDataContextProvider>
 					</BlockContextProvider>
 				);
@@ -264,30 +306,28 @@ export const withFeaturedItem =
 						taxonomy: 'product_cat',
 					} }
 				>
-					<div className={ `${ className }__inner-blocks` }>
-						<InnerBlocks
-							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
-								category,
-								! attributes.categoryId
-							) }
-							templateLock={ false }
-						/>
-					</div>
+					<FeaturedItemInnerBlocks
+						className={ `${ className }__inner-blocks` }
+						template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
+							category,
+							! attributes.categoryId
+						) }
+						attributes={ attributes }
+					/>
 				</BlockContextProvider>
 			);
 		};
 
 		const renderNoItem = () => (
 			<Placeholder
-				className={ className }
+				{ ...props.blockProps }
+				className={ clsx( props.blockProps.className, className ) }
 				icon={ <Icon icon={ icon } /> }
 				label={ label }
 			>
 				{ isLoading ? <Spinner /> : renderNoItemContent() }
 			</Placeholder>
 		);
-
-		const styleProps = useStyleProps( attributes );
 
 		const renderItem = () => {
 			const {
@@ -299,7 +339,6 @@ export const withFeaturedItem =
 				overlayColor,
 				overlayGradient,
 				style,
-				textColor,
 			} = attributes;
 
 			const containerClass = clsx(
@@ -316,18 +355,18 @@ export const withFeaturedItem =
 				},
 				dimRatioToClass( dimRatio ),
 				contentAlign !== 'center' && `has-${ contentAlign }-content`,
-				styleProps.className
+				props.blockProps.className
 			);
 
-			const containerStyle: React.CSSProperties = {
-				borderRadius: style?.border?.radius,
-				color: textColor
-					? `var(--wp--preset--color--${ textColor })`
-					: style?.color?.text,
-				boxSizing: 'border-box',
-				minHeight,
-				...styleProps.style,
-			};
+			const hasAspectRatio = !! style?.dimensions?.aspectRatio;
+			const containerStyle = {
+				'--wc-featured-item-min-height': `${ getSetting(
+					'defaultHeight',
+					500
+				) }px`,
+				minHeight: hasAspectRatio ? undefined : minHeight,
+				...props.blockProps.style,
+			} as CSSProperties;
 
 			const isImgElement = ! isRepeated && ! hasParallax;
 
@@ -346,17 +385,26 @@ export const withFeaturedItem =
 
 			return (
 				<>
-					<ConstrainedResizable
-						enable={ { bottom: true } }
-						onResize={ onResize }
-						showHandle={ isSelected }
-						style={ { minHeight } }
-					/>
 					<div
+						{ ...props.blockProps }
 						className={ containerClass }
-						ref={ featuredProductParentRef }
+						ref={ containerRef }
 						style={ containerStyle }
 					>
+						<ConstrainedResizable
+							enable={ { bottom: true } }
+							onResize={ onResize }
+							showHandle={
+								isSelected &&
+								! hasAspectRatio &&
+								! style?.dimensions?.minHeight
+							}
+							style={ {
+								minHeight: hasAspectRatio
+									? undefined
+									: minHeight,
+							} }
+						/>
 						<div className={ `${ className }__wrapper` }>
 							<div
 								className="background-dim__overlay"
@@ -402,13 +450,15 @@ export const withFeaturedItem =
 
 		if ( isEditingImage ) {
 			return (
-				<Component
-					{ ...props }
-					backgroundImageSize={ backgroundImageSize }
-					backgroundColorVisibilityStatus={
-						backgroundColorVisibilityStatus
-					}
-				/>
+				<div { ...props.blockProps }>
+					<Component
+						{ ...props }
+						backgroundImageSize={ backgroundImageSize }
+						backgroundColorVisibilityStatus={
+							backgroundColorVisibilityStatus
+						}
+					/>
+				</div>
 			);
 		}
 

@@ -8,7 +8,7 @@
 		"interactivity": {
 			"clientNavigation": true
 		},
-		"align": [ "wide", "full" ],
+		"align": true,
 		"ariaLabel": true,
 		"html": false,
 		"filter": {
@@ -16,27 +16,70 @@
 		},
 		"color": {
 			"background": true,
-			"text": true
+			"text": true,
+			"heading": true,
+			"gradients": true,
+			"link": true,
+			"enableContrastChecker": false
 		},
 		"spacing": {
 			"padding": true,
+			"margin": [ "top", "bottom" ],
+			"blockGap": true,
 			"__experimentalDefaultControls": {
-				"padding": true
-			},
-			"__experimentalSkipSerialization": true
+				"padding": true,
+				"blockGap": true
+			}
 		},
 		"__experimentalBorder": {
 			"color": true,
 			"radius": true,
+			"style": true,
 			"width": true,
 			"__experimentalDefaultControls": {
 				"color": true,
 				"radius": true,
+				"style": true,
 				"width": true
-			},
-			"__experimentalSkipSerialization": true
+			}
 		},
-		"multiple": true
+		"multiple": true,
+		"anchor": true,
+		"shadow": true,
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"dimensions": {
+			"aspectRatio": true,
+			"minHeight": true
+		},
+		"allowedBlocks": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"verticalAlignment": "center",
+				"justifyContent": "stretch",
+				"flexWrap": "nowrap"
+			},
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowOrientation": false,
+			"allowJustification": false,
+			"allowSizingOnChildren": false,
+			"allowWrap": false,
+			"allowVerticalAlignment": true
+		}
 	},
 	"attributes": {
 		"alt": {
@@ -79,8 +122,7 @@
 			"default": ""
 		},
 		"minHeight": {
-			"type": "number",
-			"default": 500
+			"type": "number"
 		},
 		"linkText": {
 			"type": "string",
@@ -99,6 +141,9 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
+		},
+		"anchor": {
+			"type": "string"
 		}
 	},
 	"selectors": {

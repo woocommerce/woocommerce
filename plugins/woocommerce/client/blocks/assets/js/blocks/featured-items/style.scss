@@ -55,14 +55,15 @@
 	@include with-background-dim();
 	@include with-content-selection();
 
-	align-content: center;
-	align-items: center;
+	align-content: normal;
+	align-items: stretch;
 	background-position: center center;
 	background-size: cover;
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	justify-content: center;
 	margin: 0 auto;
+	min-height: var(--wc-featured-item-min-height, 500px);
 	overflow: hidden;
 	position: relative;
 	width: 100%;
@@ -113,7 +114,6 @@
 	}
 
 	&__description,
-	&__inner-blocks,
 	&__link,
 	&__price,
 	&__title,
@@ -145,6 +145,20 @@
 		}
 	}
 
+	&__inner-blocks {
+		color: inherit;
+		width: 100%;
+		z-index: 1;
+
+		&.is-layout-flex {
+			flex: 1;
+		}
+
+		&:not(.is-layout-flex) {
+			padding: 0 48px 16px 48px;
+		}
+	}
+
 	&__description {
 		color: inherit;
 
@@ -153,9 +167,8 @@
 		}
 	}
 
-	&__inner-blocks {
-		.wp-block-post-title,
-		.wp-block-woocommerce-category-title {
+	:where(&__inner-blocks) {
+		:where(.wp-block-post-title, .wp-block-woocommerce-category-title) {
 			&,
 			a {
 				color: inherit;
@@ -164,7 +177,6 @@
 	}
 
 	& &__title {
-		color: inherit;
 		margin-top: 0;
 
 		div {
@@ -185,7 +197,13 @@
 		justify-content: center;
 		overflow: hidden;
 		width: 100%;
-		height: 100%;
+		height: auto;
+
+		&:has(> #{$block}__inner-blocks.is-layout-flex) {
+			flex-direction: column;
+			flex-wrap: nowrap;
+			align-items: stretch;
+		}
 	}
 
 	.wp-block-button.aligncenter {

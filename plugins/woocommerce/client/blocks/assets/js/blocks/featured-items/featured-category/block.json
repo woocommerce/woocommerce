@@ -8,11 +8,15 @@
 		"interactivity": {
 			"clientNavigation": true
 		},
-		"align": [ "wide", "full" ],
+		"align": true,
 		"ariaLabel": true,
 		"color": {
 			"background": true,
-			"text": true
+			"text": true,
+			"heading": true,
+			"gradients": true,
+			"link": true,
+			"enableContrastChecker": false
 		},
 		"html": false,
 		"filter": {
@@ -20,21 +24,60 @@
 		},
 		"spacing": {
 			"padding": true,
+			"margin": [ "top", "bottom" ],
+			"blockGap": true,
 			"__experimentalDefaultControls": {
-				"padding": true
-			},
-			"__experimentalSkipSerialization": true
+				"padding": true,
+				"blockGap": true
+			}
 		},
 		"__experimentalBorder": {
 			"color": true,
 			"radius": true,
+			"style": true,
 			"width": true,
 			"__experimentalDefaultControls": {
 				"color": true,
 				"radius": true,
+				"style": true,
 				"width": true
+			}
+		},
+		"anchor": true,
+		"shadow": true,
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"dimensions": {
+			"aspectRatio": true,
+			"minHeight": true
+		},
+		"allowedBlocks": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"verticalAlignment": "center",
+				"justifyContent": "stretch",
+				"flexWrap": "nowrap"
 			},
-			"__experimentalSkipSerialization": true
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowOrientation": false,
+			"allowJustification": false,
+			"allowSizingOnChildren": false,
+			"allowWrap": false,
+			"allowVerticalAlignment": true
 		}
 	},
 	"attributes": {
@@ -78,8 +121,7 @@
 			"default": ""
 		},
 		"minHeight": {
-			"type": "number",
-			"default": 500
+			"type": "number"
 		},
 		"linkText": {
 			"default": "Shop now",
@@ -98,6 +140,9 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
+		},
+		"anchor": {
+			"type": "string"
 		}
 	},
 	"selectors": {

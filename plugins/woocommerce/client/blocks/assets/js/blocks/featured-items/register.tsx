@@ -1,6 +1,3 @@
-// Disabling because of `__experimental` property names.
-/* eslint-disable @typescript-eslint/naming-convention */
-
 /**
  * External dependencies
  */
@@ -15,76 +12,15 @@ import type { BlockConfiguration } from '@wordpress/blocks';
  */
 import { Edit } from './edit';
 
-type CSSDirections = 'top' | 'right' | 'bottom' | 'left';
-
-interface ExtendedBlockSupports {
-	supports: {
-		color?: {
-			background: string;
-			gradients: boolean;
-			link: boolean;
-			text: string;
-		};
-		spacing?: {
-			margin: boolean | CSSDirections[];
-			padding: boolean | CSSDirections[];
-			__experimentalDefaultControls?: {
-				margin?: boolean;
-				padding?: boolean;
-			};
-			__experimentalSkipSerialization?: boolean;
-		};
-		__experimentalBorder?: {
-			color: boolean;
-			radius: boolean;
-			width: boolean;
-			__experimentalSkipSerialization?: boolean;
-		};
-	};
-}
-
 export function register(
 	Block: FunctionComponent,
 	example: { attributes: Record< string, unknown > },
-	metadata: BlockConfiguration & ExtendedBlockSupports,
+	metadata: BlockConfiguration,
 	settings: Partial< BlockConfiguration >
 ): void {
 	const DEFAULT_SETTINGS = {
-		attributes: {
-			...metadata.attributes,
-			/**
-			 * A minimum height for the block.
-			 *
-			 * Note: if padding is increased, this way the inner content will never
-			 * overflow, but instead will resize the container.
-			 *
-			 * It was decided to change this to make this block more in line with
-			 * the “Cover” block.
-			 */
-			minHeight: {
-				type: 'number',
-				default: getSetting( 'defaultHeight', 500 ),
-			},
-		},
-		supports: {
-			...metadata.supports,
-			color: {
-				background: metadata.supports?.color?.background,
-				text: metadata.supports?.color?.text,
-			},
-			spacing: {
-				padding: metadata.supports?.spacing?.padding,
-
-				__experimentalDefaultControls: {
-					padding:
-						metadata.supports?.spacing
-							?.__experimentalDefaultControls,
-				},
-				__experimentalSkipSerialization:
-					metadata.supports?.spacing?.__experimentalSkipSerialization,
-			},
-			__experimentalBorder: metadata?.supports?.__experimentalBorder,
-		},
+		attributes: metadata.attributes,
+		supports: metadata.supports,
 	};
 
 	const DEFAULT_EXAMPLE = {
