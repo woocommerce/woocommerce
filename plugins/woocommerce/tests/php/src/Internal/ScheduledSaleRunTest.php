@@ -275,6 +275,33 @@ class ScheduledSaleRunTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Accepted product references still settle scheduled sales.
+	 */
+	public function test_settles_supported_data_store_result_shapes(): void {
+		$ids = array();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$ids[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
+		}
+
+		$rows = array(
+			(string) $ids[0],
+			wc_get_product( $ids[1] ),
+			get_post( $ids[2] ),
+		);
+
+		$this->process_run( $rows, ScheduledSaleRun::MODE_END );
+
+		foreach ( $ids as $index => $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id}, supplied as " . wp_json_encode( $rows[ $index ] ) . ', should have settled.'
+			);
+		}
+	}
+
+	/**
 	 * @testdox An id listed twice in one batch is processed once.
 	 */
 	public function test_processes_a_duplicated_id_once(): void {
