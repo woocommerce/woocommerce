@@ -63,7 +63,7 @@ function purple_get_woocommerce_outdated_notice( string $minimum, string $curren
 		)
 	);
 	if ( current_user_can( 'update_plugins' ) ) {
-		$notice .= ' <a href="' . esc_url( self_admin_url( 'update-core.php' ) ) . '">' . esc_html__( 'View updates', 'purple' ) . '</a>';
+		$notice .= ' <a href="' . esc_url( self_admin_url( 'plugins.php?plugin_status=upgrade' ) ) . '">' . esc_html__( 'View updates', 'purple' ) . '</a>';
 	}
 
 	return $notice;
