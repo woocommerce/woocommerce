@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent qty input controls being out of order on single product page edit view
