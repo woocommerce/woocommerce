@@ -502,7 +502,7 @@ class BatchProcessingController {
 	 * @return string Option name.
 	 */
 	private function get_processor_state_option_name( $batch_processor ): string {
-		$class_name = is_a( $batch_processor, BatchProcessorInterface::class ) ? get_class( $batch_processor ) : $batch_processor;
+		$class_name = is_a( $batch_processor, BatchProcessorInterface::class, true ) ? get_class( $batch_processor ) : $batch_processor;
 		$class_md5  = md5( $class_name );
 		// truncate the class name so we know that it will fit in the option name column along with md5 hash and prefix.
 		$class_name = substr( $class_name, 0, 140 );
