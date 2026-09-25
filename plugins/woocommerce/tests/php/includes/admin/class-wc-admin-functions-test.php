@@ -643,4 +643,108 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 			'Existing shipping lines named Shipping should not be replaced with the generic method title'
 		);
 	}
+
+	/**
+	 * A block-based default page is matched by its WooCommerce block opener, so a customized
+	 * existing page is adopted instead of duplicated.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68099
+	 */
+	public function test_wc_create_page_adopts_customized_block_page(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'my-custom-cart',
+				'post_title'   => 'My custom cart',
+				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart alignwide is-loading">default markup</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
+
+		wp_delete_post( $existing_page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * A page holding a different block with the same name prefix (e.g. cart-link) is not adopted.
+	 */
+	public function test_wc_create_page_does_not_adopt_page_with_prefixed_block_name(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$other_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'header-links',
+				'post_title'   => 'Header links',
+				'post_content' => '<!-- wp:woocommerce/cart-link {"cartIcon":"cart"} --><a href="/cart/">Cart</a><!-- /wp:woocommerce/cart-link -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertNotEquals( $other_page_id, $page_id );
+		$this->assertSame( 'cart', get_post( $page_id )->post_name );
+
+		wp_delete_post( $other_page_id, true );
+		wp_delete_post( $page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * The classic shortcode matching keeps working unchanged.
+	 */
+	public function test_wc_create_page_still_matches_shortcode_content(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'old-cart',
+				'post_title'   => 'Old cart',
+				'post_content' => 'Before [woocommerce_cart] after',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+
+		wp_delete_post( $existing_page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * A trashed page that only contains the block is not restored; the trash lookup keeps its strict match.
+	 */
+	public function test_wc_create_page_does_not_restore_trashed_page_by_block_only(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$trashed_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'trash',
+				'post_name'    => 'cart__trashed',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:paragraph --><p>Outdated intro.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">old</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertNotEquals( $trashed_page_id, $page_id );
+		$this->assertSame( 'trash', get_post( $trashed_page_id )->post_status );
+
+		wp_delete_post( $trashed_page_id, true );
+		wp_delete_post( $page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
 }
