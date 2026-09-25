@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the labels of coupon discount types added by extensions in the Analytics Coupons report instead of N/A.

@@ -338,7 +338,6 @@ class MiniCart extends AbstractBlock {
 					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
-					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
 						$state = wp_interactivity_state();
 						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
@@ -455,7 +454,9 @@ class MiniCart extends AbstractBlock {
 			data-wp-on--click="actions.overlayCloseDrawer"
 			data-wp-on--keydown="actions.handleOverlayKeydown"
 			data-wp-watch="callbacks.focusFirstElement"
-			data-wp-bind--class="state.drawerOverlayClass"
+			data-wp-class--wc-block-components-drawer__screen-overlay--with-slide-in="state.isOpen"
+			data-wp-class--wc-block-components-drawer__screen-overlay--is-hidden="!state.isOpen"
+			class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out"
 		>
 			<div
 				data-wp-bind--role="state.drawerRole"

@@ -130,6 +130,17 @@ pnpm --filter=@woocommerce/plugin-woocommerce changelog add
 
 This command prompts for the change type and description. Run it once per affected package before creating any PR.
 
+**Writing the entry.** Write for whoever reads the field: merchants read the body, reviewers read the comment. A reviewer asks for changes on a weak entry as they would on weak code.
+
+- **Body**: one merchant-facing sentence, about 120 characters or fewer. It ships verbatim to the public `changelog.txt`, so say what changed for merchants, not how. No issue or PR refs; the tooling appends the PR link. Example: `Restore the "Browse store" link on the empty cart page.`
+- **`Comment:`** (`Type: dev`, no body): about 100 characters or fewer naming the area and kind of change, not the implementation, and making clear why nothing ships to merchants. Only reviewers read it. Example: `Improve system status and payment gateway REST API tests; no production change.`
+
+Not this: `Type: dev` with the body `Add unit tests covering customer session fallbacks.` — a body always ships, so an internal-only change lands in the public changelog as a `Dev -` line. Only `Comment:` keeps it out of the release notes.
+
+Not this either: `Make WC_Shipping_Cache::refresh_package_rates() run after cart contents change.` — a method name is not an outcome. Say what it does: `Show updated shipping costs after the cart changes, instead of stale ones.` A body that opens on two filter names and runs past 500 characters fails the same way, from the other end.
+
+Use more characters when they identify the affected behavior, an important condition, or a required action. The `woocommerce-git-commit` skill has the file format.
+
 ### Pull Request Template
 
 When creating PRs, **always use the template** from `.github/PULL_REQUEST_TEMPLATE.md`. Key sections:

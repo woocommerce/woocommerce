@@ -181,6 +181,7 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
+	 * @return void
 	 */
 	public function create( &$data ) {
 		$this->instance->create( $data );
@@ -191,6 +192,7 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
+	 * @return void
 	 */
 	public function update( &$data ) {
 		$this->instance->update( $data );
