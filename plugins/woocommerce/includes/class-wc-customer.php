@@ -297,8 +297,13 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		$address_fields = WC()->countries->get_country_locale();
 		$locale_key     = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
-		$default_locale = $address_fields['default'];
+		$default_locale = $address_fields['default'] ?? null;
 		$country_locale = $address_fields[ $locale_key ] ?? array();
+
+		// The default entry is missing while the locale settings are being built, and a locale filter callback can drop or replace it.
+		if ( ! is_array( $default_locale ) ) {
+			$default_locale = WC()->countries->get_default_address_fields();
+		}
 
 		/**
 		 * Checks all shipping address fields against the country's locale settings.

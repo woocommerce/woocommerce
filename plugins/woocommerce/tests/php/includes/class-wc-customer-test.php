@@ -75,4 +75,71 @@ class WC_Customer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( 'WC_Customer', $re_fetched_customer );
 	}
+
+	/**
+	 * @testdox has_full_shipping_address() still requires the default fields when the default locale entry is missing or not an array.
+	 *
+	 * @dataProvider provide_broken_default_locale_entries
+	 *
+	 * @param mixed $default_entry Value to put in the default locale entry, or null to remove the entry.
+	 */
+	public function test_has_full_shipping_address_requires_default_fields_without_a_default_locale_entry( $default_entry ): void {
+		$countries = WC()->countries;
+		$countries->get_country_locale();
+		if ( null === $default_entry ) {
+			unset( $countries->locale['default'] );
+		} else {
+			$countries->locale['default'] = $default_entry;
+		}
+		$sut = $this->get_customer_without_shipping_postcode();
+
+		$this->assertFalse( $sut->has_full_shipping_address(), 'A missing postcode should still make the shipping address incomplete.' );
+	}
+
+	/**
+	 * Broken values for the default entry of the country locale settings.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_broken_default_locale_entries(): array {
+		return array(
+			'entry removed'      => array( null ),
+			'entry not an array' => array( false ),
+		);
+	}
+
+	/**
+	 * @testdox has_full_shipping_address() still requires the default fields when it runs while the country locale settings are being built.
+	 */
+	public function test_has_full_shipping_address_requires_default_fields_while_country_locale_is_built(): void {
+		$sut    = $this->get_customer_without_shipping_postcode();
+		$nested = null;
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $sut, &$nested ) {
+				$nested = $sut->has_full_shipping_address();
+				return $locale;
+			}
+		);
+		WC()->countries->locale = array();
+
+		WC()->countries->get_country_locale();
+
+		$this->assertFalse( $nested, 'A check made while the locale settings are built should still treat a missing postcode as incomplete.' );
+	}
+
+	/**
+	 * Get a customer whose US shipping address has everything but a postcode.
+	 *
+	 * @return WC_Customer
+	 */
+	private function get_customer_without_shipping_postcode(): WC_Customer {
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_state( 'CA' );
+		$customer->set_shipping_city( 'San Francisco' );
+		$customer->set_shipping_postcode( '' );
+
+		return $customer;
+	}
 }
