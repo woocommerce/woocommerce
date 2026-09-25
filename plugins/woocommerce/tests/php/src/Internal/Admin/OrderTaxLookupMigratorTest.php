@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -49,6 +50,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Reports::reset_stats_dbs();
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		$this->sut = wc_get_container()->get( OrderTaxLookupMigrator::class );
@@ -60,6 +62,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( OrderTaxLookupMigrator::class );
 
@@ -100,6 +103,63 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		foreach ( $order->get_items( OrderItemType::TAX ) as $item_id => $tax_item ) {
 			wc_update_order_item_meta( $item_id, 'rate_id', $rate_ids_by_code[ $tax_item->get_name() ] );
 		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		return $order;
+	}
+
+	/**
+	 * Create a completed DE order with two product units, a fee and shipping, all taxed at one
+	 * registered rate, and let the analytics sync record it.
+	 *
+	 * @param string $fee_total Fee total, negative for a discount.
+	 * @return WC_Order
+	 */
+	private function seed_taxed_order( string $fee_total = '10' ): WC_Order {
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '19',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Taxable Product' );
+		$product->set_regular_price( '100' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'DE' );
+		$order->set_shipping_country( 'DE' );
+		$order->add_product( $product, 2 );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_name( 'Handling' );
+		$fee->set_total( $fee_total );
+		$fee->set_tax_status( 'taxable' );
+		$order->add_item( $fee );
+
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( '5' );
+		$order->add_item( $shipping );
+
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_date_paid( time() );
+		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -155,6 +215,28 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clear the taxable amount split of an order's lookup rows and set the base they add up to,
+	 * the shape the table held before it recorded the order and shipping parts.
+	 *
+	 * @param int   $order_id       Order id.
+	 * @param float $taxable_amount Base the rows carry.
+	 */
+	private function unsplit_lookup_rows( int $order_id, float $taxable_amount ): void {
+		global $wpdb;
+
+		$table_name = TaxesDataStore::get_db_table_name();
+
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"UPDATE {$table_name} SET taxable_amount = %f, order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
+				$taxable_amount,
+				$order_id
+			)
+		);
+	}
+
+	/**
 	 * Read an order's lookup rows.
 	 *
 	 * @param int $order_id Order id.
@@ -202,6 +284,45 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An order holding no order and shipping split is pending, one holding a split of zero is not.
+	 */
+	public function test_orders_holding_an_unsplit_taxable_amount_are_pending(): void {
+		$unsplit = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+
+		$this->unsplit_lookup_rows( $unsplit->get_id(), 215.0 );
+
+		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'Only the order holding no split should be pending.' );
+		$this->assertSame( array( $unsplit->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The batch should hold only that order.' );
+	}
+
+	/**
+	 * @testdox Processing a batch records the order and shipping parts of the taxable amount.
+	 */
+	public function test_process_batch_records_the_taxable_amount_split(): void {
+		global $wpdb;
+
+		$order = $this->seed_taxed_order();
+		$this->unsplit_lookup_rows( $order->get_id(), 215.0 );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$table_name = TaxesDataStore::get_db_table_name();
+		$sums       = $wpdb->get_row(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT SUM(order_taxable_amount) AS order_part, SUM(shipping_taxable_amount) AS shipping_part FROM {$table_name} WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		// 2 x 100 product + 10 fee on the order side, 5 shipping on the shipping side.
+		$this->assertSame( 210.0, (float) $sums->order_part, 'The rebuild should record the order part.' );
+		$this->assertSame( 5.0, (float) $sums->shipping_part, 'The rebuild should record the shipping part.' );
+		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'A rebuilt order should stop being pending.' );
+	}
+
+	/**
 	 * @testdox Processing a batch gives every tax line of the order its own lookup row.
 	 */
 	public function test_process_batch_rebuilds_one_row_per_tax_line(): void {
@@ -240,6 +361,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $this->lookup_rows( $order->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that cannot be loaded should not hold the pass up.' );
 		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'Nothing should be left pending once the pass is through.' );
+		$this->assertSame( array(), OrdersScheduler::get_failed_order_imports()['ids'], 'An order whose rows were dropped has nothing left to retry, so it should not be recorded as a failed import.' );
 
 		$tools = $this->sut->handle_woocommerce_debug_tools( array() );
 		$this->assertTrue( $tools['rebuild_analytics_tax_data']['disabled'], 'The tool should not go on offering a run that cannot change anything.' );
@@ -269,6 +391,10 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->lookup_rows( $order->get_id() ), 'An order the reports still read should keep its rows.' );
 		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the order.' );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array( $order->get_id() ), $failed['ids'], 'The cursor steps past an order that could not be read, so it should be left where Analytics settings offers a retry over it. A row left behind reports no taxable amount split for its whole rate.' );
 	}
 
 	/**
@@ -395,6 +521,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 			'An order with no creation date should be stepped past. A batch that raises never reaches the cursor write, and is handed out again forever.'
 		);
 		$this->assertNotEmpty( $this->lookup_rows( $order->get_id() ), 'An order that was stepped past should keep its rows.' );
+		$this->assertSame( array( $order->get_id() ), OrdersScheduler::get_failed_order_imports()['ids'], 'An order the rebuild kept but could not rewrite should be left where Analytics settings offers a retry over it.' );
 	}
 
 	/**
@@ -435,6 +562,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->unmigrate_lookup_rows( $left->get_id(), 0, 0.25 );
 
 		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $stepped_past->get_id() );
+		update_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION, $stepped_past->get_id() );
 
 		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The count should hold what is left of the pass.' );
 
@@ -476,6 +604,91 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		wc_update_11201_migrate_tax_lookup_order_items();
 
 		$this->assertTrue( $batch_processor->is_enqueued( OrderTaxLookupMigrator::class ), 'The database update should hand the rebuild to the batch processing controller.' );
+	}
+
+	/**
+	 * @testdox The taxable amount split update runs the rebuild over the whole table again, on a cursor of its own.
+	 */
+	public function test_taxable_amount_split_update_restarts_the_rebuild(): void {
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+
+		// An order the earlier pass has already been through, holding a base with no split.
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $order->get_id(), 215.0 );
+		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $order->get_id() + 1 );
+
+		$cache_version = ReportsCache::get_version();
+
+		wc_update_1130_split_tax_lookup_taxable_amount();
+
+		$this->assertSame( $order->get_id() + 1, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The update should leave the cursor of the earlier pass alone.' );
+		$this->assertFalse( get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should start at the top of the table.' );
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should reach an order the earlier pass has stepped past.' );
+		$this->assertTrue( $batch_processor->is_enqueued( OrderTaxLookupMigrator::class ), 'The update should hand the rebuild to the batch processing controller.' );
+		$this->assertNotSame( $cache_version, ReportsCache::get_version(), 'The update should invalidate the cached report responses, which last a week.' );
+	}
+
+	/**
+	 * @testdox The split pass rebuilds an order whose base nets to zero.
+	 */
+	public function test_split_pass_rebuilds_a_base_that_nets_to_zero(): void {
+		global $wpdb;
+
+		// A negative fee takes the order part to -5, which offsets the 5 of shipping.
+		$order = $this->seed_taxed_order( '-205' );
+		$this->unsplit_lookup_rows( $order->get_id(), 0.0 );
+
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'An order holding no split should be pending, whatever its base.' );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$table_name = TaxesDataStore::get_db_table_name();
+		$sums       = $wpdb->get_row(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT SUM(order_taxable_amount) AS order_part, SUM(shipping_taxable_amount) AS shipping_part FROM {$table_name} WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertSame( -5.0, (float) $sums->order_part, 'The rebuild should record the order part.' );
+		$this->assertSame( 5.0, (float) $sums->shipping_part, 'The rebuild should record the shipping part.' );
+		$this->assertSame( 0, $this->sut->get_total_pending_count(), 'Nothing should be left pending once the pass is through.' );
+	}
+
+	/**
+	 * @testdox A batch steps each pass past the orders it covered, and leaves a pass that is already further along.
+	 */
+	public function test_each_pass_keeps_its_own_cursor(): void {
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $order->get_id(), 215.0 );
+
+		$stepped_past = $order->get_id() + 1000;
+		update_option( OrderTaxLookupMigrator::CURSOR_OPTION, $stepped_past );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should step past the order it went through.' );
+		$this->assertSame( $stepped_past, (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'A pass already further along should not be rewound to the batch.' );
+	}
+
+	/**
+	 * @testdox A batch read before the split columns existed does not step the split pass past the orders it left out.
+	 */
+	public function test_batch_in_flight_does_not_step_a_new_pass_past_orders_it_left_out(): void {
+		$left_out = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unsplit_lookup_rows( $left_out->get_id(), 215.0 );
+
+		$in_batch = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $in_batch->get_id(), 0, 0.25 );
+
+		// The batch the order item pass alone would have read, before the split columns existed.
+		$this->sut->process_batch( array( $in_batch->get_id() ) );
+
+		$this->assertSame( $in_batch->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The pass the batch was read for should step past it.' );
+		$this->assertSame( $left_out->get_id() - 1, (int) get_option( OrderTaxLookupMigrator::SPLIT_CURSOR_OPTION ), 'The split pass should stop before the order the batch left out.' );
+		$this->assertContains( $left_out->get_id(), $this->sut->get_next_batch_to_process( 10 ), 'The split pass should still reach the order the batch left out.' );
 	}
 
 	/**

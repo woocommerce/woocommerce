@@ -7,6 +7,7 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
@@ -325,4 +326,19 @@ function wc_update_1050_add_idx_user_email() {
  */
 function wc_update_11201_migrate_tax_lookup_order_items() {
 	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
+}
+
+/**
+ * Queue the rebuild of `wc_order_tax_lookup` rows recorded before the taxable amount was split
+ * into its order and shipping parts.
+ *
+ * @since 11.3.0
+ *
+ * @return void
+ */
+function wc_update_1130_split_tax_lookup_taxable_amount() {
+	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
+
+	// A store with nothing to rebuild would otherwise keep serving cached rows without the split.
+	ReportsCache::invalidate();
 }
