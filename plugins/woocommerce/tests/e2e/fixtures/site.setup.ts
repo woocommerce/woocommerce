@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -85,6 +85,14 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 
 	await setup.step( 'disable onboarding wizard', async () => {
 		await skipOnboardingWizard();
+	} );
+
+	await setup.step( 'dismiss analytics overview metrics tour', async () => {
+		// The tour blocks clicks outside the menu it points at, which breaks
+		// any test that opens Analytics Overview and uses the rest of the page.
+		await restApi.post( `${ WP_API_PATH }/users/me`, {
+			woocommerce_meta: { dashboard_performance_tour_shown: 'yes' },
+		} );
 	} );
 
 	await setup.step( 'determine if multisite', async () => {
