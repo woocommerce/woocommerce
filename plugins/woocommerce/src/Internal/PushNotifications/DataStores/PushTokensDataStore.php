@@ -447,13 +447,17 @@ class PushTokensDataStore {
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
 	 * @param int|null $per_page Optional number of tokens per page.
+	 * @param array    $filters  Optional exact-match filters: `user_id` (int) and `device_uuid` (string).
+	 * @phpstan-param array{user_id?: int|null, device_uuid?: string|null} $filters
 	 * @return PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}
 	 *
 	 * @since 10.7.0
 	 */
-	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ) {
-		$paginate  = null !== $page && null !== $per_page;
-		$cache_key = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
+	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null, array $filters = array() ) {
+		$paginate    = null !== $page && null !== $per_page;
+		$user_id     = empty( $filters['user_id'] ) ? null : (int) $filters['user_id'];
+		$device_uuid = empty( $filters['device_uuid'] ) ? null : (string) $filters['device_uuid'];
+		$cache_key   = implode( ',', $roles ) . ":$page:$per_page:$user_id:$device_uuid";
 
 		$empty_result = $paginate
 			? array(
@@ -474,12 +478,16 @@ class PushTokensDataStore {
 		global $wpdb;
 
 		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
-		$users_with_tokens = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
-				PushToken::POST_TYPE
-			)
-		);
+		$sql  = "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'";
+		$args = array( PushToken::POST_TYPE );
+
+		if ( null !== $user_id ) {
+			$sql   .= ' AND post_author = %d';
+			$args[] = $user_id;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is built from literals above and every value goes through a placeholder.
+		$users_with_tokens = $wpdb->get_col( $wpdb->prepare( $sql, ...$args ) );
 
 		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
@@ -509,6 +517,17 @@ class PushTokensDataStore {
 			$query_args['order']   = 'ASC';
 		}
 
+		if ( null !== $device_uuid ) {
+			// Bounded by author__in, so the meta join only sees this store's own tokens.
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => 'device_uuid',
+					'value' => $device_uuid,
+				),
+			);
+		}
+
 		$query = new WP_Query( $query_args );
 
 		/**
@@ -520,8 +539,26 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
+			$result = $empty_result;
+
+			// WP_Query skips counting when a page comes back empty, so a page past the end would otherwise report no matches.
+			if ( $paginate && $page > 1 ) {
+				$count_query = new WP_Query(
+					array_merge(
+						$query_args,
+						array(
+							'paged'          => 1,
+							'posts_per_page' => 1,
+						)
+					)
+				);
+
+				$result['total']       = (int) $count_query->found_posts;
+				$result['total_pages'] = (int) ceil( $result['total'] / $per_page );
+			}
+
+			$this->tokens_by_roles_cache[ $cache_key ] = $result;
+			return $result;
 		}
 
 		_prime_post_caches( $post_ids, false, true );
