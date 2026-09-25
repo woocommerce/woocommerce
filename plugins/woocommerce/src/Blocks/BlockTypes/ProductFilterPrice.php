@@ -47,8 +47,8 @@ final class ProductFilterPrice extends AbstractBlock {
 	public function prepare_selected_filters( $items, $params ) {
 		$min_price           = intval( $params[ self::MIN_PRICE_QUERY_VAR ] ?? 0 );
 		$max_price           = intval( $params[ self::MAX_PRICE_QUERY_VAR ] ?? 0 );
-		$formatted_min_price = $min_price ? html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) ) : null;
-		$formatted_max_price = $max_price ? html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) ) : null;
+		$formatted_min_price = $min_price ? $this->format_price( $min_price ) : null;
+		$formatted_max_price = $max_price ? $this->format_price( $max_price ) : null;
 
 		if ( ! $formatted_min_price && ! $formatted_max_price ) {
 			return $items;
@@ -108,8 +108,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		$min_price     = intval( $filter_params[ self::MIN_PRICE_QUERY_VAR ] ?? $min_range );
 		$max_price     = intval( $filter_params[ self::MAX_PRICE_QUERY_VAR ] ?? $max_range );
 
-		$formatted_min_price = html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) );
-		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
+		$formatted_min_price = $this->format_price( $min_price );
+		$formatted_max_price = $this->format_price( $max_price );
 
 		$filter_context = array(
 			'currentMin' => $min_price,
@@ -184,6 +184,23 @@ final class ProductFilterPrice extends AbstractBlock {
 				''
 			)
 		);
+	}
+
+	/**
+	 * Format a plain-text price, isolating RTL currency symbols from the amount.
+	 *
+	 * @param int $price Price to format.
+	 * @return string Formatted price.
+	 */
+	private function format_price( $price ) {
+		$formatted = html_entity_decode( wp_strip_all_tags( wc_price( $price, array( 'decimals' => 0 ) ) ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8' );
+		$symbol    = html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8' );
+
+		if ( preg_match( '/[\p{Arabic}\p{Hebrew}]/u', $symbol ) ) {
+			$formatted = str_replace( $symbol, "\u{2068}{$symbol}\u{2069}", $formatted );
+		}
+
+		return $formatted;
 	}
 
 	/**

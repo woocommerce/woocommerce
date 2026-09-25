@@ -57,6 +57,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 
 		$show_input_fields = isset( $attributes['showInputFields'] ) ? $attributes['showInputFields'] : false;
 		$inline_input      = isset( $attributes['inlineInput'] ) ? $attributes['inlineInput'] : false;
+		$currency_symbol   = html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8' );
+		$is_rtl_symbol     = (bool) preg_match( '/[\p{Arabic}\p{Hebrew}]/u', $currency_symbol );
+		$symbol            = '<span dir="auto">' . esc_html( $currency_symbol ) . '</span>';
+		$position          = get_option( 'woocommerce_currency_pos' );
+		$space             = in_array( $position, array( 'left_space', 'right_space' ), true ) ? '&nbsp;' : '';
+		$prefix            = in_array( $position, array( 'right', 'right_space' ), true ) ? '' : $symbol . $space;
+		$suffix            = in_array( $position, array( 'right', 'right_space' ), true ) ? $space . $symbol : '';
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -93,14 +100,20 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		?>
 		<div class="wc-block-product-filter-price-slider__left text">
 			<?php if ( $show_input_fields ) : ?>
+				<?php if ( $is_rtl_symbol ) : ?>
+					<?php echo $prefix; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<input
 					class="min"
 					type="text"
-					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-bind--value="<?php echo $is_rtl_symbol ? 'state.minPrice' : 'state.formattedMinPrice'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"
 					data-wp-on--focus="actions.selectInputContent"
 					data-wp-on--input="actions.debounceSetMinPrice"
 					aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 				/>
+				<?php if ( $is_rtl_symbol ) : ?>
+					<?php echo $suffix; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 			<?php else : ?>
 				<span data-wp-text="state.formattedMinPrice"></span>
 			<?php endif; ?>
@@ -150,14 +163,20 @@ class ProductFilterPriceSlider extends AbstractBlock {
 				<?php endif; ?>
 				<div class="wc-block-product-filter-price-slider__right text">
 					<?php if ( $show_input_fields ) : ?>
+						<?php if ( $is_rtl_symbol ) : ?>
+							<?php echo $prefix; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php endif; ?>
 						<input
 							class="max"
 							type="text"
-							data-wp-bind--value="state.formattedMaxPrice"
+							data-wp-bind--value="<?php echo $is_rtl_symbol ? 'state.maxPrice' : 'state.formattedMaxPrice'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"
 							data-wp-on--focus="actions.selectInputContent"
 							data-wp-on--input="actions.debounceSetMaxPrice"
 							aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 						/>
+						<?php if ( $is_rtl_symbol ) : ?>
+							<?php echo $suffix; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php endif; ?>
 					<?php else : ?>
 					<span data-wp-text="state.formattedMaxPrice"></span>
 					<?php endif; ?>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show right-to-left currency symbols in the configured position in Product Filters price ranges.
