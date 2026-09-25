@@ -378,7 +378,7 @@ test.describe( `${ blockData.name }`, () => {
 				expect( await pageObject.getActiveThumbnailImageId() ).toEqual(
 					nextImageId
 				);
-			} ).toPass( { timeout: 5_000 } );
+			} ).toPass( { timeout: 1_000 } );
 
 			await expect
 				.poll( () =>
