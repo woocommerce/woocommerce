@@ -499,6 +499,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
 					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
 					'i18n_global_unique_id_error'       => __( 'Enter only numbers and hyphens (-). The letter X is allowed only as the final ISBN-10 check digit.', 'woocommerce' ),
+					'i18n_commodity_code_error'         => __( 'Enter a commodity code of 6–14 digits. Spaces and punctuation are removed.', 'woocommerce' ),
+					'i18n_customs_description_error'    => __( 'Emoji and special symbols, such as ™, are not allowed in the customs description.', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),

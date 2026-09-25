@@ -354,6 +354,83 @@
 				}
 			)
 
+			// Commodity codes allow the punctuation merchants copy them with, such as 0901.21.0010.
+			// Digits past the 14th are dropped as they are typed or pasted. Too-short codes are only
+			// flagged on change, so the tip doesn't show while the merchant is still typing.
+			.on(
+				'input',
+				'input[type=text][name*=_customs_commodity_code]',
+				function () {
+					var value = $( this ).val();
+					var digits = 0;
+					var trimmed = value.replace( /[0-9]/g, function ( digit ) {
+						return ++digits > 14 ? '' : digit;
+					} );
+
+					if ( trimmed !== value ) {
+						var caret = this.selectionStart;
+						$( this ).val( trimmed );
+						this.setSelectionRange( caret, caret );
+					}
+
+					$( document.body ).triggerHandler(
+						trimmed !== value || /[^0-9.\s\-]/.test( trimmed )
+							? 'wc_add_error_tip'
+							: 'wc_remove_error_tip',
+						[ $( this ), 'i18n_commodity_code_error' ]
+					);
+				}
+			)
+
+			// Customs descriptions allow only letters, digits, spaces, punctuation and printable ASCII symbols, so emoji
+			// and symbols such as ™ are dropped. RegExp() keeps the legacy ES5 parser from rejecting the u flag.
+			.on(
+				'input',
+				'input[type=text][name*=_customs_description]',
+				function () {
+					var value = $( this ).val();
+					var cleaned = value.replace(
+						new RegExp(
+							'[^\\x20-\\x7E\\p{L}\\p{Mn}\\p{Mc}\\p{N}\\p{P}\\s]|[\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]',
+							'gu'
+						),
+						''
+					);
+
+					if ( cleaned !== value ) {
+						var caret =
+							this.selectionStart -
+							( value.length - cleaned.length );
+						$( this ).val( cleaned );
+						this.setSelectionRange( caret, caret );
+					}
+
+					$( document.body ).triggerHandler(
+						cleaned !== value
+							? 'wc_add_error_tip'
+							: 'wc_remove_error_tip',
+						[ $( this ), 'i18n_customs_description_error' ]
+					);
+				}
+			)
+
+			// Keep only the digits that will be stored, and flag a code shorter than 6 digits.
+			.on(
+				'change',
+				'input[type=text][name*=_customs_commodity_code]',
+				function () {
+					var cleaned = $( this ).val().replace( /[^0-9]/g, '' );
+					$( this ).val( cleaned );
+
+					$( document.body ).triggerHandler(
+						cleaned && cleaned.length < 6
+							? 'wc_add_error_tip'
+							: 'wc_remove_error_tip',
+						[ $( this ), 'i18n_commodity_code_error' ]
+					);
+				}
+			)
+
 			.on( 'init_tooltips', function () {
 				$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 					attribute: 'data-tip',
