@@ -45,8 +45,11 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsGroupedProductItemMock();
 			new AddToCartWithOptionsGroupedProductItemSelectorMock();
 			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
+			// The VariationSelectorAttribute tests may have registered these already.
+			if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options-variation-selector-attribute' ) ) {
+				new AddToCartWithOptionsVariationSelectorAttributeMock();
+				new AddToCartWithOptionsVariationSelectorAttributeNameMock();
+			}
 
 			self::$are_blocks_registered = true;
 		}
