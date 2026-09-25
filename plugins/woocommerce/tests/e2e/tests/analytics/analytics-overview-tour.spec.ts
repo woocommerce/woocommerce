@@ -41,6 +41,11 @@ const testAsNewAdmin = test.extend< {
 	},
 } );
 
+testAsNewAdmin.skip(
+	!! process.env.IS_MULTISITE,
+	'The REST API cannot delete users on multisite, so the new admin cannot be cleaned up'
+);
+
 testAsNewAdmin(
 	'points new admins at the Performance menu until they open it',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
