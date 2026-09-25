@@ -451,6 +451,26 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep an optional reason on a cash sale.
+	 */
+	public function test_cash_sale_with_reason(): void {
+		$session_id = $this->open_session()->get_data()['id'];
+		$order      = $this->create_cash_order( '10.00' );
+
+		$response = $this->record_movement(
+			$session_id,
+			array(
+				'type'     => 'cash_sale',
+				'order_id' => $order->get_id(),
+				'reason'   => 'Walk-in',
+			)
+		);
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 'Walk-in', $response->get_data()['reason'] );
+	}
+
+	/**
 	 * @testdox Should reject cash sale sources that are not recognized, paid, or in the session currency.
 	 */
 	public function test_cash_sale_source_validation(): void {

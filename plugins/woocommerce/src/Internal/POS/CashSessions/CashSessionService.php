@@ -626,11 +626,11 @@ class CashSessionService {
 		$rules = array(
 			CashMovementType::CASH_SALE   => array(
 				'required'  => array( 'order_id' ),
-				'forbidden' => array( 'amount', 'refund_id', 'occurred_at', 'reason' ),
+				'forbidden' => array( 'amount', 'refund_id', 'occurred_at' ),
 			),
 			CashMovementType::CASH_REFUND => array(
 				'required'  => array( 'order_id', 'refund_id' ),
-				'forbidden' => array( 'amount', 'occurred_at', 'reason' ),
+				'forbidden' => array( 'amount', 'occurred_at' ),
 			),
 			CashMovementType::PAID_IN     => array(
 				'required'  => array( 'amount', 'reason' ),
