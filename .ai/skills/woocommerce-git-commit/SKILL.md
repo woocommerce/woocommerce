@@ -111,6 +111,8 @@ Type: dev
 Comment: Remove real sleep() calls from PHP unit tests; no production change.
 ```
 
+What to actually write in each field — who reads it, the length targets, and the review bar — is in the Changelog Entries section of the repository root `AGENTS.md`.
+
 Do not confuse `Comment:` with the pull request template's "Comment required below" field. That one belongs to the PR form and is unrelated to the changelog file.
 
 Changes that touch no package (for example `.ai/skills/` or `AGENTS.md`) need no entry at all.

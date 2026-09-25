@@ -349,7 +349,7 @@ final class Wishlist extends AbstractBlock {
 	 * Get the frontend style handle for this block type.
 	 *
 	 * Returning null lets WP use the `style` array from block.json, which
-	 * lists this block's own stylesheet plus the atomic
+	 * lists this block's own stylesheet plus the product element
 	 * product-image / product-price / product-button stylesheets we
 	 * borrow class names from.
 	 *
