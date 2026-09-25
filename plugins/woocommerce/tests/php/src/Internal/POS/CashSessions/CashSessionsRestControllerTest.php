@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\CashSessions;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsDataStore;
+use DateTimeImmutable;
+use DateTimeZone;
 use WC_Order;
 use WC_Order_Refund;
 use WC_REST_Unit_Test_Case;
@@ -337,6 +339,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_paid_in_and_out_totals(): void {
 		$session_id = $this->open_session( array( 'opening_amount' => '100.00' ) )->get_data()['id'];
+		$now        = time();
 
 		$in  = $this->record_movement(
 			$session_id,
@@ -344,7 +347,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'type'        => 'paid_in',
 				'amount'      => '25.10',
 				'reason'      => 'Extra change',
-				'occurred_at' => '2026-09-25T14:00:00+02:00',
+				'occurred_at' => self::device_time( $now, '+02:00' ),
 			)
 		);
 		$out = $this->record_movement(
@@ -358,7 +361,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 201, $in->get_status() );
 		$this->assertSame( 'in', $in->get_data()['direction'] );
-		$this->assertSame( '2026-09-25T12:00:00Z', $in->get_data()['occurred_at'] );
+		$this->assertSame( self::device_time( $now ), $in->get_data()['occurred_at'] );
 		$this->assertSame( $this->manager_id, $in->get_data()['created_by'] );
 		$this->assertSame( 'Store Manager', $in->get_data()['created_by_name'] );
 		$this->assertSame( 'out', $out->get_data()['direction'] );
@@ -803,6 +806,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		)->get_data()['id'];
 		$before     = $this->request( 'GET', self::BASE . "/$session_id" )->get_data();
+		$now        = time();
 
 		$correlation = wp_generate_uuid4();
 		$requested   = $this->record_drawer_event(
@@ -820,7 +824,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'reason'         => 'no_sale',
 				'correlation_id' => $correlation,
 				'drawer_id'      => ' FRONT counter',
-				'occurred_at'    => '2026-09-25T15:00:05+03:00',
+				'occurred_at'    => self::device_time( $now, '+03:00' ),
 			)
 		);
 
@@ -828,7 +832,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Front counter', $requested->get_data()['drawer_id'] );
 		$this->assertSame( 201, $opened->get_status() );
 		$this->assertSame( 'Front counter', $opened->get_data()['drawer_id'], 'Events keep the session spelling' );
-		$this->assertSame( '2026-09-25T12:00:05Z', $opened->get_data()['occurred_at'] );
+		$this->assertSame( self::device_time( $now ), $opened->get_data()['occurred_at'] );
 		$this->assertSame( $correlation, $opened->get_data()['correlation_id'] );
 		$this->assertSame( $this->manager_id, $opened->get_data()['created_by'] );
 		$this->assertSame( $before, $this->request( 'GET', self::BASE . "/$session_id" )->get_data() );
@@ -878,6 +882,34 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a client occurred_at before the session opened or in the future, allowing clock skew.
+	 */
+	public function test_occurred_at_must_be_within_session(): void {
+		$session_id = $this->open_session( array( 'drawer_id' => 'Till' ) )->get_data()['id'];
+		$now        = time();
+		$paid_in    = fn( int $time ) => $this->record_movement(
+			$session_id,
+			array(
+				'type'        => 'paid_in',
+				'amount'      => '1.00',
+				'reason'      => 'x',
+				'occurred_at' => self::device_time( $time ),
+			)
+		);
+
+		$this->assert_error( $paid_in( $now + HOUR_IN_SECONDS ), 400, 'woocommerce_rest_cash_invalid_timestamp' );
+		$this->assert_error( $paid_in( $now - HOUR_IN_SECONDS ), 400, 'woocommerce_rest_cash_invalid_timestamp' );
+		$this->assert_error( $this->record_drawer_event( $session_id, array( 'occurred_at' => self::device_time( $now + HOUR_IN_SECONDS ) ) ), 400, 'woocommerce_rest_cash_invalid_timestamp' );
+		$this->assert_error( $this->record_drawer_event( $session_id, array( 'occurred_at' => '2020-01-01T00:00:00Z' ) ), 400, 'woocommerce_rest_cash_invalid_timestamp' );
+		$this->assertSame( 1, $this->count_rows( 'movements' ) );
+		$this->assertSame( 0, $this->count_rows( 'drawer_events' ) );
+
+		$this->assertSame( 201, $paid_in( $now + 60 )->get_status(), 'A device clock a minute ahead is accepted' );
+		$this->assertSame( 201, $paid_in( $now - 60 )->get_status(), 'A device clock a minute behind is accepted' );
+		$this->assertSame( 201, $this->record_drawer_event( $session_id, array( 'occurred_at' => self::device_time( $now + 60 ) ) )->get_status() );
+	}
+
+	/**
 	 * @testdox Should replay drawer event retries, including after close.
 	 */
 	public function test_drawer_event_retries(): void {
@@ -886,7 +918,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			'request_id'  => wp_generate_uuid4(),
 			'type'        => 'open_failed',
 			'reason'      => 'cash_sale',
-			'occurred_at' => '2026-09-25T12:00:00Z',
+			'occurred_at' => self::device_time( time() ),
 		);
 
 		$first = $this->request( 'POST', self::BASE . "/$session_id/drawer-events", $body );
@@ -912,7 +944,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			'request_id'  => wp_generate_uuid4(),
 			'type'        => 'opened',
 			'reason'      => 'no_sale',
-			'occurred_at' => '2026-09-25T12:00:00Z',
+			'occurred_at' => self::device_time( time() ),
 		);
 
 		$first = $this->request( 'POST', self::BASE . "/$session_id/drawer-events", $body );
@@ -1090,7 +1122,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'request_id'  => wp_generate_uuid4(),
 				'type'        => 'open_requested',
 				'reason'      => 'no_sale',
-				'occurred_at' => '2026-09-25T12:00:00Z',
+				'occurred_at' => self::device_time( time() ),
 			),
 			$overrides
 		);
@@ -1145,6 +1177,20 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
 		return $refund;
+	}
+
+	/**
+	 * Format a Unix time as an RFC 3339 device timestamp.
+	 *
+	 * @param int    $time   Unix time.
+	 * @param string $offset UTC offset such as "+02:00", or "Z".
+	 * @return string
+	 */
+	private static function device_time( int $time, string $offset = 'Z' ): string {
+		if ( 'Z' === $offset ) {
+			return gmdate( 'Y-m-d\\TH:i:s\\Z', $time );
+		}
+		return ( new DateTimeImmutable( '@' . $time ) )->setTimezone( new DateTimeZone( $offset ) )->format( 'Y-m-d\\TH:i:sP' );
 	}
 
 	/**

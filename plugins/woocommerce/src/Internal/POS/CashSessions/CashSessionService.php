@@ -28,6 +28,11 @@ use Throwable;
 class CashSessionService {
 
 	/**
+	 * Allowed device clock skew, in seconds, when checking a client occurred_at against the session and server time.
+	 */
+	private const CLOCK_SKEW_SECONDS = 300;
+
+	/**
 	 * Storage.
 	 *
 	 * @var CashSessionsDataStore
@@ -440,6 +445,7 @@ class CashSessionService {
 		}
 
 		$this->check_event_drawer( $session, $drawer );
+		$this->check_occurred_at( $session, $occurred_at );
 		$this->source_resolver->check_references( $references['order_id'], $references['refund_id'] );
 		if ( null !== $references['movement_id'] ) {
 			$movement = $this->data_store->get_movement( $references['movement_id'] );
@@ -610,7 +616,7 @@ class CashSessionService {
 			$row,
 			array(
 				'amount'          => $amount,
-				'occurred_at_gmt' => isset( $params['occurred_at'] ) ? $this->parse_timestamp( (string) $params['occurred_at'] ) : $now,
+				'occurred_at_gmt' => isset( $params['occurred_at'] ) ? $this->check_occurred_at( $session, $this->parse_timestamp( (string) $params['occurred_at'] ) ) : $now,
 			)
 		);
 	}
@@ -887,6 +893,25 @@ class CashSessionService {
 		} catch ( InvalidArgumentException $e ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_timestamp', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Reject a client occurred_at that is before the session opened or in the future, allowing for clock skew.
+	 *
+	 * @param array<string, mixed> $session Session row.
+	 * @param string               $gmt     UTC storage value.
+	 * @return string The same value.
+	 * @throws CashSessionException When the time is outside the session.
+	 */
+	private function check_occurred_at( array $session, string $gmt ): string {
+		$time = strtotime( $gmt . ' UTC' );
+		if ( $time < strtotime( $session['date_created_gmt'] . ' UTC' ) - self::CLOCK_SKEW_SECONDS ) {
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_timestamp', __( 'The time is before the cash session opened.', 'woocommerce' ) );
+		}
+		if ( $time > time() + self::CLOCK_SKEW_SECONDS ) {
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_timestamp', __( 'The time is in the future.', 'woocommerce' ) );
+		}
+		return $gmt;
 	}
 
 	/**
