@@ -48,7 +48,14 @@ jobs:
             - name: Setup PNPM
               uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
+            - name: Skip changelog push for cross-repository pull requests
+              if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
+              run: |
+                  echo "Skipping changelog automation for cross-repository pull request."
+                  echo "The base repository token cannot push to the contributor fork."
+
             - name: Generate Changelog File
+              if: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository }}
               env:
                   GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
               run: pnpm utils changefile ${{ github.event.number || inputs.prNumber }} -o ${{ github.repository_owner }}

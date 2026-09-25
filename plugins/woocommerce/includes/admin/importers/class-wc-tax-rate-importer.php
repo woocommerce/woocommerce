@@ -125,7 +125,20 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 * @return string
 	 */
 	public function format_data_from_csv( $data, $enc ) {
-		return ( 'UTF-8' === $enc ) ? $data : utf8_encode( $data );
+		$data = (string) $data;
+
+		if ( 'UTF-8' === $enc ) {
+			return $data;
+		}
+
+		if ( function_exists( 'mb_convert_encoding' ) ) {
+			$converted = mb_convert_encoding( $data, 'UTF-8', 'ISO-8859-1' );
+			if ( false !== $converted ) {
+				return $converted;
+			}
+		}
+
+		return wp_scrub_utf8( $data );
 	}
 
 	/**
