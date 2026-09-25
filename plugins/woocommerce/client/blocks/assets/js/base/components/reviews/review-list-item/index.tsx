@@ -26,6 +26,7 @@ function getReviewImage(
 	}
 	const productImage = review.product_image;
 	const thumbnailSrcSet = productImage?.thumbnail_srcset || undefined;
+	const thumbnailSizes = productImage?.thumbnail_sizes || undefined;
 
 	return (
 		<div className="wc-block-review-list-item__image wc-block-components-review-list-item__image">
@@ -35,6 +36,7 @@ function getReviewImage(
 					alt={ productImage?.alt || '' }
 					src={ productImage?.thumbnail || '' }
 					srcSet={ thumbnailSrcSet }
+					sizes={ thumbnailSizes }
 				/>
 			) : (
 				// The alt text is left empty on purpose, as it's considered a decorative image.

@@ -18,6 +18,7 @@ export type Review =
 				alt: string;
 				thumbnail: string;
 				thumbnail_srcset?: string;
+				thumbnail_sizes?: string;
 				name: string;
 				sizes: string;
 				src: string;
