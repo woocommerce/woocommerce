@@ -240,9 +240,6 @@ class ReportExporter {
 	/**
 	 * Queue the next page of an export.
 	 *
-	 * The page is due now, not in 5 seconds as schedule_action() queues it, so the runner that wrote this
-	 * page writes the next one in the same run instead of the export waiting for the next runner.
-	 *
 	 * @param array $args Arguments for export_report().
 	 * @return void
 	 */
@@ -528,7 +525,6 @@ class ReportExporter {
 	 */
 	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
 		if ( 100 !== self::get_export_percentage_complete( $report_type, $export_id ) ) {
-			// Say so rather than finishing quietly: the scheduler records this action as complete either way.
 			wc_get_logger()->warning(
 				sprintf( 'Not emailing the %1$s report export %2$s: it never reported itself complete.', $report_type, $export_id ),
 				array( 'source' => 'report-csv-exporter' )

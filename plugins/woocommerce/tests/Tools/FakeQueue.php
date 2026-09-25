@@ -74,8 +74,7 @@ class FakeQueue implements \WC_Queue_Interface {
 	public function search( $args = array(), $return_format = OBJECT ) {
 		$result = array();
 
-		// Only a search naming both the hook and the exact arguments is matched; any other search
-		// finds nothing, which is what it finds against a real queue too.
+		// Only a search naming both the hook and the exact arguments is matched.
 		if ( ! isset( $args['args'], $args['hook'] ) ) {
 			return $result;
 		}
