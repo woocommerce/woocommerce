@@ -139,9 +139,72 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
+		} else {
+			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
 		$customer->set_object_read( true );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address when the store defaults the shipping destination
+	 * to the billing address (the "Shipping destination" shipping option).
+	 *
+	 * Runs only when there is no usable session snapshot for the customer: a fresh load from their account, or
+	 * a snapshot invalidated because the account was modified. A shipping address set earlier in the same
+	 * session is kept for as long as its snapshot stays valid.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	protected function maybe_default_shipping_to_billing( &$customer ): void {
+		$default_to_billing = 'shipping' !== get_option( 'woocommerce_ship_to_destination', 'billing' )
+			&& $this->billing_address_can_replace_shipping( $customer );
+
+		/**
+		 * Filters whether the customer's billing address is used as their default shipping address when the
+		 * session customer is loaded without a usable session snapshot.
+		 *
+		 * Returning false leaves the saved shipping address in place without changing the "Shipping destination"
+		 * setting, which also drives the shortcode checkout's "Ship to a different address?" checkbox.
+		 *
+		 * @since 11.3.0
+		 * @param bool        $default_to_billing Whether the billing address is copied over the shipping address.
+		 * @param WC_Customer $customer           Customer object.
+		 */
+		if ( ! apply_filters( 'woocommerce_customer_session_default_shipping_to_billing', $default_to_billing, $customer ) ) {
+			return;
+		}
+
+		foreach ( $customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
+				$customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
+	}
+
+	/**
+	 * Checks whether the billing address is complete enough to stand in as the shipping destination.
+	 *
+	 * The whole billing address is copied, empty fields included, so a billing address holding little more than
+	 * a country would replace a complete saved shipping address with one that postcode and city based shipping
+	 * zones can no longer match. Such an address is only used when there is no saved shipping address to lose.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	protected function billing_address_can_replace_shipping( $customer ): bool {
+		if ( ! $customer->get_billing_country() ) {
+			return false;
+		}
+
+		if ( ! $customer->has_shipping_address() ) {
+			return true;
+		}
+
+		return (bool) $customer->get_billing_address_1() || (bool) $customer->get_billing_postcode() || (bool) $customer->get_billing_city();
 	}
 
 	/**
@@ -156,14 +219,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 			if ( ! $customer->get_billing_country() ) {
 				$customer->set_billing_country( $default['country'] );
+
+				// The default state only makes sense together with the default country: a saved address in a country
+				// without states must not pick up the store's base state.
+				if ( ! $customer->get_billing_state() ) {
+					$customer->set_billing_state( $default['state'] );
+				}
 			}
 
 			if ( ! $customer->get_shipping_country() && ! $has_shipping_address ) {
 				$customer->set_shipping_country( $customer->get_billing_country() );
-			}
-
-			if ( ! $customer->get_billing_state() ) {
-				$customer->set_billing_state( $default['state'] );
 			}
 
 			if ( ! $customer->get_shipping_state() && ! $has_shipping_address ) {
