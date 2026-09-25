@@ -142,6 +142,7 @@ jQuery( function ( $ ) {
 
 			$address.hide();
 			$this.parent().find( 'a' ).toggle();
+			$this.parent().find( '.wc-order-copy-address' ).hide();
 
 			if ( ! $country_input.val() ) {
 				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).trigger( 'change' );

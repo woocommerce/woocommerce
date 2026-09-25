@@ -533,4 +533,27 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		unset( $_GET['order_date_type'], $_GET['m'], $GLOBALS['pagenow'] );
 		wp_delete_post( $order->get_id(), true );
 	}
+
+	/**
+	 * @testdox Order preview details report which addresses exist, without falling back to billing for shipping.
+	 */
+	public function test_order_preview_details_report_which_addresses_exist(): void {
+		$order = wc_create_order();
+		$order->set_billing_first_name( 'Maria' );
+		$order->set_billing_address_1( '742 Evergreen Terrace' );
+		$order->save();
+
+		$details = WC_Admin_List_Table_Orders::order_preview_get_order_details( $order );
+
+		$this->assertTrue( $details['has_billing_address'], 'An order with a billing address should report one.' );
+		$this->assertFalse( $details['has_shipping_address'], 'An order without a shipping address should not report one.' );
+
+		$order->set_shipping_first_name( 'Aiko' );
+		$order->set_shipping_address_1( '1200 Pine Ave' );
+		$order->save();
+
+		$details = WC_Admin_List_Table_Orders::order_preview_get_order_details( $order );
+
+		$this->assertTrue( $details['has_shipping_address'], 'An order with a shipping address should report one.' );
+	}
 }
