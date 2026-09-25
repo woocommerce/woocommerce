@@ -147,7 +147,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'args'                => $this->get_args( 'delete' ),
-					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_authenticated' ),
+					'permission_callback' => array( $this, 'authorize_wpcom_or_allowed_user_while_enabled' ),
 				),
 				'schema' => array( $this, 'get_schema' ),
 			)

@@ -1195,12 +1195,12 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should still require an allowed role when the request is not from WPCOM.
 	 */
-	public function test_authorize_as_from_wpcom_or_authenticated_rejects_user_without_role(): void {
+	public function test_authorize_wpcom_or_allowed_user_while_enabled_rejects_user_without_role(): void {
 		wp_set_current_user( $this->subscriber_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
 
-		$this->assertFalse( $this->controller->authorize_as_from_wpcom_or_authenticated( $request ) );
+		$this->assertFalse( $this->controller->authorize_wpcom_or_allowed_user_while_enabled( $request ) );
 	}
 
 	/**
