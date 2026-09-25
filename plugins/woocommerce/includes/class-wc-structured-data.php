@@ -44,6 +44,7 @@ class WC_Structured_Data {
 
 		// Output structured data.
 		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
+		add_action( 'wp_footer', array( $this, 'maybe_generate_product_data' ), 9 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 	}
 
@@ -173,6 +174,32 @@ class WC_Structured_Data {
 		echo '<div style="display: none; font-size: 0; max-height: 0; line-height: 0; padding: 0; mso-hide: all;">';
 		$this->output_structured_data();
 		echo '</div>';
+	}
+
+	/**
+	 * Generates product data when a single product template did not generate it.
+	 *
+	 * Hooked into `wp_footer` before structured data is output.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function maybe_generate_product_data() {
+		if ( ! is_product() ) {
+			return;
+		}
+
+		foreach ( $this->get_data() as $data ) {
+			if ( in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
+				return;
+			}
+		}
+
+		$product = wc_get_product( get_queried_object_id() );
+		if ( $product ) {
+			$this->generate_product_data( $product );
+		}
 	}
 
 	/**
