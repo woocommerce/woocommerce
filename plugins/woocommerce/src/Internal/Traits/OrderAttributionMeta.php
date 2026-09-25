@@ -344,8 +344,10 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the label for the order origin.
 		 *
-		 * This label should have a %s placeholder for the formatted source to be inserted
-		 * via sprintf().
+		 * A label with a %s placeholder has the formatted source inserted via sprintf().
+		 * A label without a placeholder is used as the complete origin, which lets custom
+		 * source types show their own text instead of "Unknown". An empty label falls
+		 * back to the formatted source.
 		 *
 		 * @since 8.5.0
 		 *
@@ -363,7 +365,7 @@ trait OrderAttributionMeta {
 		);
 
 		if ( false === strpos( $label, '%' ) ) {
-			return $formatted_source;
+			return '' === $label ? $formatted_source : $label;
 		}
 
 		return sprintf( $label, $formatted_source );

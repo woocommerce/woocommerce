@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use an order attribution origin label filtered without a %s placeholder as the complete origin instead of discarding it, so custom source types can show their own label.
