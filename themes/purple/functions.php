@@ -10,6 +10,10 @@
 
 declare( strict_types = 1 );
 
+if ( is_admin() ) {
+	require_once get_template_directory() . '/inc/woocommerce-compatibility.php';
+}
+
 if ( ! function_exists( 'purple_hide_store_templates_from_template_picker' ) ) :
 	/**
 	 * Keep store templates out of the post editor's "Change template" picker.
