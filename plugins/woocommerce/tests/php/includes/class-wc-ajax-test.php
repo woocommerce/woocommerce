@@ -1867,13 +1867,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
 	 * @dataProvider update_order_review_notice_cases_provider
 	 *
-	 * @param array[] $notices                Notices to add during the checkout update.
-	 * @param string  $expected_result        Expected legacy AJAX result, which only reports whether a notice was rendered.
-	 * @param bool    $expected_has_errors    Expected error flag.
-	 * @param bool    $reload_checkout        Whether the callback requests a checkout reload.
-	 * @param bool    $suppress_notice_output Whether a filter empties `woocommerce_notice_types`, the way Funnel Builder does on AJAX requests.
+	 * @param array[]       $notices             Notices to add during the checkout update.
+	 * @param string        $expected_result     Expected legacy AJAX result, which only reports whether a notice was rendered.
+	 * @param bool          $expected_has_errors Expected error flag.
+	 * @param bool          $reload_checkout     Whether the callback requests a checkout reload.
+	 * @param string[]|null $rendered_types      Notice types a `woocommerce_notice_types` filter keeps, or null for no filter. An empty list suppresses every notice, the way Funnel Builder does on AJAX requests.
 	 */
-	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, bool $suppress_notice_output = false ): void {
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, ?array $rendered_types = null ): void {
 		$product            = null;
 		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
 		$original_customer  = clone WC()->customer;
@@ -1909,8 +1909,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			};
 			add_action( 'woocommerce_checkout_update_order_review', $callback, 10, 1 );
 
-			if ( $suppress_notice_output ) {
-				add_filter( 'woocommerce_notice_types', '__return_empty_array' );
+			if ( null !== $rendered_types ) {
+				add_filter(
+					'woocommerce_notice_types',
+					static function () use ( $rendered_types ) {
+						return $rendered_types;
+					}
+				);
 			}
 
 			$_POST = array(
@@ -1928,10 +1933,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
 			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
 
-			if ( $reload_checkout || $suppress_notice_output || empty( $notices ) ) {
+			if ( $reload_checkout || array() === $rendered_types || empty( $notices ) ) {
 				$this->assertSame( '', $response['messages'], 'The response should carry no rendered notices.' );
 			} else {
 				foreach ( $notices as $notice ) {
+					if ( null !== $rendered_types && ! in_array( $notice['type'], $rendered_types, true ) ) {
+						$this->assertStringNotContainsString( $notice['message'], $response['messages'], 'The response should leave out notice types the filter removed.' );
+						continue;
+					}
 					$this->assertStringContainsString( $notice['message'], $response['messages'], 'The response should retain each rendered notice message.' );
 					$this->assertStringContainsString( $notice['class'], $response['messages'], 'The response should retain each rendered notice type.' );
 				}
@@ -1959,7 +1968,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * The legacy result stays `failure` whenever a notice was rendered, whatever its type, so only
 	 * the error flag tells a real failure apart from a success or info notice. Both report what
-	 * rendered, so a queued error that a filter keeps off the page counts for neither.
+	 * rendered, so a queued error that a filter keeps off the page counts for neither, even when
+	 * the filter still lets other notice types through.
 	 *
 	 * @return array[]
 	 */
@@ -2047,7 +2057,25 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				'success',
 				false,
 				false,
-				true,
+				array(),
+			),
+			'error notice kept off the page beside a success notice' => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				false,
+				false,
+				array( 'success', 'notice' ),
 			),
 		);
 	}
