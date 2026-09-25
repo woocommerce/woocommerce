@@ -197,6 +197,17 @@ class NotificationProcessor {
 			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
 		);
 
+		$target_token_id = $notification->get_target_token_id();
+
+		if ( null !== $target_token_id ) {
+			$eligible_tokens = array_values(
+				array_filter(
+					$eligible_tokens,
+					fn( PushToken $token ) => (int) $token->get_id() === $target_token_id
+				)
+			);
+		}
+
 		/**
 		 * Filter out tokens whose owning user does not want this notification.
 		 * The decision is delegated to the notification itself via

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNoti
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\TestNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -129,6 +130,54 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should send a notification with a target token to that token only.
+	 */
+	public function test_process_sends_only_to_the_target_token(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn(
+			array(
+				new PushToken(
+					array(
+						'id'       => 11,
+						'user_id'  => 1,
+						'token'    => 'other-token',
+						'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+						'platform' => PushToken::PLATFORM_APPLE,
+					)
+				),
+				new PushToken(
+					array(
+						'id'       => 12,
+						'user_id'  => 1,
+						'token'    => 'target-token',
+						'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+						'platform' => PushToken::PLATFORM_APPLE,
+					)
+				),
+			)
+		);
+
+		$this->dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch' )
+			->with(
+				$this->anything(),
+				$this->callback( fn( array $tokens ) => array( 'target-token' ) === array_map( fn( PushToken $token ) => $token->get_token(), $tokens ) )
+			)
+			->willReturn(
+				array(
+					'success'     => true,
+					'retry_after' => null,
+				)
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $this->step_logger );
+
+		$this->assertTrue( $sut->process( new TestNotification( 5, 12 ) ) );
 	}
 
 	/**

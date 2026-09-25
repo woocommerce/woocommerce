@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add a WordPress.com-only push notification test endpoint; nothing is shown to merchants.
+
