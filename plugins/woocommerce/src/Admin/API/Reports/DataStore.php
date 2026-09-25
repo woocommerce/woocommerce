@@ -1489,6 +1489,59 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	}
 
 	/**
+	 * Returns payment gateway subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   Boolean operator joining the include and exclude clauses.
+	 * @return string
+	 */
+	protected function get_payment_method_subquery( $query_args, $operator = 'AND' ) {
+		global $wpdb;
+
+		$table      = $wpdb->prefix . 'wc_order_stats';
+		$subqueries = array();
+
+		$included = $this->get_payment_method_list( $query_args, 'payment_method_is' );
+		if ( $included ) {
+			$subqueries[] = "{$table}.payment_method IN ( {$included} )";
+		}
+
+		$excluded = $this->get_payment_method_list( $query_args, 'payment_method_is_not' );
+		if ( $excluded ) {
+			// Orders placed without a gateway, and rows written before the column existed, carry NULL.
+			// NOT IN would drop them, and they are not the excluded gateway either.
+			$subqueries[] = "( {$table}.payment_method IS NULL OR {$table}.payment_method NOT IN ( {$excluded} ) )";
+		}
+
+		return implode( " {$operator} ", $subqueries );
+	}
+
+	/**
+	 * Build a quoted SQL list from the payment gateway ids held in a query argument.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $field      Query argument holding the ids.
+	 * @return string Comma separated list of quoted ids, empty when there is nothing to filter on.
+	 */
+	private function get_payment_method_list( $query_args, $field ) {
+		$payment_methods = isset( $query_args[ $field ] ) && is_array( $query_args[ $field ] ) ? $query_args[ $field ] : array();
+		$payment_methods = array_filter(
+			array_map( 'strval', $payment_methods ),
+			function ( $payment_method ) {
+				return '' !== $payment_method;
+			}
+		);
+
+		if ( ! $payment_methods ) {
+			return '';
+		}
+
+		return "'" . implode( "','", array_map( 'esc_sql', $payment_methods ) ) . "'";
+	}
+
+	/**
 	 * Returns customer subquery to be used in WHERE SQL query, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.

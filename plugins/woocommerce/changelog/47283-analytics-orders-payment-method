@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Analytics: report the payment method on the Orders report, as a column, a CSV export column, and an advanced filter.

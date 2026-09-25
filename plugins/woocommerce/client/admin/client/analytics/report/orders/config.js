@@ -13,7 +13,7 @@ import {
 	getTaxRateLabels,
 	getVariationLabels,
 } from '../../../lib/async-requests';
-import { ORDER_STATUSES } from '~/utils/admin-settings';
+import { ORDER_STATUSES, PAYMENT_GATEWAYS } from '~/utils/admin-settings';
 
 const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
 const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';
@@ -264,6 +264,40 @@ export const advancedFilters = applyFilters(
 						},
 					],
 					defaultOption: 'new',
+				},
+			},
+			payment_method: {
+				labels: {
+					add: __( 'Payment method', 'woocommerce' ),
+					remove: __( 'Remove payment method filter', 'woocommerce' ),
+					rule: __(
+						'Select a payment method filter match',
+						'woocommerce'
+					),
+					/* translators: A sentence describing a Payment method filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
+					title: __(
+						'<title>Payment method</title> <rule/> <filter/>',
+						'woocommerce'
+					),
+					filter: __( 'Select a payment method', 'woocommerce' ),
+				},
+				rules: [
+					{
+						value: 'is',
+						/* translators: Sentence fragment, logical, "Is" refers to searching for orders paid with a chosen payment method. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x( 'Is', 'payment method', 'woocommerce' ),
+					},
+					{
+						value: 'is_not',
+						/* translators: Sentence fragment, logical, "Is Not" refers to searching for orders not paid with a chosen payment method. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x( 'Is Not', 'payment method', 'woocommerce' ),
+					},
+				],
+				input: {
+					component: 'SelectControl',
+					options: Object.entries( PAYMENT_GATEWAYS ).map(
+						( [ value, label ] ) => ( { value, label } )
+					),
 				},
 			},
 			refunds: {
