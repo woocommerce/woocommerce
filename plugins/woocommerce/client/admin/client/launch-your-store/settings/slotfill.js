@@ -99,7 +99,16 @@ const SiteVisibility = () => {
 				initValues.siteVisibilityBadge ===
 					currentValues.siteVisibilityBadge;
 		}
-	}, [ comingSoon, storePagesOnly, privateLink, siteVisibilityBadge ] );
+	}, [
+		comingSoon,
+		storePagesOnly,
+		privateLink,
+		siteVisibilityBadge,
+		setting.woocommerce_coming_soon,
+		setting.woocommerce_store_pages_only,
+		setting.woocommerce_private_link,
+		setting.woocommerce_feature_site_visibility_badge_enabled,
+	] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -174,6 +183,7 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'yes' );
+						setSiteVisibilityBadge( 'yes' );
 						recordEvent( 'site_visibility_toggle', {
 							status: 'coming_soon',
 						} );
@@ -297,6 +307,7 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'no' );
+						setSiteVisibilityBadge( 'no' );
 						recordEvent( 'site_visibility_toggle', {
 							status: 'live',
 						} );
