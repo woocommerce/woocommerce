@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component, Fragment, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
-import { withSelect } from '@wordpress/data';
+import { useSelect, useDispatch, withSelect } from '@wordpress/data';
+import { optionsStore } from '@woocommerce/data';
 import {
 	EllipsisMenu,
 	MenuItem,
@@ -34,74 +35,75 @@ const { performanceIndicators: indicators } = getAdminSetting(
 	}
 );
 
-const TOUR_SEEN_KEY = 'wc-performance-metrics-tour-seen';
+const TOUR_OPTION = 'woocommerce_performance_metrics_tour_shown';
 
-const hasSeenTour = () => {
-	try {
-		return window.localStorage.getItem( TOUR_SEEN_KEY ) === 'yes';
-	} catch {
-		// Storage unavailable: treat as seen so the tour never traps anyone.
-		return true;
+/**
+ * A one-time introduction to the menu that holds the hidden metrics.
+ *
+ * Dismissal is stored as a user option rather than in the browser, matching
+ * ReportDateTour, so it doesn't reappear on a merchant's second device.
+ */
+const MetricsMenuTour = () => {
+	const [ isDismissed, setIsDismissed ] = useState( false );
+	const { updateOptions } = useDispatch( optionsStore );
+
+	const { shouldShowTour, isResolving } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } = select( optionsStore );
+
+		return {
+			shouldShowTour: getOption( TOUR_OPTION ) !== 'yes',
+			isResolving: ! hasFinishedResolution( 'getOption', [
+				TOUR_OPTION,
+			] ),
+		};
+	}, [] );
+
+	if ( isDismissed || ! shouldShowTour || isResolving ) {
+		return null;
 	}
+
+	return (
+		<TourKit
+			config={ {
+				steps: [
+					{
+						referenceElements: {
+							desktop:
+								'.woocommerce-dashboard__performance-menu .woocommerce-ellipsis-menu__toggle',
+						},
+						meta: {
+							heading: __(
+								'Choose which metrics to display',
+								'woocommerce'
+							),
+							descriptions: {
+								desktop: __(
+									'Some are hidden by default. Add or remove them from this menu.',
+									'woocommerce'
+								),
+							},
+							primaryButton: {
+								text: __( 'Got it', 'woocommerce' ),
+							},
+						},
+					},
+				],
+				closeHandler: () => {
+					void updateOptions( { [ TOUR_OPTION ]: 'yes' } );
+					setIsDismissed( true );
+				},
+				options: {
+					effects: {
+						arrowIndicator: true,
+						spotlight: { interactivity: { enabled: true } },
+					},
+				},
+			} }
+		/>
+	);
 };
 
 class StorePerformance extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = { showTour: ! hasSeenTour() };
-		this.dismissTour = this.dismissTour.bind( this );
-	}
-
-	dismissTour() {
-		try {
-			window.localStorage.setItem( TOUR_SEEN_KEY, 'yes' );
-		} catch {}
-		this.setState( { showTour: false } );
-	}
-
-	renderTour() {
-		if ( ! this.state.showTour ) {
-			return null;
-		}
-
-		return (
-			<TourKit
-				config={ {
-					steps: [
-						{
-							referenceElements: {
-								desktop:
-									'.woocommerce-dashboard__performance-menu .woocommerce-ellipsis-menu__toggle',
-							},
-							meta: {
-								heading: __(
-									'Choose which metrics to display',
-									'woocommerce'
-								),
-								descriptions: {
-									desktop: __(
-										'Some are hidden by default. Add or remove them from this menu.',
-										'woocommerce'
-									),
-								},
-								primaryButton: {
-									text: __( 'Got it', 'woocommerce' ),
-								},
-							},
-						},
-					],
-					closeHandler: this.dismissTour,
-					options: {
-						effects: {
-							arrowIndicator: true,
-							spotlight: { interactivity: { enabled: true } },
-						},
-					},
-				} }
-			/>
-		);
-	}
-
 	renderMenu() {
 		const {
 			hiddenBlocks,
@@ -255,7 +257,7 @@ class StorePerformance extends Component {
 						{ this.renderList() }
 					</div>
 				) }
-				{ this.renderTour() }
+				<MetricsMenuTour />
 			</Fragment>
 		);
 	}
