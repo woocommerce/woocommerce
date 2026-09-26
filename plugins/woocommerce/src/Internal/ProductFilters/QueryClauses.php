@@ -168,7 +168,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( isset( $price_range['min_price'] ) ) {
-			$min_price_filter = intval( $price_range['min_price'] );
+			$min_price_filter = (float) wc_format_decimal( $price_range['min_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'max_price', '>=' );
@@ -178,7 +178,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( isset( $price_range['max_price'] ) ) {
-			$max_price_filter = intval( $price_range['max_price'] );
+			$max_price_filter = (float) wc_format_decimal( $price_range['max_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'min_price', '<=' );
@@ -210,6 +210,21 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $args;
 		}
 
+		if ( 'yes' !== get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+			return $this->add_attribute_taxonomy_clauses( $args, $chosen_attributes );
+		}
+
+		return $this->add_attribute_lookup_table_clauses( $args, $chosen_attributes );
+	}
+
+	/**
+	 * Add attribute clauses using the product attributes lookup table.
+	 *
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes Chosen attributes.
+	 * @return array
+	 */
+	private function add_attribute_lookup_table_clauses( array $args, array $chosen_attributes ): array {
 		global $wpdb;
 
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
@@ -293,6 +308,8 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				WHERE is_variation_attribute=1
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
+				GROUP BY product_or_parent_id
+				HAVING COUNT(DISTINCT term_id)={$count}
 			)";
 		}
 
@@ -302,6 +319,93 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		} elseif ( ! empty( $chosen_attributes ) ) {
 			$args['where'] .= ' AND 1=0';
 		}
+
+		return $args;
+	}
+
+	/**
+	 * Add attribute clauses using WordPress taxonomy queries.
+	 *
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes Chosen attributes.
+	 * @return array
+	 */
+	private function add_attribute_taxonomy_clauses( array $args, array $chosen_attributes ): array {
+		global $wpdb;
+
+		$all_term_slugs = array();
+		foreach ( $chosen_attributes as $data ) {
+			if ( ! empty( $data['terms'] ) && is_array( $data['terms'] ) ) {
+				$all_term_slugs = array_merge( $all_term_slugs, $data['terms'] );
+			}
+		}
+
+		if ( empty( $all_term_slugs ) ) {
+			$args['where'] .= ' AND 1=0';
+			return $args;
+		}
+
+		$all_terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_term_slugs,
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $all_terms ) ) {
+			$args['where'] .= ' AND 1=0';
+			return $args;
+		}
+
+		$term_ids_by_taxonomy = array();
+		foreach ( $all_terms as $term ) {
+			$term_ids_by_taxonomy[ $term->taxonomy ][ $term->slug ] = (int) $term->term_id;
+		}
+
+		$clauses = array();
+		foreach ( $chosen_attributes as $taxonomy => $data ) {
+			$term_ids     = array_values( array_intersect_key( $term_ids_by_taxonomy[ $taxonomy ] ?? array(), array_flip( $data['terms'] ) ) );
+			$is_and       = 'and' === strtolower( $data['query_type'] );
+			$unique_terms = array_unique( $data['terms'] );
+
+			if ( empty( $term_ids ) || ( $is_and && count( $term_ids ) !== count( $unique_terms ) ) ) {
+				$args['where'] .= ' AND 1=0';
+				return $args;
+			}
+
+			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			if ( $is_and && count( $term_ids ) > 1 ) {
+				$clauses[] = $wpdb->prepare(
+					"{$wpdb->posts}.ID IN (
+						SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						WHERE tt.taxonomy = %s
+						AND tt.term_id IN {$term_ids_list}
+						GROUP BY tr.object_id
+						HAVING COUNT(DISTINCT tt.term_id) = %d
+					)",
+					$taxonomy,
+					count( $term_ids )
+				);
+			} else {
+				$clauses[] = $wpdb->prepare(
+					"EXISTS (
+						SELECT 1 FROM {$wpdb->term_relationships} tr
+						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						WHERE tr.object_id = {$wpdb->posts}.ID
+						AND tt.taxonomy = %s
+						AND tt.term_id IN {$term_ids_list}
+					)",
+					$taxonomy
+				);
+			}
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		}
+
+		$args['where'] .= ' AND (' . implode( ' AND ', $clauses ) . ')';
 
 		return $args;
 	}

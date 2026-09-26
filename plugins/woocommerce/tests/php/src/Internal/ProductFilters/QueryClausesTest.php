@@ -94,6 +94,31 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Decimal price boundaries are not truncated.
+	 */
+	public function test_decimal_price_boundaries_are_not_truncated(): void {
+		$product         = $this->fixture_data->get_simple_product(
+			array(
+				'name'          => 'Decimal price product',
+				'regular_price' => 10.5,
+			)
+		);
+		$price_range     = array(
+			'min_price' => 10.5,
+			'max_price' => 10.5,
+		);
+		$filter_callback = function ( $args ) use ( $price_range ) {
+			return $this->sut->add_price_clauses( $args, $price_range );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = wc_get_products( array() );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertSame( array( $product->get_name() ), $this->get_data_from_products_array( $received_products ) );
+	}
+
+	/**
 	 * @testdox Test the product query with post clauses containing stock clauses.
 	 *
 	 * @testWith [["instock"]]
@@ -133,14 +158,19 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 *           ["pa_color",["red-slug"],"or"]
 	 *           ["pa_color",["red-slug","not-exist-slug"],"or"]
 	 *           ["pa_color",["red-slug","green-slug"],"or"]
+	 *           ["pa_color",["red-slug","green-slug"],"and"]
+	 *           ["pa_color",["red-slug","blue-slug"],"and"]
+	 *           ["pa_color",["red-slug"],"or",false]
+	 *           ["pa_color",["red-slug","green-slug"],"and",false]
 	 *
-	 * @todo Add tests for `and` query type once https://github.com/woocommerce/woocommerce/pull/44825 is merged.
-	 *
-	 * @param string   $taxonomy   Attribute taxonomy name.
-	 * @param string[] $terms      Chosen terms' slug.
-	 * @param string   $query_type Query type. Accepts 'and' or 'or'.
+	 * @param string   $taxonomy      Attribute taxonomy name.
+	 * @param string[] $terms         Chosen terms' slug.
+	 * @param string   $query_type    Query type. Accepts 'and' or 'or'.
+	 * @param bool     $lookup_enabled Whether to use the product attributes lookup table.
 	 */
-	public function test_attribute_clauses_with( $taxonomy, $terms, $query_type ) {
+	public function test_attribute_clauses_with( $taxonomy, $terms, $query_type, $lookup_enabled = true ) {
+		update_option( 'woocommerce_attribute_lookup_enabled', $lookup_enabled ? 'yes' : 'no' );
+
 		$chosen_attributes = array(
 			$taxonomy => array(
 				'terms'      => $terms,
@@ -191,6 +221,27 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Attribute lookup filtering ignores unknown terms in an AND query.
+	 */
+	public function test_attribute_lookup_clauses_ignore_unknown_and_terms(): void {
+		$chosen_attributes = array(
+			'pa_color' => array(
+				'terms'      => array( 'red-slug', 'not-exist-slug' ),
+				'query_type' => 'and',
+			),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
+			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertSame( array( 'Product 5' ), $received_products );
+	}
+
+	/**
 	 * Test the product query with post clauses containing taxonomy clauses.
 	 *
 	 * @testWith ["product_cat", ["cat-1"]]
@@ -238,6 +289,25 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox Taxonomy filtering ignores selected taxonomies with no matching term.
+	 */
+	public function test_taxonomy_clauses_ignore_taxonomies_without_matching_terms(): void {
+		$chosen_taxonomies = array(
+			'product_cat' => array( 'cat-1' ),
+			'product_tag' => array( 'not-exist-slug' ),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_taxonomies ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen_taxonomies );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4', 'Product 5', 'Product 6' ), $received_products );
 	}
 
 	/**
