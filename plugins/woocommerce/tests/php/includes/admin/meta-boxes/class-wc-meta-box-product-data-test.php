@@ -158,6 +158,62 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The classic editor saves Core's MPN and ignores the unprefixed input.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Core's submitted value, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
+	 */
+	public function test_save_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
+		$sut = new WC_Product_Simple();
+		$sut->set_mpn( 'ORIGINAL' );
+		$sut->save();
+
+		$_POST = array( '_mpn' => 'EXTENSION-PART' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulate an extension's form input without loading the extension.
+		if ( null !== $submitted_mpn ) {
+			$_POST['_wc_mpn'] = wp_slash( $submitted_mpn ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
+		}
+
+		WC_Meta_Box_Product_Data::save( $sut->get_id(), get_post( $sut->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+	}
+
+	/**
+	 * @testdox Variation saves use Core's MPN and ignore the unprefixed input.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Core's submitted value, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
+	 */
+	public function test_save_variation_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
+		$parent = new WC_Product_Variable();
+		$parent->save();
+		$sut = new WC_Product_Variation();
+		$sut->set_parent_id( $parent->get_id() );
+		$sut->set_mpn( 'ORIGINAL' );
+		$sut->save();
+
+		$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulate an extension's form input without loading the extension.
+			'variable_post_id' => array( $sut->get_id() ),
+			'variable_mpn'     => array( 'EXTENSION-PART' ),
+		);
+		if ( null !== $submitted_mpn ) {
+			$_POST['variable_wc_mpn'] = array( wp_slash( $submitted_mpn ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
+		}
+
+		WC_Meta_Box_Product_Data::save_variations( $parent->get_id(), get_post( $parent->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+	}
+
+	/**
 	 * Save a product through the public classic product data meta-box seam.
 	 *
 	 * @param WC_Product                                    $product Product to save.

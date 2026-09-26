@@ -117,6 +117,18 @@ defined( 'ABSPATH' ) || exit;
 						'wrapper_class' => 'form-row',
 					)
 				);
+
+				woocommerce_wp_text_input(
+					array(
+						'id'            => "variable_wc_mpn{$loop}", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'name'          => "variable_wc_mpn[{$loop}]", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'value'         => $variation_object->get_mpn( 'edit' ),
+						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+						'desc_tip'      => true,
+						'description'   => __( 'Enter the manufacturer part number for this variation.', 'woocommerce' ),
+						'wrapper_class' => 'form-row',
+					)
+				);
 				?>
 				</div>
 			</div>

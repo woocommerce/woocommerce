@@ -4117,3 +4117,22 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 
 	return false;
 }
+
+/**
+ * Add and populate the MPN lookup column for existing stores.
+ *
+ * @since 11.3.0
+ */
+function wc_update_11301_add_mpn_to_product_lookup_table(): void {
+	global $wpdb;
+
+	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
+	}
+
+	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
+	}
+
+	wc_update_product_lookup_tables_column( 'mpn' );
+}

@@ -41,6 +41,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		do_action( 'woocommerce_product_options_global_unique_id' );
 
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_wc_mpn',
+				'value'       => $product_object->get_mpn( 'edit' ), // @phpstan-ignore variable.undefined (The including meta box supplies $product_object.)
+				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+				'desc_tip'    => true,
+				'description' => __( 'Enter the manufacturer part number for this product.', 'woocommerce' ),
+			)
+		);
+
+		/**
+		 * Action hook after the MPN (Manufacturer part number) product option field.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_product_options_mpn' );
+
 		?>
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />

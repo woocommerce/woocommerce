@@ -255,6 +255,11 @@ class WC_Structured_Data {
 			$markup['gtin'] = $gtin;
 		}
 
+		$mpn = $product->get_mpn();
+		if ( '' !== $mpn ) {
+			$markup['mpn'] = $mpn;
+		}
+
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
@@ -284,6 +289,13 @@ class WC_Structured_Data {
 					$markup['gtin'] = $variation_gtin;
 				} else {
 					unset( $markup['gtin'] );
+				}
+
+				$variation_mpn = $selected_variation->get_mpn();
+				if ( '' !== $variation_mpn ) {
+					$markup['mpn'] = $variation_mpn;
+				} else {
+					unset( $markup['mpn'] );
 				}
 			}
 
