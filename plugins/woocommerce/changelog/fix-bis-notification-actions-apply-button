@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align the customer stock notification admin screens with the order screens: even page gutters, a full-width action dropdown, rounded meta box corners, and a right-aligned submit button.
