@@ -12,13 +12,12 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.4.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 global $comment;
-$verified = wc_review_is_from_verified_owner( $comment->comment_ID );
 
 if ( '0' === $comment->comment_approved ) { ?>
 
@@ -33,7 +32,7 @@ if ( '0' === $comment->comment_approved ) { ?>
 	<p class="meta">
 		<strong class="woocommerce-review__author"><?php comment_author(); ?> </strong>
 		<?php
-		if ( 'yes' === get_option( 'woocommerce_review_rating_verification_label' ) && $verified ) {
+		if ( 'yes' === get_option( 'woocommerce_review_rating_verification_label' ) && wc_review_is_from_verified_owner( $comment->comment_ID ) ) {
 			echo '<em class="woocommerce-review__verified verified">(' . esc_attr__( 'verified owner', 'woocommerce' ) . ')</em> ';
 		}
 
