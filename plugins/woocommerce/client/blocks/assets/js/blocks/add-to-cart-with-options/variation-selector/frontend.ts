@@ -55,6 +55,46 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+// Kept outside the store so that reading it does not subscribe the watch.
+const announcedVariationIds = new WeakMap< HTMLElement, number | null >();
+
+/**
+ * Dispatches `wc-blocks_product_in_context_changed` when the selected
+ * variation changes. The first call for an element only records the
+ * selection the page was rendered with.
+ */
+const announceVariationChange = (
+	element: HTMLElement | null,
+	mainProduct: ProductResponseItem,
+	variation: ProductResponseItem | null
+): void => {
+	if ( ! element ) {
+		return;
+	}
+
+	const variationId = variation?.id ?? null;
+	const previousId = announcedVariationIds.get( element );
+	announcedVariationIds.set( element, variationId );
+
+	if ( previousId === undefined || previousId === variationId ) {
+		return;
+	}
+
+	element.dispatchEvent(
+		new CustomEvent( 'wc-blocks_product_in_context_changed', {
+			bubbles: true,
+			detail: {
+				productId: mainProduct.id,
+				variationId,
+				// A plain copy: the store objects are writable proxies.
+				product: JSON.parse(
+					JSON.stringify( variation ?? mainProduct )
+				),
+			},
+		} )
+	);
+};
+
 const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
@@ -449,6 +489,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					? productContext
 					: productsState
 				).variationId = variationId;
+
+				announceVariationChange(
+					getElement().ref,
+					product,
+					matchedVariation
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );

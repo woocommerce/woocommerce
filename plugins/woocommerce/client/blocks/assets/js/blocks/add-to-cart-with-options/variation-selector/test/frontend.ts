@@ -127,6 +127,7 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		mockProductsState.productVariationInContext = null;
 		mockProductsState.productVariations = {};
 		mockProductsState.findProduct.mockReturnValue( null );
+		mockGetElement.mockReturnValue( { ref: null } );
 		mockGetConfig.mockReturnValue( {
 			errorMessages: {
 				variableProductMissingAttributes: 'Choose options.',
@@ -359,6 +360,62 @@ describe( 'Add to Cart + Options variation selector store', () => {
 			message: 'Choose options.',
 			group: 'variable-product',
 		} );
+	} );
+
+	it( 'dispatches wc-blocks_product_in_context_changed when the selected variation changes', () => {
+		const element = document.createElement( 'div' );
+		document.body.appendChild( element );
+		const listener = jest.fn();
+		document.addEventListener(
+			'wc-blocks_product_in_context_changed',
+			listener
+		);
+		mockGetElement.mockReturnValue( { ref: element } );
+
+		try {
+			const mainProduct = {
+				id: 100,
+				type: 'variable',
+				variations: [ variation( 101, [] ), variation( 102, [] ) ],
+			};
+			const blue = { id: 101 };
+			const red = { id: 102 };
+			mockProductsState.mainProductInContext = mainProduct;
+
+			// Rendered selection: recorded, not announced.
+			mockProductsState.findProduct.mockReturnValue( blue );
+			getRegisteredStore().callbacks.setSelectedVariationId();
+			getRegisteredStore().callbacks.setSelectedVariationId();
+			expect( listener ).not.toHaveBeenCalled();
+
+			mockProductsState.findProduct.mockReturnValue( red );
+			getRegisteredStore().callbacks.setSelectedVariationId();
+			expect( listener ).toHaveBeenCalledTimes( 1 );
+			const [ changed ] = listener.mock.calls[ 0 ];
+			expect( changed.target ).toBe( element );
+			expect( changed.detail ).toEqual( {
+				productId: 100,
+				variationId: 102,
+				product: red,
+			} );
+			expect( changed.detail.product ).not.toBe( red );
+
+			// Incomplete selection: the variable product is in context.
+			mockProductsState.findProduct.mockReturnValue( mainProduct );
+			getRegisteredStore().callbacks.setSelectedVariationId();
+			expect( listener ).toHaveBeenCalledTimes( 2 );
+			expect( listener.mock.calls[ 1 ][ 0 ].detail ).toEqual( {
+				productId: 100,
+				variationId: null,
+				product: mainProduct,
+			} );
+		} finally {
+			document.removeEventListener(
+				'wc-blocks_product_in_context_changed',
+				listener
+			);
+			element.remove();
+		}
 	} );
 
 	it.each( [
