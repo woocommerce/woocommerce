@@ -141,6 +141,37 @@ describe( 'Core Profiler shipping partner tracking', () => {
 		} );
 	} );
 
+	describe( 'recordTracksPluginsInstallationRequest (coreprofiler_store_extensions_continue)', () => {
+		it( 'should report selected :alt plugins by slug', () => {
+			tracksActions.recordTracksPluginsInstallationRequest( {
+				context: makeContext(),
+				event: {
+					type: 'PLUGINS_INSTALLATION_REQUESTED',
+					payload: {
+						pluginsShown: [
+							'mailpoet',
+							'woocommerce-services:tax',
+						],
+						pluginsSelected: [
+							'mailpoet:alt',
+							'woocommerce-services:tax',
+						],
+						pluginsUnselected: [],
+					},
+				},
+			} );
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extensions_continue',
+				{
+					shown: [ 'mailpoet', 'woocommerce-services:tax' ],
+					selected: [ 'mailpoet', 'woocommerce-services:tax' ],
+					unselected: [],
+				}
+			);
+		} );
+	} );
+
 	describe( 'recordTracksPluginsInstallationRequest (shipping_partner_click)', () => {
 		it( 'should fire shipping_partner_click for each selected shipping plugin', () => {
 			const context = makeContext( {

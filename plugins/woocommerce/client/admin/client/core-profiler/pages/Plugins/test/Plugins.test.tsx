@@ -9,6 +9,19 @@ import { Extension } from '@woocommerce/data';
  */
 import { computePluginsSelection, joinWithAnd, Plugins } from '../Plugins';
 
+const installationError = ( plugin: string ) => ( {
+	plugin,
+	error: 'Installation failed',
+	errorDetails: {
+		data: {
+			code: 'some_error_code',
+			data: {
+				status: 400,
+			},
+		},
+	},
+} );
+
 describe( 'Plugins Component', () => {
 	const mockSendEvent = jest.fn();
 	const mockContext = {
@@ -66,6 +79,13 @@ describe( 'Plugins Component', () => {
 		pluginsInstallationErrors: [],
 	};
 	const navigationProgress = 80;
+	const altPlugin = {
+		...mockContext.pluginsAvailable[ 3 ],
+		key: 'plugin5:alt',
+		slug: 'plugin5',
+		name: 'Plugin 5',
+		label: 'Plugin 5',
+	};
 
 	it( 'renders correctly', () => {
 		render(
@@ -211,6 +231,72 @@ describe( 'Plugins Component', () => {
 		expect( checkbox4 ).toBeChecked();
 	} );
 
+	it( 'keeps an :alt-keyed plugin selected when retrying after an installation error', () => {
+		const context = {
+			...mockContext,
+			pluginsAvailable: [ ...mockContext.pluginsAvailable, altPlugin ],
+		};
+		const { unmount } = render(
+			<Plugins
+				context={ context }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		fireEvent.click( screen.getByText( 'Continue' ) );
+		const { pluginsSelected } =
+			mockSendEvent.mock.calls[ mockSendEvent.mock.calls.length - 1 ][ 0 ]
+				.payload;
+		unmount();
+
+		// The state machine stores the submitted selection and returns to this page on errors.
+		render(
+			<Plugins
+				context={ {
+					...context,
+					pluginsSelected,
+					pluginsInstallationErrors: [
+						installationError( 'plugin5:alt' ),
+					],
+				} }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		const checkbox5 = screen
+			.getByRole( 'heading', { level: 3, name: 'Plugin 5' } )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' )
+			?.querySelector( 'input[type="checkbox"]' );
+		expect( checkbox5 ).toBeChecked();
+	} );
+
+	it( 'names an :alt-keyed plugin in the installation error banner', () => {
+		render(
+			<Plugins
+				context={ {
+					...mockContext,
+					pluginsAvailable: [
+						...mockContext.pluginsAvailable,
+						altPlugin,
+					],
+					pluginsInstallationErrors: [
+						installationError( 'plugin5:alt' ),
+					],
+					pluginsSelected: [ 'plugin5:alt' ],
+				} }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		expect(
+			screen.getByText(
+				/Oops! We encountered a problem while installing/
+			)
+		).toHaveTextContent(
+			'Oops! We encountered a problem while installing Plugin 5.'
+		);
+	} );
+
 	it( 'handles skip action', () => {
 		render(
 			<Plugins
@@ -244,7 +330,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [ 'plugin1', 'plugin3' ],
-			selectedPluginSlugs: [],
+			selectedPluginKeys: [],
 		} );
 	} );
 
@@ -261,7 +347,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [],
-			selectedPluginSlugs: [ 'plugin1', 'plugin3' ],
+			selectedPluginKeys: [ 'plugin1', 'plugin3' ],
 		} );
 	} );
 
@@ -277,7 +363,33 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [ 'plugin3' ],
-			selectedPluginSlugs: [ 'plugin1' ],
+			selectedPluginKeys: [ 'plugin1' ],
+		} );
+	} );
+
+	it( 'keeps the full key of a selected :alt plugin and reports its slug to Tracks', () => {
+		const selectedPlugins = new Set< Extension >( [
+			{ key: 'plugin4:alt' } as Extension,
+		] );
+		const result = computePluginsSelection(
+			[
+				...mockPluginsAvailable,
+				{ key: 'plugin4:alt', is_activated: false },
+				{ key: 'plugin5:alt', is_activated: false },
+			] as Extension[],
+			selectedPlugins
+		);
+
+		expect( result ).toEqual( {
+			pluginsShown: [
+				'plugin1',
+				'plugin2',
+				'plugin3',
+				'plugin4',
+				'plugin5',
+			],
+			pluginsUnselected: [ 'plugin1', 'plugin3', 'plugin5' ],
+			selectedPluginKeys: [ 'plugin4:alt' ],
 		} );
 	} );
 
@@ -288,7 +400,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [],
 			pluginsUnselected: [],
-			selectedPluginSlugs: [],
+			selectedPluginKeys: [],
 		} );
 	} );
 } );

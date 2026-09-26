@@ -339,7 +339,9 @@ const getPluginNameParam = (
 		} )?.requires_jpc;
 	} );
 
-	return JpcRequiredPlugins.join( ',' );
+	return JpcRequiredPlugins.map( ( key ) => key.replace( ':alt', '' ) ).join(
+		','
+	);
 };
 
 const redirectToJetpackAuthPage = ( {
@@ -1577,7 +1579,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 												event.payload.installationCompletedResult.installedPlugins.map(
 													(
 														extension: InstalledPlugin
-													) => extension.plugin
+													) =>
+														extension.plugin.replace(
+															':alt',
+															''
+														)
 												),
 											completed: true,
 										} );
