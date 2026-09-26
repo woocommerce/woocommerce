@@ -149,8 +149,14 @@ export const formatPrice = (
 
 	const currency: Currency = getCurrency( currencyData );
 
-	const { minorUnit, prefix, suffix, decimalSeparator, thousandSeparator } =
-		currency;
+	const {
+		minorUnit,
+		prefix,
+		suffix,
+		symbol,
+		decimalSeparator,
+		thousandSeparator,
+	} = currency;
 
 	const formattedPrice: number = priceInt / 10 ** minorUnit;
 
@@ -158,14 +164,21 @@ export const formatPrice = (
 		formattedPrice.toString()
 	);
 
-	const formattedValue = `${ prefix }${ applyThousandSeparator(
+	const isolateRtlAffix = ( affix: string ) =>
+		/[\p{Script=Arabic}\p{Script=Hebrew}]/u.test( symbol )
+			? affix.replace( symbol, `\u2068${ symbol }\u2069` )
+			: affix;
+
+	const formattedValue = `${ isolateRtlAffix(
+		prefix
+	) }${ applyThousandSeparator(
 		beforeDecimal,
 		thousandSeparator
 	) }${ applyDecimal(
 		afterDecimal,
 		decimalSeparator,
 		minorUnit
-	) }${ suffix }`;
+	) }${ isolateRtlAffix( suffix ) }`;
 
 	return formattedValue;
 };

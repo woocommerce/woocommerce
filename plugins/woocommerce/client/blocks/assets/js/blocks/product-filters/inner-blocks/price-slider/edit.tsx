@@ -2,6 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import type { ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import {
@@ -45,7 +46,7 @@ const PriceSliderEdit = ( {
 	setSliderHandleBorder,
 	slider,
 	setSlider,
-}: EditProps ): JSX.Element | null => {
+}: EditProps ): ReactElement | null => {
 	const {
 		showInputFields,
 		inlineInput,
@@ -77,27 +78,49 @@ const PriceSliderEdit = ( {
 	}
 
 	const { min, max, currentMin, currentMax } = rangeInput;
-	const formattedMinPrice = formatPrice(
-		currentMin,
-		getCurrency( { minorUnit: 0 } )
+	const currency = getCurrency( { minorUnit: 0 } );
+	const { prefix, suffix, symbol } = currency;
+	const hasRtlSymbol = /[\p{Script=Arabic}\p{Script=Hebrew}]/u.test( symbol );
+	const renderPrice = ( price: number ) => (
+		<>
+			<span dir="auto">{ prefix }</span>
+			{ formatPrice( price, { ...currency, prefix: '', suffix: '' } ) }
+			<span dir="auto">{ suffix }</span>
+		</>
 	);
 
-	const formattedMaxPrice = formatPrice(
-		currentMax,
-		getCurrency( { minorUnit: 0 } )
-	);
+	const renderInput = ( price: number, className: string ) => {
+		if ( ! showInputFields ) {
+			return (
+				<span>
+					{ hasRtlSymbol
+						? renderPrice( price )
+						: formatPrice( price, currency ) }
+				</span>
+			);
+		}
 
-	const priceMin = showInputFields ? (
-		<input className="min" type="text" defaultValue={ formattedMinPrice } />
-	) : (
-		<span>{ formattedMinPrice }</span>
-	);
+		return hasRtlSymbol ? (
+			<>
+				<span dir="auto">{ prefix }</span>
+				<input
+					className={ className }
+					type="text"
+					defaultValue={ price }
+				/>
+				<span dir="auto">{ suffix }</span>
+			</>
+		) : (
+			<input
+				className={ className }
+				type="text"
+				defaultValue={ formatPrice( price, currency ) }
+			/>
+		);
+	};
 
-	const priceMax = showInputFields ? (
-		<input className="max" type="text" defaultValue={ formattedMaxPrice } />
-	) : (
-		<span>{ formattedMaxPrice }</span>
-	);
+	const priceMin = renderInput( currentMin, 'min' );
+	const priceMax = renderInput( currentMax, 'max' );
 
 	return (
 		<>
