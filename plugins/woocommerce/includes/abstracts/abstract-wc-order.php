@@ -1973,6 +1973,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
 		if ( $coupon_info ) {
 			$coupon_object->set_short_info( $coupon_info );
+			$coupon_object->set_maximum_discount_from_order_item( $coupon_item );
 			return $coupon_object;
 		}
 
@@ -2047,6 +2048,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					$coupon_info = $coupon->get_short_info();
 					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
+					$coupon->add_maximum_discount_to_order_item( $coupon_item );
 				} else {
 					$coupon_item = $this->get_item( $item_id, false );
 				}
