@@ -11,7 +11,7 @@ declare( strict_types = 1 );
 class WC_My_Account_Payment_Methods_Template_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should label saved methods without a card brand by their own name, keep brand labels, and skip names that only repeat the token type.
+	 * @testdox Should label saved methods without a card brand by their own name, even with last4, keep brand labels, and skip names that only repeat the token type.
 	 */
 	public function test_labels_saved_methods_without_brand(): void {
 		add_filter(
@@ -28,7 +28,10 @@ class WC_My_Account_Payment_Methods_Template_Test extends WC_Unit_Test_Case {
 				if ( 'branded' === $token->get_token() ) {
 					$item['method']['brand'] = 'wallet';
 				}
-				if ( 'unnamed' === $token->get_token() ) {
+				if ( in_array( $token->get_token(), array( 'last4', 'last4-unnamed' ), true ) ) {
+					$item['method']['last4'] = '1234';
+				}
+				if ( in_array( $token->get_token(), array( 'unnamed', 'last4-unnamed' ), true ) ) {
 					$item['display_name'] = 'Fake_Custom';
 				}
 				return $item;
@@ -39,7 +42,7 @@ class WC_My_Account_Payment_Methods_Template_Test extends WC_Unit_Test_Case {
 
 		$user_id = self::factory()->user->create();
 		wp_set_current_user( $user_id );
-		foreach ( array( 'plain', 'branded', 'unnamed' ) as $token_value ) {
+		foreach ( array( 'plain', 'branded', 'unnamed', 'last4', 'last4-unnamed' ) as $token_value ) {
 			$token = new FakeCustomPaymentToken();
 			$token->set_token( $token_value );
 			$token->set_gateway_id( WC_Gateway_BACS::ID );
@@ -68,11 +71,11 @@ class WC_My_Account_Payment_Methods_Template_Test extends WC_Unit_Test_Case {
 			$method_labels[] = trim( $method_cell->textContent );
 		}
 		$this->assertSame(
-			array( FakeCustomPaymentToken::DISPLAY_NAME, 'Wallet', '' ),
+			array( FakeCustomPaymentToken::DISPLAY_NAME, 'Wallet', '', FakeCustomPaymentToken::DISPLAY_NAME, 'ending in 1234' ),
 			$method_labels,
-			'Rows without a brand should show the token name, a brand should win, and a name equal to the token type should be skipped.'
+			'Rows without a brand should show the token name even with last4, a brand should win, and a name equal to the token type should be skipped.'
 		);
-		$this->assertSame( 3, $delete_links->length, 'Every row should keep its Delete action.' );
+		$this->assertSame( 5, $delete_links->length, 'Every row should keep its Delete action.' );
 		$this->assertStringNotContainsString( 'Undefined array key', $html, 'The template should not emit PHP notices for tokens without a brand.' );
 	}
 }
