@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Auto-cap line item refunds to prevent gateway rejection on 1p tax rounding discrepancies.
