@@ -11,6 +11,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
 -   [Renderer Classes](#renderer-classes)
     -   [Renderer](#renderer)
     -   [Content_Renderer](#content_renderer)
+-   [Render Lifecycle Actions](#render-lifecycle-actions)
 -   [Rendering Direction](#rendering-direction)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
@@ -223,6 +224,50 @@ $result      = $content_renderer->render_without_css_inline( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```
+
+## Render Lifecycle Actions
+
+Two actions mark the start and the end of rendering an email's content. Use them to set up state a render needs and to put it back afterwards, for example a filter that must not apply to email HTML. `Content_Renderer` is reused for every email in a request, so anything left behind affects later renders and the rest of the request.
+
+```php
+/**
+ * Fires when rendering an email's content is about to start.
+ *
+ * @since 2.9.2
+ */
+do_action( 'woocommerce_email_editor_render_start' );
+
+/**
+ * Fires when rendering an email has finished, whether it succeeded or threw.
+ *
+ * @since 2.18.0
+ */
+do_action( 'woocommerce_email_editor_render_end' );
+```
+
+**Example Usage:**
+
+```php
+add_action(
+    'woocommerce_email_editor_render_start',
+    function () {
+        remove_filter( 'render_block', 'my_plugin_add_front_end_markup' );
+    }
+);
+
+add_action(
+    'woocommerce_email_editor_render_end',
+    function () {
+        add_filter( 'render_block', 'my_plugin_add_front_end_markup' );
+    }
+);
+```
+
+Each start is followed by exactly one end. Renders must not be nested, which the package does not check: a nested render resets the outer one's globals and rendering context. The end action fires from the same `finally` block that resets the renderer, so it also fires when a render throws.
+
+By then the renderer has been reset: the rendering context is gone and the `$post` and template globals are back to what they were, so the action carries no arguments and a callback cannot tell which email finished. A callback that needs the post should read it at the start of the render. A callback must also not throw, because it would mask the render's own error and stop later callbacks from restoring their state.
+
+Versions before 2.18.0 do not fire the end action, so a plugin that supports them cannot rely on the render end alone to undo its setup.
 
 ## Rendering Direction
 

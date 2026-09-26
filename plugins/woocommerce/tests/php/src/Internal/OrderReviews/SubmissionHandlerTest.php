@@ -32,6 +32,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'comment_moderation', '0' );
 		update_option( 'comment_max_links', 2 );
 		update_option( 'moderation_keys', '' );
+		update_option( 'disallowed_keys', '' );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
 		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
 		remove_all_filters( 'woocommerce_review_order_eligible_items' );
@@ -1436,5 +1437,205 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $total );
+	}
+
+	/**
+	 * Submit review rows for an order and return the per-row results.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @param array    $rows  Rows with product_id, order_item_id, rating and text.
+	 * @return array Result rows, in submission order.
+	 */
+	private function submit_rows( WC_Order $order, array $rows ): array {
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => $rows,
+		);
+
+		$response = $this->dispatch();
+		$results  = array_values( (array) ( $response['data']['results'] ?? array() ) );
+		$this->assertCount( count( $rows ), $results, 'Each submitted row should produce a result.' );
+
+		return $results;
+	}
+
+	/**
+	 * Submit a single-row review for the given order item.
+	 *
+	 * @param WC_Order $order      The order being reviewed.
+	 * @param int      $product_id Product ID of the row.
+	 * @param int      $item_id    Order item ID of the row.
+	 * @param int      $rating     Star rating.
+	 * @param string   $text       Review text.
+	 * @return array Result row for the submitted review.
+	 */
+	private function submit_review( WC_Order $order, int $product_id, int $item_id, int $rating, string $text ): array {
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => $rating,
+					'text'          => $text,
+				),
+			)
+		);
+
+		return $results[0];
+	}
+
+	/**
+	 * @testdox An approved review is included in the product's average rating, rating counts and review count.
+	 */
+	public function test_approved_review_updates_product_rating_aggregates(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 5, 'Great.' );
+		$this->assertSame( 'ok', $row['status'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, (float) $product->get_average_rating() );
+		$this->assertSame( array( 5 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox Editing an approved review's rating updates the product aggregates to the new rating.
+	 * @testWith ["Great."]
+	 *           ["Changed my mind."]
+	 *
+	 * @param string $edited_text Text sent with the edit; the original text keeps the row's moderation state.
+	 */
+	public function test_editing_approved_review_updates_product_rating_aggregates( string $edited_text ): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Great.' );
+		$edit  = $this->submit_review( $built['order'], $product_id, $item_id, 2, $edited_text );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $first['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 2, (float) $product->get_average_rating() );
+		$this->assertSame( array( 2 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review held for moderation is not counted until it is approved.
+	 */
+	public function test_held_review_is_counted_only_after_approval(): void {
+		update_option( 'comment_moderation', '1' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 4, 'Pending.' );
+		$this->assertSame( 'pending_moderation', $row['status'] );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		wp_set_comment_status( $row['comment_id'], 'approve' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+	}
+
+	/**
+	 * @testdox A held review is counted once an edit removes the text that held it.
+	 */
+	public function test_held_review_approved_by_edit_updates_product_rating_aggregates(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 3, 'Clean text now.' );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $held['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 3, (float) $product->get_average_rating() );
+		$this->assertSame( array( 3 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox Reviews for two variations in one submission are both included in the parent product's aggregates.
+	 */
+	public function test_variation_reviews_update_parent_aggregates(): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = $this->make_empty_order();
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+		$items = array_values( $order->get_items() );
+
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $variation_a->get_id(),
+					'order_item_id' => $items[0]->get_id(),
+					'rating'        => 5,
+					'text'          => 'Loved variation A.',
+				),
+				array(
+					'product_id'    => $variation_b->get_id(),
+					'order_item_id' => $items[1]->get_id(),
+					'rating'        => 3,
+					'text'          => 'Variation B was just OK.',
+				),
+			)
+		);
+		$this->assertSame( array( 'ok', 'ok' ), array_column( $results, 'status' ) );
+
+		$parent = wc_get_product( $variable->get_id() );
+		$this->assertEquals( 4, (float) $parent->get_average_rating() );
+		$this->assertSame(
+			array(
+				3 => 1,
+				5 => 1,
+			),
+			$parent->get_rating_counts()
+		);
+		$this->assertSame( 2, $parent->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review auto-rejected for a disallowed word is counted once a clean resubmission approves it.
+	 */
+	public function test_resubmission_after_auto_rejection_updates_product_rating_aggregates(): void {
+		update_option( 'disallowed_keys', 'casino-bonus' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$rejected = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Visit casino-bonus now.' );
+		$this->assertContains( wp_get_comment_status( $rejected['comment_id'] ), array( 'spam', 'trash' ) );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		$resubmitted = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text this time.' );
+		$this->assertSame( 'ok', $resubmitted['status'] );
+		$this->assertSame( $rejected['comment_id'], $resubmitted['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
 	}
 }

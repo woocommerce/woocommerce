@@ -295,10 +295,6 @@ CREATE TABLE $meta_table_name (
 			if ( false === $result ) {
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
-
-			if ( 0 === $result ) {
-				return new \WP_Error( 'db_update_error', 'Invalid notification ID.' );
-			}
 		}
 
 		$notification->save_meta_data();

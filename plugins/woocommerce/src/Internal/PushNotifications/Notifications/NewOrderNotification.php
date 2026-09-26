@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Order;
 
 defined( 'ABSPATH' ) || exit;
@@ -50,7 +51,7 @@ class NewOrderNotification extends Notification {
 		return array(
 			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->format_triggered_timestamp( (string) $order->get_meta( NotificationProcessor::TRIGGERED_META_KEY ) ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**
@@ -131,11 +132,23 @@ class NewOrderNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {
+	public function read_meta( string $key ): string {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+
+		return $order instanceof WC_Order ? (string) $order->get_meta( $key ) : '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
+	 */
+	public function write_meta( string $key, ?int $timestamp = null ): void {
 		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
 
 		if ( $order instanceof WC_Order ) {
-			$order->update_meta_data( $key, (string) time() );
+			$order->update_meta_data( $key, (string) ( $timestamp ?? time() ) );
 			$order->save_meta_data();
 		}
 	}

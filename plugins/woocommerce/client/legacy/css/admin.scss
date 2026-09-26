@@ -3905,7 +3905,9 @@ ul.order_notes {
 
 	#add_order_note {
 		width: 100%;
-		height: 60px;
+		min-height: 60px;
+		// stylelint-disable-next-line property-no-unknown -- field-sizing is missing from Stylelint 14. See #69077.
+		field-sizing: content;
 	}
 
 	.order_note_visibility {
