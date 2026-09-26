@@ -9,6 +9,7 @@ import { lazy, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
@@ -42,6 +43,11 @@ const DownloadsReport = lazy( () =>
 );
 const StockReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-stock" */ './stock' )
+);
+const StockNotificationsReport = lazy( () =>
+	import(
+		/* webpackChunkName: "analytics-report-stock-notifications" */ './stock-notifications'
+	)
 );
 const CustomersReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-customers" */ './customers' )
@@ -115,6 +121,16 @@ const getReports = () => {
 					component: StockReport,
 					navArgs: {
 						id: 'woocommerce-analytics-stock',
+					},
+			  }
+			: null,
+		isFeatureEnabled( 'customer_stock_notifications' )
+			? {
+					report: 'stock-notifications',
+					title: __( 'Stock notifications', 'woocommerce' ),
+					component: StockNotificationsReport,
+					navArgs: {
+						id: 'woocommerce-analytics-stock-notifications',
 					},
 			  }
 			: null,
