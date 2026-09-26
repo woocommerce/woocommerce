@@ -5,6 +5,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 
 interface ReviewByProductAttributes {
 	editMode: boolean;
+	offset: number;
 	productId: number;
 }
 

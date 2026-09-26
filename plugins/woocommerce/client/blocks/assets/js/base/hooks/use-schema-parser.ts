@@ -106,38 +106,24 @@ const useDocumentObject = < T extends FormType | 'global' >(
 			checkout: {
 				createAccount: shouldCreateAccount,
 				customerNote: orderNotes,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
-							ORDER_FORM_KEYS.includes(
-								key as keyof OrderFormValues
-							)
-						) {
-							acc[ key as keyof OrderFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as OrderFormValues
-				),
+				additionalFields: Object.fromEntries(
+					Object.entries( additionalFields ).filter( ( [ key ] ) =>
+						ORDER_FORM_KEYS.includes( key as keyof OrderFormValues )
+					)
+				) as OrderFormValues,
 				paymentMethod: activePaymentMethod,
 			},
 			customer: {
 				id: customerId,
 				billingAddress,
 				shippingAddress,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
-							CONTACT_FORM_KEYS.includes(
-								key as keyof ContactFormValues
-							)
-						) {
-							acc[ key as keyof ContactFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as ContactFormValues
-				),
+				additionalFields: Object.fromEntries(
+					Object.entries( additionalFields ).filter( ( [ key ] ) =>
+						CONTACT_FORM_KEYS.includes(
+							key as keyof ContactFormValues
+						)
+					)
+				) as ContactFormValues,
 				...( formType === 'billing' || formType === 'shipping'
 					? {
 							address:

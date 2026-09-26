@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { getOnSubmitLabel } from './get-on-submit-label';
 
 /**
  * Initialize the state
@@ -23,18 +24,20 @@ export function setCesSurveyQueue( queue ) {
 /**
  * Add a new CES track to the state.
  *
- * @param {Object} args                 All arguments.
- * @param {string} args.action          action name for the survey
- * @param {string} args.title           title for the snackback
- * @param {string} args.description     description for feedback modal.
- * @param {string} args.noticeLabel     noticeLabel for notice.
- * @param {string} args.firstQuestion   first question for modal survey
- * @param {string} args.secondQuestion  second question for modal survey
- * @param {string} [args.icon]          optional icon for notice.
- * @param {string} [args.pageNow]       optional value of window.pagenow, default to window.pagenow
- * @param {string} [args.adminPage]     optional value of window.adminpage, default to window.adminpage
- * @param {string} [args.onsubmitLabel] optional label for the snackback onsubmit, default to undefined
- * @param {Object} args.props           object for optional props
+ * @param {Object} args                  All arguments.
+ * @param {string} args.action           action name for the survey
+ * @param {string} args.title            title for the snackback
+ * @param {string} args.description      description for feedback modal.
+ * @param {string} args.noticeLabel      noticeLabel for notice.
+ * @param {string} args.firstQuestion    first question for modal survey
+ * @param {string} args.secondQuestion   second question for modal survey
+ * @param {string} [args.icon]           optional icon for notice.
+ * @param {string} [args.pageNow]        optional value of window.pagenow, default to window.pagenow
+ * @param {string} [args.adminPage]      optional value of window.adminpage, default to window.adminpage
+ * @param {string} [args.onSubmitLabel]  optional label for the snackback onsubmit, default to undefined
+ * @param {string} [args.onsubmitLabel]  deprecated lower-camel alias for onSubmitLabel
+ * @param {string} [args.onsubmit_label] deprecated snake-case alias for onSubmitLabel
+ * @param {Object} args.props            object for optional props
  */
 export function addCesSurvey( {
 	action,
@@ -46,7 +49,9 @@ export function addCesSurvey( {
 	icon,
 	pageNow = window.pagenow,
 	adminPage = window.adminpage,
-	onsubmitLabel = undefined,
+	onSubmitLabel,
+	onsubmitLabel,
+	onsubmit_label,
 	props = {},
 } ) {
 	return {
@@ -60,7 +65,11 @@ export function addCesSurvey( {
 		icon,
 		pageNow,
 		adminPage,
-		onsubmit_label: onsubmitLabel,
+		onSubmitLabel: getOnSubmitLabel( {
+			onSubmitLabel,
+			onsubmitLabel,
+			onsubmit_label,
+		} ),
 		props,
 	};
 }
@@ -81,7 +90,7 @@ export function showCesModal(
 	return {
 		type: TYPES.SHOW_CES_MODAL,
 		surveyProps,
-		onsubmit_label: surveyProps.onsubmitLabel || '',
+		onSubmitLabel: getOnSubmitLabel( surveyProps ) ?? '',
 		props,
 		onSubmitNoticeProps,
 		tracksProps,
@@ -137,7 +146,6 @@ export function addCesSurveyForCustomerSearch() {
 		),
 		pageNow: 'woocommerce_page_wc-admin',
 		adminPage: 'woocommerce_page_wc-admin',
-		onsubmit_label: undefined,
 		props: {
 			search_area: 'customer',
 		},

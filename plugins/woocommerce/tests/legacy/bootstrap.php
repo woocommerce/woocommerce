@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -41,7 +42,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		$this->register_autoloader_for_testing_tools();
 
-		$this->initialize_code_hacker();
+		$this->maybe_initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
@@ -70,6 +71,9 @@ class WC_Unit_Tests_Bootstrap {
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
+		// Keep the shared DB update queue clean outside the variation gallery package tests.
+		tests_add_filter( 'init', array( $this, 'cancel_variation_gallery_migration_action' ), 21 );
+
 		// Speed things up by turning down the password hashing cost.
 		tests_add_filter(
 			'wp_hash_password_options',
@@ -87,8 +91,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
-
-		$this->maybe_announce_skipped_graphql_tests();
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
@@ -145,7 +147,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize the code hacker.
+	 * Initialize the code hacker unless the WC_TEST_DISABLE_CODE_HACKER environment variable is set.
+	 *
+	 * The code hacker owns PHP's file stream wrapper, so tools that need that wrapper
+	 * themselves (for example mutation testers, which swap mutated files in at include
+	 * time) cannot run alongside it.
+	 */
+	private function maybe_initialize_code_hacker() {
+		if ( empty( getenv( 'WC_TEST_DISABLE_CODE_HACKER' ) ) ) {
+			$this->initialize_code_hacker();
+			return;
+		}
+
+		echo 'Not enabling the code hacker (WC_TEST_DISABLE_CODE_HACKER is set). Tests that mock functions or static methods, or that subclass final classes, will fail.' . PHP_EOL;
+	}
+
+	/**
+	 * Initialize the code hacker and register the hacks.
 	 *
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
@@ -177,45 +195,6 @@ class WC_Unit_Tests_Bootstrap {
 	private function maybe_initialize_hpos() {
 		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
-	}
-
-	/**
-	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
-	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
-	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
-	 * `ms-files` and `external-http` groups.
-	 *
-	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
-	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
-	 * only. A default run (no `--testsuite` filter) runs the full suite list,
-	 * which includes the GraphQL suite, so there is nothing to announce. The
-	 * `--testsuite` value may be a comma-joined suite list, hence the substring
-	 * match rather than an exact comparison.
-	 */
-	private function maybe_announce_skipped_graphql_tests() {
-		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
-
-		$has_testsuite_filter = false;
-		$running_graphql      = false;
-		foreach ( $argv as $arg ) {
-			if ( ! is_string( $arg ) ) {
-				continue;
-			}
-			if ( false !== strpos( $arg, '--testsuite' ) ) {
-				$has_testsuite_filter = true;
-			}
-			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
-				$running_graphql = true;
-			}
-		}
-
-		// Without an explicit --testsuite filter the default suite list runs,
-		// which already includes the GraphQL suite: nothing is skipped.
-		if ( ! $has_testsuite_filter || $running_graphql ) {
-			return;
-		}
-
-		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**
@@ -255,12 +234,6 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
-
-		// Default Back In Stock alpha to enabled during tests when no
-		// per-suite override has been set.
-		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		}
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -308,6 +281,20 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Cancel the variation gallery migration scheduled during test bootstrap.
+	 *
+	 * The package scheduler is covered directly by its own tests. Leaving its
+	 * bootstrap action pending leaks into unrelated tests of the shared DB update queue.
+	 */
+	public function cancel_variation_gallery_migration_action(): void {
+		WC()->queue()->cancel_all(
+			'woocommerce_run_update_callback',
+			array( 'update_callback' => array( VariationGalleryMigration::class, 'run' ) ),
+			'woocommerce-db-updates'
+		);
+	}
+
+	/**
 	 * Load WC-specific test cases and factories.
 	 *
 	 * @since 2.2
@@ -349,6 +336,8 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
 	}
 
 	/**

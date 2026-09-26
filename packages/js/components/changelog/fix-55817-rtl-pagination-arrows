@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flip the pagination previous/next arrow icons in RTL locales so they point in the direction they navigate.

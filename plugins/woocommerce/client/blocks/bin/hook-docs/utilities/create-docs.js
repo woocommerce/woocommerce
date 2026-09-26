@@ -15,11 +15,8 @@ const { json2md } = require( './json2md' );
 const createDocs = ( file, jsonDocs ) => {
 	console.log( chalk.blue( `Creating file ${ file }...` ) );
 
-	fs.writeFile( file, json2md( jsonDocs ), function ( error ) {
-		if ( error ) {
-			throw error;
-		}
-	} );
+	// Synchronous, so a write failure surfaces inside the caller's try/catch.
+	fs.writeFileSync( file, json2md( jsonDocs ) );
 };
 
 module.exports = { createDocs };

@@ -9,10 +9,25 @@ export const getProductsNameFromClassicTemplate = async ( page: Page ) => {
 	return products.allTextContents();
 };
 
-export const getProductsNameFromProductQuery = async ( page: Page ) => {
-	const products = page.locator( '.wp-block-query .wp-block-post-title' );
+export const getProductsNameFromProductCollection = async ( page: Page ) => {
+	const products = page.locator(
+		'.wp-block-woocommerce-product-collection .wp-block-post-title'
+	);
 	return products.allTextContents();
 };
+
+export const getProductCollectionQuery = async ( page: Page ) =>
+	page.evaluate( () => {
+		const block = window.wp.data
+			.select( 'core/block-editor' )
+			.getBlocks()
+			.find(
+				( candidate: { name: string } ) =>
+					candidate.name === 'woocommerce/product-collection'
+			);
+
+		return block?.attributes.query ?? {};
+	} );
 
 export const productQueryInnerBlocksTemplate = [
 	{

@@ -324,4 +324,98 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
 		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
 	}
+
+	/**
+	 * The /wc/v2/orders route registers its own schema args, so this confirms the reserved-meta-key
+	 * guard is wired onto the live v2 endpoint, not just the shared prepare methods.
+	 *
+	 * @testdox PUT /wc/v2/orders/<id> rejects a serialized value under the reserved meta key of every line type.
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string   $line_type    Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param callable $create_item  Builds the order item that $line_type maps to.
+	 */
+	public function test_v2_update_rejects_serialized_taxes_line_meta_key( string $line_type, callable $create_item ): void {
+		$order = new WC_Order();
+		$item  = $create_item();
+		$order->add_item( $item );
+		$order->save();
+
+		$response = $this->dispatch_serialized_taxes_update( $order->get_id(), $line_type, $item->get_id() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_order_item_meta_key', $data['data']['details'][ $line_type ]['code'] );
+	}
+
+	/**
+	 * Every request key that maps to an order item type accepting meta data.
+	 *
+	 * @return array
+	 */
+	public function provide_reserved_meta_key_line_types(): array {
+		return array(
+			'line items'     => array(
+				'line_items',
+				function () {
+					$item = new WC_Order_Item_Product();
+					$item->set_product( WC_Helper_Product::create_simple_product() );
+					$item->set_quantity( 1 );
+					$item->set_total( '10.00' );
+					return $item;
+				},
+			),
+			'fee lines'      => array(
+				'fee_lines',
+				function () {
+					$item = new WC_Order_Item_Fee();
+					$item->set_name( 'Test fee' );
+					$item->set_total( '5.00' );
+					return $item;
+				},
+			),
+			'shipping lines' => array(
+				'shipping_lines',
+				function () {
+					$item = new WC_Order_Item_Shipping();
+					$item->set_method_id( 'flat_rate' );
+					$item->set_method_title( 'Flat rate' );
+					$item->set_total( '10.00' );
+					return $item;
+				},
+			),
+		);
+	}
+
+	/**
+	 * Dispatch a PUT that posts a serialized value under the reserved `_taxes` meta key of one order item.
+	 *
+	 * @param int    $order_id  Order to update.
+	 * @param string $line_type Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param int    $item_id   Order item ID to target.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_serialized_taxes_update( int $order_id, string $line_type, int $item_id ) {
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					$line_type => array(
+						array(
+							'id'        => $item_id,
+							'meta_data' => array(
+								array(
+									'key'   => '_taxes',
+									'value' => 'O:8:"stdClass":0:{}',
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		return $this->server->dispatch( $request );
+	}
 }

@@ -89,6 +89,11 @@ $products = wc_get_products( array( 'type' => 'external' ) );
 ```
 
 ```php
+// Using constant class for type.
+$products = wc_get_products( array( 'type' => \Automattic\WooCommerce\Enums\ProductType::EXTERNAL ) );
+```
+
+```php
 // Get external products limited to specific IDs.
 $args = array(
     'type' => 'external',

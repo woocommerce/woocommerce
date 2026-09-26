@@ -160,7 +160,7 @@ class CustomerEffortScoreTracks {
 						if ( $('.tags tbody > tr').length > initialCount ) {
 							// New tag detected.
 							clearInterval( interval );
-							wp.data.dispatch('wc/customer-effort-score').addCesSurvey({ action: '%s', title: '%s', firstQuestion: '%s', secondQuestion: '%s', onsubmitLabel: '%s' });
+							wp.data.dispatch('wc/customer-effort-score').addCesSurvey({ action: '%s', title: '%s', firstQuestion: '%s', secondQuestion: '%s', onSubmitLabel: '%s' });
 						} else {
 							// Form is no longer loading, most likely failed.
 							if ( $( '#addtag .submit .spinner.is-active' ).length < 1 ) {

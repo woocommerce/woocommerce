@@ -292,8 +292,34 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			$coupon->set_discount_type( $request['discount_type'] );
 		}
 
+		// When both minimum_amount and maximum_amount are present in the same
+		// request, pass them together through the coupon's set_props() so the
+		// pair is validated as a unit.  Calling the setters sequentially (as
+		// the default loop below does) causes the first setter to compare its
+		// new value against the stale stored value of the other field, which
+		// spuriously rejects valid simultaneous raises like min=100/max=200 →
+		// min=250/max=300.
+		$amount_keys_handled = false;
+		if ( ! is_null( $request['minimum_amount'] ) && ! is_null( $request['maximum_amount'] ) ) {
+			$amount_result = $coupon->set_props(
+				array(
+					'minimum_amount' => $request['minimum_amount'],
+					'maximum_amount' => $request['maximum_amount'],
+				)
+			);
+			if ( is_wp_error( $amount_result ) ) {
+				return $amount_result;
+			}
+			$amount_keys_handled = true;
+		}
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
+			// minimum_amount and maximum_amount were already applied atomically above.
+			if ( $amount_keys_handled && in_array( $key, array( 'minimum_amount', 'maximum_amount' ), true ) ) {
+				continue;
+			}
+
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {

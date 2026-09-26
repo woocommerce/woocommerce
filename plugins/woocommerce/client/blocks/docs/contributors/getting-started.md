@@ -2,105 +2,116 @@
 
 ## Table of contents <!-- omit in toc -->
 
--   [Cloning the Git Repository](#cloning-the-git-repository)
--   [Configuring your WordPress site](#configuring-your-wordpress-site)
+-   [Prerequisites](#prerequisites)
+-   [Cloning the Git repository](#cloning-the-git-repository)
 -   [Installing dependencies](#installing-dependencies)
--   [Building the plugin files](#building-the-plugin-files)
+-   [Building the Blocks client](#building-the-blocks-client)
+-   [Running WooCommerce locally](#running-woocommerce-locally)
+-   [Configuring your WordPress site](#configuring-your-wordpress-site)
 -   [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
 -   [Linting](#linting)
--   [Running the Blocks plugin](#running-the-blocks-plugin)
 -   [Developer Tools (Visual Studio Code)](#developer-tools-visual-studio-code)
     -   [EditorConfig](#editorconfig)
     -   [ESLint](#eslint)
     -   [Prettier](#prettier)
 -   [Testing](#testing)
 
-Before you can begin contributing to the Blocks plugin there are several steps and tools required to setup your local development environment.
+The Blocks client lives in the WooCommerce monorepo at `plugins/woocommerce/client/blocks` and ships as part of WooCommerce core, so there is no separate Blocks plugin to install or activate. This page covers the setup that is specific to it. The [monorepo README](../../../../../../README.md#getting-started) and the [WooCommerce plugin README](../../../../README.md#getting-started) are the source of truth for everything else.
 
-## Cloning the Git Repository
+## Prerequisites
 
-Before you can start modifying files you'll want to clone this repository locally, either via the command line, or using a Git client such as [GitHub Desktop](https://desktop.github.com/).
+You need Node.js, PNPM, PHP, and Composer. The [monorepo README](../../../../../../README.md#getting-started) lists the supported versions and links to install instructions for each. PNPM reads the Node version pinned in the repository and uses it for every script it runs, so you do not need to select one by hand.
 
-To do so from the command line, ensure you have [`git`](https://git-scm.com) installed on your machine, and run the clone command:
+Docker is needed as well if you want the `wp-env` environment described below.
+
+## Cloning the Git repository
+
+Clone the monorepo, either from the command line or with a Git client such as [GitHub Desktop](https://desktop.github.com/):
 
 ```sh
-git clone https://github.com/woocommerce/woocommerce-blocks.git
-```
-
-## Configuring your WordPress site
-
-When developing this plugin, you'll must add the following to the `wp-config.php` file attached to the WordPress instance you are using to test the plugin against:
-
-```php
-define( 'JETPACK_AUTOLOAD_DEV', true );
-```
-
-The above constant definition ensures that classes in the cloned plugin are always overriding what's included with WooCommerce core via the Woo Blocks package.
-
-It's also _recommended_ you add the following constant definitions to your `wp-config.php` file as well to make sure you are catching any PHP notices and/or errors introduced:
-
-```php
-define( 'WP_DEBUG', true );
-define( 'SCRIPT_DEBUG', true );
+git clone https://github.com/woocommerce/woocommerce.git
 ```
 
 ## Installing dependencies
 
-To install dependencies, you will need the following tools installed on your machine:
+Install the JavaScript and PHP dependencies for the whole monorepo from its root directory:
 
--   [Node.js](https://nodejs.org/) (which includes `npm`): Most monorepo scripts run through PNPM, which installs and uses the Node version pinned in [the `.nvmrc` file](../../.nvmrc) automatically. A version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional if you would like help installing or switching between Node versions.
--   [PHP](https://www.php.net/manual/en/install.php): WooCommerce Blocks requires PHP. It is also needed to run Composer and various project build scripts.
--   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
+```sh
+pnpm install --frozen-lockfile
+```
 
-See [`package.json` `engines`](../../package.json) and [`readme.txt`](../../readme.txt#L6) for details on required versions.
+## Building the Blocks client
 
-<!--  -->
+Building is required before the blocks work in WordPress. Both commands below compile the client with `webpack` and write the result to `plugins/woocommerce/assets/client/blocks`:
 
-Once you the above setup, install the dependencies from the command line:
+```sh
+# Build the Blocks client once.
+pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks
 
--   Change directory to your repo folder, e.g. `$ cd woocommerce-blocks`.
--   (Optional) If you manage Node versions with a tool such as nvm, select the pinned version - `$ nvm use`
--   Install JavaScript and PHP dependencies - `$ npm install && composer install`.
+# Rebuild whenever a file changes.
+pnpm --filter='@woocommerce/block-library' watch:build
+```
 
-## Building the plugin files
+To build every part of the WooCommerce plugin instead of the Blocks client alone, run `pnpm --filter='@woocommerce/plugin-woocommerce' build`. The [JavaScript Build System](javascript-build-system.md) document explains how the webpack configuration is put together.
 
-NPM is used to trigger builds. Building is required for the plugin to functional.
+## Running WooCommerce locally
 
--   Run `$ npm run build` to build all assets for production.
--   Run `$ npm start` to run the development build and watch for changes.
+The quickest environment is `wp-env`, which the WooCommerce plugin provides:
 
-These scripts compile the code using `webpack` which is one of the installed dependencies from earlier.
+```sh
+pnpm --filter='@woocommerce/plugin-woocommerce' env:dev
+```
 
-You can also run `$ npx webpack` to run the development build and not keep watching for changes.
+It serves WordPress with WooCommerce active at `http://localhost:8888/`. Edit a page or post in the block editor, and the WooCommerce blocks are in the inserter.
+
+You can also run WooCommerce on your own environment. In that case, make sure the `plugins/woocommerce` directory is available as a plugin in your site's `wp-content/plugins` folder.
+
+## Configuring your WordPress site
+
+The `wp-env` setup above already defines the constants below. On your own environment, add them to `wp-config.php`:
+
+```php
+define( 'JETPACK_AUTOLOAD_DEV', true );
+define( 'WP_DEBUG', true );
+define( 'SCRIPT_DEBUG', true );
+```
+
+`JETPACK_AUTOLOAD_DEV` makes the Jetpack autoloader prefer the packages in your checkout. The other two surface PHP notices and load unminified assets.
 
 ## Create a plugin package in ZIP format
 
-Run `$ npm run package-plugin` to trigger install and build, and then create a zip file which you can use to install WooCommerce Blocks in WordPress admin.
+Build a WooCommerce ZIP that you can install through WP Admin:
 
-You can also do different variations of this command. By default it builds a production version of the plugin. You can also:
-
--   Build a development version of the plugin: `$ npm run package-plugin:dev`
--   Just do a zip build of the current environment (useful when you already have built files for zipping): `$ npm run package-plugin:zip-only`
+```sh
+pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
+```
 
 ## Linting
 
-Run `$ npm run lint` to check code against our linting rules.
+Run the Blocks linters:
 
-This script runs 3 sub-commands: `lint:php`, `lint:css`, `lint:js`. Use these to run linters across the codebase (linters check for valid syntax).
+```sh
+pnpm --filter='@woocommerce/block-library' lint
+```
 
--   `lint:php` runs phpcs via composer, which uses the [phpcs.xml](../../phpcs.xml) rule set.
--   `lint:css` runs stylelint over all the scss code in `assets/css`, using the rules in [.stylelintrc.json.](../../.stylelintrc.json)
--   `lint:js` runs eslint over all the JavaScript, using the rules in [.eslintrc.js.](../../.eslintrc.js)
+That covers JavaScript and TypeScript with ESLint, SCSS with Stylelint, and TypeScript declarations with `tsc`:
 
-Note; linters are also ran before commits via Git. If there are any violations, you will not be able to commit your changes until they are fixed, unless you add the `--no-verify` flag to your commit command.
+-   ESLint uses the package's own [`eslint.config.mjs`](../../eslint.config.mjs), which adds rules on top of the monorepo configuration.
+-   Stylelint uses [`.stylelintrc.json`](../../.stylelintrc.json).
 
-## Running the Blocks plugin
+To lint or fix a single file, pass its path, relative to `plugins/woocommerce/client/blocks`, before any flags:
 
-To run the Blocks plugin you'll need a WordPress development environment - e.g. [`VVV`](https://varyingvagrantvagrants.org) or [`docker`](https://www.docker.com).
+```sh
+pnpm --filter='@woocommerce/block-library' lint:js assets/js/blocks/cart/metadata.tsx --fix
+```
 
--   Ensure the repo folder is in the `wp-content/plugins` folder of your WordPress environment.
--   Activate the `WooCommerce Blocks` plugin (should be dev version, e.g. `2.6.0-dev`).
--   Edit a page or post in block editor - you should see WooCommerce blocks in the block inserter!
+The PHP behind the blocks lives in `plugins/woocommerce/src/Blocks` and is linted with the plugin's PHPCS setup, which uses [`phpcs.xml`](../../../../phpcs.xml):
+
+```sh
+pnpm --filter='@woocommerce/plugin-woocommerce' lint:php:changes
+```
+
+Linters also run against staged files before each commit. If there are violations, the commit is blocked until they are fixed, unless you add the `--no-verify` flag.
 
 ## Developer Tools (Visual Studio Code)
 
@@ -110,13 +121,13 @@ Here are some directions for setting up Visual Studio Code (most tools are also 
 
 ### EditorConfig
 
-[EditorConfig](https://editorconfig.org/) defines a standard configuration for setting up your editor, for example using tabs instead of spaces. You should install the [EditorConfig for VS Code extension](https://marketplace.visualstudio.com/items?itemName=editorconfig.editorconfig) and it will automatically configure your editor to match the rules defined in the Blocks plugin repository `.editorconfig` file.
+[EditorConfig](https://editorconfig.org/) defines a standard configuration for setting up your editor, for example using tabs instead of spaces. You should install the [EditorConfig for VS Code extension](https://marketplace.visualstudio.com/items?itemName=editorconfig.editorconfig) and it will automatically configure your editor to match the rules defined in the repository's `.editorconfig` file.
 
 ### ESLint
 
 [ESLint](https://eslint.org/) statically analyzes the code to find problems. The lint rules are integrated in the continuous integration process and must pass to be able to commit. You should install the [ESLint Extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for Visual Studio Code (see [eslint docs](https://eslint.org/docs/user-guide/integrations) for more editor integrations).
 
-With the extension installed, ESLint will use the `.eslintrc.js` file in the root of the Blocks plugin repository for formatting rules. It will highlight issues as you code.
+With the extension installed, ESLint will use the [`eslint.config.mjs`](../../eslint.config.mjs) file in the Blocks client for formatting rules. It will highlight issues as you code.
 
 ### Prettier
 
@@ -131,16 +142,26 @@ To use Prettier, you should install the [Prettier - Code formatter](https://mark
 },
 ```
 
-This will use the `.prettierrc.js` file in the root folder of the Blocks plugin repository and the version of Prettier that is installed in the root `node_modules` folder.
+This will use the [`.prettierrc.js`](../../.prettierrc.js) file in the Blocks client and the version of Prettier installed in the monorepo.
 
 ## Testing
 
-You’ll find a handful of scripts in `package.json` that performs the automated tests and linting. You can run the following commands to execute automated tests in your terminal:
+Run the Jest unit tests:
 
--   JS tests: `npm run test`
--   Run `npm run wp-env` command to setup the development environment in Docker.
+```sh
+# Run the test suite.
+pnpm --filter='@woocommerce/block-library' test:js
+
+# Run a single test file.
+pnpm --filter='@woocommerce/block-library' test:js -- path/to/test
+
+# Update snapshots after intentional changes.
+pnpm --filter='@woocommerce/block-library' test:update
+```
 
 To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](javascript-testing.md).
+
+End-to-end tests for the blocks are part of the WooCommerce end-to-end suite in `plugins/woocommerce/tests/e2e`. The [E2E guidelines](e2e-guidelines.md) cover how to write and run them.
 
 <!-- FEEDBACK -->
 
@@ -151,4 +172,3 @@ To find out more about how to run automated JavaScript tests, check out the docu
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/getting-started.md)
 
 <!-- /FEEDBACK -->
-

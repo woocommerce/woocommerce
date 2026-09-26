@@ -15,7 +15,7 @@ interface DateTimeProviderInterface {
 	/**
 	 * Returns the current DateTime.
 	 *
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public function get_now();
 }

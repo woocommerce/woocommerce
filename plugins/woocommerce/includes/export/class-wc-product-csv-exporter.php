@@ -714,7 +714,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
+							$terms  = (array) $attribute->get_terms();
 							$values = array();
 
 							foreach ( $terms as $term ) {

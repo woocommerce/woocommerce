@@ -41,7 +41,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 
 		$legend[] = array(
 			/* translators: %s: signups amount */
-			'title'            => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . count( $this->customers ) . '</strong>' ),
+			'title'            => sprintf( __( '%s signups in this period', 'woocommerce' ), '<strong>' . number_format_i18n( count( $this->customers ) ) . '</strong>' ),
 			'color'            => $this->chart_colours['signups'],
 			'highlight_series' => 2,
 		);

@@ -9,6 +9,7 @@ jobs:
   preparation:
     name: Check versions and prep for update
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       current_wp_version: ${{ steps.compute-wp-versions.outputs.wp_version }}
       required_wp_version: ${{ steps.compute-wp-versions.outputs.wp_required_version }}
@@ -96,6 +97,7 @@ jobs:
   update-versions:
     needs: [preparation]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.preparation.outputs.matrix) }}

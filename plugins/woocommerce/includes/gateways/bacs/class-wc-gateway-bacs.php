@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Gateways\ShippingMethodRestrictionsTrait;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,6 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_BACS extends WC_Payment_Gateway {
+
+	use ShippingMethodRestrictionsTrait;
 
 	/**
 	 * Unique ID for this gateway.
@@ -71,6 +74,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$this->title        = $this->get_option( 'title' );
 		$this->description  = $this->get_option( 'description' );
 		$this->instructions = $this->get_option( 'instructions' );
+		$this->init_shipping_method_restrictions();
 
 		// BACS account fields shown on the thanks page and in emails.
 		$this->account_details = get_option(
@@ -101,37 +105,42 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 
-		$this->form_fields = array(
-			'enabled'         => array(
-				'title'   => __( 'Enable/Disable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable bank transfer', 'woocommerce' ),
-				'default' => 'no',
+		$this->form_fields = array_merge(
+			array(
+				'enabled'      => array(
+					'title'   => __( 'Enable/Disable', 'woocommerce' ),
+					'type'    => 'checkbox',
+					'label'   => __( 'Enable bank transfer', 'woocommerce' ),
+					'default' => 'no',
+				),
+				'title'        => array(
+					'title'       => __( 'Title', 'woocommerce' ),
+					'type'        => 'safe_text',
+					'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+					'default'     => __( 'Direct bank transfer', 'woocommerce' ),
+					'desc_tip'    => true,
+				),
+				'description'  => array(
+					'title'       => __( 'Description', 'woocommerce' ),
+					'type'        => 'textarea',
+					'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
+					'default'     => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.', 'woocommerce' ),
+					'desc_tip'    => true,
+				),
+				'instructions' => array(
+					'title'       => __( 'Instructions', 'woocommerce' ),
+					'type'        => 'textarea',
+					'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
+					'default'     => '',
+					'desc_tip'    => true,
+				),
 			),
-			'title'           => array(
-				'title'       => __( 'Title', 'woocommerce' ),
-				'type'        => 'safe_text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => __( 'Direct bank transfer', 'woocommerce' ),
-				'desc_tip'    => true,
-			),
-			'description'     => array(
-				'title'       => __( 'Description', 'woocommerce' ),
-				'type'        => 'textarea',
-				'description' => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ),
-				'default'     => __( 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.', 'woocommerce' ),
-				'desc_tip'    => true,
-			),
-			'instructions'    => array(
-				'title'       => __( 'Instructions', 'woocommerce' ),
-				'type'        => 'textarea',
-				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
-			),
-			'account_details' => array(
-				'type' => 'account_details',
-			),
+			$this->get_shipping_method_restrictions_form_fields(),
+			array(
+				'account_details' => array(
+					'type' => 'account_details',
+				),
+			)
 		);
 	}
 

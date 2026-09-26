@@ -44,6 +44,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import DownloadIcon from './download-icon';
 import { extendTableData, getExportQuery } from './utils';
+import { hasEmptySearchResults } from '../utils';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -65,13 +66,13 @@ const ReportTable = ( props ) => {
 		endpoint,
 		// These props are not used in the render function, but are destructured
 		// so they are not included in the `tableProps` variable.
-		// eslint-disable-next-line no-unused-vars
 		itemIdField,
-		// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		tableQuery = {},
 		compareBy,
 		compareParam = 'filter',
 		searchBy,
+		limitProperties,
 		labels = {},
 		...tableProps
 	} = props;
@@ -540,6 +541,11 @@ ReportTable.propTypes = {
 		placeholder: PropTypes.string,
 	} ),
 	/**
+	 * Properties used to limit the results. It will be used in the API call to send the IDs.
+	 * Defaults to the `endpoint`.
+	 */
+	limitProperties: PropTypes.array,
+	/**
 	 * Primary data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
 	 */
@@ -577,6 +583,7 @@ export default compose(
 			getSummary,
 			isRequesting,
 			itemIdField,
+			limitProperties,
 			query,
 			tableData,
 			tableQuery,
@@ -586,13 +593,13 @@ export default compose(
 			extendedItemsStoreName,
 		} = props;
 
+		const limitBy = limitProperties || [ endpoint ];
+
 		const extendedStoreSelector = extendedItemsStoreName
 			? select( extendedItemsStoreName )
 			: null;
 
-		const noSearchResultsFound =
-			query.search && ! ( query[ endpoint ] && query[ endpoint ].length );
-		if ( isRequesting || noSearchResultsFound ) {
+		if ( isRequesting || hasEmptySearchResults( query, limitBy ) ) {
 			return EMPTY_OBJECT;
 		}
 
@@ -609,6 +616,7 @@ export default compose(
 					selector: reportStoreSelector,
 					dataType: 'primary',
 					query,
+					limitBy,
 					filters,
 					advancedFilters,
 					defaultDateRange,
@@ -621,6 +629,7 @@ export default compose(
 				endpoint,
 				query,
 				selector: reportStoreSelector,
+				limitBy,
 				tableQuery,
 				filters,
 				advancedFilters,

@@ -733,6 +733,46 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Nested Cart-Token should be ignored in a batch request.
+	 */
+	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {
+		$token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI'] = '/' . rest_get_url_prefix() . '/wc/store/v1/batch';
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+			$request->set_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'requests' => array(
+							array(
+								'method'  => 'POST',
+								'path'    => '/wc/store/v1/cart/update-customer',
+								'headers' => array( 'Cart-Token' => $token ),
+								'body'    => array( 'billing_address' => array( 'first_name' => 'Nonce-free' ) ),
+							),
+						),
+					)
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 401, $data['responses'][0]['status'] ?? null, 'A sub-request token must not waive the nonce check.' );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
 	 * Test that cart GET endpoint sends Cache-Control headers.
 	 */
 	public function test_cart_get_endpoint_cache_control_headers() {
@@ -1509,5 +1549,78 @@ class Cart extends ControllerTestCase {
 
 		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 		remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+	}
+
+	/**
+	 * @testdox Should return an error response when restoring the cart session throws.
+	 */
+	public function test_cart_session_failure_returns_error_response() {
+		wc()->session->set( 'cart', wc()->cart->get_cart_for_session() );
+
+		// The route restores the cart only when this action has not run yet, so reset
+		// the counter to put the process back into the state a REST request starts in.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		$cart_backup = WC()->cart;
+		$callback    = static function () {
+			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
+
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
+		}
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+		$this->assertArrayNotHasKey( 'Cart-Token', $response->get_headers(), 'A failed cart response should not include a cart token.' );
+		$this->assertArrayNotHasKey( 'Cart-Hash', $response->get_headers(), 'A failed cart response should not include a cart hash.' );
+	}
+
+	/**
+	 * @testdox Should return an error response when the cart session fails before it is restored.
+	 */
+	public function test_cart_session_failure_before_restore_returns_error_response() {
+		// This filter runs before `get_cart_from_session()` fires its action, so nothing
+		// stops the response headers attempting a second load of the failed cart.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		// A REST request never runs `initialize_cart()`, so the route starts with no
+		// cart at all. The test bootstrap leaves one behind.
+		$cart_backup = WC()->cart;
+		WC()->cart   = null;
+
+		$callback = static function () {
+			throw new \RuntimeException( 'Synthetic session handler failure.' );
+		};
+		add_filter( 'woocommerce_session_handler', $callback );
+
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_session_handler', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
+		}
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 	}
 }

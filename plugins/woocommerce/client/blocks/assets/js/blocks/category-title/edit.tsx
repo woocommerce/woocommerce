@@ -6,6 +6,8 @@ import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
+import { escapeHTML } from '@wordpress/escape-html';
 import { WP_REST_API_Category } from 'wp-types';
 import {
 	AlignmentControl,
@@ -38,6 +40,7 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
+		taxonomy?: string;
 	};
 }
 
@@ -64,39 +67,44 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		level === 0 ? 'p' : `h${ level }`
 	) as keyof JSX.IntrinsicElements;
 
-	const { termId, termTaxonomy } = context;
+	const { termId, termTaxonomy, taxonomy } = context;
+	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
 		( select ) => {
-			if ( ! termId ) return false;
+			if ( ! termId ) {
+				return false;
+			}
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
+				name: effectiveTaxonomy,
 				id: termId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
-	const isPreviewMode = usePreviewMode();
+	const isPreviewMode = usePreviewMode() && ! termId;
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
-		termTaxonomy || 'product_cat',
+		effectiveTaxonomy,
 		'name',
 		termId ? String( termId ) : undefined
 	);
 
 	let displayRawTitle = '';
 	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].description;
+		displayRawTitle = previewCategories[ 0 ].name;
 	} else if ( typeof rawTitle === 'string' ) {
 		displayRawTitle = rawTitle;
 	}
 
 	let displayFullTitle = '';
 	if ( isPreviewMode ) {
-		displayFullTitle = previewCategories[ 0 ].description;
+		displayFullTitle = escapeHTML( previewCategories[ 0 ].name );
+	} else if ( typeof fullTitle === 'string' ) {
+		displayFullTitle = escapeHTML( decodeEntities( fullTitle ) );
 	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
@@ -108,18 +116,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	const link = useSelect(
 		( select ) => {
-			if ( ! termId ) return undefined;
+			if ( ! termId ) {
+				return undefined;
+			}
 			const record = select(
 				coreStore
 			).getEntityRecord< WP_REST_API_Category >(
 				'taxonomy',
-				termTaxonomy || 'product_cat',
+				effectiveTaxonomy,
 				termId
 			);
 
 			return record?.link;
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const blockProps = useBlockProps( {
@@ -132,7 +142,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		__( 'Category title', 'woocommerce' )
 	) as JSX.Element;
 
-	if ( termId ) {
+	if ( termId || isPreviewMode ) {
 		titleElement = userCanEdit ? (
 			<PlainText
 				tagName={ TagName }

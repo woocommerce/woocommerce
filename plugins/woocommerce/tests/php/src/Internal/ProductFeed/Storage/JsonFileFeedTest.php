@@ -303,6 +303,68 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should build an encoded feed URL using the current uploads URL.
+	 */
+	public function test_get_file_url_for_identifier_uses_current_uploads_url(): void {
+		$upload_dir_filter = function ( array $upload_dir ): array {
+			$upload_dir['baseurl'] = 'https://current.example/uploads';
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $upload_dir_filter );
+
+		try {
+			$this->assertSame(
+				'https://current.example/uploads/product-feeds/feed%20name.json',
+				JsonFileFeed::get_file_url_for_identifier( 'feed name.json' )
+			);
+		} finally {
+			remove_filter( 'upload_dir', $upload_dir_filter );
+		}
+	}
+
+	/**
+	 * @testdox Should not build a feed URL for an invalid identifier.
+	 */
+	public function test_get_file_url_for_identifier_rejects_invalid_identifier(): void {
+		$this->assertNull( JsonFileFeed::get_file_url_for_identifier( '../feed.json' ) );
+		$this->assertNull( JsonFileFeed::get_file_url_for_identifier( 'feed.csv' ) );
+	}
+
+	/**
+	 * @testdox Should preserve the upload URL resolved when an existing feed was opened.
+	 */
+	public function test_get_file_url_preserves_cached_upload_url(): void {
+		$generation_upload_dir_filter = function ( array $upload_dir ): array {
+			$upload_dir['baseurl'] = 'https://generation.example/uploads';
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $generation_upload_dir_filter );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+		} finally {
+			remove_filter( 'upload_dir', $generation_upload_dir_filter );
+		}
+
+		$response_upload_dir_filter = function ( array $upload_dir ): array {
+			$upload_dir['baseurl'] = 'https://response.example/uploads';
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $response_upload_dir_filter );
+
+		try {
+			$this->assertStringStartsWith(
+				'https://generation.example/uploads/product-feeds/',
+				(string) $feed->get_file_url()
+			);
+		} finally {
+			remove_filter( 'upload_dir', $response_upload_dir_filter );
+		}
+	}
+
+	/**
 	 * Test that add_entry before start is a no-op (does not throw).
 	 */
 	public function test_add_entry_before_start_is_noop() {

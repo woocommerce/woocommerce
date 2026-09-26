@@ -28,6 +28,7 @@ jobs:
        github.event.pull_request.merged == true && 
        github.event.label.name == 'cherry pick to frozen release')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       pr_number: ${{ steps.set-vars.outputs.pr_number }}
       base_branch: ${{ steps.set-vars.outputs.base_branch }}
@@ -93,6 +94,7 @@ jobs:
   cherry-pick-to-trunk-check:
     needs: [prepare, cherry-pick]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       add_cp_to_trunk_nag: ${{ steps.check.outputs.add_cp_to_trunk_nag }}
     steps:
@@ -120,9 +122,10 @@ jobs:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     if: ${{ always() && needs.cherry-pick.outputs.status == 'success' && needs.cherry-pick.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
 
-      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preperation for the same release.
+      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preparation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -202,6 +205,7 @@ jobs:
   handle-skipped:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
@@ -224,6 +228,7 @@ jobs:
   handle-failures:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
     steps:
       - name: Add "cherry pick failed" label

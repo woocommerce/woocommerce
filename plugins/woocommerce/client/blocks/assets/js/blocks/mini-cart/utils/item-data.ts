@@ -17,6 +17,8 @@
 export type ItemData = {
 	/** Raw (non-display) attribute name, used by variation entries. */
 	raw_attribute?: string | undefined;
+	/** Raw (non-display) name, used by item_data entries. */
+	raw_key?: string | undefined;
 	/** Raw (non-display) value. */
 	value?: string | undefined;
 	/** Display-ready value; preferred over `value` when present. */

@@ -134,9 +134,9 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Update context for inner blocks to provide postId and postType.
 	 *
-	 * @param array    $context Block context.
-	 * @param array    $parsed_block Block attributes.
-	 * @param WP_Block $parent_block Block instance.
+	 * @param array          $context Block context.
+	 * @param array          $parsed_block Block attributes.
+	 * @param \WP_Block|null $parent_block Block instance.
 	 *
 	 * @return array Updated block context.
 	 */
@@ -231,9 +231,9 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Render the featured item block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {

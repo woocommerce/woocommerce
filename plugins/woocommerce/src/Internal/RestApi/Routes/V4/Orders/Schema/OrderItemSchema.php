@@ -290,7 +290,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			return '';
 		}
 
-		$image_id = $product->get_image_id() ? $product->get_image_id() : 0;
+		$image_id = (int) $product->get_image_id();
 		return $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 	}
 }

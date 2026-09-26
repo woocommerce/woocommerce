@@ -229,7 +229,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function has_valid_order_key( $order ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return ! empty( $_GET['key'] ) && $order->key_is_valid( wc_clean( wp_unslash( $_GET['key'] ) ) );
+		return isset( $_GET['key'] ) && is_string( $_GET['key'] ) && $order->key_is_valid( wc_clean( wp_unslash( $_GET['key'] ) ) );
 	}
 
 	/**

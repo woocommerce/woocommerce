@@ -18,6 +18,7 @@ import { isBoolean } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { withSpokenMessages } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -30,7 +31,6 @@ import { EXCLUDED_BLOCKS } from '../../constants';
 import { Notice } from '../../components/notice';
 import type { Attributes } from './types';
 import type { FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import RatingStars from './components/rating-stars';
 

@@ -22,7 +22,7 @@ class PaymentResult {
 	/**
 	 * Array of details about the payment.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $payment_details = [];
 
@@ -67,6 +67,26 @@ class PaymentResult {
 	}
 
 	/**
+	 * Get the redirect URL.
+	 *
+	 * @since 11.2.0
+	 * @return string URL the customer is sent to after checkout, empty when none was set.
+	 */
+	public function get_redirect_url(): string {
+		return $this->redirect_url;
+	}
+
+	/**
+	 * Get the payment details.
+	 *
+	 * @since 11.2.0
+	 * @return array Key value pairs the gateway returned, empty when none were set.
+	 */
+	public function get_payment_details(): array {
+		return $this->payment_details;
+	}
+
+	/**
 	 * Set payment status.
 	 *
 	 * @throws \Exception When an invalid status is provided.
@@ -96,9 +116,9 @@ class PaymentResult {
 	/**
 	 * Set redirect URL.
 	 *
-	 * @param array $redirect_url URL to redirect the customer to after checkout.
+	 * @param string $redirect_url URL to redirect the customer to after checkout.
 	 */
-	public function set_redirect_url( $redirect_url = [] ) {
+	public function set_redirect_url( $redirect_url = '' ) {
 		$this->redirect_url = esc_url_raw( $redirect_url );
 	}
 }

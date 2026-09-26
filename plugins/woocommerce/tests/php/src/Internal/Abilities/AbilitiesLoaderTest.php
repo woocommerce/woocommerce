@@ -474,7 +474,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		add_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
 
 		try {
-			do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+			do_action( 'wp_abilities_api_init' );
 		} finally {
 			remove_filter( 'woocommerce_logging_class', $logger_filter );
 			remove_action( 'wp_abilities_api_init', $shadow_callback, 5 );
@@ -569,7 +569,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_categories_init', $callback );
-		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise category registration on its required lifecycle hook.
+		do_action( 'wp_abilities_api_categories_init' );
 		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		$this->assertTrue( wp_has_ability_category( 'woocommerce' ) );
@@ -2233,7 +2233,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_categories_init', $callback );
-		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_categories_init' );
 		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		$this->registered_category_ids[] = 'woocommerce';
@@ -2246,7 +2246,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$callback = array( AbilitiesLoader::class, 'register_abilities' );
 
 		add_action( 'wp_abilities_api_init', $callback );
-		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_init' );
 		remove_action( 'wp_abilities_api_init', $callback );
 	}
 

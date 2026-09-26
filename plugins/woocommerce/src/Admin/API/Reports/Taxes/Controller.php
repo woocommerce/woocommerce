@@ -63,6 +63,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['orderby']             = $request['orderby'];
 		$args['order']               = $request['order'];
 		$args['taxes']               = $request['taxes'];
+		$args['location_includes']   = $request['location_includes'];
+		$args['location_excludes']   = $request['location_excludes'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
@@ -121,61 +123,67 @@ class Controller extends GenericController implements ExportableInterface {
 			'title'      => 'report_taxes',
 			'type'       => 'object',
 			'properties' => array(
-				'tax_rate_id'  => array(
+				'tax_rate_id'    => array(
 					'description' => __( 'Tax rate ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name'         => array(
+				'name'           => array(
 					'description' => __( 'Tax rate name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'tax_rate'     => array(
+				'tax_rate'       => array(
 					'description' => __( 'Tax rate.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'country'      => array(
+				'country'        => array(
 					'description' => __( 'Country / Region.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'state'        => array(
+				'state'          => array(
 					'description' => __( 'State.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'priority'     => array(
+				'priority'       => array(
 					'description' => __( 'Priority.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'total_tax'    => array(
+				'total_tax'      => array(
 					'description' => __( 'Total tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'order_tax'    => array(
+				'order_tax'      => array(
 					'description' => __( 'Order tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'shipping_tax' => array(
+				'shipping_tax'   => array(
 					'description' => __( 'Shipping tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'orders_count' => array(
+				'taxable_amount' => array(
+					'description' => __( 'Taxable amount.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'orders_count'   => array(
 					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -204,6 +212,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'order_tax',
 				'total_tax',
 				'shipping_tax',
+				'taxable_amount',
 				'orders_count',
 			)
 		);
@@ -216,6 +225,16 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
+		$params['location_includes']  = array(
+			'description'       => __( 'Includes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['location_excludes']  = array(
+			'description'       => __( 'Excludes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}
@@ -227,12 +246,13 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'tax_code'     => __( 'Tax code', 'woocommerce' ),
-			'rate'         => __( 'Rate', 'woocommerce' ),
-			'total_tax'    => __( 'Total tax', 'woocommerce' ),
-			'order_tax'    => __( 'Order tax', 'woocommerce' ),
-			'shipping_tax' => __( 'Shipping tax', 'woocommerce' ),
-			'orders_count' => __( 'Orders', 'woocommerce' ),
+			'tax_code'       => __( 'Tax code', 'woocommerce' ),
+			'rate'           => __( 'Rate', 'woocommerce' ),
+			'total_tax'      => __( 'Total tax', 'woocommerce' ),
+			'order_tax'      => __( 'Order tax', 'woocommerce' ),
+			'shipping_tax'   => __( 'Shipping tax', 'woocommerce' ),
+			'taxable_amount' => __( 'Taxable amount', 'woocommerce' ),
+			'orders_count'   => __( 'Orders', 'woocommerce' ),
 		);
 
 		/**
@@ -252,7 +272,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'tax_code'     => \WC_Tax::get_rate_code(
+			'tax_code'       => \WC_Tax::get_rate_code(
 				(object) array(
 					'tax_rate_id'       => $item['tax_rate_id'],
 					'tax_rate_country'  => $item['country'],
@@ -261,11 +281,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'tax_rate_priority' => $item['priority'],
 				)
 			),
-			'rate'         => $item['tax_rate'],
-			'total_tax'    => self::csv_number_format( $item['total_tax'] ),
-			'order_tax'    => self::csv_number_format( $item['order_tax'] ),
-			'shipping_tax' => self::csv_number_format( $item['shipping_tax'] ),
-			'orders_count' => $item['orders_count'],
+			'rate'           => $item['tax_rate'],
+			'total_tax'      => self::csv_number_format( $item['total_tax'] ),
+			'order_tax'      => self::csv_number_format( $item['order_tax'] ),
+			'shipping_tax'   => self::csv_number_format( $item['shipping_tax'] ),
+			'taxable_amount' => $this->prepare_taxable_amount_for_export( $item ),
+			'orders_count'   => $item['orders_count'],
 		);
 
 		/**
@@ -277,5 +298,25 @@ class Controller extends GenericController implements ExportableInterface {
 		 * @param array $item        The original report item.
 		 */
 		return apply_filters( 'woocommerce_report_taxes_prepare_export_item', $export_item, $item );
+	}
+
+	/**
+	 * Format the taxable amount of a report row for export.
+	 *
+	 * A zero base under a non-zero tax marks a lookup row recorded before the taxable
+	 * amount existed (or a manual tax line) - unknown, so exported as an empty cell
+	 * rather than a zero a merchant could mistake for a filing figure.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return string
+	 */
+	private function prepare_taxable_amount_for_export( $item ) {
+		if ( ! isset( $item['taxable_amount'] ) ) {
+			return '';
+		}
+
+		$unknown = 0.0 === (float) $item['taxable_amount'] && 0.0 !== (float) ( $item['total_tax'] ?? 0 );
+
+		return $unknown ? '' : self::csv_number_format( $item['taxable_amount'] );
 	}
 }

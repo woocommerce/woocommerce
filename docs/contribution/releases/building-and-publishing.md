@@ -29,7 +29,7 @@ Keep the _[Release Troubleshooting & Recovery](/docs/contribution/releases/troub
 #### 1. Pre-build checks
 
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
-- [ ] Verify no open issues or pull requests exist against the [release milestone](https://github.com/woocommerce/woocommerce/milestones/). Ping authors as needed to merge or close.
+- [ ] Verify no open issues or pull requests exist against the [release milestone](https://github.com/woocommerce/woocommerce/milestones/). Ping authors as needed to merge or close; for betas, marking a PR as a draft works as a temporary workaround.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"](https://github.com/woocommerce/woocommerce/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value in the readme.txt on the release branch matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 

@@ -18,17 +18,9 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 *
 	 */
 	public static function setUpBeforeClass(): void {
-		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
-	}
+		parent::setUpBeforeClass();
 
-	/**
-	 * Set up the test.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'This test is not compatible with the custom orders table.' );
-		}
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
 	}
 
 	/**
@@ -175,5 +167,42 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $product->get_name(), $data->name );
+	}
+
+	/**
+	 * @testdox Currency tooltip fragments preserve filtered symbols as valid JavaScript strings.
+	 */
+	public function test_get_currency_tooltip_encodes_filtered_symbol(): void {
+		$currency_symbol = "'\"\\</script>€雪";
+		$currency_pos    = get_option( 'woocommerce_currency_pos', null );
+		$positions       = array(
+			'right'       => array( 'append_tooltip', $currency_symbol ),
+			'right_space' => array( 'append_tooltip', '&nbsp;' . $currency_symbol ),
+			'left'        => array( 'prepend_tooltip', $currency_symbol ),
+			'left_space'  => array( 'prepend_tooltip', $currency_symbol . '&nbsp;' ),
+		);
+		$report          = new WC_Admin_Report();
+		$filter          = static function () use ( $currency_symbol ): string {
+			return $currency_symbol;
+		};
+
+		add_filter( 'woocommerce_currency_symbol', $filter );
+		try {
+			foreach ( $positions as $position => $expected ) {
+				update_option( 'woocommerce_currency_pos', $position );
+				$fragment = $report->get_currency_tooltip();
+
+				$this->assertSame( 1, preg_match( '/^(append_tooltip|prepend_tooltip): (.+)$/s', $fragment, $matches ) );
+				$this->assertSame( $expected[0], $matches[1] );
+				$this->assertSame( $expected[1], json_decode( $matches[2], true, 512, JSON_THROW_ON_ERROR ) );
+			}
+		} finally {
+			remove_filter( 'woocommerce_currency_symbol', $filter );
+			if ( null === $currency_pos ) {
+				delete_option( 'woocommerce_currency_pos' );
+			} else {
+				update_option( 'woocommerce_currency_pos', $currency_pos );
+			}
+		}
 	}
 }

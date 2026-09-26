@@ -224,8 +224,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: %s: net sales */
 							esc_html__( 'Net sales this month %s', 'woocommerce' ),
-							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_price() returns filterable price markup for the dashboard.
+						);
 					?>
 					</a>
 				</li>
@@ -244,9 +244,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity sold */
 							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
-							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
-							$top_seller->qty
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . esc_html( get_the_title( $top_seller->product_id ) ) . '</strong>',
+							(int) $top_seller->qty
+						);
 					?>
 					</a>
 				</li>

@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,6 +17,9 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore
  */
 class PushTokensDataStoreTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
+
 	/**
 	 * Tear down the test case.
 	 */
@@ -704,6 +708,77 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report no tokens when none are registered.
+	 */
+	public function test_has_tokens_returns_false_when_no_tokens_exist(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should not query again once a lookup found no tokens.
+	 */
+	public function test_has_tokens_memoizes_a_negative_result(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->has_tokens();
+
+		$queries_before = $wpdb->num_queries;
+		$data_store->has_tokens();
+
+		$this->assertSame( $queries_before, $wpdb->num_queries );
+	}
+
+	/**
+	 * @testdox Should report tokens once one is registered, regardless of the owner's role.
+	 */
+	public function test_has_tokens_returns_true_when_a_token_exists(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $subscriber_id,
+				'token'         => 'subscriber_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'subscriber-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( ( new PushTokensDataStore() )->has_tokens() );
+	}
+
+	/**
+	 * @testdox Should report tokens after one is created, when an earlier lookup found none.
+	 */
+	public function test_has_tokens_reflects_a_token_created_after_an_earlier_lookup(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->assertFalse( $data_store->has_tokens() );
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertTrue( $data_store->has_tokens() );
+		$this->assertCount( 1, $data_store->get_tokens_for_roles( array( 'administrator' ) ) );
+	}
+
+	/**
 	 * @testdox Should return tokens for users with matching roles.
 	 */
 	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {
@@ -892,6 +967,127 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the real totals when the requested page is past the last one.
+	 */
+	public function test_get_tokens_for_roles_reports_totals_for_a_page_past_the_end(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+		$wanted     = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 3, 10, array( 'device_uuid' => $wanted->get_device_uuid() ) );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
+
+	/**
+	 * @testdox Should return only the given user's tokens when filtered by user ID.
+	 */
+	public function test_get_tokens_for_roles_filters_by_user_id(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $second_admin_id ) );
+
+		$this->assertCount( 1, $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $second_admin_id, $result['tokens'][0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should return nothing when the filtered user does not have a matching role, even if they own tokens.
+	 */
+	public function test_get_tokens_for_roles_user_id_filter_cannot_widen_the_role_check(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $subscriber_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $subscriber_id ) );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * @testdox Should return only the matching device's token when filtered by device UUID.
+	 */
+	public function test_get_tokens_for_roles_filters_by_device_uuid(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+		$wanted = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'device_uuid' => $wanted->get_device_uuid() ) );
+
+		$this->assertCount( 1, $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $wanted->get_id(), $result['tokens'][0]->get_id() );
+	}
+
+	/**
+	 * @testdox Should require both filters to match when both are given.
+	 */
+	public function test_get_tokens_for_roles_combines_user_id_and_device_uuid_filters(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$first_admin_token = $this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$mismatch = $data_store->get_tokens_for_roles(
+			array( 'administrator' ),
+			1,
+			10,
+			array(
+				'user_id'     => $second_admin_id,
+				'device_uuid' => $first_admin_token->get_device_uuid(),
+			)
+		);
+		$match    = $data_store->get_tokens_for_roles(
+			array( 'administrator' ),
+			1,
+			10,
+			array(
+				'user_id'     => $first_admin_id,
+				'device_uuid' => $first_admin_token->get_device_uuid(),
+			)
+		);
+
+		$this->assertSame( 0, $mismatch['total'] );
+		$this->assertSame( 1, $match['total'] );
+		$this->assertSame( $first_admin_token->get_id(), $match['tokens'][0]->get_id() );
+	}
+
+	/**
+	 * @testdox Should not serve a filtered call from the cache of an unfiltered one in the same request.
+	 */
+	public function test_get_tokens_for_roles_caches_filtered_and_unfiltered_results_separately(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$unfiltered = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10 );
+		$filtered   = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $first_admin_id ) );
+
+		$this->assertSame( 2, $unfiltered['total'] );
+		$this->assertSame( 1, $filtered['total'] );
+	}
+
+	/**
 	 * @testdox Should not run any user query when no tokens exist.
 	 */
 	public function test_get_tokens_for_roles_skips_user_query_when_no_tokens_exist(): void {
@@ -957,6 +1153,520 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should delete every token owned by the user and report how many went.
+	 */
+	public function test_delete_for_user_deletes_all_of_that_users_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, 101 );
+		$this->create_push_token_for_user( $data_store, 101 );
+		$retained = $this->create_push_token_for_user( $data_store, 102 );
+
+		$this->assertSame( 2, $data_store->delete_for_user( 101 ) );
+		$this->assertSame( 0, $this->count_tokens_for_user( 101 ) );
+		$this->assertNotNull( get_post( $retained->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should report zero when the user owns no tokens.
+	 */
+	public function test_delete_for_user_returns_zero_when_the_user_has_no_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertSame( 0, $data_store->delete_for_user( 103 ) );
+	}
+
+	/**
+	 * A caller that loses the user ID must not match every author-less row.
+	 *
+	 * @testdox Should refuse a non-positive user ID and delete nothing.
+	 */
+	public function test_delete_for_user_refuses_a_non_positive_user_id(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$this->create_push_token_for_user( $data_store, 105 );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = %s",
+				PushToken::POST_TYPE
+			)
+		);
+
+		$this->assertSame( 0, $data_store->delete_for_user( 0 ) );
+		$this->assertSame( 1, $this->count_tokens_for_user( 0 ) );
+	}
+
+	/**
+	 * @testdox Should remove the token's meta along with the record.
+	 */
+	public function test_delete_for_user_removes_token_meta(): void {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_push_token_for_user( $data_store, 104 );
+		$token_id   = $push_token->get_id();
+
+		$data_store->delete_for_user( 104 );
+
+		$this->assertSame( '', get_post_meta( $token_id, 'token', true ) );
+	}
+
+	/**
+	 * Counts the push token records owned by a user.
+	 *
+	 * @param int $user_id The owning user ID.
+	 * @return int The number of records.
+	 */
+	private function count_tokens_for_user( int $user_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d",
+				PushToken::POST_TYPE,
+				$user_id
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests reading a push token populates the registration and confirmation timestamps.
+	 */
+	public function test_read_populates_timestamps_from_the_post_record() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$post = get_post( $push_token->get_id() );
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( $post->post_date_gmt, $read->get_created_at_gmt() );
+		$this->assertSame( $post->post_modified_gmt, $read->get_last_confirmed_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests re-registering a device advances the confirmation timestamp past the registration one.
+	 */
+	public function test_read_reflects_a_re_registered_token_as_a_later_confirmation_time() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		/**
+		 * `post_modified_gmt` only advances once a second has elapsed, so the
+		 * original post date is backdated rather than waiting on the clock.
+		 */
+		wp_update_post(
+			array(
+				'ID'                => $push_token->get_id(),
+				'post_date_gmt'     => '2026-01-01 00:00:00',
+				'post_date'         => '2026-01-01 00:00:00',
+				'post_modified_gmt' => '2026-01-01 00:00:00',
+				'post_modified'     => '2026-01-01 00:00:00',
+			)
+		);
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$data_store->update( $push_token );
+
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( '2026-01-01 00:00:00', $read->get_created_at_gmt() );
+		$this->assertGreaterThan( $read->get_created_at_gmt(), $read->get_last_confirmed_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a token has no last sent time until it has actually been sent.
+	 */
+	public function test_last_sent_at_is_null_for_a_token_that_has_never_been_sent() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send stamps every supplied token with the same time.
+	 */
+	public function test_record_last_sent_at_stamps_all_supplied_tokens() {
+		$data_store = new PushTokensDataStore();
+		$first      = $this->create_test_push_token();
+		$second     = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $first, $second ) );
+		$data_store->flush_last_sent_at();
+
+		$first_send_at  = $data_store->read( $first->get_id() )->get_last_sent_at_gmt();
+		$second_send_at = $data_store->read( $second->get_id() )->get_last_sent_at_gmt();
+
+		$this->assertNotNull( $first_send_at );
+		$this->assertSame( $first_send_at, $second_send_at );
+	}
+
+	/**
+	 * @testdox Tests recording a send twice replaces the stamp rather than accumulating rows.
+	 *
+	 * The batched write bypasses the meta API, so it has to leave exactly one
+	 * row per token behind — a duplicate would make `get_post_meta( …, true )`
+	 * return an arbitrary one of them.
+	 */
+	public function test_record_last_sent_at_replaces_the_previous_stamp() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests an older stamp does not replace a newer one.
+	 *
+	 * Each request captures its timestamp when it dispatches and writes it on
+	 * shutdown, so a slow request can reach the update after a later one has
+	 * already written a newer value. The update is advance-only so the field
+	 * cannot go backwards.
+	 */
+	public function test_an_older_stamp_does_not_replace_a_newer_one() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+		$newer      = gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS );
+
+		update_post_meta( $push_token->get_id(), PushTokensDataStore::LAST_SENT_AT_META_KEY, $newer );
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$this->assertSame( $newer, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send leaves the rest of the token record untouched.
+	 */
+	public function test_record_last_sent_at_does_not_disturb_other_token_data() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( $push_token->get_token(), $read->get_token() );
+		$this->assertSame( $push_token->get_device_uuid(), $read->get_device_uuid() );
+		$this->assertSame( $push_token->get_device_locale(), $read->get_device_locale() );
+		$this->assertSame( $push_token->get_metadata(), $read->get_metadata() );
+	}
+
+	/**
+	 * @testdox Tests updating a token preserves its last sent time.
+	 *
+	 * The app re-registers a device whenever its locale or metadata changes,
+	 * which must not wipe the send history that update path knows nothing about.
+	 */
+	public function test_updating_a_token_preserves_its_last_sent_at_time() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt();
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$data_store->update( $push_token );
+
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send defers the write until the buffer is flushed.
+	 *
+	 * A request can process many notifications against the same few tokens, so
+	 * the write is buffered and happens once rather than once per notification.
+	 */
+	public function test_record_last_sent_at_defers_the_write_until_flushed() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+
+		$data_store->flush_last_sent_at();
+
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests repeated recording before a flush results in a single write.
+	 */
+	public function test_repeated_recording_before_a_flush_writes_once() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		for ( $i = 0; $i < 5; $i++ ) {
+			$data_store->record_last_sent_at( array( $push_token ) );
+		}
+
+		$data_store->flush_last_sent_at();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests flushing an already flushed buffer is a no-op.
+	 */
+	public function test_flushing_twice_does_not_write_again() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt();
+
+		$data_store->flush_last_sent_at();
+
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a later send advances the stored time in the existing row.
+	 *
+	 * The row is updated in place so that repeatedly sending to the same device
+	 * does not consume `meta_id` values or churn the primary key on what is the
+	 * busiest write path in the feature. The earlier time is seeded an hour back
+	 * because two sends in the same second write an identical value, which the
+	 * advance-only guard skips. The unrelated row holds the same earlier time so
+	 * the guard would not protect it if the update matched on more than its key.
+	 */
+	public function test_a_later_send_advances_the_stored_time_in_place() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+		$earlier    = gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS );
+
+		update_post_meta( $push_token->get_id(), PushTokensDataStore::LAST_SENT_AT_META_KEY, $earlier );
+		update_post_meta( $push_token->get_id(), 'unrelated_meta', $earlier );
+
+		$meta_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$this->assertNotNull( $meta_id );
+		$this->assertGreaterThan( $earlier, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+		$this->assertSame( $earlier, get_post_meta( $push_token->get_id(), 'unrelated_meta', true ) );
+		$this->assertSame(
+			$meta_id,
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+					$push_token->get_id(),
+					PushTokensDataStore::LAST_SENT_AT_META_KEY
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests every token is stamped when the buffer spans more than one chunk.
+	 */
+	public function test_flush_stamps_every_token_across_chunks() {
+		$data_store = new PushTokensDataStore();
+		$tokens     = array();
+
+		for ( $i = 0; $i < PushTokensDataStore::LAST_SENT_AT_CHUNK_SIZE + 5; $i++ ) {
+			$tokens[] = $this->create_test_push_token();
+		}
+
+		$data_store->record_last_sent_at( $tokens );
+		$data_store->flush_last_sent_at();
+
+		foreach ( $tokens as $token ) {
+			$this->assertNotNull( $data_store->read( $token->get_id() )->get_last_sent_at_gmt() );
+		}
+	}
+
+	/**
+	 * @testdox Tests the Action Scheduler hook flushes buffered stamps.
+	 *
+	 * The safety net and retry paths run under a queue runner that can be killed
+	 * before shutdown, so the buffer is also flushed after each action. This
+	 * exists only for a path a hook creates, so nothing else would catch its
+	 * removal.
+	 */
+	public function test_the_action_scheduler_hook_flushes_buffered_stamps() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing Action Scheduler's hook, not declaring one.
+		do_action( 'action_scheduler_after_execute', 1, null, '' );
+
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a failed read of existing stamps does not insert duplicates.
+	 *
+	 * `wpdb::query()` returns false without setting `last_error` when the `query`
+	 * filter empties the statement, so a failed read must not be taken as "no
+	 * rows exist". `wp_postmeta` has no unique key to catch the duplicates that
+	 * would follow.
+	 */
+	public function test_a_failed_read_of_existing_stamps_does_not_insert_duplicates() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$empty_the_select = function ( $query ) {
+			return false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, 'last_sent_at_gmt' )
+				? ''
+				: $query;
+		};
+
+		add_filter( 'query', $empty_the_select );
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		remove_filter( 'query', $empty_the_select );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests a write that fails without throwing is reported.
+	 *
+	 * `wpdb::query()` returns false rather than throwing when the `query` filter
+	 * empties the statement, so nothing would surface the lost stamp unless the
+	 * return value is checked. The log is the only signal that stamps are not
+	 * being recorded.
+	 */
+	public function test_a_failed_write_of_stamps_is_logged() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$empty_the_update = function ( $query ) {
+			return false !== strpos( $query, 'UPDATE' ) && false !== strpos( $query, 'last_sent_at_gmt' )
+				? ''
+				: $query;
+		};
+
+		add_filter( 'query', $empty_the_update );
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		remove_filter( 'query', $empty_the_update );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+		$this->assertLogged( 'warning', 'Could not record last sent time for push tokens.' );
+	}
+
+	/**
+	 * @testdox Tests an error raised while writing stamps does not escape the flush.
+	 *
+	 * The flush runs on `action_scheduler_after_execute`, which fires between an
+	 * action completing and being marked complete, so anything escaping here
+	 * records a delivered notification's action as failed. Errors do not extend
+	 * Exception, which is why the catch is on Throwable.
+	 */
+	public function test_an_error_while_writing_stamps_does_not_escape_the_flush() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$raise_an_error = function ( $query ) {
+			if ( false !== strpos( $query, 'last_sent_at_gmt' ) ) {
+				throw new \Error( 'Raised for testing.' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $raise_an_error );
+
+		try {
+			$data_store->record_last_sent_at( array( $push_token ) );
+			$data_store->flush_last_sent_at();
+		} finally {
+			remove_filter( 'query', $raise_an_error );
+		}
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send with no tokens is a no-op.
+	 */
+	public function test_record_last_sent_at_ignores_an_empty_token_list() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->record_last_sent_at( array() );
+		$data_store->flush_last_sent_at();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s",
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 0, $row_count );
 	}
 
 	/**

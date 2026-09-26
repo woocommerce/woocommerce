@@ -19,14 +19,16 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 	return class WrappedComponent extends Component {
 		constructor() {
 			super( ...arguments );
+			const categoryId = this.getCategoryId();
 			this.state = {
 				error: null,
-				loading: false,
+				loading: !! categoryId && categoryId !== 'preview',
 				category:
 					this.props.attributes.categoryId === 'preview'
 						? this.props.attributes.previewCategory
 						: null,
 			};
+			this.getCategoryId = this.getCategoryId.bind( this );
 			this.loadCategory = this.loadCategory.bind( this );
 		}
 
@@ -36,15 +38,28 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 
 		componentDidUpdate( prevProps ) {
 			if (
-				prevProps.attributes.categoryId !==
-				this.props.attributes.categoryId
+				this.getCategoryId( prevProps ) !==
+				this.getCategoryId( this.props )
 			) {
 				this.loadCategory();
 			}
 		}
 
+		getCategoryId( props = this.props ) {
+			const { categoryId } = props.attributes;
+			if ( categoryId ) {
+				return categoryId;
+			}
+
+			const taxonomy =
+				props.context?.termTaxonomy || props.context?.taxonomy;
+			const shouldUseContext = taxonomy === 'product_cat';
+
+			return shouldUseContext ? props.context?.termId : undefined;
+		}
+
 		loadCategory() {
-			const { categoryId } = this.props.attributes;
+			const categoryId = this.getCategoryId();
 
 			if ( categoryId === 'preview' ) {
 				return;
@@ -82,6 +97,7 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 					getCategory={ this.loadCategory }
 					isLoading={ loading }
 					category={ category }
+					effectiveCategoryId={ this.getCategoryId() }
 				/>
 			);
 		}

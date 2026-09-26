@@ -30,7 +30,6 @@ class Totals extends \WP_UnitTestCase {
 
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		wp_set_current_user( 0 );
@@ -100,6 +99,9 @@ class Totals extends \WP_UnitTestCase {
 	 * tearDown.
 	 */
 	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
 		parent::tearDown();
 		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 		WC()->cart->empty_cart();
@@ -174,6 +176,7 @@ class Totals extends \WP_UnitTestCase {
 				'create_account'   => true,
 				'customer_note'    => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,

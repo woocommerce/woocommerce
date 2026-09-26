@@ -17,3 +17,6 @@ require_once __DIR__ . '/mocks/class-wc-tracks.php';
 
 // Initialize WordPress test environment using WorDBless (database-less).
 \WorDBless\Load::load();
+
+// Depends on WP_REST_Controller, so it must come after WorDBless has loaded core.
+require_once __DIR__ . '/mocks/class-wc-rest-controller.php';

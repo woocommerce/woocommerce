@@ -44,7 +44,7 @@ final class SessionHandler extends WC_Session {
 	 * Constructor for the session class.
 	 */
 	public function __construct() {
-		$this->token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+		$this->token = CartTokenUtils::get_request_cart_token();
 		$this->table = $GLOBALS['wpdb']->prefix . 'woocommerce_sessions';
 	}
 
@@ -58,8 +58,17 @@ final class SessionHandler extends WC_Session {
 
 	/**
 	 * Process the token header to load the correct session.
+	 *
+	 * Verifies the signature here rather than trusting the caller that selected this handler.
 	 */
 	protected function init_session_from_token() {
+		if ( ! CartTokenUtils::validate_cart_token( $this->token ) ) {
+			$this->_customer_id       = $this->generate_customer_id();
+			$this->session_expiration = CartTokenUtils::get_cart_token_expiration();
+			$this->_data              = array();
+			return;
+		}
+
 		$payload = CartTokenUtils::get_cart_token_payload( $this->token );
 
 		$this->_customer_id       = $payload['user_id'];
@@ -127,8 +136,8 @@ final class SessionHandler extends WC_Session {
 
 		$value = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT session_value FROM %i WHERE session_key = %s',
-				$this->table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+				"SELECT session_value FROM {$this->table} WHERE session_key = %s",
 				$customer_id
 			)
 		);
@@ -186,8 +195,8 @@ final class SessionHandler extends WC_Session {
 
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
-					$this->table,
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+					"INSERT INTO {$this->table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->session_expiration

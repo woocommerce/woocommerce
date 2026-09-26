@@ -207,7 +207,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $group, 'Group `id` entry is missing' );
 		$this->assertEquals( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $group['id'] );
 		$this->assertArrayHasKey( '_order', $group, 'Group `_order` entry is missing' );
-		$this->assertIsInteger( $group['_order'], 'Group `_order` entry is not an integer' );
+		$this->assertIsInt( $group['_order'], 'Group `_order` entry is not an integer' );
 		$this->assertArrayHasKey( '_type', $group, 'Group `_type` entry is missing' );
 		$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PMS_GROUP, $group['_type'], 'Group `_type` entry is not `' . PaymentsProviders::TYPE_OFFLINE_PMS_GROUP . '`' );
 		$this->assertArrayHasKey( 'title', $group, 'Group `title` entry is missing' );
@@ -385,7 +385,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1', $suggestion1['id'] );
 		$this->assertEquals( 'suggestion1', $suggestion1['_suggestion_id'] );
 		$this->assertArrayHasKey( '_order', $suggestion1, 'Provider `_order` entry is missing' );
-		$this->assertIsInteger( $suggestion1['_order'], 'Provider `_order` entry is not an integer' );
+		$this->assertIsInt( $suggestion1['_order'], 'Provider `_order` entry is not an integer' );
 		$this->assertEquals( 0, $suggestion1['_order'] );
 		$this->assertArrayHasKey( '_type', $suggestion1, 'Provider `_type` entry is missing' );
 		$this->assertEquals( PaymentsProviders::TYPE_SUGGESTION, $suggestion1['_type'] );

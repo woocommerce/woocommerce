@@ -9,12 +9,15 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * EmailActionControllerTests tests.
  */
 class EmailActionControllerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -35,6 +38,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
 		// in production code never runs during the test.
@@ -50,6 +54,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 

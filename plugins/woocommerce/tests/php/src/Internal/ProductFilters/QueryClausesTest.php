@@ -241,6 +241,17 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Non-string taxonomy filter values are ignored.
+	 */
+	public function test_non_string_taxonomy_filter_values_are_ignored(): void {
+		$query                           = new \WP_Query();
+		$query->query_vars['categories'] = array( 'cat-1' );
+		$clauses                         = array( 'where' => '' );
+
+		$this->assertSame( $clauses, $this->sut->add_query_clauses( $clauses, $query ) );
+	}
+
+	/**
 	 * @testdox A hierarchical category filter must match products in descendant categories without a child_of query per chosen term.
 	 *
 	 * @testWith [["hcat-parent"], ["In Parent", "In Child", "In Grandchild"]]
@@ -303,5 +314,27 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		foreach ( array( $grandchild, $sibling, $child, $parent ) as $term ) {
 			wp_delete_term( $term['term_id'], 'product_cat' );
 		}
+	}
+
+	/**
+	 * @testdox Price clauses adjust for standard tax class when shop displays prices including tax.
+	 */
+	public function test_price_clauses_with_tax_inclusive_display(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		$clauses = $this->sut->add_price_clauses(
+			array(
+				'where' => '',
+				'join'  => '',
+			),
+			array(
+				'min_price' => 20,
+				'max_price' => 50,
+			)
+		);
+
+		$this->assertStringContainsString( "wc_product_meta_lookup.tax_class = ''", $clauses['where'] );
 	}
 }

@@ -28,6 +28,8 @@ class MainFile extends WP_UnitTestCase {
 	 * Ensure that container is reset between tests.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
 		// reset container.
 		$this->container = Package::container( true );
 	}
@@ -60,5 +62,7 @@ class MainFile extends WP_UnitTestCase {
 	 */
 	protected function tearDown(): void {
 		Package::init();
+
+		parent::tearDown();
 	}
 }

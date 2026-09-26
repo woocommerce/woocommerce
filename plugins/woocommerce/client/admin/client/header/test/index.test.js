@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 /**
@@ -51,44 +51,12 @@ const encodedBreadcrumb = [
 ];
 
 describe( 'Header', () => {
-	beforeEach( () => {
-		// Mock RAF to be synchronous for testing
-		jest.spyOn( window, 'requestAnimationFrame' ).mockImplementation(
-			( cb ) => {
-				cb();
-			}
-		);
-	} );
-
-	afterEach( () => {
-		window.requestAnimationFrame.mockRestore();
-	} );
-
 	it( 'should render decoded breadcrumb name', () => {
 		const { queryByText } = render(
 			<Header sections={ encodedBreadcrumb } query={ {} } />
 		);
 		expect( queryByText( 'Accounts &amp; Privacy' ) ).toBe( null );
 		expect( queryByText( 'Accounts & Privacy' ) ).not.toBe( null );
-	} );
-
-	it( 'should only have the is-scrolled class if the page is scrolled', () => {
-		const { container } = render(
-			<Header sections={ encodedBreadcrumb } query={ {} } />
-		);
-
-		const topLevelElement = container.firstChild;
-		expect( Object.values( topLevelElement.classList ) ).not.toContain(
-			'is-scrolled'
-		);
-		Object.defineProperty( window, 'pageYOffset', {
-			value: 200,
-			writable: false,
-		} );
-		fireEvent.scroll( window, { target: { scrollY: 200 } } );
-		expect( Object.values( topLevelElement.classList ) ).toContain(
-			'is-scrolled'
-		);
 	} );
 
 	it( 'correctly updates the document title to reflect the navigation state', () => {

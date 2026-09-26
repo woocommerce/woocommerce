@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Start a single wp-env container set for tests via `--config .wp-env.test.json` (testsEnvironment: false) instead of provisioning separate dev and tests environments; test-only tooling change, no merchant-facing impact.

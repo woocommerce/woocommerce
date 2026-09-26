@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Triggers;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -14,6 +15,9 @@ use WC_Unit_Test_Case;
  * Tests for the NewOrderNotificationTrigger class.
  */
 class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
+
+	use PushNotificationsTestTrait;
+
 	/**
 	 * An instance of NewOrderNotificationTrigger.
 	 *
@@ -37,7 +41,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
 
-		$this->store->init( $dispatcher );
+		$this->store->init( $dispatcher, $this->create_data_store_with_tokens( true ) );
 		$this->store->register();
 
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );

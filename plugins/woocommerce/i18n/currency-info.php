@@ -263,6 +263,14 @@ return array(
 		'gsw_CH'  => $global_formats['rs_dot_apos_ltr'],
 		'rm_CH'   => $global_formats['rs_dot_apos_ltr'],
 	),
+	'CHW' => array(
+		'de_CH'   => $global_formats['ls_dot_apos_ltr'],
+		'fr_CH'   => $global_formats['rs_comma_space_ltr'],
+		'it_CH'   => $global_formats['ls_dot_apos_ltr'],
+		'default' => $global_formats['ls_dot_apos_ltr'],
+		'gsw_CH'  => $global_formats['rs_dot_apos_ltr'],
+		'rm_CH'   => $global_formats['rs_dot_apos_ltr'],
+	),
 	'CLP' => array(
 		'es_CL'   => $global_formats['lx_comma_dot_ltr'],
 		'default' => $global_formats['lx_comma_dot_ltr'],

@@ -85,38 +85,61 @@ test.describe( 'Shopper → Extensibility', () => {
 		test( 'Unpushed data is/is not overwritten depending on arg', async ( {
 			checkoutPageObject,
 		} ) => {
-			// First test by only partially filling in the address form.
-			await checkoutPageObject.page
-				.getByLabel( 'Country/Region' )
-				.selectOption( 'United Kingdom (UK)' );
-			await checkoutPageObject.page.getByLabel( 'Country/Region' ).blur();
+			// Fill in the address, then wait until it has reached the server. The dirty flag is
+			// not enough on its own: it is cleared by whichever push finishes first, which can
+			// be an earlier one that did not carry the address.
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await expect
+				.poll(
+					async () =>
+						checkoutPageObject.page.evaluate( async () => {
+							const response = await fetch(
+								'/wp-json/wc/store/v1/cart'
+							);
+							if ( ! response.ok ) {
+								return null;
+							}
+							const cart = await response.json();
+							const postcode = cart?.shipping_address?.postcode;
+							return typeof postcode === 'string'
+								? postcode
+								: null;
+						} ),
+					{ timeout: 15000 }
+				)
+				.toBe( '90210' );
 
+			// A postcode that fails validation is never pushed, so it only exists in the browser.
+			const postcode =
+				checkoutPageObject.page.locator( '#shipping-postcode' );
+			await postcode.fill( 'ABCDEF' );
+			await postcode.blur();
+			await checkoutPageObject.page.waitForFunction(
+				() =>
+					window.localStorage.getItem(
+						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
+					) === 'true'
+			);
+
+			// Without the arg, the unpushed postcode is kept.
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } )"
 			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'GB' );
-			await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
-			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).not.toHaveValue( 'GB' );
+			await expect( postcode ).toHaveValue( 'ABCDEF' );
 
-			// Next fully test the address form (so it pushes), then run extensionCartUpdate with
-			// overwriteDirtyCustomerData: true so overwriting is possible, but since the address pushed it should not
-			// be overwritten.
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'US' );
+			// With overwriteDirtyCustomerData, the address from the server replaces it.
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
+			);
+			await expect( postcode ).toHaveValue( '90210' );
+
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
 			).toHaveValue( 'US' );
+			await expect( postcode ).toHaveValue( '90210' );
 		} );
 		test( 'Cart data can be modified by extensions', async ( {
 			checkoutPageObject,

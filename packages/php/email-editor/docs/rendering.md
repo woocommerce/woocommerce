@@ -11,6 +11,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
 -   [Renderer Classes](#renderer-classes)
     -   [Renderer](#renderer)
     -   [Content_Renderer](#content_renderer)
+-   [Render Lifecycle Actions](#render-lifecycle-actions)
 -   [Rendering Direction](#rendering-direction)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
@@ -118,6 +119,45 @@ $html_content = $rendered_email['html'];
 $text_content = $rendered_email['text'];
 ```
 
+#### Rendering without a saved post
+
+Use `render_from_content()` to render block markup that has no database record.
+
+```php
+/**
+ * Renders block markup that has no backing post.
+ *
+ * @param string $content       Block HTML markup to render.
+ * @param string $template_slug Block template slug to render the content with.
+ * @param string $subject Email subject.
+ * @param string $pre_header An email preheader or preview text.
+ * @param string $language Email language.
+ * @param string $meta_robots Optional meta robots value for browser display.
+ * @return array
+ */
+public function render_from_content(
+    string $content,
+    string $template_slug,
+    string $subject,
+    string $pre_header,
+    string $language = 'en',
+    string $meta_robots = ''
+): array
+```
+
+**Example Usage:**
+
+```php
+$rendered_email = $renderer->render_from_content(
+    $block_markup,
+    'my-email-template-slug',
+    'Order Confirmation',
+    'Your order has been confirmed'
+);
+```
+
+Internally the renderer wraps the markup in a synthetic `WP_Post` with `ID === 0`; the rendering pipeline treats that ID as "no database record" and reads everything from the post object.
+
 ### Content_Renderer
 
 The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer` class is responsible for rendering only the HTML of block template content and a post. The block template has to contain a `core/post-content` block.
@@ -184,6 +224,50 @@ $result      = $content_renderer->render_without_css_inline( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```
+
+## Render Lifecycle Actions
+
+Two actions mark the start and the end of rendering an email's content. Use them to set up state a render needs and to put it back afterwards, for example a filter that must not apply to email HTML. `Content_Renderer` is reused for every email in a request, so anything left behind affects later renders and the rest of the request.
+
+```php
+/**
+ * Fires when rendering an email's content is about to start.
+ *
+ * @since 2.9.2
+ */
+do_action( 'woocommerce_email_editor_render_start' );
+
+/**
+ * Fires when rendering an email has finished, whether it succeeded or threw.
+ *
+ * @since 2.18.0
+ */
+do_action( 'woocommerce_email_editor_render_end' );
+```
+
+**Example Usage:**
+
+```php
+add_action(
+    'woocommerce_email_editor_render_start',
+    function () {
+        remove_filter( 'render_block', 'my_plugin_add_front_end_markup' );
+    }
+);
+
+add_action(
+    'woocommerce_email_editor_render_end',
+    function () {
+        add_filter( 'render_block', 'my_plugin_add_front_end_markup' );
+    }
+);
+```
+
+Each start is followed by exactly one end. Renders must not be nested, which the package does not check: a nested render resets the outer one's globals and rendering context. The end action fires from the same `finally` block that resets the renderer, so it also fires when a render throws.
+
+By then the renderer has been reset: the rendering context is gone and the `$post` and template globals are back to what they were, so the action carries no arguments and a callback cannot tell which email finished. A callback that needs the post should read it at the start of the render. A callback must also not throw, because it would mask the render's own error and stop later callbacks from restoring their state.
+
+Versions before 2.18.0 do not fire the end action, so a plugin that supports them cannot rely on the render end alone to undo its setup.
 
 ## Rendering Direction
 

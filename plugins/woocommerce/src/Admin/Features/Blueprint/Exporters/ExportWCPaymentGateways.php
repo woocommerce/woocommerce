@@ -9,7 +9,9 @@ use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
 
 /**
- * ExportWCPaymentGateways class
+ * Legacy payment gateways exporter.
+ *
+ * @deprecated 11.2.0 Payment settings are no longer included in Blueprint exports.
  */
 class ExportWCPaymentGateways implements StepExporter {
 	/**
@@ -25,17 +27,7 @@ class ExportWCPaymentGateways implements StepExporter {
 	 * @return Step
 	 */
 	public function export(): Step {
-		$options = array();
-		$this->maybe_hide_wcpay_gateways();
-		foreach ( $this->get_wc_payment_gateways() as $id => $payment_gateway ) {
-			if ( in_array( $id, $this->exclude_ids, true ) ) {
-				continue;
-			}
-
-			$options[ 'woocommerce_' . $id . '_settings' ] = $payment_gateway->settings;
-		}
-
-		return new SetSiteOptions( $options );
+		return new SetSiteOptions();
 	}
 
 	/**
@@ -82,7 +74,7 @@ class ExportWCPaymentGateways implements StepExporter {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'Includes all settings in WooCommerce | Settings | Payments.', 'woocommerce' );
+		return __( 'Payment settings are not included in Blueprint exports.', 'woocommerce' );
 	}
 
 

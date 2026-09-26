@@ -190,6 +190,35 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 ]
 ```
 
+## Item data
+
+Each cart item carries display metadata in `item_data`, a list of entries built by callbacks on the `woocommerce_get_item_data` filter:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `raw_key` | string | Machine-readable name for the entry, set by the extension that added it. Never translated, so clients can match on it. |
+| `name` | string | Name of the metadata, for display. Some extensions send `key` instead. |
+| `value` | string | Value of the metadata. |
+| `display` | string | Optionally, how the value should be displayed. |
+
+`raw_key` was added in WooCommerce 11.2.0. Entries that omit it are unchanged.
+
+Most stores return an empty list. Entries appear when an extension adds them, as Product Add-Ons, Bookings, Deposits and Gift Cards do.
+
+Both `name` and `key` hold a label meant for a shopper to read, so both can be translated and neither is safe to match on. Use `raw_key` to find your own entry.
+
+Every value in an entry, `raw_key` included, is passed through [`wp_kses_post()`](https://developer.wordpress.org/reference/functions/wp_kses_post/). That rewrites some characters — a bare `&` arrives as `&amp;`, so an equality check against the value you set will not match. Keep `raw_key` to lowercase letters, digits, `_`, `-` and `/`.
+
+Extensions can add properties beyond the four above through the same filter. Note that the endpoint checks each entry as a whole: if any one property holds a value that is not a scalar (an array, an object, `null`), the **entire entry** is dropped, not just that property.
+
+The order endpoint has an `item_data` list too, and it uses the opposite convention: there `key` is the raw metadata key and `display_key` is the label. See [Order](./order.md#item-data).
+
+### Data you do not want displayed
+
+`item_data` is for metadata shown next to the cart item. Anything else belongs in your `extensions` namespace on the cart item, which the Store API is built to carry. See [Cart Items](../extending-store-api/available-endpoints-to-extend.md#cart-items).
+
+Setting `hidden` on an entry keeps it out of the cart, the mini-cart and the classic templates, so this is not broken — but it leaves the data identified only by a label field, which is a poor fit for something never shown, and any client written against the schema still receives it.
+
 ## Single Cart Item
 
 Get a single cart item by its key.

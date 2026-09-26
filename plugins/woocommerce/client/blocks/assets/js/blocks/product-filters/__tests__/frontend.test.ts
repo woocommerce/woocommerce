@@ -127,6 +127,50 @@ describe( 'product filters interactivity store', () => {
 		] );
 	} );
 
+	it( 'toggles an attribute and removes its query parameters when deselected', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const context = {
+			isOverlayOpened: false,
+			params: {},
+			activeFilters: [],
+			item: {
+				type: 'attribute/color',
+				label: 'Gray',
+				value: 'gray',
+				selected: false,
+				count: 2,
+				attributeQueryType: 'or' as const,
+			},
+			activeLabelTemplate: 'Color: {{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [
+			{
+				value: 'gray',
+				type: 'attribute/color',
+				activeLabel: 'Color: Gray',
+				attributeQueryType: 'or',
+			},
+		] );
+		expect( mockRegisteredStore.state.params ).toEqual( {
+			filter_color: 'gray',
+			query_type_color: 'or',
+		} );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [] );
+		expect( mockRegisteredStore.state.params ).toEqual( {} );
+	} );
+
 	it( 'returns no selectable items when server context items are not an array', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Product filters store was not registered.' );
@@ -138,6 +182,28 @@ describe( 'product filters interactivity store', () => {
 		} );
 
 		expect( mockRegisteredStore.state.selectableItems ).toEqual( [] );
+	} );
+
+	it( 'closes from the backdrop but not the dialog', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		const context = { isOverlayOpened: true };
+		const wrapper = document.createElement( 'div' );
+		const dialog = document.createElement( 'div' );
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+			target: dialog,
+			currentTarget: wrapper,
+		} as unknown as MouseEvent );
+		expect( context.isOverlayOpened ).toBe( true );
+
+		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+			target: wrapper,
+			currentTarget: wrapper,
+		} as unknown as MouseEvent );
+		expect( context.isOverlayOpened ).toBe( false );
 	} );
 
 	it( 'does not add child-owned index metadata to selectable items', () => {
@@ -270,7 +336,7 @@ describe( 'product filters interactivity store', () => {
 						actions: {
 							navigate: routerNavigate,
 						},
-					} );
+					} as unknown as typeof import('@wordpress/interactivity-router') );
 
 					expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
 					const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
@@ -434,7 +500,7 @@ describe( 'product filters interactivity store', () => {
 			expect( firstYield.done ).toBe( false );
 			iterator.next( {
 				actions: { navigate: routerNavigate },
-			} );
+			} as unknown as typeof import('@wordpress/interactivity-router') );
 
 			expect( mockReload ).not.toHaveBeenCalled();
 			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );

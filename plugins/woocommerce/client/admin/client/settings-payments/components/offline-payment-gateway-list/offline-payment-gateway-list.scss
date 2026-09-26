@@ -1,8 +1,16 @@
 .woocommerce-list {
-	border-top: 1px solid $gray-200;
+	// No border-top: the header above closes itself off with its own
+	// border-bottom, in every loading state.
 
 	.woocommerce-list__item {
 		padding: 0 48px;
+
+		// The separator comes from @woocommerce/components' List, which draws
+		// it in $gray-100 — a shade lighter than the lines bracketing the list
+		// and than the separators on the main providers list.
+		&:not(:first-child) {
+			border-top-color: $gray-200;
+		}
 
 		&.is-last {
 			border-bottom: 1px solid $gray-200;

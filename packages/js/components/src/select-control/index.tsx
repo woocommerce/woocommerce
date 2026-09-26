@@ -299,6 +299,15 @@ export class SelectControl extends Component< Props, State > {
 		return Boolean( selected );
 	}
 
+	hasTags() {
+		const selected = this.getSelected();
+
+		return (
+			Array.isArray( selected ) &&
+			selected.some( ( item ) => Boolean( item.label ) )
+		);
+	}
+
 	getSelected(): Selected | undefined {
 		const { multiple, options, selected } = this.props;
 
@@ -565,6 +574,7 @@ export class SelectControl extends Component< Props, State > {
 		const { isExpanded, isFocused, selectedIndex } = this.state;
 
 		const hasMultiple = this.hasMultiple();
+		const hasTags = this.hasTags();
 		const { key: selectedKey = '' } =
 			( isNumber( selectedIndex ) && options[ selectedIndex ] ) || {};
 		const listboxId = isExpanded
@@ -577,7 +587,7 @@ export class SelectControl extends Component< Props, State > {
 		return (
 			<div
 				className={ clsx( 'woocommerce-select-control', className, {
-					'has-inline-tags': hasMultiple && inlineTags,
+					'has-inline-tags': hasTags && inlineTags,
 					'is-focused': isFocused,
 					'is-searchable': isSearchable,
 				} ) }
@@ -611,7 +621,7 @@ export class SelectControl extends Component< Props, State > {
 					activeId={ activeId }
 					className={ controlClassName }
 					disabled={ disabled }
-					hasTags={ hasMultiple }
+					hasTags={ hasTags }
 					isExpanded={ isExpanded }
 					listboxId={ listboxId }
 					onSearch={ this.search }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Enabled optimized variations price hashing for new stores by default.

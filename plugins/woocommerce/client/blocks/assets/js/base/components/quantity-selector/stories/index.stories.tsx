@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useArgs } from '@storybook/client-api';
-import type { Story, Meta } from '@storybook/react';
+import { useArgs } from 'storybook/preview-api';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -19,7 +19,7 @@ export default {
 	},
 } as Meta< QuantitySelectorProps >;
 
-const Template: Story< QuantitySelectorProps > = ( args ) => {
+const Template: StoryFn< QuantitySelectorProps > = ( args ) => {
 	const [ {}, setArgs ] = useArgs();
 
 	const onChange = ( newVal: number ) => {

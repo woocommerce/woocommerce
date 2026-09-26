@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove real sleep() calls from PHP unit tests by controlling timestamps explicitly; no production change.

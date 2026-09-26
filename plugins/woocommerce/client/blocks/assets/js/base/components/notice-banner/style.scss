@@ -41,6 +41,19 @@
 			}
 		}
 
+		// Notice contents are always a list, whether there is one notice or
+		// several, so the markers are removed to keep a single notice reading
+		// as plain text. `role="list"` on the element preserves the semantics.
+		ul.wc-block-components-notice-banner__list {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+
+			li + li {
+				margin-block-start: $gap-smaller;
+			}
+		}
+
 		// Legacy notice compatibility.
 		.wc-forward {
 			float: right;

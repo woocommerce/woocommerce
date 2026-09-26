@@ -178,7 +178,7 @@ class ProductQuery implements QueryClausesGenerator {
 				$args['tax_query'] = $tax_query; // phpcs:ignore
 			}
 		} else {
-			// For product_variantions we need to convert the tax_query to a meta_query.
+			// For product_variations we need to convert the tax_query to a meta_query.
 			if ( ! empty( $args['tax_query'] ) ) {
 				$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_merge( $tax_query, $args['tax_query'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			} else {
@@ -624,11 +624,6 @@ class ProductQuery implements QueryClausesGenerator {
 	 * @return string
 	 */
 	protected function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 }

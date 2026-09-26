@@ -56,3 +56,4 @@ storybook-static/
 /.wp-env.override.json
 /eslint_report.json
 /storybook/dist
+/bin/hook-docs/data/

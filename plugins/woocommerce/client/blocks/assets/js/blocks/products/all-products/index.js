@@ -3,7 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, grid } from '@wordpress/icons';
-import '@woocommerce/atomic-blocks';
+import '@woocommerce/product-elements';
 
 /**
  * Internal dependencies

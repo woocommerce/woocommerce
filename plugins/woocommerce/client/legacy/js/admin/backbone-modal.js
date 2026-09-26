@@ -109,6 +109,16 @@
 			$( document.body ).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function( e ) {
+			// Allow listeners to cancel the response via event.preventDefault(),
+			// e.g. to validate inputs and keep the modal open. Covers click,
+			// touch and keyboard paths.
+			var beforeResponse = $.Event( 'wc_backbone_modal_before_response' );
+			$( document.body ).trigger( beforeResponse, [ this._target, this.$el ] );
+
+			if ( beforeResponse.isDefaultPrevented() ) {
+				return;
+			}
+
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e, true );
 		},
@@ -149,14 +159,22 @@
 			var button = e.keyCode || e.which;
 
 			// Enter key
-			if (
-				13 === button &&
-				! ( e.target.tagName && ( e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea' ) )
-			) {
-				if ( $( '#btn-ok' ).length ) {
-					this.addButton( e );
-				}	else if ( $( '#btn-next' ).length ) {
-					this.nextButton( e );
+			if ( 13 === button ) {
+				var isFormField = e.target.tagName &&
+					( e.target.tagName.toLowerCase() === 'input' ||
+						e.target.tagName.toLowerCase() === 'textarea' );
+
+				// Let selectWoo handle Enter on an enhanced-select control instead of submitting the modal.
+				var inEnhancedSelect = $( e.target ).closest(
+					'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
+				).length > 0;
+
+				if ( ! isFormField && ! inEnhancedSelect ) {
+					if ( $( '#btn-ok' ).length ) {
+						this.addButton( e );
+					}	else if ( $( '#btn-next' ).length ) {
+						this.nextButton( e );
+					}
 				}
 			}
 

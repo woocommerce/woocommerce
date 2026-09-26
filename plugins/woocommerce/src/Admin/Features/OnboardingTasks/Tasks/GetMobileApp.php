@@ -70,6 +70,15 @@ class GetMobileApp extends Task {
 	}
 
 	/**
+	 * Check if a task is dismissable.
+	 *
+	 * @return bool
+	 */
+	public function is_dismissable() {
+		return true;
+	}
+
+	/**
 	 * Determines if site has any users connected to WordPress.com via JetPack
 	 *
 	 * @return bool

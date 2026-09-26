@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show the billing name for guest orders in the WooCommerce Home Orders activity panel instead of leaving the name blank.

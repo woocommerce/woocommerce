@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Product;
 use WC_Helper_Product;
 
@@ -20,6 +21,8 @@ use WC_Helper_Product;
  * Tests for NotificationsProcessor class
  */
 class NotificationsProcessorTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * @var NotificationsProcessor
@@ -31,6 +34,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		\WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
 
 		$eligibility_service = new EligibilityService();
@@ -51,6 +55,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 

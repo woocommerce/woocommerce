@@ -91,7 +91,7 @@ export function formatValue(
  * Calculates the delta/percentage change between two numbers.
  *
  * @param {number} primaryValue   the value to calculate change for.
- * @param {number} secondaryValue the baseline which to calculdate the change against.
+ * @param {number} secondaryValue the baseline against which to calculate the change.
  * @return {?number} Percent change between the primaryValue from the secondaryValue.
  */
 export function calculateDelta( primaryValue: number, secondaryValue: number ) {
@@ -107,7 +107,7 @@ export function calculateDelta( primaryValue: number, secondaryValue: number ) {
 	}
 
 	return Math.round(
-		( ( primaryValue - secondaryValue ) / secondaryValue ) * 100
+		( ( primaryValue - secondaryValue ) / Math.abs( secondaryValue ) ) * 100
 	);
 }
 

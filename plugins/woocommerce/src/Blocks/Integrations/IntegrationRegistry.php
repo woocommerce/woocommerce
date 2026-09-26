@@ -45,7 +45,7 @@ class IntegrationRegistry {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param IntegrationRegistry $this Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.
+		 * @param IntegrationRegistry $registry Instance of the IntegrationRegistry class which exposes the IntegrationRegistry::register() method.
 		 */
 		do_action( 'woocommerce_blocks_' . $this->registry_identifier . '_registration', $this );
 

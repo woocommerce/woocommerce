@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { test, expect } from '@playwright/test';
-import type { Page, Locator } from '@playwright/test';
+import type {
+	Page,
+	Locator,
+	Response as PlaywrightResponse,
+} from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -29,6 +33,22 @@ const headers = {
 	Authorization: `Basic ${ base64String }`,
 	cookie: '',
 };
+
+// Call this before the click that triggers the save, and await the returned
+// promise after it — registering the listener after the click can miss a
+// response that already arrived.
+const waitForUserPrefsSave = () =>
+	page.waitForResponse(
+		( res ) =>
+			res.url().includes( `/users/${ userId }` ) &&
+			res.request().method() !== 'GET'
+	);
+
+const expectSaved = ( response: PlaywrightResponse ) =>
+	expect(
+		response.ok(),
+		`${ response.status() } ${ response.url() }`
+	).toBeTruthy();
 
 const hidePerformanceSection = async () => {
 	const response =
@@ -212,12 +232,9 @@ test.describe(
 
 					await test.step( `Move first section down`, async () => {
 						await buttons_ellipsis.first().click();
+						const savePromise = waitForUserPrefsSave();
 						await menuitem_moveDown.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
+						expectSaved( await savePromise );
 					} );
 
 					await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
@@ -241,12 +258,9 @@ test.describe(
 
 					await test.step( `Move second section up`, async () => {
 						await buttons_ellipsis.nth( 1 ).click();
+						const savePromise = waitForUserPrefsSave();
 						await menuitem_moveUp.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
+						expectSaved( await savePromise );
 					} );
 
 					await test.step( `Expect second section becomes first section, first becomes second`, async () => {
@@ -268,13 +282,11 @@ test.describe(
 						name: 'Choose which analytics to display and the section name',
 					} )
 					.click();
+				const savePromise = waitForUserPrefsSave();
 				await page
 					.getByRole( 'menuitem', { name: 'Remove section' } )
 					.click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
-				);
+				expectSaved( await savePromise );
 			} );
 
 			await test.step( `Expect the Performance section to be hidden`, async () => {
@@ -284,16 +296,14 @@ test.describe(
 		} );
 
 		test( 'should allow a user to add a section back in', async () => {
-			await hidePerformanceSection( page );
+			await hidePerformanceSection();
 			await page.reload();
 
 			await test.step( `Add the Performance section back in.`, async () => {
 				await page.getByTitle( 'Add more sections' ).click();
+				const savePromise = waitForUserPrefsSave();
 				await page.getByTitle( 'Add Performance section' ).click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
-				);
+				expectSaved( await savePromise );
 			} );
 
 			await test.step( `Expect the Performance section to be added back.`, async () => {

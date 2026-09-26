@@ -11,7 +11,7 @@ class ArrayUtils {
 	 * @param array $array  The array to join together with the natural language conjunction.
 	 * @param bool  $enclose_items_with_quotes Whether each item in the array should be enclosed within quotation marks.
 	 *
-	 * @return string a string containing a list of items and a natural language conjuction.
+	 * @return string a string containing a list of items and a natural language conjunction.
 	 */
 	public static function natural_language_join( $array, $enclose_items_with_quotes = false ) {
 		if ( true === $enclose_items_with_quotes ) {

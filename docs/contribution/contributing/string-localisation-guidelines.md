@@ -170,3 +170,7 @@ This approach may not be suitable in all cases, because it can take time for CLD
 
 - [Snippet to add a country](/docs/code-snippets/add-a-country)
 - [Snippet to add or modify states](/docs/code-snippets/add-or-modify-states)
+
+### Updating an existing country or subdivision code
+
+Adding a new country or subdivision code is safe, and so is changing a display name, since names are just translatable strings. Renaming or removing an existing **code** is different: the old code may already be stored in customer orders, shipping zones, tax rates, and the store's default country setting, so it often needs a database migration too. For subdivision codes, use `MigrationHelper::migrate_country_states()` (`Automattic\WooCommerce\Database\Migrations\MigrationHelper`). There's an example in `wc_update_721_adjust_new_zealand_states()` (`wc-update-functions.php`). The helper only covers subdivision codes, so country or other changes might need a custom migration routine.

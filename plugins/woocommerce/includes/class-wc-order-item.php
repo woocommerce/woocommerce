@@ -283,23 +283,19 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
-
-		$inc_tax = ! empty( $calculate_tax_for['prices_include_tax'] );
-
 		if ( '0' !== $this->get_tax_class() && ProductTaxStatus::TAXABLE === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
 			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
-			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, $inc_tax );
+			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
 
 			if ( method_exists( $this, 'get_subtotal' ) ) {
-				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, $inc_tax );
+				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, false );
 				$this->set_taxes(
 					array(
 						'total'    => $taxes,
 						'subtotal' => $subtotal_taxes,
 					)
 				);
-
 			} else {
 				$this->set_taxes( array( 'total' => $taxes ) );
 			}
@@ -343,6 +339,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 		$order_item_name   = $this->get_name();
 
+		// Compare entity-decoded copies below: wp_kses_post() normalizes special characters
+		// in display values (e.g. "&" to "&amp;") while the item name stores them raw.
+		$decoded_item_name = ! $include_all && $product && $product->is_type( ProductType::VARIATION ) ? wp_specialchars_decode( $order_item_name, ENT_QUOTES ) : null;
+
 		foreach ( $meta_data as $meta ) {
 			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
@@ -362,7 +362,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( null !== $decoded_item_name && wc_is_attribute_in_product_name( wp_specialchars_decode( $display_value, ENT_QUOTES ), $decoded_item_name ) ) {
 				continue;
 			}
 

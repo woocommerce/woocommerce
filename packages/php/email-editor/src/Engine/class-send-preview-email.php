@@ -219,7 +219,7 @@ class Send_Preview_Email {
 	 */
 	private function fetch_post( $post_id ): \WP_Post {
 		$post = get_post( intval( $post_id ) );
-		if ( ! $post instanceof \WP_Post ) {
+		if ( ! $post instanceof \WP_Post || ! Email_Editor::is_email_post_type( $post->post_type ) ) {
 			throw new \Exception( esc_html__( 'Invalid post', 'woocommerce' ) );
 		}
 		return $post;

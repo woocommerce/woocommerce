@@ -91,12 +91,23 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		const response = await restApi.get( `${ WC_API_PATH }/system_status` );
 		const { environment } = response.data;
 
-		if ( environment.wp_multisite === false ) {
-			delete process.env.IS_MULTISITE;
+		// `wp_multisite` is a boolean (`is_multisite()`, schema `type: boolean`),
+		// but the response is untyped here and these suites also run against
+		// remote hosts on arbitrary WooCommerce versions, where a filter on
+		// `woocommerce_rest_prepare_system_status` could return a stringy value.
+		// Comparing the stringified value resolves either form. IS_MULTISITE is
+		// presence-based: '1' on multisite, unset otherwise — never '0'.
+		const rawMultisite = String( environment.wp_multisite ).toLowerCase();
+		const isMultisite = rawMultisite === 'true' || rawMultisite === '1';
+
+		if ( isMultisite ) {
+			process.env.IS_MULTISITE = '1';
 		} else {
-			process.env.IS_MULTISITE = environment.wp_multisite;
-			console.log( `IS_MULTISITE: ${ process.env.IS_MULTISITE }` );
+			delete process.env.IS_MULTISITE;
 		}
+		console.log(
+			`IS_MULTISITE: ${ process.env.IS_MULTISITE ?? '(unset)' }`
+		);
 	} );
 
 	await setup.step( 'general settings', async () => {

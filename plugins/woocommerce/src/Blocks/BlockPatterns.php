@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -206,10 +207,6 @@ class BlockPatterns {
 			return;
 		}
 
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
 			// Only log once per day by using a transient.
@@ -217,7 +214,7 @@ class BlockPatterns {
 			// By only logging when patterns are empty and no fetch is scheduled,
 			// we ensure that warnings are only generated in genuinely problematic situations,
 			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! get_transient( $transient_key ) && ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
+			if ( ! get_transient( $transient_key ) && ! ActionSchedulerUtil::has_scheduled_action( 'fetch_patterns' ) ) {
 				wc_get_logger()->warning(
 					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
 				);

@@ -37,7 +37,17 @@ final class ProductStockStatus {
 	public const LOW_STOCK = 'lowstock';
 
 	/**
-	 * Returns all product stock status values.
+	 * Returns every stock status value defined by this enum, as a flat list.
+	 *
+	 * It is wider than the set of statuses products store. self::LOW_STOCK is a reporting
+	 * aggregate: the Analytics stock report counts in-stock products whose quantity has fallen to
+	 * their low-stock threshold, so a low-stock product stores self::IN_STOCK. That report adds
+	 * self::LOW_STOCK to its own enum for exactly that reason.
+	 *
+	 * WC_Product::set_stock_status() coerces anything outside wc_get_product_stock_status_options()
+	 * to self::IN_STOCK, so use that helper for values you intend to store or filter on. It returns
+	 * a value => label map rather than a list, and being filterable it also carries statuses an
+	 * extension added.
 	 *
 	 * @since 10.9.0
 	 *

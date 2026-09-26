@@ -4,7 +4,7 @@
  * External dependencies
  */
 import React, { createElement } from '@wordpress/element';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 /**
  * Internal dependencies
  */
@@ -14,7 +14,7 @@ const ChildComponent = () => {
 	throw new Error( 'This is a test error' );
 };
 
-const Template: Story< ErrorBoundaryProps > = ( args ) => (
+const Template: StoryFn< ErrorBoundaryProps > = ( args ) => (
 	<ErrorBoundary { ...args }>
 		<ChildComponent />
 	</ErrorBoundary>

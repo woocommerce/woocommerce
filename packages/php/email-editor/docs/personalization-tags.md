@@ -9,6 +9,8 @@
 -   [Editor UI](#editor-ui)
 -   [Format](#format)
 -   [Context](#context)
+-   [Rendering Context and Escaping](#rendering-context-and-escaping)
+-   [Value Interceptor](#value-interceptor)
 -   [Core Components](#core-components)
 -   [Creating Custom Tags](#creating-custom-tags)
 -   [Usage with Renderer](#usage-with-renderer)
@@ -99,7 +101,7 @@ This would render as: "Hello John, your order #12345 was placed on January 15, 2
 
 ## Context
 
-Rendering context is a simple associative array passed to the Personalizer. It is the integrator's responsibility to build the context and set it to the Personalizer.
+The personalization context is a simple associative array passed to the Personalizer. It is the integrator's responsibility to build the context and set it to the Personalizer.
 The context is then passed to the `Personalization_Tag` callback function and can be used to derive the value.
 Note: This is still an early concept, and we may add actions/filters, as well as default context data.
 
@@ -112,6 +114,83 @@ $context = [
     // ... additional context data
 ];
 ```
+
+One key is reserved: `rendering_context` — see [Rendering Context and Escaping](#rendering-context-and-escaping).
+
+## Rendering Context and Escaping
+
+Email content is rendered into different destinations, and the correct value (and its escaping) differs per destination. The caller of `personalize_content()` declares the rendering context of the whole content: `Personalizer::RENDERING_CONTEXT_HTML` (default) for HTML bodies, or `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as the email subject, preheader, or a plain-text body.
+
+The Personalizer passes the context of each replacement to the tag callback under the reserved `rendering_context` key (`Personalizer::RENDERING_CONTEXT_KEY`) of the context array. Any value stored under this key via `set_context()` is overwritten.
+
+| Rendering context | Where the value lands | What the callback must return |
+| --- | --- | --- |
+| `Personalizer::RENDERING_CONTEXT_HTML` | HTML body content | An HTML fragment. Escape any dynamic data yourself (e.g. `esc_html()`) — unless the tag declares `VALUE_TYPE_TEXT`, in which case return raw text and the Personalizer escapes it (see [Value Type](#value-type)). |
+| `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
+| `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
+
+If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
+
+Inspecting the rendering context is optional — a callback that ignores it simply returns the same value for every destination. A tag that serves different content per destination can switch on the key:
+
+```php
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+
+function ( $context ) {
+    if ( Personalizer::RENDERING_CONTEXT_TEXT === ( $context[ Personalizer::RENDERING_CONTEXT_KEY ] ?? '' ) ) {
+        return 'Save 20% with code SAVE20';
+    }
+    return '<strong>Save 20%</strong> with code SAVE20';
+}
+```
+
+### Value Type
+
+Most tags return plain text: names, order numbers, dates. Declare those with `Personalization_Tag::VALUE_TYPE_TEXT`. The callback then always returns the raw, unescaped value, and the Personalizer escapes it to fit the rendering context: `esc_html()` in HTML content, untouched in plain-text output and in link URLs (where `esc_url()` is applied when the attribute is written). Declaring a value type is the expected practice for new tags.
+
+```php
+$registry->register(
+    new Personalization_Tag(
+        'First Name',
+        'customer/first-name',
+        'Customer',
+        function ( $context ) {
+            return $context['customer_first_name'] ?? '';
+        },
+        array(),
+        null,
+        array(),
+        Personalization_Tag::VALUE_TYPE_TEXT
+    )
+);
+```
+
+Note: the `esc_html()` call does not double-encode existing entities, so a raw text value that itself contains an entity-shaped sequence (e.g. a literal `&amp;`) renders as the decoded character (`&`). Always return genuinely raw text.
+
+The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in every rendering context — including plain-text output; the callback owns escaping and any per-context differences (in the `text` rendering context it must return raw plain text without markup or entities).
+
+## Value Interceptor
+
+The Personalizer offers an advanced extension point that intercepts every resolved tag value just before it is written into the content:
+
+```php
+$previous = $personalizer->set_value_interceptor(
+    function ( string $value, string $source, string $rendering_context ): string {
+        // Record the value externally, substitute a placeholder, etc.
+        return $value;
+    }
+);
+```
+
+The interceptor receives:
+
+-   `$value` — the resolved value, after any context-driven escaping (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content).
+-   `$source` — the raw source text being replaced: the trimmed tag token including arguments, the raw `data-link-href` attribute value, or the tag token found inside a plain `href`.
+-   `$rendering_context` — the `RENDERING_CONTEXT_*` constant of the replacement site.
+
+Its return value is written instead of the resolved value and must be a string — anything else throws a `TypeError`. In the `html` and `text` rendering contexts it is written verbatim. In the `href` rendering context it ends up in the `href` attribute, which WordPress escapes with `esc_url()`: characters not allowed in URLs (such as curly braces) are stripped and a missing scheme is prepended, so a `{{placeholder}}` return comes out as `http://placeholder`. An empty return in the `href` rendering context means no replacement — the link is left untouched, just like an empty resolved value.
+
+The interceptor persists until cleared by passing `null`, and the Personalizer instance obtained from the DI container is shared — WooCommerce core's transactional emails personalize through the same instance. Clear the interceptor (or restore the previous one returned by `set_value_interceptor()`) in a `finally` block, so an exception cannot leave it registered for unrelated emails.
 
 ## Core Components
 
@@ -170,13 +249,14 @@ The main class representing individual tags.
 
 ```php
 new Personalization_Tag(
-    string $name,           // Display name in UI
-    string $token,          // Token used in content
-    string $category,       // Category for organization
-    callable $callback,     // Function to generate value
-    array $attributes = [], // Default attributes
-    ?string $value_to_insert = null // Custom insert value
-    array $post_types       // List of supported post types
+    string $name,                    // Display name in UI
+    string $token,                   // Token used in content
+    string $category,                // Category for organization
+    callable $callback,              // Function to generate value
+    array $attributes = [],          // Default attributes
+    ?string $value_to_insert = null, // Custom insert value
+    array $post_types = [],          // List of supported post types
+    string $value_type = Personalization_Tag::VALUE_TYPE_HTML // Type of value the callback returns (VALUE_TYPE_TEXT or VALUE_TYPE_HTML)
 );
 ```
 
@@ -190,6 +270,7 @@ new Personalization_Tag(
 -   `get_attributes()`: Get default attributes
 -   `get_value_to_insert()`: Get the value to insert in UI
 -   `get_post_types()`: Get the list of post types
+-   `get_value_type()`: Get the type of value the callback returns
 
 ### Personalizer
 
@@ -199,7 +280,8 @@ Main engine for replacing tags with values in email content.
 
 -   `set_context(array $context)`: Set the personalization context
 -   `get_context()`: Get the current context
--   `personalize_content(string $content)`: Process and personalize content
+-   `personalize_content(string $content, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML)`: Process and personalize content; pass `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as subjects or plain-text bodies
+-   `set_value_interceptor(?callable $interceptor)`: Register a callback intercepting each resolved value before it is written, or clear it with `null`; returns the previously registered interceptor (see [Value Interceptor](#value-interceptor))
 
 **Example Usage:**
 
@@ -324,7 +406,7 @@ $personalized_html = $personalizer->personalize_content( $rendered_email['html']
 
 // The personalized HTML is now ready for sending
 $email_html = $personalized_html;
-$email_text = $rendered_email['text']; // Note: text version would need separate personalization if needed
+$email_text = $personalizer->personalize_content( $rendered_email['text'], Personalizer::RENDERING_CONTEXT_TEXT );
 ```
 
 This workflow first renders the email template with blocks, then applies personalization tags to the rendered HTML content, creating a fully personalized email ready for delivery.

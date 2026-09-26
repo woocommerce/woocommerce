@@ -7,12 +7,22 @@ import {
 	useInnerBlocksProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, RangeControl } from '@wordpress/components';
-import { Icon, trash } from '@wordpress/icons';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import {
+	PanelBody,
+	RangeControl,
+	Placeholder,
+	ExternalLink,
+} from '@wordpress/components';
+import { Icon, trash, starEmpty } from '@wordpress/icons';
+import {
+	PLACEHOLDER_IMG_SRC,
+	getSettingWithCoercion,
+	getAdminLink,
+} from '@woocommerce/settings';
+import { isBoolean } from '@woocommerce/types';
 
 interface SavedForLaterAttributes {
-	columnCount: number;
+	columnCount?: number;
 }
 
 interface EditProps {
@@ -22,6 +32,9 @@ interface EditProps {
 
 const MIN_COLUMNS = 2;
 const MAX_COLUMNS = 6;
+// Kept in sync with the PHP-side fallback in `SavedForLater::render()` —
+// the attribute has no block.json default on purpose.
+const DEFAULT_COLUMNS = 5;
 
 // Lives in JS because `__()` is needed for the heading copy. `block.json`
 // strings aren't run through translation, so keeping the template here
@@ -79,7 +92,16 @@ const PREVIEW_ITEMS = [
 ];
 
 const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
-	const { columnCount } = attributes;
+	const columnCount = attributes.columnCount ?? DEFAULT_COLUMNS;
+
+	// The block type stays registered when the `cart_save_for_later` feature is
+	// off (so content saved while it was on isn't flagged as an unsupported
+	// block). `experimentalCartSaveForLater` mirrors that feature in wcSettings.
+	const isFeatureEnabled = getSettingWithCoercion(
+		'experimentalCartSaveForLater',
+		false,
+		isBoolean
+	);
 
 	const blockProps = useBlockProps( {
 		className: 'wc-block-saved-for-later',
@@ -94,6 +116,38 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 		{ className: 'wc-block-saved-for-later__header' },
 		{ template: TEMPLATE }
 	);
+
+	// Nothing to preview when the feature is off — show a short notice instead
+	// of the sample list, so a persisted block doesn't look like a real one.
+	if ( ! isFeatureEnabled ) {
+		return (
+			<div { ...blockProps }>
+				<Placeholder
+					icon={ <Icon icon={ starEmpty } /> }
+					label={ __( 'Saved for later', 'woocommerce' ) }
+					instructions={ sprintf(
+						/* translators: %s: the feature name ("Save for Later in Cart"). */
+						__(
+							'The “%s” feature is off, so this block will not appear on your store.',
+							'woocommerce'
+						),
+						__( 'Save for Later in Cart', 'woocommerce' )
+					) }
+				>
+					<ExternalLink
+						href={ getAdminLink(
+							'admin.php?page=wc-settings&tab=advanced&section=features'
+						) }
+					>
+						{ __(
+							'Enable it in WooCommerce settings',
+							'woocommerce'
+						) }
+					</ExternalLink>
+				</Placeholder>
+			</div>
+		);
+	}
 
 	return (
 		<>

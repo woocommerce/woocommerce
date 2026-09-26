@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Declare webpack as a devDependency so the bundle build works without relying on hoisted packages.

@@ -30,7 +30,6 @@
 			"minHeight": true
 		},
 		"spacing": {
-			"blockGap": true,
 			"padding": true,
 			"margin": true,
 			"__experimentalDefaultControls": {

@@ -368,6 +368,32 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBeHidden();
 		} );
 
+		test( 'Conditional field stays hidden while the field it depends on has no value', async ( {
+			checkoutPageObject,
+			frontendUtils,
+		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
+			const facebookPage = checkoutPageObject.page.getByLabel(
+				'Which Facebook page did you see us on?'
+			);
+			const howDidYouHear = checkoutPageObject.page.getByLabel(
+				'How did you hear about us?'
+			);
+
+			// Nothing has been picked yet, so the rule must not match.
+			await expect( howDidYouHear ).toHaveValue( '' );
+			await expect( facebookPage ).toBeHidden();
+
+			await howDidYouHear.selectOption( 'facebook' );
+			await expect( facebookPage ).toBeVisible();
+
+			await howDidYouHear.selectOption( 'google' );
+			await expect( facebookPage ).toBeHidden();
+		} );
+
 		test( 'Conditional fields are shown/hidden based on cart state', async ( {
 			checkoutPageObject,
 			frontendUtils,

@@ -5,6 +5,22 @@ namespace Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives;
 
 /**
  * Abstract class for payment extension suggestion incentive provider classes.
+ *
+ * Caching derived store-context values
+ *
+ * Providers cache the store-context values they derive, since deriving them costs DB
+ * queries. A value cached beyond a single request outlives the logic that derived it, so
+ * correcting that logic later doesn't reach the stores already holding a value - unless
+ * the cache expires, or the value records which version of the logic produced it.
+ *
+ * Transients get this from their expiration. `WooPayments::has_wcpay()` caches in an
+ * option instead, and pairs it with a second option holding the logic version, re-deriving
+ * a value an older version produced. Its logic only ever narrows what qualifies, so it
+ * skips re-deriving a cached `no` - a shortcut that doesn't carry over to logic that
+ * widens what qualifies, or to a value richer than yes/no.
+ *
+ * That pairing also lets the WooPayments plugin, which writes the same value option from
+ * its own copy of the logic, ship before or after core.
  */
 abstract class Incentive {
 	const PREFIX = 'woocommerce_admin_pes_incentive_';

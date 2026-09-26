@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -18,6 +19,11 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
  * @internal
  */
 final class BlockTypesController {
+
+	/**
+	 * Priority of the add_data_attributes render_block filter.
+	 */
+	private const DATA_ATTRIBUTES_PRIORITY = 10;
 
 	/**
 	 * Instance of the asset API.
@@ -41,6 +47,18 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Static because it mirrors the WordPress block-type registry, which is a process-global singleton: once
+	 * any controller has registered the blocks they are registered for the whole request, regardless of which
+	 * container instance owns the controller. Only tracks the AbstractBlock-based block types registered by
+	 * register_blocks(); blocks registered through other paths are not reflected here.
+	 *
+	 * @var bool
+	 */
+	private static $register_blocks_has_run = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -59,9 +77,10 @@ final class BlockTypesController {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
-		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
@@ -110,6 +129,12 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		// Set before registering rather than after, so a registration failure is not retried on a later call.
+		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -118,6 +143,71 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Prepare block rendering for an email, and register the blocks if this request skipped that.
+	 *
+	 * Registration runs third-party code, and an error there must not stop the email from being sent.
+	 *
+	 * @internal
+	 */
+	public function register_blocks_for_email(): void {
+		$this->suspend_data_attributes_for_email_render();
+
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		try {
+			$this->register_blocks();
+		} catch ( \Throwable $e ) {
+			wc_caught_exception( $e, __METHOD__ );
+		}
+	}
+
+	/**
+	 * Stop adding data- attributes to blocks until the email render ends.
+	 *
+	 * No block that can appear in an email reads the attributes back, so in email HTML they are only weight. A
+	 * filter an extension removed is left alone.
+	 */
+	private function suspend_data_attributes_for_email_render(): void {
+		$data_attributes_callback = array( $this, 'add_data_attributes' );
+		if ( self::DATA_ATTRIBUTES_PRIORITY !== has_filter( 'render_block', $data_attributes_callback ) ) {
+			return;
+		}
+
+		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+	}
+
+	/**
+	 * Add the data- attributes filter back once the email render has ended.
+	 *
+	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 *
+	 * @internal
+	 */
+	public function restore_data_attributes_after_email_render(): void {
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+	}
+
+	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Covers only the AbstractBlock-based block types that register_blocks() registers — blocks registered
+	 * through other paths are not tracked. Used by the on-demand registration on the
+	 * woocommerce_short_description filter (see Bootstrap::maybe_register_blocks_from_content) to avoid
+	 * re-registering the block set when eager registration already ran on init.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool True if register_blocks() has already run.
+	 */
+	public function register_blocks_has_run() {
+		return self::$register_blocks_has_run;
 	}
 
 	/**
@@ -208,6 +298,41 @@ final class BlockTypesController {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
+		$shop_permalink = WC()->call_function( 'wc_get_page_permalink', 'shop' );
+		register_block_pattern(
+			'woocommerce/cart-empty-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center","className":"wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a></div><!-- /wp:button --></div><!-- /wp:buttons -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/cart-new-in-store-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		// This heading is what a merchant sees above the cart cross-sells, so it has to match what the
+		// editor inserts: the same markup and the same string as the heading in
+		// client/blocks/assets/js/blocks/product-collection/collections/cross-sells.tsx. The installed
+		// Cart page only stores this pattern's slug, so this content is the single definition of it.
+		//
+		// The literal '…' is that shared msgid. The classic template templates/cart/cross-sells.php uses
+		// the '&hellip;' spelling, which gettext treats as a separate string; bg_BG, mk_MK and th have
+		// translated only that one, so they render this heading in English until they translate the
+		// literal form — as they already do for an editor-inserted cross-sells block.
+		register_block_pattern(
+			'woocommerce/cart-cross-sells-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} --><h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
@@ -495,9 +620,11 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
-			$block_types[] = 'SavedForLater';
-		}
+		// Registered unconditionally so content saved while the feature was on
+		// doesn't surface an "unsupported block" notice once it's disabled. The
+		// block gates its own auto-injection, rendering, and inserter visibility
+		// on the `saved-for-later` feature (see SavedForLater).
+		$block_types[] = 'SavedForLater';
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
 			$block_types[] = 'Wishlist';
@@ -585,7 +712,64 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Set the preferred taxonomy and term for product breadcrumbs.
+	 * Use one shared editor stylesheet for WooCommerce blocks.
+	 *
+	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
+	 * keeps those per-block handles for frontend performance, but removes them in
+	 * admin so the block editor loads the combined stylesheet only.
+	 *
+	 * @internal
+	 *
+	 * @param array $settings Block settings.
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return array Block settings.
+	 */
+	public function use_single_block_editor_style( $settings, $metadata ) {
+		if (
+			! BlockEditorUnifiedAssets::is_enabled() ||
+			! is_admin() ||
+			! $this->is_woocommerce_block_metadata( $metadata ) ) {
+			return $settings;
+		}
+
+		$settings['style_handles']        = array();
+		$settings['style']                = array();
+		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+		$settings['editor_style']         = array( 'wc-block-library-style' );
+
+		return $settings;
+	}
+
+	/**
+	 * Check whether block metadata belongs to a block bundled with WooCommerce.
+	 *
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return bool Whether the metadata file is in the WooCommerce blocks directory.
+	 */
+	private function is_woocommerce_block_metadata( $metadata ) {
+		static $blocks_path = null;
+
+		if ( null === $blocks_path ) {
+			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
+			$blocks_path   = false === $resolved_path
+				? ''
+				: trailingslashit( wp_normalize_path( $resolved_path ) );
+		}
+
+		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
+			return false;
+		}
+
+		return str_starts_with(
+			wp_normalize_path( $metadata['file'] ),
+			$blocks_path
+		);
+	}
+
+	/**
+	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
 	 *
 	 * @internal
 	 *

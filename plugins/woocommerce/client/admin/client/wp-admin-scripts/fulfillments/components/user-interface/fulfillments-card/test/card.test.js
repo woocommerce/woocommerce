@@ -18,13 +18,13 @@ jest.mock( '@wordpress/components', () => ( {
 describe( 'FulfillmentCard', () => {
 	it( 'renders the header and children', () => {
 		render(
-			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable>
+			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
 
 		expect( screen.getByText( 'Header' ) ).toBeInTheDocument();
-		// Children should not be visible by default for collapsable
+		// Children should not be visible by default for collapsible
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 		// Click the header div (role="button") to expand
 		fireEvent.click(
@@ -33,9 +33,9 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
-	it( 'renders as collapsable and toggles visibility', () => {
+	it( 'renders as collapsible and toggles visibility', () => {
 		render(
-			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable>
+			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
@@ -52,23 +52,23 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'renders without clickable header when not collapsable', () => {
+	it( 'renders without clickable header when not collapsible', () => {
 		render(
-			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable={ false }>
+			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible={ false }>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
 
 		expect( screen.queryByRole( 'button' ) ).not.toBeInTheDocument();
-		// Children should not be visible if not collapsable (matches component behavior)
+		// Children should not be visible if not collapsible (matches component behavior)
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'renders children if initialState is expanded (collapsable)', () => {
+	it( 'renders children if initialState is expanded (collapsible)', () => {
 		render(
 			<FulfillmentCard
 				header={ <h1>Header</h1> }
-				isCollapsable
+				isCollapsible
 				initialState="expanded"
 			>
 				<p>Child content</p>
@@ -79,11 +79,11 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
-	it( 'does not render children if initialState is closed (collapsable)', () => {
+	it( 'does not render children if initialState is closed (collapsible)', () => {
 		render(
 			<FulfillmentCard
 				header={ <h1>Header</h1> }
-				isCollapsable
+				isCollapsible
 				initialState="closed"
 			>
 				<p>Child content</p>
@@ -96,9 +96,9 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'supports keyboard interaction on collapsable header', () => {
+	it( 'supports keyboard interaction on collapsible header', () => {
 		render(
-			<FulfillmentCard header={ <h1>Header</h1> } isCollapsable>
+			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);

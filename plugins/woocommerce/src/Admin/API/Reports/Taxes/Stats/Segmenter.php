@@ -64,7 +64,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		// Reformat result.
 		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
@@ -92,6 +92,10 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
 		}
 
+		// Note: datetime_anchor is discarded before segments reach the response (see
+		// ReportsSegmenter::reformat_intervals_segments), so it still anchors on
+		// wc_order_tax_lookup.date_created while the rest of the report buckets by the
+		// configured wc_order_stats date column. Harmless today; revisit if it is ever surfaced.
 		$intervals_segments = $wpdb->get_results(
 			"SELECT
 						MAX($table_name.date_created) AS datetime_anchor,
@@ -111,7 +115,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		// Reformat result.
 		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );

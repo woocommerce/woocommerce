@@ -28,6 +28,21 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$this->assertEmpty( $this->registry->get() );
 	}
 
+	/**
+	 * @testdox Currency data decodes HTML entities in the price separators.
+	 */
+	public function test_currency_data_decodes_separator_entities() {
+		update_option( 'woocommerce_price_thousand_sep', '&nbsp;' );
+		update_option( 'woocommerce_price_decimal_sep', '&#44;' );
+
+		$method = new \ReflectionMethod( $this->registry, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( $this->registry );
+
+		$this->assertSame( "\u{00A0}", $currency_data['thousandSeparator'] );
+		$this->assertSame( ',', $currency_data['decimalSeparator'] );
+	}
+
 	public function test_add_data() {
 		$this->registry->add( 'test', 'foo' );
 		$this->assertEquals( [ 'test' => 'foo' ], $this->registry->get() );

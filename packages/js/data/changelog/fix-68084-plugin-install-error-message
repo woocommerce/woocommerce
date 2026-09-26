@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Plugin install/activate error messages now read as one sentence instead of splicing the server error onto the frame with a comma.

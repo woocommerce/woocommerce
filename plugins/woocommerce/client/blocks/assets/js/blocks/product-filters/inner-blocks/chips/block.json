@@ -17,6 +17,25 @@
 		"interactivity": true,
 		"woocommerce": {
 			"innerBlockDisplayStyle": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalTextTransform": true
+		},
+		"__experimentalBorder": {
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalSkipSerialization": true
+		}
+	},
+	"selectors": {
+		"border": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item",
+		"spacing": {
+			"padding": ".wp-block-woocommerce-product-filter-chips:not(.is-style-swatch) .wc-block-product-filter-chips__item"
 		}
 	},
 	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],

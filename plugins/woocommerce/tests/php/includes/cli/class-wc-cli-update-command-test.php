@@ -26,6 +26,8 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	 * Make WP_Install::$db_updates readable and capture the original value.
 	 */
 	public function set_up() {
+		parent::set_up();
+
 		$this->db_updates_property = new ReflectionProperty( WC_Install::class, 'db_updates' );
 		$this->db_updates_property->setAccessible( true );
 		$this->db_updates_original_value = $this->db_updates_property->getValue();
@@ -37,6 +39,8 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	public function tear_down() {
 		$this->db_updates_property->setValue( $this->db_updates_original_value );
 		$this->db_updates_property->setAccessible( false );
+
+		parent::tear_down();
 	}
 
 	/**
@@ -64,6 +68,44 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Number of times the batched test callback has run.
+	 *
+	 * @var int
+	 */
+	public static $batched_callback_runs = 0;
+
+	/**
+	 * Update callback that asks to be run again until its third run.
+	 *
+	 * @return bool
+	 */
+	public static function batched_callback() {
+		++self::$batched_callback_runs;
+
+		return self::$batched_callback_runs < 3;
+	}
+
+	/**
+	 * @testdox Batched update callbacks are run again while they return true.
+	 */
+	public function test_batched_callbacks_run_until_completed() {
+		$this->mock_wp_cli();
+
+		self::$batched_callback_runs = 0;
+		$this->db_updates_property->setValue(
+			array(
+				'5.0.0' => array( __CLASS__ . '::batched_callback' ),
+			)
+		);
+
+		update_option( 'woocommerce_db_version', '4.0.0' );
+		$sut = new WC_CLI_Update_Command();
+		$sut->update();
+
+		$this->assertSame( 3, self::$batched_callback_runs, 'A callback returning true should be run again until it returns false.' );
+	}
+
+	/**
 	 * @testdox After `wp wc update` has run, the `woocommerce_db_option` should be left at the expected value (even if no update callbacks were executed)
 	 */
 	public function test_db_version_is_updated_if_no_callbacks() {
@@ -86,8 +128,6 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 	 * Mock WP_CLI and related functionality.
 	 */
 	private function mock_wp_cli() {
-		parent::set_up();
-
 		$this->register_legacy_proxy_static_mocks(
 			array(
 				WP_CLI::class => array(

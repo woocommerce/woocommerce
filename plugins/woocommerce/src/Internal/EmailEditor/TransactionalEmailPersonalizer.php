@@ -38,11 +38,12 @@ class TransactionalEmailPersonalizer {
 	 *
 	 * @param string    $content The content to personalize.
 	 * @param \WC_Email $email The WooCommerce email object.
+	 * @param string    $rendering_context The rendering context of the content — Personalizer::RENDERING_CONTEXT_HTML or Personalizer::RENDERING_CONTEXT_TEXT.
 	 * @return string The personalized content.
 	 */
-	public function personalize_transactional_content( string $content, \WC_Email $email ): string {
+	public function personalize_transactional_content( string $content, \WC_Email $email, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML ): string {
 		$this->configure_context_by_email( $email );
-		return $this->personalizer->personalize_content( $content );
+		return $this->personalizer->personalize_content( $content, $rendering_context );
 	}
 
 	/**

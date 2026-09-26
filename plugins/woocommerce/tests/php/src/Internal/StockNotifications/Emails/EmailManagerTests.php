@@ -6,12 +6,15 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for EmailManager wrapper methods.
  */
 class EmailManagerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -32,6 +35,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Short-circuit `wp_mail()` so the tests never attempt a real SMTP handoff.
 		// Returning a non-null value from `pre_wp_mail` signals WP core to skip the actual send.
@@ -40,7 +44,11 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->sut = new EmailManager();
 		$this->sut->init();
 
-		// Boot the mailer so email classes are registered.
+		// `WC_Emails` is a singleton that keeps whichever email list it built on its first
+		// construction for the rest of the process. Reset it so this test's registration
+		// via `woocommerce_email_classes` is actually picked up rather than an earlier
+		// test's (feature-disabled) build of the list.
+		$this->reset_email_singleton();
 		WC()->mailer();
 	}
 
@@ -50,7 +58,20 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
 		$this->sent_to = array();
+		$this->restore_stock_notifications_feature_option();
+		// Discard this test's `WC_Emails` build so later tests rebuild their own from
+		// whatever filters are active for them, rather than inheriting this test's list.
+		$this->reset_email_singleton();
 		parent::tearDown();
+	}
+
+	/**
+	 * Reset the `WC_Emails` singleton so the next `WC()->mailer()` call rebuilds it.
+	 */
+	private function reset_email_singleton(): void {
+		$instance_property = ( new \ReflectionClass( \WC_Emails::class ) )->getProperty( 'instance' );
+		$instance_property->setAccessible( true );
+		$instance_property->setValue( null, null );
 	}
 
 	/**

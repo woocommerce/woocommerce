@@ -26,7 +26,7 @@ export default function ShipmentForm() {
 
 	return (
 		<FulfillmentCard
-			isCollapsable={ false }
+			isCollapsible={ false }
 			initialState="expanded"
 			header={
 				<>

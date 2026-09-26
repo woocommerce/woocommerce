@@ -7,15 +7,15 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { useCheckoutSubmit } from '../use-checkout-submit';
 import {
 	CHECKOUT_STORE_KEY,
 	config as checkoutStoreConfig,
-} from '../../../../data/checkout';
+} from '@woocommerce/block-data/checkout';
 import {
 	PAYMENT_STORE_KEY,
 	config as paymentDataStoreConfig,
-} from '../../../../data/payment';
+} from '@woocommerce/block-data/payment';
+import { useCheckoutSubmit } from '../use-checkout-submit';
 
 jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 	const original = jest.requireActual(

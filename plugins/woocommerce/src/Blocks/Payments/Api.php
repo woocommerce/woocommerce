@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 /**
  *  The Api class provides an interface to payment method registration.
@@ -59,10 +60,33 @@ class Api {
 	 * @return array
 	 */
 	public function add_payment_method_script_dependencies( $dependencies, $handle ) {
-		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend' ], true ) ) {
+		if ( ! in_array( $handle, $this->get_cart_checkout_script_handles(), true ) ) {
 			return $dependencies;
 		}
-		return array_merge( $dependencies, $this->payment_method_registry->get_all_active_payment_method_script_dependencies() );
+		return array_values(
+			array_unique(
+				array_merge(
+					$dependencies,
+					$this->payment_method_registry->get_all_active_payment_method_script_dependencies()
+				)
+			)
+		);
+	}
+
+	/**
+	 * Get Cart and Checkout script handles for the active editor asset configuration.
+	 *
+	 * @return string[] Script handles.
+	 */
+	private function get_cart_checkout_script_handles(): array {
+		$editor_handles = BlockEditorUnifiedAssets::is_enabled()
+			? array( 'wc-block-library' )
+			: array( 'wc-checkout-block', 'wc-cart-block' );
+
+		return array_merge(
+			$editor_handles,
+			array( 'wc-cart-block-frontend', 'wc-checkout-block-frontend' )
+		);
 	}
 
 	/**
@@ -160,7 +184,7 @@ class Api {
 						sprintf( 'console.error( "%s" );', $error_message )
 					);
 
-					$cart_checkout_scripts = [ 'wc-cart-block', 'wc-cart-block-frontend', 'wc-checkout-block', 'wc-checkout-block-frontend' ];
+					$cart_checkout_scripts = $this->get_cart_checkout_script_handles();
 					foreach ( $cart_checkout_scripts as $script_handle ) {
 						if (
 							! array_key_exists( $script_handle, $wp_scripts->registered ) ||

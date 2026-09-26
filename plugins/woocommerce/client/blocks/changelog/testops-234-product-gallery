@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Product Gallery E2E tests from 12 to 8; Jest owns the block's registered defaults and its Single Product ancestry.
+

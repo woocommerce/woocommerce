@@ -38,10 +38,10 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/sanitize#readme",
 	"dependencies": {
-		"dompurify": "^3.2.6"
+		"dompurify": "^3.4.14"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@types/dompurify": "^2.0.4",
 		"@types/jest": "29.5.x",
 		"@types/trusted-types": "^2.0.7",

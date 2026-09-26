@@ -183,12 +183,11 @@
 
 			&.min {
 				&::-webkit-slider-thumb {
-					margin-left: -2px;
 					background-position-x: left;
 				}
 				&::-moz-range-thumb {
 					background-position-x: left;
-					transform: translate(-2px, 2px);
+					transform: translateY(2px);
 				}
 				&::-ms-thumb {
 					background-position-x: left;
@@ -198,11 +197,10 @@
 			&.max {
 				&::-webkit-slider-thumb {
 					background-position-x: right;
-					margin-left: 2px;
 				}
 				&::-moz-range-thumb {
 					background-position-x: right;
-					transform: translate(2px, 2px);
+					transform: translateY(2px);
 				}
 				&::-ms-thumb {
 					background-position-x: right;

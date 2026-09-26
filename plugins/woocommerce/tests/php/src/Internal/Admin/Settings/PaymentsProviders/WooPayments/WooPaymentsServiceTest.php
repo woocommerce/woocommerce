@@ -2456,6 +2456,36 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Serialized NOX profile strings are ignored without instantiating objects.
+	 */
+	public function test_get_onboarding_step_status_ignores_serialized_profile_string(): void {
+		NoxProfileObjectInstantiationProbe::$was_unserialized = false;
+
+		$serialized_profile = maybe_serialize(
+			array(
+				'probe' => new NoxProfileObjectInstantiationProbe(),
+			)
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $serialized_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $serialized_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, 'US' );
+
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $status );
+		$this->assertFalse( NoxProfileObjectInstantiationProbe::$was_unserialized, 'Serialized NOX profile strings must not instantiate objects.' );
+	}
+
+	/**
 	 * Data provider for test_get_onboarding_step_status.
 	 *
 	 * @return array[]

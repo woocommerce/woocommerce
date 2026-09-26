@@ -60,7 +60,14 @@ const customer = {
 
 // Reviews are ordered by when they were created.
 // source: plugins/woocommerce/tests/e2e/bin/blocks/scripts/parallel/reviews.sh
+// Three distinct ratings so latest / highest / lowest are different reviews.
 const hoodieReviews = [
+	{
+		name: `${ customer.first_name } ${ customer.last_name }`,
+		email: customer.email,
+		review: "It's ok.",
+		rating: 3,
+	},
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,

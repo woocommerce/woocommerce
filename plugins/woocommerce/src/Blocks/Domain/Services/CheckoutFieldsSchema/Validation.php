@@ -4,6 +4,12 @@ declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
+use Automattic\WooCommerce\Internal\Checkout\DateFormatLimitParser;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Errors\ValidationError;
+use Opis\JsonSchema\Parsers\DefaultVocabulary;
+use Opis\JsonSchema\Parsers\SchemaParser;
+use Opis\JsonSchema\SchemaLoader;
 use Opis\JsonSchema\{
 	Helper,
 	Validator
@@ -20,6 +26,39 @@ class Validation {
 	 * @var string
 	 */
 	private static $meta_schema_json = '';
+
+	/**
+	 * Date comparison keywords shared with ajv-formats.
+	 */
+	private const FORMAT_LIMIT_KEYWORDS = [
+		'formatMinimum',
+		'formatMaximum',
+		'formatExclusiveMinimum',
+		'formatExclusiveMaximum',
+	];
+
+	/**
+	 * Keywords that may hold a `$data` reference instead of a literal value, because
+	 * the base document schema we have doesn't include those.
+	 */
+	private const DATA_REF_KEYWORDS = [
+		'multipleOf',
+		'maximum',
+		'exclusiveMaximum',
+		'minimum',
+		'exclusiveMinimum',
+		'maxLength',
+		'minLength',
+		'pattern',
+		'maxItems',
+		'minItems',
+		'uniqueItems',
+		'maxProperties',
+		'minProperties',
+		'required',
+		'enum',
+		'format',
+	];
 
 	/**
 	 * Get the field schema with context.
@@ -90,7 +129,11 @@ class Validation {
 		}
 
 		try {
-			$validator = new Validator();
+			$vocabulary = new DefaultVocabulary();
+			foreach ( self::FORMAT_LIMIT_KEYWORDS as $keyword ) {
+				$vocabulary->appendKeyword( new DateFormatLimitParser( $keyword ) );
+			}
+			$validator = new Validator( new SchemaLoader( new SchemaParser( [], [], $vocabulary ) ) );
 			$result    = $validator->validate(
 				Helper::toJSON( $document_object->get_data() ),
 				Helper::toJSON( $rules )
@@ -153,8 +196,7 @@ class Validation {
 		}
 
 		if ( empty( self::$meta_schema_json ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			self::$meta_schema_json = file_get_contents( __DIR__ . '/json-schema-draft-07.json' );
+			self::$meta_schema_json = self::build_meta_schema();
 		}
 
 		$validator = new Validator();
@@ -172,10 +214,103 @@ class Validation {
 			self::$meta_schema_json
 		);
 
-		if ( $result->hasError() ) {
-			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', esc_html( (string) $result->error() ) );
+		$error = $result->error();
+		if ( null !== $error ) {
+			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', self::format_schema_error( $error ) );
 		}
 
 		return true;
+	}
+
+	/**
+	 * Describes schema errors at the failing keyword instead of the outer schema wrapper.
+	 *
+	 * @param ValidationError $error The schema validation error.
+	 * @return string The error paths and messages.
+	 */
+	private static function format_schema_error( ValidationError $error ): string {
+		$formatter = new ErrorFormatter();
+		$errors    = $formatter->format(
+			$error,
+			true,
+			static function ( ValidationError $error ) use ( $formatter ): string {
+				if ( 'const' === $error->keyword() ) {
+					return sprintf( 'The value must be %s', wp_json_encode( $error->args()['const'] ) );
+				}
+				$schema = $error->schema()->info()->data();
+				if ( 'enum' === $error->keyword() && is_object( $schema ) && isset( $schema->enum ) ) {
+					return sprintf( 'The value must be one of: %s', implode( ', ', array_map( 'wp_json_encode', $schema->enum ) ) );
+				}
+				return $formatter->formatErrorMessage( $error );
+			}
+		);
+		$messages  = [];
+		foreach ( $errors as $path => $details ) {
+			// The properties/test prefix belongs to our meta-schema check, not the supplied rule.
+			$path       = rawurldecode( preg_replace( '#^/properties/test(?=/|$)#', '', $path ) ?? $path );
+			$messages[] = sprintf( 'At "%s": %s.', $path ? $path : '/', implode( '; ', $details ) );
+		}
+
+		return implode( ' ', $messages );
+	}
+
+	/**
+	 * Adds $data references and date comparisons to the draft-07 meta schema.
+	 *
+	 * @return string The meta schema as JSON.
+	 */
+	private static function build_meta_schema(): string {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$draft_07    = (string) file_get_contents( __DIR__ . '/json-schema-draft-07.json' );
+		$meta_schema = json_decode( $draft_07, true );
+
+		// Fall back to the pristine meta schema rather than none at all, so rules are still checked.
+		if ( ! is_array( $meta_schema ) ) {
+			return $draft_07;
+		}
+
+		$meta_schema['definitions']['dataRef'] = [
+			'type'                 => 'object',
+			'required'             => [ '$data' ],
+			'properties'           => [
+				'$data' => [
+					'type'  => 'string',
+					'anyOf' => [
+						[ 'format' => 'json-pointer' ],
+						[ 'format' => 'relative-json-pointer' ],
+					],
+				],
+			],
+			'additionalProperties' => false,
+		];
+
+		foreach ( self::DATA_REF_KEYWORDS as $keyword ) {
+			$meta_schema['properties'][ $keyword ] = [
+				'anyOf' => [
+					$meta_schema['properties'][ $keyword ],
+					[ '$ref' => '#/definitions/dataRef' ],
+				],
+			];
+		}
+
+		foreach ( self::FORMAT_LIMIT_KEYWORDS as $keyword ) {
+			$meta_schema['properties'][ $keyword ]   = [
+				'anyOf' => [
+					[
+						'type'   => 'string',
+						'format' => 'date',
+					],
+					[ '$ref' => '#/definitions/dataRef' ],
+				],
+			];
+			$meta_schema['dependencies'][ $keyword ] = [
+				'required'   => [ 'format' ],
+				'properties' => [ 'format' => [ 'const' => 'date' ] ],
+			];
+		}
+
+		$widened = wp_json_encode( $meta_schema );
+
+		return is_string( $widened ) ? $widened : $draft_07;
 	}
 }

@@ -85,6 +85,43 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product archive titles fall back to Shop when the configured Shop page is missing.
+	 */
+	public function test_product_archive_title_falls_back_to_shop_when_shop_page_is_missing(): void {
+		global $wp_query, $wp_the_query;
+
+		// Nothing is restored by hand. The transaction rollback covers the option
+		// and the page, and `WP_UnitTestCase_Base::tear_down()` replaces both
+		// query globals with a fresh `WP_Query` before the next test runs.
+		$shop_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Retired catalog',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		wp_delete_post( $shop_page_id, true );
+
+		$query                       = new WP_Query( array( 'post_type' => 'product' ) );
+		$query->is_post_type_archive = true;
+		$query->is_archive           = true;
+		$query->is_tax               = false;
+		$query->is_home              = false;
+		$wp_query                    = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertTrue( is_shop(), 'The query must represent the product archive.' );
+		$this->assertSame( '', get_the_title( $shop_page_id ), 'The configured Shop page must be missing.' );
+		$this->assertSame( 10, has_filter( 'post_type_archive_title', 'wc_update_product_archive_title' ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core owns this hook; the test exercises WooCommerce's registered callback.
+		$title = apply_filters( 'post_type_archive_title', 'Products', 'product' );
+
+		$this->assertSame( __( 'Shop', 'woocommerce' ), $title );
+	}
+
+	/**
 	 * @testdox woocommerce_get_product_subcategories caches results under the expected key.
 	 */
 	public function test_subcategories_are_cached_under_expected_key(): void {
@@ -223,5 +260,117 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$markup  = $this->render_loop_add_to_cart( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow"', $markup );
+	}
+
+	/**
+	 * @testdox Pagination defaults link page one to the canonical archive URL.
+	 */
+	public function test_pagination_defaults_link_page_one_to_canonical_archive_url(): void {
+		global $wp_rewrite;
+
+		$original_permalink_structure = $wp_rewrite->permalink_structure;
+		$buffer_level                 = ob_get_level();
+		$previous_loop                = $GLOBALS['woocommerce_loop'] ?? null;
+		$pagination_args              = null;
+		$get_pagenum_link_filter      = static function ( $link, $pagenum ) {
+			return 'https://example.test/shop/page/' . $pagenum . '/';
+		};
+		$pagination_args_filter       = static function ( $args ) use ( &$pagination_args ) {
+			$pagination_args = $args;
+			return $args;
+		};
+
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		wc_setup_loop(
+			array(
+				'is_shortcode' => false,
+				'is_paginated' => true,
+				'total'        => 2,
+				'total_pages'  => 2,
+				'current_page' => 2,
+			)
+		);
+		add_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10, 2 );
+		add_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+
+		ob_start();
+		try {
+			woocommerce_pagination();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10 );
+			remove_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+			$wp_rewrite->set_permalink_structure( $original_permalink_structure );
+			if ( null === $previous_loop ) {
+				wc_reset_loop();
+			} else {
+				$GLOBALS['woocommerce_loop'] = $previous_loop;
+			}
+		}
+
+		$this->assertSame( 'https://example.test/shop/%_%', $pagination_args['base'] );
+		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
+		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
+	}
+
+	/**
+	 * @testdox wc_display_product_attributes() renders term names when the taxonomy is registered but missing from the global attribute list.
+	 */
+	public function test_display_product_attributes_without_global_attribute_entry(): void {
+		global $wc_product_attributes;
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$taxonomy        = $attribute->get_name();
+		$taxonomy_object = $wc_product_attributes[ $taxonomy ];
+		unset( $wc_product_attributes[ $taxonomy ] );
+		$warnings     = array();
+		$buffer_level = ob_get_level();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		ob_start();
+		try {
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			restore_error_handler();
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			$wc_product_attributes[ $taxonomy ] = $taxonomy_object;
+		}
+
+		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
+		$this->assertStringContainsString( 'Matte', $markup );
+	}
+
+	/**
+	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
+	 */
+	public function test_empty_cart_message_uses_notices_wrapper(): void {
+		ob_start();
+		wc_empty_cart_message();
+		$markup = (string) ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<div class="woocommerce-notices-wrapper wc-empty-cart-message">',
+			$markup,
+			'The empty cart message should keep its own class and gain the notices wrapper class.'
+		);
+		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
 	}
 }

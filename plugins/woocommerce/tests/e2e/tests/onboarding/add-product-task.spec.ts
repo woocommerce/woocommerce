@@ -12,7 +12,6 @@ import {
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hide_task_list = async ( restApi: any, task_list_name: string ) => {
 	const {
 		status,
@@ -26,7 +25,6 @@ const hide_task_list = async ( restApi: any, task_list_name: string ) => {
 	return isHidden === true;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const show_task_list = async ( restApi: any, task_list_name: string ) => {
 	const {
 		status,
@@ -104,6 +102,21 @@ test.describe( 'Add Product Task', () => {
 		await expect(
 			page.getByRole( 'menuitem', { name: 'Grouped product' } )
 		).toBeVisible();
+		await expect(
+			page.locator( '#toplevel_page_woocommerce' )
+		).toHaveClass( /wp-has-current-submenu/ );
+		await expect( page.locator( '#menu-posts-product' ) ).not.toHaveClass(
+			/wp-has-current-submenu/
+		);
+
+		await page
+			.getByRole( 'menuitem', { name: 'Physical product' } )
+			.click();
+		await expect(
+			page.locator(
+				'#menu-posts-product .wp-submenu li.current > a[href="post-new.php?post_type=product"]'
+			)
+		).toBeVisible();
 	} );
 
 	test( 'Products page redirects to add product task when no products exist', async ( {
@@ -113,7 +126,9 @@ test.describe( 'Add Product Task', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		// Verify redirect to add product task
-		await expect( page ).toHaveURL( /.+task=products/ );
+		await expect( page ).toHaveURL(
+			/.+path=%2Fadd-product.+task=products/
+		);
 		await expect(
 			page.getByRole( 'menuitem', { name: 'Physical product' } )
 		).toBeVisible();
@@ -123,6 +138,20 @@ test.describe( 'Add Product Task', () => {
 		await expect(
 			page.getByRole( 'menuitem', { name: 'Grouped product' } )
 		).toBeVisible();
+		await expect( page.locator( '#menu-posts-product' ) ).toHaveClass(
+			/wp-has-current-submenu/
+		);
+		await expect(
+			page.locator(
+				'#menu-posts-product .wp-submenu li.current > a[href="edit.php?post_type=product"]'
+			)
+		).toBeVisible();
+
+		await page.getByTestId( 'header-back-button' ).click();
+		await expect( page ).toHaveURL( /admin\.php\?page=wc-admin$/ );
+		await expect(
+			page.locator( '#toplevel_page_woocommerce' )
+		).toHaveClass( /wp-has-current-submenu/ );
 	} );
 
 	test( 'Products page shows products table when products exist', async ( {
@@ -174,7 +203,9 @@ test.describe( 'Add Product Task', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		// Verify redirect to add product task
-		await expect( page ).toHaveURL( /.+task=products/ );
+		await expect( page ).toHaveURL(
+			/.+path=%2Fadd-product.+task=products/
+		);
 		await expect(
 			page.getByRole( 'menuitem', { name: 'Physical product' } )
 		).toBeVisible();

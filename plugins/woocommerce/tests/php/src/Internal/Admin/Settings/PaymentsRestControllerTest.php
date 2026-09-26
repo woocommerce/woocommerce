@@ -251,7 +251,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		foreach ( $data['suggestions'] as $suggestion ) {
 			$this->assertArrayHasKey( 'id', $suggestion, 'Suggestion `id` entry is missing' );
 			$this->assertArrayHasKey( '_priority', $suggestion, 'Suggestion `_priority` entry is missing' );
-			$this->assertIsInteger( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+			$this->assertIsInt( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 			$this->assertArrayHasKey( '_type', $suggestion, 'Suggestion `_type` entry is missing' );
 			$this->assertArrayHasKey( 'title', $suggestion, 'Suggestion `title` entry is missing' );
 			$this->assertArrayHasKey( 'description', $suggestion, 'Suggestion `description` entry is missing' );

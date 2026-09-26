@@ -33,7 +33,7 @@ const RecommendedExtensions = ( {
 	const categoryClass = category
 		? `woocommerce-marketing-recommended-extensions-card__category-${ category }`
 		: '';
-	const placholdersCount = 5;
+	const placeholdersCount = 5;
 
 	return (
 		<Card
@@ -48,10 +48,10 @@ const RecommendedExtensions = ( {
 				<div
 					className={ clsx(
 						'woocommerce-marketing-recommended-extensions-card__items',
-						`woocommerce-marketing-recommended-extensions-card__items--count-${ placholdersCount }`
+						`woocommerce-marketing-recommended-extensions-card__items--count-${ placeholdersCount }`
 					) }
 				>
-					{ [ ...Array( placholdersCount ).keys() ].map( ( key ) => (
+					{ [ ...Array( placeholdersCount ).keys() ].map( ( key ) => (
 						<RecommendedExtensionsPlaceholder key={ key } />
 					) ) }
 				</div>

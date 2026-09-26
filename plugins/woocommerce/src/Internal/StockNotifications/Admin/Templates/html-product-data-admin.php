@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$image              = wp_get_attachment_image_src( $product->get_image_id(), 'woocommerce_thumbnail' );
+$image              = wp_get_attachment_image_src( (int) $product->get_image_id(), 'woocommerce_thumbnail' );
 $image_src          = is_array( $image ) && isset( $image[0] ) ? $image[0] : '';
 $stock_availability = $product->get_availability();
 $identifier         = '#' . $product->get_id();

@@ -4,6 +4,7 @@
 import { isNil } from 'lodash';
 import { format as d3Format } from 'd3-format';
 import { utcParse as d3UTCParse } from 'd3-time-format';
+import moment from 'moment';
 
 /**
  * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
@@ -59,6 +60,26 @@ export const getUniqueDates = ( data, dateParser ) => {
 	const parseDate = d3UTCParse( dateParser );
 	const dates = new Set( data.map( ( d ) => d.date ) );
 	return [ ...dates ].sort( ( a, b ) => parseDate( a ) - parseDate( b ) );
+};
+
+/**
+ * Formats the date label of a data point. A point can cover a range of dates,
+ * for example a previous year 28th and 29th February folded into one point,
+ * in which case both ends are formatted and joined.
+ *
+ * @param {Function}    formatter    - date formatting function.
+ * @param {Date|string} labelDate    - date of the data point.
+ * @param {Date|string} labelDateEnd - optional last date the data point covers.
+ * @return {string} Formatted label.
+ */
+export const getDateLabel = ( formatter, labelDate, labelDateEnd ) => {
+	const toDate = ( date ) =>
+		date instanceof Date ? date : moment( date ).toDate();
+	const label = formatter( toDate( labelDate ) );
+	if ( labelDateEnd ) {
+		return `${ label } - ${ formatter( toDate( labelDateEnd ) ) }`;
+	}
+	return label;
 };
 
 /**

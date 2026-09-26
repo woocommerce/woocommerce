@@ -141,6 +141,71 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save should persist the selected WooCommerce.com checkbox without enabling its peer.
+	 *
+	 * @dataProvider woocommerce_com_checkbox_options_provider
+	 *
+	 * @param string $selected_option_id Selected checkbox option ID.
+	 * @param string $peer_option_id     Peer checkbox option ID.
+	 */
+	public function test_save_persists_woocommerce_com_checkbox_options( $selected_option_id, $peer_option_id ): void {
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
+
+		// Detach the tracking callbacks that react to woocommerce_allow_tracking changing:
+		// they have side effects the rollback cannot undo. `_restore_hooks()` puts them back
+		// after the test. The marketing-notes callback stays attached, because the notes it
+		// deletes are rows the rollback restores.
+		foreach ( array( 'get_tracking_history', 'handle_tracking_setting_change' ) as $method ) {
+			remove_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10 );
+		}
+
+		try {
+			// The peer starts at 'yes' on purpose. Seeding both to 'no' would make the peer
+			// assertion below unfalsifiable: its expected post-state would equal its pre-state, so
+			// it would pass whether or not the save touched it. An unchecked box posts nothing and
+			// WC_Admin_Settings::save_fields writes 'no' for it, which is what is being asserted.
+			update_option( $selected_option_id, 'no' );
+			update_option( $peer_option_id, 'yes' );
+
+			// Post '1', the value a ticked checkbox submits. save_fields also accepts 'yes', which no
+			// browser sends, so posting 'yes' would not notice the '1' branch breaking.
+			$GLOBALS['current_section'] = 'woocommerce_com';
+			$_POST                      = array( $selected_option_id => '1' );
+
+			$sut = new WC_Settings_Advanced();
+			$sut->save();
+
+			// woocommerce_allow_tracking is autoloaded, and get_option() answers autoloaded options
+			// from `alloptions`, so clear that too for both values to be read from the database.
+			wp_cache_delete( $selected_option_id, 'options' );
+			wp_cache_delete( $peer_option_id, 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+
+			$this->assertSame( 'yes', get_option( $selected_option_id ) );
+			$this->assertSame( 'no', get_option( $peer_option_id ) );
+		} finally {
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
+	 * Provides WooCommerce.com checkbox options and their peers.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function woocommerce_com_checkbox_options_provider(): array {
+		return array(
+			'analytics tracking'      => array( 'woocommerce_allow_tracking', 'woocommerce_show_marketplace_suggestions' ),
+			'marketplace suggestions' => array( 'woocommerce_show_marketplace_suggestions', 'woocommerce_allow_tracking' ),
+		);
+	}
+
+	/**
 	 * @testdox output method should invoke the output method of the appropriate class depending on the section.
 	 *
 	 * @testWith ["webhooks", "WC_Admin_Webhooks"]

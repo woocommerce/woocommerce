@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix false "Daily Cron: Not scheduled" on Status page for fresh WooCommerce installs.

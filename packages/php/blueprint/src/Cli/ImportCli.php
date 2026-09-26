@@ -40,6 +40,9 @@ class ImportCli {
 			return;
 		}
 
+		\WP_CLI::warning( 'A Blueprint imported with WP-CLI can change anything this command can access on the site — including data that is not described in the file. Only import files from a source you trust.' );
+		\WP_CLI::confirm( 'Do you want to continue?', $optional_args );
+
 		$results = $blueprint->import();
 
 		$result_formatter = new CliResultFormatter( $results );

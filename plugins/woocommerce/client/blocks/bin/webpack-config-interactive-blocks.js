@@ -3,10 +3,14 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const [
-	,
-	moduleConfig,
-] = require( '@wordpress/scripts/config/webpack.config' );
+// wp-scripts exports [ scriptConfig, moduleConfig ] when WP_EXPERIMENTAL_MODULES
+// is set, and a bare scriptConfig otherwise. Both carry the same module.rules,
+// which is the only thing taken from it here, so read that one value instead of
+// depending on the export's shape.
+const wpScriptsConfig = require( '@wordpress/scripts/config/webpack.config' );
+const {
+	module: { rules: wpScriptsModuleRules },
+} = Array.isArray( wpScriptsConfig ) ? wpScriptsConfig[ 1 ] : wpScriptsConfig;
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const {
 	WebpackRTLPlugin,
@@ -16,7 +20,7 @@ const {
  * Internal dependencies
  */
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getResolve } = require( './webpack-helpers' );
+const { getAlias, getResolve } = require( './webpack-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
@@ -37,7 +41,7 @@ const entries = {
 	...editorStyleEntries,
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
-		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+		'./assets/js/blocks/product-elements-blocks/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
@@ -73,7 +77,7 @@ module.exports = {
 		module: true,
 	},
 	resolve: {
-		...getResolve(),
+		...getResolve( { alias: getAlias() } ),
 		extensions: [ '.js', '.ts', '.tsx' ],
 	},
 	plugins: [
@@ -99,7 +103,7 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			...moduleConfig.module.rules.filter(
+			...wpScriptsModuleRules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&
 					! rule.test.test( '.scss' ) &&

@@ -4,7 +4,7 @@
 import { Button, Icon } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
-import { sprintf, __ } from '@wordpress/i18n';
+import { sprintf, __, isRTL } from '@wordpress/i18n';
 import clsx from 'clsx';
 
 type PageArrowsProps = {
@@ -74,7 +74,7 @@ export function PageArrows( {
 					onClick={ previousPage }
 					label={ __( 'Previous Page', 'woocommerce' ) }
 				>
-					<Icon icon={ chevronLeft } />
+					<Icon icon={ isRTL() ? chevronRight : chevronLeft } />
 				</Button>
 				<Button
 					className={ nextLinkClass }
@@ -82,7 +82,7 @@ export function PageArrows( {
 					onClick={ nextPage }
 					label={ __( 'Next Page', 'woocommerce' ) }
 				>
-					<Icon icon={ chevronRight } />
+					<Icon icon={ isRTL() ? chevronLeft : chevronRight } />
 				</Button>
 			</div>
 		</div>

@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 11.0.0
+ * @version 11.2.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -90,7 +90,7 @@ foreach ( $items as $item_id => $item ) :
 							 * @since 2.1.0
 							 */
 							$order_item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
-							echo wp_kses_post( "<h3 style='font-size: inherit;font-weight: inherit;'>{$order_item_name}</h3>" );
+							echo wp_kses_post( "<h3 class='wc-product-name' style='font-size: inherit;font-weight: inherit;'>{$order_item_name}</h3>" );
 
 							// SKU.
 							if ( $show_sku && $sku ) {

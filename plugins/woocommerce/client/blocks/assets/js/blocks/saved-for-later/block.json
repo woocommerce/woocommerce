@@ -8,10 +8,12 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Saved for Later" ],
 	"textdomain": "woocommerce",
+	"blockHooks": {
+		"woocommerce/cart": "after"
+	},
 	"attributes": {
 		"columnCount": {
-			"type": "number",
-			"default": 5
+			"type": "number"
 		}
 	},
 	"allowedBlocks": [ "core/heading" ],
@@ -19,6 +21,7 @@
 		 "align": [ "wide", "full" ],
 		"interactivity": true,
 		"html": false,
+		"multiple": false,
 		"reusable": false,
 		"spacing": {
 			"margin": true,

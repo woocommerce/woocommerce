@@ -65,6 +65,7 @@ const CustomerAddress = () => {
 		editingShippingAddress,
 		shippingAddress,
 		isInitialized,
+		setEditingShippingAddress,
 		validationErrors,
 	] );
 

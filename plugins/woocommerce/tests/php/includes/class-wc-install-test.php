@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Caches\ProductCountCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
  * Class WC_Install_Test.
  */
 class WC_Install_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * Test if verify base table can detect missing tables and clear the stored missing table list.
@@ -108,6 +110,106 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	public function test_dbDelta_is_a_noop() {
 		$db_delta_result = WC_Install::create_tables();
 		$this->assertEmpty( $db_delta_result );
+	}
+
+	/**
+	 * dbDelta cannot change a primary key, so wc_order_tax_lookup is re-keyed by a guarded ALTER in
+	 * create_tables(). The rows a store carries into it have to survive, and since create_tables()
+	 * runs again on every update, the second pass has to leave everything alone.
+	 *
+	 * @testdox create_tables() re-keys the tax lookup by tax order item, keeps its rows, and runs once.
+	 */
+	public function test_create_tables_rekeys_the_order_tax_lookup_by_tax_order_item(): void {
+		global $wpdb;
+
+		// The lookup tables are real rather than temporary, so let this test alter them.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+		$key   = function () use ( $wpdb, $table ) {
+			return $wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+		$rows  = function () use ( $wpdb, $table ) {
+			return $wpdb->get_results( "SELECT * FROM `{$table}` WHERE order_id = 4242", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->insert(
+			$table,
+			array(
+				'order_id'     => 4242,
+				'tax_rate_id'  => 7,
+				'date_created' => '2023-02-10 10:00:00',
+				'total_tax'    => 6.0,
+			)
+		);
+
+		$this->assertEmpty( $key(), 'The table should start out on the released key.' );
+
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The primary key should gain the tax order item column.' );
+		$this->assertCount( 1, $rows(), 'The rows a store carried into the re-key should survive it.' );
+		$this->assertSame( 0, (int) $rows()[0]['order_item_id'], 'Rows that predate the column should land on its default and keep reporting on their rate id alone.' );
+
+		$before = $rows();
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty( $key(), 'The second pass should leave the key alone.' );
+		$this->assertSame( $before, $rows(), 'The second pass should leave the rows alone.' );
+
+		$wpdb->delete( $table, array( 'order_id' => 4242 ), array( '%d' ) );
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+	}
+
+	/**
+	 * The reports read a table the re-key never reached the way they always did, so nothing else
+	 * says the store missed the fix.
+	 *
+	 * @testdox create_tables() logs a tax lookup re-key that did not land.
+	 */
+	public function test_create_tables_logs_a_failed_order_tax_lookup_rekey(): void {
+		global $wpdb;
+
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Fail every ALTER against the table, the way a server that refuses the statement would.
+		$break_alter = function ( $query ) use ( $table ) {
+			if ( 0 === strpos( $query, "ALTER TABLE {$table} " ) ) {
+				return "ALTER TABLE `{$table}_missing` ADD COLUMN broken bigint";
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_alter );
+
+		$suppress = $wpdb->suppress_errors( true );
+		WC_Install::create_tables();
+		$wpdb->suppress_errors( $suppress );
+
+		remove_filter( 'query', $break_alter );
+
+		$this->assertLogged( 'error', 'wc_order_tax_lookup', array( 'source' => 'wc-order-tax-lookup-migration' ) );
+
+		// Put the key right again for the tests that follow.
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty(
+			$wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'The re-key should land again once the server accepts the ALTER.'
+		);
+
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 	}
 
 	/**
@@ -314,11 +416,9 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @testdox The version check schedules the automatic database update.
 	 */
 	public function test_version_check_schedules_db_auto_update(): void {
-		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
-		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
-
-		update_option( 'woocommerce_db_version', $from_version );
-		update_option( 'woocommerce_version', $from_version );
+		// Simulate version older than WC()->version is installed.
+		update_option( 'woocommerce_db_version', '9.4.0' );
+		update_option( 'woocommerce_version', '9.4.0' );
 
 		WC_Install::check_version();
 
@@ -345,6 +445,14 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			empty( $versions ) || version_compare( preg_replace( '/-.*$/', '', end( $versions ) ), WC()->stable_version(), '<=' ),
 			'WC_Install::$db_update_callbacks must not contain versions that are ahead of current stable (except, possibly, for suffix).',
 		);
+
+		// Sequential keys (X.Y.Z-1, X.Y.Z-2) are not needed for -dev versions.
+		if ( '-dev' === substr( WC()->version, -4 ) ) {
+			$this->assertEmpty(
+				preg_grep( '/^' . preg_quote( WC()->stable_version(), '/' ) . '-/', $versions ),
+				sprintf( 'WC_Install::$db_update_callbacks must not contain sequential keys for %1$s while the version is %2$s. Add the callbacks to the plain \'%1$s\' key instead.', WC()->stable_version(), WC()->version ),
+			);
+		}
 	}
 
 	/**
@@ -616,5 +724,193 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			get_post( $attachment_id ),
 			'A custom merchant placeholder attachment should not be deleted.'
 		);
+	}
+
+	/**
+	 * @testdox Should reference block patterns instead of baking translated empty cart strings into the Cart page content.
+	 */
+	public function test_cart_block_content_references_empty_cart_patterns(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->',
+			$content,
+			'The empty cart title should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->',
+			$content,
+			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'Your cart is empty',
+			$content,
+			'The empty cart title must not be frozen into the page content in the install-time locale.'
+		);
+		$this->assertStringNotContainsString(
+			'New in store',
+			$content,
+			'The "New in store" heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the empty cart title, the Return to shop button, and the New in store heading from the referenced patterns.
+	 */
+	public function test_empty_cart_message_patterns_render_expected_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-empty-message' ),
+			'The cart-empty-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-new-in-store-message' ),
+			'The cart-new-in-store-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /--><!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->'
+		);
+
+		$this->assertStringContainsString(
+			'Your cart is empty',
+			$rendered,
+			'The cart-empty-message pattern should render the empty cart title.'
+		);
+		$this->assertStringContainsString(
+			'wc-block-cart__empty-cart__title',
+			$rendered,
+			'The rendered empty cart title should keep the markup the installer previously inlined.'
+		);
+		$this->assertStringNotContainsString(
+			'with-empty-cart-icon',
+			$rendered,
+			'The empty cart heading must not carry the class that used to inject the icon via CSS (WOOPLUG-2240).'
+		);
+		$this->assertStringContainsString(
+			'New in store',
+			$rendered,
+			'The cart-new-in-store-message pattern should render the "New in store" heading.'
+		);
+		$this->assertStringContainsString(
+			'Return to shop',
+			$rendered,
+			'The cart-empty-message pattern should render the Return to shop button that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
+		$this->assertStringContainsString(
+			'wp-block-button__link',
+			$rendered,
+			'The Return to shop link should render as a core button, matching the empty Mini-Cart.'
+		);
+	}
+
+	/**
+	 * @testdox Should reference a block pattern instead of baking the translated cross-sells heading into the Cart page content.
+	 */
+	public function test_cart_block_content_references_cross_sells_pattern(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->',
+			$content,
+			'The cross-sells heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$content,
+			'The cross-sells heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the cross-sells heading from the referenced pattern with the markup the installer used to inline.
+	 */
+	public function test_cart_cross_sells_message_pattern_renders_installer_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-cross-sells-message' ),
+			'The cart-cross-sells-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks( '<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->' );
+
+		// The literal ellipsis is the msgid the blocks JS defaults use, so every path that renders this
+		// heading shares one string. Asserting the exact spelling keeps that alignment deliberate: the
+		// classic template's '&hellip;' variant is a different msgid with different translation coverage.
+		$this->assertStringContainsString(
+			'You may be interested in…',
+			$rendered,
+			'The pattern should render the cross-sells heading with the literal-ellipsis msgid the blocks JS defaults use.'
+		);
+		// The pattern predates #60278, which restyled the heading in the installer without updating the
+		// pattern. These two assertions catch the styling drifting apart again and visibly changing the cart.
+		$this->assertStringContainsString(
+			'has-text-align-left',
+			$rendered,
+			'The rendered cross-sells heading should keep the alignment the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'margin-bottom:1rem',
+			$rendered,
+			'The rendered cross-sells heading should keep the bottom margin the installer previously inlined.'
+		);
+	}
+
+	/**
+	 * The point of the fix, asserted directly: the heading comes from the translation layer on each
+	 * request instead of the copy the installer used to freeze into post_content.
+	 *
+	 * The pattern resolves its own string when it registers, not when it renders, so a plain
+	 * switch_to_locale() here would prove nothing — the registry already holds the finished content.
+	 * Re-registering under the filter is what stands in for a request served in another language.
+	 *
+	 * @testdox Should take the cross-sells heading from the active translation rather than a frozen string.
+	 */
+	public function test_cart_cross_sells_heading_follows_the_active_translation(): void {
+		$slug      = 'woocommerce/cart-cross-sells-message';
+		$reference = '<!-- wp:pattern {"slug":"' . $slug . '"} /-->';
+		$sentinel  = 'PSEUDO_TRANSLATED_CROSS_SELLS_HEADING';
+
+		$translate = static function ( $translation, $text, $domain ) use ( $sentinel ) {
+			return ( 'woocommerce' === $domain && 'You may be interested in…' === $text ) ? $sentinel : $translation;
+		};
+
+		add_filter( 'gettext', $translate, 10, 3 );
+		$this->reregister_block_patterns();
+		$translated = do_blocks( $reference );
+		remove_filter( 'gettext', $translate, 10 );
+
+		// Leave the registry as this test found it, for anything that renders the pattern later.
+		$this->reregister_block_patterns();
+		$untranslated = do_blocks( $reference );
+
+		$this->assertStringContainsString(
+			$sentinel,
+			$translated,
+			'The heading should come from the translation layer, so a translated site renders translated copy.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$translated,
+			'The English copy must not survive alongside the translation; that would mean it is frozen somewhere.'
+		);
+		$this->assertStringContainsString(
+			'You may be interested in…',
+			$untranslated,
+			'Dropping the translation should fall back to the English source string.'
+		);
+	}
+
+	/**
+	 * Rebuilds the patterns through the real registration, so the test exercises the content
+	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
+	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
+	 */
+	private function reregister_block_patterns(): void {
+		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
 	}
 }

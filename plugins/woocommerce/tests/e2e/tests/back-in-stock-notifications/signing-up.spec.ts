@@ -1,0 +1,399 @@
+/**
+ * Internal dependencies
+ */
+import { expect, request, tags } from '../../fixtures/fixtures';
+import { CUSTOMER_STATE_PATH } from '../../playwright.config';
+import { customer } from '../../test-data/data';
+import {
+	BIS_FEATURE_OPTION,
+	bisEmailSubject,
+	bisFormLocator,
+	bisNotice,
+	bisTargetProductInput,
+	expectEmailAsAdmin,
+	resetBISOptions,
+	setBISOptions,
+	signUpOnProductPage,
+	test,
+	uniqueGuestEmail,
+} from '../../utils/back-in-stock-notifications';
+import { clearFilters, setFilterValue } from '../../utils/filters';
+import { setOption } from '../../utils/options';
+
+/**
+ * Drop a trailing slash so URL paths compare regardless of permalink trailing.
+ *
+ * @param path URL path to normalize.
+ */
+const trimSlash = ( path: string ) => path.replace( /\/$/, '' );
+
+test.describe(
+	'Back in Stock Notifications — signing up',
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	() => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
+		test.afterAll( async ( { baseURL } ) => {
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
+		} );
+
+		test.describe( 'Signups disabled', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+					requireAccount: false,
+				} );
+			} );
+
+			test( 'turning signups off removes the form from the product page', async ( {
+				page,
+				product,
+				baseURL,
+			} ) => {
+				// Positive control: the form is there while signups are on, so
+				// a product page that renders no form for an unrelated reason
+				// cannot pass the assertion below.
+				await page.goto( product.permalink );
+				await expect( bisFormLocator( page ) ).toHaveCount( 1 );
+
+				// Flipped inside the test rather than in `beforeAll` so the
+				// control above and the assertion below run against the same
+				// product. The next describe's `beforeAll` sets it back.
+				await setBISOptions( request, baseURL!, {
+					allowSignups: false,
+				} );
+
+				await page.goto( product.permalink );
+				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
+				await expect(
+					page.getByRole( 'heading', {
+						name: /Want to be notified when this product is back in stock\?/i,
+					} )
+				).toHaveCount( 0 );
+			} );
+		} );
+
+		test.describe( 'Logged-in customer, single opt-in', () => {
+			test.use( { storageState: CUSTOMER_STATE_PATH } );
+
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+					requireAccount: false,
+				} );
+			} );
+
+			test( 'the signup form renders on an out-of-stock simple product page', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: /Want to be notified when this product is back in stock\?/i,
+					} )
+				).toBeVisible();
+
+				// A logged-in customer does not see the email field — email is derived server-side.
+				await expect(
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
+				).toHaveCount( 0 );
+				await expect(
+					page.getByRole( 'button', { name: /Notify me/i } )
+				).toBeVisible();
+			} );
+
+			test( 'submitting the form surfaces a success notice with a link to manage notifications', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
+
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+
+				// Logged-in signups get a "Manage notifications" CTA in front
+				// of the notice, pointing at the account endpoint.
+				await expect(
+					page.getByRole( 'link', { name: 'Manage notifications' } )
+				).toHaveAttribute( 'href', /stock-notifications/ );
+			} );
+
+			test( 'a repeated signup surfaces the "already joined" notice', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
+
+				// Wait for the first submission to finish so the re-navigation
+				// below can't race it. This is the first signup for a freshly
+				// created product, so it always succeeds.
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+
+				// Submitting the form a second time (the "already joined"
+				// notice only renders as a form-submit response; the cached
+				// state shown on page reload is behind the off-by-default
+				// `woocommerce_customer_stock_notifications_personalization_enabled`
+				// filter).
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
+				await expect(
+					page.getByText( bisNotice.alreadyJoined )
+				).toBeVisible();
+			} );
+
+			test( 'a missing nonce is rejected once nonce checks are on', async ( {
+				page,
+				product,
+			} ) => {
+				// Core only verifies the signup nonce when personalization is
+				// on and the shopper is logged in (or an account is required),
+				// so guest forms survive HTML caching. Turn personalization on
+				// through the test helper's filter cookie to reach that branch.
+				await setFilterValue(
+					page,
+					'woocommerce_customer_stock_notifications_personalization_enabled',
+					true
+				);
+
+				await page.goto( product.permalink );
+
+				// Blank the nonce the form posts, the way a stale cached page
+				// or a forged request would.
+				await page
+					.locator( 'input[name="wc_bis_nonce"]' )
+					.evaluate( ( input: HTMLInputElement ) => {
+						input.value = '';
+					} );
+				await signUpOnProductPage( page );
+
+				await expect(
+					page.getByText( bisNotice.errors.failed )
+				).toBeVisible();
+
+				// Positive control on the same page: with the nonce intact the
+				// signup goes through, so the rejection above was the nonce.
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+
+				await clearFilters( page );
+			} );
+		} );
+
+		test.describe( 'Guest — single opt-in', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+					requireAccount: false,
+				} );
+			} );
+
+			test( 'the signup form shows an email field for guests', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+
+				await expect(
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'button', { name: /Notify me/i } )
+				).toBeVisible();
+
+				// Guest signups never register an account, so no consent
+				// checkbox is rendered.
+				await expect(
+					page.locator( 'input[name="wc_bis_opt_in"]' )
+				).toHaveCount( 0 );
+			} );
+
+			test( 'submitting the form surfaces a success notice', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page, {
+					email: uniqueGuestEmail( 'bis-guest-single' ),
+				} );
+
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+			} );
+
+			test( 'an invalid email address is rejected', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+
+				// The form opts out of browser validation (`novalidate`), so
+				// the malformed address reaches the server and it is the
+				// server's rejection that renders.
+				await signUpOnProductPage( page, { email: 'not-an-email' } );
+
+				await expect(
+					page.getByText( bisNotice.errors.invalidEmail )
+				).toBeVisible();
+			} );
+
+			test( 'a product id that does not exist is rejected', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+
+				await bisTargetProductInput( page ).evaluate(
+					( input: HTMLInputElement ) => {
+						input.value = '999999999';
+					}
+				);
+				await signUpOnProductPage( page, {
+					email: uniqueGuestEmail( 'bis-guest-bad-product' ),
+				} );
+
+				await expect(
+					page.getByText( bisNotice.errors.invalidProduct )
+				).toBeVisible();
+			} );
+		} );
+
+		test.describe( 'Guest — double opt-in', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: true,
+					requireAccount: false,
+				} );
+			} );
+
+			test( 'submitting signup dispatches a verification email', async ( {
+				page,
+				product,
+				browser,
+			} ) => {
+				const email = uniqueGuestEmail( 'bis-guest-double' );
+
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page, { email } );
+
+				await expect(
+					page.getByText( bisNotice.doubleOptIn )
+				).toBeVisible();
+
+				// WP Mail Logging is an admin-only screen, so the log is read
+				// from a separate admin context.
+				await expectEmailAsAdmin(
+					browser,
+					email,
+					bisEmailSubject.verify( product.name )
+				);
+			} );
+		} );
+
+		test.describe( 'Guest — requires account', () => {
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: false,
+					requireAccount: true,
+				} );
+			} );
+
+			test( 'the signup form hides the email field when an account is required', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+
+				await expect(
+					page.getByRole( 'textbox', {
+						name: /Email address to be notified/i,
+					} )
+				).toHaveCount( 0 );
+				await expect(
+					page.getByRole( 'button', { name: /Notify me/i } )
+				).toHaveCount( 0 );
+
+				// Pair the absence with the prompt core renders in its place,
+				// so a 404 or a failed render can't pass as account gating.
+				await expect(
+					page.getByText( bisNotice.accountRequired )
+				).toBeVisible();
+			} );
+
+			test( 'logging in from the prompt lets the customer sign up', async ( {
+				page,
+				product,
+				baseURL,
+			} ) => {
+				await page.goto( product.permalink );
+
+				const accountPath = trimSlash(
+					new URL( 'my-account/', baseURL ).pathname
+				);
+				const loginLink = page.getByRole( 'link', { name: 'log in' } );
+
+				// The link has to point at the account page itself. A nested
+				// endpoint such as /my-account/my-account/ still lands there
+				// via WordPress' 404 URL guessing, so only the href tells a
+				// working link apart from a broken one.
+				const href = await loginLink.getAttribute( 'href' );
+				expect( trimSlash( new URL( href!, baseURL ).pathname ) ).toBe(
+					accountPath
+				);
+
+				await loginLink.click();
+
+				await expect( page ).toHaveURL(
+					( url ) => trimSlash( url.pathname ) === accountPath
+				);
+
+				await page.locator( '#username' ).fill( customer.username );
+				await page.locator( '#password' ).fill( customer.password );
+				await page
+					.getByRole( 'button', { name: 'Log in', exact: true } )
+					.click();
+
+				// Login lands on the account dashboard, so go back to the
+				// product to find the form now rendered for the customer.
+				await page.goto( product.permalink );
+				await expect(
+					page.getByText( bisNotice.accountRequired )
+				).toHaveCount( 0 );
+
+				await signUpOnProductPage( page );
+
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'link', { name: 'Manage notifications' } )
+				).toBeVisible();
+			} );
+		} );
+	}
+);

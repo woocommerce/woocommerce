@@ -17,19 +17,10 @@ import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvement
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 	order: async ( { restApi }, use ) => {
-		let order;
-
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
-				billing: { email: faker.internet.exampleEmail() },
-			} )
-			.then( ( response ) => {
-				order = response.data;
-			} )
-			.catch( ( error ) => {
-				console.error( error );
-			} );
+		const { data: order } = await restApi.post( `${ WC_API_PATH }/orders`, {
+			status: 'processing',
+			billing: { email: faker.internet.exampleEmail() },
+		} );
 
 		await use( order );
 
@@ -79,31 +70,19 @@ test.beforeEach( async ( { baseURL } ) => {
 			subject.replace( 'ORDER_ID', `${ order.id }` )
 		);
 
-		await restApi
-			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
-				status,
-			} )
-			.catch( ( error ) => {
-				console.error( error );
-			} );
+		const { data: updatedOrder } = await restApi.put(
+			`${ WC_API_PATH }/orders/${ order.id }`,
+			{ status }
+		);
 
-		let orderStatus;
-		await restApi
-			.get( `${ WC_API_PATH }/orders/${ order.id }` )
-			.then( ( response ) => {
-				orderStatus = response.data.status;
-			} );
+		expect( updatedOrder.status ).toEqual( status );
 
-		await expect( orderStatus ).toEqual( status );
-
-		let emailRow;
-		await test.step( 'check the email exists', async () => {
-			emailRow = await expectEmail(
+		const emailRow = await test.step( 'check the email exists', () =>
+			expectEmail(
 				page,
 				role === 'customer' ? order.billing.email : admin.email,
 				subjectRegex
-			);
-		} );
+			) );
 
 		await test.step( 'check the email content', async () => {
 			await emailRow.getByRole( 'button', { name: 'View log' } ).click();
@@ -138,4 +117,51 @@ test( 'Merchant can resend order details to customer', async ( {
 		order.billing.email,
 		new RegExp( `Details for order #${ order.id }` )
 	);
+} );
+
+test( 'Zero cost shipping method keeps its title in the order email', async ( {
+	baseURL,
+	page,
+	restApi,
+} ) => {
+	const methodName = 'Shipping TBD';
+	const billingEmail = faker.internet.exampleEmail();
+
+	await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
+
+	const { data: order } = await restApi.post( `${ WC_API_PATH }/orders`, {
+		status: 'processing',
+		billing: { email: billingEmail },
+		shipping_lines: [
+			{
+				method_id: 'flat_rate',
+				method_title: methodName,
+				total: '0.00',
+			},
+		],
+	} );
+
+	try {
+		const emailRow = await expectEmail(
+			page,
+			billingEmail,
+			/order has been received/
+		);
+		await emailRow.getByRole( 'button', { name: 'View log' } ).click();
+
+		const shippingRow = page
+			.locator( '#wp-mail-logging-modal-content-body-content' )
+			.locator( 'iframe' )
+			.contentFrame()
+			.locator( 'tr.order-totals-shipping' );
+
+		await expect( shippingRow.locator( 'td' ) ).toContainText( methodName );
+		await expect( shippingRow.locator( 'td' ) ).not.toContainText(
+			'Free!'
+		);
+	} finally {
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+			force: true,
+		} );
+	}
 } );

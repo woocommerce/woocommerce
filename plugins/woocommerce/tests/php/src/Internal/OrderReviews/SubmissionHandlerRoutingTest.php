@@ -1,0 +1,144 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
+use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
+use WC_Helper_Product;
+use WC_Unit_Test_Case;
+use WPAjaxDieContinueException;
+
+/**
+ * End-to-end wiring test for the submit_order_reviews AJAX action.
+ *
+ * Complements SubmissionHandlerTest (which calls handle() directly) by proving
+ * the registered admin-ajax action actually routes to the handler for guests.
+ */
+class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+		// Drive the production registration path: the flag was off at bootstrap,
+		// so re-run the init-hooked resolver now that it's on. tearDown() drops the
+		// container's resolved-instance cache, so each test re-resolves a fresh
+		// SubmissionHandler whose auto-init() registers both wp_ajax_* hooks.
+		WC()->maybe_init_order_reviews();
+		update_option( 'comment_moderation', '0' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		// Drop the container's resolved-instance cache so the next setUp()
+		// re-resolves a fresh SubmissionHandler. Without this, the cached instance
+		// would skip its auto-init() on the next resolve and the wp_ajax_* hooks
+		// would never register, regressing test_action_hooks_are_registered.
+		wc_get_container()->reset_all_resolved();
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
+		delete_option( 'comment_moderation' );
+		$_POST = array();
+		ItemEligibility::reset_cache();
+		remove_all_filters( 'wp_die_ajax_handler' );
+		remove_all_filters( 'wp_doing_ajax' );
+		remove_all_filters( 'wp_send_json_handler' );
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Both the authenticated and nopriv AJAX actions are wired through the production init path.
+	 */
+	public function test_action_hooks_are_registered(): void {
+		$handler = wc_get_container()->get( SubmissionHandler::class );
+
+		$this->assertNotFalse(
+			has_action( 'wp_ajax_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) ),
+			'Authenticated submit_order_reviews action should be wired when the feature is enabled.'
+		);
+		$this->assertNotFalse(
+			has_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) ),
+			'Guest submit_order_reviews action should be wired when the feature is enabled.'
+		);
+	}
+
+	/**
+	 * @testdox A guest request routes through admin-ajax to the handler and inserts a review.
+	 */
+	public function test_guest_submission_routes_end_to_end(): void {
+		$order = wc_create_order( array( 'status' => OrderStatus::COMPLETED ) );
+		$order->set_billing_first_name( 'John' );
+		$order->set_billing_email( 'john@example.com' );
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$item_id = 0;
+		foreach ( $order->get_items() as $item ) {
+			$item_id = $item->get_id();
+		}
+
+		$_POST['_wcnonce'] = wp_create_nonce( SubmissionHandler::ACTION );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['key']      = $order->get_order_key();
+		$_POST['reviews']  = array(
+			array(
+				'order_item_id' => $item_id,
+				'product_id'    => $product->get_id(),
+				'rating'        => 5,
+				'text'          => 'Great product!',
+			),
+		);
+
+		$response = $this->dispatch();
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame( 'ok', $response['data']['results'][0]['status'] );
+
+		$comment = get_comment( $response['data']['results'][0]['comment_id'] );
+		$this->assertSame( 'review', $comment->comment_type );
+		$this->assertSame( $product->get_id(), (int) $comment->comment_post_ID );
+	}
+
+	/**
+	 * Fire the registered nopriv action and capture the JSON envelope it emits.
+	 *
+	 * @return array{success:bool,data:mixed}
+	 */
+	private function dispatch(): array {
+		// Same capture pattern SubmissionHandlerTest uses: wp_send_json writes
+		// to the output buffer via wp_die, so an ob_start/ob_get_clean pair
+		// collects the rendered JSON. wp_send_json itself fires no filter.
+		add_filter( 'wp_die_ajax_handler', static fn() => static fn() => null );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		ob_start();
+		try {
+			do_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION );
+		} catch ( WPAjaxDieContinueException $e ) {
+			// Expected: wp_send_json_* always calls wp_die().
+			unset( $e );
+		} finally {
+			// Clean the buffer even if a non-WPAjax exception escaped, so the test
+			// process does not leak a stray buffer to subsequent tests.
+			$body = (string) ob_get_clean();
+		}
+
+		$decoded  = json_decode( $body, true );
+		$response = array(
+			'success' => false,
+			'data'    => null,
+		);
+		if ( is_array( $decoded ) ) {
+			$response['success'] = ! empty( $decoded['success'] );
+			$response['data']    = $decoded['data'] ?? null;
+		}
+		return $response;
+	}
+}

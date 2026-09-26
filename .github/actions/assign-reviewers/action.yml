@@ -1,0 +1,28 @@
+name: 'Assign reviewers'
+description: 'Request reviews on a pull request, either from the owners of the files it changes or from the teams its author belongs to. Expects a Linux runner: glob matching follows the runner platform, and is case-insensitive on macOS and Windows.'
+
+inputs:
+  mode:
+    description: 'How to pick reviewers: `changed-files` matches the config keys as globs against the changed files, `author-team` matches them as team slugs against the author.'
+    required: true
+  config:
+    description: 'Path to the reviewer config, relative to the repository root. A JSON object mapping each key to a reviewer, or a list of them: a team slug, or `@login` for a person.'
+    required: true
+  github-token:
+    description: 'Token used to look up teams and request reviews. Needs to be able to request team reviews.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Request the reviews
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        CONFIG_FILE: ${{ inputs.config }}
+        MODE: ${{ inputs.mode }}
+        SCRIPT: ${{ github.action_path }}/assign.js
+      with:
+        github-token: ${{ inputs.github-token }}
+        retries: 2
+        script: |
+          await require( process.env.SCRIPT ).assignReviewers( { github, context, core } );

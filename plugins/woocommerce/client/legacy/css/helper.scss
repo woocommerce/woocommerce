@@ -732,7 +732,7 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	td.color-bar.expiring {
-		border-left-color: orange;
+		border-left-color: #ffa500;
 	}
 
 	td.color-bar.update-available {
@@ -1006,7 +1006,7 @@ $admin-theme-color: var(--wp-admin-theme-color);
 		}
 	}
 
-	& + .form-toggle__label .form-toggle__switch {
+	+ .form-toggle__label .form-toggle__switch {
 		background: #999;
 	}
 

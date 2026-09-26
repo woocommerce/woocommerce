@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
-use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
  * Utility methods used for the Product Gallery block.
@@ -442,7 +441,7 @@ class ProductGalleryUtils {
 	 * Decision tree (variation chosen):
 	 * - no variation images → parent featured + parent gallery
 	 * - own featured only → variation featured + parent gallery extras
-	 * - own featured + gallery (flag on) → variation images only
+	 * - own featured + gallery → variation images only
 	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
 	 * @param int   $variation_id          Variation post ID.
@@ -460,12 +459,9 @@ class ProductGalleryUtils {
 		$featured_id    = (int) $variation->get_image_id();
 		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
 
-		$variation_gallery_ids = array();
-		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
-			$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
-			$variation_gallery_ids = array_values( $variation_gallery_ids );
-		}
+		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		// No images from variation - full parent fallback.
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {

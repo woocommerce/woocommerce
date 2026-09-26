@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { TreeSelectControl } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { paymentGatewaysStore, paymentSettingsStore } from '@woocommerce/data';
@@ -14,7 +13,6 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
-import { mapShippingMethodsOptions } from '~/settings-payments/offline/utils';
 import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import {
@@ -23,6 +21,11 @@ import {
 	TextareaEdit,
 	type OfflineFormValues,
 } from './dataform-controls';
+import {
+	getShippingRestrictionFields,
+	getShippingRestrictionSettings,
+	getShippingRestrictionValues,
+} from './shipping-restriction-fields';
 
 /**
  * This page is used to manage the settings for the Cash on delivery payment gateway.
@@ -62,27 +65,11 @@ export const SettingsPaymentsCod = () => {
 				title: codSettings.settings.title.value,
 				description: codSettings.description,
 				instructions: codSettings.settings.instructions.value,
-				enable_for_methods: Array.isArray(
-					codSettings.settings.enable_for_methods.value
-				)
-					? codSettings.settings.enable_for_methods.value
-					: [],
-				enable_for_virtual:
-					codSettings.settings.enable_for_virtual.value === 'yes',
+				...getShippingRestrictionValues( codSettings ),
 			} );
 			setHasChanges( false );
 		}
 	}, [ codSettings ] );
-
-	const shippingMethodsOptions = useMemo(
-		() =>
-			codSettings?.settings.enable_for_methods?.options
-				? mapShippingMethodsOptions(
-						codSettings.settings.enable_for_methods.options
-				  )
-				: [],
-		[ codSettings ]
-	);
 
 	const fields: Field< OfflineFormValues >[] = useMemo(
 		() => [
@@ -119,42 +106,12 @@ export const SettingsPaymentsCod = () => {
 				),
 				Edit: TextareaEdit,
 			},
-			{
-				id: 'enable_for_methods',
-				label: __( 'Enable for shipping methods', 'woocommerce' ),
-				description: __(
-					'Select shipping methods for which this payment method is enabled.',
-					'woocommerce'
-				),
-				// COD-specific edit control: renders the shipping methods
-				// multi-select using the options that ship with the gateway.
-				Edit: ( { data, field, onChange } ) => {
-					const value = field.getValue( { item: data } );
-					return (
-						<TreeSelectControl
-							label={ field.label }
-							help={ field.description }
-							options={ shippingMethodsOptions }
-							value={ Array.isArray( value ) ? value : [] }
-							onChange={ ( newValue: string[] ) =>
-								onChange( { [ field.id ]: newValue } )
-							}
-							selectAllLabel={ false }
-						/>
-					);
-				},
-			},
-			{
-				id: 'enable_for_virtual',
-				label: __( 'Accept for virtual orders', 'woocommerce' ),
-				description: __(
-					'Accept cash on delivery if the order is virtual',
-					'woocommerce'
-				),
-				Edit: CheckboxEdit,
-			},
+			...getShippingRestrictionFields(
+				codSettings,
+				__( 'cash on delivery', 'woocommerce' )
+			),
 		],
-		[ shippingMethodsOptions ]
+		[ codSettings ]
 	);
 
 	const saveSettings = () => {
@@ -167,10 +124,7 @@ export const SettingsPaymentsCod = () => {
 		const settings: Record< string, string | string[] > = {
 			title: String( formValues.title ),
 			instructions: String( formValues.instructions ),
-			enable_for_methods: Array.isArray( formValues.enable_for_methods )
-				? formValues.enable_for_methods
-				: [],
-			enable_for_virtual: formValues.enable_for_virtual ? 'yes' : 'no',
+			...getShippingRestrictionSettings( formValues ),
 		};
 
 		updatePaymentGateway( 'cod', {

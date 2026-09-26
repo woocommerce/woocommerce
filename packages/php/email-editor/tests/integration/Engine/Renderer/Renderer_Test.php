@@ -299,7 +299,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it renders post wrapped withing a template associated with the post via _wp_page_template post meta.
+	 * Test it renders post wrapped within a template associated with the post via _wp_page_template post meta.
 	 */
 	public function testItRendersPostWithinAssociatedTemplate(): void {
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
@@ -323,7 +323,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it renders post wrapped withing a template passed as parameter.
+	 * Test it renders post wrapped within a template passed as parameter.
 	 */
 	public function testItRendersPostWithinTemplatePassedAsParameter(): void {
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
@@ -346,6 +346,77 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'test-email-template-extra'
 		);
 		$this->assertStringContainsString( 'test-template-class-extra', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders block markup without a backing post.
+	 */
+	public function testItRendersFromContentWithoutBackingPost(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-content',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-content"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+
+		$rendered = $this->renderer->render_from_content(
+			'<!-- wp:paragraph --><p>Content without a post!</p><!-- /wp:paragraph -->',
+			'test-email-template-content',
+			'Subject',
+			'Preheader content'
+		);
+
+		$this->assertStringContainsString( 'test-template-class-content', $rendered['html'] );
+		$this->assertStringContainsString( 'Content without a post!', $rendered['html'] );
+		$this->assertStringContainsString( 'Subject', $rendered['html'] );
+		$this->assertStringContainsString( 'Content without a post!', $rendered['text'] );
+		// The fixture post created in setUp must not leak into the output.
+		$this->assertStringNotContainsString( 'Hello!', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders the template chrome with an empty body for empty content.
+	 */
+	public function testItRendersFromEmptyContent(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-empty',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-empty"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+
+		$rendered = $this->renderer->render_from_content(
+			'',
+			'test-email-template-empty',
+			'Subject',
+			'Preheader content'
+		);
+
+		$this->assertStringContainsString( 'test-template-class-empty', $rendered['html'] );
+		$this->assertStringContainsString( 'Subject', $rendered['html'] );
+	}
+
+	/**
+	 * Test the documented contract: a resolvable template slug is required.
+	 *
+	 * Pins the current failure mode so a behavior change (e.g. a graceful
+	 * fallback) is a conscious API decision, not an accident.
+	 */
+	public function testItRequiresResolvableTemplateSlug(): void {
+		$this->expectException( \TypeError::class );
+
+		$this->renderer->render_from_content(
+			'<!-- wp:paragraph --><p>Content</p><!-- /wp:paragraph -->',
+			'this-template-slug-is-not-registered',
+			'Subject',
+			'Preheader content'
+		);
 	}
 
 	/**

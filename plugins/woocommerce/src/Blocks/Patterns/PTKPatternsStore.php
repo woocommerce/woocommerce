@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use WP_Upgrader;
 
 /**
@@ -109,7 +110,7 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
+		if ( ActionSchedulerUtil::has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
 

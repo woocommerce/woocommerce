@@ -350,6 +350,40 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should reduce srcset width descriptors for wide images in portrait aspect ratios.
+	 */
+	public function test_product_image_render_adjusts_srcset_for_portrait_aspect_ratio() {
+		$data = $this->create_product_with_image();
+
+		wp_update_attachment_metadata(
+			$data['image_id'],
+			array(
+				'width'  => 2000,
+				'height' => 1000,
+				'file'   => 'wide-image.jpg',
+				'sizes'  => array(
+					'large' => array(
+						'file'      => 'wide-image-1024x512.jpg',
+						'width'     => 1024,
+						'height'    => 512,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
+		update_post_meta( $data['image_id'], '_wp_attached_file', 'wide-image.jpg' );
+
+		$default_markup  = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
+		$portrait_markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/4"}' );
+
+		$this->assertStringContainsString( 'wide-image-1024x512.jpg 1024w', $default_markup );
+		$this->assertStringContainsString( 'wide-image-1024x512.jpg 384w', $portrait_markup );
+
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
 	 * Test that the ProductImage block handles invalid product IDs correctly.
 	 */
 	public function test_product_image_render_with_invalid_product() {

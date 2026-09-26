@@ -47,7 +47,7 @@ In practice, that means the dependency version is:
 
 We have an alias to the 14.2.0 version of `@wordpress/components` called `wordpress-components`. This alias was used to import a limited set of components in front-end components. This alias is deprecated and **should no longer be used**. When the `FormTokenField` component is removed from the codebase, the alias will be removed as well.
 
-We also have one other alias `wordpress-components-slotfill`, used to import the `SlotFill` and `Fill` components from `@wordpress/components`. This alias **should not be used to import any other dependencies from `@wordpress/components`**, and **should not be used outside of the slot fill context** — import it only within the slot fill seam at `packages/checkout/slot`, never directly from other components or blocks.
+We also have one other alias `wordpress-components-slotfill`, used to import the `SlotFill` and `Fill` components from `@wordpress/components`. This alias **should not be used to import any other dependencies from `@wordpress/components`**, and **should not be used outside of the slot fill context** — import it only within the slot fill seam at `packages/public-api/blocks-checkout/slot`, never directly from other components or blocks.
 
 It is pinned to `@wordpress/components@29.5.4`, matching the version in the `wp-min` catalog in the root `pnpm-workspace.yaml`, so the slot fill resolves to the same `@wordpress/components` the rest of the package already builds against rather than a separate copy. The version is hardcoded because pnpm cannot combine the `catalog:` protocol with an `npm:` alias — re-pin it manually whenever the `wp-min` catalog bumps `@wordpress/components`.
 

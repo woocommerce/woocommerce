@@ -28,6 +28,7 @@ import { useInstanceId } from '@wordpress/compose';
 import { dispatch, select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { Icon, calendar } from '@wordpress/icons';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
@@ -37,6 +38,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  */
 import { Select } from '../../select';
 import AddressLineFields from './address-line-fields';
+import { resolveDateConstraints } from './date-constraints';
 import { FormProps } from './types';
 import { useFormFields } from './use-form-fields';
 import { useFormValidation } from './use-form-validation';
@@ -421,6 +423,22 @@ const Form = <
 						}
 						{ ...fieldProps }
 						type={ field.type }
+						{ ...( field.type === 'date'
+							? {
+									...resolveDateConstraints( field ),
+									icon: (
+										<span
+											className="wc-block-components-text-input__date-icon"
+											aria-hidden="true"
+										>
+											<Icon
+												icon={ calendar }
+												size={ 24 }
+											/>
+										</span>
+									),
+							  }
+							: {} ) }
 						ariaDescribedBy={ ariaDescribedBy }
 						value={
 							decodeEntities(

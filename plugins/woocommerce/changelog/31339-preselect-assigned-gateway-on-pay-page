@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pre-select the payment method a merchant assigned to an admin-created order on its Pay for order page, instead of the first enabled method.

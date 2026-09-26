@@ -28,6 +28,7 @@ interface WithBlockControlsRequiredProps< T > {
 	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
+	canEditItem: boolean;
 }
 
 interface WithBlockControlsCategoryProps< T >
@@ -53,6 +54,7 @@ type BlockControlRequiredAttributes = {
 };
 
 interface BlockControlsProps {
+	canEditItem?: boolean;
 	backgroundImageId: number;
 	backgroundImageSrc: string;
 	contentAlign: BlockAlignment;
@@ -72,6 +74,7 @@ interface BlockControlsConfiguration extends GenericBlockUIConfig {
 }
 
 export const BlockControls = ( {
+	canEditItem = true,
 	backgroundImageId,
 	backgroundImageSrc,
 	contentAlign,
@@ -122,16 +125,18 @@ export const BlockControls = ( {
 					</ToolbarButton>
 				) : null }
 			</ToolbarGroup>
-			<ToolbarGroup
-				controls={ [
-					{
-						icon: 'edit',
-						title: editLabel,
-						onClick: () => setEditMode( ! editMode ),
-						isActive: editMode,
-					},
-				] }
-			/>
+			{ canEditItem && (
+				<ToolbarGroup
+					controls={ [
+						{
+							icon: 'edit',
+							title: editLabel,
+							onClick: () => setEditMode( ! editMode ),
+							isActive: editMode,
+						},
+					] }
+				/>
+			) }
 		</BlockControlsWrapper>
 	);
 };
@@ -156,6 +161,7 @@ export const withBlockControls =
 		return (
 			<>
 				<BlockControls
+					canEditItem={ props.canEditItem }
 					backgroundImageId={ backgroundImageId }
 					backgroundImageSrc={ backgroundImageSrc }
 					contentAlign={ contentAlign }

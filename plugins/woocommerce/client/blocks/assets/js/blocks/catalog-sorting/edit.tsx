@@ -25,10 +25,7 @@ const CatalogSorting = ( {
 		<>
 			{ useLabel ? (
 				<>
-					<label
-						className="orderby-label"
-						htmlFor="woocommerce-orderby"
-					>
+					<label htmlFor="woocommerce-orderby">
 						{ __( 'Sort by', 'woocommerce' ) }
 					</label>
 					<select className="orderby" id="woocommerce-orderby">
