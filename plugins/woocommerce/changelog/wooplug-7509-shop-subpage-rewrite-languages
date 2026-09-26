@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve Shop subpage URLs when rewrite rules are regenerated in another language.
