@@ -42,7 +42,7 @@ Expand your audience across marketing and social channels with [Google Ads](http
 
 Enhance store functionality with hundreds of free and paid extensions from the [WooCommerce Marketplace](https://woocommerce.com/products/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). Our developers [vet each new extension](https://woocommerce.com/document/marketplace-overview/#section-6?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and regularly review existing extensions to maintain Marketplace quality standards. We are actively [looking for products that help store builders create successful stores](https://woocommerce.com/document/marketplace-overview/#section-2?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
-Manage your store from anywhere with the free WooCommerce [mobile app](https://woocommerce.com/mobile/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) (Android and iOS). Spoiler alert: Keep an ear out for the slightly addictive "cha-ching" notification sound each time you make a new sale!
+Manage your store from anywhere with the free WooCommerce [mobile app](https://woocommerce.com/mobile/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) (Android and iOS), and sell in person with [WooCommerce POS](https://woocommerce.com/woocommerce-pos/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), built into the app. Spoiler alert: Keep an ear out for the slightly addictive "cha-ching" notification sound each time you make a new sale!
 
 = Own and control your store data – forever =
 
@@ -105,6 +105,10 @@ First, troubleshoot common login issues using this helpful [step-by-step guide](
 = Will WooCommerce work with my theme? =
 
 Yes! WooCommerce will work with any theme but may require some additional styling. If you’re looking for a theme featuring deep WooCommerce integration, we recommend [Storefront](https://woocommerce.com/storefront/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
+
+= Can I sell in person with WooCommerce? =
+
+Yes. WooCommerce POS is built into the free WooCommerce mobile app. It turns a tablet or phone into a point of sale, takes card payments, and keeps online and in-person orders and inventory in one store. Check the [requirements](https://woocommerce.com/document/woo-mobile-app-point-of-sale-mode/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing#requirements) for availability in your country, then learn more about [WooCommerce POS](https://woocommerce.com/woocommerce-pos/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
 = How do I update WooCommerce? =
 
