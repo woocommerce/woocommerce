@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow mobile zoom in the Core Profiler without triggering automatic input zoom.
