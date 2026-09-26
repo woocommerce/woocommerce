@@ -1,0 +1,34 @@
+.woocommerce-layout__header {
+	.woocommerce-layout__header-wrapper {
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-layout__header-heading {
+		.woocommerce-settings-payments-header__title {
+			// font-size, font-weight, AND color all inherit from the
+			// shared `.woocommerce-layout__header-heading` rule
+			// (15px / 500 / $gray-900, in client/admin/client/header/
+			// style.scss). Dropped the duplicate 16px + 600 + $gray-900
+			// overrides here so all floating-header titles stay in
+			// lockstep on the same tokens.
+			font-style: normal;
+			line-height: 24px;
+		}
+	}
+
+	.woocommerce-settings-payments-header__description {
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px;
+		color: $gray-700;
+		flex-basis: 100%;
+	}
+
+	&:has(.woocommerce-settings-payments-header__description) {
+		.woocommerce-layout__header-heading,
+		.woocommerce-settings-payments-header__title,
+		.woocommerce-settings-payments-header__description {
+			display: block;
+		}
+	}
+}

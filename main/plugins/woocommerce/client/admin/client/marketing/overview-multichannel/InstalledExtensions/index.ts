@@ -1,0 +1,1 @@
+export { InstalledExtensions } from './InstalledExtensions';

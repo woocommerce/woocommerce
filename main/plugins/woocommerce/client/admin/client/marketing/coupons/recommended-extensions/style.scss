@@ -1,0 +1,97 @@
+.woocommerce-marketing-recommended-extensions-card {
+	.components-card__body {
+		padding: $gap-small;
+	}
+
+
+	&__items {
+		display: flex;
+		flex-wrap: wrap;
+
+		@include breakpoint( ">600px" ) {
+			> a,
+			> .is-loading.woocommerce-marketing-recommended-extensions-item {
+				width: 50%;
+			}
+		}
+
+		@include breakpoint( ">960px" ) {
+			> a,
+			> .is-loading.woocommerce-marketing-recommended-extensions-item {
+				width: 33.3%;
+			}
+
+			&--count-1 > a,
+			&--count-1 > .is-loading.woocommerce-marketing-recommended-extensions-item {
+				width: 100%;
+			}
+
+			&--count-2 > a,
+			&--count-2 > .is-loading.woocommerce-marketing-recommended-extensions-item {
+				width: 50%;
+			}
+
+			&--count-4 > a,
+			&--count-4 > .is-loading.woocommerce-marketing-recommended-extensions-item {
+				width: 25%;
+			}
+		}
+	}
+}
+
+.woocommerce-marketing-recommended-extensions-item {
+	display: block;
+	padding: 12px;
+	text-decoration: none;
+	position: relative;
+
+	h4 {
+		color: $gray-900;
+		margin: -2px 0 ( $gap-smallest - 1 );
+		font-size: 16px;
+		line-height: 1.3;
+		transition: color 0.2s ease;
+	}
+
+	p {
+		color: $gray-700;
+		margin: 0;
+	}
+
+	&:hover {
+		h4 {
+			color: var(--wp-admin-theme-color);
+		}
+		p {
+			color: $gray-900;
+		}
+	}
+
+	&__text {
+		padding-left: 46px;
+	}
+
+	.woocommerce-admin-marketing-product-icon {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+	}
+}
+
+.woocommerce-marketing-recommended-extensions-item.is-loading {
+
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		min-height: 16px;
+	}
+
+	h4 {
+		width: 80%;
+	}
+
+	p :last-child {
+		width: 60%;
+	}
+
+}

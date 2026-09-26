@@ -1,0 +1,61 @@
+@mixin animate-slider($vector, $duration: 300ms, $timing-function: ease-in) {
+	.slide-enter {
+		transform: translateX($vector * 100%);
+	}
+	.slide-enter-active {
+		transform: translateX(0%);
+		transition: transform $duration $timing-function;
+	}
+	.slide-exit {
+		transform: translateX(0%);
+	}
+	.slide-exit-active {
+		transform: translateX($vector * -100%);
+		transition: transform $duration $timing-function;
+	}
+}
+
+.woocommerce-marketing-slider {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+
+	// slide container
+	& > div {
+		width: 100%;
+		white-space: normal;
+		overflow: hidden;
+		display: block;
+		position: relative;
+		height: 100%;
+	}
+
+	&__slide {
+		top: 0;
+		left: 0;
+		width: 100%;
+		position: relative;
+	}
+
+	.slide-enter,
+	.slide-exit {
+		position: absolute;
+	}
+
+	&.animate-right {
+		// $vector = -1 for sliding from left to right
+		@include animate-slider(-1);
+	}
+
+	&.animate-left {
+		// $vector = 1 for sliding from right to left
+		@include animate-slider(1);
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		.slide-enter-active,
+		.slide-exit-active {
+			transition: none !important;
+		}
+	}
+}

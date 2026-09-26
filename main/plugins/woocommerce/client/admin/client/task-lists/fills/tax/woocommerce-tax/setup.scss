@@ -1,0 +1,49 @@
+.woocommerce-task-tax__automated-tax-control {
+	display: flex;
+	align-items: center;
+	margin-top: $gap;
+
+	i {
+		margin-left: $gap;
+		margin-right: $gap-large;
+	}
+
+	.woocommerce-task-tax__automated-tax-control-inner {
+		border-top: 1px solid $studio-gray-5;
+		display: flex;
+		align-items: center;
+		flex: 1;
+		font-size: 16px;
+		padding-top: $gap;
+		padding-bottom: $gap;
+	}
+
+	.components-form-toggle {
+		margin-left: auto;
+	}
+}
+
+.woocommerce-task-tax__success {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: $gap-largest;
+	text-align: center;
+
+	.woocommerce-task-tax__success-icon {
+		font-size: 48px;
+		height: 48px;
+		align-items: center;
+		display: flex;
+	}
+
+	#woocommerce-task-tax__success-message {
+		font-size: 32px;
+		font-weight: 400;
+	}
+
+	p {
+		margin-top: 0;
+		font-size: 16px;
+	}
+}

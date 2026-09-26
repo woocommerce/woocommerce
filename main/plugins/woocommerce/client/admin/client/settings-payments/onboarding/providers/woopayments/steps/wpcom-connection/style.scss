@@ -1,0 +1,43 @@
+.settings-payments-onboarding-modal {
+	&__step {
+		&--content-jetpack {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 48px;
+			text-align: center;
+			max-width: 650px;
+			margin: 0 auto;
+
+			&-title {
+				font-size: 20px;
+				line-height: 24px;
+				margin: 0 0 16px;
+				font-weight: 500;
+				color: $gray-900;
+				width: 100%;
+			}
+
+			&-description {
+				font-size: 13px;
+				line-height: 20px;
+				color: $gray-700;
+				margin: 0 0 32px;
+			}
+
+			&-button {
+				justify-content: center;
+
+				@media (max-width: 1024px) {
+					width: 100%;
+				}
+			}
+
+			@media (max-width: 768px) {
+				padding: 48px 0;
+				text-align: left;
+			}
+		}
+	}
+}

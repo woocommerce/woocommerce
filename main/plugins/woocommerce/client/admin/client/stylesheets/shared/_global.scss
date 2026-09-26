@@ -1,0 +1,95 @@
+@import "node_modules/@wordpress/base-styles/colors.native";
+// By using CSS variables, we can switch the spacing rhythm using a single media query.
+:root {
+	--large-gap: 40px;
+	--main-gap: 24px;
+}
+@media (max-width: 960px) {
+	:root {
+		--large-gap: 24px;
+	}
+}
+@media (max-width: 782px) {
+	:root {
+		--large-gap: 16px;
+		--main-gap: 16px;
+	}
+}
+
+// Set up animation
+@keyframes loading-fade {
+	0% {
+		opacity: 0.7;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.7;
+	}
+}
+
+.woocommerce-layout {
+	select:hover {
+		color: $gray-900;
+	}
+
+	.components-base-control select.components-select-control__input {
+		max-width: 100%;
+		line-height: normal;
+	}
+
+	.components-panel__body > .components-panel__body-title,
+	.woocommerce-experimental-list__item,
+	.woocommerce-inbox-message {
+		&:hover {
+			background: $gray-0;
+		}
+	}
+	/**
+	* JITM specific styles
+	*/
+	&__jitm {
+		.jitm-card {
+			margin: 3rem 1.25rem 1.25rem;
+		}
+	}
+	&__jitm-hide {
+		display: none;
+	}
+}
+
+body.woocommerce-admin-page {
+	// Prevent orphans
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	caption,
+	figcaption {
+		text-wrap: balance;
+	}
+
+	p,
+	ul,
+	ol,
+	blockquote {
+		text-wrap: pretty;
+	}
+
+	.components-button.is-primary {
+		&:not(:disabled):not([aria-disabled="true"]):hover {
+			color: $studio-white;
+		}
+	}
+
+	.components-snackbar .components-button.is-tertiary {
+		color: $studio-white;
+
+		&:not(:disabled):not([aria-disabled="true"]):hover {
+			color: $studio-white;
+		}
+	}
+}

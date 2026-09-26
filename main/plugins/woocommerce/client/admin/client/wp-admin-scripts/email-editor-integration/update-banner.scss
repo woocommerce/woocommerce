@@ -1,0 +1,98 @@
+/**
+ * <UpdateBanner> — RSM-141.
+ *
+ * Floating card pinned 16px from the canvas top, centered horizontally.
+ * Uses WPDS tokens via CSS custom properties with sensible WP-admin
+ * fallbacks; no custom design tokens introduced.
+ */
+
+.wc-update-banner {
+	position: absolute;
+	top: 16px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: min(720px, calc(100% - 32px));
+	background: var(--wpds-color-bg-surface, #fff);
+	border-radius: var(--wpds-border-radius-sm, 2px);
+	box-shadow:
+		var(--wpds-elevation-md, 0 1px 2px rgba(0, 0, 0, 0.06)),
+		0 4px 12px rgba(0, 0, 0, 0.08);
+	border-left: 3px solid var(--wpds-color-bg-interactive-brand-strong, #3858e9);
+	padding: 12px 16px;
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+	z-index: 100;
+	pointer-events: auto;
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__title {
+		font-weight: 600;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+
+	&__subtitle {
+		margin-top: 4px;
+		font-size: 12px;
+		color: var(--wpds-color-text-secondary, #757575);
+	}
+
+	&__expand {
+		appearance: none;
+		background: none;
+		border: 0;
+		padding: 4px 0 0 0;
+		margin-top: 6px;
+		color: var(--wpds-color-bg-interactive-brand-strong, #3858e9);
+		cursor: pointer;
+		font-size: 12px;
+		font-weight: 500;
+	}
+
+	&__changes {
+		margin: 8px 0 0 16px;
+		padding: 0;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+	}
+
+	&__dismiss {
+		appearance: none;
+		background: none;
+		border: 0;
+		padding: 4px 8px;
+		font-size: 16px;
+		line-height: 1;
+		cursor: pointer;
+		color: var(--wpds-color-text-secondary, #757575);
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+	}
+
+	/* Success morph */
+	&--success {
+		background: var(--wpds-color-bg-surface-success-weak, #ebffed);
+		border-left-color: var(--wpds-color-bg-interactive-success-strong, #00ba37);
+	}
+
+	/* Failure morph */
+	&--failure {
+		background: var(--wpds-color-bg-surface-warning, #fde6be);
+		border-left-color: #b26200;
+	}
+}
