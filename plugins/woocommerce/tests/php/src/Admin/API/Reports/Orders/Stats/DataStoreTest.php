@@ -602,11 +602,33 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( '0', $returning_flag( $order_1->get_id() ), 'Oldest order should start as the non-returning first order.' );
 		$this->assertSame( '1', $returning_flag( $order_2->get_id() ), 'Second order should start as returning.' );
 
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
-		$order_1->set_status( $long_status );
-		$order_1->save();
+		// Saving the long status stores nothing: WordPress refuses to shorten an
+		// overlength value for the posts table, and the orders table only keeps a
+		// truncated one while strict SQL mode is off. Write the truncated status
+		// the reports are meant to read.
+		$truncated_status = mb_substr( 'wc-' . $long_status, 0, 20 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				$wpdb->prefix . 'wc_orders',
+				array( 'status' => $truncated_status ),
+				array( 'id' => $order_1->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => $truncated_status ),
+				array( 'ID' => $order_1->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			clean_post_cache( $order_1->get_id() );
+		}
+
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			wc_get_container()->get( OrderCache::class )->remove( $order_1->get_id() );
+		}
 
 		// Reload so the order reports the truncated status actually stored in the database.
 		$order_1 = wc_get_order( $order_1->get_id() );
