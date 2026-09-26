@@ -94,6 +94,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_checkout_page_id'                 => 'single_select_page_with_search',
 			'woocommerce_myaccount_page_id'                => 'single_select_page_with_search',
 			'woocommerce_terms_page_id'                    => 'single_select_page_with_search',
+			'woocommerce_refund_returns_page_id'           => 'single_select_page_with_search',
 			'checkout_process_options'                     => array( 'title', 'sectionend' ),
 			'woocommerce_force_ssl_checkout'               => 'checkbox',
 			'woocommerce_unforce_ssl_checkout'             => 'checkbox',
@@ -119,6 +120,49 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		}
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox Saving Page setup reassigns or clears the selected refund and returns policy page.
+	 */
+	public function test_save_reassigns_refund_returns_page(): void {
+		$old_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$new_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $old_page_id );
+
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restore the test request after saving.
+		$had_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_section = $GLOBALS['current_section'] ?? null;
+		try {
+			$GLOBALS['current_section'] = '';
+			$_POST                      = array( 'woocommerce_refund_returns_page_id' => (string) $new_page_id );
+			( new WC_Settings_Advanced() )->save();
+
+			$this->assertSame( (string) $new_page_id, get_option( 'woocommerce_refund_returns_page_id' ), 'The new selection should be saved.' );
+			$this->assertSame( $new_page_id, wc_get_page_id( 'refund_returns' ), 'Consumers should resolve the reassigned page.' );
+
+			$_POST['woocommerce_refund_returns_page_id'] = '';
+			( new WC_Settings_Advanced() )->save();
+			$this->assertSame( '', get_option( 'woocommerce_refund_returns_page_id' ), 'Clearing the selection should be saved.' );
+			$this->assertSame( -1, wc_get_page_id( 'refund_returns' ), 'Consumers should not resolve a page once selection is cleared.' );
+		} finally {
+			$_POST = $original_post;
+			if ( $had_section ) {
+				$GLOBALS['current_section'] = $original_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
 	}
 
 	/**
