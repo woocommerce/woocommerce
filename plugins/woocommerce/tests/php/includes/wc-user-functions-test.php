@@ -263,16 +263,31 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Timeframe totals for a missing customer must not include guest orders.
+	 * Timeframe totals reject invalid IDs while preserving guest and unfiltered behavior.
 	 */
-	public function test_timeframe_total_spent_excludes_guests_for_missing_customer(): void {
+	public function test_timeframe_total_spent_rejects_invalid_customer_ids(): void {
 		foreach ( array( false, true ) as $hpos_enabled ) {
 			$this->toggle_cot_feature_and_usage( $hpos_enabled );
 
-			$order = WC_Helper_Order::create_order( 0, null, array( 'status' => OrderStatus::COMPLETED ) );
+			$storage_suffix = $hpos_enabled ? 'hpos' : 'cpt';
+			$customer       = WC_Helper_Customer::create_customer(
+				"timeframe-negative-$storage_suffix",
+				'password',
+				"timeframe-negative-$storage_suffix@example.com"
+			);
+			$order          = WC_Helper_Order::create_order( 0, null, array( 'status' => OrderStatus::COMPLETED ) );
 			$order->set_date_paid( '2024-02-10 12:00:00' );
 			$order->set_total( 20 );
 			$order->save();
+
+			$customer_order = WC_Helper_Order::create_order(
+				$customer->get_id(),
+				null,
+				array( 'status' => OrderStatus::COMPLETED )
+			);
+			$customer_order->set_date_paid( '2024-02-10 12:00:00' );
+			$customer_order->set_total( 30 );
+			$customer_order->save();
 
 			$timeframe = array(
 				'after'  => '2024-01-01 00:00:00',
@@ -289,12 +304,21 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 				wc_get_customer_total_spent( PHP_INT_MAX, $timeframe ),
 				'A missing positive customer ID must not receive guest timeframe totals.'
 			);
+			$this->assertSame( '30.00', wc_get_customer_total_spent( $customer->get_id(), $timeframe ) );
+			$this->assertSame(
+				'0.00',
+				wc_get_customer_total_spent( -$customer->get_id(), $timeframe ),
+				'A negative customer ID must not resolve to another customer.'
+			);
 
-			// Preserve the established, unfiltered behavior for both guest ID 0 and a missing positive ID.
+			// Preserve established unfiltered results for guest, missing positive, and negative IDs.
 			$this->assertSame( '20.00', wc_get_customer_total_spent( 0 ) );
 			$this->assertSame( '20.00', wc_get_customer_total_spent( PHP_INT_MAX ) );
+			$this->assertSame( '30.00', wc_get_customer_total_spent( -$customer->get_id() ) );
 
 			$order->delete( true );
+			$customer_order->delete( true );
+			$customer->delete( true );
 		}
 	}
 

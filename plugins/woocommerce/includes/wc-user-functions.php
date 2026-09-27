@@ -880,7 +880,6 @@ function wc_get_customer_available_downloads( $customer_id ) {
  * @throws InvalidArgumentException When a paid-date filter cannot be parsed.
  */
 function wc_get_customer_total_spent( $user_id, $args = array() ) {
-	$customer = new WC_Customer( $user_id );
 	$args     = wp_parse_args(
 		$args,
 		array(
@@ -891,11 +890,18 @@ function wc_get_customer_total_spent( $user_id, $args = array() ) {
 
 	$has_timeframe = ( null !== $args['after'] && '' !== $args['after'] ) || ( null !== $args['before'] && '' !== $args['before'] );
 	if ( ! $has_timeframe ) {
+		$customer = new WC_Customer( $user_id );
 		return $customer->get_total_spent();
 	}
 
+	if ( 0 > $user_id ) {
+		return '0.00';
+	}
+
+	$customer = new WC_Customer( $user_id );
+
 	// A missing positive user ID is reset to 0 by WC_Customer. Do not interpret that as a request for guest totals.
-	if ( $user_id > 0 && 0 === $customer->get_id() ) {
+	if ( 0 < $user_id && 0 === $customer->get_id() ) {
 		return '0.00';
 	}
 
