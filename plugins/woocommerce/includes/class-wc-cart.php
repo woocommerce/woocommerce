@@ -1888,8 +1888,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 *
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
-				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_enabled = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+				// A hidden field is not required, the same rule the classic checkout validates with.
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
@@ -1904,7 +1905,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
