@@ -2,7 +2,7 @@
 /**
  * Customer Data Store Timeframe Interface
  *
- * @version 11.1.0
+ * @version 11.3.0
  * @package WooCommerce\Interface
  */
 
@@ -14,6 +14,7 @@ interface WC_Customer_Data_Store_Timeframe_Interface {
 	/**
 	 * Return how much money this customer has spent in a paid-date timeframe.
 	 *
+	 * @since 11.3.0
 	 * @param WC_Customer $customer Customer object.
 	 * @param array       $args Paid-date filters.
 	 * @return string

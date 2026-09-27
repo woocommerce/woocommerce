@@ -871,7 +871,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 /**
  * Get total spent by customer.
  *
- * @since 11.1.0 Added the `$args` parameter.
+ * @since 11.3.0 Added the `$args` parameter.
  *
  * @param  int   $user_id User ID.
  * @param  array $args    Optional arguments. Supports exclusive `before` and `after` paid-date filters as
@@ -892,6 +892,11 @@ function wc_get_customer_total_spent( $user_id, $args = array() ) {
 	$has_timeframe = ( null !== $args['after'] && '' !== $args['after'] ) || ( null !== $args['before'] && '' !== $args['before'] );
 	if ( ! $has_timeframe ) {
 		return $customer->get_total_spent();
+	}
+
+	// A missing positive user ID is reset to 0 by WC_Customer. Do not interpret that as a request for guest totals.
+	if ( $user_id > 0 && 0 === $customer->get_id() ) {
+		return '0.00';
 	}
 
 	/**

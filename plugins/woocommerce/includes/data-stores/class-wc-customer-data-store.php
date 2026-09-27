@@ -715,7 +715,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * This is an optional data store capability. The established get_total_spent()
 	 * contract remains unchanged for third-party customer data stores.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @param array       $args Supports exclusive `before` and `after` paid-date filters as date strings,
@@ -750,7 +750,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		/**
 		 * Filters the SQL query used to get a customer's total spent in a paid-date timeframe.
 		 *
-		 * @since 11.1.0
+		 * @since 11.3.0
 		 *
 		 * @param string      $sql      The SQL query to use.
 		 * @param WC_Customer $customer The customer to get the total spent for.
@@ -768,7 +768,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		/**
 		 * Filters total spent in a paid-date timeframe for a given customer.
 		 *
-		 * @since 11.1.0
+		 * @since 11.3.0
 		 *
 		 * @param mixed       $money_spent The calculated money spent value.
 		 * @param WC_Customer $customer    The customer to get the total spent for.
