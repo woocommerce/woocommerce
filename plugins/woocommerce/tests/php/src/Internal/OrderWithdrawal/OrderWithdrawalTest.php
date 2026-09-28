@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailPreview;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
@@ -25,7 +26,6 @@ use WC_Unit_Test_Case;
 class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 	private const FEATURE_OPTION                      = 'woocommerce_feature_order_withdrawal_enabled';
-	private const ENDPOINT_OPTION                     = 'woocommerce_myaccount_order_withdrawal_endpoint';
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
@@ -128,7 +128,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
-		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
+		$this->original_endpoint_option    = get_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_flush_queue_option = get_option( self::FLUSH_QUEUE_OPTION, self::MISSING_OPTION_MARK );
 
 		if ( ! WC()->session ) {
@@ -140,7 +140,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$_SERVER['REMOTE_ADDR']    = '203.0.113.10';
 		$this->clear_order_withdrawal_rate_limits();
 		$this->disable_feature();
-		delete_option( self::ENDPOINT_OPTION );
+		delete_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION );
 		delete_option( self::FLUSH_QUEUE_OPTION );
 		wc_clear_notices();
 	}
@@ -164,7 +164,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		}
 
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
-		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
+		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
@@ -682,7 +682,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
+		$endpoint      = new OrderWithdrawalEndpoint();
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -751,8 +753,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -789,12 +793,15 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
+		$notification->init( $endpoint );
 		$controller->init(
 			$this->sut,
 			new OrderWithdrawalFormView(),
 			$notification,
-			$email_preview
+			$email_preview,
+			$endpoint
 		);
 
 		try {

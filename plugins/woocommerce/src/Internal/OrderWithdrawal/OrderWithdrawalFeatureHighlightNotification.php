@@ -16,6 +16,13 @@ use Exception;
  */
 final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooksInterface {
 
+	/**
+	 * Order withdrawal endpoint.
+	 *
+	 * @var OrderWithdrawalEndpoint
+	 */
+	private OrderWithdrawalEndpoint $endpoint;
+
 	public const NOTE_NAME              = 'wc-admin-order-withdrawal-feature';
 	public const CREATED_OPTION         = 'woocommerce_order_withdrawal_inbox_notification_created';
 	public const ENABLED_NOTE_NAME      = 'wc-admin-order-withdrawal-enabled';
@@ -24,6 +31,16 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
 	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
 	private const DOCUMENTATION_URL     = 'https://woocommerce.com/document/customer-order-withdrawal/';
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @param OrderWithdrawalEndpoint $endpoint Order withdrawal endpoint.
+	 * @internal
+	 */
+	final public function init( OrderWithdrawalEndpoint $endpoint ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
+		$this->endpoint = $endpoint;
+	}
 
 	/**
 	 * Register hooks.
@@ -185,7 +202,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		$note->add_action(
 			'view-page',
 			__( 'View page', 'woocommerce' ),
-			$this->get_order_withdrawal_page_url(),
+			$this->endpoint->get_url(),
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);
@@ -225,16 +242,6 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		update_option( $created_option, 'yes', false );
 
 		return true;
-	}
-
-	/**
-	 * Get the configured public order withdrawal page URL.
-	 */
-	private function get_order_withdrawal_page_url(): string {
-		$endpoint    = (string) get_option( OrderWithdrawalController::ENDPOINT_OPTION, OrderWithdrawalController::ENDPOINT_SLUG );
-		$account_url = wc_get_page_permalink( 'myaccount' );
-
-		return wc_get_endpoint_url( $endpoint, '', $account_url ? $account_url : home_url( '/' ) );
 	}
 
 	/**

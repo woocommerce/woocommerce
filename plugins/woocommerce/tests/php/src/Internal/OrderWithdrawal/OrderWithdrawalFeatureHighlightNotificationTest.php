@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFeatureHighlightNotification;
 use WC_Unit_Test_Case;
 
@@ -18,7 +19,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	private const ALLOWED_COUNTRIES_OPTION    = 'woocommerce_allowed_countries';
 	private const ALL_EXCEPT_COUNTRIES_OPTION = 'woocommerce_all_except_countries';
 	private const SPECIFIC_COUNTRIES_OPTION   = 'woocommerce_specific_allowed_countries';
-	private const ENDPOINT_OPTION             = 'woocommerce_myaccount_order_withdrawal_endpoint';
 	private const MISSING_OPTION_MARK         = '__woocommerce_order_withdrawal_missing_option__';
 
 	private const OPTION_NAMES = array(
@@ -27,7 +27,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		self::ALLOWED_COUNTRIES_OPTION,
 		self::ALL_EXCEPT_COUNTRIES_OPTION,
 		self::SPECIFIC_COUNTRIES_OPTION,
-		self::ENDPOINT_OPTION,
+		OrderWithdrawalEndpoint::ENDPOINT_OPTION,
 		OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION,
 		OrderWithdrawalFeatureHighlightNotification::ENABLED_CREATED_OPTION,
 	);
@@ -53,6 +53,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		parent::setUp();
 
 		$this->sut = new OrderWithdrawalFeatureHighlightNotification();
+		$this->sut->init( new OrderWithdrawalEndpoint() );
 		$this->store_original_options();
 		$this->delete_notification_state();
 		$this->set_live_eu_store_defaults();
@@ -121,7 +122,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	 * @testdox Should add a notification with the configured withdrawal page when the feature is enabled.
 	 */
 	public function test_possibly_add_enabled_note_adds_notification_with_configured_page_url(): void {
-		update_option( self::ENDPOINT_OPTION, 'request-withdrawal' );
+		update_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, 'request-withdrawal' );
 
 		$this->sut->possibly_add_enabled_note( 'order_withdrawal', true );
 
