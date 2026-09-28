@@ -1402,6 +1402,19 @@ jQuery( function ( $ ) {
 					wc_meta_boxes_order_items.backbone.handle_tax_rate_result_tab_navigation( modal, event );
 				} );
 
+				results.on( 'keydown', '[data-wc-tax-rate-settings]', function( event ) {
+					if ( 13 !== event.which && 32 !== event.which ) {
+						return;
+					}
+
+					event.stopPropagation();
+
+					if ( 32 === event.which ) {
+						event.preventDefault();
+						this.click();
+					}
+				} );
+
 				load_tax_rates( 1 );
 			},
 
@@ -1523,7 +1536,8 @@ jQuery( function ( $ ) {
 						$( '<p class="wc-tax-rate-empty-action"></p>' ).append(
 							$( '<a></a>', {
 								class: 'woocommerce-BlankState-cta button',
-								href:  wc_enhanced_select_params.tax_rates_settings_url
+								href:  wc_enhanced_select_params.tax_rates_settings_url,
+								'data-wc-tax-rate-settings': true
 							} ).text( wc_enhanced_select_params.i18n_tax_settings )
 						)
 					)
