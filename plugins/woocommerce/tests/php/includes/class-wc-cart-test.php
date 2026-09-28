@@ -996,8 +996,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$hook,
 			function ( $fields ) use ( &$calls ) {
 				++$calls;
-				// Stop a runaway recursion so a regression fails the assertion below instead of exhausting the process.
-				if ( $calls <= 10 ) {
+				// Stop a runaway recursion well above the bounded count, so a regression fails the assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
 					WC()->cart->calculate_totals();
 				}
 				return $fields;
@@ -1024,29 +1024,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A show_shipping() call made while the shipping address fields are read checks the address against the country locale.
+	 * @testdox A show_shipping() call nested once inside the shipping address field read reads the fields too, so it answers like the outer call.
 	 */
-	public function test_nested_show_shipping_checks_the_address_against_the_country_locale(): void {
+	public function test_show_shipping_nested_once_answers_like_the_outer_call(): void {
+		$answers = $this->record_nested_show_shipping_answers_with_an_optional_postcode();
+
+		$this->assertTrue( $answers[1], 'The outer call should apply the shipping fields filter that makes the postcode optional.' );
+		$this->assertSame( array( true ), array_unique( $answers[2] ), 'A call nested once should read the same fields and answer like the outer call.' );
+	}
+
+	/**
+	 * @testdox A show_shipping() call nested twice inside the shipping address field read checks the address against the country locale.
+	 */
+	public function test_show_shipping_nested_twice_checks_the_address_against_the_country_locale(): void {
+		$answers = $this->record_nested_show_shipping_answers_with_an_optional_postcode();
+
+		$this->assertSame( array( false ), array_unique( $answers[3] ), 'A call nested twice should require the postcode, as the US locale does.' );
+		$this->assertArrayNotHasKey( 4, $answers, 'The nesting should stop at the call that checks the country locale.' );
+	}
+
+	/**
+	 * @testdox show_shipping() keeps the totals it found when a guarded field filter recalculates them for an address without a city.
+	 */
+	public function test_show_shipping_keeps_the_totals_when_a_guarded_field_filter_recalculates_them(): void {
 		$this->add_product_for_an_address_without_postcode();
-		$calls  = 0;
-		$nested = array();
+		WC()->cart->get_customer()->set_shipping_postcode( '10001' );
+		WC()->cart->get_customer()->set_shipping_city( '' );
 		add_filter(
-			'woocommerce_shipping_fields',
-			function ( $fields ) use ( &$calls, &$nested ) {
-				++$calls;
-				// Stop a runaway recursion so a regression fails the assertion below instead of exhausting the process.
-				if ( $calls <= 10 ) {
-					$nested[] = WC()->cart->show_shipping();
+			'woocommerce_default_address_fields',
+			function ( $fields ) {
+				static $calculating = false;
+				// Recalculate once per nesting chain, as extensions that read the cart total from a field filter do.
+				if ( ! $calculating ) {
+					$calculating = true;
+					WC()->cart->calculate_totals();
+					$calculating = false;
 				}
-				$fields['shipping_postcode']['required'] = false;
 				return $fields;
 			}
 		);
+		WC()->cart->calculate_totals();
+		$shipping_total = (float) WC()->cart->get_shipping_total();
 
-		$outer = WC()->cart->show_shipping();
+		$result = WC()->cart->show_shipping();
 
-		$this->assertSame( array( false ), array_unique( $nested ), 'A nested call should require the postcode, as the US locale does.' );
-		$this->assertTrue( $outer, 'The outer call should apply the shipping fields filter that makes the postcode optional.' );
+		$this->assertGreaterThan( 0.0, $shipping_total, 'The classic check does not require a city, so the flat rate should be charged.' );
+		$this->assertTrue( $result, 'The classic check does not require a city.' );
+		$this->assertSame( $shipping_total, (float) WC()->cart->get_shipping_total(), 'The recalculation inside show_shipping() should keep the shipping total.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal() + $shipping_total, (float) WC()->cart->get_total( 'edit' ), 'The total should still include shipping.' );
+	}
+
+	/**
+	 * @testdox show_shipping() leaves totals that match its answer when a field filter recalculates them and makes the postcode optional.
+	 */
+	public function test_show_shipping_leaves_totals_that_match_its_answer_when_a_field_filter_recalculates_them(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$calls = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+		WC()->cart->calculate_totals();
+
+		$result = WC()->cart->show_shipping();
+
+		$this->assertTrue( $result, 'The shipping fields filter makes the postcode optional.' );
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The recalculation inside show_shipping() should keep shipping calculated.' );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), 'The recalculation inside show_shipping() should keep the flat rate.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal() + (float) WC()->cart->get_shipping_total(), (float) WC()->cart->get_total( 'edit' ), 'The total should include shipping.' );
 	}
 
 	/**
@@ -1112,17 +1165,18 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_calculate_totals_leaves_out_shipping_that_a_nested_check_allowed(): void {
 		$this->add_product_for_an_address_without_postcode();
-		// The AE locale makes the postcode optional, so a nested check that reads the locale allows shipping.
+		// The AE locale makes the postcode optional, so the innermost nested check, which reads the locale, allows shipping.
 		WC()->cart->get_customer()->set_shipping_country( 'AE' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
 		WC()->cart->get_customer()->set_shipping_city( 'Dubai' );
-		$recalculated = false;
+		$calls = 0;
 		add_filter(
 			'woocommerce_shipping_fields',
-			function ( $fields ) use ( &$recalculated ) {
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
 				$fields['shipping_postcode']['required'] = true;
-				if ( ! $recalculated ) {
-					$recalculated = true;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
 					WC()->cart->calculate_totals();
 				}
 				return $fields;
@@ -1140,13 +1194,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_calculate_totals_charges_shipping_when_the_fields_make_the_postcode_optional(): void {
 		$this->add_product_for_an_address_without_postcode();
-		$recalculated = false;
+		$calls = 0;
 		add_filter(
 			'woocommerce_shipping_fields',
-			function ( $fields ) use ( &$recalculated ) {
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
 				$fields['shipping_postcode']['required'] = false;
-				if ( ! $recalculated ) {
-					$recalculated = true;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
 					WC()->cart->calculate_totals();
 				}
 				return $fields;
@@ -1178,6 +1233,36 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$customer->set_shipping_city( 'New York' );
 		$customer->set_shipping_postcode( '' );
 		$this->clear_checkout_fields();
+	}
+
+	/**
+	 * Record what show_shipping() answers at each nesting level, keyed by level (1 = the outer call), when a shipping fields filter makes the postcode optional and calls show_shipping() again.
+	 *
+	 * @return array<int, mixed> The outer answer at key 1, and a list of nested answers at each deeper key.
+	 */
+	private function record_nested_show_shipping_answers_with_an_optional_postcode(): array {
+		$this->add_product_for_an_address_without_postcode();
+		$answers = array();
+		$level   = 1;
+		$calls   = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$answers, &$level, &$calls ) {
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion instead of exhausting the process.
+				if ( ++$calls <= 30 ) {
+					$nested_level = ++$level;
+					$answer       = WC()->cart->show_shipping();
+					--$level;
+					$answers[ $nested_level ][] = $answer;
+				}
+				return $fields;
+			}
+		);
+
+		$answers[1] = WC()->cart->show_shipping();
+
+		return $answers;
 	}
 
 	/**

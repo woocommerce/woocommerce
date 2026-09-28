@@ -40,11 +40,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $cart_context = 'shortcode';
 
 	/**
-	 * Whether show_shipping() is reading the shipping address fields, so a nested call from a field filter does not read them again.
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
 	 *
-	 * @var bool
+	 * @var int
 	 */
-	private $reading_shipping_address_fields = false;
+	private $shipping_address_field_reads = 0;
 
 	/**
 	 * Contains an array of cart items.
@@ -1890,18 +1890,19 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			// A field filter that recalculates the totals checks shipping again, so that nested call uses the country locale check below instead of reading the fields.
-			if ( 'shortcode' === $this->cart_context && ! $this->reading_shipping_address_fields ) {
+			// A field filter that recalculates the totals checks shipping again. That nested call reads the fields too, so it gives the same answer;
+			// a call nested inside it uses the country locale check below instead, which guards its own re-entry, so the reads stop there.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$this->reading_shipping_address_fields = true;
+				++$this->shipping_address_field_reads;
 				try {
 					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
 					$checkout_fields = WC()->checkout()->get_checkout_fields();
 				} finally {
-					$this->reading_shipping_address_fields = false;
+					--$this->shipping_address_field_reads;
 				}
 
 				/**
