@@ -27,8 +27,6 @@ export interface TextInputProps
 	autoComplete?: string | undefined;
 	onChange: ( newValue: string ) => void;
 	onBlur?: ( newValue: string ) => void;
-	// Whether HTML entities in the value should be decoded for display.
-	decodeValue?: boolean;
 	icon?: ReactNode;
 }
 
@@ -47,7 +45,6 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 			autoCapitalize = 'off',
 			autoComplete = 'off',
 			value = '',
-			decodeValue = true,
 			onChange,
 			required = false,
 			onBlur = () => {
@@ -73,7 +70,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				<input
 					type={ type }
 					id={ id }
-					value={ decodeValue ? decodeEntities( value ) : value }
+					value={ decodeEntities( value ) }
 					ref={ ref }
 					autoCapitalize={ autoCapitalize }
 					autoComplete={ autoComplete }

@@ -32,7 +32,6 @@ import { Icon, calendar } from '@wordpress/icons';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
-import type { JSX } from 'react';
 
 /**
  * Internal dependencies
@@ -416,16 +415,6 @@ const Form = <
 					);
 				}
 
-				const fieldValue = values[ field.key as keyof T ] as string;
-				// Registered additional checkout field IDs contain a namespace separator and retain legacy entity decoding.
-				const isCoreAddressField =
-					( addressType === 'billing' ||
-						addressType === 'shipping' ) &&
-					! field.key.includes( '/' );
-				const inputValue = isCoreAddressField
-					? fieldValue
-					: decodeEntities( fieldValue );
-
 				return (
 					<ValidatedTextInput
 						key={ field.key }
@@ -451,8 +440,11 @@ const Form = <
 							  }
 							: {} ) }
 						ariaDescribedBy={ ariaDescribedBy }
-						value={ inputValue ?? '' }
-						decodeValue={ ! isCoreAddressField }
+						value={
+							decodeEntities(
+								values[ field.key as keyof T ] as string
+							) ?? ''
+						}
 						onChange={ ( newValue: string ) =>
 							onChange( {
 								...values,

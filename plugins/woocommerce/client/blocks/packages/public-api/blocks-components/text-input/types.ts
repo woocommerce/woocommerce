@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InputHTMLAttributes, JSX, ReactNode } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 export interface ValidatedTextInputProps
 	extends Omit<
@@ -20,8 +20,6 @@ export interface ValidatedTextInputProps
 	focusOnMount?: boolean;
 	// Callback to run on change which is passed the updated value.
 	onChange: ( newValue: string ) => void;
-	// Whether HTML entities in the value should be decoded for display.
-	decodeValue?: boolean;
 	// Optional label for the field.
 	label?: string;
 	// If true, validation errors will be shown.
