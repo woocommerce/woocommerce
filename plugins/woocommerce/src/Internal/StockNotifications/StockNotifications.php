@@ -132,7 +132,7 @@ class StockNotifications implements RegisterHooksInterface {
 			$container->get( AdminManager::class );
 		}
 
-		// Front end only; admin-ajax counts as front end, as in core's is_request( 'frontend' ).
+		// Frontend only.
 		if ( ! is_admin() || wp_doing_ajax() ) {
 			$container->get( EmailActionController::class );
 			$container->get( ProductPageIntegration::class );
