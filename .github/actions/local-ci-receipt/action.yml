@@ -1,24 +1,24 @@
 name: 'Look for a local CI receipt'
-description: 'Decides whether a check run published by `gh local-ci` on the pull request head allows this job to skip its install and test steps. Every path other than a verified, matching, successful receipt yields `substituted=false` with a reason, so uncertainty never skips a test. Trust fields are read from `.github/local-ci.json` on the base branch, never from the pull request. Like the workflow that calls it, this action runs from the pull request tree on pull_request events; edits to it are part of the reviewed diff, not a bypass the tool can prevent.'
+description: 'Decides whether a `gh local-ci` receipt on the pull request head lets this job skip its install and test steps. Anything short of a verified, passing receipt yields `substituted=false` with a reason. See README.md.'
 
 inputs:
   job-name:
     description: 'The matrix job name. The receipt is the check run named `receiptPrefix + job-name`.'
     required: true
   github-token:
-    description: 'Token used to read the base-branch config and the check runs on the head commit. Needs `contents: read` and `checks: read`; the repository default `github.token` carries both, but a job that pins its own `permissions:` block must include them or every lookup fails (safely: the job then runs in full, with a warning).'
+    description: 'Needs `contents: read` and `checks: read`; the default `github.token` has both.'
     required: true
   disabled:
-    description: 'Kill switch. Pass the `LOCAL_CI_RECEIPTS_DISABLED` repository variable; `1` disables substitution for every job with no commit.'
+    description: 'Pass the `LOCAL_CI_RECEIPTS_DISABLED` repository variable; `1` disables substitution.'
     required: false
     default: ''
 
 outputs:
   substituted:
-    description: '`true` when a receipt vouches for this job and the install and test steps may be skipped.'
+    description: '`true` when the install and test steps may be skipped.'
     value: ${{ steps.lookup.outputs.substituted }}
   reason:
-    description: 'Why the decision went the way it did, for the job log and for metrics.'
+    description: 'Why.'
     value: ${{ steps.lookup.outputs.reason }}
 
 runs:

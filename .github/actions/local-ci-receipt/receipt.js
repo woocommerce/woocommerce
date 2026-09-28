@@ -11,16 +11,13 @@ const CONFIG_PATH = '.github/local-ci.json';
 const TRUSTED_ASSOCIATIONS = [ 'MEMBER', 'OWNER' ];
 const WRITE_PERMISSIONS = [ 'admin', 'maintain', 'write' ];
 const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
-// Job types whose skipped steps ci.yml actually guards. A config may declare
-// more rules than this; substitution for any other type is refused until the
-// workflow guards that type's environment and artifact steps too.
+// Only job types whose remaining steps ci.yml guards.
 const SUBSTITUTABLE_TYPES = [ 'unit' ];
 const RECEIPT_VERSION = 'v1';
 const API_TIMEOUT_MS = 20000;
 
 /**
- * Parses a receipt's external_id: `v1;author=…;base=…;config=…;…`.
- * Unknown keys are ignored; a foreign version returns null.
+ * Parses `v1;author=…;base=…;config=…`; null for any other version.
  *
  * @param {string} externalId
  * @return {Object|null}
@@ -41,9 +38,7 @@ function parseExternalId( externalId ) {
 }
 
 /**
- * Whether the kill switch is set. Any value other than an explicit "off"
- * disables substitution, so an operator typing `true` or `yes` during an
- * incident gets what they meant rather than a silent no-op.
+ * Anything but an explicit "off" value disables, so a typo fails safe.
  *
  * @param {*} value
  * @return {boolean}
@@ -53,10 +48,8 @@ function killSwitchSet( value ) {
 }
 
 /**
- * The `[type]` suffix of a job name, or "" when there is none.
- *
  * @param {string} jobName
- * @return {string}
+ * @return {string} The `[type]` suffix, or "".
  */
 function jobType( jobName ) {
 	const m = /\[([^\]]+)\]\s*(\(optional\))?\s*$/.exec( jobName );
@@ -64,9 +57,7 @@ function jobType( jobName ) {
 }
 
 /**
- * Finds the eligibility rule the tool would have used for this job, the way
- * the tool does: the job type is the `[type]` suffix of the name, the rule's
- * optional namePrefix must prefix the name, and no exclude may match.
+ * The rule that claims this job, matched the way gh local-ci matches it.
  *
  * @param {Object} config
  * @param {string} jobName
@@ -93,14 +84,14 @@ function ruleFor( config, jobName ) {
  * Decides whether the job may be substituted. Pure.
  *
  * @param {Object}      input
- * @param {string}      input.disabled       The kill-switch variable's value.
- * @param {string}      input.eventName      The workflow event.
- * @param {Object}      input.pullRequest    The pull_request payload.
- * @param {string|null} input.authorPermission The author's repository permission (`admin`/`maintain`/`write`/…), or null when unknown.
- * @param {string}      input.jobName        The matrix job name.
- * @param {Object|null} input.baseConfig     `{ raw, parsed, sha256 }` from the base branch, or null when absent.
- * @param {string|null} input.headConfigRaw  The config on the head commit, or null when absent.
- * @param {Array}       input.checkRuns      Check runs on the head commit.
+ * @param {string}      input.disabled         Kill-switch variable value.
+ * @param {string}      input.eventName
+ * @param {Object}      input.pullRequest      pull_request payload.
+ * @param {string|null} input.authorPermission Repository permission, or null.
+ * @param {string}      input.jobName
+ * @param {Object|null} input.baseConfig       `{ raw, parsed, sha256 }`, or null.
+ * @param {string|null} input.headConfigRaw
+ * @param {Array}       input.checkRuns
  * @return {{substituted: boolean, reason: string}}
  */
 function decide( input ) {
@@ -121,9 +112,7 @@ function decide( input ) {
 	if ( config.enabled !== true ) {
 		return no( 'local CI receipts are not enabled on the base branch' );
 	}
-	// The trusted config is whatever the PR targets; only the configured
-	// base branch's copy counts, so a PR opened against some other branch
-	// (a release branch, or one carrying its own config) runs in full.
+	// Only the configured base branch's config is trusted.
 	const baseRef = pr.base && pr.base.ref;
 	if ( baseRef !== config.baseBranch ) {
 		return no( `pull request targets ${ baseRef }, receipts apply to ${ config.baseBranch } only` );
@@ -133,12 +122,8 @@ function decide( input ) {
 	}
 
 	const login = String( ( pr.user && pr.user.login ) || '' );
-	// Who is running the tool is decided on the publisher's side (the
-	// allowlist compiled into gh local-ci). What CI checks here is that the
-	// author could have published at all: write permission, which is what a
-	// receipt requires, or org membership. author_association is the weak
-	// one — it is computed for the viewer, and the Actions token cannot see
-	// a private org membership, so most members show as CONTRIBUTOR.
+	// author_association is viewer-dependent (private members read as
+	// CONTRIBUTOR from Actions), so permission is checked first.
 	let trust;
 	if ( WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
 		trust = `has ${ input.authorPermission } permission`;
@@ -188,8 +173,7 @@ function decide( input ) {
 }
 
 /**
- * Races a promise against the API budget so a slow GitHub cannot stall the
- * job; the caller treats a timeout like any other failure and runs the tests.
+ * Rejects after API_TIMEOUT_MS so a slow API cannot stall the job.
  *
  * @param {Promise} promise
  * @param {string}  what
@@ -204,7 +188,7 @@ function within( promise, what ) {
 }
 
 /**
- * Fetches a file's raw bytes at a ref, or null when it does not exist there.
+ * The config file's raw bytes at a ref, or null when absent.
  *
  * @param {Object} github
  * @param {Object} repo   `{ owner, repo }`
@@ -227,8 +211,7 @@ async function rawFile( github, repo, ref ) {
 }
 
 /**
- * The author's permission on the repository, or null when the token cannot
- * ask (the decision then falls back to author_association).
+ * The author's repository permission, or null when unavailable.
  *
  * @param {Object} github
  * @param {Object} repo   `{ owner, repo }`
@@ -246,14 +229,12 @@ async function authorPermission( github, repo, username ) {
 		);
 		return ( res.data && res.data.permission ) || null;
 	} catch ( e ) {
-		// A token that may not ask (403) is the same as not knowing.
 		return null;
 	}
 }
 
 /**
- * Gathers the inputs, decides, and writes the outputs. Never throws: any
- * failure becomes `substituted=false` with the error as the reason.
+ * Gathers the inputs, decides, writes the outputs. Never throws.
  *
  * @param {Object} args
  * @param {Object} args.github
@@ -274,11 +255,7 @@ async function lookup( { github, context, core } ) {
 			headConfigRaw: null,
 			checkRuns: [],
 		};
-		// Fetch only as much as the decision needs: with the kill switch set,
-		// on a non-PR event, or while the feature is off on the base branch,
-		// every test job would otherwise spend three API calls to learn
-		// nothing. decide() refuses on those grounds before it reads what
-		// was not fetched.
+		// No API calls when the switch is set, off a PR, or not enabled.
 		const wanted = ! killSwitchSet( input.disabled ) && input.eventName === 'pull_request' && pr;
 		if ( wanted ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
@@ -296,9 +273,7 @@ async function lookup( { github, context, core } ) {
 			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
 			input.authorPermission = await authorPermission( github, repo, pr.user && pr.user.login );
 			core.info( `author permission lookup: ${ input.authorPermission || 'unavailable to this token' }; association ${ pr.author_association }` );
-			// One call, for the one name this job cares about: the API filters
-			// by name and app, and `all` keeps every attempt so the newest can
-			// be chosen here rather than trusting the API's idea of latest.
+			// `all`: every attempt, so the newest is chosen here.
 			const listed = await within(
 				github.rest.checks.listForRef( {
 					...repo,
