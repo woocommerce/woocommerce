@@ -2,8 +2,6 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * FeaturedItem class.
  */
@@ -431,9 +429,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
-
-		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
-		$style             .= $global_style_style;
 
 		return $style;
 	}
