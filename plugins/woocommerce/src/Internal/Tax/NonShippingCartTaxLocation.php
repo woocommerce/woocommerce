@@ -14,18 +14,11 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 class NonShippingCartTaxLocation {
 
 	/**
-	 * Stack of dispatch IDs for Store API cart and checkout requests.
+	 * Tracks whether the cart is being priced, as opposed to catalog prices.
 	 *
-	 * @var int[]
+	 * @var CartPricingContext
 	 */
-	private $dispatch_stack = array();
-
-	/**
-	 * Map of dispatch IDs to their cart/checkout context and the cart context depth when the dispatch started.
-	 *
-	 * @var array<int, array{is_cart_or_checkout: bool, cart_context_depth: int}>
-	 */
-	private $dispatch_contexts = array();
+	private $cart_pricing_context;
 
 	/**
 	 * Whether the cart shipping check is running, so re-entrant calls from needs_shipping filter callbacks are skipped.
@@ -35,183 +28,16 @@ class NonShippingCartTaxLocation {
 	private $is_checking_shipping = false;
 
 	/**
-	 * Nesting depth of cart totals calculations and mini-cart renders, which count as cart context on any page.
-	 *
-	 * @var int
-	 */
-	private $cart_context_depth = 0;
-
-	/**
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
 	 * @internal
+	 *
+	 * @param CartPricingContext $cart_pricing_context Tracks whether the cart is being priced.
 	 */
-	final public function init(): void {
-		$this->dispatch_stack     = array();
-		$this->dispatch_contexts  = array();
-		$this->cart_context_depth = 0;
+	final public function init( CartPricingContext $cart_pricing_context ): void {
+		$this->cart_pricing_context = $cart_pricing_context;
 		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
-		// Register the cart/checkout context only after a route matches, and clear it right
-		// after the callback.
-		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
-		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
-		// Blocks hydration calls cart and checkout route callbacks directly, without the REST dispatch
-		// lifecycle, so the context is registered from its own before/after filters instead.
-		add_filter( 'woocommerce_hydration_dispatch_request', array( $this, 'handle_hydration_dispatch_request' ), 10, 3 );
-		add_filter( 'woocommerce_hydration_request_after_callbacks', array( $this, 'handle_hydration_request_after_callbacks' ), 10, 3 );
-		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
-		// so both can happen outside the cart and checkout pages.
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_cart_context_start' ), PHP_INT_MIN, 0 );
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_cart_context_end' ), PHP_INT_MAX, 0 );
-		add_action( 'woocommerce_before_mini_cart', array( $this, 'handle_cart_context_start' ), PHP_INT_MIN, 0 );
-		add_action( 'woocommerce_after_mini_cart', array( $this, 'handle_cart_context_end' ), PHP_INT_MAX, 0 );
-	}
-
-	/**
-	 * Start a cart context for a cart totals calculation or a mini-cart render.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 */
-	public function handle_cart_context_start(): void {
-		++$this->cart_context_depth;
-	}
-
-	/**
-	 * End a cart context started by handle_cart_context_start().
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 */
-	public function handle_cart_context_end(): void {
-		$this->cart_context_depth = max( 0, $this->cart_context_depth - 1 );
-	}
-
-	/**
-	 * Register Store API cart and checkout context after a route matches, before its callback runs.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param mixed            $response Result to send to the client.
-	 * @param mixed            $handler  Route handler for the request.
-	 * @param \WP_REST_Request $request  Request used to generate the response.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return mixed The response.
-	 */
-	public function handle_rest_request_before_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->register_dispatch_context( $request, $request->get_route() );
-
-		return $response;
-	}
-
-	/**
-	 * Register Store API cart and checkout context for a route hydrated by Blocks hydration.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param mixed $hydration_result Result of the hydration. If not null, it is used as the response.
-	 * @param mixed $request          Request used to generate the response.
-	 * @param mixed $path             Request path matched for the request.
-	 * @return mixed The hydration result.
-	 */
-	public function handle_hydration_dispatch_request( $hydration_result, $request, $path ) {
-		if ( ! $request instanceof \WP_REST_Request ) {
-			return $hydration_result;
-		}
-
-		$this->register_dispatch_context( $request, is_string( $path ) ? (string) strtok( $path, '?' ) : $request->get_route() );
-
-		return $hydration_result;
-	}
-
-	/**
-	 * Clear the hydration context after the hydrated route callback runs.
-	 *
-	 * Paired with the woocommerce_hydration_dispatch_request filter inside Hydration::get_response_from_controller().
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param mixed $response Result to send to the client.
-	 * @param mixed $handler  Route handler used for the request.
-	 * @param mixed $request  Request used to generate the response.
-	 * @return mixed The response.
-	 */
-	public function handle_hydration_request_after_callbacks( $response, $handler, $request ) {
-		if ( $request instanceof \WP_REST_Request ) {
-			$this->clear_dispatch_context( $request );
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Clear the Store API request context after the route callback runs.
-	 *
-	 * Paired with rest_request_before_callbacks inside WP_REST_Server::respond_to_request(),
-	 * so the stack stays balanced for both external and internal (rest_do_request) dispatches.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param mixed            $response Result to send to the client.
-	 * @param mixed            $handler  Route handler for the request.
-	 * @param \WP_REST_Request $request  Request used to generate the response.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return mixed The response.
-	 */
-	public function handle_rest_request_after_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->clear_dispatch_context( $request );
-
-		return $response;
-	}
-
-	/**
-	 * Register a Store API dispatch context on the stack.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param \WP_REST_Request $request    Request used to generate the response.
-	 * @param string           $route_path Route path the request was matched to.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 */
-	private function register_dispatch_context( \WP_REST_Request $request, string $route_path ): void {
-		$dispatch_id         = spl_object_id( $request );
-		$is_cart_or_checkout = 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $route_path );
-
-		$this->dispatch_contexts[ $dispatch_id ] = array(
-			'is_cart_or_checkout' => $is_cart_or_checkout,
-			'cart_context_depth'  => $this->cart_context_depth,
-		);
-		$this->dispatch_stack[]                  = $dispatch_id;
-	}
-
-	/**
-	 * Remove a dispatch's cart/checkout context from the stack.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param \WP_REST_Request $request Request whose context should be cleared.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 */
-	private function clear_dispatch_context( \WP_REST_Request $request ): void {
-		$dispatch_id = spl_object_id( $request );
-
-		// Remove the context for this specific dispatch.
-		if ( isset( $this->dispatch_contexts[ $dispatch_id ] ) ) {
-			unset( $this->dispatch_contexts[ $dispatch_id ] );
-		}
-
-		// Remove the dispatch ID from the stack, preserving the order of outer contexts.
-		$stack_key = array_search( $dispatch_id, $this->dispatch_stack, true );
-		if ( false !== $stack_key ) {
-			array_splice( $this->dispatch_stack, (int) $stack_key, 1 );
-		}
 	}
 
 	/**
@@ -237,11 +63,11 @@ class NonShippingCartTaxLocation {
 			return $taxable_address;
 		}
 
-		if ( ! $this->is_cart_context() ) {
+		if ( ! $this->cart_pricing_context->is_active() ) {
 			return $taxable_address;
 		}
 
-		if ( $this->is_tax_based_on_local_pickup() ) {
+		if ( $this->is_address_resolved_for_local_pickup() ) {
 			return $taxable_address;
 		}
 
@@ -275,21 +101,16 @@ class NonShippingCartTaxLocation {
 	}
 
 	/**
-	 * Determine whether the taxable address is being resolved for the cart rather than for catalog prices.
+	 * Determine whether the incoming address is already the store or pickup address chosen for local pickup.
+	 *
+	 * The tax option still reads "shipping" in that case, so without this check the billing address would replace it.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @return bool True for cart totals, mini-cart renders, the cart and checkout pages, and Store API cart and checkout requests.
+	 * @return bool True when local pickup has replaced the customer's address for tax.
 	 */
-	private function is_cart_context(): bool {
-		$dispatch_context = empty( $this->dispatch_stack ) ? null : ( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] ?? null );
-
-		if ( null !== $dispatch_context ) {
-			// A cart context started inside this dispatch applies; one inherited from outside it is overridden by the route.
-			return $this->cart_context_depth > $dispatch_context['cart_context_depth'] || $dispatch_context['is_cart_or_checkout'];
-		}
-
-		return $this->cart_context_depth > 0 || is_cart() || is_checkout();
+	private function is_address_resolved_for_local_pickup(): bool {
+		return LocalPickupTaxRule::applies_to_shipping_methods( wc_get_chosen_shipping_method_ids() );
 	}
 
 	/**
@@ -318,40 +139,5 @@ class NonShippingCartTaxLocation {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Determine whether local pickup requires taxes to use the store base address.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return bool True when local pickup taxes are based on the store address.
-	 */
-	private function is_tax_based_on_local_pickup(): bool {
-		/**
-		 * Filters local pickup shipping methods.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
-		 */
-		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
-		if ( ! is_array( $local_pickup_methods ) ) {
-			return false;
-		}
-
-		$local_pickup_methods = array_filter( $local_pickup_methods, 'is_string' );
-
-		/**
-		 * Filters whether tax is based on the store address for local pickup.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param bool $apply_base_tax Whether to apply store-address tax for local pickup.
-		 */
-		$apply_base_tax = true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
-
-		return $apply_base_tax &&
-			count( array_intersect( wc_get_chosen_shipping_method_ids(), $local_pickup_methods ) ) > 0;
 	}
 }
