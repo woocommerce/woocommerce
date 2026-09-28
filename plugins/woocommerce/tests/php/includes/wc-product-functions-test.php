@@ -952,6 +952,124 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stock lookup regeneration preserves legacy values and affected rows when driven from managed stock.
+	 */
+	public function test_stock_lookup_regeneration_preserves_legacy_results_with_changed_and_duplicate_meta(): void {
+		global $wpdb, $wp_filter;
+
+		$fixtures = array();
+		foreach ( array( 'positive', 'missing', 'unmanaged', 'duplicate_stock', 'duplicate_stock_reverse', 'duplicate_manage', 'malformed' ) as $case ) {
+			$fixtures[ $case ] = WC_Helper_Product::create_simple_product()->get_id();
+		}
+		$variable              = WC_Helper_Product::create_variation_product();
+		$fixtures['variation'] = $variable->get_children()[0];
+
+		foreach ( $fixtures as $case => $product_id ) {
+			delete_post_meta( $product_id, '_manage_stock' );
+			delete_post_meta( $product_id, '_stock' );
+			$manage_stock_values = 'duplicate_manage' === $case ? array( 'yes', 'no', 'yes' ) : array( 'unmanaged' === $case ? 'no' : 'yes' );
+			foreach ( $manage_stock_values as $value ) {
+				add_post_meta( $product_id, '_manage_stock', $value );
+			}
+			foreach ( array(
+				'positive'                => array( '7.5' ),
+				'missing'                 => array(),
+				'unmanaged'               => array( '4' ),
+				'duplicate_stock'         => array( '2', '9' ),
+				'duplicate_stock_reverse' => array( '9', '2' ),
+				'duplicate_manage'        => array( '-3' ),
+				'malformed'               => array( 'not-a-number' ),
+				'variation'               => array( '0.25' ),
+			)[ $case ] as $value ) {
+				add_post_meta( $product_id, '_stock', $value );
+			}
+			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
+		}
+
+		$this->assertSame( array_fill_keys( array_keys( $fixtures ), 99.0 ), $this->read_stock_lookup_values( $fixtures ), 'Every fixture must begin with stale lookup stock.' );
+		$this->assertSame( wpdb::class, get_class( $wpdb ), 'The clean-core control needs the core database class.' );
+		$this->assertInstanceOf( WP_Hook::class, $wp_filter['query'] ?? null, 'The query hook must use the core dispatcher.' );
+		$create_table_callback = array( $this, '_create_temporary_tables' );
+		$drop_table_callback   = array( $this, '_drop_temporary_tables' );
+		$this->assertSame( 10, has_filter( 'query', $create_table_callback ) );
+		$this->assertSame( 10, has_filter( 'query', $drop_table_callback ) );
+		$query_callbacks_before = $wp_filter['query']->callbacks;
+		$observed_queries       = 0;
+		$identity_observer      = static function ( $query ) use ( &$observed_queries ) {
+			++$observed_queries;
+			return $query;
+		};
+
+		try {
+			remove_filter( 'query', $create_table_callback, 10 );
+			remove_filter( 'query', $drop_table_callback, 10 );
+			$this->assertFalse( has_filter( 'query', $create_table_callback ), 'The known PHPUnit CREATE TABLE observer must be removed for this UPDATE.' );
+			$this->assertFalse( has_filter( 'query', $drop_table_callback ), 'The known PHPUnit DROP TABLE observer must be removed for this UPDATE.' );
+			foreach ( array( 'all', 'log_query_custom_data' ) as $hook_name ) {
+				$this->assertFalse( has_filter( $hook_name ), "Unexpected {$hook_name} observer would disable the fast path." );
+			}
+			$query_callbacks = $wp_filter['query']->callbacks;
+			$this->assertCount( 1, $query_callbacks, 'Unexpected query callback priority would disable the fast path.' );
+			$this->assertArrayHasKey( 0, $query_callbacks, 'Only the core placeholder callback may remain.' );
+			$this->assertCount( 1, $query_callbacks[0], 'Only the core placeholder callback may remain.' );
+			$core_callback = reset( $query_callbacks[0] );
+			$this->assertSame( array( $wpdb, 'remove_placeholder_escape' ), $core_callback['function'] );
+			$this->assertSame( 1, $core_callback['accepted_args'] );
+
+			add_filter( 'query', $identity_observer, 10, 1 );
+			wc_update_product_lookup_tables_column( 'stock_quantity' );
+			$legacy_sql           = $wpdb->last_query;
+			$legacy_rows_affected = $wpdb->rows_affected;
+			remove_filter( 'query', $identity_observer, 10 );
+			$this->assertSame( 1, $observed_queries, 'The legacy path should execute one UPDATE.' );
+			$this->assertStringNotContainsString( 'STRAIGHT_JOIN', $legacy_sql, 'A query observer must select the original stock UPDATE.' );
+			$legacy_values = $this->read_stock_lookup_values( $fixtures );
+
+			foreach ( $fixtures as $case => $product_id ) {
+				$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to reset lookup row for {$case}." );
+			}
+			wc_update_product_lookup_tables_column( 'stock_quantity' );
+			$fast_sql           = $wpdb->last_query;
+			$fast_rows_affected = $wpdb->rows_affected;
+			$fast_values        = $this->read_stock_lookup_values( $fixtures );
+
+			$this->assertSame( $legacy_values, $fast_values, 'Changed and duplicate metadata must produce the same lookup stock values.' );
+			$this->assertSame( $legacy_rows_affected, $fast_rows_affected, 'Changed and duplicate metadata must affect the same number of lookup rows.' );
+			$this->assertSame( 7.5, $fast_values['positive'] );
+			$this->assertNull( $fast_values['missing'] );
+			$this->assertSame( 99.0, $fast_values['unmanaged'] );
+			$this->assertContains( $fast_values['duplicate_stock'], array( 2.0, 9.0 ) );
+			$this->assertContains( $fast_values['duplicate_stock_reverse'], array( 2.0, 9.0 ) );
+			$this->assertSame( -3.0, $fast_values['duplicate_manage'] );
+			$this->assertSame( 0.25, $fast_values['variation'] );
+			$this->assertStringContainsString( 'STRAIGHT_JOIN', $fast_sql, 'The clean-core path must use the managed-stock-first UPDATE.' );
+		} finally {
+			remove_filter( 'query', $identity_observer, 10 );
+			add_filter( 'query', $create_table_callback, 10, 1 );
+			add_filter( 'query', $drop_table_callback, 10, 1 );
+			$this->assertSame( $query_callbacks_before, $wp_filter['query']->callbacks, 'The query hook must be restored after stock regeneration.' );
+		}
+	}
+
+	/**
+	 * Read stock lookup values for a named product fixture.
+	 *
+	 * @param array<string, int> $fixtures Named product IDs.
+	 * @return array<string, float|null>
+	 */
+	private function read_stock_lookup_values( array $fixtures ): array {
+		global $wpdb;
+
+		$values = array();
+		foreach ( $fixtures as $case => $product_id ) {
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ), ARRAY_A );
+			$this->assertIsArray( $row, "Missing lookup row for {$case}." );
+			$values[ $case ] = null === $row['stock_quantity'] ? null : (float) $row['stock_quantity'];
+		}
+		return $values;
+	}
+
+	/**
 	 * @testdox Queued rating count batches do not run when reviews are disabled.
 	 * @testWith ["yes", 3, true]
 	 *           ["no", 1, false]
