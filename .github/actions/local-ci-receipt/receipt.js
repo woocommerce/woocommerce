@@ -12,8 +12,8 @@
  * is `.github/local-ci.json`, read from the base branch so a pull request
  * cannot repoint it.
  *
- * `decide()` is pure and is what test.js exercises; `lookup()` gathers its
- * inputs with Octokit and writes the outputs.
+ * `decide()` is pure; `lookup()` gathers its inputs with Octokit and writes
+ * the outputs. Tested live: see AGENTS.md next to this file.
  */
 
 const crypto = require( 'crypto' );
