@@ -350,9 +350,7 @@ class WC_Install {
 		'11.1.0-1' => array(
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
-		'11.2.0-1' => array(
-			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
-			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_delete_surface_cart_checkout_note',
@@ -362,6 +360,17 @@ class WC_Install {
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
 		),
+<<<<<<< HEAD
+=======
+		'11.2.0-1' => array(
+			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
+		'11.3.0'   => array(
+			'wc_update_1130_set_legacy_variation_price_hash_option',
+			'wc_update_1130_delete_unpublished_variation_lookup_rows',
+		),
+>>>>>>> cf5f05c987 (Charge shipping in the classic checkout when a hidden address field is required (#69139))
 	);
 
 	/**
