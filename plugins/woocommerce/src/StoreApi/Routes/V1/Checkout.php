@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 
 /**
  * Checkout class.
@@ -187,10 +188,9 @@ class Checkout extends AbstractCartRoute {
 			// that never left checkout-draft included.
 			// Re-read the order first, since a gateway that advanced it may have done so on its own
 			// instance, leaving the one held here reporting a stale status.
-			$order = $this->order ? wc_get_order( $this->order->get_id() ) : null;
-			$order = $order instanceof \WC_Order ? $order : $this->order;
+			$order = $this->order instanceof \WC_Order ? PaymentRecovery::refresh_order( $this->order ) : null;
 
-			if ( $order && ! $this->order_moved_past_payment( $order ) ) {
+			if ( $order && ! PaymentRecovery::order_moved_past_payment( $order ) ) {
 				wc_release_stock_for_order( $order );
 				wc_release_coupons_for_order( $order );
 			}
