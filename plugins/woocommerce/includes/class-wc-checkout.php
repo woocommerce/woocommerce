@@ -35,6 +35,13 @@ class WC_Checkout {
 	);
 
 	/**
+	 * Error code create_order() returns when the submit repeats one for an order that moved past payment.
+	 *
+	 * @var string
+	 */
+	private const ORDER_ALREADY_PLACED_ERROR = 'checkout-order-already-placed';
+
+	/**
 	 * The single instance of the class.
 	 *
 	 * @var WC_Checkout|null
@@ -419,7 +426,7 @@ class WC_Checkout {
 			// emptied, so this submit is a repeat: a new order would charge the shopper twice.
 			if ( $order instanceof WC_Order && $order->has_cart_hash( $cart_hash ) && $this->order_moved_past_payment( $order ) ) {
 				return new WP_Error(
-					'checkout-order-already-placed',
+					self::ORDER_ALREADY_PLACED_ERROR,
 					__( 'This order has already been placed.', 'woocommerce' ),
 					array(
 						'order_id' => $order_id,
@@ -1564,7 +1571,7 @@ class WC_Checkout {
 				$order_id = $this->create_order( $posted_data );
 				$order    = wc_get_order( $order_id );
 
-				if ( is_wp_error( $order_id ) && 'checkout-order-already-placed' === $order_id->get_error_code() ) {
+				if ( is_wp_error( $order_id ) && self::ORDER_ALREADY_PLACED_ERROR === $order_id->get_error_code() ) {
 					$session_order = wc_get_order( $order_id->get_error_data()['order_id'] ?? 0 );
 
 					if ( $session_order instanceof WC_Order ) {
