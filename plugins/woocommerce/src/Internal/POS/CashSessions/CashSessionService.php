@@ -376,6 +376,14 @@ class CashSessionService {
 				return $this->resolve_movement_conflict( $session_id, $request_id, $hash, null );
 			}
 
+			// A retry that raced its original sees the original only once it holds the lock. Replay it before
+			// the totals checks, which would otherwise count the original and reject the retry.
+			$existing = $this->data_store->find_movement_by_request( $session_id, $request_id );
+			if ( null !== $existing ) {
+				$this->rollback();
+				return $this->replay_movement( $existing, $hash );
+			}
+
 			$sums   = $this->data_store->get_movement_sums( array( $session_id ) )[ $session_id ] ?? array();
 			$totals = $this->check_total_limit( $sums, $type, (int) $row['amount'] );
 			// Open decision: a paid out cannot take more cash than the drawer is expected to hold, so a typo

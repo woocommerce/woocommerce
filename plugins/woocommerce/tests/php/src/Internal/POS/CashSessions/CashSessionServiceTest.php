@@ -417,6 +417,48 @@ class CashSessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should replay a paid out retry that raced its original instead of rejecting it for insufficient cash.
+	 */
+	public function test_paid_out_retry_racing_original_replays_before_cash_check(): void {
+		$params = array(
+			'request_id' => self::REQUEST_ID,
+			'type'       => 'paid_out',
+			'amount'     => '8.00',
+			'reason'     => 'Supplier',
+		);
+		// A 10.00 float, so the hash helper's own paid out of 8.00 passes the cash check.
+		$this->data_store->method( 'get_movement_sums' )->willReturn( array( self::SESSION_ID => array( 'opening_float' => 1000 ) ) );
+		$stored = $this->movement_row(
+			array(
+				'type'         => 'paid_out',
+				'amount'       => 800,
+				'reason'       => 'Supplier',
+				'request_hash' => $this->movement_hash( $params ),
+			)
+		);
+		// The retry misses the first lookup, then finds the original once it holds the session lock. The totals
+		// already include the original 8.00, leaving 2.00, so a cash check before the replay would reject it.
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'bump_revision' )->willReturn( true );
+		$this->data_store->method( 'get_movement_sums' )->willReturn(
+			array(
+				self::SESSION_ID => array(
+					'opening_float' => 1000,
+					'paid_out'      => 800,
+				),
+			)
+		);
+		$this->data_store->method( 'find_movement_by_request' )->willReturnOnConsecutiveCalls( null, $stored );
+		$this->data_store->expects( $this->never() )->method( 'insert_movement' );
+
+		$result = $this->sut->record_movement( self::SESSION_ID, $params );
+
+		$this->assertFalse( $result['created'] );
+		$this->assertSame( 40, $result['movement']['id'] );
+		$this->assert_rolled_back();
+	}
+
+	/**
 	 * @testdox Should replay a drawer event retry that finds the session closed after its original was stored.
 	 */
 	public function test_drawer_event_retry_racing_original_replays(): void {
