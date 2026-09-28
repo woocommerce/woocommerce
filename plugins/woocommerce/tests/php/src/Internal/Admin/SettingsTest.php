@@ -290,6 +290,49 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The preloaded component settings expose the filtered defaults so "Reset defaults" can restore them.
+	 */
+	public function test_component_settings_expose_filtered_defaults(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		// The settings are only injected in admin; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+
+		$settings = $this->sut->add_component_settings( array() );
+
+		$this->assertArrayHasKey( 'wcAdminSettingsDefaults', $settings, 'Defaults should be preloaded alongside wcAdminSettings.' );
+		$this->assertContains( 'refunded', $settings['wcAdminSettingsDefaults']['woocommerce_actionable_order_statuses'], 'The filtered default should reach the client.' );
+		$this->assertSame(
+			array( 'pending', 'cancelled', 'failed' ),
+			$settings['wcAdminSettingsDefaults']['woocommerce_excluded_report_order_statuses'],
+			'An unfiltered setting should keep its built-in default.'
+		);
+	}
+
+	/**
+	 * @testdox The preloaded component settings expose coupon discount types, including ones added by extensions.
+	 */
+	public function test_component_settings_expose_coupon_types(): void {
+		$add_type = function ( $types ) {
+			$types['custom_discount'] = 'Custom discount';
+			return $types;
+		};
+		add_filter( 'woocommerce_coupon_discount_types', $add_type );
+		$this->added_filters[] = array( 'woocommerce_coupon_discount_types', $add_type );
+		// Coupon types are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$settings = $this->sut->add_component_settings( array() );
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
+		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
 	 * Get the resolved wc_admin group settings via the REST settings controller.
 	 *
 	 * @return array
