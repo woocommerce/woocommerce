@@ -105,9 +105,8 @@ class CashSessionService {
 		}
 		$opening_amount = $this->parse_amount( (string) $params['opening_amount'], $precision );
 
-		$open = $this->data_store->find_open_session_by_device( $device_id );
-		if ( null !== $open ) {
-			throw $this->already_open( (int) $open['id'] );
+		if ( null !== $this->data_store->find_open_session_by_device( $device_id ) ) {
+			return $this->resolve_open_conflict( $request_id, $hash, $device_id );
 		}
 
 		$actor = $this->get_actor();
@@ -342,11 +341,8 @@ class CashSessionService {
 		}
 
 		$row = $this->build_movement_row( $session, $type, $params, $reason );
-		if ( null !== $row['source_key'] ) {
-			$recorded = $this->data_store->find_movement_by_source( $row['source_key'] );
-			if ( null !== $recorded ) {
-				throw $this->source_already_recorded( $recorded );
-			}
+		if ( null !== $row['source_key'] && null !== $this->data_store->find_movement_by_source( $row['source_key'] ) ) {
+			return $this->resolve_movement_conflict( $session_id, $request_id, $hash, $row['source_key'] );
 		}
 		$row['session_id']   = $session_id;
 		$row['request_id']   = $request_id;
@@ -441,13 +437,7 @@ class CashSessionService {
 
 		$existing = $this->data_store->find_drawer_event_by_request( $session_id, $request_id );
 		if ( null !== $existing ) {
-			if ( ! hash_equals( (string) $existing['request_hash'], $hash ) ) {
-				throw CashSessionException::request_conflict();
-			}
-			return array(
-				'created' => false,
-				'event'   => $existing,
-			);
+			return $this->replay_drawer_event( $existing, $hash );
 		}
 		if ( CashSessionStatus::OPEN !== $session['status'] ) {
 			throw CashSessionException::session_closed( $session_id );
@@ -485,6 +475,12 @@ class CashSessionService {
 		try {
 			$locked = $this->data_store->lock_session( $session_id );
 			if ( null === $locked || CashSessionStatus::OPEN !== $locked['status'] ) {
+				// The original of this retry may have been stored just before the close.
+				$this->rollback();
+				$winner = $this->data_store->find_drawer_event_by_request( $session_id, $request_id );
+				if ( null !== $winner ) {
+					return $this->replay_drawer_event( $winner, $hash );
+				}
 				throw CashSessionException::session_closed( $session_id );
 			}
 			$event_id = $this->data_store->insert_drawer_event( $row );
@@ -494,13 +490,7 @@ class CashSessionService {
 				if ( null === $winner ) {
 					throw CashSessionException::request_in_progress();
 				}
-				if ( ! hash_equals( (string) $winner['request_hash'], $hash ) ) {
-					throw CashSessionException::request_conflict();
-				}
-				return array(
-					'created' => false,
-					'event'   => $winner,
-				);
+				return $this->replay_drawer_event( $winner, $hash );
 			}
 			$this->commit();
 		} catch ( Throwable $e ) {
@@ -728,7 +718,9 @@ class CashSessionService {
 	}
 
 	/**
-	 * Decide why an open insert failed: a concurrent retry, an open session on the device, or a race in progress.
+	 * Decide why an open cannot go ahead: a concurrent retry, an open session on the device, or a race in progress.
+	 *
+	 * The request ID is looked up again first, so a retry racing its own original gets a replay, not a conflict.
 	 *
 	 * @param string $request_id Request ID.
 	 * @param string $hash       Payload hash.
@@ -783,7 +775,7 @@ class CashSessionService {
 	}
 
 	/**
-	 * Decide why a movement write failed after the pre-checks passed.
+	 * Decide why a movement cannot be written: a concurrent retry, a recorded source, a close, or a race in progress.
 	 *
 	 * @param int         $session_id Session ID.
 	 * @param string      $request_id Request ID.
@@ -808,6 +800,24 @@ class CashSessionService {
 			throw CashSessionException::session_closed( $session_id );
 		}
 		throw CashSessionException::request_in_progress();
+	}
+
+	/**
+	 * Return a replayed drawer event, or reject a changed payload.
+	 *
+	 * @param array<string, mixed> $row  Drawer event row.
+	 * @param string               $hash Payload hash of the retry.
+	 * @return array{created: bool, event: array<string, mixed>}
+	 * @throws CashSessionException When the payload differs.
+	 */
+	private function replay_drawer_event( array $row, string $hash ): array {
+		if ( ! hash_equals( (string) $row['request_hash'], $hash ) ) {
+			throw CashSessionException::request_conflict();
+		}
+		return array(
+			'created' => false,
+			'event'   => $row,
+		);
 	}
 
 	/**

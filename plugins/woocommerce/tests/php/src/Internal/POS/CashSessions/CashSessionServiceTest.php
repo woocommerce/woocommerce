@@ -291,6 +291,71 @@ class CashSessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should replay an open retry that finds the device busy with the session its original just opened.
+	 */
+	public function test_open_retry_racing_original_replays(): void {
+		$hash = $this->open_hash();
+		$this->data_store->method( 'find_session_by_open_request' )->willReturnOnConsecutiveCalls( null, $this->session_row( array( 'open_request_hash' => $hash ) ) );
+		$this->data_store->method( 'find_open_session_by_device' )->willReturn( $this->session_row() );
+
+		$result = $this->sut->open_session( $this->open_params() );
+
+		$this->assertFalse( $result['created'] );
+		$this->assertSame( array(), $this->transaction->calls );
+	}
+
+	/**
+	 * @testdox Should replay a cash sale retry that finds the order already recorded by its original.
+	 */
+	public function test_movement_retry_racing_original_replays(): void {
+		$this->source_resolver->method( 'resolve_sale' )->willReturn(
+			array(
+				'amount'          => 1000,
+				'occurred_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				'source_key'      => 'order:5',
+			)
+		);
+		$params = array(
+			'request_id' => self::REQUEST_ID,
+			'type'       => 'cash_sale',
+			'order_id'   => 5,
+		);
+		$stored = $this->movement_row(
+			array(
+				'type'         => 'cash_sale',
+				'order_id'     => 5,
+				'source_key'   => 'order:5',
+				'request_hash' => $this->movement_hash( $params ),
+			)
+		);
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'find_movement_by_request' )->willReturnOnConsecutiveCalls( null, $stored );
+		$this->data_store->method( 'find_movement_by_source' )->willReturn( $stored );
+
+		$result = $this->sut->record_movement( self::SESSION_ID, $params );
+
+		$this->assertFalse( $result['created'] );
+		$this->assertSame( 40, $result['movement']['id'] );
+	}
+
+	/**
+	 * @testdox Should replay a drawer event retry that finds the session closed after its original was stored.
+	 */
+	public function test_drawer_event_retry_racing_original_replays(): void {
+		$params = $this->drawer_event_params();
+		$stored = $this->drawer_event_row( array( 'request_hash' => $this->drawer_event_hash( $params ) ) );
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'lock_session' )->willReturn( $this->session_row( array( 'status' => 'closed' ) ) );
+		$this->data_store->method( 'find_drawer_event_by_request' )->willReturnOnConsecutiveCalls( null, $stored );
+
+		$result = $this->sut->record_drawer_event( self::SESSION_ID, $params );
+
+		$this->assertFalse( $result['created'] );
+		$this->assertSame( 60, $result['event']['id'] );
+		$this->assert_rolled_back();
+	}
+
+	/**
 	 * Build a new SUT with a fresh data store stub and transaction double.
 	 */
 	private function reset_sut(): void {
@@ -319,6 +384,50 @@ class CashSessionServiceTest extends WC_Unit_Test_Case {
 			}
 		);
 		$this->sut->record_movement( self::SESSION_ID, $params );
+
+		$this->reset_sut();
+		return $hash;
+	}
+
+	/**
+	 * Payload hash the service stores for the open request, captured from a successful write.
+	 *
+	 * @return string
+	 */
+	private function open_hash(): string {
+		$hash = '';
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'insert_movement' )->willReturn( 1 );
+		$this->data_store->method( 'insert_session' )->willReturnCallback(
+			function ( array $row ) use ( &$hash ) {
+				$hash = $row['open_request_hash'];
+				return self::SESSION_ID;
+			}
+		);
+		$this->sut->open_session( $this->open_params() );
+
+		$this->reset_sut();
+		return $hash;
+	}
+
+	/**
+	 * Payload hash the service stores for a drawer event request, captured from a successful write.
+	 *
+	 * @param array<string, mixed> $params Drawer event request.
+	 * @return string
+	 */
+	private function drawer_event_hash( array $params ): string {
+		$hash = '';
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'lock_session' )->willReturn( $this->session_row() );
+		$this->data_store->method( 'get_drawer_event' )->willReturn( $this->drawer_event_row() );
+		$this->data_store->method( 'insert_drawer_event' )->willReturnCallback(
+			function ( array $row ) use ( &$hash ) {
+				$hash = $row['request_hash'];
+				return 60;
+			}
+		);
+		$this->sut->record_drawer_event( self::SESSION_ID, $params );
 
 		$this->reset_sut();
 		return $hash;
