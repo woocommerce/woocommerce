@@ -237,9 +237,7 @@ body {
 }
 
 .woocommerce form .form-row label:not(:has(input[type="checkbox"])) {
-	font-size: var(--wp--preset--font-size--medium);
-	line-height: 1.71;
-	margin-bottom: 5px;
+	margin-bottom: 0.3em;
 }
 
 .woocommerce-form-login .form-row:has(.woocommerce-form-login__submit) {
@@ -257,10 +255,6 @@ body {
 	float: none;
 	margin: 0;
 	order: -1;
-}
-
-.woocommerce-account h2:has(+ .woocommerce-form-login) {
-	margin-block: var(--wp--preset--spacing--30);
 }
 
 .woocommerce-LostPassword.lost_password {
