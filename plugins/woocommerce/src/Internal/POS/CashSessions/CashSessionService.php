@@ -175,18 +175,16 @@ class CashSessionService {
 	 *
 	 * @param int $session_id Session ID.
 	 * @return array<string, mixed>
-	 * @throws CashSessionException When the session does not exist.
+	 * @throws CashSessionException When the session does not exist or the user may not see it.
 	 */
 	public function get_session( int $session_id ): array {
-		$row = $this->data_store->get_session( $session_id );
-		if ( null === $row ) {
-			throw CashSessionException::session_not_found();
-		}
+		$row = $this->get_session_row( $session_id );
+		$this->check_session_access( $row );
 		return $this->with_totals( array( $row ) )[0];
 	}
 
 	/**
-	 * List sessions, newest first.
+	 * List sessions, newest first. Users without manage_woocommerce only see sessions they opened.
 	 *
 	 * @since 11.3.0
 	 *
@@ -198,6 +196,9 @@ class CashSessionService {
 	 */
 	public function list_sessions( array $filters, int $page, int $per_page ): array {
 		$query = array();
+		if ( ! $this->is_manager() ) {
+			$query['opened_by'] = get_current_user_id();
+		}
 		if ( isset( $filters['device_id'] ) ) {
 			$query['device_id'] = (string) $filters['device_id'];
 		}
@@ -402,11 +403,12 @@ class CashSessionService {
 	 * @param int $page       1-based page.
 	 * @param int $per_page   Page size.
 	 * @return array{items: array<int, array<string, mixed>>, total: int, precision: int}
-	 * @throws CashSessionException When the session does not exist.
+	 * @throws CashSessionException When the session does not exist or the user may not see it.
 	 */
 	public function list_movements( int $session_id, int $page, int $per_page ): array {
 		$session = $this->get_session_row( $session_id );
-		$result  = $this->data_store->query_movements( $session_id, $page, $per_page );
+		$this->check_session_access( $session );
+		$result = $this->data_store->query_movements( $session_id, $page, $per_page );
 
 		return array(
 			'items'     => $result['rows'],
@@ -535,10 +537,10 @@ class CashSessionService {
 	 * @param int $page       1-based page.
 	 * @param int $per_page   Page size.
 	 * @return array{items: array<int, array<string, mixed>>, total: int}
-	 * @throws CashSessionException When the session does not exist.
+	 * @throws CashSessionException When the session does not exist or the user may not see it.
 	 */
 	public function list_drawer_events( int $session_id, int $page, int $per_page ): array {
-		$this->get_session_row( $session_id );
+		$this->check_session_access( $this->get_session_row( $session_id ) );
 		$result = $this->data_store->query_drawer_events( $session_id, $page, $per_page );
 
 		return array(
@@ -859,16 +861,35 @@ class CashSessionService {
 	}
 
 	/**
-	 * Reject a user who may not change a session.
+	 * Whether the current user may see and change a session.
 	 *
-	 * Open decision: only the user who opened a session, or a user with manage_woocommerce, may close it or
-	 * add movements and drawer events. Revisit with the POS roles work (user story 15).
+	 * Open decision: only the user who opened a session, or a user with manage_woocommerce, may read it, close
+	 * it, or read and add its movements and drawer events. Revisit with the POS roles work (user stories 11, 13, 15).
+	 *
+	 * @param array<string, mixed> $session Session row.
+	 * @return bool
+	 */
+	private function can_access_session( array $session ): bool {
+		return get_current_user_id() === (int) $session['opened_by'] || $this->is_manager();
+	}
+
+	/**
+	 * Whether the current user can see and change every session.
+	 *
+	 * @return bool
+	 */
+	private function is_manager(): bool {
+		return current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
+	 * Reject a user who may not see or change a session.
 	 *
 	 * @param array<string, mixed> $session Session row.
 	 * @throws CashSessionException When the user is neither the opener nor a store manager.
 	 */
 	private function check_session_access( array $session ): void {
-		if ( get_current_user_id() === (int) $session['opened_by'] || current_user_can( 'manage_woocommerce' ) ) {
+		if ( $this->can_access_session( $session ) ) {
 			return;
 		}
 		throw new CashSessionException(
@@ -1082,20 +1103,25 @@ class CashSessionService {
 	}
 
 	/**
-	 * Build the duplicate source error.
+	 * Build the duplicate source error. Where it was recorded is only included for users who may see that session.
 	 *
 	 * @param array<string, mixed> $movement The movement that already records the source.
 	 * @return CashSessionException
 	 */
 	private function source_already_recorded( array $movement ): CashSessionException {
+		$session = $this->data_store->get_session( (int) $movement['session_id'] );
+		$data    = null !== $session && $this->can_access_session( $session )
+			? array(
+				'session_id'  => (int) $movement['session_id'],
+				'movement_id' => (int) $movement['id'],
+			)
+			: array();
+
 		return new CashSessionException(
 			'woocommerce_rest_cash_source_already_recorded',
 			__( 'This order or refund is already recorded in a cash session.', 'woocommerce' ),
 			409,
-			array(
-				'session_id'  => (int) $movement['session_id'],
-				'movement_id' => (int) $movement['id'],
-			)
+			$data
 		);
 	}
 

@@ -19,7 +19,8 @@ use WP_REST_Server;
  *
  * Every route needs an authenticated user with the POS "process sales" capability or manage_woocommerce.
  * Recording a cash refund additionally needs the POS "issue refunds" capability or manage_woocommerce.
- * Writes to an existing session also need to be its opener or have manage_woocommerce (checked by the service).
+ * Reading or writing an existing session also needs to be its opener or have manage_woocommerce, and lists
+ * only show such sessions (checked by the service).
  *
  * @since 11.3.0
  */

@@ -1169,7 +1169,7 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		get_user_by( 'id', $cashier )->add_cap( Capabilities::CAP_PROCESS_SALES );
 		wp_set_current_user( $cashier );
 
-		$this->assertSame( 200, $this->request( 'GET', self::BASE . "/$session_id" )->get_status() );
+		$this->assertSame( 200, $this->request( 'GET', self::BASE )->get_status() );
 		$opened = $this->open_session( array( 'device_id' => 'ipad-9' ) );
 		$this->assertSame( 201, $opened->get_status() );
 		$session_id = $opened->get_data()['id'];
@@ -1235,6 +1235,48 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->manager_id );
 		$this->assertSame( 201, $this->record_movement( $session_id, $paid_out )->get_status() );
 		$this->assertSame( 200, $this->close_session( $session_id, 2, '30.00' )->get_status() );
+	}
+
+	/**
+	 * @testdox Should show cashiers only the sessions they opened and let a store manager see all of them.
+	 */
+	public function test_cashiers_only_read_their_own_sessions(): void {
+		wp_set_current_user( $this->create_cashier() );
+		$own = $this->open_session( array( 'device_id' => 'ipad-1' ) )->get_data()['id'];
+
+		wp_set_current_user( $this->create_cashier() );
+		$other = $this->open_session( array( 'device_id' => 'ipad-2' ) )->get_data()['id'];
+
+		$this->assertSame( array( $other ), array_column( $this->request( 'GET', self::BASE )->get_data(), 'id' ) );
+		$this->assertSame( array(), $this->request( 'GET', self::BASE, array( 'device_id' => 'ipad-1' ) )->get_data() );
+		$this->assert_error( $this->request( 'GET', self::BASE . "/$own" ), 403, 'woocommerce_rest_cash_session_not_owner' );
+		$this->assert_error( $this->request( 'GET', self::BASE . "/$own/movements" ), 403, 'woocommerce_rest_cash_session_not_owner' );
+		$this->assert_error( $this->request( 'GET', self::BASE . "/$own/drawer-events" ), 403, 'woocommerce_rest_cash_session_not_owner' );
+
+		wp_set_current_user( $this->manager_id );
+		$this->assertSame( array( $other, $own ), array_column( $this->request( 'GET', self::BASE )->get_data(), 'id' ) );
+		$this->assertSame( 200, $this->request( 'GET', self::BASE . "/$own/movements" )->get_status() );
+	}
+
+	/**
+	 * @testdox Should not reveal another cashier's session when an order is already recorded there.
+	 */
+	public function test_source_conflict_hides_unreadable_session(): void {
+		$order = $this->create_cash_order( '12.00' );
+		wp_set_current_user( $this->create_cashier() );
+		$first = $this->open_session( array( 'device_id' => 'ipad-1' ) )->get_data()['id'];
+		$this->assertSame( 201, $this->record_sale( $first, $order->get_id() )->get_status() );
+
+		wp_set_current_user( $this->create_cashier() );
+		$second = $this->open_session( array( 'device_id' => 'ipad-2' ) )->get_data()['id'];
+		$again  = $this->record_sale( $second, $order->get_id() );
+
+		$this->assert_error( $again, 409, 'woocommerce_rest_cash_source_already_recorded' );
+		$this->assertArrayNotHasKey( 'session_id', $again->get_data()['data'] );
+		$this->assertArrayNotHasKey( 'movement_id', $again->get_data()['data'] );
+
+		wp_set_current_user( $this->manager_id );
+		$this->assertSame( $first, $this->record_sale( $second, $order->get_id() )->get_data()['data']['session_id'] );
 	}
 
 	/**

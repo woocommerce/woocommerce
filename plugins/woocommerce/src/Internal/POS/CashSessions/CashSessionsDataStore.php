@@ -115,7 +115,8 @@ CREATE TABLE $sessions (
 	UNIQUE KEY open_drawer_key (open_drawer_key),
 	KEY device_id (device_id),
 	KEY drawer_key (drawer_key),
-	KEY status (status)
+	KEY status (status),
+	KEY opened_by (opened_by)
 ) $collate;
 CREATE TABLE $movements (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -286,9 +287,9 @@ CREATE TABLE $drawer_events (
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array{device_id?: string, drawer_key?: string, status?: string} $filters Exact-match filters.
-	 * @param int                                                             $page     1-based page.
-	 * @param int                                                             $per_page Page size.
+	 * @param array{device_id?: string, drawer_key?: string, status?: string, opened_by?: int} $filters  Exact-match filters.
+	 * @param int                                                                              $page     1-based page.
+	 * @param int                                                                              $per_page Page size.
 	 * @return array{rows: array<int, array<string, mixed>>, total: int}
 	 */
 	public function query_sessions( array $filters, int $page, int $per_page ): array {
@@ -309,6 +310,10 @@ CREATE TABLE $drawer_events (
 		if ( isset( $filters['status'] ) ) {
 			$where[] = 'status = %s';
 			$args[]  = $filters['status'];
+		}
+		if ( isset( $filters['opened_by'] ) ) {
+			$where[] = 'opened_by = %d';
+			$args[]  = $filters['opened_by'];
 		}
 
 		return $this->paginate( $this->get_sessions_table(), implode( ' AND ', $where ), $args, 'id DESC', $page, $per_page );
