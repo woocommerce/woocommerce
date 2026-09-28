@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restrict Shop page template choices to the Product Catalog and enable template-locked rendering in the block editor.

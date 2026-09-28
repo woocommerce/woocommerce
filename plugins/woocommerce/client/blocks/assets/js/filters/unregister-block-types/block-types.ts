@@ -23,15 +23,6 @@ export const POST_EDITOR_BLOCK_TYPES_TO_UNREGISTER = [
 ];
 
 /**
- * Catalog blocks needed to render the Shop page template in the page editor.
- */
-export const SHOP_PAGE_TEMPLATE_BLOCK_TYPES = [
-	'woocommerce/breadcrumbs',
-	'woocommerce/catalog-sorting',
-	'woocommerce/product-results-count',
-];
-
-/**
  * WooCommerce block types allowed in Widget Areas. New blocks won't be
  * exposed in the Widget Area unless specifically added here.
  */

@@ -42,13 +42,13 @@ class ProductCatalogTemplate extends AbstractTemplate {
 		if (
 			'wp_template' === $template_type &&
 			is_array( $query ) &&
-			isset( $query['post_id'] ) &&
-			is_numeric( $query['post_id'] ) &&
-			(int) $query['post_id'] > 0 &&
-			wc_get_page_id( 'shop' ) === (int) $query['post_id'] &&
+			isset( $query['slug'] ) &&
+			is_string( $query['slug'] ) &&
+			'' !== $query['slug'] &&
+			get_post_field( 'post_name', wc_get_page_id( 'shop' ) ) === $query['slug'] &&
 			wp_is_block_theme()
 		) {
-			// Query without post_id to include catalog templates and preserve customized WooCommerce templates' precedence.
+			// Query without the page slug to preserve customized WooCommerce templates' precedence.
 			$catalog_templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ), 'wp_template' );
 			foreach ( $catalog_templates as $template ) {
 				if ( $template instanceof \WP_Block_Template && self::SLUG === $template->slug ) {
@@ -58,30 +58,6 @@ class ProductCatalogTemplate extends AbstractTemplate {
 		}
 
 		return $templates;
-	}
-
-	/**
-	 * Associate the current Shop page with the catalog without overwriting its saved page template.
-	 *
-	 * @internal
-	 *
-	 * @param mixed  $value Short-circuited metadata value, or null.
-	 * @param int    $post_id Post ID.
-	 * @param string $meta_key Metadata key.
-	 * @param bool   $single Whether to return a single value.
-	 * @return mixed
-	 */
-	public function handle_get_post_metadata( $value, $post_id, $meta_key, $single ) {
-		if (
-			null === $value &&
-			'_wp_page_template' === $meta_key &&
-			wp_is_block_theme() &&
-			wc_get_page_id( 'shop' ) === $post_id
-		) {
-			return $single ? self::SLUG : array( self::SLUG );
-		}
-
-		return $value;
 	}
 
 	/**
