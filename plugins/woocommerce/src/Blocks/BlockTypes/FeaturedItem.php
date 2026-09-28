@@ -333,7 +333,13 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		$output .= $this->render_attributes( $item, $attributes );
 
 		if ( ! empty( $content ) ) {
-			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
+			// Prevent adding default gap to existing blocks without custom spacing.
+			$output .= sprintf(
+				'<div class="wc-block-%1$s__inner-blocks"%2$s>%3$s</div>',
+				$this->block_name,
+				empty( $attributes['style']['spacing']['blockGap'] ) ? ' style="gap:0"' : '',
+				$content
+			);
 		}
 
 		$output .= '</div>';

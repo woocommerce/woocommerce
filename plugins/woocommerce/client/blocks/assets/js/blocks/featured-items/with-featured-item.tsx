@@ -140,7 +140,10 @@ function FeaturedItemInnerBlocks( {
 	attributes: FeaturedItemRequiredAttributes;
 } ) {
 	const innerProps = useInnerBlocksProps(
-		{ className },
+		{
+			className,
+			style: { gap: attributes.style?.spacing?.blockGap ? undefined : 0 },
+		},
 		{
 			template,
 			templateLock: false,
