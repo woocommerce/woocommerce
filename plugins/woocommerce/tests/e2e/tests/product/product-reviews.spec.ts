@@ -165,6 +165,61 @@ test.describe( 'Product Reviews', () => {
 			).toBeVisible();
 		} );
 
+<<<<<<< HEAD
+=======
+		test( 'can reply to a product review', async ( { page, reviews } ) => {
+			const review = reviews[ 0 ];
+
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product-reviews'
+			);
+
+			const dismissLinks = page.getByRole( 'link', {
+				name: 'Dismiss',
+				exact: true,
+			} );
+			await page.addLocatorHandler( dismissLinks.first(), async () => {
+				// Extensions can each add a notice, so dismiss all of them.
+				let remainingNotices = await dismissLinks.count();
+				while ( remainingNotices > 0 ) {
+					await dismissLinks.first().click();
+					await expect
+						.poll( () => dismissLinks.count() )
+						.toBeLessThan( remainingNotices );
+					remainingNotices = await dismissLinks.count();
+				}
+			} );
+
+			const reviewRow = page.locator( `#comment-${ review.id }` );
+			await reviewRow.hover();
+			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
+			const replyTextArea = page.locator( 'textarea#replycontent' );
+
+			await expect( replyTextArea ).toBeVisible();
+
+			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
+			await replyTextArea.fill( replyText );
+
+			await page
+				.getByRole( 'cell', { name: 'Reply to Comment' } )
+				.getByRole( 'button', { name: 'Reply', exact: true } )
+				.click();
+
+			await expect( replyTextArea ).toBeHidden();
+
+			const productLink = await reviewRow
+				.locator( 'a.comments-view-item-link' )
+				.getAttribute( 'href' );
+			await page.goto( productLink );
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
+
+			const replyReviews = page.locator(
+				`div.comment_container:has-text("${ replyText }")`
+			);
+			await expect( replyReviews ).toBeVisible();
+		} );
+
+>>>>>>> b2ed4556ce (Fix E2E selectors for extension editors and notices (#69113))
 		test( 'can edit a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ];
 
