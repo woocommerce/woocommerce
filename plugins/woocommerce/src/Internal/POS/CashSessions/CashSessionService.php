@@ -37,6 +37,11 @@ class CashSessionService {
 	public const CLOCK_SKEW_SECONDS = 300;
 
 	/**
+	 * How many times a session read is retried when its revision changes while totals are read.
+	 */
+	private const SNAPSHOT_ATTEMPTS = 3;
+
+	/**
 	 * Storage.
 	 *
 	 * @var CashSessionsDataStore
@@ -903,11 +908,35 @@ class CashSessionService {
 	/**
 	 * Attach totals to session rows, reading all movement sums in one query.
 	 *
+	 * Every movement write bumps the revision, so an open session whose revision is unchanged after the sums
+	 * were read has totals that match that revision. A changed session is read again, which keeps a close
+	 * based on the returned revision from failing with a conflict the cashier never saw.
+	 *
 	 * @param array<int, array<string, mixed>> $rows Session rows.
 	 * @return array<int, array<string, mixed>>
+	 * @throws CashSessionException When sessions keep changing while they are read.
 	 */
 	private function with_totals( array $rows ): array {
-		$sums = $this->data_store->get_movement_sums( array_column( $rows, 'id' ) );
+		for ( $attempt = 1; ; $attempt++ ) {
+			$sums  = $this->data_store->get_movement_sums( array_column( $rows, 'id' ) );
+			$open  = array_filter( $rows, fn( array $row ) => CashSessionStatus::OPEN === $row['status'] );
+			$now   = $this->data_store->get_session_revisions( array_column( $open, 'id' ) );
+			$stale = array_filter( $open, fn( array $row ) => ( $now[ (int) $row['id'] ] ?? (int) $row['revision'] ) !== (int) $row['revision'] );
+			if ( empty( $stale ) ) {
+				break;
+			}
+			if ( $attempt >= self::SNAPSHOT_ATTEMPTS ) {
+				throw new CashSessionException(
+					'woocommerce_rest_cash_session_busy',
+					__( 'The cash session changed while it was being read. Retry shortly.', 'woocommerce' ),
+					409,
+					array( 'retry_after_seconds' => 1 )
+				);
+			}
+			foreach ( array_keys( $stale ) as $index ) {
+				$rows[ $index ] = $this->data_store->get_session( (int) $rows[ $index ]['id'] ) ?? $rows[ $index ];
+			}
+		}
 
 		return array_map(
 			fn( array $row ) => array(

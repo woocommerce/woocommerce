@@ -465,6 +465,37 @@ CREATE TABLE $drawer_events (
 	}
 
 	/**
+	 * Read the current revision of sessions.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int[] $session_ids Session IDs.
+	 * @return array<int, int> Session ID => revision.
+	 * @throws RuntimeException When the query fails.
+	 */
+	public function get_session_revisions( array $session_ids ): array {
+		global $wpdb;
+
+		$session_ids = array_values( array_unique( array_map( 'absint', $session_ids ) ) );
+		if ( empty( $session_ids ) ) {
+			return array();
+		}
+
+		$table        = $this->get_sessions_table();
+		$placeholders = implode( ',', array_fill( 0, count( $session_ids ), '%d' ) );
+		$rows         = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is trusted, placeholders are generated.
+			$wpdb->prepare( "SELECT id, revision FROM $table WHERE id IN ($placeholders)", $session_ids ),
+			ARRAY_A
+		);
+		if ( ! is_array( $rows ) || '' !== $this->last_query_error() ) {
+			throw new RuntimeException( 'Could not read cash session revisions: ' . esc_html( $this->last_query_error() ) );
+		}
+
+		return array_map( 'intval', array_column( $rows, 'revision', 'id' ) );
+	}
+
+	/**
 	 * Read a drawer event.
 	 *
 	 * @since 11.3.0

@@ -356,6 +356,46 @@ class CashSessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should re-read a session whose revision changed while its totals were read, so both match.
+	 */
+	public function test_get_session_pairs_revision_with_totals(): void {
+		$this->data_store->method( 'get_session' )->willReturnOnConsecutiveCalls(
+			$this->session_row(),
+			$this->session_row( array( 'revision' => 2 ) )
+		);
+		$this->data_store->method( 'get_movement_sums' )->willReturn( array( self::SESSION_ID => array( 'paid_in' => 500 ) ) );
+		$this->data_store->method( 'get_session_revisions' )->willReturn( array( self::SESSION_ID => 2 ) );
+
+		$session = $this->sut->get_session( self::SESSION_ID );
+
+		$this->assertSame( 2, $session['row']['revision'], 'The revision should be the one the totals were read at' );
+		$this->assertSame( 500, $session['totals']['paid_in'] );
+	}
+
+	/**
+	 * @testdox Should ask for a retry when a session keeps changing while its totals are read.
+	 */
+	public function test_get_session_gives_up_when_revision_keeps_changing(): void {
+		$revision = 1;
+		$this->data_store->method( 'get_session' )->willReturnCallback(
+			function () use ( &$revision ) {
+				return $this->session_row( array( 'revision' => $revision ) );
+			}
+		);
+		$this->data_store->method( 'get_movement_sums' )->willReturn( array() );
+		$this->data_store->method( 'get_session_revisions' )->willReturnCallback(
+			function () use ( &$revision ) {
+				++$revision;
+				return array( self::SESSION_ID => $revision );
+			}
+		);
+
+		$error = $this->catch_error( fn() => $this->sut->get_session( self::SESSION_ID ) );
+
+		$this->assert_error( $error, 409, 'woocommerce_rest_cash_session_busy' );
+	}
+
+	/**
 	 * Build a new SUT with a fresh data store stub and transaction double.
 	 */
 	private function reset_sut(): void {
