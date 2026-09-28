@@ -129,7 +129,7 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 
 		$this->assertInstanceOf( Note::class, $note, 'Enabling order withdrawal should create an inbox notification.' );
 		$this->assertSame( 'The order withdrawal feature is enabled', $note->get_title(), 'The notification should have the expected title.' );
-		$this->assertSame( 'This gives customers a simple, self-serve way to request a withdrawal during the applicable period, generally 14 days from delivery for goods or from when a service contract is agreed.', $note->get_content(), 'The notification should explain the enabled feature.' );
+		$this->assertSame( 'Your order withdrawal page is ready. Share its URL wherever customers need access to the withdrawal form, such as your store\'s terms and conditions.', $note->get_content(), 'The notification should explain how to share the withdrawal page.' );
 
 		$actions = $note->get_actions();
 

@@ -176,7 +176,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 
 		$note->set_title( __( 'The order withdrawal feature is enabled', 'woocommerce' ) );
 		$note->set_content(
-			__( 'This gives customers a simple, self-serve way to request a withdrawal during the applicable period, generally 14 days from delivery for goods or from when a service contract is agreed.', 'woocommerce' )
+			__( 'Your order withdrawal page is ready. Share its URL wherever customers need access to the withdrawal form, such as your store\'s terms and conditions.', 'woocommerce' )
 		);
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
