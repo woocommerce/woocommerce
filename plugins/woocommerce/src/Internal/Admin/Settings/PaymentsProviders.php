@@ -215,6 +215,14 @@ class PaymentsProviders {
 	private array $payment_gateways_for_display_cache = array();
 
 	/**
+	 * The cached count of non-shell payment gateways registered by each extension, keyed by country code
+	 * and then by normalized plugin slug. Used to avoid recomputing the counts for every gateway in a request.
+	 *
+	 * @var array
+	 */
+	private array $gateways_count_by_extension_cache = array();
+
+	/**
 	 * The payment extension suggestions service.
 	 *
 	 * @var ExtensionSuggestions
@@ -1272,6 +1280,7 @@ class PaymentsProviders {
 	public function clear_cache(): void {
 		$this->payment_gateways_cache             = array();
 		$this->payment_gateways_for_display_cache = array();
+		$this->gateways_count_by_extension_cache  = array();
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
 		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
@@ -1373,9 +1382,11 @@ class PaymentsProviders {
 		if ( ! is_null( $suggestion ) ) {
 			// The title, description, icon, and image from the suggestion take precedence over the ones from the gateway.
 			// This is temporary until we update the partner extensions.
-			// Do not override the title and description for certain suggestions because theirs are more descriptive
-			// (like including the payment method when registering multiple gateways for the same provider).
-			if ( ! in_array(
+			// Do not override the title and description when the extension registers multiple gateways
+			// (one per payment method, typically) because each gateway's own title and description are more
+			// descriptive than the generic suggestion ones, and overriding them would make the gateways indistinguishable.
+			// Also do not override them for certain suggestions that we know to have less descriptive details.
+			if ( ! $this->extension_registers_multiple_gateways( $normalized_plugin_slug, $country_code ) && ! in_array(
 				$suggestion['id'],
 				array(
 					ExtensionSuggestions::PAYPAL_FULL_STACK,
@@ -1636,6 +1647,52 @@ class PaymentsProviders {
 		}
 
 		return Utils::order_map_normalize( $new_order_map );
+	}
+
+	/**
+	 * Determine if the extension identified by the given plugin slug registers more than one payment gateway.
+	 *
+	 * Only non-shell gateways are counted: gateways without a WC admin title and description are not shown
+	 * on the settings page, so they should not affect how the shown ones are presented.
+	 *
+	 * Note: This uses the raw payment gateways list (not the one for display) since preparing the display list
+	 * relies on the gateway details, which in turn rely on this check.
+	 *
+	 * @param string $normalized_plugin_slug The normalized plugin slug of the extension.
+	 * @param string $country_code           Optional. The country code for which the payment gateways are being generated.
+	 *                                       This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool True if the extension registers more than one non-shell payment gateway, false otherwise.
+	 */
+	private function extension_registers_multiple_gateways( string $normalized_plugin_slug, string $country_code = '' ): bool {
+		if ( empty( $normalized_plugin_slug ) ) {
+			return false;
+		}
+
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
+		if ( ! isset( $this->gateways_count_by_extension_cache[ $country_code ] ) ) {
+			$counts = array();
+			foreach ( $this->get_payment_gateways( false, $country_code ) as $gateway ) {
+				if ( ! $gateway instanceof WC_Payment_Gateway ||
+					$this->is_offline_payment_method( $gateway->id ) ||
+					$this->is_shell_payment_gateway( $gateway ) ) {
+					continue;
+				}
+
+				$plugin_slug = Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) );
+				if ( empty( $plugin_slug ) ) {
+					continue;
+				}
+
+				$counts[ $plugin_slug ] = ( $counts[ $plugin_slug ] ?? 0 ) + 1;
+			}
+
+			$this->gateways_count_by_extension_cache[ $country_code ] = $counts;
+		}
+
+		return ( $this->gateways_count_by_extension_cache[ $country_code ][ $normalized_plugin_slug ] ?? 0 ) > 1;
 	}
 
 	/**

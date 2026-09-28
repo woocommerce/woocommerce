@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep each gateway's own title and description on the Payments settings page when an extension registers multiple gateways, instead of replacing them with the generic extension suggestion details.
