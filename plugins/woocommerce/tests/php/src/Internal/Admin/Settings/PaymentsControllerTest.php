@@ -69,7 +69,6 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset( $GLOBALS['current_tab'] );
 		set_current_screen( 'front' );
-		delete_option( 'woocommerce_checkout_page_id' );
 
 		if ( null !== $this->gateways_filter_callback ) {
 			remove_filter( 'woocommerce_payment_gateways', $this->gateways_filter_callback );
