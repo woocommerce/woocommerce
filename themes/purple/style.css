@@ -237,7 +237,7 @@ body {
 }
 
 .woocommerce form .form-row label:not(:has(input[type="checkbox"])) {
-	margin-bottom: 0.3em;
+	margin-bottom: 0.25em;
 }
 
 .woocommerce-form-login .form-row:has(.woocommerce-form-login__submit) {
