@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Exclude payment settings from Blueprint exports and clarify this in the export interface.

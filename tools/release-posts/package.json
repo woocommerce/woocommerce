@@ -1,7 +1,7 @@
 {
 	"name": "release-posts",
 	"version": "0.0.1",
-	"description": "Automate release post generation for Wordpress plugins",
+	"description": "Automate release post generation for WordPress plugins",
 	"main": " ",
 	"scripts": {
 		"lint": "tsc --noEmit",

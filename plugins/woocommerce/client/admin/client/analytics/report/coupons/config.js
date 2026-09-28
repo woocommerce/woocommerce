@@ -79,15 +79,17 @@ const filterValues = [
 				chartMode: 'item-comparison',
 				path: [ 'select_coupon' ],
 				settings: {
-					type: 'coupons',
 					param: 'coupons',
 					getLabels: getCouponLabels,
 					labels: {
+						button: __( 'Single Coupon', 'woocommerce' ),
+					},
+					searchProps: {
+						type: 'coupons',
 						placeholder: __(
 							'Type to search for a coupon',
 							'woocommerce'
 						),
-						button: __( 'Single Coupon', 'woocommerce' ),
 					},
 				},
 			},
@@ -97,7 +99,6 @@ const filterValues = [
 		label: __( 'Comparison', 'woocommerce' ),
 		value: 'compare-coupons',
 		settings: {
-			type: 'coupons',
 			param: 'coupons',
 			getLabels: getCouponLabels,
 			labels: {
@@ -107,6 +108,9 @@ const filterValues = [
 					'Check at least two coupon codes below to compare',
 					'woocommerce'
 				),
+			},
+			searchProps: {
+				type: 'coupons',
 			},
 			onClick: addCesSurveyForAnalytics,
 		},

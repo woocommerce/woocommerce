@@ -56,8 +56,8 @@ module.exports = {
 		'@wordpress/core-data/build/(.*)$':
 			'<rootDir>/node_modules/@wordpress/core-data/build/$1',
 
-		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
-		'@woocommerce/atomic-utils': 'assets/js/atomic/utils',
+		'@woocommerce/product-elements':
+			'assets/js/blocks/product-elements-blocks',
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
 		'^@woocommerce/settings$': 'packages/public-api/settings',
@@ -99,6 +99,7 @@ module.exports = {
 		'@woocommerce/blocks-test-utils': 'tests/utils',
 		'^@woocommerce/types/(.*)$': 'packages/public-api/types/$1',
 		'^@woocommerce/types$': 'packages/public-api/types',
+		'^@woocommerce/utils/(.*)$': 'assets/js/utils/$1',
 		'@woocommerce/utils': 'assets/js/utils',
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
@@ -138,7 +139,8 @@ module.exports = {
 		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',
 	},
 	transformIgnorePatterns: [
-		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)',
+		// temporal-polyfill and its deps are ESM-only, so they need transforming too.
+		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js|\\.pnpm/temporal-|temporal-)',
 	],
 	verbose: true,
 	cacheDirectory: '<rootDir>/../../node_modules/.cache/jest',

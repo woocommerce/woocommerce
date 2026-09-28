@@ -181,7 +181,6 @@ class PaymentsProviders {
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
 		ExtensionSuggestions::HELCIM            => Helcim::class,
-		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
@@ -1276,6 +1275,8 @@ class PaymentsProviders {
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
 		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
+		// Suggestion details are embedded in the gateway details, so clear their cache too.
+		$this->extension_suggestions->clear_cache();
 	}
 
 	/**
@@ -1391,7 +1392,6 @@ class PaymentsProviders {
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
 					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
 					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
 					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.

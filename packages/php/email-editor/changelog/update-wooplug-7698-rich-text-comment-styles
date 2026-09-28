@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move the personalization tag chip styles to a single flattened stylesheet loaded into both the editor iframe and the admin document.

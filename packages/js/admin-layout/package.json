@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/admin-layout",
 	"version": "2.0.0",
-	"description": "WooCommerce admin layout copmonents and utilities.",
+	"description": "WooCommerce admin layout components and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"keywords": [

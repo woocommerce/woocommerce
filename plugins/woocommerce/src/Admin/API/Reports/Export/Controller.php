@@ -255,12 +255,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		// @todo - add thing in the links below instead?
 		if ( 100 === $percentage ) {
-			$query_args = array(
-				'action'   => ReportExporter::DOWNLOAD_EXPORT_ACTION,
-				'filename' => "wc-{$report_type}-report-export-{$export_id}",
-			);
-
-			$result['download_url'] = add_query_arg( $query_args, admin_url() );
+			$result['download_url'] = ReportExporter::get_download_url( $report_type, $export_id );
 		}
 
 		// Wrap the data in a response object.

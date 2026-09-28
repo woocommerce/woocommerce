@@ -54,7 +54,10 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset $_GET, the global query, and any logged-in user between tests.
+	 * Reset $_GET, the global query, any logged-in user, and the Review Order
+	 * assets between tests. The script and style registries are global and the
+	 * base class does not own them, so a test that reaches `enqueue_assets()`
+	 * would otherwise leave the handle registered for the rest of the process.
 	 */
 	public function tearDown(): void {
 		$_GET = array();
@@ -65,6 +68,10 @@ class EndpointTest extends WC_Unit_Test_Case {
 		wp_reset_postdata();
 		wp_set_current_user( 0 );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
+		wp_dequeue_script( 'wc-order-review' );
+		wp_deregister_script( 'wc-order-review' );
+		wp_dequeue_style( 'wc-order-review' );
+		wp_deregister_style( 'wc-order-review' );
 		parent::tearDown();
 	}
 
@@ -548,12 +555,12 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The disabled-products info notice renders when at least one order item is STATUS_SKIP and the form is still active.
+	 * @testdox An item whose product has reviews closed is counted by the info notice and renders no form row, while the reviewable item still gets one.
 	 */
-	public function test_disabled_products_notice_renders_above_form(): void {
+	public function test_reviews_disabled_item_renders_notice_and_no_form_row(): void {
 		$order      = OrderHelper::create_order();
-		$reviewable = WC_Helper_Product::create_simple_product();
-		$disabled   = WC_Helper_Product::create_simple_product();
+		$reviewable = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Reviewable Blue Lamp' ) );
+		$disabled   = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Closed Red Kettle' ) );
 		wp_update_post(
 			array(
 				'ID'             => $disabled->get_id(),
@@ -575,6 +582,16 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'woocommerce-info woocommerce-review-order__notice', $html );
 		$this->assertStringContainsString( 'see all your products?', $html );
 		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+
+		// `customer-review-order-row.php` opens each row with this exact class
+		// attribute, so the occurrence count is the number of rendered rows.
+		$this->assertSame(
+			1,
+			substr_count( $html, 'class="woocommerce-review-order__item"' ),
+			'Only the item whose product accepts reviews should render a form row.'
+		);
+		$this->assertStringContainsString( 'Reviewable Blue Lamp', $html );
+		$this->assertStringNotContainsString( 'Closed Red Kettle', $html );
 	}
 
 	/**
@@ -612,6 +629,83 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
 		$this->assertStringContainsString( 'Thank you for your reviews', $html );
 		$this->assertStringContainsString( 'Your feedback helps', $html );
+	}
+
+	/**
+	 * @testdox The empty-state template renders the nothing-to-review arm, and no form, when the order has no reviewable items.
+	 */
+	public function test_empty_state_template_renders_nothing_to_review(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'nothing@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		// `ItemEligibility::decide()` marks an item SKIP when `comments_open()`
+		// is false, and skipped rows never set `$has_unreviewed_row`. The order
+		// therefore reaches the empty-state template with `$reviewed_count` at
+		// 0, which is the arm the thank-you test above does not exercise.
+		wp_update_post(
+			array(
+				'ID'             => $product->get_id(),
+				'comment_status' => 'closed',
+			)
+		);
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order--empty', $html );
+		$this->assertStringContainsString( 'Nothing to review here', $html );
+		$this->assertStringContainsString( 'There are no products on this order that are open for reviews right now.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The wc-order-review script is localized with the four submission-outcome strings the frontend renders.
+	 */
+	public function test_enqueued_script_localizes_the_submission_outcome_strings(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Stage the globals gate_request() reads before it enqueues the assets:
+		// `is_page( review_order_page_id )`, the order id query var, and the key.
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$this->endpoint->gate_request();
+
+		$data = (string) wp_scripts()->get_data( 'wc-order-review', 'data' );
+		$this->assertStringStartsWith( 'var wcOrderReview = ', $data );
+
+		$payload = json_decode( rtrim( substr( $data, strpos( $data, '=' ) + 1 ), " \t\n;" ), true );
+		$this->assertIsArray( $payload, 'The localized wcOrderReview payload should be valid JSON.' );
+
+		$this->assertEquals(
+			array(
+				'ok'                 => 'Thanks, your review is live.',
+				'pending_moderation' => 'Thanks, your review is pending approval.',
+				'error'              => 'Something went wrong, please try again.',
+				'rating_required'    => 'Please rate this product before submitting your review.',
+			),
+			$payload['i18n'] ?? null,
+			'The frontend renders these strings verbatim, so the page must ship them unchanged.'
+		);
 	}
 
 	/**
@@ -724,6 +818,111 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $first_id, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'option should adopt the slug-routed (lowest-id) page' );
 		$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'rewrite flush should be queued when the option moves' );
+	}
+
+	/**
+	 * @testdox Installing-mode requests defer the rewrite flush until the next normal request registers the endpoint.
+	 * @dataProvider provide_pending_rewrite_option_autoload_cases
+	 *
+	 * @param bool $autoload Whether the pending option is autoloaded.
+	 */
+	public function test_pending_rewrite_flush_is_deferred_during_installing_mode( bool $autoload ): void {
+		global $wp_actions, $wp_rewrite;
+
+		$this->reset_review_order_pages();
+		$page_id = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		update_option( 'woocommerce_review_order_page_id', $page_id );
+
+		$original_installing = wp_installing();
+		$original_pending    = get_option( 'woocommerce_review_order_flush_rewrite_pending', null );
+		$original_queue      = get_option( 'woocommerce_queue_flush_rewrite_rules', null );
+		$original_rules      = get_option( 'rewrite_rules', null );
+		$original_extra      = $wp_rewrite->extra_rules_top;
+		$original_generated  = $wp_rewrite->rules;
+		$original_permalink  = $wp_rewrite->permalink_structure;
+		$original_wp_loaded  = $wp_actions['wp_loaded'] ?? null;
+
+		$original_alloptions = wp_load_alloptions();
+
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+		add_option( 'woocommerce_review_order_flush_rewrite_pending', 'no', '', $autoload );
+		$this->assertSame( 'no', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'Prime the option cache before the install-mode write.' );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		update_option( 'rewrite_rules', array() );
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		$wp_rewrite->extra_rules_top = array();
+		add_filter( 'flush_rewrite_rules_hard', '__return_false' );
+		$wp_actions['wp_loaded'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate wp_loaded so WP_Rewrite::flush_rules() would write rules if the install guard did not return early.
+		wp_installing( true );
+
+		try {
+			// Republishing the draft host page queues the flush through the install-mode write path.
+			$this->endpoint->maybe_create_host_page();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$this->assertSame( array(), (array) get_option( 'rewrite_rules' ), 'Installing mode should not persist rewrite rules.' );
+			$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'A soft endpoint flush should not use the shared hard-flush queue.' );
+
+			wp_installing( false );
+			$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'The next normal request should see the queued flush through the option cache.' );
+			$this->endpoint->add_rewrite_rule();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$review_order_rules = array_filter(
+				(array) get_option( 'rewrite_rules' ),
+				static function ( $query ): bool {
+					return str_contains( $query, Endpoint::QUERY_VAR . '=' );
+				}
+			);
+
+			$this->assertNotEmpty( $review_order_rules, 'The next normal request should persist the endpoint registered on init.' );
+			$this->assertFalse( get_option( 'woocommerce_review_order_flush_rewrite_pending', false ), 'The normal request should consume the endpoint trigger.' );
+		} finally {
+			wp_installing( false );
+			remove_action( 'wp_loaded', array( $wp_rewrite, 'flush_rules' ) );
+			remove_filter( 'flush_rewrite_rules_hard', '__return_false' );
+			delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			delete_option( 'rewrite_rules' );
+			if ( null !== $original_pending ) {
+				add_option( 'woocommerce_review_order_flush_rewrite_pending', $original_pending, '', array_key_exists( 'woocommerce_review_order_flush_rewrite_pending', $original_alloptions ) );
+			}
+			if ( null !== $original_queue ) {
+				add_option( 'woocommerce_queue_flush_rewrite_rules', $original_queue, '', array_key_exists( 'woocommerce_queue_flush_rewrite_rules', $original_alloptions ) );
+			}
+			if ( null !== $original_rules ) {
+				add_option( 'rewrite_rules', $original_rules, '', array_key_exists( 'rewrite_rules', $original_alloptions ) );
+			}
+			$wp_rewrite->set_permalink_structure( $original_permalink );
+			$wp_rewrite->extra_rules_top = $original_extra;
+			$wp_rewrite->rules           = $original_generated;
+			if ( null === $original_wp_loaded ) {
+				unset( $wp_actions['wp_loaded'] );
+			} else {
+				$wp_actions['wp_loaded'] = $original_wp_loaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original action count.
+			}
+			wp_installing( $original_installing );
+		}
+	}
+
+	/**
+	 * Pending rewrite option cache locations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provide_pending_rewrite_option_autoload_cases(): array {
+		return array(
+			'autoloaded in alloptions' => array( true ),
+			'cached by option name'    => array( false ),
+		);
 	}
 
 	/**

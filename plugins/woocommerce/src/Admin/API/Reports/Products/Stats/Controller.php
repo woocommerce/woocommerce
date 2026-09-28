@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -239,6 +240,7 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
+		$params['search']          = ProductSearchQuery::get_collection_param();
 		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',

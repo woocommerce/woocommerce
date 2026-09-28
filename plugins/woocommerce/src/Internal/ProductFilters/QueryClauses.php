@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -419,12 +420,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( string $sql ): string {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
@@ -474,6 +470,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {
+			$tax_class             = (string) $tax_class;
 			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
 			$or_queries[]          = $wpdb->prepare(
 				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
