@@ -124,7 +124,6 @@ export const TotalsCoupon = ( {
 							value={ couponValue }
 							ariaDescribedBy={ hasError ? errorId : undefined }
 							aria-invalid={ hasError }
-							aria-errormessage={ hasError ? errorId : undefined }
 							onChange={ ( newCouponValue ) => {
 								setErrorMessage( '' );
 								setCouponValue( newCouponValue );

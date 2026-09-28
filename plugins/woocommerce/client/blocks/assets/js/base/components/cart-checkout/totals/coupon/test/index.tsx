@@ -56,10 +56,6 @@ describe( 'TotalsCoupon', () => {
 				'aria-describedby',
 				ERROR_ID
 			);
-			expect( couponInput ).toHaveAttribute(
-				'aria-errormessage',
-				ERROR_ID
-			);
 			expect(
 				couponInput.closest( '.wc-block-components-text-input' )
 			).toHaveClass( 'has-error' );
