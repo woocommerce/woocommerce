@@ -657,4 +657,46 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ) );
 	}
+
+	/**
+	 * @testdox Customs CSV headers map to product properties regardless of case.
+	 */
+	public function test_customs_headers_are_mapped(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+		$sut = new WC_Product_CSV_Importer_Controller();
+
+		$expected = array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'Commodity code (HS code)', 'COUNTRY OF ORIGIN', 'Customs description' ) ),
+			'Exported customs labels should map to the customs setters.'
+		);
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'COMMODITY_CODE', 'Country_Of_Origin', 'customs_description' ) ),
+			'Machine-name headers should map to the customs setters.'
+		);
+
+		// The controller has loaded the mappings; an empty list skips the en_US early return.
+		$english = wc_importer_default_english_mappings( array() );
+		foreach ( array( 'Commodity code (HS code)', 'Country of origin', 'Customs description' ) as $index => $label ) {
+			$this->assertSame( $expected[ $index ], $english[ $label ] ?? null, "Translated stores should still map the English {$label} header." );
+		}
+	}
+
+	/**
+	 * @testdox Customs fields are available in the CSV mapping selector.
+	 */
+	public function test_customs_fields_are_mapping_options(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'get_mapping_options' );
+		$method->setAccessible( true );
+		$options = $method->invoke( new WC_Product_CSV_Importer_Controller() );
+
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $property ) {
+			$this->assertArrayHasKey( $property, $options, 'Merchants should be able to map each customs field manually.' );
+		}
+		$this->assertSame( 'Commodity code (HS code)', $options['customs_commodity_code'], 'The commodity code option should match the export label.' );
+	}
 }
