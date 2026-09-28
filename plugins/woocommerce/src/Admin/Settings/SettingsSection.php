@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Base class for extensions that register a section under an existing WooCommerce settings page.
  *
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 abstract class SettingsSection implements SettingsSectionInterface, SettingsSectionUIPageProviderInterface {
 

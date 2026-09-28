@@ -6,8 +6,6 @@
  * @version 2.4.0
  */
 
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
-use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\ProductsSettingsPageAdapter;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,16 +37,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'box';
-
-	/**
-	 * Get the settings UI page adapter for this settings page.
-	 *
-	 * @since 10.9.0
-	 * @return SettingsUIPageInterface|null
-	 */
-	public function get_settings_ui_page(): ?SettingsUIPageInterface {
-		return new ProductsSettingsPageAdapter( $this );
-	}
 
 	/**
 	 * Get own sections.
