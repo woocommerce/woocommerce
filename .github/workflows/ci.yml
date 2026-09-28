@@ -45,6 +45,9 @@ concurrency:
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
+  # Split sharded Playwright projects listed in plugins/woocommerce/tests/e2e/spec-durations.json by
+  # measured file duration instead of test count (tests/e2e/bin/playwright-duration-shard.mjs).
+  CI_DURATION_SHARDS: '1'
   # Paths that cannot change the behaviour of any code. `identify-jobs-to-run` derives the
   # `needs-code-validation` filter from this list. The job-level `ignore` lists in each
   # project's `config.ci` (see tools/monorepo-utils/src/ci-jobs/README.md) are a separate,

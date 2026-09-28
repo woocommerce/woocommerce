@@ -93,6 +93,6 @@ title
 # See https://github.com/microsoft/playwright/issues/33684.
 export NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source"
 
-pnpm playwright test --config="$configFile" "$@"
+node "$SCRIPT_PATH/bin/playwright-duration-shard.mjs" --config="$configFile" "$@"
 
 
