@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\CashSessions;
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionService;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsDataStore;
+use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsSchema;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionTransaction;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSourceResolver;
 use DateTimeImmutable;
@@ -1040,6 +1041,17 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 201, $paid_in( $now + 60 )->get_status(), 'A device clock a minute ahead is accepted' );
 		$this->assertSame( 201, $paid_in( $now - 60 )->get_status(), 'A device clock a minute behind is accepted' );
 		$this->assertSame( 201, $this->record_drawer_event( $session_id, array( 'occurred_at' => self::device_time( $now + 60 ) ) )->get_status() );
+	}
+
+	/**
+	 * @testdox Should state the clock skew window in the occurred_at argument descriptions.
+	 */
+	public function test_occurred_at_skew_is_documented(): void {
+		$schema = wc_get_container()->get( CashSessionsSchema::class );
+
+		foreach ( array( $schema->get_create_movement_args(), $schema->get_create_drawer_event_args() ) as $args ) {
+			$this->assertStringContainsString( '5 minutes', $args['occurred_at']['description'] );
+		}
 	}
 
 	/**

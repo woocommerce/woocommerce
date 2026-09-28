@@ -29,8 +29,12 @@ class CashSessionService {
 
 	/**
 	 * Allowed device clock skew, in seconds, when checking a client occurred_at against the session and server time.
+	 *
+	 * Open decision: a client time may fall up to this much before the session opened or after server time, so
+	 * history can show such times. Occurrence never decides session membership, so totals are not affected.
+	 * CashSessionsSchema states the window in the occurred_at descriptions.
 	 */
-	private const CLOCK_SKEW_SECONDS = 300;
+	public const CLOCK_SKEW_SECONDS = 300;
 
 	/**
 	 * Storage.

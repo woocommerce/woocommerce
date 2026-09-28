@@ -455,15 +455,27 @@ class CashSessionsSchema {
 	}
 
 	/**
-	 * Timestamp argument. The explicit offset is checked by CashTimestamp.
+	 * Occurrence timestamp argument. The explicit offset is checked by CashTimestamp, the time window by CashSessionService.
 	 *
 	 * @param string $description Description.
 	 * @param bool   $required    Whether it is required.
 	 * @return array<string, mixed>
 	 */
 	private function timestamp_arg( string $description, bool $required ): array {
+		$minutes = intdiv( CashSessionService::CLOCK_SKEW_SECONDS, MINUTE_IN_SECONDS );
+		$window  = sprintf(
+			/* translators: %d: number of minutes. */
+			_n(
+				'RFC 3339 with an explicit offset. It can be at most %d minute before the session opened or ahead of server time, to allow for device clock differences.',
+				'RFC 3339 with an explicit offset. It can be at most %d minutes before the session opened or ahead of server time, to allow for device clock differences.',
+				$minutes,
+				'woocommerce'
+			),
+			$minutes
+		);
+
 		return array(
-			'description' => $description . ' ' . __( 'RFC 3339 with an explicit offset.', 'woocommerce' ),
+			'description' => $description . ' ' . $window,
 			'type'        => 'string',
 			'required'    => $required,
 		);
