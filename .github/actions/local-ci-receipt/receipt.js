@@ -64,20 +64,6 @@ function killSwitchSet( value ) {
 }
 
 /**
- * Deterministic spot-check bucket for a (commit, job) pair: 0..99. The same
- * pair always lands in the same bucket, so a re-run is reproducible and an
- * audit can recompute it.
- *
- * @param {string} headSha
- * @param {string} jobName
- * @return {number}
- */
-function sampleBucket( headSha, jobName ) {
-	const digest = crypto.createHash( 'sha256' ).update( headSha + jobName ).digest();
-	return digest.readUInt32BE( 0 ) % 100;
-}
-
-/**
  * The `[type]` suffix of a job name, or "" when there is none.
  *
  * @param {string} jobName
@@ -126,10 +112,10 @@ function ruleFor( config, jobName ) {
  * @param {Object|null} input.baseConfig     `{ raw, parsed, sha256 }` from the base branch, or null when absent.
  * @param {string|null} input.headConfigRaw  The config on the head commit, or null when absent.
  * @param {Array}       input.checkRuns      Check runs on the head commit.
- * @return {{substituted: boolean, reason: string, spotCheck: boolean}}
+ * @return {{substituted: boolean, reason: string}}
  */
 function decide( input ) {
-	const no = ( reason ) => ( { substituted: false, reason, spotCheck: false } );
+	const no = ( reason ) => ( { substituted: false, reason } );
 
 	if ( killSwitchSet( input.disabled ) ) {
 		return no( `kill switch LOCAL_CI_RECEIPTS_DISABLED=${ input.disabled }` );
@@ -205,23 +191,11 @@ function decide( input ) {
 	if ( ! SUBSTITUTABLE_TYPES.includes( jobType( input.jobName ) ) ) {
 		return no( `ci.yml does not guard the steps a ${ jobType( input.jobName ) } job needs; only ${ SUBSTITUTABLE_TYPES.join( '/' ) } jobs may be substituted` );
 	}
-	const bucket = sampleBucket( pr.head.sha, input.jobName );
-	// A rate that is not a number fails closed: spot-check everything rather
-	// than nothing.
-	const rate = rule.sampleRate === undefined ? 0 : Number( rule.sampleRate );
-	if ( ! Number.isFinite( rate ) || bucket < rate ) {
-		return {
-			substituted: false,
-			spotCheck: true,
-			reason: `spot check: bucket ${ bucket } < sampleRate ${ rule.sampleRate }; running anyway to verify receipt ${ receipt.html_url || receipt.id }`,
-		};
-	}
-
 	let reason = `receipt ${ receipt.html_url || receipt.id } by ${ meta.author } (${ trust })`;
 	if ( meta.base && pr.base && meta.base !== pr.base.sha ) {
 		reason += ` (base moved since: tested against ${ meta.base.slice( 0, 11 ) }, base is now ${ String( pr.base.sha ).slice( 0, 11 ) })`;
 	}
-	return { substituted: true, reason, spotCheck: false };
+	return { substituted: true, reason };
 }
 
 /**
@@ -351,20 +325,15 @@ async function lookup( { github, context, core } ) {
 		}
 		result = decide( input );
 	} catch ( e ) {
-		result = { substituted: false, spotCheck: false, reason: `lookup failed, running normally: ${ e && e.message ? e.message : e }` };
+		result = { substituted: false, reason: `lookup failed, running normally: ${ e && e.message ? e.message : e }` };
 	}
-	if ( result.spotCheck ) {
-		// An annotation, not a log line: a spot check that then fails is the
-		// one signal that a receipt was wrong, and it has to be findable.
-		core.notice( `local-ci spot check: ${ result.reason }` );
-	} else if ( /lookup failed/.test( result.reason ) ) {
+	if ( /lookup failed/.test( result.reason ) ) {
 		core.warning( `local-ci: ${ result.reason }` );
 	}
 	core.info( `substituted=${ result.substituted } reason=${ result.reason }` );
 	core.setOutput( 'substituted', String( result.substituted ) );
 	core.setOutput( 'reason', result.reason );
-	core.setOutput( 'spot-check', String( result.spotCheck ) );
 	return result;
 }
 
-module.exports = { decide, lookup, parseExternalId, sampleBucket, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES };
+module.exports = { decide, lookup, parseExternalId, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES };

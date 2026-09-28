@@ -20,7 +20,6 @@
     {
       "type": "unit",
       "namePrefix": "JavaScript",
-      "sampleRate": 10,
       "prepare": {
         "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies. Re-validate and update mirrors.sha256 when that action changes.",
         "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },

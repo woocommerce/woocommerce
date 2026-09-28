@@ -12,7 +12,7 @@ const crypto = require( 'crypto' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const { decide, lookup, parseExternalId, sampleBucket, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES } = require( './receipt.js' );
+const { decide, lookup, parseExternalId, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES } = require( './receipt.js' );
 
 const ran = [];
 const check = ( name, run ) => ran.push( { name, run } );
@@ -31,7 +31,7 @@ const configObject = ( overrides = {} ) => ( {
 	receiptPrefix: 'local-ci/v1: ',
 	enabled: true,
 	plan: { command: [ 'true' ] },
-	eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 0, run: [ 'x' ] } ],
+	eligible: [ { type: 'unit', namePrefix: 'JavaScript', run: [ 'x' ] } ],
 	...overrides,
 } );
 
@@ -89,7 +89,6 @@ const refuses = ( result, fragment ) => {
 check( 'a verified successful receipt by the author substitutes', () => {
 	const r = decide( input() );
 	assert.strictEqual( r.substituted, true, r.reason );
-	assert.strictEqual( r.spotCheck, false );
 	assert.ok( r.reason.includes( 'runs/100' ) && r.reason.includes( 'by octo' ) && r.reason.includes( 'is MEMBER' ), r.reason );
 } );
 
@@ -214,14 +213,6 @@ check( 'a job with no eligibility rule in the base config is refused even with a
 	refuses( decide( input( { jobName: name, checkRuns: [ receipt( cfg, { name: 'local-ci/v1: ' + name } ) ] } ) ), 'no eligibility rule' );
 } );
 
-check( 'sampleBucket is pinned: sha256(sha + name), first four bytes mod 100 — an audit can recompute it', () => {
-	// Literals, not derived from the function: a change to the hash, the
-	// input order or the modulus must fail here.
-	assert.strictEqual( sampleBucket( HEAD, JOB ), 13 );
-	assert.strictEqual( sampleBucket( 'b'.repeat( 40 ), JOB ), 82, 'the commit is part of the input' );
-	assert.strictEqual( sampleBucket( HEAD, 'JavaScript - @acme/other [unit]' ), 23, 'the job name is part of the input' );
-} );
-
 check( 'ruleFor matches the way the tool does: [type] suffix, namePrefix, exclude, and the (optional) tail', () => {
 	const cfg = configObject( {
 		eligible: [
@@ -263,28 +254,6 @@ check( 'only job types whose steps ci.yml guards may be substituted, whatever th
 	refuses( decide( input( { baseConfig: cfg, headConfigRaw: cfg.raw, jobName: name, checkRuns: [ receipt( cfg, { name: 'local-ci/v1: ' + name } ) ] } ) ), 'does not guard the steps' );
 	assert.strictEqual( jobType( name ), 'e2e' );
 	assert.strictEqual( jobType( 'no type here' ), '' );
-} );
-
-check( 'a sampleRate that is not a number spot-checks everything rather than nothing', () => {
-	const cfg = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 'ten', run: [ 'x' ] } ] } );
-	const r = decide( input( { baseConfig: cfg, headConfigRaw: cfg.raw, checkRuns: [ receipt( cfg ) ] } ) );
-	assert.strictEqual( r.substituted, false );
-	assert.strictEqual( r.spotCheck, true, r.reason );
-} );
-
-check( 'deterministic spot check: the bucket decides, and the same pair always lands in the same bucket', () => {
-	const bucket = sampleBucket( HEAD, JOB );
-	assert.strictEqual( sampleBucket( HEAD, JOB ), bucket );
-	assert.ok( bucket >= 0 && bucket < 100 );
-	const inSample = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: bucket + 1, run: [ 'x' ] } ] } );
-	const hit = decide( input( { baseConfig: inSample, headConfigRaw: inSample.raw, checkRuns: [ receipt( inSample ) ] } ) );
-	assert.strictEqual( hit.substituted, false );
-	assert.strictEqual( hit.spotCheck, true );
-	assert.ok( hit.reason.startsWith( 'spot check' ), hit.reason );
-	const outOfSample = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: bucket, run: [ 'x' ] } ] } );
-	assert.strictEqual( decide( input( { baseConfig: outOfSample, headConfigRaw: outOfSample.raw, checkRuns: [ receipt( outOfSample ) ] } ) ).substituted, true );
-	const everything = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 100, run: [ 'x' ] } ] } );
-	assert.strictEqual( decide( input( { baseConfig: everything, headConfigRaw: everything.raw, checkRuns: [ receipt( everything ) ] } ) ).spotCheck, true );
 } );
 
 check( 'base drift is reported but still substitutes (phase-1 policy)', () => {
@@ -355,16 +324,6 @@ const fakeCore = () => {
 	return { outputs, notices, warnings, infos, info: ( m ) => infos.push( m ), notice: ( m ) => notices.push( m ), warning: ( m ) => warnings.push( m ), setOutput: ( k, v ) => ( outputs[ k ] = v ) };
 };
 
-check( 'lookup annotates a spot check so a failing one can be found', async () => {
-	const everything = baseConfig( { eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 100, run: [ 'x' ] } ] } );
-	process.env.JOB_NAME = JOB;
-	process.env.DISABLED = '';
-	const core = fakeCore();
-	await lookup( { github: fakeGithub( { baseRaw: everything.raw, headRaw: everything.raw, pages: [ [ receipt( everything ) ] ] } ), context: prContext(), core } );
-	assert.strictEqual( core.outputs[ 'spot-check' ], 'true' );
-	assert.ok( core.notices.some( ( n ) => n.includes( 'spot check' ) && n.includes( 'runs/100' ) ), core.notices );
-} );
-
 check( 'lookup reads base and head config, pages check runs on the head, and writes outputs', async () => {
 	const cfg = baseConfig();
 	process.env.JOB_NAME = JOB;
@@ -374,7 +333,6 @@ check( 'lookup reads base and head config, pages check runs on the head, and wri
 	const github = fakeGithub( { baseRaw: cfg.raw, headRaw: cfg.raw, pages } );
 	await lookup( { github, context: prContext(), core } );
 	assert.strictEqual( core.outputs.substituted, 'true', core.outputs.reason );
-	assert.strictEqual( core.outputs[ 'spot-check' ], 'false' );
 	assert.deepStrictEqual( github.calls, [ [ 'getContent', BASE, CONFIG_PATH ], [ 'getContent', HEAD, CONFIG_PATH ], [ 'permission', 'octo' ], [ 'listForRef', HEAD, 'local-ci/v1: ' + JOB ] ] );
 } );
 

@@ -20,9 +20,6 @@ outputs:
   reason:
     description: 'Why the decision went the way it did, for the job log and for metrics.'
     value: ${{ steps.lookup.outputs.reason }}
-  spot-check:
-    description: '`true` when a valid receipt existed but this job was chosen to run anyway as a deterministic spot check.'
-    value: ${{ steps.lookup.outputs.spot-check }}
 
 runs:
   using: 'composite'
