@@ -65,12 +65,7 @@ test.describe(
 
 				// Before a variation is picked the form is rendered but
 				// hidden, and still points at the parent product.
-				//
-				// Asserted on the `hidden` class rather than on visibility:
-				// that class is the contract `back-in-stock-form.js` drives,
-				// while whether it actually hides the form depends on the
-				// theme's stylesheet.
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 				await expect( targetProduct ).toHaveValue(
 					String( variableProduct.id )
 				);
@@ -81,7 +76,7 @@ test.describe(
 					variableProduct.outOfStockVariation
 				);
 
-				await expect( form ).not.toContainClass( 'hidden' );
+				await expect( form ).toBeVisible();
 				await expect(
 					form.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
@@ -98,7 +93,7 @@ test.describe(
 					variableProduct.inStockVariation!
 				);
 
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 			} );
 
 			test( 'signing up for an out-of-stock variation confirms the variation by name', async ( {

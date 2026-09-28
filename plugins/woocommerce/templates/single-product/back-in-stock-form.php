@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="wc_bis_form<?php echo $is_visible ? '' : ' hidden'; ?>" data-bis-product-id="<?php echo absint( $product_id ); ?>">
+<div class="wc_bis_form" data-bis-product-id="<?php echo absint( $product_id ); ?>" <?php echo $is_visible ? '' : 'hidden'; ?>>
 
 	<h3 id="wc_bis_form_heading_<?php echo absint( $product_id ); ?>">
 		<?php echo wp_kses_post( __( 'Want to be notified when this product is back in stock?', 'woocommerce' ) ); ?>

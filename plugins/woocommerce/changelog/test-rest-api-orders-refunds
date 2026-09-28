@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Add REST orders and refunds controller tests asserting persisted state, status transitions, search, collection filters and ordering.

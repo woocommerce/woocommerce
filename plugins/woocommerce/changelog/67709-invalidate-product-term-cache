@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Invalidate cached product terms when their taxonomy terms are reordered.
