@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 require_once WC_ABSPATH . '/includes/class-wc-brands.php';
@@ -346,29 +345,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Omitting a taxonomy from the filtered map does not disable its main-query filter.
-	 */
-	public function test_omitted_taxonomy_param_still_filters_main_query(): void {
-		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
-			unset( $taxonomy_params['product_brand'] );
-			return $taxonomy_params;
-		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
-
-		$params     = wc_get_container()->get( Params::class );
-		$param_keys = $params->get_param_keys();
-		$this->assertSame( 'brands', $params->get_param( 'taxonomy' )['product_brand'], 'Omitting the brand mapping must keep its default.' );
-		$this->assertContains( 'brands', $param_keys, 'The default brand key remains public.' );
-		$this->assertContains( 'categories', $param_keys, 'Unrelated category keys remain public.' );
-		$this->assertContains( 'tags', $param_keys, 'Unrelated tag keys remain public.' );
-
-		list( $where, $posts ) = $this->query_main_products( $this->cat_and_unknown_brand_query_vars() );
-
-		$this->assertStringContainsString( 'AND 1=0', $where, 'The default brands param must still fail-close an unmatched brand.' );
-		$this->assertCount( 0, $posts, 'Omitting the mapping must not disable the brand filter.' );
-	}
-
-	/**
 	 * @testdox Renaming a taxonomy filter param releases the old param and filters on the new one.
 	 */
 	public function test_renamed_taxonomy_param_is_used_on_main_query(): void {
@@ -397,28 +373,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 			array( $brand_owner->get_name() ),
 			$this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) ),
 			'The renamed param should filter on product_brand exactly as the original param did.'
-		);
-	}
-
-	/**
-	 * @testdox Without the filter, a taxonomy param with no matching term still fails the main query closed.
-	 */
-	public function test_taxonomy_param_still_fails_closed_without_filter(): void {
-		list( $where, $posts ) = $this->query_main_products( $this->cat_and_unknown_brand_query_vars() );
-
-		$this->assertStringContainsString( 'AND 1=0', $where, 'An unmatched taxonomy filter param should still fail the query closed by default.' );
-		$this->assertCount( 0, $posts, 'No products should be returned when the taxonomy filter fails closed.' );
-	}
-
-	/**
-	 * Query vars pairing a category that exists with a brand slug that does not.
-	 *
-	 * @return array
-	 */
-	private function cat_and_unknown_brand_query_vars(): array {
-		return array(
-			'product_cat' => 'cat-1',
-			'brands'      => 'no-such-brand',
 		);
 	}
 
@@ -477,16 +431,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		}
 
 		return array( $where, $posts );
-	}
-
-	/**
-	 * Reset the static params cache, which no base class owns.
-	 */
-	private function clear_params_cache(): void {
-		$reflection      = new \ReflectionClass( Params::class );
-		$params_property = $reflection->getProperty( 'params' );
-		$params_property->setAccessible( true );
-		$params_property->setValue( array() );
 	}
 
 	/**

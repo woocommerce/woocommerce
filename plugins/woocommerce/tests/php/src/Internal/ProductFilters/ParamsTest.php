@@ -277,7 +277,7 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy params can be renamed via the woocommerce_product_filter_taxonomy_params filter.
+	 * @testdox Taxonomy params can be renamed while omitted mappings keep their defaults.
 	 */
 	public function test_taxonomy_params_are_filterable_by_rename(): void {
 		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
@@ -285,6 +285,7 @@ class ParamsTest extends AbstractProductFiltersTest {
 			$this->assertSame( 'tags', $taxonomy_params['product_tag'] ?? null, 'The filter receives the default tag parameter.' );
 			$this->assertSame( 'brands', $taxonomy_params['product_brand'] ?? null, 'The filter receives the default brand parameter.' );
 			$taxonomy_params['product_brand'] = 'wc_brands';
+			unset( $taxonomy_params['product_tag'] );
 			return $taxonomy_params;
 		};
 		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
@@ -293,6 +294,8 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$param_keys      = $this->sut->get_param_keys();
 
 		$this->assertSame( 'wc_brands', $taxonomy_params['product_brand'], 'Renamed taxonomy param should use the new key.' );
+		$this->assertSame( 'tags', $taxonomy_params['product_tag'], 'Omitted taxonomy param should keep its default.' );
+		$this->assertContains( 'tags', $param_keys, 'get_param_keys() should retain the omitted taxonomy param.' );
 		$this->assertContains( 'wc_brands', $param_keys, 'get_param_keys() should expose the renamed param.' );
 		$this->assertNotContains( 'brands', $param_keys, 'get_param_keys() should not expose the original param name once renamed.' );
 	}
