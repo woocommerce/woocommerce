@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Stop adding block data- attributes to the HTML of emails built with the block email editor.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep checkout from marking fields invalid when an extension hides error notices but still shows other notices.
