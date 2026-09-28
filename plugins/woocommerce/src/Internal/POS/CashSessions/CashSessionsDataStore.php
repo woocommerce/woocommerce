@@ -532,7 +532,7 @@ CREATE TABLE $drawer_events (
 		if ( 1 === $result ) {
 			return (int) $wpdb->insert_id;
 		}
-		if ( false !== strpos( (string) $wpdb->last_error, 'Duplicate entry' ) ) {
+		if ( $this->is_duplicate_key_error() ) {
 			return null;
 		}
 		throw new RuntimeException( 'Could not store the cash session record: ' . esc_html( '' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error' ) );
@@ -575,6 +575,26 @@ CREATE TABLE $drawer_events (
 			'rows'  => $rows,
 			'total' => (int) $total,
 		);
+	}
+
+	/**
+	 * Whether the last query failed on a unique key.
+	 *
+	 * Uses the MySQL error number, because the message is translated when the server sets lc_messages.
+	 *
+	 * @return bool
+	 */
+	private function is_duplicate_key_error(): bool {
+		global $wpdb;
+
+		if ( '' === $this->last_query_error() ) {
+			return false;
+		}
+		if ( $wpdb->dbh instanceof \mysqli ) {
+			return 1062 === $wpdb->dbh->errno;
+		}
+		// Database drop-ins without a mysqli handle: fall back to the English message.
+		return false !== strpos( $this->last_query_error(), 'Duplicate entry' );
 	}
 
 	/**

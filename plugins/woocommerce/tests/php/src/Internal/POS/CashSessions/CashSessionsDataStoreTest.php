@@ -85,6 +85,31 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect a unique key conflict when the database reports errors in another language.
+	 */
+	public function test_duplicate_detection_does_not_depend_on_error_language(): void {
+		global $wpdb;
+		$this->sut->insert_session( $this->session_row( 'device-1', 'aaaaaaaa-0000-4000-8000-000000000001' ) );
+
+		$original = (string) $wpdb->get_var( 'SELECT @@SESSION.lc_messages' );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$wpdb->query( "SET SESSION lc_messages = 'de_DE'" );
+			$wpdb->insert( $this->sut->get_sessions_table(), array_merge( $this->session_row( 'device-2', 'aaaaaaaa-0000-4000-8000-000000000001' ), array( 'status' => 'open' ) ) );
+			if ( false !== strpos( $wpdb->last_error, 'Duplicate entry' ) ) {
+				$this->markTestSkipped( 'The database server has no translated error messages.' );
+			}
+
+			$result = $this->sut->insert_session( $this->session_row( 'device-3', 'aaaaaaaa-0000-4000-8000-000000000001' ) );
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION lc_messages = %s', $original ) );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertNull( $result, 'A reused open request ID should be reported as a conflict' );
+	}
+
+	/**
 	 * @testdox Should throw for insert failures that are not unique key conflicts.
 	 */
 	public function test_insert_failure_other_than_duplicate_throws(): void {
