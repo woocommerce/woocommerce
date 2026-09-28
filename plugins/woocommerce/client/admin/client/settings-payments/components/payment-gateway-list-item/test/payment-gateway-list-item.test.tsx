@@ -652,10 +652,9 @@ describe( 'PaymentGatewayListItem', () => {
 		};
 
 		const setIncompatibleGatewayIds = ( ids: string[] ) => {
-			window.wcSettings.admin.woocommerce_checkout_block_compatibility =
-				{
-					incompatible_gateway_ids: ids,
-				};
+			window.wcSettings.admin.woocommerce_checkout_block_compatibility = {
+				incompatible_gateway_ids: ids,
+			};
 		};
 
 		afterEach( () => {
