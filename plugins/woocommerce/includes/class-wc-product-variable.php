@@ -194,7 +194,7 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $min_price !== $max_price ) {
 				$price = wc_format_price_range( $min_price, $max_price );
-			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+			} elseif ( $min_reg_price === $max_reg_price && $this->is_on_sale() ) {
 				$price = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
 			} else {
 				$price = wc_price( $min_price );
