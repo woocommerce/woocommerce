@@ -1,19 +1,8 @@
 /**
- * The consumer side of local-first CI.
- *
- * A contributor runs eligible CI jobs on their machine with `gh local-ci`,
- * which publishes one check run per attempted job (a "receipt") on the
- * commit through a GitHub App. This script decides, for one matrix job,
- * whether such a receipt lets the job skip its install and test steps.
- *
- * The decision is deliberately one-sided: every path that is not a verified,
- * matching, successful receipt ends in `substituted=false` with a reason.
- * Uncertainty runs the tests. CI has no dependency on the tool; the contract
- * is `.github/local-ci.json`, read from the base branch so a pull request
- * cannot repoint it.
- *
- * `decide()` is pure; `lookup()` gathers its inputs with Octokit and writes
- * the outputs. Tested live: see AGENTS.md next to this file.
+ * Decides whether a `gh local-ci` receipt (a check run on the head commit)
+ * lets this matrix job skip its install and test steps. Anything short of
+ * a verified, passing receipt yields `substituted=false` with a reason.
+ * `decide()` is pure; `lookup()` fetches its inputs. See README.md.
  */
 
 const crypto = require( 'crypto' );
