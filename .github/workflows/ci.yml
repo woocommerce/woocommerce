@@ -48,6 +48,9 @@ env:
   # Split sharded Playwright projects listed in plugins/woocommerce/tests/e2e/spec-durations.json by
   # measured file duration instead of test count (tests/e2e/bin/playwright-duration-shard.mjs).
   CI_DURATION_SHARDS: '1'
+  # Trim per-job setup in `project-test-jobs`: e2e/API jobs that test the shared plugin zip install
+  # only the JS packages their specs import, and wp-env jobs reuse the runner's Docker daemon.
+  CI_FAST_SETUP: '1'
   # Paths that cannot change the behaviour of any code. `identify-jobs-to-run` derives the
   # `needs-code-validation` filter from this list. The job-level `ignore` lists in each
   # project's `config.ci` (see tools/monorepo-utils/src/ci-jobs/README.md) are a separate,
@@ -109,7 +112,6 @@ jobs:
     # matrices that we can use to run CI tasks only on the projects that need them.
     name: 'Build Project Jobs'
     if: ${{ !cancelled() }}
-    needs: 'identify-jobs-to-run'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     timeout-minutes: 5
     outputs:
@@ -303,7 +305,7 @@ jobs:
         name: 'Install Monorepo'
         id: 'install-monorepo'
         with:
-          install: '${{ matrix.projectName }}...'
+          install: ${{ ( env.CI_FAST_SETUP == '1' && matrix.projectName == '@woocommerce/plugin-woocommerce' && matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && ( matrix.testType == 'e2e' || matrix.testType == 'api' ) && format( '@woocommerce/plugin-woocommerce{0}@woocommerce/e2e-utils-playwright...', fromJSON( '"\n"' ) ) ) || format( '{0}...', matrix.projectName ) }}
           build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
@@ -343,7 +345,7 @@ jobs:
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment: increase max-download-attempts'
-        if: ${{ matrix.testEnv.shouldCreate }}
+        if: ${{ matrix.testEnv.shouldCreate && ( env.CI_FAST_SETUP != '1' || runner.environment != 'github-hosted' ) }}
         uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
         with:
           daemon-config: |
@@ -351,6 +353,18 @@ jobs:
               "max-download-attempts": 10,
               "max-concurrent-downloads": 3
             }
+
+      - name: 'Start Test Environment: increase max-download-attempts (runner Docker)'
+        if: ${{ matrix.testEnv.shouldCreate && env.CI_FAST_SETUP == '1' && runner.environment == 'github-hosted' }}
+        # Same daemon settings as the step above, merged into the preinstalled daemon's config
+        # instead of downloading and starting a second Docker.
+        run: |
+          set -o pipefail
+          config=/etc/docker/daemon.json
+          base=$(sudo cat "$config" 2> /dev/null || true)
+          echo "$base" | jq -s '( add // {} ) + { "max-download-attempts": 10, "max-concurrent-downloads": 3 }' | sudo tee "$config" > /dev/null
+          sudo systemctl restart docker
+          docker info --format 'Docker {{.ServerVersion}}, storage driver {{.Driver}}'
 
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
