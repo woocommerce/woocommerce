@@ -73,6 +73,16 @@ class CashMoneyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should parse amounts up to a caller-supplied maximum.
+	 */
+	public function test_parse_with_total_limit(): void {
+		$this->assertSame( CashMoney::MAX_TOTAL_MINOR_UNITS, CashMoney::parse( '999999999999999.99', 2, CashMoney::MAX_TOTAL_MINOR_UNITS ) );
+
+		$this->expectException( OverflowException::class );
+		CashMoney::parse( '1000000000000000.00', 2, CashMoney::MAX_TOTAL_MINOR_UNITS );
+	}
+
+	/**
 	 * @testdox Should accept source amounts with trailing zeros beyond the precision.
 	 *
 	 * @testWith ["10.500000", 2, 1050]

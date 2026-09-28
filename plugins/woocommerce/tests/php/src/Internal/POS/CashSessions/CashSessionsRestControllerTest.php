@@ -883,6 +883,27 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a counted amount up to the session total limit, above the single movement limit.
+	 *
+	 * @testWith ["999999999999999.99", 200]
+	 *           ["1000000000000000.00", 400]
+	 *
+	 * @param string $counted Counted amount.
+	 * @param int    $status  Expected HTTP status.
+	 */
+	public function test_close_counted_amount_uses_total_limit( string $counted, int $status ): void {
+		$session_id = $this->open_session()->get_data()['id'];
+
+		$response = $this->close_session( $session_id, 1, $counted );
+
+		$this->assertSame( $status, $response->get_status(), (string) wp_json_encode( $response->get_data() ) );
+		if ( 200 === $status ) {
+			$this->assertSame( $counted, $response->get_data()['counted_amount'] );
+			$this->assertSame( $counted, $response->get_data()['variance'] );
+		}
+	}
+
+	/**
 	 * @testdox Should keep closed session data immutable.
 	 */
 	public function test_closed_session_is_immutable(): void {

@@ -43,11 +43,12 @@ final class CashMoney {
 	 *
 	 * @param string $value     Decimal string such as "148.50".
 	 * @param int    $precision Number of fractional digits of the currency.
+	 * @param int    $max       Largest accepted value in minor units, at most MAX_TOTAL_MINOR_UNITS.
 	 * @return int Minor units.
 	 * @throws InvalidArgumentException When the value is malformed or too precise.
-	 * @throws OverflowException When the value is above the supported maximum.
+	 * @throws OverflowException When the value is above the maximum.
 	 */
-	public static function parse( string $value, int $precision ): int {
+	public static function parse( string $value, int $precision, int $max = self::MAX_AMOUNT_MINOR_UNITS ): int {
 		$parts = self::split( $value );
 		if ( null === $parts ) {
 			throw new InvalidArgumentException( 'The amount must be a nonnegative decimal string such as "10.50".' );
@@ -56,7 +57,7 @@ final class CashMoney {
 			throw new InvalidArgumentException( 'The amount has more decimal places than the currency allows.' );
 		}
 
-		$minor_units = self::to_minor_units( $parts[0], $parts[1], $precision );
+		$minor_units = self::to_minor_units( $parts[0], $parts[1], $precision, min( $max, self::MAX_TOTAL_MINOR_UNITS ) );
 		if ( null === $minor_units ) {
 			throw new OverflowException( 'The amount is too large.' );
 		}
@@ -87,7 +88,7 @@ final class CashMoney {
 			throw new DomainException( 'The source amount has more decimal places than the session currency.' );
 		}
 
-		$minor_units = self::to_minor_units( $parts[0], (string) substr( $parts[1], 0, $precision ), $precision );
+		$minor_units = self::to_minor_units( $parts[0], (string) substr( $parts[1], 0, $precision ), $precision, self::MAX_AMOUNT_MINOR_UNITS );
 		if ( null === $minor_units ) {
 			throw new OverflowException( 'The amount is too large.' );
 		}
@@ -178,12 +179,14 @@ final class CashMoney {
 	 * @param string $integer   Integer digits.
 	 * @param string $fraction  Fraction digits, at most $precision long.
 	 * @param int    $precision Number of fractional digits.
-	 * @return int|null Null when the value is above the supported maximum.
+	 * @param int    $max       Largest accepted value, at most MAX_TOTAL_MINOR_UNITS.
+	 * @return int|null Null when the value is above the maximum.
 	 */
-	private static function to_minor_units( string $integer, string $fraction, int $precision ): ?int {
+	private static function to_minor_units( string $integer, string $fraction, int $precision, int $max ): ?int {
 		$digits = ltrim( $integer . str_pad( $fraction, $precision, '0' ), '0' );
 
-		if ( strlen( $digits ) > strlen( (string) self::MAX_AMOUNT_MINOR_UNITS ) ) {
+		// The length check keeps the cast below PHP_INT_MAX.
+		if ( strlen( $digits ) > strlen( (string) $max ) || (int) $digits > $max ) {
 			return null;
 		}
 

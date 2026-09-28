@@ -248,8 +248,9 @@ class CashSessionService {
 			throw CashSessionException::session_closed( $session_id );
 		}
 
+		// A count can be as large as any session total, which is above the single movement limit.
 		$precision      = (int) $row['currency_precision'];
-		$counted_amount = $this->parse_amount( (string) $params['counted_amount'], $precision );
+		$counted_amount = $this->parse_amount( (string) $params['counted_amount'], $precision, CashMoney::MAX_TOTAL_MINOR_UNITS );
 		$actor          = $this->get_actor();
 
 		$this->start_transaction();
@@ -921,12 +922,13 @@ class CashSessionService {
 	 *
 	 * @param string $value     Decimal string.
 	 * @param int    $precision Precision.
+	 * @param int    $max       Largest accepted value in minor units.
 	 * @return int
 	 * @throws CashSessionException When the amount is invalid.
 	 */
-	private function parse_amount( string $value, int $precision ): int {
+	private function parse_amount( string $value, int $precision, int $max = CashMoney::MAX_AMOUNT_MINOR_UNITS ): int {
 		try {
-			return CashMoney::parse( $value, $precision );
+			return CashMoney::parse( $value, $precision, $max );
 		} catch ( InvalidArgumentException | OverflowException $e ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', $e->getMessage() );
 		}
