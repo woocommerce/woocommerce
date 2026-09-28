@@ -75,6 +75,34 @@ class ProductQueryFilters {
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$stock_status_counts = array();
+		if ( empty( $stock_status_options ) ) {
+			return $stock_status_counts;
+		}
+
+		if ( $this->can_combine_stock_status_queries() ) {
+			$selects  = array();
+			$statuses = array();
+			foreach ( $stock_status_options as $index => $status ) {
+				$escaped_status = esc_sql( $status );
+				$selects[]      = "COUNT( DISTINCT CASE WHEN postmeta.meta_value = '{$escaped_status}' THEN posts.ID END ) as status_{$index}";
+				$statuses[]     = "'{$escaped_status}'";
+			}
+
+			$stock_status_count_sql = '
+				SELECT ' . implode( ', ', $selects ) . "
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+					AND postmeta.meta_key = '_stock_status'
+					AND postmeta.meta_value IN ( " . implode( ', ', $statuses ) . " )
+				WHERE posts.ID IN ( {$product_query_sql} )
+			";
+			$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
+			foreach ( $stock_status_options as $index => $status ) {
+				$stock_status_counts[ $status ] = $result->{"status_{$index}"};
+			}
+
+			return $stock_status_counts;
+		}
 
 		foreach ( $stock_status_options as $status ) {
 			$stock_status_count_sql = $this->generate_stock_status_count_query( $status, $product_query_sql, $stock_status_options );
@@ -84,6 +112,46 @@ class ProductQueryFilters {
 		}
 
 		return $stock_status_counts;
+	}
+
+	/**
+	 * Check whether stock status queries have no custom database observers.
+	 *
+	 * @return bool
+	 */
+	private function can_combine_stock_status_queries(): bool {
+		global $wpdb, $wp_filter;
+
+		if ( ! is_object( $wpdb ) || get_class( $wpdb ) !== \wpdb::class || ! is_array( $wp_filter ) ) {
+			return false;
+		}
+
+		foreach ( array( 'all', 'log_query_custom_data' ) as $hook_name ) {
+			if ( isset( $wp_filter[ $hook_name ] ) && ( ! $wp_filter[ $hook_name ] instanceof \WP_Hook || ! is_array( $wp_filter[ $hook_name ]->callbacks ) || ! empty( $wp_filter[ $hook_name ]->callbacks ) ) ) {
+				return false;
+			}
+		}
+
+		if ( ! isset( $wp_filter['query'] ) ) {
+			return true;
+		}
+
+		$query_hook = $wp_filter['query'];
+		if ( ! $query_hook instanceof \WP_Hook || ! is_array( $query_hook->callbacks ) ) {
+			return false;
+		}
+		if ( empty( $query_hook->callbacks ) ) {
+			return true;
+		}
+		if ( count( $query_hook->callbacks ) !== 1 || ! isset( $query_hook->callbacks[0] ) || ! is_array( $query_hook->callbacks[0] ) || count( $query_hook->callbacks[0] ) !== 1 ) {
+			return false;
+		}
+
+		$callback = reset( $query_hook->callbacks[0] );
+		return is_array( $callback )
+			&& isset( $callback['function'], $callback['accepted_args'] )
+			&& array( $wpdb, 'remove_placeholder_escape' ) === $callback['function']
+			&& 1 === $callback['accepted_args'];
 	}
 
 	/**
