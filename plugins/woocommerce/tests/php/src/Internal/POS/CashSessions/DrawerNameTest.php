@@ -52,5 +52,13 @@ class DrawerNameTest extends WC_Unit_Test_Case {
 		$this->assertSame( DrawerName::key( 'Front counter' ), DrawerName::key( 'FRONT COUNTER' ) );
 		$this->assertSame( DrawerName::key( 'Caja ÑANDÚ' ), DrawerName::key( 'caja ñandú' ) );
 		$this->assertNotSame( DrawerName::key( 'Front counter' ), DrawerName::key( 'Back counter' ) );
+		$this->assertNotSame( DrawerName::key( 'Café' ), DrawerName::key( 'Cafe' ), 'Accents are not folded' );
+	}
+
+	/**
+	 * @testdox Should give a fixed-width key even when lowercasing adds characters.
+	 */
+	public function test_key_has_fixed_width(): void {
+		$this->assertSame( 64, strlen( DrawerName::key( str_repeat( 'İ', DrawerName::MAX_LENGTH ) ) ) );
 	}
 }

@@ -339,6 +339,28 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should filter drawers by exact name apart from case, not by accent-insensitive collation.
+	 */
+	public function test_drawer_filter_is_accent_sensitive(): void {
+		$cafe = $this->open_session( array( 'drawer_id' => 'Café' ) )->get_data()['id'];
+
+		$this->assertSame( array(), $this->request( 'GET', self::BASE, array( 'drawer_id' => 'Cafe' ) )->get_data() );
+		$this->assertSame( array( $cafe ), array_column( $this->request( 'GET', self::BASE, array( 'drawer_id' => 'CAFÉ' ) )->get_data(), 'id' ) );
+	}
+
+	/**
+	 * @testdox Should accept a maximum-length drawer name whose lowercase form is longer.
+	 */
+	public function test_drawer_name_with_case_expansion(): void {
+		$name = str_repeat( 'İ', 128 );
+
+		$response = $this->open_session( array( 'drawer_id' => $name ) );
+
+		$this->assertSame( 201, $response->get_status(), (string) wp_json_encode( $response->get_data() ) );
+		$this->assertSame( array( $response->get_data()['id'] ), array_column( $this->request( 'GET', self::BASE, array( 'drawer_id' => $name ) )->get_data(), 'id' ) );
+	}
+
+	/**
 	 * @testdox Should list sessions newest first with filters and pagination headers.
 	 */
 	public function test_list_sessions(): void {

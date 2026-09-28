@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use RuntimeException;
 
 /**
@@ -18,24 +17,6 @@ use RuntimeException;
  * @since 11.3.0
  */
 class CashSessionsDataStore {
-
-	/**
-	 * Database utility, used for index length limits.
-	 *
-	 * @var DatabaseUtil
-	 */
-	private DatabaseUtil $database_util;
-
-	/**
-	 * Initialize dependencies.
-	 *
-	 * @internal
-	 *
-	 * @param DatabaseUtil $database_util Database utility.
-	 */
-	final public function init( DatabaseUtil $database_util ): void {
-		$this->database_util = $database_util;
-	}
 
 	/**
 	 * Sessions table name.
@@ -87,7 +68,7 @@ class CashSessionsDataStore {
 	/**
 	 * Schema for dbDelta, used by WC_Install.
 	 *
-	 * Amounts are BIGINT minor units at the session precision.
+	 * Amounts are BIGINT minor units at the session precision. drawer_key holds DrawerName::key(), a hash.
 	 *
 	 * @since 11.3.0
 	 *
@@ -96,11 +77,10 @@ class CashSessionsDataStore {
 	public function get_database_schema(): string {
 		global $wpdb;
 
-		$collate          = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
-		$max_index_length = $this->database_util->get_max_index_length();
-		$sessions         = $this->get_sessions_table();
-		$movements        = $this->get_movements_table();
-		$drawer_events    = $this->get_drawer_events_table();
+		$collate       = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+		$sessions      = $this->get_sessions_table();
+		$movements     = $this->get_movements_table();
+		$drawer_events = $this->get_drawer_events_table();
 
 		return "
 CREATE TABLE $sessions (
@@ -108,7 +88,7 @@ CREATE TABLE $sessions (
 	device_id varchar(128) NOT NULL,
 	open_device_hash char(64) NULL,
 	drawer_name varchar(128) NULL,
-	drawer_key varchar(255) NULL,
+	drawer_key char(64) NULL,
 	status varchar(20) NOT NULL,
 	revision int(10) unsigned NOT NULL DEFAULT 1,
 	currency char(3) NOT NULL,
@@ -131,7 +111,7 @@ CREATE TABLE $sessions (
 	UNIQUE KEY open_request_id (open_request_id),
 	UNIQUE KEY open_device_hash (open_device_hash),
 	KEY device_id (device_id),
-	KEY drawer_key (drawer_key($max_index_length)),
+	KEY drawer_key (drawer_key),
 	KEY status (status)
 ) $collate;
 CREATE TABLE $movements (

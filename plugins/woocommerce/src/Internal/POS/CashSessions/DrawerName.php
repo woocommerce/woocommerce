@@ -50,12 +50,15 @@ final class DrawerName {
 	/**
 	 * Comparison key for a normalized drawer name.
 	 *
+	 * A hash of the lowercase name: it has a fixed width even when lowercasing adds characters, and SQL
+	 * compares it exactly whatever the column collation, as the PHP binding checks do.
+	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $name Normalized drawer name.
-	 * @return string
+	 * @return string 64 hex characters.
 	 */
 	public static function key( string $name ): string {
-		return mb_strtolower( $name, 'UTF-8' );
+		return hash( 'sha256', mb_strtolower( $name, 'UTF-8' ) );
 	}
 }
