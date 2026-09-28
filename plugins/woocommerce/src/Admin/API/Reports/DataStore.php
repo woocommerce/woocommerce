@@ -888,17 +888,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Whether free orders are left out of the report being built.
 	 *
-	 * A report asking for a specific treatment wins; otherwise the store-wide
-	 * setting applies, except on the reports listed above.
+	 * The store-wide setting applies, except on the reports listed above.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return bool
 	 */
 	protected function should_exclude_free_orders( $query_args ) {
-		if ( isset( $query_args['free_orders'] ) && '' !== $query_args['free_orders'] ) {
-			return 'exclude' === $query_args['free_orders'];
-		}
-
 		foreach ( self::get_free_order_including_contexts() as $context ) {
 			if ( 0 === strpos( (string) $this->context, $context ) ) {
 				return false;

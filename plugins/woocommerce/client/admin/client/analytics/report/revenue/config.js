@@ -7,7 +7,6 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { getFreeOrdersFilter } from '../free-orders-filter';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const REVENUE_REPORT_CHARTS_FILTER = 'woocommerce_admin_revenue_report_charts';
@@ -153,5 +152,4 @@ export const filters = applyFilters( REVENUE_REPORT_FILTERS_FILTER, [
 		showFilters: () => filterValues.length > 0,
 		filters: filterValues,
 	},
-	getFreeOrdersFilter(),
 ] );

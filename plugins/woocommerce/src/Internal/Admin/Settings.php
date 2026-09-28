@@ -265,12 +265,8 @@ class Settings {
 			);
 		}
 
-		// An immutable snapshot of the free order exclusion, so report configs can
-		// decide whether to render their control at module load. The mutable
-		// wcAdminSettings source is not readable synchronously by design.
-		$excluded_orders                         = \WC_Admin_Settings::get_option( 'woocommerce_analytics_excluded_orders', array() );
-		$settings['analyticsExcludesFreeOrders'] = is_array( $excluded_orders ) && in_array( 'zero_total', $excluded_orders, true );
-		$settings['analyticsFreeOrderAmount']    = html_entity_decode( wp_strip_all_tags( wc_price( 0 ) ), ENT_QUOTES, 'UTF-8' );
+		// Zero in the store currency, for the excluded orders setting label.
+		$settings['analyticsFreeOrderAmount'] = html_entity_decode( wp_strip_all_tags( wc_price( 0 ) ), ENT_QUOTES, 'UTF-8' );
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );

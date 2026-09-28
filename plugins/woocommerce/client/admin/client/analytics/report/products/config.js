@@ -9,7 +9,6 @@ import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 /**
  * Internal dependencies
  */
-import { getFreeOrdersFilter } from '../free-orders-filter';
 import {
 	getProductLabels,
 	getVariationLabels,
@@ -229,5 +228,4 @@ if ( Object.keys( advancedFilters.filters ).length ) {
 export const filters = applyFilters( PRODUCTS_REPORT_FILTERS_FILTER, [
 	filterConfig,
 	variationsConfig,
-	getFreeOrdersFilter(),
 ] );
