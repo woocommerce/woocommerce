@@ -212,6 +212,7 @@ class BlockPatterns {
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
+<<<<<<< HEAD
 			// Only log once per day by using a transient.
 			$transient_key = 'wc_ptk_pattern_store_warning';
 			// By only logging when patterns are empty and no fetch is scheduled,
@@ -224,6 +225,8 @@ class BlockPatterns {
 				// Set the transient to true to indicate that the warning has been logged in the current day.
 				set_transient( $transient_key, true, DAY_IN_SECONDS );
 			}
+=======
+>>>>>>> 7841e7fd73 (Stop scheduling Pattern Fetcher jobs (#68701))
 			return;
 		}
 
