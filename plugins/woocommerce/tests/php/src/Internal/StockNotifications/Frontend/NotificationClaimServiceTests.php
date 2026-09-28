@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationClaimService;
@@ -109,6 +110,20 @@ class NotificationClaimServiceTests extends \WC_Unit_Test_Case {
 		$this->sut->claim_guest_notifications( $customer_id );
 
 		$this->assertEqualSets( array( $first->get_id(), $second->get_id() ), $claimed_ids, 'Every claimed sign-up should be announced' );
+	}
+
+	/**
+	 * @testdox Should claim guest sign-ups when the customer verifies their email.
+	 */
+	public function test_claims_guest_signups_on_email_verification(): void {
+		$this->init_stock_notifications_services();
+
+		$customer_id  = $this->factory->user->create( array( 'user_email' => 'shopper@example.com' ) );
+		$notification = $this->create_notification( 0, 'shopper@example.com' );
+
+		wc_get_container()->get( EmailVerificationService::class )->mark_verified( $customer_id );
+
+		$this->assertSame( $customer_id, $this->reload( $notification )->get_user_id(), 'Verifying the email should link the guest sign-up' );
 	}
 
 	/**
