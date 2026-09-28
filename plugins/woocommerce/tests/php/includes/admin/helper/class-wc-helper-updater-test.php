@@ -326,6 +326,99 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed update check should keep the cached products and back off for a short window.
+	 *
+	 * @testWith ["server-error"]
+	 *           ["transport-error"]
+	 *
+	 * @param string $failure Kind of failure the update-check request returns.
+	 */
+	public function test_update_check_preserves_cache_when_request_fails( string $failure ): void {
+		$cached_data = array(
+			'hash'     => 'a-stale-hash',
+			'updated'  => time(),
+			'products' => array(
+				123 => array(
+					'version' => '1.2.3',
+					'slug'    => 'test-plugin',
+				),
+			),
+			'errors'   => array(),
+		);
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		$requests  = 0;
+		$http_mock = static function () use ( $failure, &$requests ) {
+			++$requests;
+			return 'transport-error' === $failure
+				? new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' )
+				: array(
+					'response' => array(
+						'code'    => 500,
+						'message' => 'Internal Server Error',
+					),
+					'body'     => '',
+				);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result       = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+			$second_check = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'def456',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$backoff_until = (int) get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
+		$this->assertSame( $cached_data['products'], $result, 'A failed check should serve the previously cached products' );
+		$this->assertSame( $cached_data, get_transient( '_woocommerce_helper_updates' ), 'A failed check should leave the cached update data untouched' );
+		$this->assertSame( $cached_data['products'], $second_check, 'A check inside the backoff window should serve the cached products' );
+		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even with a changed payload' );
+		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
+		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+	}
+
+	/**
+	 * @testdox A failed update check with nothing cached should return no products and not cache the empty result.
+	 */
+	public function test_update_check_without_cache_returns_nothing_when_request_fails(): void {
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 6: Could not resolve host' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( array(), $result, 'With nothing cached there are no products to serve' );
+		$this->assertFalse( get_transient( '_woocommerce_helper_updates' ), 'The empty result should not be cached' );
+	}
+
+	/**
 	 * Test that _update_check refreshes cache when hash doesn't match.
 	 */
 	public function test_update_check_refreshes_cache_with_mismatched_hash() {

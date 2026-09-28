@@ -1043,7 +1043,7 @@ class WC_Helper_Updater {
 	 * Extract the products from a cached update-check payload.
 	 *
 	 * Used on the paths that serve the previous cache rather than a fresh
-	 * response — while rate limited, and on the rate-limited response itself.
+	 * response — while backing off, and when the update check fails.
 	 *
 	 * @param mixed $data The data retrieved from the transient, of any shape.
 	 * @return array The cached products, or an empty array when there are none.
@@ -1081,12 +1081,12 @@ class WC_Helper_Updater {
 			return $data['products'];
 		}
 
-		// If a previous update-check was rate limited (HTTP 429), honor the
-		// server's reset window and skip the remote call until it passes. This
-		// backoff is independent of the payload hash above, so a changed payload
-		// (or a flushed cache) can't slip past it — but clicking the Marketplace
-		// "Refresh" button bypasses and clears it. Return the last cached
-		// products, if any, rather than an empty set.
+		/*
+		 * After a failed or rate-limited update-check, skip the remote call until the
+		 * backoff window passes. This check ignores the payload hash, so a changed
+		 * payload or flushed cache can't slip past it, but the Marketplace "Refresh"
+		 * button clears it. Return the last cached products, if any.
+		 */
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
 			return self::get_cached_products( $data );
 		}
@@ -1127,21 +1127,17 @@ class WC_Helper_Updater {
 
 		$response_code = (int) wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $response_code ) {
-			$data['errors'][] = 'http-error';
-
-			// Respect server-side rate limiting: on a 429, record the reset window so
-			// we hold off on further update-check calls until then, and return the
-			// previously cached products without touching the cache. Caching this
-			// empty result for 12 hours would outlive the reset window, and it would
-			// discard the very products the backoff branch above serves while we wait.
+			// Leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
 			if ( 429 === $response_code && is_array( $request ) ) {
 				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
-
-				return self::get_cached_products( $cached_data );
+			} else {
+				WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
 			}
-		} else {
-			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
+
+			return self::get_cached_products( $cached_data );
 		}
+
+		$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
 		return $data['products'];

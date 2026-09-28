@@ -3289,6 +3289,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		// A backoff from the pre-connect (public) update-check shouldn't block the first authenticated one.
+		WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 	}

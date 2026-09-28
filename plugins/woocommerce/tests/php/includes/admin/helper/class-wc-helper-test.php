@@ -88,6 +88,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
 		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
 	}
 
@@ -1243,6 +1244,37 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 				),
 			),
 			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
+	 * @testdox Connecting the site should clear an update-check backoff so the first authenticated check runs.
+	 */
+	public function test_update_auth_option_clears_update_check_backoff(): void {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+
+		$http_mock = static function () {
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => '{"name":"Test","email":"test@example.com"}',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			WC_Helper::update_auth_option( 'token', 'secret', 123, home_url() );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper_Options::update( 'auth', $previous_auth );
+		}
+
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'Connecting should clear the update-check backoff'
 		);
 	}
 }
