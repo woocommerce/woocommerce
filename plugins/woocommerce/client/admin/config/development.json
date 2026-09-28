@@ -2,7 +2,6 @@
 	"features": {
 		"experimental-blocks": true,
 		"minified-js": true,
-		"settings-ui": false,
 		"store-alerts": true,
 		"rest-api-v4": false,
 		"order-detail-redesign": false

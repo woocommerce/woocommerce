@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve unrelated settings extension registrations and disabled-field explanations, and simplify DataForm updates.

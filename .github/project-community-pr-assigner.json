@@ -69,7 +69,6 @@
 	"plugins/woocommerce/tests/php/src/Internal/Admin/*Marketing*/**/*": "ballade",
 	"plugins/woocommerce/tests/php/includes/emails/**/*": "ballade",
 	"plugins/woocommerce/tests/legacy/unit-tests/{coupon,discounts,email}/**/*": "ballade",
-	"packages/js/settings-ui/**/*": "moltres",
 	"plugins/woocommerce/client/admin/client/{payments,payments-welcome,settings,settings-payments,settings-recommendations}/**/*": "moltres",
 	"plugins/woocommerce/src/Gateways/**/*": "moltres",
 	"plugins/woocommerce/src/Admin/Settings/**/*": "moltres",

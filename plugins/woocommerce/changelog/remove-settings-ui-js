@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove the experimental Settings UI package and assets, which were behind a feature flag that was always off.
+

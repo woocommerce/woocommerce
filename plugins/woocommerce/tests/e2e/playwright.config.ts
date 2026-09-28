@@ -183,9 +183,6 @@ const serialRunSpecs = [
 	// restores it in teardown.
 	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
-	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
-	// in afterAll.
-	'**/tests/settings/settings-ui-feature-flag.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
 	'**/tests/shop/cart-redirection.spec.ts',
