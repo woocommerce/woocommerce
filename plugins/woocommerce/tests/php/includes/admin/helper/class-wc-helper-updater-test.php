@@ -326,7 +326,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed update check should keep the cached products and back off for a short window.
+	 * @testdox A failed update check should keep the cached products, without their forced auto-update, and back off for a short window.
 	 *
 	 * @testWith ["server-error"]
 	 *           ["transport-error"]
@@ -339,8 +339,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'updated'  => time(),
 			'products' => array(
 				123 => array(
-					'version' => '1.2.3',
-					'slug'    => 'test-plugin',
+					'version'    => '1.2.3',
+					'slug'       => 'test-plugin',
+					'autoupdate' => true,
 				),
 			),
 			'errors'   => array(),
@@ -368,6 +369,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 					123 => array(
 						'product_id' => 123,
 						'file_id'    => 'abc123',
+						'version'    => '1.0.0',
 					),
 				)
 			);
@@ -375,7 +377,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				array(
 					123 => array(
 						'product_id' => 123,
-						'file_id'    => 'def456',
+						'file_id'    => 'abc123',
+						'version'    => '1.1.0',
 					),
 				)
 			);
@@ -383,11 +386,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_mock );
 		}
 
-		$backoff_until = (int) get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
-		$this->assertSame( $cached_data['products'], $result, 'A failed check should serve the previously cached products' );
+		$expected_products = array(
+			123 => array(
+				'version' => '1.2.3',
+				'slug'    => 'test-plugin',
+			),
+		);
+		$backoff_until     = (int) get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
+		$this->assertSame( $expected_products, $result, 'A failed check should serve the cached products, without a forced auto-update decided for another version' );
 		$this->assertSame( $cached_data, get_transient( '_woocommerce_helper_updates' ), 'A failed check should leave the cached update data untouched' );
-		$this->assertSame( $cached_data['products'], $second_check, 'A check inside the backoff window should serve the cached products' );
-		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even with a changed payload' );
+		$this->assertSame( $expected_products, $second_check, 'A check inside the backoff window should serve the cached products' );
+		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
 		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
 		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
 	}

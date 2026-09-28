@@ -1043,15 +1043,25 @@ class WC_Helper_Updater {
 	 * Extract the products from a cached update-check payload.
 	 *
 	 * Used on the paths that serve the previous cache rather than a fresh
-	 * response — while backing off, and when the update check fails.
+	 * response — while backing off, and when the update check fails. The cache was
+	 * made for another payload, so its server-side `autoupdate` decisions are dropped.
 	 *
 	 * @param mixed $data The data retrieved from the transient, of any shape.
 	 * @return array The cached products, or an empty array when there are none.
 	 */
 	private static function get_cached_products( $data ) {
-		return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
-			? $data['products']
-			: array();
+		if ( ! is_array( $data ) || ! isset( $data['products'] ) || ! is_array( $data['products'] ) ) {
+			return array();
+		}
+
+		$products = $data['products'];
+		foreach ( $products as $product_id => $product ) {
+			if ( is_array( $product ) ) {
+				unset( $products[ $product_id ]['autoupdate'] );
+			}
+		}
+
+		return $products;
 	}
 
 	/**
