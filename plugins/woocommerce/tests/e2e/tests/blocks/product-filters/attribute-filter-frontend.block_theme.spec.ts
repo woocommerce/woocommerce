@@ -126,7 +126,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			} );
 		} );
 
-		test( 'renders product counts next to every Color attribute term', async ( {
+		test( 'renders current product counts for every attribute', async ( {
 			page,
 		} ) => {
 			await page.goto( '/shop' );

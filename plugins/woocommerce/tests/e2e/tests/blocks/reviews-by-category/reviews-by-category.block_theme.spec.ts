@@ -41,7 +41,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'offset setting applies in the editor and on the frontend', async ( {
+	test( 'Category offset persists into frontend review results', async ( {
 		page,
 		admin,
 		frontendUtils,

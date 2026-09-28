@@ -120,7 +120,7 @@ describe( 'useGetLocation', () => {
 		);
 	} );
 
-	it( 'resolves a category template slug into a numeric taxonomy location', async () => {
+	it( 'resolves category location into taxonomy request', async () => {
 		primeEntityResolution( 'taxonomy', 'product_cat', 'hoodies', [
 			{ id: 81, slug: 'hoodies' },
 		] );

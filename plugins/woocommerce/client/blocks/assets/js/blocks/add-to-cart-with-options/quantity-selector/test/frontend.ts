@@ -169,7 +169,7 @@ describe( 'Add to Cart + Options quantity selector store', () => {
 		}
 	);
 
-	it( 'passes a below-minimum positive value through unchanged on blur', () => {
+	it( 'preserves a positive manual value for validation by the parent store', () => {
 		mockContext.inputElement = createInput( '3' );
 
 		getRegisteredStore().actions.handleQuantityBlur();
