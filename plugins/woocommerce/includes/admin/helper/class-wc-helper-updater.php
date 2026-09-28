@@ -21,6 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Helper_Updater {
 
 	/**
+	 * Prefix for the utm_campaign value of links in the message appended to Core's update row.
+	 */
+	private const CAMPAIGN_UPDATE_ROW = 'pu_plugin_screen';
+
+	/**
+	 * Prefix for the utm_campaign value of links in the notice row under an up-to-date plugin.
+	 */
+	private const CAMPAIGN_PLUGIN_ROW = 'pu_plugin_row';
+
+	/**
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
@@ -41,6 +51,9 @@ class WC_Helper_Updater {
 		if ( WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_plugins_without_subscription' ), 11 );
+			add_action( 'after_plugin_row', array( __CLASS__, 'display_subscription_notice_for_woo_plugins' ), 10, 2 );
+		} else {
+			add_action( 'after_plugin_row', array( __CLASS__, 'display_connect_notice_for_woo_plugins' ), 10, 2 );
 		}
 	}
 
@@ -250,29 +263,437 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function add_connect_woocom_plugin_message() {
+		self::print_update_row_message( self::get_connect_notice( self::CAMPAIGN_UPDATE_ROW ) );
+	}
+
+	/**
+	 * Append a message to the update row Core renders for a plugin.
+	 *
+	 * Core has already printed its own sentence, so the message is preceded by a space.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $notice The notice text, which may contain a single link.
+	 *
+	 * @return void
+	 */
+	private static function print_update_row_message( string $notice ): void {
+		if ( '' === $notice ) {
+			return;
+		}
+
+		echo ' ' . self::kses_notice( $notice ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kses_notice() escapes.
+	}
+
+	/**
+	 * Strip a notice down to text and a link with a class.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $notice The notice HTML.
+	 *
+	 * @return string
+	 */
+	private static function kses_notice( string $notice ): string {
+		return wp_kses(
+			$notice,
+			array(
+				'a' => array(
+					'href'  => array(),
+					'class' => array(),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Message asking an unconnected store to connect to WooCommerce.com.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $campaign_prefix Prefix for the link's utm_campaign value.
+	 *
+	 * @return string
+	 */
+	private static function get_connect_notice( string $campaign_prefix ): string {
 		$connect_page_url = add_query_arg(
 			array(
 				'page'         => 'wc-admin',
 				'tab'          => 'my-subscriptions',
 				'path'         => rawurlencode( '/extensions' ),
 				'utm_source'   => 'pu',
-				'utm_campaign' => 'pu_plugin_screen_connect',
+				'utm_campaign' => $campaign_prefix . '_connect',
 			),
 			admin_url( 'admin.php' )
 		);
 
+		return sprintf(
+			/* translators: 1: URL of the WooCommerce.com connect page */
+			__( 'Extension distributed via WooCommerce.com. <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> for security updates, product improvements, and support.', 'woocommerce' ),
+			esc_url( $connect_page_url )
+		);
+	}
+
+	/**
+	 * Product ID of the WooCommerce.com plugin a row notice applies to.
+	 *
+	 * Returns 0 when the row should get no notice: the plugin isn't WooCommerce.com hosted, the
+	 * screen is one Core renders no update rows on, or Core already renders an update row for it,
+	 * which the in_plugin_update_message-{file-name} handlers append their own message to.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 *
+	 * @return int
+	 */
+	private static function get_product_id_for_plugin_row_notice( $plugin_file, $plugin_data ): int {
+		global $wp_list_table;
+
+		// Core skips its own update rows for these users, so there is nothing to act on here either.
+		if ( is_null( $wp_list_table ) || ! current_user_can( 'update_plugins' ) ) {
+			return 0;
+		}
+
+		// On multisite, plugins are managed from the network admin, and Core renders no update rows on a sub-site's screen.
+		if ( is_multisite() && ! is_network_admin() ) {
+			return 0;
+		}
+
+		if ( empty( $plugin_data['Woo'] ) ) {
+			return 0;
+		}
+
+		// The Update Manager is what delivers the updates these notices are about, so prompting on its own row reads as circular.
+		if ( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE === $plugin_file ) {
+			return 0;
+		}
+
+		$woo_plugins = WC_Helper::get_local_woo_plugins();
+		if ( ! isset( $woo_plugins[ $plugin_file ] ) ) {
+			return 0;
+		}
+
+		$updates = get_site_transient( 'update_plugins' );
+		if ( isset( $updates->response[ $plugin_file ] ) ) {
+			return 0;
+		}
+
+		return (int) $woo_plugins[ $plugin_file ]['_product_id'];
+	}
+
+	/**
+	 * Print a notice row underneath a plugin row, styled like the update rows Core renders.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param string $row_type    Value for the data-plugin-row-type attribute.
+	 * @param string $notice      The notice text, which may contain a single link.
+	 *
+	 * @return void
+	 */
+	private static function print_plugin_row_notice( $plugin_file, $row_type, $notice ): void {
+		global $wp_list_table;
+
 		printf(
-			wp_kses(
-			/* translators: 1: Woo Update Manager plugin install URL */
-				__( ' <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
+			'<tr class="plugin-update-tr %1$s" data-plugin="%2$s" data-plugin-row-type="%3$s"><td colspan="%4$s" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt"><p>%5$s</p></div></td></tr>',
+			esc_attr( ( is_network_admin() ? is_plugin_active_for_network( $plugin_file ) : is_plugin_active( $plugin_file ) ) ? 'active' : 'inactive' ),
+			esc_attr( $plugin_file ),
+			esc_attr( $row_type ),
+			esc_attr( (string) $wp_list_table->get_column_count() ),
+			self::kses_notice( $notice ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kses_notice() escapes.
+		);
+	}
+
+	/**
+	 * Runs on after_plugin_row, show a connect message on WooCommerce.com plugin rows that Core
+	 * renders no update notice for.
+	 *
+	 * Core only renders its update row -- and with it the message appended by
+	 * add_connect_woocom_plugin_message() -- when an update is pending, so an up-to-date plugin
+	 * gives an unconnected store no indication that it won't receive updates.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 *
+	 * @return void
+	 */
+	public static function display_connect_notice_for_woo_plugins( $plugin_file, $plugin_data ): void {
+		if ( 0 === self::get_product_id_for_plugin_row_notice( $plugin_file, $plugin_data ) ) {
+			return;
+		}
+
+		self::print_plugin_row_notice( $plugin_file, 'woo-connect-notice', self::get_connect_notice( self::CAMPAIGN_PLUGIN_ROW ) );
+	}
+
+	/**
+	 * Runs on after_plugin_row, show a subscription message on WooCommerce.com plugin rows that
+	 * Core renders no update notice for.
+	 *
+	 * Rows that do have an update are covered by the in_plugin_update_message-{file-name} handlers.
+	 * Without one, a plugin whose subscription is missing, expired, or lapsing says nothing at all.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 *
+	 * @return void
+	 */
+	public static function display_subscription_notice_for_woo_plugins( $plugin_file, $plugin_data ): void {
+		$product_id = self::get_product_id_for_plugin_row_notice( $plugin_file, $plugin_data );
+		if ( 0 === $product_id ) {
+			return;
+		}
+
+		$notice = self::get_subscription_notice( $product_id, self::get_product_page_url( $plugin_file ), self::CAMPAIGN_PLUGIN_ROW );
+		if ( '' === $notice ) {
+			return;
+		}
+
+		self::print_plugin_row_notice( $plugin_file, 'woo-subscription-notice', $notice );
+	}
+
+	/**
+	 * Message for a product's subscription state, or an empty string when there is nothing to say.
+	 *
+	 * Resolves the product's subscriptions once and hands them to whichever message needs them,
+	 * so a screen full of WooCommerce.com plugins doesn't filter the whole list twice per row.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $product_id       WooCommerce.com product ID.
+	 * @param string $product_page_url WooCommerce.com product page URL, or an empty string.
+	 * @param string $campaign_prefix  Prefix for the link's utm_campaign value.
+	 *
+	 * @return string
+	 */
+	private static function get_subscription_notice( int $product_id, string $product_page_url, string $campaign_prefix ): string {
+		// While the last subscriptions fetch is still failing, the list is stale or empty, so a
+		// missing subscription would be a guess rather than a fact.
+		if ( null !== WC_Helper::get_api_error() ) {
+			return '';
+		}
+
+		$subscriptions = self::get_subscriptions_for_product( $product_id );
+		if ( empty( $subscriptions ) ) {
+			return self::get_purchase_notice( $product_id, $product_page_url, $campaign_prefix );
+		}
+
+		return self::get_renewal_notice( $subscriptions, $campaign_prefix );
+	}
+
+	/**
+	 * Every subscription the account holds for a product.
+	 *
+	 * Read straight from get_subscriptions() so the per-request static caches in
+	 * get_installed_subscriptions() and get_unconnected_subscriptions() don't pin the first
+	 * result for the rest of the request.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int $product_id WooCommerce.com product ID.
+	 *
+	 * @return array
+	 */
+	private static function get_subscriptions_for_product( int $product_id ): array {
+		return wp_list_filter( WC_Helper::get_subscriptions(), array( 'product_id' => $product_id ) );
+	}
+
+	/**
+	 * WooCommerce.com product page URL for a plugin, from the update data Core already holds.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 *
+	 * @return string The product page URL, or an empty string when the update data carries none.
+	 */
+	private static function get_product_page_url( $plugin_file ): string {
+		$updates = get_site_transient( 'update_plugins' );
+
+		return self::get_product_page_url_from_update_response( $updates->no_update[ $plugin_file ] ?? $updates->response[ $plugin_file ] ?? null );
+	}
+
+	/**
+	 * WooCommerce.com product page URL carried by an update response, or an empty string.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $response Update response from the update_plugins transient.
+	 *
+	 * @return string
+	 */
+	private static function get_product_page_url_from_update_response( $response ): string {
+		return is_object( $response ) && ! empty( $response->url ) ? (string) $response->url : '';
+	}
+
+	/**
+	 * Message for a plugin whose product the connected account holds no subscription for.
+	 *
+	 * Links to the product page so the reader can see what a subscription covers before buying.
+	 * Falls back to the cart when the update data carries no product URL.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int    $product_id       WooCommerce.com product ID.
+	 * @param string $product_page_url WooCommerce.com product page URL, or an empty string.
+	 * @param string $campaign_prefix  Prefix for the link's utm_campaign value.
+	 *
+	 * @return string
+	 */
+	private static function get_purchase_notice( int $product_id, string $product_page_url, string $campaign_prefix ): string {
+		$purchase_link = '' !== $product_page_url
+			? add_query_arg(
 				array(
-					'a' => array(
-						'href'  => array(),
-						'class' => array(),
-					),
-				)
+					'utm_source'   => 'pu',
+					'utm_campaign' => $campaign_prefix . '_purchase',
+				),
+				$product_page_url
+			)
+			: add_query_arg(
+				array(
+					'add-to-cart'  => $product_id,
+					'utm_source'   => 'pu',
+					'utm_campaign' => $campaign_prefix . '_purchase',
+				),
+				PluginsHelper::WOO_CART_PAGE_URL
+			);
+
+		return sprintf(
+			/* translators: 1: URL of the WooCommerce.com product page */
+			__( 'You don\'t have an active subscription for this product. <a href="%1$s" class="woocommerce-purchase-subscription">Subscribe</a> now for security updates, product improvements, and support.', 'woocommerce' ),
+			esc_url( $purchase_link )
+		);
+	}
+
+	/**
+	 * Message for a plugin whose subscription has expired or is lapsing.
+	 *
+	 * Returns an empty string for a subscription that needs no action.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array  $subscriptions   Every subscription the account holds for the product.
+	 * @param string $campaign_prefix Prefix for the link's utm_campaign value.
+	 *
+	 * @return string
+	 */
+	private static function get_renewal_notice( array $subscriptions, string $campaign_prefix ): string {
+		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions( $subscriptions );
+
+		if ( ! empty( $expired_subscription ) ) {
+			return sprintf(
+				/* translators: 1: URL of the WooCommerce.com cart set up to renew the subscription */
+				__( 'Your subscription for this extension has expired. <a href="%1$s" class="woocommerce-renew-subscription">Renew your subscription</a> for security updates, product improvements, and support.', 'woocommerce' ),
+				esc_url( self::get_renew_link( $expired_subscription, $campaign_prefix . '_renew' ) )
+			);
+		}
+
+		if ( ! empty( $expiring_subscription ) ) {
+			$autorenew_link = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => $campaign_prefix . '_enable_autorenew',
+				),
+				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
+			// Auto-renew still needs turning on when the record carries no usable expiry; only
+			// the date is unknown, so name everything except the day.
+			if ( ! is_numeric( $expiring_subscription['expires'] ?? null ) ) {
+				return sprintf(
+					/* translators: 1: URL of the My Subscriptions page */
+					__( 'Your subscription for this extension expires soon. <a href="%1$s" class="woocommerce-enable-autorenew">Enable auto-renew</a> to keep getting updates and support.', 'woocommerce' ),
+					esc_url( $autorenew_link )
+				);
+			}
+
+			return sprintf(
+				/* translators: 1: Expiry date, 2: URL of the My Subscriptions page */
+				__( 'Your subscription for this extension expires on %1$s. <a href="%2$s" class="woocommerce-enable-autorenew">Enable auto-renew</a> to keep getting updates and support.', 'woocommerce' ),
+				wp_date( get_option( 'date_format' ), (int) $expiring_subscription['expires'] ),
+				esc_url( $autorenew_link )
+			);
+		}
+
+		return '';
+	}
+
+	/**
+	 * Product ID carried by an update response WooCommerce wrote, or 0 for anything else.
+	 *
+	 * The updater sets the ID to "woocommerce-com-<product ID>". A filter can replace the
+	 * response, so anything that does not match exactly is treated as not ours rather than
+	 * having its digits scraped out.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $response Update response from the update_plugins transient.
+	 *
+	 * @return int
+	 */
+	private static function get_product_id_from_update_response( $response ): int {
+		if ( ! is_object( $response ) || ! isset( $response->id ) || ! is_string( $response->id ) ) {
+			return 0;
+		}
+
+		$prefix = 'woocommerce-com-';
+		if ( 0 !== strpos( $response->id, $prefix ) ) {
+			return 0;
+		}
+
+		$product_id = substr( $response->id, strlen( $prefix ) );
+
+		return ctype_digit( $product_id ) ? (int) $product_id : 0;
+	}
+
+	/**
+	 * Cart link that renews one specific subscription.
+	 *
+	 * A plain add-to-cart link would buy a new subscription instead. This is the same link the
+	 * My Subscriptions screen and the product usage notice use. Renewing needs the product key
+	 * and the order ID; a record missing either gets the add-to-cart link, which still works.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array  $subscription Subscription record from the WooCommerce.com API.
+	 * @param string $campaign     utm_campaign value for the link.
+	 *
+	 * @return string
+	 */
+	private static function get_renew_link( array $subscription, string $campaign ): string {
+		$product_id  = $subscription['product_id'];
+		$product_key = $subscription['product_key'] ?? '';
+		$order_id    = $subscription['order_id'] ?? '';
+
+		// The same shape check filter_valid_subscriptions() applies to the product ID.
+		$has_order_id = ( is_int( $order_id ) || ( is_string( $order_id ) && ctype_digit( $order_id ) ) ) && 0 < (int) $order_id;
+
+		if ( ! is_string( $product_key ) || '' === $product_key || ! $has_order_id ) {
+			return add_query_arg(
+				array(
+					'add-to-cart'  => $product_id,
+					'utm_source'   => 'pu',
+					'utm_campaign' => $campaign,
+				),
+				PluginsHelper::WOO_CART_PAGE_URL
+			);
+		}
+
+		return add_query_arg(
+			array(
+				'renew_product' => $product_id,
+				'product_key'   => $product_key,
+				'order_id'      => $order_id,
+				'utm_source'    => 'pu',
+				'utm_campaign'  => $campaign,
 			),
-			esc_url( $connect_page_url ),
+			PluginsHelper::WOO_CART_PAGE_URL
 		);
 	}
 
@@ -312,6 +733,53 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Expired and lapsing subscriptions for a product that the merchant should act on.
+	 *
+	 * Every subscription the account holds for the product counts, wherever it is connected,
+	 * because renewing and buying can be done from any store. Nothing is returned while another
+	 * subscription still covers the product, so a store that keeps its updates stays quiet.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $subscriptions Every subscription the account holds for the product.
+	 *
+	 * @return array A pair of subscriptions, each an array or false: the expired one, then the
+	 *               lapsing one without auto-renew.
+	 */
+	private static function get_renewable_subscriptions( array $subscriptions ): array {
+		if ( empty( $subscriptions ) ) {
+			return array( false, false );
+		}
+
+		// A lifetime subscription never lapses, so an expired flag on one is nothing to act on.
+		$active = array_filter(
+			$subscriptions,
+			function ( $subscription ) {
+				return empty( $subscription['expired'] ) || ! empty( $subscription['lifetime'] );
+			}
+		);
+
+		// Nothing covers the product any more, so renewing is what restores updates.
+		if ( empty( $active ) ) {
+			return array( current( $subscriptions ), false );
+		}
+
+		$lapsing = array_filter(
+			$active,
+			function ( $subscription ) {
+				return ! empty( $subscription['expiring'] ) && empty( $subscription['autorenew'] );
+			}
+		);
+
+		// One subscription that outlives the others keeps the product covered.
+		if ( count( $lapsing ) !== count( $active ) ) {
+			return array( false, false );
+		}
+
+		return array( false, current( $lapsing ) );
+	}
+
+	/**
 	 * Runs on in_plugin_update_message-{file-name}, show a message if plugins subscription expired or expiring soon.
 	 *
 	 * @param object $plugin_data An array of plugin metadata.
@@ -320,89 +788,12 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
-		// Extract product ID from the response.
-		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
-
-		$installed_or_unconnected = array_merge(
-			WC_Helper::get_installed_subscriptions(),
-			WC_Helper::get_unconnected_subscriptions()
-		);
-
-		// Product subscriptions.
-		$subscriptions = wp_list_filter( $installed_or_unconnected, array( 'product_id' => $product_id ) );
-		if ( empty( $subscriptions ) ) {
+		$product_id = self::get_product_id_from_update_response( $response );
+		if ( 0 === $product_id || null !== WC_Helper::get_api_error() ) {
 			return;
 		}
 
-		$expired_subscription = current(
-			array_filter(
-				$subscriptions,
-				function ( $subscription ) {
-					return ! empty( $subscription['expired'] ) && ! $subscription['lifetime'];
-				}
-			)
-		);
-
-		$expiring_subscription = current(
-			array_filter(
-				$subscriptions,
-				function ( $subscription ) {
-					return ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'];
-				}
-			)
-		);
-
-		// Prepare the expiry notice based on subscription status.
-		$expiry_notice = '';
-		if ( ! empty( $expired_subscription ) ) {
-
-			$renew_link = add_query_arg(
-				array(
-					'add-to-cart'  => $product_id,
-					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_plugin_screen_renew',
-				),
-				PluginsHelper::WOO_CART_PAGE_URL
-			);
-
-			/* translators: 1: Product regular price */
-			$product_price = ! empty( $expired_subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $expired_subscription['product_regular_price'] ) ) : '';
-
-			$expiry_notice = sprintf(
-			/* translators: 1: URL to My Subscriptions page 2: Product price */
-				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
-				esc_url( $renew_link ),
-				$product_price
-			);
-		} elseif ( ! empty( $expiring_subscription ) ) {
-			$renew_link = add_query_arg(
-				array(
-					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_plugin_screen_enable_autorenew',
-				),
-				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
-			);
-
-			$expiry_notice = sprintf(
-			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
-				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
-				date_i18n( 'F jS', $expiring_subscription['expires'] ),
-				esc_url( $renew_link )
-			);
-		}
-
-		// Display the expiry notice.
-		if ( ! empty( $expiry_notice ) ) {
-			echo wp_kses(
-				$expiry_notice,
-				array(
-					'a' => array(
-						'href'  => array(),
-						'class' => array(),
-					),
-				)
-			);
-		}
+		self::print_update_row_message( self::get_renewal_notice( self::get_subscriptions_for_product( $product_id ), self::CAMPAIGN_UPDATE_ROW ) );
 	}
 
 	/**
@@ -416,38 +807,18 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_plugins_without_subscription( $plugin_data, $response ) {
-		// Extract product ID from the response.
-		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
-
-		if ( WC_Helper::has_product_subscription( $product_id ) ) {
+		$product_id = self::get_product_id_from_update_response( $response );
+		if ( 0 === $product_id || null !== WC_Helper::get_api_error() ) {
 			return;
 		}
 
-		// Prepare the expiry notice based on subscription status.
-		$purchase_link = add_query_arg(
-			array(
-				'add-to-cart'  => $product_id,
-				'utm_source'   => 'pu',
-				'utm_campaign' => 'pu_plugin_screen_purchase',
-			),
-			PluginsHelper::WOO_CART_PAGE_URL,
-		);
+		// An empty list after a failed fetch would be a guess, which the guard above rules out.
+		if ( ! empty( self::get_subscriptions_for_product( $product_id ) ) ) {
+			return;
+		}
 
-		$notice = sprintf(
-			/* translators: 1: URL to My Subscriptions page */
-			__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe</a> to update.', 'woocommerce' ),
-			esc_url( $purchase_link ),
-		);
-
-		// Display the expiry notice.
-		echo wp_kses(
-			$notice,
-			array(
-				'a' => array(
-					'href'  => array(),
-					'class' => array(),
-				),
-			)
+		self::print_update_row_message(
+			self::get_purchase_notice( $product_id, self::get_product_page_url_from_update_response( $response ), self::CAMPAIGN_UPDATE_ROW )
 		);
 	}
 

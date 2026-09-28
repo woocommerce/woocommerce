@@ -63,6 +63,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['orderby']             = $request['orderby'];
 		$args['order']               = $request['order'];
 		$args['taxes']               = $request['taxes'];
+		$args['location_includes']   = $request['location_includes'];
+		$args['location_excludes']   = $request['location_excludes'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
@@ -222,6 +224,16 @@ class Controller extends GenericController implements ExportableInterface {
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['location_includes']  = array(
+			'description'       => __( 'Includes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['location_excludes']  = array(
+			'description'       => __( 'Excludes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

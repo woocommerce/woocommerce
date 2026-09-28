@@ -161,7 +161,10 @@
 						"composer.lock",
 						"**/*.php",
 						".wp-env.test.json",
-						"phpunit.xml"
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -190,7 +193,10 @@
 						"composer.lock",
 						"**/*.php",
 						".wp-env.test.json",
-						"phpunit.xml"
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -219,7 +225,10 @@
 						"composer.lock",
 						"**/*.php",
 						".wp-env.test.json",
-						"phpunit.xml"
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -245,7 +254,10 @@
 						"tests/legacy/**",
 						"tests/php/**",
 						"tests/unit-tests/**",
-						"phpunit.xml"
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -819,7 +831,10 @@
 						"composer.lock",
 						"**/*.php",
 						".wp-env.test.json",
-						"phpunit.xml"
+						"phpunit.xml",
+						"client/blocks/assets/js/**/block.json",
+						"client/blocks/bin/copy-blocks-json.sh",
+						"tests/php/bin/run-phpunit.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -974,6 +989,7 @@
 						"patterns/**/*.php",
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
+						"src/StoreApi/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
 						"sample-data/sample_products.xml",
@@ -1104,6 +1120,7 @@
 						"patterns/**/*.php",
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
+						"src/StoreApi/**/*.php",
 						"src/Internal/Features/BlockEditorUnifiedAssets.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
@@ -1277,7 +1294,8 @@
 					"changes": [
 						"includes/gateways/paypal/**/*.php",
 						"src/Gateways/PayPal/**/*.php",
-						"tests/e2e/tests/paypal/**"
+						"tests/e2e/tests/paypal/**",
+						"tests/e2e/fixtures/paypal-fixtures.ts"
 					],
 					"events": [
 						"pull_request",

@@ -124,10 +124,23 @@ export class FrontendUtils {
 		const { waitForCartRequests } = this.trackCartRequests();
 
 		if ( itemName !== '' ) {
-			// We can't use `getByRole()` here because the Add to Cart button
-			// might be a button (in blocks) or a link (in the legacy template).
+			// The button's accessible name is translated, so matching on it
+			// breaks whenever the site runs in another language. Match the
+			// product by its title, which is content and stays as authored, and
+			// click the control by class, since it is a button in blocks and a
+			// link in the legacy template. Match the heading rather than any
+			// descendant text, so a product cannot be selected by text the
+			// card repeats, and keep it exact, or "Beanie" also selects
+			// "Beanie with Logo".
 			await this.page
-				.getByLabel( `Add to cart: “${ itemName }”` )
+				.locator( 'li.product' )
+				.filter( {
+					has: this.page.getByRole( 'heading', {
+						name: itemName,
+						exact: true,
+					} ),
+				} )
+				.locator( '.add_to_cart_button' )
 				.click();
 		} else {
 			await this.page.click( 'text=Add to cart' );
