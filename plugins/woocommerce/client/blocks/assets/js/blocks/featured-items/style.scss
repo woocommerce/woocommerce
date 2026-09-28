@@ -165,7 +165,7 @@
 		}
 	}
 
-	:where(&__inner-blocks) {
+	&__inner-blocks {
 		:where(.wp-block-post-title, .wp-block-woocommerce-category-title) {
 			&,
 			a {
