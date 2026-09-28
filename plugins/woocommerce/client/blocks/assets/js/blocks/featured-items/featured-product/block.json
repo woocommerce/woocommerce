@@ -17,7 +17,6 @@
 		"color": {
 			"background": true,
 			"text": true,
-			"heading": true,
 			"gradients": true,
 			"link": true,
 			"enableContrastChecker": false
