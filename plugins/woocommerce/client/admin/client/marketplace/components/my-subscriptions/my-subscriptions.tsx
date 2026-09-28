@@ -34,6 +34,7 @@ import {
 } from '../../contexts/types';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
+import { MARKETPLACE_CONNECT_DOCS_PATH } from '../constants';
 
 /**
  * Whether the failure captured at page load has already been reported.
@@ -117,7 +118,7 @@ export default function MySubscriptions(): React.JSX.Element {
 
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(
-			'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
+			'Create and connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
 			'woocommerce'
 		);
 
@@ -160,9 +161,19 @@ export default function MySubscriptions(): React.JSX.Element {
 					<p className="woocommerce-marketplace__my-subscriptions__description">
 						{ connectMessage }
 					</p>
-					<Button href={ connectUrl() } variant="primary">
-						{ __( 'Connect', 'woocommerce' ) }
-					</Button>
+					<div className="woocommerce-marketplace__my-subscriptions__connect-actions">
+						<Button href={ connectUrl() } variant="primary">
+							{ __( 'Connect', 'woocommerce' ) }
+						</Button>
+						<Button
+							href={ MARKETPLACE_CONNECT_DOCS_PATH }
+							target="_blank"
+							rel="noopener noreferrer"
+							variant="secondary"
+						>
+							{ __( 'Learn more', 'woocommerce' ) }
+						</Button>
+					</div>
 				</div>
 			</>
 		);
