@@ -230,6 +230,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
+			'customs_commodity_code',
+			'customs_country_of_origin',
+			'customs_description',
 		);
 
 		if ( $with_cogs_enabled ) {
@@ -2677,5 +2680,126 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_rest_invalid_product_id', $data['update'][0]['error']['code'] );
 		$this->assertSame( 'Updated in batch', $data['update'][1]['name'] );
 		$this->assertSame( 'Updated in batch', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Creating a product normalizes customs values.
+	 */
+	public function test_create_product_normalizes_customs_values(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'                      => 'Coffee',
+				'customs_commodity_code'    => '0901.21.0010',
+				'customs_country_of_origin' => ' br ',
+				'customs_description'       => '<b>Roasted coffee</b>',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Valid customs values should create the product.' );
+		$data = $response->get_data();
+		$this->assertSame( '0901210010', $data['customs_commodity_code'], 'The commodity code should be stored without punctuation.' );
+		$this->assertSame( 'BR', $data['customs_country_of_origin'], 'The country of origin should be trimmed and uppercased.' );
+		$this->assertSame( 'Roasted coffee', $data['customs_description'], 'The customs description should be stripped of markup.' );
+	}
+
+	/**
+	 * @testdox Product customs values honor the request context.
+	 */
+	public function test_product_customs_values_use_request_context(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_customs_commodity_code( '090121' );
+		$product->save();
+		$filter = static function () {
+			return '999999';
+		};
+		add_filter( 'woocommerce_product_get_customs_commodity_code', $filter );
+
+		$view = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) )->get_data();
+		$edit = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$edit->set_param( 'context', 'edit' );
+		$edit = $this->server->dispatch( $edit )->get_data();
+
+		$this->assertSame( '999999', $view['customs_commodity_code'], 'The view context should return the filtered value.' );
+		$this->assertSame( '090121', $edit['customs_commodity_code'], 'The edit context should return the stored value.' );
+	}
+
+	/**
+	 * @testdox Omitted product customs fields are preserved while null clears them.
+	 */
+	public function test_update_product_preserves_and_clears_customs_values(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_customs_commodity_code( '090121' );
+		$product->set_customs_country_of_origin( 'BR' );
+		$product->set_customs_description( 'Coffee' );
+		$product->save();
+		$id = $product->get_id();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params( array( 'menu_order' => 3 ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'An update without customs fields should succeed.' );
+		$this->assertSame( '090121', $response->get_data()['customs_commodity_code'], 'Omitted customs fields should be preserved.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params(
+			array(
+				'customs_commodity_code'    => null,
+				'customs_country_of_origin' => null,
+				'customs_description'       => null,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Clearing customs fields should succeed.' );
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $field ) {
+			$this->assertNull( $response->get_data()[ $field ], "The $field field should be cleared." );
+			$this->assertFalse( metadata_exists( 'post', $id, '_' . $field ), "The $field meta should be deleted." );
+		}
+	}
+
+	/**
+	 * @testdox Invalid product customs input rejects the request without saving other changes.
+	 * @testWith ["customs_commodity_code", "0901A10010"]
+	 * @param string $field Invalid field.
+	 * @param string $value Invalid value.
+	 */
+	public function test_update_product_rejects_invalid_customs_values( string $field, string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_menu_order( 2 );
+		$product->save();
+		$id = $product->get_id();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $id );
+		$request->set_body_params(
+			array(
+				'menu_order'                => 7,
+				'customs_country_of_origin' => 'BR',
+				$field                      => $value,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid customs input should return a 400 response.' );
+		$this->assertSame( 'woocommerce_product_invalid_' . $field, $response->get_data()['code'], 'The error code should name the invalid field.' );
+		$this->assertSame( 2, wc_get_product( $id )->get_menu_order(), 'Other product changes should not be saved.' );
+		$this->assertFalse( metadata_exists( 'post', $id, '_customs_country_of_origin' ), 'Valid customs values in the same request should not be saved.' );
+	}
+
+	/**
+	 * @testdox Non-string JSON customs values are rejected.
+	 */
+	public function test_update_product_rejects_non_string_customs_value(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'customs_commodity_code' => 90121000 ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'A numeric commodity code should be rejected.' );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Schema validation should reject the non-string value.' );
+		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_customs_commodity_code' ), 'A rejected commodity code should not be stored.' );
 	}
 }
