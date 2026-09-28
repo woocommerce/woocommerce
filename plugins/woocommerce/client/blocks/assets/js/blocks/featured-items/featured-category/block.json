@@ -8,7 +8,7 @@
 		"interactivity": {
 			"clientNavigation": true
 		},
-		"align": true,
+		"align": [ "wide", "full" ],
 		"ariaLabel": true,
 		"color": {
 			"background": true,
