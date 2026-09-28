@@ -122,8 +122,8 @@ Confirm `LOCAL_CI_RECEIPTS_DISABLED` is `0`.
   the receipt's name and `external_id` on the commit
   (`gh api repos/woocommerce/woocommerce/commits/<sha>/check-runs?app_id=4830646`)
   with what `receipt.js` computes.
-- `author … has unknown repository permission and association CONTRIBUTOR`
-  means the permission lookup failed; check the token's permissions on the
-  job.
+- `author … has unknown repository permission; write permission is
+  required` means the permission lookup failed; check the token's
+  permissions on the job.
 - `lookup failed, running normally: …` is an API or parse error; the message
   says which.

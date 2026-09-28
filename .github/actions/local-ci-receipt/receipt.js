@@ -8,7 +8,6 @@
 const crypto = require( 'crypto' );
 
 const CONFIG_PATH = '.github/local-ci.json';
-const TRUSTED_ASSOCIATIONS = [ 'MEMBER', 'OWNER' ];
 const WRITE_PERMISSIONS = [ 'admin', 'maintain', 'write' ];
 const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
 // Only job types whose remaining steps ci.yml guards.
@@ -122,16 +121,12 @@ function decide( input ) {
 	}
 
 	const login = String( ( pr.user && pr.user.login ) || '' );
-	// author_association is viewer-dependent (private members read as
-	// CONTRIBUTOR from Actions), so permission is checked first.
-	let trust;
-	if ( WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
-		trust = `has ${ input.authorPermission } permission`;
-	} else if ( TRUSTED_ASSOCIATIONS.includes( pr.author_association ) ) {
-		trust = `is ${ pr.author_association }`;
-	} else {
-		return no( `author ${ login } has ${ input.authorPermission || 'unknown' } repository permission and association ${ pr.author_association }; write permission or MEMBER/OWNER is required` );
+	// Write permission is what publishing a receipt requires; nothing weaker
+	// (author_association is viewer-dependent) is accepted in its place.
+	if ( ! WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
+		return no( `author ${ login } has ${ input.authorPermission || 'unknown' } repository permission; write permission is required` );
 	}
+	const trust = `has ${ input.authorPermission } permission`;
 
 	const name = String( config.receiptPrefix || '' ) + input.jobName;
 	const appId = Number( config.app && config.app.appId );
@@ -272,7 +267,7 @@ async function lookup( { github, context, core } ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
 			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
 			input.authorPermission = await authorPermission( github, repo, pr.user && pr.user.login );
-			core.info( `author permission lookup: ${ input.authorPermission || 'unavailable to this token' }; association ${ pr.author_association }` );
+			core.info( `author permission lookup: ${ input.authorPermission || 'unavailable to this token' }` );
 			// `all`: every attempt, so the newest is chosen here.
 			const listed = await within(
 				github.rest.checks.listForRef( {

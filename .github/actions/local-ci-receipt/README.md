@@ -7,8 +7,8 @@ run created on the head commit by the Woo Local CI Checks GitHub App.
 
 The job is skipped only when the newest receipt of its name comes from that
 App, passed, was made under the config trunk has, and was published by the
-PR author, who has write access. Anything else runs the job as always and
-logs the reason. Receipts apply to `pull_request` events only; merge queue
+PR author, whose write permission on the repository is confirmed through
+the API. Anything else runs the job as always and logs the reason. Receipts apply to `pull_request` events only; merge queue
 runs and pushes to trunk run everything.
 
 - `action.yml` — composite action; `receipt.js` — the decision (`decide()`)
