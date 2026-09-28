@@ -28,8 +28,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		self::ALL_EXCEPT_COUNTRIES_OPTION,
 		self::SPECIFIC_COUNTRIES_OPTION,
 		OrderWithdrawalEndpoint::ENDPOINT_OPTION,
-		OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION,
-		OrderWithdrawalFeatureHighlightNotification::ENABLED_CREATED_OPTION,
 	);
 
 	/**
@@ -81,11 +79,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 			1,
 			$note_ids,
 			'An eligible existing live store should receive the notification.'
-		);
-		$this->assertSame(
-			'yes',
-			get_option( OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION ),
-			'Creating the note should persist the one-time creation flag.'
 		);
 	}
 
@@ -277,9 +270,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	 * Delete notification state created by tests.
 	 */
 	private function delete_notification_state(): void {
-		delete_option( OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION );
-		delete_option( OrderWithdrawalFeatureHighlightNotification::ENABLED_CREATED_OPTION );
-
 		$note_ids = array_merge(
 			$this->get_notification_note_ids(),
 			$this->get_enabled_notification_note_ids()

@@ -23,10 +23,8 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 */
 	private OrderWithdrawalEndpoint $endpoint;
 
-	public const NOTE_NAME              = 'wc-admin-order-withdrawal-feature';
-	public const CREATED_OPTION         = 'woocommerce_order_withdrawal_inbox_notification_created';
-	public const ENABLED_NOTE_NAME      = 'wc-admin-order-withdrawal-enabled';
-	public const ENABLED_CREATED_OPTION = 'woocommerce_order_withdrawal_enabled_inbox_notification_created';
+	public const NOTE_NAME         = 'wc-admin-order-withdrawal-feature';
+	public const ENABLED_NOTE_NAME = 'wc-admin-order-withdrawal-enabled';
 
 	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
 	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
@@ -81,7 +79,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 */
 	public function possibly_add_note(): void {
 		try {
-			if ( $this->has_note_been_created( self::CREATED_OPTION, self::NOTE_NAME ) ) {
+			if ( $this->note_exists( self::NOTE_NAME ) ) {
 				return;
 			}
 
@@ -89,13 +87,8 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 				return;
 			}
 
-			if ( ! add_option( self::CREATED_OPTION, 'yes', '', false ) ) {
-				return;
-			}
-
 			$this->get_feature_highlight_note()->save();
 		} catch ( Exception $exception ) {
-			delete_option( self::CREATED_OPTION );
 			wc_get_logger()->error(
 				'Unable to create the order withdrawal inbox notification.',
 				array(
@@ -120,19 +113,14 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		}
 
 		try {
-			if ( $this->has_note_been_created( self::ENABLED_CREATED_OPTION, self::ENABLED_NOTE_NAME ) ) {
+			if ( $this->note_exists( self::ENABLED_NOTE_NAME ) ) {
 				$this->dismiss_note( self::NOTE_NAME );
-				return;
-			}
-
-			if ( ! add_option( self::ENABLED_CREATED_OPTION, 'yes', '', false ) ) {
 				return;
 			}
 
 			$this->get_enabled_note()->save();
 			$this->dismiss_note( self::NOTE_NAME );
 		} catch ( Exception $exception ) {
-			delete_option( self::ENABLED_CREATED_OPTION );
 			wc_get_logger()->error(
 				'Unable to create the order withdrawal enabled inbox notification.',
 				array(
@@ -245,16 +233,11 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	}
 
 	/**
-	 * Whether a note has already been created, including soft-deleted notes.
+	 * Whether a note exists, including soft-deleted notes.
 	 *
-	 * @param string $created_option Option tracking whether the note was created.
-	 * @param string $note_name      Note name stored in the data store.
+	 * @param string $note_name Note name stored in the data store.
 	 */
-	private function has_note_been_created( string $created_option, string $note_name ): bool {
-		if ( 'yes' === get_option( $created_option, 'no' ) ) {
-			return true;
-		}
-
+	private function note_exists( string $note_name ): bool {
 		/**
 		 * Data store instance.
 		 *
@@ -263,13 +246,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( $note_name );
 
-		if ( empty( $note_ids ) ) {
-			return false;
-		}
-
-		update_option( $created_option, 'yes', false );
-
-		return true;
+		return ! empty( $note_ids );
 	}
 
 	/**
