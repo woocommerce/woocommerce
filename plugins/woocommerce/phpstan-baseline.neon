@@ -35771,12 +35771,6 @@ parameters:
 			path: includes/wccom-site/class-wc-wccom-site.php
 
 		-
-			message: '#^Method WC_WCCOM_Site\:\:authenticate_wccom\(\) should return int\|false but returns WP_User\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wccom-site/class-wc-wccom-site.php
-
-		-
 			message: '#^Method WC_WCCOM_Site\:\:includes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
