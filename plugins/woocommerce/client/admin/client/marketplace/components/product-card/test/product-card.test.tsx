@@ -51,6 +51,7 @@ const context = {
 			tooltip: 'Verified against WooCommerce standards.',
 		},
 	},
+	productPreviewVariation: null,
 } as unknown as MarketplaceContextType;
 
 const product: Product = {
@@ -290,16 +291,84 @@ describe( 'ProductCard click tracking', () => {
 	} );
 
 	it( 'records the click once when the card opens a preview modal', () => {
-		clickCard(
-			{},
-			{
-				iamSettings: {
-					...context.iamSettings,
-					product_previews: 'modal',
-				},
-			}
-		);
+		clickCard( {}, { productPreviewVariation: 'treatment' } );
 
 		expect( cardClickEvents() ).toHaveLength( 1 );
+	} );
+} );
+
+describe( 'ProductCard product preview experiment', () => {
+	const productUrl = 'https://woocommerce.com/products/test-extension/';
+
+	beforeEach( () => {
+		jest.mocked( queueRecordEvent ).mockClear();
+	} );
+
+	function renderExperimentCard(
+		productPreviewVariation: string | null,
+		productOverrides: Partial< Product > = {}
+	) {
+		return renderCard(
+			ProductCardType.regular,
+			{ url: productUrl, ...productOverrides },
+			{ productPreviewVariation }
+		);
+	}
+
+	function clickEventProperties() {
+		return jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ];
+	}
+
+	it( 'opens the preview instead of the product page in the treatment arm', () => {
+		const view = renderExperimentCard( 'treatment' );
+		const link = view.getByRole( 'link' );
+
+		// fireEvent returns false when the click's default action was prevented.
+		expect( fireEvent.click( link ) ).toBe( false );
+		expect( clickEventProperties() ).toMatchObject( {
+			preview_variation: 'treatment',
+		} );
+		expect( link ).toHaveAttribute(
+			'href',
+			`${ productUrl }?utm_term=treatment`
+		);
+	} );
+
+	it( 'opens the product page in the control arm', () => {
+		const view = renderExperimentCard( 'control' );
+		const link = view.getByRole( 'link' );
+
+		expect( fireEvent.click( link ) ).toBe( true );
+		expect( clickEventProperties() ).toMatchObject( {
+			preview_variation: 'control',
+		} );
+		expect( link ).toHaveAttribute(
+			'href',
+			`${ productUrl }?utm_term=control`
+		);
+	} );
+
+	it( 'leaves the card untagged until the assignment loads', () => {
+		const view = renderExperimentCard( null );
+		const link = view.getByRole( 'link' );
+
+		expect( fireEvent.click( link ) ).toBe( true );
+		expect( clickEventProperties() ).not.toHaveProperty(
+			'preview_variation'
+		);
+		expect( link ).toHaveAttribute( 'href', productUrl );
+	} );
+
+	it( 'keeps business service cards out of the experiment', () => {
+		const view = renderExperimentCard( 'treatment', {
+			type: ProductType.businessService,
+		} );
+		const link = view.getByRole( 'link' );
+
+		expect( fireEvent.click( link ) ).toBe( true );
+		expect( clickEventProperties() ).not.toHaveProperty(
+			'preview_variation'
+		);
+		expect( link ).toHaveAttribute( 'href', productUrl );
 	} );
 } );

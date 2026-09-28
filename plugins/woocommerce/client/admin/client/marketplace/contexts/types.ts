@@ -33,7 +33,6 @@ export type MarketplaceContextType = {
 		updatedCounts: Partial< SearchResultsCountType >
 	) => void;
 	iamSettings: {
-		product_previews?: 'modal' | 'none';
 		quality_badge?: {
 			enabled?: boolean;
 			label?: string;
@@ -41,6 +40,11 @@ export type MarketplaceContextType = {
 			docs_url?: string;
 		};
 	};
+	/**
+	 * Variation of the product preview experiment, or null when it hasn't
+	 * loaded or the store isn't in the experiment.
+	 */
+	productPreviewVariation: string | null;
 };
 
 export type SubscriptionsContextType = {

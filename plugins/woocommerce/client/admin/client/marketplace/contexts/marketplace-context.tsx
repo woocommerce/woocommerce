@@ -18,6 +18,7 @@ import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_IAM_SETTINGS_API_PATH,
 } from '../components/constants';
+import { loadProductPreviewVariation } from '../utils/product-preview-experiment';
 
 // Create storage utils with 24h expiration
 const iamSettingsStorage = createStorageUtils< {
@@ -39,6 +40,7 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	},
 	setSearchResultsCount: () => {},
 	iamSettings: {},
+	productPreviewVariation: null,
 } );
 
 export function MarketplaceContextProvider( props: {
@@ -47,6 +49,9 @@ export function MarketplaceContextProvider( props: {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
+	const [ productPreviewVariation, setProductPreviewVariation ] = useState<
+		string | null
+	>( null );
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
@@ -107,6 +112,14 @@ export function MarketplaceContextProvider( props: {
 	}, [] );
 
 	/**
+	 * Load the assignment up front so product cards already know whether to
+	 * open the preview modal when clicked.
+	 */
+	useEffect( () => {
+		void loadProductPreviewVariation().then( setProductPreviewVariation );
+	}, [] );
+
+	/**
 	 * Knowing installed products will help us to determine which products
 	 * should have the "Add to Site" button enabled.
 	 */
@@ -136,6 +149,7 @@ export function MarketplaceContextProvider( props: {
 		searchResultsCount,
 		setSearchResultsCount,
 		iamSettings,
+		productPreviewVariation,
 	};
 
 	return (
