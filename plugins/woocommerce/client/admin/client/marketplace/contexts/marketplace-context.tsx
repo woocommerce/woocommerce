@@ -7,6 +7,7 @@ import {
 	useCallback,
 	createContext,
 } from '@wordpress/element';
+import { useExperiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_IAM_SETTINGS_API_PATH,
 } from '../components/constants';
-import { loadProductPreviewVariation } from '../utils/product-preview-experiment';
+import { PRODUCT_PREVIEW_EXPERIMENT_NAME } from '../utils/product-preview-experiment';
 
 // Create storage utils with 24h expiration
 const iamSettingsStorage = createStorageUtils< {
@@ -49,9 +50,12 @@ export function MarketplaceContextProvider( props: {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
-	const [ productPreviewVariation, setProductPreviewVariation ] = useState<
-		string | null
-	>( null );
+	// Loaded up front so product cards already know whether to open the preview modal when clicked.
+	const [ , productPreviewAssignment ] = useExperiment(
+		PRODUCT_PREVIEW_EXPERIMENT_NAME
+	);
+	const productPreviewVariation =
+		productPreviewAssignment?.variationName ?? null;
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
@@ -109,14 +113,6 @@ export function MarketplaceContextProvider( props: {
 				console.error( 'Failed to fetch IAM settings:', error );
 				setIamSettings( {} ); // Fallback to an empty object
 			} );
-	}, [] );
-
-	/**
-	 * Load the assignment up front so product cards already know whether to
-	 * open the preview modal when clicked.
-	 */
-	useEffect( () => {
-		void loadProductPreviewVariation().then( setProductPreviewVariation );
 	}, [] );
 
 	/**

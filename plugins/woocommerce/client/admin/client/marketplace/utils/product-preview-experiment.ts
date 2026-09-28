@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { loadExperimentAssignment } from '@woocommerce/explat';
-
-/**
  * Internal dependencies
  */
 import { MARKETPLACE_HOST } from '../components/constants';
@@ -18,18 +13,6 @@ export const PRODUCT_PREVIEW_TREATMENT = 'treatment';
  * purchases can be split by variation.
  */
 export const PRODUCT_PREVIEW_VARIATION_PARAM = 'utm_term';
-
-/**
- * Resolves to null when the store is not in the experiment, tracking is off,
- * or the request fails. The ExPlat client caches the assignment per browser.
- */
-export async function loadProductPreviewVariation(): Promise< string | null > {
-	const assignment = await loadExperimentAssignment(
-		PRODUCT_PREVIEW_EXPERIMENT_NAME
-	);
-
-	return assignment.variationName;
-}
 
 /**
  * Adds the variation to the WooCommerce.com links in the preview HTML, such as

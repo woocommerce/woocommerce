@@ -1,50 +1,7 @@
 /**
- * External dependencies
- */
-import { loadExperimentAssignment } from '@woocommerce/explat';
-
-jest.mock( '@woocommerce/explat', () => ( {
-	loadExperimentAssignment: jest.fn(),
-} ) );
-
-/**
  * Internal dependencies
  */
-import {
-	PRODUCT_PREVIEW_EXPERIMENT_NAME,
-	addVariationToPreviewLinks,
-	loadProductPreviewVariation,
-} from '../product-preview-experiment';
-
-describe( 'loadProductPreviewVariation', () => {
-	it( 'resolves to the assigned variation', async () => {
-		jest.mocked( loadExperimentAssignment ).mockResolvedValue( {
-			experimentName: PRODUCT_PREVIEW_EXPERIMENT_NAME,
-			variationName: 'treatment',
-			retrievedTimestamp: 0,
-			ttl: 60,
-		} );
-
-		await expect( loadProductPreviewVariation() ).resolves.toBe(
-			'treatment'
-		);
-		expect( loadExperimentAssignment ).toHaveBeenCalledWith(
-			PRODUCT_PREVIEW_EXPERIMENT_NAME
-		);
-	} );
-
-	it( 'resolves to null when the store is not in the experiment', async () => {
-		jest.mocked( loadExperimentAssignment ).mockResolvedValue( {
-			experimentName: PRODUCT_PREVIEW_EXPERIMENT_NAME,
-			variationName: null,
-			retrievedTimestamp: 0,
-			ttl: 60,
-			isFallbackExperimentAssignment: true,
-		} );
-
-		await expect( loadProductPreviewVariation() ).resolves.toBeNull();
-	} );
-} );
+import { addVariationToPreviewLinks } from '../product-preview-experiment';
 
 describe( 'addVariationToPreviewLinks', () => {
 	function hrefs( html: string ) {

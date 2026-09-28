@@ -304,71 +304,57 @@ describe( 'ProductCard product preview experiment', () => {
 		jest.mocked( queueRecordEvent ).mockClear();
 	} );
 
-	function renderExperimentCard(
-		productPreviewVariation: string | null,
-		productOverrides: Partial< Product > = {}
-	) {
-		return renderCard(
-			ProductCardType.regular,
-			{ url: productUrl, ...productOverrides },
-			{ productPreviewVariation }
-		);
-	}
-
-	function clickEventProperties() {
-		return jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ];
-	}
-
-	it( 'opens the preview instead of the product page in the treatment arm', () => {
-		const view = renderExperimentCard( 'treatment' );
-		const link = view.getByRole( 'link' );
-
-		// fireEvent returns false when the click's default action was prevented.
-		expect( fireEvent.click( link ) ).toBe( false );
-		expect( clickEventProperties() ).toMatchObject( {
-			preview_variation: 'treatment',
-		} );
-		expect( link ).toHaveAttribute(
-			'href',
-			`${ productUrl }?utm_term=treatment`
-		);
-	} );
-
-	it( 'opens the product page in the control arm', () => {
-		const view = renderExperimentCard( 'control' );
-		const link = view.getByRole( 'link' );
-
-		expect( fireEvent.click( link ) ).toBe( true );
-		expect( clickEventProperties() ).toMatchObject( {
-			preview_variation: 'control',
-		} );
-		expect( link ).toHaveAttribute(
-			'href',
-			`${ productUrl }?utm_term=control`
-		);
-	} );
-
-	it( 'leaves the card untagged until the assignment loads', () => {
-		const view = renderExperimentCard( null );
-		const link = view.getByRole( 'link' );
-
-		expect( fireEvent.click( link ) ).toBe( true );
-		expect( clickEventProperties() ).not.toHaveProperty(
-			'preview_variation'
-		);
-		expect( link ).toHaveAttribute( 'href', productUrl );
-	} );
-
-	it( 'keeps business service cards out of the experiment', () => {
-		const view = renderExperimentCard( 'treatment', {
+	it.each( [
+		{
+			name: 'opens the preview instead of the product page in the treatment arm',
+			variation: 'treatment',
+			opensProductPage: false,
+			tag: 'treatment',
+		},
+		{
+			name: 'opens the product page in the control arm',
+			variation: 'control',
+			opensProductPage: true,
+			tag: 'control',
+		},
+		{
+			name: 'leaves the card untagged until the assignment loads',
+			variation: null,
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'keeps business service cards out of the experiment',
+			variation: 'treatment',
 			type: ProductType.businessService,
-		} );
-		const link = view.getByRole( 'link' );
+			opensProductPage: true,
+			tag: undefined,
+		},
+	] )(
+		'$name',
+		( {
+			variation,
+			type = ProductType.extension,
+			opensProductPage,
+			tag,
+		} ) => {
+			const view = renderCard(
+				ProductCardType.regular,
+				{ url: productUrl, type },
+				{ productPreviewVariation: variation }
+			);
+			const link = view.getByRole( 'link' );
 
-		expect( fireEvent.click( link ) ).toBe( true );
-		expect( clickEventProperties() ).not.toHaveProperty(
-			'preview_variation'
-		);
-		expect( link ).toHaveAttribute( 'href', productUrl );
-	} );
+			// fireEvent returns false when the click's default action was prevented.
+			expect( fireEvent.click( link ) ).toBe( opensProductPage );
+			expect(
+				jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ]
+					?.preview_variation
+			).toBe( tag );
+			expect( link ).toHaveAttribute(
+				'href',
+				tag ? `${ productUrl }?utm_term=${ tag }` : productUrl
+			);
+		}
+	);
 } );
