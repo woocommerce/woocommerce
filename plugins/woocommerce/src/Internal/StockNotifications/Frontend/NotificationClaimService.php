@@ -80,10 +80,10 @@ final class NotificationClaimService {
 			 *
 			 * @since 11.3.0
 			 *
-			 * @param int      $notification_id The ID of the claimed notification.
-			 * @param \WP_User $customer        The customer the notification was linked to.
+			 * @param Notification $notification The claimed notification.
+			 * @param \WP_User     $customer     The customer the notification was linked to.
 			 */
-			do_action( 'woocommerce_stock_notification_claimed_by_customer', $notification->get_id(), $customer );
+			do_action( 'woocommerce_customer_stock_notifications_claimed', $notification, $customer );
 
 			++$claimed;
 		}

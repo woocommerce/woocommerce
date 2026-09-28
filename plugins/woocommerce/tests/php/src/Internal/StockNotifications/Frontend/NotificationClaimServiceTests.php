@@ -90,7 +90,7 @@ class NotificationClaimServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_stock_notification_claimed_by_customer for each claimed sign-up.
+	 * @testdox Should fire woocommerce_customer_stock_notifications_claimed for each claimed sign-up.
 	 */
 	public function test_fires_action_for_each_claimed_signup(): void {
 		$customer_id = $this->factory->user->create( array( 'user_email' => 'shopper@example.com' ) );
@@ -100,9 +100,9 @@ class NotificationClaimServiceTests extends \WC_Unit_Test_Case {
 
 		$claimed_ids = array();
 		add_action(
-			'woocommerce_stock_notification_claimed_by_customer',
-			static function ( $notification_id ) use ( &$claimed_ids ) {
-				$claimed_ids[] = $notification_id;
+			'woocommerce_customer_stock_notifications_claimed',
+			static function ( $notification ) use ( &$claimed_ids ) {
+				$claimed_ids[] = $notification->get_id();
 			}
 		);
 
