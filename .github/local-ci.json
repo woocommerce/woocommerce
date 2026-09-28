@@ -1,5 +1,5 @@
 {
-  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup action in ci.yml (consumer). CI reads this file from trunk; a PR that changes it gets a full CI run. Who may publish is the allowlist compiled into gh local-ci, not this file.",
+  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup action in ci.yml (consumer). CI reads this file from trunk; a PR that changes it gets a full CI run. Who may publish is the allowlist compiled into gh local-ci, not this file. (scratch: touched again, with the kill switch off, to prove a config change forces full CI)",
   "version": 1,
   "host": "github.com",
   "repository": "woocommerce/woocommerce",
@@ -39,6 +39,5 @@
     }
   ],
 
-  "lockfile": "pnpm-lock.yaml",
-  "$note": "scratch: touched to prove a config change forces full CI"
+  "lockfile": "pnpm-lock.yaml"
 }
