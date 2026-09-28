@@ -32,7 +32,12 @@ describe( 'useStoreCart', () => {
 
 	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
 	const mockShippingAddress = {
-		city: 'New York',
+		city: 'New York &amp; East',
+		'plugin/delivery-notes': 'Ring &amp; wait',
+	};
+	const mockNormalizedShippingAddress = {
+		city: 'New York &amp; East',
+		'plugin/delivery-notes': 'Ring & wait',
 	};
 	const mockCartData = {
 		coupons: [],
@@ -75,7 +80,7 @@ describe( 'useStoreCart', () => {
 		cartFees: [],
 		billingData: {},
 		billingAddress: {},
-		shippingAddress: mockShippingAddress,
+		shippingAddress: mockNormalizedShippingAddress,
 		shippingRates: [],
 		extensions: {},
 		isLoadingRates: false,
@@ -159,6 +164,19 @@ describe( 'useStoreCart', () => {
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();
 			expect( receiveCartContents ).toBeUndefined();
+		} );
+
+		it( 'preserves literal HTML entities in core address values', () => {
+			const { result } = renderStoreCartHook( {
+				shouldSelect: true,
+			} );
+
+			expect( result.current.shippingAddress.city ).toBe(
+				'New York &amp; East'
+			);
+			expect(
+				result.current.shippingAddress[ 'plugin/delivery-notes' ]
+			).toBe( 'Ring & wait' );
 		} );
 	} );
 } );

@@ -74,6 +74,42 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return package destination addresses as sanitized plain text.
+	 */
+	public function test_package_destination_uses_plain_text_values(): void {
+		$package = array(
+			'destination' => array(
+				'address_1' => '1 Rock & Roll - West',
+				'address_2' => 'Suite <script>alert("x")</script> A&B',
+				'city'      => "Coeur d'Alene - North & South",
+				'state'     => 'CA',
+				'postcode'  => '90210',
+				'country'   => 'US',
+			),
+		);
+
+		$response = $this->invoke_prepare_package_destination_response( $package );
+
+		$this->assertSame( '1 Rock & Roll - West', $response->address_1, 'Destination addresses should preserve punctuation.' );
+		$this->assertSame( 'Suite A&B', $response->address_2, 'Destination addresses should remove executable markup.' );
+		$this->assertSame( "Coeur d'Alene - North & South", $response->city, 'Destination cities should preserve punctuation.' );
+	}
+
+	/**
+	 * Invoke the protected prepare_package_destination_response method.
+	 *
+	 * @param array $package Shipping package.
+	 * @return object
+	 */
+	private function invoke_prepare_package_destination_response( array $package ): object {
+		$reflection = new ReflectionClass( $this->sut );
+		$method     = $reflection->getMethod( 'prepare_package_destination_response' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->sut, $package );
+	}
+
+	/**
 	 * Invoke the protected get_rate_response method.
 	 *
 	 * @param WC_Shipping_Rate $rate Rate object.

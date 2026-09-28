@@ -19,6 +19,7 @@ import {
 } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
+import type { MutableRefObject } from 'react';
 import type {
 	StoreCart,
 	CartResponseTotals,
@@ -37,7 +38,6 @@ import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
-	// eslint-disable-next-line @typescript-eslint/no-shadow
 	export function decodeEntities< T >( coupon: T ): T;
 }
 const defaultShippingAddress: CartResponseShippingAddress = {
@@ -101,10 +101,16 @@ const normalizeAddress = <
 	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T,
-	addressRef: React.MutableRefObject< T >
+	addressRef: MutableRefObject< T >
 ): T => {
+	// Registered additional checkout field IDs contain a namespace separator and retain legacy entity decoding.
 	const normalizedAddress = emptyHiddenAddressFields(
-		decodeValues( address )
+		Object.fromEntries(
+			Object.entries( address ).map( ( [ key, value ] ) => [
+				key,
+				key.includes( '/' ) ? decodeEntities( value ) : value,
+			] )
+		) as T
 	);
 	if ( ! fastDeepEqual( addressRef.current, normalizedAddress ) ) {
 		addressRef.current = normalizedAddress;

@@ -13,15 +13,12 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WC_Unit_Test_Case;
 
 /**
- * Tests that AbstractAddressSchema::sanitize_callback() does not strip
- * backslashes from address fields.
+ * Tests Store API address sanitization and response formatting.
  *
- * The Store API reads a JSON request body via json_decode(), which is never
- * subject to WordPress "magic quotes". Calling wp_unslash() on that data used
- * to silently drop real backslashes the user typed (e.g. "apt 4\"). These
- * tests guard against a regression of that behaviour.
+ * JSON address values are not magic-quoted, so literal backslashes must remain intact. Address fields are plain text and must not be HTML encoded during a cart or checkout round trip.
  *
  * @see https://github.com/woocommerce/woocommerce/issues/58214
+ * @see https://github.com/woocommerce/woocommerce/issues/68162
  */
 class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
@@ -184,6 +181,83 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
 			$this->assertIsString( $result['phone'] );
 		}
+	}
+
+	/**
+	 * @testdox Should sanitize address fields as plain text without encoding punctuation.
+	 */
+	public function test_sanitizes_address_fields_as_plain_text(): void {
+		$address = $this->make_address(
+			array(
+				'company'   => 'AT&T <b>Marketing</b>',
+				'address_1' => '1 Rock & Roll - West',
+				'address_2' => 'Suite <em>A&B</em>',
+				'city'      => "Coeur d'Alene - North & South",
+			)
+		);
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'AT&T Marketing', $result['company'], 'Company HTML should be removed without encoding its ampersand.' );
+		$this->assertSame( '1 Rock & Roll - West', $result['address_1'], 'Address punctuation should remain unchanged.' );
+		$this->assertSame( 'Suite A&B', $result['address_2'], 'Address HTML should be removed without encoding its ampersand.' );
+		$this->assertSame( "Coeur d'Alene - North & South", $result['city'], 'City punctuation should remain unchanged.' );
+	}
+
+	/**
+	 * @testdox Should preserve literal entity text in core address fields.
+	 */
+	public function test_preserves_literal_entity_text(): void {
+		$address = $this->make_address( array( 'company' => 'AT&amp;T' ) );
+
+		$sanitized = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+		$customer  = new \WC_Customer();
+		$customer->set_billing_company( $sanitized['company'] );
+		$response = $this->sut->get_item_response( $customer );
+
+		$this->assertSame( 'AT&amp;T', $sanitized['company'] );
+		$this->assertSame( 'AT&amp;T', $response['company'] );
+	}
+
+	/**
+	 * @testdox Should preserve the existing HTML sanitization of additional address fields.
+	 */
+	public function test_preserves_additional_address_field_sanitization(): void {
+		$address = $this->make_address( array( $this->field_id => 'AT&T <b>note</b>' ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'AT&amp;T note', $result[ $this->field_id ] );
+	}
+
+	/**
+	 * @testdox Should not strip percent-encoded characters from billing email addresses.
+	 */
+	public function test_does_not_sanitize_email_as_plain_text(): void {
+		$email   = 'user%41b@example.com';
+		$address = $this->make_address( array( 'email' => $email ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( sanitize_email( $email ), $result['email'] );
+	}
+
+	/**
+	 * @testdox Should return address fields as sanitized plain text without applying typography.
+	 */
+	public function test_get_item_response_returns_address_fields_as_plain_text(): void {
+		$customer = new \WC_Customer();
+		$customer->set_billing_company( 'AT&T <b>Marketing</b>' );
+		$customer->set_billing_address_1( '1 Rock & Roll - West' );
+		$customer->set_billing_address_2( 'Suite <em>A&B</em>' );
+		$customer->set_billing_city( "Coeur d'Alene - North & South" );
+
+		$result = $this->sut->get_item_response( $customer );
+
+		$this->assertSame( 'AT&T Marketing', $result['company'], 'Company responses should contain sanitized plain text.' );
+		$this->assertSame( '1 Rock & Roll - West', $result['address_1'], 'Address responses should preserve punctuation.' );
+		$this->assertSame( 'Suite A&B', $result['address_2'], 'Address responses should contain sanitized plain text.' );
+		$this->assertSame( "Coeur d'Alene - North & South", $result['city'], 'City responses should preserve punctuation.' );
 	}
 
 	/**

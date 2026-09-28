@@ -123,6 +123,40 @@ describe( 'Form Component', () => {
 		);
 	};
 
+	test( 'preserves literal HTML entities in address input values', () => {
+		renderInCheckoutProvider(
+			<Form
+				addressType="shipping"
+				fields={ [ 'city' ] }
+				onChange={ jest.fn() }
+				values={ {
+					country: 'GB',
+					city: 'London &amp; Westminster',
+				} }
+			/>
+		);
+
+		expect( screen.getByLabelText( cityRegExp ) ).toHaveValue(
+			'London &amp; Westminster'
+		);
+	} );
+
+	test( 'continues decoding HTML entities in additional address fields', () => {
+		renderInCheckoutProvider(
+			<Form
+				addressType="shipping"
+				fields={ [ 'plugin/delivery-notes' ] }
+				onChange={ jest.fn() }
+				values={ {
+					country: 'GB',
+					'plugin/delivery-notes': 'Ring &amp; wait',
+				} }
+			/>
+		);
+
+		expect( screen.getByDisplayValue( 'Ring & wait' ) ).toBeInTheDocument();
+	} );
+
 	test( 'updates context value when interacting with form elements', async () => {
 		renderInCheckoutProvider(
 			<>
