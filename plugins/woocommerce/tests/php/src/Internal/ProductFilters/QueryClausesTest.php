@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
+require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+
 /**
  * Tests related to QueryClauses service.
  */
@@ -24,13 +26,39 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
+	 * Callback added to the woocommerce_product_filter_taxonomy_params filter during a test.
+	 *
+	 * @var callable|null
+	 */
+	private $taxonomy_params_filter;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$container = wc_get_container();
-		$this->sut = $container->get( QueryClauses::class );
+		// Ensure brands taxonomy is registered for testing.
+		\WC_Brands::init_taxonomy();
+
+		$this->sut = wc_get_container()->get( QueryClauses::class );
+
+		// The static map may have been warmed by another test class before product_brand existed.
+		$this->clear_params_cache();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->taxonomy_params_filter ) {
+				remove_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+				$this->taxonomy_params_filter = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -315,4 +343,118 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 			wp_delete_term( $term['term_id'], 'product_cat' );
 		}
 	}
+<<<<<<< HEAD
+=======
+
+	/**
+	 * @testdox Renaming a taxonomy filter param releases the old param and filters on the new one.
+	 */
+	public function test_renamed_taxonomy_param_is_used_on_main_query(): void {
+		$brand_owner = $this->products[0];
+		$brand_slug  = $this->assign_brand_to_product( $brand_owner, 'Acme' );
+
+		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
+			$taxonomy_params['product_brand'] = 'wc_brands';
+			return $taxonomy_params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+
+		list( $where, $posts ) = $this->query_main_products( array( 'brands' => $brand_slug ) );
+
+		$this->assertStringNotContainsString( 'AND 1=0', $where, 'The released param must no longer reach the taxonomy clauses.' );
+		$this->assertEqualsCanonicalizing(
+			$this->get_data_from_products_array( $this->products ),
+			$this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) ),
+			'Once renamed, the old param must be ignored rather than filtering the query.'
+		);
+
+		list( $where, $posts ) = $this->query_main_products( array( 'wc_brands' => $brand_slug ) );
+
+		$this->assertStringNotContainsString( 'AND 1=0', $where, 'The renamed param matches a real term, so the query must not fail closed.' );
+		$this->assertSame(
+			array( $brand_owner->get_name() ),
+			$this->get_data_from_products_array( array_map( 'wc_get_product', $posts ) ),
+			'The renamed param should filter on product_brand exactly as the original param did.'
+		);
+	}
+
+	/**
+	 * Create a product brand and assign it to a single product.
+	 *
+	 * @param \WC_Product $product    Product to assign the brand to.
+	 * @param string      $brand_name Brand name.
+	 * @return string The brand slug.
+	 */
+	private function assign_brand_to_product( \WC_Product $product, string $brand_name ): string {
+		$term = wp_insert_term( $brand_name, 'product_brand' );
+		$this->assertIsArray( $term, 'The product brand fixture should be created.' );
+
+		wp_set_object_terms( $product->get_id(), array( (int) $term['term_id'] ), 'product_brand' );
+
+		return get_term( (int) $term['term_id'], 'product_brand' )->slug;
+	}
+
+	/**
+	 * Run a main product query and capture the resulting WHERE clause alongside the returned posts.
+	 *
+	 * @param array $query_vars Query vars to add to the product query.
+	 * @return array {
+	 *     @type string     $0 The final WHERE clause.
+	 *     @type \WP_Post[] $1 The posts returned by the query.
+	 * }
+	 */
+	private function query_main_products( array $query_vars ): array {
+		$where         = '';
+		$capture_where = function ( array $clauses ) use ( &$where ): array {
+			$where = $clauses['where'];
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $capture_where, 20 );
+
+		global $wp_the_query;
+		$previous_wp_the_query = $wp_the_query;
+
+		try {
+			$query        = new \WP_Query();
+			$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$posts        = $query->query(
+				array_merge(
+					array(
+						'post_type' => 'product',
+						// Stands in for what WC_Query::pre_get_posts() sets on a product archive.
+						'wc_query'  => 'product_query',
+					),
+					$query_vars
+				)
+			);
+		} finally {
+			$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			remove_filter( 'posts_clauses', $capture_where, 20 );
+		}
+
+		return array( $where, $posts );
+	}
+
+	/**
+	 * @testdox Price clauses adjust for standard tax class when shop displays prices including tax.
+	 */
+	public function test_price_clauses_with_tax_inclusive_display(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		$clauses = $this->sut->add_price_clauses(
+			array(
+				'where' => '',
+				'join'  => '',
+			),
+			array(
+				'min_price' => 20,
+				'max_price' => 50,
+			)
+		);
+
+		$this->assertStringContainsString( "wc_product_meta_lookup.tax_class = ''", $clauses['where'] );
+	}
+>>>>>>> 0b5afedcd2 (Add woocommerce_product_filter_taxonomy_params so plugins can rename core's reserved filter params (#68904))
 }
