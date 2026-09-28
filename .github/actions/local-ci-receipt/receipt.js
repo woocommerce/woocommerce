@@ -239,7 +239,7 @@ async function rawFile( github, repo, ref ) {
 
 /**
  * The author's permission on the repository, or null when the token cannot
- * ask (the decision then falls back to the allowlist and association).
+ * ask (the decision then falls back to author_association).
  *
  * @param {Object} github
  * @param {Object} repo   `{ owner, repo }`
