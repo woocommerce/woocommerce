@@ -652,7 +652,7 @@ describe( 'PaymentGatewayListItem', () => {
 		};
 
 		const setIncompatibleGatewayIds = ( ids: string[] ) => {
-			window.wcSettings.admin.woocommerce_payments_checkout_block_compatibility =
+			window.wcSettings.admin.woocommerce_checkout_block_compatibility =
 				{
 					incompatible_gateway_ids: ids,
 				};
@@ -660,7 +660,7 @@ describe( 'PaymentGatewayListItem', () => {
 
 		afterEach( () => {
 			delete window.wcSettings.admin
-				.woocommerce_payments_checkout_block_compatibility;
+				.woocommerce_checkout_block_compatibility;
 		} );
 
 		it( 'shows the badge when an enabled gateway is incompatible', () => {

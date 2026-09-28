@@ -98,7 +98,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertContains(
 			'fake-gateway-id',
-			$settings['woocommerce_payments_checkout_block_compatibility']['incompatible_gateway_ids'],
+			$settings['woocommerce_checkout_block_compatibility']['incompatible_gateway_ids'],
 			'A gateway without a Checkout block integration should be reported as incompatible'
 		);
 	}
@@ -114,7 +114,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotContains(
 			'fake-gateway-id',
-			$settings['woocommerce_payments_checkout_block_compatibility']['incompatible_gateway_ids'],
+			$settings['woocommerce_checkout_block_compatibility']['incompatible_gateway_ids'],
 			'A gateway with a Checkout block integration should not be reported as incompatible'
 		);
 	}
@@ -130,7 +130,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertContains(
 			'fake-gateway-id',
-			$settings['woocommerce_payments_checkout_block_compatibility']['incompatible_gateway_ids'],
+			$settings['woocommerce_checkout_block_compatibility']['incompatible_gateway_ids'],
 			'The enabled state of a gateway should not influence the compatibility list'
 		);
 	}
@@ -150,7 +150,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 		$settings = $this->sut->preload_settings();
 
 		$this->assertArrayNotHasKey(
-			'woocommerce_payments_checkout_block_compatibility',
+			'woocommerce_checkout_block_compatibility',
 			$settings,
 			'Stores on the classic checkout should not receive compatibility data'
 		);
@@ -166,9 +166,41 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 		$settings = $this->sut->preload_settings();
 
 		$this->assertArrayNotHasKey(
-			'woocommerce_payments_checkout_block_compatibility',
+			'woocommerce_checkout_block_compatibility',
 			$settings,
 			'Compatibility data is only needed by the payments settings page'
+		);
+	}
+
+	/**
+	 * @testdox Should not list gateways whose Checkout block integration only sets its name in initialize().
+	 */
+	public function test_preload_settings_skips_gateways_whose_integration_is_named_on_initialize(): void {
+		$this->register_fake_gateway();
+
+		// Like WooPayments: `$name` stays at the default '' when the registry keys it in register(),
+		// and is only assigned once initialize() runs.
+		$integration = new class() extends AbstractPaymentMethodType {
+			/**
+			 * Initializes the payment method type.
+			 */
+			public function initialize() {
+				$this->name = 'fake-gateway-id';
+			}
+		};
+
+		$this->get_payment_method_registry()->register( $integration );
+		$integration->initialize();
+
+		// The registry keyed it under the default empty name, so that is what teardown must unregister.
+		$this->registered_integration_names[] = '';
+
+		$settings = $this->sut->preload_settings();
+
+		$this->assertNotContains(
+			'fake-gateway-id',
+			$settings['woocommerce_checkout_block_compatibility']['incompatible_gateway_ids'],
+			'A gateway whose integration only sets its name in initialize() should not be reported as incompatible'
 		);
 	}
 

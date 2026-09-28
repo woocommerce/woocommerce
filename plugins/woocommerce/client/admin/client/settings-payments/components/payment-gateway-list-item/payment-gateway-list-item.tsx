@@ -54,7 +54,7 @@ export const PaymentGatewayListItem = ( {
 		gateway.state.enabled &&
 		(
 			window.wcSettings?.admin
-				?.woocommerce_payments_checkout_block_compatibility
+				?.woocommerce_checkout_block_compatibility
 				?.incompatible_gateway_ids ?? []
 		).includes( gateway.id );
 
