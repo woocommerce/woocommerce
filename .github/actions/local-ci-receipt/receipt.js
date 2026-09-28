@@ -158,29 +158,19 @@ function decide( input ) {
 	}
 
 	const login = String( ( pr.user && pr.user.login ) || '' );
-	const rollout = config.rollout;
-	let listed = false;
-	if ( rollout ) {
-		listed = ( rollout.authors || [] ).some( ( a ) => a.toLowerCase() === login.toLowerCase() );
-		const labelled = !! rollout.label && ( pr.labels || [] ).some( ( l ) => l.name === rollout.label );
-		if ( ! listed && ! labelled ) {
-			return no( `author ${ login } is not in the rollout allowlist and the pull request has no "${ rollout.label || '' }" label` );
-		}
-	}
-	// Who may be trusted, in order of strength. An allowlist entry is a
-	// reviewed line in the base branch's config. Write permission is what
-	// publishing a receipt already requires. author_association is the weak
-	// one: it is computed for the viewer, and the Actions token cannot see a
-	// private org membership, so most members show as CONTRIBUTOR.
+	// Who is running the tool is decided on the publisher's side (the
+	// allowlist compiled into gh local-ci). What CI checks here is that the
+	// author could have published at all: write permission, which is what a
+	// receipt requires, or org membership. author_association is the weak
+	// one — it is computed for the viewer, and the Actions token cannot see
+	// a private org membership, so most members show as CONTRIBUTOR.
 	let trust;
-	if ( listed ) {
-		trust = 'allowlisted on the base branch';
-	} else if ( WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
+	if ( WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
 		trust = `has ${ input.authorPermission } permission`;
 	} else if ( TRUSTED_ASSOCIATIONS.includes( pr.author_association ) ) {
 		trust = `is ${ pr.author_association }`;
 	} else {
-		return no( `author ${ login } is not allowlisted, has ${ input.authorPermission || 'unknown' } repository permission and association ${ pr.author_association }; one of allowlist, write permission or MEMBER/OWNER is required` );
+		return no( `author ${ login } has ${ input.authorPermission || 'unknown' } repository permission and association ${ pr.author_association }; write permission or MEMBER/OWNER is required` );
 	}
 
 	const name = String( config.receiptPrefix || '' ) + input.jobName;
@@ -293,6 +283,7 @@ async function authorPermission( github, repo, username ) {
 		);
 		return ( res.data && res.data.permission ) || null;
 	} catch ( e ) {
+		// A token that may not ask (403) is the same as not knowing.
 		return null;
 	}
 }
@@ -341,6 +332,7 @@ async function lookup( { github, context, core } ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
 			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
 			input.authorPermission = await authorPermission( github, repo, pr.user && pr.user.login );
+			core.info( `author permission lookup: ${ input.authorPermission || 'unavailable to this token' }; association ${ pr.author_association }` );
 			// One call, for the one name this job cares about: the API filters
 			// by name and app, and `all` keeps every attempt so the newest can
 			// be chosen here rather than trusting the API's idea of latest.

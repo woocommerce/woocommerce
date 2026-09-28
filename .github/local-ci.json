@@ -1,5 +1,5 @@
 {
-  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup step in ci.yml (consumer). CI reads the trust fields from trunk's copy of this file; a PR that changes it gets a full CI run.",
+  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup action in ci.yml (consumer). CI reads this file from trunk; a PR that changes it gets a full CI run. Who may publish is the allowlist compiled into gh local-ci, not this file.",
   "version": 1,
   "host": "github.com",
   "repository": "woocommerce/woocommerce",
@@ -8,7 +8,6 @@
   "receiptPrefix": "local-ci/v1: ",
 
   "enabled": false,
-  "rollout": { "authors": [ "MrJnrman" ], "label": "local-ci" },
 
   "plan": {
     "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT.",

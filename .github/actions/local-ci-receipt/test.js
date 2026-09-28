@@ -30,7 +30,6 @@ const configObject = ( overrides = {} ) => ( {
 	baseBranch: 'trunk',
 	receiptPrefix: 'local-ci/v1: ',
 	enabled: true,
-	rollout: { authors: [ 'octo' ], label: 'local-ci' },
 	plan: { command: [ 'true' ] },
 	eligible: [ { type: 'unit', namePrefix: 'JavaScript', sampleRate: 0, run: [ 'x' ] } ],
 	...overrides,
@@ -91,7 +90,7 @@ check( 'a verified successful receipt by the author substitutes', () => {
 	const r = decide( input() );
 	assert.strictEqual( r.substituted, true, r.reason );
 	assert.strictEqual( r.spotCheck, false );
-	assert.ok( r.reason.includes( 'runs/100' ) && r.reason.includes( 'by octo' ) );
+	assert.ok( r.reason.includes( 'runs/100' ) && r.reason.includes( 'by octo' ) && r.reason.includes( 'is MEMBER' ), r.reason );
 } );
 
 check( 'the kill switch wins over everything, and any non-off value trips it', () => {
@@ -133,48 +132,20 @@ check( 'a pull request that changes the config gets full CI', () => {
 	refuses( decide( input( { headConfigRaw: null } ) ), 'config changes always get full CI' );
 } );
 
-check( 'rollout gate: unlisted author without the label is refused, label admits', () => {
-	refuses( decide( input( { pullRequest: pullRequest( { user: { login: 'someone' } } ) } ) ), 'not in the rollout allowlist' );
-	refuses( decide( input( { pullRequest: pullRequest( { user: { login: 'someone' }, labels: [ { name: 'needs-review' } ] } ) } ) ), 'not in the rollout allowlist' );
-	// Allowlist match ignores case; the receipt author still has to be the PR author.
+check( 'the author login comparison with the receipt ignores case', () => {
 	const upper = baseConfig();
 	const r = decide( input( { pullRequest: pullRequest( { user: { login: 'OCTO' } } ), checkRuns: [ receipt( upper ) ] } ) );
 	assert.strictEqual( r.substituted, true, r.reason );
-	// The receipt author still has to match the PR author, so give someone their own receipt.
-	// A label admits to the rollout but is not itself trust: write permission or membership is still needed.
+} );
+
+check( 'trust: write permission or MEMBER/OWNER is required; who runs the tool is decided by its own allowlist', () => {
 	const cfg = baseConfig();
-	const labelled = input( {
-		pullRequest: pullRequest( { user: { login: 'someone' }, labels: [ { name: 'local-ci' } ] } ),
-		checkRuns: [ receipt( cfg, { external_id: 'v1;' + externalId( cfg, { author: 'someone' } ) } ) ],
-	} );
-	assert.strictEqual( decide( labelled ).substituted, true, 'MEMBER with the label' );
-	refuses( decide( { ...labelled, pullRequest: pullRequest( { user: { login: 'someone' }, labels: [ { name: 'local-ci' } ], author_association: 'CONTRIBUTOR' } ) } ), 'one of allowlist, write permission or MEMBER/OWNER is required' );
-} );
-
-check( 'no rollout block means every member may substitute', () => {
-	const cfg = baseConfig( { rollout: undefined } );
-	const r = decide( input( {
-		baseConfig: cfg, headConfigRaw: cfg.raw,
-		pullRequest: pullRequest( { user: { login: 'anyone' } } ),
-		checkRuns: [ receipt( cfg, { external_id: 'v1;' + externalId( cfg, { author: 'anyone' } ) } ) ],
-	} ) );
-	assert.strictEqual( r.substituted, true, r.reason );
-} );
-
-check( 'trust: an allowlisted author is trusted whatever the association (private org membership reads as CONTRIBUTOR)', () => {
-	const r = decide( input( { pullRequest: pullRequest( { author_association: 'CONTRIBUTOR' } ) } ) );
-	assert.strictEqual( r.substituted, true, r.reason );
-	assert.ok( r.reason.includes( 'allowlisted on the base branch' ), r.reason );
-} );
-
-check( 'trust: without an allowlist entry, write permission or MEMBER/OWNER is required', () => {
-	const cfg = baseConfig( { rollout: undefined } );
 	const someone = ( overrides ) => input( {
 		baseConfig: cfg, headConfigRaw: cfg.raw,
 		pullRequest: pullRequest( { user: { login: 'someone' }, author_association: 'CONTRIBUTOR', ...overrides } ),
 		checkRuns: [ receipt( cfg, { external_id: 'v1;' + externalId( cfg, { author: 'someone' } ) } ) ],
 	} );
-	refuses( decide( someone( {} ) ), 'one of allowlist, write permission or MEMBER/OWNER is required' );
+	refuses( decide( someone( {} ) ), 'write permission or MEMBER/OWNER is required' );
 	refuses( decide( { ...someone( {} ), authorPermission: 'read' } ), 'has read repository permission' );
 	refuses( decide( { ...someone( {} ), authorPermission: 'triage' } ), 'has triage repository permission' );
 	for ( const p of [ 'write', 'maintain', 'admin' ] ) {
@@ -380,7 +351,8 @@ const fakeCore = () => {
 	const outputs = {};
 	const notices = [];
 	const warnings = [];
-	return { outputs, notices, warnings, info: () => {}, notice: ( m ) => notices.push( m ), warning: ( m ) => warnings.push( m ), setOutput: ( k, v ) => ( outputs[ k ] = v ) };
+	const infos = [];
+	return { outputs, notices, warnings, infos, info: ( m ) => infos.push( m ), notice: ( m ) => notices.push( m ), warning: ( m ) => warnings.push( m ), setOutput: ( k, v ) => ( outputs[ k ] = v ) };
 };
 
 check( 'lookup annotates a spot check so a failing one can be found', async () => {
@@ -414,8 +386,20 @@ check( 'lookup survives a permission lookup the token is not allowed to make', a
 	const github = fakeGithub( { baseRaw: cfg.raw, headRaw: cfg.raw, pages: [ [ receipt( cfg ) ] ] } );
 	github.rest.repos.getCollaboratorPermissionLevel = async () => { const e = new Error( 'Forbidden' ); e.status = 403; throw e; };
 	await lookup( { github, context: prContext(), core } );
-	assert.strictEqual( core.outputs.substituted, 'true', core.outputs.reason + ' (octo is allowlisted, so the permission is not needed)' );
-	assert.ok( core.outputs.reason.includes( 'allowlisted' ), core.outputs.reason );
+	assert.strictEqual( core.outputs.substituted, 'true', core.outputs.reason + ' (octo is MEMBER in the fixture, so the permission is not needed)' );
+	assert.ok( core.outputs.reason.includes( 'is MEMBER' ), core.outputs.reason );
+} );
+
+check( 'lookup: write permission admits a private-membership author, and the lookup result is logged', async () => {
+	const cfg = baseConfig();
+	process.env.JOB_NAME = JOB;
+	process.env.DISABLED = '';
+	const core = fakeCore();
+	const github = fakeGithub( { baseRaw: cfg.raw, headRaw: cfg.raw, pages: [ [ receipt( cfg ) ] ] } );
+	await lookup( { github, context: { ...prContext(), payload: { pull_request: pullRequest( { author_association: 'CONTRIBUTOR' } ) } }, core } );
+	assert.strictEqual( core.outputs.substituted, 'true', core.outputs.reason );
+	assert.ok( core.outputs.reason.includes( 'has write permission' ), core.outputs.reason );
+	assert.ok( core.infos.some( ( m ) => m.includes( 'author permission lookup: write' ) ), core.infos );
 } );
 
 check( 'lookup reads the head config from the head, so a PR that edits it is caught', async () => {
@@ -423,7 +407,7 @@ check( 'lookup reads the head config from the head, so a PR that edits it is cau
 	process.env.JOB_NAME = JOB;
 	process.env.DISABLED = '';
 	const core = fakeCore();
-	const edited = cfg.raw.replace( '"local-ci"', '"anything-goes"' );
+	const edited = cfg.raw.replace( '"local-ci/v1: "', '"local-ci/v2: "' );
 	assert.notStrictEqual( edited, cfg.raw );
 	await lookup( { github: fakeGithub( { baseRaw: cfg.raw, headRaw: edited, pages: [ [ receipt( cfg ) ] ] } ), context: prContext(), core } );
 	assert.strictEqual( core.outputs.substituted, 'false' );
