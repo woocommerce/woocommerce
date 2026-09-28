@@ -94,29 +94,7 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	public function ensure_recurring_fetch_patterns_if_enabled() {
-<<<<<<< HEAD
-		if ( ! $this->allowed_tracking_is_enabled() ) {
-			return;
-		}
-
-		$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
-	}
-
-	/**
-	 * Schedule an action if it's not already pending.
-	 *
-	 * @param string $action The action name to schedule.
-	 * @return void
-	 */
-	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
-			return;
-		}
-
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
-=======
 		$this->cancel_fetch_patterns_when_ready();
->>>>>>> 7841e7fd73 (Stop scheduling Pattern Fetcher jobs (#68701))
 	}
 
 	/**
