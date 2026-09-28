@@ -77,9 +77,10 @@ final class CustomsDataValidator {
 			return null;
 		}
 
-		if ( is_string( $value ) ) {
-			// Unicode-aware trim, so a pasted non-breaking space counts as empty.
-			$code = strtoupper( (string) preg_replace( '/^\s+|\s+$/u', '', $value ) );
+		// Unicode-aware trim, so a pasted non-breaking space counts as empty. Null means invalid UTF-8.
+		$trimmed = is_string( $value ) ? preg_replace( '/^\s+|\s+$/u', '', $value ) : null;
+		if ( null !== $trimmed ) {
+			$code = strtoupper( $trimmed );
 			if ( '' === $code ) {
 				return null;
 			}

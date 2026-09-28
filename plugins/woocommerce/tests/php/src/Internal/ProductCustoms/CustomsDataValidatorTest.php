@@ -108,6 +108,14 @@ class CustomsDataValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject an origin country that is not valid UTF-8 instead of clearing it.
+	 */
+	public function test_country_of_origin_rejects_invalid_utf8(): void {
+		$this->expectException( WC_Data_Exception::class );
+		CustomsDataValidator::normalize_country_of_origin( " \xC3\x28 " );
+	}
+
+	/**
 	 * @testdox Should lightly normalize stored values without validating them.
 	 * @testWith ["customs_commodity_code", " 12 ", "12"]
 	 *           ["customs_country_of_origin", " zz ", "ZZ"]
