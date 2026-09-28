@@ -154,7 +154,7 @@ class PaymentsController {
 
 		// Add the gateways that are not available in the Checkout block, but only when the store uses it.
 		if ( 'checkout' === $current_tab && CartCheckoutUtils::is_checkout_block_default() ) {
-			$settings['woocommerce_payments_checkout_block_compatibility'] = array(
+			$settings['woocommerce_checkout_block_compatibility'] = array(
 				'incompatible_gateway_ids' => $this->get_gateway_ids_incompatible_with_checkout_block(),
 			);
 		}
