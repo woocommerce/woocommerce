@@ -3,8 +3,15 @@
 	"private": true,
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
+		"@wordpress/api-fetch": "catalog:wp-min",
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/core-data": "catalog:wp-min",
+		"@wordpress/data": "catalog:wp-min",
+		"@wordpress/dataviews": "19.1.0",
+		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/route": "0.22.0",
+		"@wordpress/url": "catalog:wp-min",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
 	},
