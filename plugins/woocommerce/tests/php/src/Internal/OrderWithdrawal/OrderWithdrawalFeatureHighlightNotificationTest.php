@@ -157,7 +157,8 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 
 	/**
 	 * @testdox Should not add the enabled notification for unrelated or disabled features.
-	 * @dataProvider provide_ignored_feature_changes
+	 * @testWith ["order_withdrawal", false]
+	 *           ["other_feature", true]
 	 *
 	 * @param string $feature_id Feature being toggled.
 	 * @param bool   $enabled    Whether the feature was enabled.
@@ -166,18 +167,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 		$this->sut->possibly_add_enabled_note( $feature_id, $enabled );
 
 		$this->assertFalse( Notes::get_note_by_name( OrderWithdrawalFeatureHighlightNotification::ENABLED_NOTE_NAME ), 'An irrelevant feature change should not create the notification.' );
-	}
-
-	/**
-	 * Data provider for ignored feature changes.
-	 *
-	 * @return array<string,array{0:string,1:bool}>
-	 */
-	public function provide_ignored_feature_changes(): array {
-		return array(
-			'order withdrawal disabled' => array( 'order_withdrawal', false ),
-			'unrelated feature enabled' => array( 'other_feature', true ),
-		);
 	}
 
 	/**
