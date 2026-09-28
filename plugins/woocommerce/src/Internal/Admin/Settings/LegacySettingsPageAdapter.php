@@ -17,7 +17,10 @@ defined( 'ABSPATH' ) || exit;
  * Internal implementation of the legacy settings adapter. Extensions should use
  * Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter.
  *
+ * Kept with its signatures because extensions subclass the public adapter and call these methods.
+ *
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 
@@ -49,37 +52,39 @@ class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 	/**
 	 * Build the canonical settings schema for a section.
 	 *
+	 * @deprecated 11.4.0 Returns an empty schema.
+	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return array
-	 * @throws \InvalidArgumentException When legacy settings contain duplicate group ids.
 	 */
 	public function get_schema( string $section ): array {
-		return SettingsUISchema::from_legacy_settings(
-			$this->settings_page->get_id(),
-			$section,
-			$this->settings_page->get_label(),
-			$this->settings_page->get_settings( $section ),
-			$this->get_save_adapter( $section )
-		);
+		SettingsUIDeprecation::record_usage( __METHOD__ );
+		return array();
 	}
 
 	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
+	 * @deprecated 11.4.0 Returns no handles.
+	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string[]
 	 */
 	public function get_script_handles( string $section ): array {
+		SettingsUIDeprecation::record_usage( __METHOD__ );
 		return array();
 	}
 
 	/**
 	 * Get the default save adapter for fields on this page.
 	 *
+	 * @deprecated 11.4.0 Always returns `form_post`.
+	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string
 	 */
 	public function get_save_adapter( string $section ): string {
+		SettingsUIDeprecation::record_usage( __METHOD__ );
 		return 'form_post';
 	}
 }

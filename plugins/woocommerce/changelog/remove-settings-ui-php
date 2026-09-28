@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Deprecate the experimental Settings UI PHP classes and the woocommerce_settings_sections_registration action; they no longer do anything.

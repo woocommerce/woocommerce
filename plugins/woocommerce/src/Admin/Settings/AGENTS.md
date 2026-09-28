@@ -1,6 +1,6 @@
 # Settings UI
 
-These classes power the Settings UI renderer for classic `wc-settings` pages. They are autoloaded modern code, but they are called from legacy code (`includes/admin/settings/`, `includes/admin/views/html-admin-settings.php`) that runs on every settings request.
+These classes powered the Settings UI renderer for classic `wc-settings` pages. The renderer was removed in WooCommerce 11.4.0, and the classes are now deprecated no-ops kept so extensions that reference them don't fail. Don't add features here. They are still called from legacy code (`includes/admin/settings/`) that runs on every settings request, so the rules below still apply until the classes are deleted.
 
 ## Mid-update fatal guard (required for every change)
 
@@ -12,5 +12,3 @@ Rules for this package and its call sites:
 - Public and protected method signatures are additive only. Never remove or change one; deprecate and keep it working.
 - Never delete or rename a class file that has shipped in a release. A stale classmap entry pointing at a missing file fatals inside the autoloader, where no guard can catch it.
 - Never add a required method to an interface here. Stale implementers fail at class-link time, uncatchably. Add a concrete default to the `SettingsSection` base class instead, the way `SettingsSectionUIPageProviderInterface` was introduced.
-
-Guarded call sites to copy from: `includes/admin/views/html-admin-settings.php`, `WC_Settings_Page::add_settings_ui_body_class()`, `Settings::add_settings_ui_schema()`, `WCAdminAssets::get_settings_ui_script_dependencies()`.

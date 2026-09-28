@@ -15,5 +15,6 @@ defined( 'ABSPATH' ) || exit;
  * Internal alias for the public settings UI page contract.
  *
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 interface SettingsUIPageInterface extends PublicSettingsUIPageInterface {}

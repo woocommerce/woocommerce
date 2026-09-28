@@ -16,5 +16,6 @@ defined( 'ABSPATH' ) || exit;
  * subclass it to add component metadata, script handles, or custom save behavior.
  *
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 class LegacySettingsPageAdapter extends \Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter {}
