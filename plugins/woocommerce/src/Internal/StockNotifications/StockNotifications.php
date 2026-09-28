@@ -121,6 +121,7 @@ class StockNotifications implements RegisterHooksInterface {
 		$container->get( DataRetentionController::class );
 		$container->get( Telemetry::class );
 
+		$container->get( NotificationManagementService::class );
 		$container->get( MyAccountEndpoint::class );
 
 		// The settings filters must attach outside admin too, or the REST settings
@@ -129,14 +130,14 @@ class StockNotifications implements RegisterHooksInterface {
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );
-			return;
 		}
 
-		// Frontend-only.
-		$container->get( EmailActionController::class );
-		$container->get( ProductPageIntegration::class );
-		$container->get( FormHandlerService::class );
-		$container->get( NotificationManagementService::class );
+		// Front end only; admin-ajax counts as front end, as in core's is_request( 'frontend' ).
+		if ( ! is_admin() || wp_doing_ajax() ) {
+			$container->get( EmailActionController::class );
+			$container->get( ProductPageIntegration::class );
+			$container->get( FormHandlerService::class );
+		}
 	}
 
 	/**
