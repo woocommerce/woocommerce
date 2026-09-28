@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.2.0-beta.2 2026-XX-XX =
+= 11.2.0-beta.2 2026-09-28 =
 
 **WooCommerce**
 
@@ -391,6 +391,15 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Validate post-action webhooks using the affected post ID instead of request-global post type state. [#68208](https://github.com/woocommerce/woocommerce/pull/68208)
 * Fix - Validate Settings UI schemas and script handles before mounting, with a complete classic fallback for server-side failures. [#67334](https://github.com/woocommerce/woocommerce/pull/67334)
 * Fix - Variation gallery: stop persisting the inherited parent image on variation save, prefer variation-owned galleries on the storefront, and clean up previously frozen variation thumbnails. [#68389](https://github.com/woocommerce/woocommerce/pull/68389)
+* Fix - Charge shipping in the classic checkout when an extension hides a required state or postcode field. [#69149](https://github.com/woocommerce/woocommerce/pull/69149)
+* Fix - Fix a fatal error when saving Screen Options with Back in Stock Notifications enabled. [#68986](https://github.com/woocommerce/woocommerce/pull/68986)
+* Fix - Fix PHP parse errors caused by unresolved conflicts in the Pattern Fetcher backport. [#69147](https://github.com/woocommerce/woocommerce/pull/69147)
+* Fix - Include reviews left on the Review Order page in the product's star rating and rating count. [#69105](https://github.com/woocommerce/woocommerce/pull/69105)
+* Fix - Keep checkout from marking fields invalid when an extension hides error notices but still shows other notices. [#69128](https://github.com/woocommerce/woocommerce/pull/69128)
+* Fix - Prevent variation gallery rendering from recursively requesting variation data. [#68964](https://github.com/woocommerce/woocommerce/pull/68964)
+* Fix - Restore support for other file types (e.g. PDFs) in product galleries. [#68992](https://github.com/woocommerce/woocommerce/pull/68992)
+* Fix - Show product blocks, such as Product Collection, in sent emails built with the block email editor. [#69107](https://github.com/woocommerce/woocommerce/pull/69107)
+* Fix - Treat a shipping address missing required fields as incomplete, even when an extension changes the default address settings. [#69127](https://github.com/woocommerce/woocommerce/pull/69127)
 * Add - Add an "Automatic updates" column to the My Subscriptions screen that turns auto-updates on or off for installed extensions and themes, and shows "Blocked" when they are on but something else stops the product updating [#68410](https://github.com/woocommerce/woocommerce/pull/68410)
 * Add - Add an "Awaiting confirmation" section to the Stock notifications My Account tab, listing unconfirmed sign-ups with Resend email and Cancel actions above the active notifications table. [#68295](https://github.com/woocommerce/woocommerce/pull/68295)
 * Add - Add an $orderby argument to wc_get_product_category_list() and order single-product meta categories by hierarchy. Stores on the stock single-product/meta.php template now render categories ancestor-first; return an empty string from woocommerce_product_meta_category_orderby to restore WordPress term-list order. [#67633](https://github.com/woocommerce/woocommerce/pull/67633)
@@ -506,6 +515,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Size the Catalog Sorting block to the selected option. [#67607](https://github.com/woocommerce/woocommerce/pull/67607)
 * Tweak - Three small Marketplace UI fixes: the Plugins > Add Plugin "WooCommerce Marketplace" tab lands on Discover, the Extensions page title matches other admin page titles, and compact product cards show the "Sponsored" label. [#68411](https://github.com/woocommerce/woocommerce/pull/68411)
 * Tweak - Update Antom payment gateway icon to use partner-supplied brand logo [#64584](https://github.com/woocommerce/woocommerce/pull/64584)
+* Tweak - Stop adding block data- attributes to the HTML of emails built with the block email editor. [#69107](https://github.com/woocommerce/woocommerce/pull/69107)
+* Tweak - Stop scheduling Pattern Fetcher jobs. [#69146](https://github.com/woocommerce/woocommerce/pull/69146)
 * Performance - Avoid running Inbox Note cleanup during admin initialization. [#68088](https://github.com/woocommerce/woocommerce/pull/68088)
 * Performance - Avoid site-wide orphan cleanup after product CSV imports. [#68090](https://github.com/woocommerce/woocommerce/pull/68090)
 * Performance - Cache CSV importer original-ID lookups within each import batch, so CSVs with repeated IDs or many product references (grouped, upsell, cross-sell) no longer run the same postmeta query for every occurrence. [#68018](https://github.com/woocommerce/woocommerce/pull/68018)
@@ -518,6 +529,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Performance - REST API: in the wc/v4 customers endpoint, only compute the order count, total spent and avatar fields when they are requested via _fields, avoiding wasted per-customer aggregate queries on sparse requests. [#66072](https://github.com/woocommerce/woocommerce/pull/66072)
 * Performance - Sort the products widget by sales and the top rated products widget by rating through the product lookup table instead of post meta. [#68300](https://github.com/woocommerce/woocommerce/pull/68300)
 * Performance - Tune terms and post meta cache invalidation during product saving. [#66966](https://github.com/woocommerce/woocommerce/pull/66966)
+* Performance - Revert the faster purchasable-variation check for variable products so it can get more testing before it ships again. [#69069](https://github.com/woocommerce/woocommerce/pull/69069)
+* Performance - Skip wiring the front-end stock notification services on admin requests. [#69145](https://github.com/woocommerce/woocommerce/pull/69145)
 * Enhancement - Add a dismiss button and an inline disconnect link to the connected account banner on the marketplace's My Subscriptions tab. [#68412](https://github.com/woocommerce/woocommerce/pull/68412)
 * Enhancement - Add a reusable CSS class to product names in improved order emails. [#67764](https://github.com/woocommerce/woocommerce/pull/67764)
 * Enhancement - Add a variation bulk action to set sale prices from regular prices. [#68520](https://github.com/woocommerce/woocommerce/pull/68520)
