@@ -61,4 +61,4 @@ To clear a value, call the setter with `null` or `''`. `set_props()` ignores `nu
 
 ## Usage tracking
 
-When usage tracking is enabled, WooCommerce's periodic tracker counts published products with a commodity code, country of origin, or customs description, and published variations with their own commodity code or country of origin. It sends only aggregate counts, without product IDs or field values.
+When usage tracking is enabled, WooCommerce's periodic tracker counts published products with a commodity code, country of origin, or customs description, and published variations with their own commodity code, country of origin, or customs description. It sends only aggregate counts, without product IDs or field values.
