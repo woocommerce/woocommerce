@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS\CashSessions;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
+use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionService;
 use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionsDataStore;
+use Automattic\WooCommerce\Internal\POS\CashSessions\CashSessionTransaction;
+use Automattic\WooCommerce\Internal\POS\CashSessions\CashSourceResolver;
 use DateTimeImmutable;
 use DateTimeZone;
 use WC_Order;
@@ -28,6 +31,13 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $manager_id;
 
 	/**
+	 * Transaction double used by the service during the test.
+	 *
+	 * @var RecordingTransaction
+	 */
+	private $transaction;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -43,6 +53,38 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->manager_id );
+
+		$this->transaction = new RecordingTransaction();
+		$this->use_transaction( $this->transaction );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			// The service is a container singleton that outlives the test.
+			$this->use_transaction( wc_get_container()->get( CashSessionTransaction::class ) );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * @testdox Should run writes inside a transaction.
+	 */
+	public function test_writes_use_a_transaction(): void {
+		$session_id = $this->open_session()->get_data()['id'];
+		$this->record_movement(
+			$session_id,
+			array(
+				'type'   => 'paid_in',
+				'amount' => '1.00',
+				'reason' => 'x',
+			)
+		);
+
+		$this->assertSame( array( 'start', 'commit', 'start', 'commit' ), $this->transaction->calls );
 	}
 
 	/**
@@ -1222,6 +1264,20 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private function assert_error( WP_REST_Response $response, int $status, string $code ): void {
 		$this->assertSame( $status, $response->get_status(), (string) wp_json_encode( $response->get_data() ) );
 		$this->assertSame( $code, $response->get_data()['code'] );
+	}
+
+	/**
+	 * Make the service use a transaction implementation.
+	 *
+	 * @param CashSessionTransaction $transaction Transaction.
+	 */
+	private function use_transaction( CashSessionTransaction $transaction ): void {
+		$container = wc_get_container();
+		$container->get( CashSessionService::class )->init(
+			$container->get( CashSessionsDataStore::class ),
+			$container->get( CashSourceResolver::class ),
+			$transaction
+		);
 	}
 
 	/**

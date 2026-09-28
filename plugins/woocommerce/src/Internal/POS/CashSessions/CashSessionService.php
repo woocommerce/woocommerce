@@ -47,16 +47,25 @@ class CashSessionService {
 	private CashSourceResolver $source_resolver;
 
 	/**
+	 * Transaction around multi-statement writes.
+	 *
+	 * @var CashSessionTransaction
+	 */
+	private CashSessionTransaction $transaction;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param CashSessionsDataStore $data_store      Storage.
-	 * @param CashSourceResolver    $source_resolver Order and refund validation.
+	 * @param CashSessionsDataStore  $data_store      Storage.
+	 * @param CashSourceResolver     $source_resolver Order and refund validation.
+	 * @param CashSessionTransaction $transaction     Transaction around multi-statement writes.
 	 */
-	final public function init( CashSessionsDataStore $data_store, CashSourceResolver $source_resolver ): void {
+	final public function init( CashSessionsDataStore $data_store, CashSourceResolver $source_resolver, CashSessionTransaction $transaction ): void {
 		$this->data_store      = $data_store;
 		$this->source_resolver = $source_resolver;
+		$this->transaction     = $transaction;
 	}
 
 	/**
@@ -1015,23 +1024,23 @@ class CashSessionService {
 	}
 
 	/**
-	 * Start a transaction when the site allows them.
+	 * Start a transaction, whatever WC_USE_TRANSACTIONS says.
 	 */
 	private function start_transaction(): void {
-		wc_transaction_query( 'start' );
+		$this->transaction->start();
 	}
 
 	/**
 	 * Commit the transaction.
 	 */
 	private function commit(): void {
-		wc_transaction_query( 'commit' );
+		$this->transaction->commit();
 	}
 
 	/**
 	 * Roll back the transaction. Safe to call when none is active.
 	 */
 	private function rollback(): void {
-		wc_transaction_query( 'rollback' );
+		$this->transaction->rollback();
 	}
 }
