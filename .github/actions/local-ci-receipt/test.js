@@ -234,7 +234,7 @@ check( 'the real .github/local-ci.json matches the real job-name shapes', () => 
 	assert.ok( ruleFor( real, 'JavaScript - @woocommerce/number [unit]' ), 'JS unit jobs must be claimed' );
 	assert.strictEqual( ruleFor( real, 'PHP: 8.5 WP: latest - @woocommerce/plugin-woocommerce [unit:php]' ), null, 'PHP unit is not eligible yet' );
 	assert.strictEqual( ruleFor( real, 'Blocks e2e tests 1/10 - @woocommerce/plugin-woocommerce [e2e]' ), null, 'e2e is not eligible yet' );
-	assert.strictEqual( real.enabled, false, 'ships disabled' );
+	assert.strictEqual( typeof real.enabled, 'boolean' );
 	assert.strictEqual( typeof real.app.appId, 'number' );
 } );
 

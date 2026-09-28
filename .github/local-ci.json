@@ -7,7 +7,7 @@
   "baseBranch": "trunk",
   "receiptPrefix": "local-ci/v1: ",
 
-  "enabled": false,
+  "enabled": true,
 
   "plan": {
     "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT.",
