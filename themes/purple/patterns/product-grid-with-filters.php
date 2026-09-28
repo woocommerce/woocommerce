@@ -18,7 +18,7 @@
 <!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
 <div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%"} -->
 <div class="wp-block-column" style="flex-basis:22%">
-<!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
+<!-- wp:heading {"level":3,"metadata":{"blockVisibility":{"viewport":{"mobile":false,"tablet":false}}},"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--50);font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e( 'Filter by:', 'purple' );?></h3>
 <!-- /wp:heading -->
 <?php
@@ -125,8 +125,8 @@
 <!-- wp:column {"width":"88%"} -->
 <div class="wp-block-column" style="flex-basis:88%">
 <?php // Keep the legacy drawer attribute for WooCommerce 11.1 compatibility. ?>
-<!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"metadata":{"name":"Active filters on small screens","blockVisibility":{"viewport":{"desktop":false}}}} -->
-<div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled">
+<!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"fontSize":"small","metadata":{"blockVisibility":{"viewport":{"desktop":false}}}} -->
+<div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled has-small-font-size">
 <!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-woocommerce-product-filter-active" style="margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
@@ -134,8 +134,8 @@
 
 <!-- wp:woocommerce/product-filter-clear-button -->
 <!-- wp:buttons {"layout":{"type":"flex","verticalAlignment":"stretched"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline","textAlign":"center"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
-<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-background has-text-align-center has-medium-font-size has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e( 'Clear filters', 'purple' );?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline","textAlign":"center"},"outline":"none","fontSize":"small","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"small"} -->
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-background has-text-align-center has-small-font-size has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e( 'Clear filters', 'purple' );?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 <!-- /wp:woocommerce/product-filter-clear-button --></div>
