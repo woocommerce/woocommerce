@@ -146,16 +146,14 @@
 	}
 
 	&__inner-blocks {
+		box-sizing: border-box;
 		color: inherit;
 		width: 100%;
+		padding: 0 48px 16px 48px;
 		z-index: 1;
 
 		&.is-layout-flex {
 			flex: 1;
-		}
-
-		&:not(.is-layout-flex) {
-			padding: 0 48px 16px 48px;
 		}
 	}
 
