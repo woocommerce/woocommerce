@@ -361,6 +361,21 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a clear error for drawer names instead of a fatal when mbstring is missing.
+	 */
+	public function test_drawer_name_without_mbstring(): void {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'function_exists' => fn( $name ) => 'mb_strtolower' !== $name && function_exists( $name ),
+			)
+		);
+
+		$this->assert_error( $this->open_session( array( 'drawer_id' => 'Till' ) ), 500, 'woocommerce_rest_cash_mbstring_missing' );
+		$this->assert_error( $this->request( 'GET', self::BASE, array( 'drawer_id' => 'Till' ) ), 500, 'woocommerce_rest_cash_mbstring_missing' );
+		$this->assertSame( 201, $this->open_session()->get_status(), 'A session without a drawer does not need mbstring' );
+	}
+
+	/**
 	 * @testdox Should list sessions newest first with filters and pagination headers.
 	 */
 	public function test_list_sessions(): void {

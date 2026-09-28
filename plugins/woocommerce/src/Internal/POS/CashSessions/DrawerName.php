@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * The user-entered cash drawer name from the POS app settings.
@@ -57,8 +59,13 @@ final class DrawerName {
 	 *
 	 * @param string $name Normalized drawer name.
 	 * @return string 64 hex characters.
+	 * @throws RuntimeException When the mbstring extension is missing; WooCommerce does not require it.
 	 */
 	public static function key( string $name ): string {
+		// No fallback: lowercasing without mbstring would give other keys for the same non-ASCII name.
+		if ( ! wc_get_container()->get( LegacyProxy::class )->call_function( 'function_exists', 'mb_strtolower' ) ) {
+			throw new RuntimeException( 'Comparing drawer names needs the mbstring PHP extension.' );
+		}
 		return hash( 'sha256', mb_strtolower( $name, 'UTF-8' ) );
 	}
 }

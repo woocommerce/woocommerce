@@ -83,11 +83,12 @@ class CashSessionService {
 		$request_id = strtolower( (string) $params['request_id'] );
 		$device_id  = (string) $params['device_id'];
 		$drawer     = isset( $params['drawer_id'] ) ? $this->normalize_drawer( (string) $params['drawer_id'] ) : null;
+		$drawer_key = null === $drawer ? null : $this->drawer_key( $drawer );
 		$hash       = self::payload_hash(
 			array(
 				'device_id'      => $device_id,
 				'opening_amount' => $this->canonical_amount( (string) $params['opening_amount'] ),
-				'drawer'         => null === $drawer ? null : DrawerName::key( $drawer ),
+				'drawer'         => $drawer_key,
 			)
 		);
 
@@ -118,7 +119,7 @@ class CashSessionService {
 				array(
 					'device_id'          => $device_id,
 					'drawer_name'        => $drawer,
-					'drawer_key'         => null === $drawer ? null : DrawerName::key( $drawer ),
+					'drawer_key'         => $drawer_key,
 					'currency'           => get_woocommerce_currency(),
 					'currency_precision' => $precision,
 					'opened_by'          => $actor['id'],
@@ -194,7 +195,7 @@ class CashSessionService {
 			$query['device_id'] = (string) $filters['device_id'];
 		}
 		if ( isset( $filters['drawer_id'] ) ) {
-			$query['drawer_key'] = DrawerName::key( $this->normalize_drawer( (string) $filters['drawer_id'] ) );
+			$query['drawer_key'] = $this->drawer_key( $this->normalize_drawer( (string) $filters['drawer_id'] ) );
 		}
 		if ( isset( $filters['status'] ) ) {
 			$query['status'] = (string) $filters['status'];
@@ -430,7 +431,7 @@ class CashSessionService {
 					'reason'         => (string) $params['reason'],
 					'occurred_at'    => $occurred_at,
 					'correlation_id' => $correlation,
-					'drawer'         => null === $drawer ? $session['drawer_key'] : DrawerName::key( $drawer ),
+					'drawer'         => null === $drawer ? $session['drawer_key'] : $this->drawer_key( $drawer ),
 				)
 			)
 		);
@@ -694,7 +695,7 @@ class CashSessionService {
 		if ( null === $drawer && null === $bound_key ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_required', __( 'This cash session has no drawer.', 'woocommerce' ) );
 		}
-		if ( null !== $drawer && DrawerName::key( $drawer ) !== $bound_key ) {
+		if ( null !== $drawer && $this->drawer_key( $drawer ) !== $bound_key ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_drawer_mismatch', __( 'The drawer does not match the cash session drawer.', 'woocommerce' ) );
 		}
 	}
@@ -945,6 +946,25 @@ class CashSessionService {
 			return DrawerName::normalize( $value );
 		} catch ( InvalidArgumentException $e ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_drawer', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Comparison key of a normalized drawer name.
+	 *
+	 * @param string $drawer Normalized drawer name.
+	 * @return string
+	 * @throws CashSessionException When the server cannot compare drawer names.
+	 */
+	private function drawer_key( string $drawer ): string {
+		try {
+			return DrawerName::key( $drawer );
+		} catch ( RuntimeException $e ) {
+			throw new CashSessionException(
+				'woocommerce_rest_cash_mbstring_missing',
+				__( 'Drawer names need the mbstring PHP extension, which is not enabled on this server.', 'woocommerce' ),
+				500
+			);
 		}
 	}
 
