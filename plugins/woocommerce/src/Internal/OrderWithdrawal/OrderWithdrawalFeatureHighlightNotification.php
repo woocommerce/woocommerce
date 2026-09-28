@@ -97,7 +97,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 * @param mixed $feature_id Feature being toggled.
 	 * @param mixed $enabled    Whether the feature was enabled.
 	 *
-	 * @since 11.2.0
+	 * @since 11.3.0
 	 */
 	public function possibly_add_enabled_note( $feature_id, $enabled ): void {
 		if ( 'order_withdrawal' !== $feature_id || true !== $enabled ) {
