@@ -1162,6 +1162,28 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow paid out with the process sales capability and name the missing refund capability on cash refunds.
+	 */
+	public function test_paid_out_and_refund_capabilities(): void {
+		$order  = $this->create_cash_order( '10.00' );
+		$refund = $this->create_refund( $order, '2.00' );
+		wp_set_current_user( $this->create_cashier() );
+		$session_id = $this->open_session( array( 'opening_amount' => '50.00' ) )->get_data()['id'];
+
+		$paid_out = $this->record_movement(
+			$session_id,
+			array(
+				'type'   => 'paid_out',
+				'amount' => '20.00',
+				'reason' => 'Supplier',
+			)
+		);
+
+		$this->assertSame( 201, $paid_out->get_status(), (string) wp_json_encode( $paid_out->get_data() ) );
+		$this->assert_error( $this->record_refund( $session_id, $order->get_id(), $refund->get_id() ), 403, 'woocommerce_rest_cash_cannot_record_refund' );
+	}
+
+	/**
 	 * @testdox Should refuse writes to another cashier's session and let a store manager make them.
 	 */
 	public function test_only_opener_or_manager_can_write_to_session(): void {

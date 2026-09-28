@@ -74,11 +74,13 @@ class CashSessionsRestController extends RestApiControllerBase {
 	 * @since 11.3.0
 	 */
 	public function register_routes(): void {
-		$permission          = fn() => $this->check_access( Capabilities::CAP_PROCESS_SALES );
+		$permission = fn() => $this->check_access( Capabilities::CAP_PROCESS_SALES );
+		// Open decision: paid in and paid out only need the process sales capability, like cash sales.
+		// Revisit with the POS roles work (user story 16).
 		$movement_permission = function ( WP_REST_Request $request ) {
 			$access = $this->check_access( Capabilities::CAP_PROCESS_SALES );
 			return true === $access && CashMovementType::CASH_REFUND === $request->get_param( 'type' )
-				? $this->check_access( Capabilities::CAP_ISSUE_REFUNDS )
+				? $this->check_refund_access()
 				: $access;
 		};
 		$session_id          = array(
@@ -342,6 +344,23 @@ class CashSessionsRestController extends RestApiControllerBase {
 		return new WP_Error(
 			'woocommerce_rest_cannot_access_cash_sessions',
 			__( 'Sorry, you are not allowed to manage cash sessions.', 'woocommerce' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
+	 * Check the extra capability a cash refund needs, with its own error code so the app can explain it.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function check_refund_access() {
+		if ( current_user_can( Capabilities::CAP_ISSUE_REFUNDS ) || current_user_can( 'manage_woocommerce' ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'woocommerce_rest_cash_cannot_record_refund',
+			__( 'Sorry, you are not allowed to record cash refunds.', 'woocommerce' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}
