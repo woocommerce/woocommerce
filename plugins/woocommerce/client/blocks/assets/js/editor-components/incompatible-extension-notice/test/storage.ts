@@ -117,7 +117,7 @@ describe( 'incompatible extension notice storage', () => {
 		} );
 
 		it.each( [
-			[ 'unparseable', 'not json at all' ],
+			[ 'unparsable', 'not json at all' ],
 			[ 'an object', JSON.stringify( { a: 1 } ) ],
 			[ 'a bare string', JSON.stringify( 'ext-one' ) ],
 			[ 'null', JSON.stringify( null ) ],
@@ -169,7 +169,7 @@ describe( 'incompatible extension notice storage', () => {
 		it.each( [
 			[ 'a readable value', JSON.stringify( [ 'stored' ] ) ],
 			[ 'an empty array', JSON.stringify( [] ) ],
-			[ 'something unparseable', '{not valid json' ],
+			[ 'something unparsable', '{not valid json' ],
 			// The case the `=== null` check exists for: an empty string is a
 			// write that failed, which is stored data, not an absent key.
 			[ 'an empty string', '' ],

@@ -342,7 +342,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * is normalized to the bare form in the first place.
 	 *
 	 * Nothing downstream depends on which label renders — the stored base is byte-identical, so
-	 * the product URLs and the derived `use_verbose_page_rules` flag are too.
+	 * the product URLs are too.
 	 *
 	 * @testdox Should report "Default" when the Shop slug makes both choices store the same base.
 	 */

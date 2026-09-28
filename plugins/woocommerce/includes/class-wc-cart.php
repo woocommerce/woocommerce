@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -940,6 +941,35 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Gets the display name for a cart item.
+	 *
+	 * For variations, selected "Any" attribute values that are missing from the
+	 * stored variation name are appended so the name matches fully defined
+	 * variations. The stored product and variation names are not modified.
+	 *
+	 * @since 11.2.0
+	 * @param array           $cart_item Cart item.
+	 * @param WC_Product|null $product   Optional product object to use as the name source,
+	 *                                   e.g. the result of the `woocommerce_cart_item_product` filter.
+	 *                                   Defaults to the cart item's product.
+	 * @return string The product name including any selected "Any" attribute values,
+	 *                or an empty string when no product can be resolved from the arguments.
+	 */
+	public function get_item_product_name( $cart_item, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = is_array( $cart_item ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ? $cart_item['data'] : null;
+		}
+
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+
+		$variation = isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ? $cart_item['variation'] : array();
+
+		return wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation, true );
+	}
+
+	/**
 	 * Gets cross sells based on the items in the cart.
 	 *
 	 * @return array cross_sells (item ids)
@@ -1859,7 +1889,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
@@ -1874,7 +1904,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {

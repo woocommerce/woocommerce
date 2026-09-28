@@ -185,6 +185,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$sql = apply_filters( 'woocommerce_price_filter_sql', $sql, $meta_query_sql, $tax_query_sql );
 
-		return $wpdb->get_row( $sql ); // WPCS: unprepared SQL ok.
+		return $wpdb->get_row( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Core assembles $sql from prepared WP_Meta_Query/WP_Tax_Query clauses and esc_sql'd post types; the woocommerce_price_filter_sql filter lets extensions replace the statement.
 	}
 }

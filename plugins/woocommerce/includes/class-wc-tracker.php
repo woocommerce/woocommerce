@@ -39,9 +39,10 @@ class WC_Tracker {
 	private static $api_url = 'https://tracking.woocommerce.com/v1/';
 
 	/**
-	 * Consecutive failed deliveries after which the current snapshot is abandoned.
+	 * Consecutive failed attempts after which the current snapshot is abandoned.
 	 *
-	 * Retries happen on the daily tracker action, so this bounds retrying to a few days.
+	 * Counts attempts rather than delivery failures, so a snapshot that cannot be built is
+	 * bounded too. Retries happen on the daily tracker action, so this is a few days.
 	 *
 	 * @var int
 	 */
@@ -87,6 +88,26 @@ class WC_Tracker {
 		// Recorded before building the snapshot so overlapping override sends are still suppressed.
 		update_option( 'woocommerce_tracker_last_attempt', time(), false );
 
+		// Count the attempt before the snapshot is built. A fatal or timeout inside
+		// get_tracking_data() never reaches record_send_result(), so a counter that only
+		// moved on delivery outcomes would let an unbuildable snapshot rebuild on every
+		// scheduled run instead of giving up the way a failed delivery does.
+		$attempts = (int) get_option( 'woocommerce_tracker_send_failures', 0 ) + 1;
+
+		if ( self::MAX_CONSECUTIVE_SEND_FAILURES < $attempts ) {
+			self::finish_snapshot();
+			wc_get_logger()->warning(
+				'WooCommerce tracker snapshot attempts ended before recording a result; giving up until the next interval.',
+				array(
+					'source'   => 'woocommerce-tracker',
+					'failures' => $attempts - 1,
+				)
+			);
+			return;
+		}
+
+		update_option( 'woocommerce_tracker_send_failures', $attempts, false );
+
 		$body = wp_json_encode( self::get_tracking_data() );
 		if ( false === $body ) {
 			self::record_send_failure( false, 0, 'json_encode_failure', 0 );
@@ -123,8 +144,7 @@ class WC_Tracker {
 		$status = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
 
 		if ( 200 <= $status && 300 > $status ) {
-			update_option( 'woocommerce_tracker_last_send', time() );
-			delete_option( 'woocommerce_tracker_send_failures' );
+			self::finish_snapshot();
 			return;
 		}
 
@@ -134,10 +154,10 @@ class WC_Tracker {
 	/**
 	 * Record a failed delivery attempt.
 	 *
-	 * Consecutive retryable failures are counted so a persistent outage does not retry forever;
-	 * a non-retryable failure or the last allowed attempt gives up on the current snapshot.
-	 * Retry state is only kept while tracking is still enabled, since opting out may have
-	 * happened while the request was in flight.
+	 * The attempt was already counted before the snapshot was built, so this only decides
+	 * whether to keep retrying: a non-retryable failure or the last allowed attempt gives up
+	 * on the current snapshot. Retry state is discarded when tracking was turned off while
+	 * the request was in flight.
 	 *
 	 * @param bool   $retryable  Whether the next scheduled run should try again.
 	 * @param int    $status     HTTP status code, 0 when no response was received.
@@ -145,14 +165,14 @@ class WC_Tracker {
 	 * @param int    $body_bytes Size of the snapshot.
 	 */
 	private static function record_send_failure( $retryable, $status, $error_code, $body_bytes ): void {
-		$failures = (int) get_option( 'woocommerce_tracker_send_failures', 0 ) + 1;
+		// The attempt was already counted before the snapshot was built.
+		$failures = (int) get_option( 'woocommerce_tracker_send_failures', 0 );
 		$give_up  = ! $retryable || self::MAX_CONSECUTIVE_SEND_FAILURES <= $failures;
 
 		if ( $give_up ) {
-			update_option( 'woocommerce_tracker_last_send', time() );
+			self::finish_snapshot();
+		} elseif ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
 			delete_option( 'woocommerce_tracker_send_failures' );
-		} elseif ( true === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
-			update_option( 'woocommerce_tracker_send_failures', $failures, false );
 		}
 
 		if ( 413 === $status ) {
@@ -178,6 +198,18 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Close out the current tracking attempt, whether a snapshot was sent or the
+	 * attempt was abandoned before one existed.
+	 *
+	 * The scheduled gate reads only the send time, so advancing it is what puts the
+	 * store back on the weekly interval and stops the daily retries.
+	 */
+	private static function finish_snapshot(): void {
+		update_option( 'woocommerce_tracker_last_send', time() );
+		delete_option( 'woocommerce_tracker_send_failures' );
+	}
+
+	/**
 	 * Whether a delivery failure with the given status is worth retrying.
 	 *
 	 * Transport failures (status 0), rate limiting, timeouts and server errors are retried;
@@ -191,13 +223,19 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get the last time tracking data was sent.
+	 * Get the time the current tracking attempt was closed out.
+	 *
+	 * Despite the option name, this is not only set on delivery: it also advances when an
+	 * attempt is abandoned, including before a snapshot could be built. The scheduled gate
+	 * reads it as "this cycle is done", not "a snapshot was sent".
 	 *
 	 * @return int|bool
 	 */
 	private static function get_last_send_time() {
 		/**
 		 * Filter the last time tracking data was sent.
+		 *
+		 * The timestamp also covers abandoned attempts, not only deliveries.
 		 *
 		 * @since 2.3.0
 		 */

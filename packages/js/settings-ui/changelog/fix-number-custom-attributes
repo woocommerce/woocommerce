@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Honor `disabled` and `placeholder` custom attributes on number fields.

@@ -130,7 +130,7 @@ WooCommerce.com also makes a webhook call to your webhook URL with the saas_bill
 
 ## Free Trials
 
-Our billing system optionally supports free trials. Free trials help reduce the number of refunds and cancelations by allowing merchants to see if the service is a good fit for them before purchasing. You can specify the trial period during the subscription signup initiation phase. Pass the trial_period and trial_length parameters during the initial API call.
+Our billing system optionally supports free trials. Free trials help reduce the number of refunds and cancellations by allowing merchants to see if the service is a good fit for them before purchasing. You can specify the trial period during the subscription signup initiation phase. Pass the trial_period and trial_length parameters during the initial API call.
 
 We automatically charge the subscription price when the trial period ends if the merchant didn't cancel the subscription. You will get a webhook call with the saas_billing_contract.renewed topic and the contract details. Please review the webhook section for more information.
 
@@ -244,7 +244,7 @@ If you approve a refund request for a SaaS billing order, the underlying SaaS co
 
 WooCommerce.com also makes server-to-server calls to your webhook URL with the saas_billing_contract.refunded and saas_billing_contract.canceled topics. The webhook request body contains the contract object. Check out the webhook section for more details.
 
-## Subscription cancelations
+## Subscription cancellations
 
 Merchants must be able to cancel a subscription from your application, so please make sure that feature is implemented. There is a dedicated endpoint in the HTTP API to cancel contracts. Please review our API documentation for the DELETE endpoints.
 

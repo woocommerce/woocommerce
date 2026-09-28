@@ -107,6 +107,7 @@ export {
 	getReportTableQuery,
 	getReportChartData,
 	getTooltipValueFormat,
+	usesServerSideSearch,
 } from './reports/utils';
 
 // Export constants

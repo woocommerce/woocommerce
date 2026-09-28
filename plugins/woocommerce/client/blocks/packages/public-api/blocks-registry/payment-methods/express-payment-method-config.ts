@@ -35,7 +35,7 @@ export default class ExpressPaymentMethodConfig
 			typeof config.name === 'string'
 				? config.name.replace( /[_-]/g, ' ' )
 				: config.name;
-		const trimedDescription =
+		const trimmedDescription =
 			typeof config?.description === 'string' &&
 			config.description.length > 130
 				? config.description.slice( 0, 130 ) + '...'
@@ -44,7 +44,7 @@ export default class ExpressPaymentMethodConfig
 		ExpressPaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
 		this.title = config.title || readableName;
-		this.description = trimedDescription || '';
+		this.description = trimmedDescription || '';
 		this.gatewayId = config.gatewayId || '';
 		this.content = config.content;
 		this.edit = config.edit;

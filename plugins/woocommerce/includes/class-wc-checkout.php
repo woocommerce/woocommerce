@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
@@ -564,6 +565,8 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			$variation = is_array( $values['variation'] ?? null ) ? $values['variation'] : array();
+
 			/**
 			 * Filter hook to get initial item object.
 			 *
@@ -576,7 +579,7 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
+					'variation'    => $variation,
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
@@ -590,7 +593,7 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'name'         => $product->get_name(),
+						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
@@ -1435,6 +1438,18 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
+				/**
+				 * Fires after the checkout creates the order, but before payment is processed.
+				 *
+				 * Do not use this action for payment-completion logic or to call WC_Order::payment_complete().
+				 * Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
+				 *
+				 * @since 1.1.0
+				 *
+				 * @param int                      $order_id    Order ID.
+				 * @param array                    $posted_data Posted checkout data.
+				 * @param WC_Order|WC_Order_Refund $order       Order object.
+				 */
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(
