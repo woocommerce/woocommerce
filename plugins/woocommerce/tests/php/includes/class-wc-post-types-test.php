@@ -523,6 +523,28 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Products use the classic editor unless the product description block editor feature is enabled.
+	 */
+	public function test_block_editor_for_products_follows_feature_flag(): void {
+		$features = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+
+		try {
+			$features->change_feature_enable( 'product_description_block_editor', false );
+			$this->assertFalse( use_block_editor_for_post_type( 'product' ), 'Products should use the classic editor by default.' );
+			$this->assertTrue( use_block_editor_for_post_type( 'page' ), 'Other post types should be unaffected.' );
+
+			$features->change_feature_enable( 'product_description_block_editor', true );
+			$this->assertTrue( use_block_editor_for_post_type( 'product' ), 'Products should use the block editor when the feature is enabled.' );
+
+			add_filter( 'use_block_editor_for_post_type', '__return_false', 5 );
+			$this->assertFalse( use_block_editor_for_post_type( 'product' ), 'An earlier filter disabling the block editor should be respected.' );
+		} finally {
+			remove_filter( 'use_block_editor_for_post_type', '__return_false', 5 );
+			delete_option( 'woocommerce_feature_product_description_block_editor_enabled' );
+		}
+	}
+
+	/**
 	 * Count persisted rewrite rules whose query string contains the given needle.
 	 *
 	 * @param string $needle Query string fragment to match.

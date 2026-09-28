@@ -549,6 +549,18 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
+			'product_description_block_editor'     => array(
+				'name'                         => __( 'Block editor for product descriptions', 'woocommerce' ),
+				'description'                  => __(
+					'Edit the product description with the block editor. Product data, short description and the other product fields stay available below the editor.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
 				'name'                         => __( 'Variation gallery', 'woocommerce' ),
 				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),

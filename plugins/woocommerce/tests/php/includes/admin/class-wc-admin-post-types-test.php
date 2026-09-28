@@ -64,6 +64,48 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox In the block editor, the gallery meta box is replaced and the sidebar fields are posted through hidden inputs.
+	 */
+	public function test_block_editor_product_fields(): void {
+		global $wp_meta_boxes, $product_object;
+
+		$features = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->set_featured( false );
+		$product->set_gallery_image_ids( array( 11, 12 ) );
+		$product->save();
+		$post = get_post( $product->get_id() );
+
+		try {
+			add_meta_box( 'woocommerce-product-images', 'Product gallery', '__return_null', 'product', 'side', 'low' );
+			$features->change_feature_enable( 'product_description_block_editor', false );
+			$this->sut->prepare_block_editor_product_fields( $post );
+			$this->assertNotEmpty( $wp_meta_boxes['product']['side']['low']['woocommerce-product-images'], 'The classic editor keeps the gallery meta box.' );
+			$this->assertFalse( has_action( 'woocommerce_product_data_panels', array( $this->sut, 'output_block_editor_product_fields' ) ), 'The classic editor needs no hidden fields.' );
+
+			$features->change_feature_enable( 'product_description_block_editor', true );
+			$this->sut->prepare_block_editor_product_fields( $post );
+			$this->assertEmpty( $wp_meta_boxes['product']['side']['low']['woocommerce-product-images'], 'The block editor sidebar replaces the gallery meta box.' );
+			$this->assertNotFalse( has_action( 'woocommerce_product_data_panels', array( $this->sut, 'output_block_editor_product_fields' ) ), 'The block editor needs the hidden fields.' );
+
+			$product_object = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Set by the Product data meta box.
+			ob_start();
+			$this->sut->output_block_editor_product_fields();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( 'name="_visibility" value="search"', $html );
+			$this->assertMatchesRegularExpression( '/name="_featured" value="yes"\s+disabled/', $html, 'A product that is not featured posts no _featured value.' );
+			$this->assertStringContainsString( 'name="product_image_gallery" value="11,12"', $html );
+		} finally {
+			remove_action( 'woocommerce_product_data_panels', array( $this->sut, 'output_block_editor_product_fields' ) );
+			remove_meta_box( 'woocommerce-product-images', 'product', 'side' );
+			delete_option( 'woocommerce_feature_product_description_block_editor_enabled' );
+			$product_object = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reset test state.
+		}
+	}
+
+	/**
 	 * @testdox The CPT Add Order screen leaves insertion to WordPress without redirecting or eagerly saving order metadata.
 	 */
 	public function test_new_order_screen_leaves_creation_to_wordpress(): void {
