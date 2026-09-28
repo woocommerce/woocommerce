@@ -488,6 +488,31 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a paid out up to the expected cash and reject one that would make it negative.
+	 */
+	public function test_paid_out_cannot_exceed_expected_cash(): void {
+		$session_id = $this->open_session( array( 'opening_amount' => '52.00' ) )->get_data()['id'];
+		$paid_out   = fn( string $amount ) => $this->record_movement(
+			$session_id,
+			array(
+				'type'   => 'paid_out',
+				'amount' => $amount,
+				'reason' => 'Supplier',
+			)
+		);
+
+		$too_much = $paid_out( '52.01' );
+
+		$this->assert_error( $too_much, 409, 'woocommerce_rest_cash_insufficient_cash' );
+		$this->assertSame( '52.00', $too_much->get_data()['data']['expected_amount'] );
+		$this->assertSame( 1, $this->count_rows( 'movements' ) );
+		$this->assertSame( array( 'start', 'commit', 'start', 'rollback' ), $this->transaction->calls );
+
+		$this->assertSame( 201, $paid_out( '52.00' )->get_status() );
+		$this->assertSame( '0.00', $this->request( 'GET', self::BASE . "/$session_id" )->get_data()['expected_amount'] );
+	}
+
+	/**
 	 * @testdox Should reject invalid paid in or paid out requests.
 	 *
 	 * @dataProvider invalid_movement_provider

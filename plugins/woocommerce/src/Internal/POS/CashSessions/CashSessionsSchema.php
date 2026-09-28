@@ -115,7 +115,7 @@ class CashSessionsSchema {
 				'enum'        => array( CashMovementType::CASH_SALE, CashMovementType::CASH_REFUND, CashMovementType::PAID_IN, CashMovementType::PAID_OUT ),
 				'required'    => true,
 			),
-			'amount'      => $this->money_arg( __( 'Positive amount for paid in and paid out movements.', 'woocommerce' ), false ),
+			'amount'      => $this->money_arg( __( 'Positive amount for paid in and paid out movements. A paid out cannot be more than the expected cash of the session.', 'woocommerce' ), false ),
 			'reason'      => array(
 				'description' => __( 'Reason for paid in and paid out movements.', 'woocommerce' ),
 				'type'        => 'string',

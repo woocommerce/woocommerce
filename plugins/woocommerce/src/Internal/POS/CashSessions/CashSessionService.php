@@ -367,8 +367,13 @@ class CashSessionService {
 				return $this->resolve_movement_conflict( $session_id, $request_id, $hash, null );
 			}
 
-			$totals = $this->data_store->get_movement_sums( array( $session_id ) )[ $session_id ] ?? array();
-			$this->check_total_limit( $totals, $type, (int) $row['amount'] );
+			$sums   = $this->data_store->get_movement_sums( array( $session_id ) )[ $session_id ] ?? array();
+			$totals = $this->check_total_limit( $sums, $type, (int) $row['amount'] );
+			// Open decision: a paid out cannot take more cash than the drawer is expected to hold, so a typo
+			// fails now instead of showing up as a surplus at close. Cash refunds are not limited.
+			if ( CashMovementType::PAID_OUT === $type && $totals['expected'] < 0 ) {
+				throw $this->insufficient_cash( $session_id, $totals['expected'] + (int) $row['amount'], (int) $session['currency_precision'] );
+			}
 
 			$movement_id = $this->data_store->insert_movement( $row );
 			if ( null === $movement_id ) {
@@ -683,12 +688,13 @@ class CashSessionService {
 	 * @param array<string, int> $sums   Current sums by type.
 	 * @param string             $type   New movement type.
 	 * @param int                $amount New movement amount.
+	 * @return array<string, int> Totals including the new movement.
 	 * @throws CashSessionException When a total would be out of range.
 	 */
-	private function check_total_limit( array $sums, string $type, int $amount ): void {
+	private function check_total_limit( array $sums, string $type, int $amount ): array {
 		try {
 			$sums[ $type ] = CashMoney::add( (int) ( $sums[ $type ] ?? 0 ), $amount );
-			self::compute_totals( $sums );
+			return self::compute_totals( $sums );
 		} catch ( OverflowException $e ) {
 			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'The cash session total would be too large.', 'woocommerce' ) );
 		}
@@ -1051,6 +1057,26 @@ class CashSessionService {
 			array(
 				'session_id'       => $session_id,
 				'current_revision' => $current_revision,
+			)
+		);
+	}
+
+	/**
+	 * Build the error for a paid out larger than the expected cash.
+	 *
+	 * @param int $session_id Session ID.
+	 * @param int $expected   Expected cash before the paid out, in minor units.
+	 * @param int $precision  Session precision.
+	 * @return CashSessionException
+	 */
+	private function insufficient_cash( int $session_id, int $expected, int $precision ): CashSessionException {
+		return new CashSessionException(
+			'woocommerce_rest_cash_insufficient_cash',
+			__( 'The paid out amount is more than the cash expected in the drawer.', 'woocommerce' ),
+			409,
+			array(
+				'session_id'      => $session_id,
+				'expected_amount' => CashMoney::format( $expected, $precision ),
 			)
 		);
 	}
