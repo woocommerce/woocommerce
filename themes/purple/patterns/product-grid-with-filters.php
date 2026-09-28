@@ -124,7 +124,6 @@
 
 <!-- wp:column {"width":"88%"} -->
 <div class="wp-block-column" style="flex-basis:88%">
-<?php // Keep the legacy drawer attribute for WooCommerce 11.1 compatibility. ?>
 <!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"fontSize":"small","metadata":{"blockVisibility":{"viewport":{"desktop":false}}}} -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled has-small-font-size">
 <!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} -->
