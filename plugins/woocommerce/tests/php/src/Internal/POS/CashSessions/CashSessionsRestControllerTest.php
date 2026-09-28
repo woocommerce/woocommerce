@@ -1112,7 +1112,9 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $cashier );
 
 		$this->assertSame( 200, $this->request( 'GET', self::BASE . "/$session_id" )->get_status() );
-		$this->assertSame( 201, $this->open_session( array( 'device_id' => 'ipad-9' ) )->get_status() );
+		$opened = $this->open_session( array( 'device_id' => 'ipad-9' ) );
+		$this->assertSame( 201, $opened->get_status() );
+		$session_id = $opened->get_data()['id'];
 		$this->assertSame( 201, $this->record_sale( $session_id, $order->get_id() )->get_status() );
 		$this->assertSame( 403, $this->record_refund( $session_id, $order->get_id(), $refund->get_id() )->get_status() );
 
@@ -1126,6 +1128,58 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 403, $this->record_refund( $session_id, $order->get_id(), $second->get_id() )->get_status(), 'Refund rights alone are not enough' );
 	}
 
+	/**
+	 * @testdox Should refuse writes to another cashier's session and let a store manager make them.
+	 */
+	public function test_only_opener_or_manager_can_write_to_session(): void {
+		wp_set_current_user( $this->create_cashier() );
+		$session_id = $this->open_session(
+			array(
+				'opening_amount' => '50.00',
+				'drawer_id'      => 'Till',
+			)
+		)->get_data()['id'];
+
+		wp_set_current_user( $this->create_cashier() );
+		$paid_out = array(
+			'type'   => 'paid_out',
+			'amount' => '20.00',
+			'reason' => 'Supplier',
+		);
+		$this->assert_error( $this->record_movement( $session_id, $paid_out ), 403, 'woocommerce_rest_cash_session_not_owner' );
+		$this->assert_error( $this->record_drawer_event( $session_id, array() ), 403, 'woocommerce_rest_cash_session_not_owner' );
+		$this->assert_error( $this->close_session( $session_id, 1, '0.00' ), 403, 'woocommerce_rest_cash_session_not_owner' );
+		$this->assertSame( 1, $this->count_rows( 'movements' ) );
+		$this->assertSame( 0, $this->count_rows( 'drawer_events' ) );
+
+		wp_set_current_user( $this->manager_id );
+		$this->assertSame( 201, $this->record_movement( $session_id, $paid_out )->get_status() );
+		$this->assertSame( 200, $this->close_session( $session_id, 2, '30.00' )->get_status() );
+	}
+
+	/**
+	 * @testdox Should not replay another user's request.
+	 */
+	public function test_replay_is_scoped_to_the_user(): void {
+		$body = $this->open_body();
+		wp_set_current_user( $this->create_cashier() );
+		$this->assertSame( 201, $this->request( 'POST', self::BASE, $body )->get_status() );
+
+		wp_set_current_user( $this->create_cashier() );
+
+		$this->assert_error( $this->request( 'POST', self::BASE, $body ), 409, 'woocommerce_rest_cash_request_conflict' );
+	}
+
+	/**
+	 * Create a user with only the POS process sales capability.
+	 *
+	 * @return int User ID.
+	 */
+	private function create_cashier(): int {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		get_user_by( 'id', $user_id )->add_cap( Capabilities::CAP_PROCESS_SALES );
+		return $user_id;
+	}
 
 	/**
 	 * Build a valid open request body.

@@ -240,6 +240,7 @@ class CashSessionService {
 		if ( null === $row ) {
 			throw CashSessionException::session_not_found();
 		}
+		$this->check_session_access( $row );
 		if ( $request_id === $row['close_request_id'] ) {
 			return $this->replay_close( $row, $hash );
 		}
@@ -322,6 +323,7 @@ class CashSessionService {
 		if ( null === $session ) {
 			throw CashSessionException::session_not_found();
 		}
+		$this->check_session_access( $session );
 
 		$this->check_movement_fields( $type, $params );
 		$reason = isset( $params['reason'] ) ? trim( sanitize_text_field( (string) $params['reason'] ) ) : '';
@@ -416,8 +418,10 @@ class CashSessionService {
 	 * @throws Throwable Rethrown after rolling back.
 	 */
 	public function record_drawer_event( int $session_id, array $params ): array {
+		$session = $this->get_session_row( $session_id );
+		$this->check_session_access( $session );
+
 		$request_id  = strtolower( (string) $params['request_id'] );
-		$session     = $this->get_session_row( $session_id );
 		$drawer      = isset( $params['drawer_id'] ) ? $this->normalize_drawer( (string) $params['drawer_id'] ) : null;
 		$occurred_at = $this->parse_timestamp( (string) $params['occurred_at'] );
 		$references  = array(
@@ -712,9 +716,7 @@ class CashSessionService {
 	 * @throws CashSessionException When the payload differs.
 	 */
 	private function replay_open( array $row, string $hash ): array {
-		if ( ! hash_equals( (string) $row['open_request_hash'], $hash ) ) {
-			throw CashSessionException::request_conflict();
-		}
+		$this->check_replay( $row, 'open_request_hash', 'opened_by', $hash );
 		return array(
 			'created' => false,
 			'session' => $this->with_totals( array( $row ) )[0],
@@ -763,9 +765,7 @@ class CashSessionService {
 	 * @throws CashSessionException When the payload differs.
 	 */
 	private function replay_close( array $row, string $hash ): array {
-		if ( ! hash_equals( (string) $row['close_request_hash'], $hash ) ) {
-			throw CashSessionException::request_conflict();
-		}
+		$this->check_replay( $row, 'close_request_hash', 'closed_by', $hash );
 		return $this->with_totals( array( $row ) )[0];
 	}
 
@@ -778,9 +778,7 @@ class CashSessionService {
 	 * @throws CashSessionException When the payload differs.
 	 */
 	private function replay_movement( array $row, string $hash ): array {
-		if ( ! hash_equals( (string) $row['request_hash'], $hash ) ) {
-			throw CashSessionException::request_conflict();
-		}
+		$this->check_replay( $row, 'request_hash', 'created_by', $hash );
 		return array(
 			'created'  => false,
 			'movement' => $row,
@@ -825,12 +823,48 @@ class CashSessionService {
 	 * @throws CashSessionException When the payload differs.
 	 */
 	private function replay_drawer_event( array $row, string $hash ): array {
-		if ( ! hash_equals( (string) $row['request_hash'], $hash ) ) {
-			throw CashSessionException::request_conflict();
-		}
+		$this->check_replay( $row, 'request_hash', 'created_by', $hash );
 		return array(
 			'created' => false,
 			'event'   => $row,
+		);
+	}
+
+	/**
+	 * Reject a retry with a different payload, or one sent by another user.
+	 *
+	 * A request ID replays only for the user who made the request, so it cannot expose another user's record.
+	 *
+	 * @param array<string, mixed> $row          Stored record.
+	 * @param string               $hash_column  Column with the stored payload hash.
+	 * @param string               $actor_column Column with the user who made the request.
+	 * @param string               $hash         Payload hash of the retry.
+	 * @throws CashSessionException When the retry cannot replay the record.
+	 */
+	private function check_replay( array $row, string $hash_column, string $actor_column, string $hash ): void {
+		if ( ! hash_equals( (string) $row[ $hash_column ], $hash ) || get_current_user_id() !== (int) $row[ $actor_column ] ) {
+			throw CashSessionException::request_conflict();
+		}
+	}
+
+	/**
+	 * Reject a user who may not change a session.
+	 *
+	 * Open decision: only the user who opened a session, or a user with manage_woocommerce, may close it or
+	 * add movements and drawer events. Revisit with the POS roles work (user story 15).
+	 *
+	 * @param array<string, mixed> $session Session row.
+	 * @throws CashSessionException When the user is neither the opener nor a store manager.
+	 */
+	private function check_session_access( array $session ): void {
+		if ( get_current_user_id() === (int) $session['opened_by'] || current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+		throw new CashSessionException(
+			'woocommerce_rest_cash_session_not_owner',
+			__( 'Only the person who opened this cash session or a store manager can do this.', 'woocommerce' ),
+			403,
+			array( 'session_id' => (int) $session['id'] )
 		);
 	}
 
