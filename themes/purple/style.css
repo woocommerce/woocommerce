@@ -70,15 +70,10 @@ body {
 
 .wp-block-woocommerce-checkout .wc-block-components-title {
 	font-size: var(--wp--preset--font-size--large);
-	line-height: 1.18;
 }
 
 .wc-block-components-form .wc-block-components-checkout-step {
 	margin-bottom: var(--wp--preset--spacing--50);
-}
-
-.wc-block-components-checkout-step__heading-container {
-	margin-bottom: var(--wp--preset--spacing--20);
 }
 
 .wp-block-woocommerce-checkout-order-summary-block {
