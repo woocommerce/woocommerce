@@ -2266,7 +2266,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 		return;
 	}
 
-	global $wpdb;
+	global $wpdb, $wp_filter;
 	switch ( $column ) {
 		case 'min_max_price':
 			$wpdb->query(
@@ -2288,8 +2288,50 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'stock_quantity':
-			$wpdb->query(
-				"
+			// Preserve the original SQL bytes when database extensions can observe or change the statement.
+			$can_reorder_stock_update = is_object( $wpdb ) && get_class( $wpdb ) === wpdb::class && is_array( $wp_filter );
+			if ( $can_reorder_stock_update ) {
+				foreach ( array( 'all', 'log_query_custom_data' ) as $hook_name ) {
+					if ( isset( $wp_filter[ $hook_name ] ) && ( ! $wp_filter[ $hook_name ] instanceof WP_Hook || ! is_array( $wp_filter[ $hook_name ]->callbacks ) || ! empty( $wp_filter[ $hook_name ]->callbacks ) ) ) {
+						$can_reorder_stock_update = false;
+						break;
+					}
+				}
+			}
+
+			if ( $can_reorder_stock_update && isset( $wp_filter['query'] ) ) {
+				$query_hook = $wp_filter['query'];
+				if ( ! $query_hook instanceof WP_Hook || ! is_array( $query_hook->callbacks ) ) {
+					$can_reorder_stock_update = false;
+				} elseif ( ! empty( $query_hook->callbacks ) ) {
+					if ( count( $query_hook->callbacks ) !== 1 || ! isset( $query_hook->callbacks[0] ) || ! is_array( $query_hook->callbacks[0] ) || count( $query_hook->callbacks[0] ) !== 1 ) {
+						$can_reorder_stock_update = false;
+					} else {
+						$callback                 = reset( $query_hook->callbacks[0] );
+						$can_reorder_stock_update = is_array( $callback )
+							&& isset( $callback['function'], $callback['accepted_args'] )
+							&& array( $wpdb, 'remove_placeholder_escape' ) === $callback['function']
+							&& 1 === $callback['accepted_args'];
+					}
+				}
+			}
+
+			if ( $can_reorder_stock_update ) {
+				$wpdb->query(
+					"
+					UPDATE
+						{$wpdb->postmeta} meta1
+						STRAIGHT_JOIN {$wpdb->wc_product_meta_lookup} lookup_table ON lookup_table.product_id = meta1.post_id
+						LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+					SET
+						lookup_table.stock_quantity = meta2.meta_value
+					WHERE
+						meta1.meta_key = '_manage_stock' AND meta1.meta_value = 'yes'
+					"
+				);
+			} else {
+				$wpdb->query(
+					"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
 					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
@@ -2299,7 +2341,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 				WHERE
 					meta1.meta_value = 'yes'
 				"
-			);
+				);
+			}
 			break;
 		case 'sku':
 		case 'global_unique_id':
