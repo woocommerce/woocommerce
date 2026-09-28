@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP parse errors caused by unresolved conflicts in the Pattern Fetcher backport.
