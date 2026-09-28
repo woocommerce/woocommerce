@@ -20,6 +20,7 @@ const crypto = require( 'crypto' );
 
 const CONFIG_PATH = '.github/local-ci.json';
 const TRUSTED_ASSOCIATIONS = [ 'MEMBER', 'OWNER' ];
+const WRITE_PERMISSIONS = [ 'admin', 'maintain', 'write' ];
 const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
 // Job types whose skipped steps ci.yml actually guards. A config may declare
 // more rules than this; substitution for any other type is refused until the
@@ -120,6 +121,7 @@ function ruleFor( config, jobName ) {
  * @param {string}      input.disabled       The kill-switch variable's value.
  * @param {string}      input.eventName      The workflow event.
  * @param {Object}      input.pullRequest    The pull_request payload.
+ * @param {string|null} input.authorPermission The author's repository permission (`admin`/`maintain`/`write`/…), or null when unknown.
  * @param {string}      input.jobName        The matrix job name.
  * @param {Object|null} input.baseConfig     `{ raw, parsed, sha256 }` from the base branch, or null when absent.
  * @param {string|null} input.headConfigRaw  The config on the head commit, or null when absent.
@@ -157,15 +159,28 @@ function decide( input ) {
 
 	const login = String( ( pr.user && pr.user.login ) || '' );
 	const rollout = config.rollout;
+	let listed = false;
 	if ( rollout ) {
-		const listed = ( rollout.authors || [] ).some( ( a ) => a.toLowerCase() === login.toLowerCase() );
+		listed = ( rollout.authors || [] ).some( ( a ) => a.toLowerCase() === login.toLowerCase() );
 		const labelled = !! rollout.label && ( pr.labels || [] ).some( ( l ) => l.name === rollout.label );
 		if ( ! listed && ! labelled ) {
 			return no( `author ${ login } is not in the rollout allowlist and the pull request has no "${ rollout.label || '' }" label` );
 		}
 	}
-	if ( ! TRUSTED_ASSOCIATIONS.includes( pr.author_association ) ) {
-		return no( `author association ${ pr.author_association } is not one of ${ TRUSTED_ASSOCIATIONS.join( '/' ) }` );
+	// Who may be trusted, in order of strength. An allowlist entry is a
+	// reviewed line in the base branch's config. Write permission is what
+	// publishing a receipt already requires. author_association is the weak
+	// one: it is computed for the viewer, and the Actions token cannot see a
+	// private org membership, so most members show as CONTRIBUTOR.
+	let trust;
+	if ( listed ) {
+		trust = 'allowlisted on the base branch';
+	} else if ( WRITE_PERMISSIONS.includes( String( input.authorPermission || '' ).toLowerCase() ) ) {
+		trust = `has ${ input.authorPermission } permission`;
+	} else if ( TRUSTED_ASSOCIATIONS.includes( pr.author_association ) ) {
+		trust = `is ${ pr.author_association }`;
+	} else {
+		return no( `author ${ login } is not allowlisted, has ${ input.authorPermission || 'unknown' } repository permission and association ${ pr.author_association }; one of allowlist, write permission or MEMBER/OWNER is required` );
 	}
 
 	const name = String( config.receiptPrefix || '' ) + input.jobName;
@@ -212,7 +227,7 @@ function decide( input ) {
 		};
 	}
 
-	let reason = `receipt ${ receipt.html_url || receipt.id } by ${ meta.author }`;
+	let reason = `receipt ${ receipt.html_url || receipt.id } by ${ meta.author } (${ trust })`;
 	if ( meta.base && pr.base && meta.base !== pr.base.sha ) {
 		reason += ` (base moved since: tested against ${ meta.base.slice( 0, 11 ) }, base is now ${ String( pr.base.sha ).slice( 0, 11 ) })`;
 	}
@@ -259,6 +274,30 @@ async function rawFile( github, repo, ref ) {
 }
 
 /**
+ * The author's permission on the repository, or null when the token cannot
+ * ask (the decision then falls back to the allowlist and association).
+ *
+ * @param {Object} github
+ * @param {Object} repo   `{ owner, repo }`
+ * @param {string} username
+ * @return {Promise<string|null>}
+ */
+async function authorPermission( github, repo, username ) {
+	if ( ! username ) {
+		return null;
+	}
+	try {
+		const res = await within(
+			github.rest.repos.getCollaboratorPermissionLevel( { ...repo, username } ),
+			`reading ${ username }'s permission`
+		);
+		return ( res.data && res.data.permission ) || null;
+	} catch ( e ) {
+		return null;
+	}
+}
+
+/**
  * Gathers the inputs, decides, and writes the outputs. Never throws: any
  * failure becomes `substituted=false` with the error as the reason.
  *
@@ -275,6 +314,7 @@ async function lookup( { github, context, core } ) {
 			disabled: process.env.DISABLED,
 			eventName: context.eventName,
 			pullRequest: pr,
+			authorPermission: null,
 			jobName: process.env.JOB_NAME,
 			baseConfig: null,
 			headConfigRaw: null,
@@ -300,6 +340,7 @@ async function lookup( { github, context, core } ) {
 		if ( wanted && input.baseConfig && input.baseConfig.parsed.enabled === true ) {
 			const repo = { owner: context.repo.owner, repo: context.repo.repo };
 			input.headConfigRaw = await rawFile( github, repo, pr.head.sha );
+			input.authorPermission = await authorPermission( github, repo, pr.user && pr.user.login );
 			// One call, for the one name this job cares about: the API filters
 			// by name and app, and `all` keeps every attempt so the newest can
 			// be chosen here rather than trusting the API's idea of latest.
