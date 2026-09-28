@@ -92,6 +92,7 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_cache_key_uses_complete_parameter_map(): void {
 		$key_method = new \ReflectionMethod( $this->sut, 'get_transient_key' );
+		$key_method->setAccessible( true );
 		$query_vars = array( 'post_type' => 'product' );
 		$initial    = $key_method->invoke( $this->sut, $query_vars, 'price' );
 

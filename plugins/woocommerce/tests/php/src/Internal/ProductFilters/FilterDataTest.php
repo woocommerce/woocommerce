@@ -80,6 +80,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 			'brands'      => get_term( (int) $brand['term_id'], 'product_brand' )->slug,
 		);
 		$key_method = new \ReflectionMethod( $this->sut, 'get_transient_key' );
+		$key_method->setAccessible( true );
 
 		$rename = static function ( array $params ): array {
 			$params['product_brand'] = 'wc_brands';
