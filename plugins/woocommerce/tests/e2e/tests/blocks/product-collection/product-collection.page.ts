@@ -382,6 +382,31 @@ class ProductCollectionPage {
 		await inputField.fill( numberOfColumns.toString() );
 	}
 
+	async setOrderBy(
+		orderBy:
+			| 'title/asc'
+			| 'title/desc'
+			| 'date/desc'
+			| 'date/asc'
+			| 'popularity/desc'
+			| 'rating/desc'
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const orderByComboBox = sidebarSettings.getByRole( 'combobox', {
+			name: 'Order by',
+		} );
+		await orderByComboBox.selectOption( orderBy );
+		await this.editor.canvas.locator( SELECTORS.product ).first().waitFor();
+		await this.refreshLocators( 'editor' );
+	}
+
+	async getOrderByElement() {
+		const sidebarSettings = this.locateSidebarSettings();
+		return sidebarSettings.getByRole( 'combobox', {
+			name: 'Order by',
+		} );
+	}
+
 	async setShowOnlyProductsOnSale(
 		{
 			onSale,
@@ -407,6 +432,53 @@ class ProductCollectionPage {
 		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
 	}
 
+	async setShowOnlyFeaturedProducts(
+		{
+			featured,
+			isLocatorsRefreshNeeded,
+		}: {
+			featured: boolean;
+			isLocatorsRefreshNeeded?: boolean;
+		} = {
+			featured: true,
+			isLocatorsRefreshNeeded: true,
+		}
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel(
+			SELECTORS.featuredControlLabel
+		);
+		if ( featured ) {
+			await input.check();
+		} else {
+			await input.uncheck();
+		}
+
+		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
+	}
+
+	async setCreatedFilter( {
+		operator,
+		range,
+	}: {
+		operator: 'within' | 'before';
+		range: 'last24hours' | 'last7days' | 'last30days' | 'last3months';
+	} ) {
+		if ( ! operator || ! range ) {
+			return false;
+		}
+
+		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
+		const rangeSelector = SELECTORS.createdFilter.range[ range ];
+
+		const sidebarSettings = this.locateSidebarSettings();
+		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
+		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
+
+		await operatorButton.click();
+		await rangeButton.click();
+	}
+
 	async setPriceRange( { min, max }: { min?: string; max?: string } = {} ) {
 		const minInputSelector = SELECTORS.priceRangeFilter.min;
 		const maxInputSelector = SELECTORS.priceRangeFilter.max;
@@ -422,6 +494,43 @@ class ProductCollectionPage {
 		await maxInput.fill( max || '' );
 		// Value is applied on blur so it's required.
 		await maxInput.blur();
+	}
+
+	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel( filterName );
+		await input.click();
+
+		// Clear the input field.
+		let numberOfAlreadySelectedProducts = await input.evaluate(
+			( node ) => {
+				return node.parentElement?.children.length;
+			}
+		);
+		while ( numberOfAlreadySelectedProducts ) {
+			// Backspace will remove token
+			await this.page.keyboard.press( 'Backspace' );
+			numberOfAlreadySelectedProducts--;
+		}
+
+		// Add new values.
+		for ( const name of filterValue ) {
+			await input.pressSequentially( name );
+			await sidebarSettings
+				.getByRole( 'option', { name } )
+				.getByText( name )
+				.click();
+		}
+
+		await this.refreshLocators( 'editor' );
+	}
+
+	async setKeyword( keyword: string ) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const input = sidebarSettings.getByLabel( 'Keyword' );
+		await input.clear();
+		await input.fill( keyword );
+		await this.refreshLocators( 'editor' );
 	}
 
 	async focusProductCollection() {
@@ -475,6 +584,35 @@ class ProductCollectionPage {
 		}
 	}
 
+	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {
+		const sidebarSettings = this.locateSidebarSettings();
+
+		const productAttributesContainer = sidebarSettings.locator(
+			'.woocommerce-product-attributes'
+		);
+
+		// Whenever attributes filter is added, it fetched the attributes from the server.
+		// So, we need to wait for the attributes to be fetched.
+		await productAttributesContainer.getByLabel( 'Attributes' ).isEnabled();
+
+		// If value is not visible, then toggle the attribute to make it visible.
+		const isAttributeValueVisible =
+			(
+				await productAttributesContainer
+					.getByLabel( value )
+					.elementHandles()
+			).length !== 0;
+		if ( ! isAttributeValueVisible ) {
+			await productAttributesContainer
+				.locator( `li:has-text("${ attribute }")` )
+				.click();
+		}
+
+		// Now, check the value.
+		await productAttributesContainer.getByLabel( value ).check();
+		await this.refreshLocators( 'editor' );
+	}
+
 	/**
 	 * Check a taxonomy term checkbox (categories, tags, brands).
 	 */
@@ -499,6 +637,25 @@ class ProductCollectionPage {
 	/**
 	 * Uncheck a taxonomy term checkbox (categories, tags, brands).
 	 */
+	async uncheckTaxonomyTerm(
+		taxonomy: 'categories' | 'tags' | 'brands',
+		term: string
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const taxonomyContainer = sidebarSettings.locator(
+			`.woocommerce-product-${ taxonomy }`
+		);
+		await taxonomyContainer.waitFor();
+
+		const checkbox = taxonomyContainer
+			.getByRole( 'checkbox', { name: term } )
+			.first();
+		if ( await checkbox.isChecked() ) {
+			await checkbox.click();
+		}
+		await this.refreshLocators( 'editor' );
+	}
+
 	async setViewportSize( {
 		width,
 		height,
