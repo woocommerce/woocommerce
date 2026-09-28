@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve installed payment gateways’ names and descriptions on the Payments settings page.

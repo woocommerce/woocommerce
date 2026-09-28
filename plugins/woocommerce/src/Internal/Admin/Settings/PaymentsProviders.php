@@ -1371,43 +1371,6 @@ class PaymentsProviders {
 		// The suggestions only know about the normalized (aka official) plugin slug.
 		$suggestion = $this->get_extension_suggestion_by_plugin_slug( $normalized_plugin_slug, $country_code );
 		if ( ! is_null( $suggestion ) ) {
-			// The title, description, icon, and image from the suggestion take precedence over the ones from the gateway.
-			// This is temporary until we update the partner extensions.
-			// Do not override the title and description for certain suggestions because theirs are more descriptive
-			// (like including the payment method when registering multiple gateways for the same provider).
-			if ( ! in_array(
-				$suggestion['id'],
-				array(
-					ExtensionSuggestions::PAYPAL_FULL_STACK,
-					ExtensionSuggestions::PAYPAL_WALLET,
-					ExtensionSuggestions::MOLLIE,
-					ExtensionSuggestions::MONEI,
-					ExtensionSuggestions::ANTOM,
-					ExtensionSuggestions::MERCADO_PAGO,
-					ExtensionSuggestions::AMAZON_PAY,
-					ExtensionSuggestions::SQUARE,
-					ExtensionSuggestions::PAYONEER,
-					ExtensionSuggestions::AIRWALLEX,
-					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
-					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
-					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
-					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
-					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
-					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
-					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
-					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
-				),
-				true
-			) ) {
-				if ( ! empty( $suggestion['title'] ) ) {
-					$gateway_details['title'] = $suggestion['title'];
-				}
-
-				if ( ! empty( $suggestion['description'] ) ) {
-					$gateway_details['description'] = $suggestion['description'];
-				}
-			}
-
 			if ( ! empty( $suggestion['icon'] ) ) {
 				$gateway_details['icon'] = $suggestion['icon'];
 			}
