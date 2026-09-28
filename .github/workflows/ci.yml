@@ -51,6 +51,8 @@ env:
   # Trim per-job setup in `project-test-jobs`: e2e/API jobs that test the shared plugin zip install
   # only the JS packages their specs import, and wp-env jobs reuse the runner's Docker daemon.
   CI_FAST_SETUP: '1'
+  # Keep the PHP unit test database in memory: its datadir is disposable and fsync-bound on runner disks.
+  CI_TMPFS_MYSQL: '1'
   # Paths that cannot change the behaviour of any code. `identify-jobs-to-run` derives the
   # `needs-code-validation` filter from this list. The job-level `ignore` lists in each
   # project's `config.ci` (see tools/monorepo-utils/src/ci-jobs/README.md) are a separate,
@@ -365,6 +367,17 @@ jobs:
           echo "$base" | jq -s '( add // {} ) + { "max-download-attempts": 10, "max-concurrent-downloads": 3 }' | sudo tee "$config" > /dev/null
           sudo systemctl restart docker
           docker info --format 'Docker {{.ServerVersion}}, storage driver {{.Driver}}'
+
+      - name: 'Start Test Environment: MySQL datadir on tmpfs'
+        if: ${{ env.CI_TMPFS_MYSQL == '1' && matrix.testEnv.shouldCreate && matrix.testType == 'unit:php' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+        # Compose adopts a pre-created volume carrying its labels; wp-env's project is the install path's basename.
+        working-directory: ${{ matrix.projectPath }}
+        run: |
+          project=$(basename "$(pnpm --silent wp-env:test status --json | jq -r '.installPath // empty')")
+          if [ -z "$project" ] || ! docker volume create --driver local --opt type=tmpfs --opt device=tmpfs --opt o=size=4g \
+            --label "com.docker.compose.project=$project" --label com.docker.compose.volume=mysql "${project}_mysql"; then
+            echo "::warning::Could not create the tmpfs MySQL volume; MySQL stays on disk."
+          fi
 
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
