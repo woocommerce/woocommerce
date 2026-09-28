@@ -3,8 +3,6 @@
  */
 import { Page } from '@wordpress/admin-ui';
 import { Button, Notice, Spinner } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
 import { useParams } from '@wordpress/route';
@@ -12,18 +10,10 @@ import { useParams } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import { getScreen, NO_KEY, useScreenDefinition } from './screen';
-import type {
-	PaymentSettingsScreen,
-	ScreenDefinition,
-	SettingsRecord,
-} from './screen';
+import { useSettingsEntity } from './save';
+import { getScreen, useScreenDefinition } from './screen';
+import type { PaymentSettingsScreen, ScreenDefinition } from './screen';
 import './style.scss';
-
-// Every store has this metadata selector, but core-data's types leave it out.
-interface ResolutionSelectors {
-	getResolutionError: ( selector: string, args: unknown[] ) => unknown;
-}
 
 function SettingsForm( {
 	screen,
@@ -32,33 +22,18 @@ function SettingsForm( {
 	screen: PaymentSettingsScreen;
 	definition: ScreenDefinition;
 } ) {
-	const { kind, name } = screen.entity;
-	const { record, data, isDirty, isSaving, saveError, loadError } = useSelect(
-		( select ) => {
-			const core = select( coreStore );
-			return {
-				record: core.getEntityRecord( kind, name, NO_KEY ),
-				data: core.getEditedEntityRecord( kind, name, NO_KEY ) as
-					| SettingsRecord
-					| undefined,
-				isDirty: core.hasEditsForEntityRecord( kind, name, NO_KEY ),
-				isSaving: core.isSavingEntityRecord( kind, name, NO_KEY ),
-				saveError: core.getLastEntitySaveError( kind, name, NO_KEY ) as
-					| Error
-					| undefined,
-				loadError: (
-					core as unknown as ResolutionSelectors
-				 ).getResolutionError( 'getEntityRecord', [
-					kind,
-					name,
-					NO_KEY,
-				] ) as Error | undefined,
-			};
-		},
-		[ kind, name ]
-	);
-	const { editEntityRecord, saveEditedEntityRecord } =
-		useDispatch( coreStore );
+	const {
+		record,
+		data,
+		isDirty,
+		isSaving,
+		loadError,
+		notice,
+		clearNotice,
+		edit,
+		save,
+		discard,
+	} = useSettingsEntity( screen );
 	const { validity, isValid } = useFormValidity(
 		data ?? {},
 		definition.fields,
@@ -77,23 +52,6 @@ function SettingsForm( {
 		return <Spinner />;
 	}
 
-	const onChange = ( edits: SettingsRecord ) => {
-		if ( ! isSaving ) {
-			void editEntityRecord( kind, name, NO_KEY, edits );
-		}
-	};
-	const onSave = async () => {
-		if ( isSaving || ! isDirty || ! isValid ) {
-			return;
-		}
-		try {
-			await saveEditedEntityRecord( kind, name, NO_KEY, {
-				throwOnError: true,
-			} );
-		} catch {
-			// The error is shown from the entity's last save error.
-		}
-	};
 	return (
 		<Page
 			title={ screen.title }
@@ -105,9 +63,7 @@ function SettingsForm( {
 						variant="secondary"
 						size="compact"
 						disabled={ isSaving || ! isDirty }
-						onClick={ () =>
-							void editEntityRecord( kind, name, NO_KEY, record )
-						}
+						onClick={ discard }
 					>
 						{ __( 'Discard changes', 'woocommerce' ) }
 					</Button>
@@ -116,7 +72,7 @@ function SettingsForm( {
 						size="compact"
 						isBusy={ isSaving }
 						disabled={ isSaving || ! isDirty || ! isValid }
-						onClick={ () => void onSave() }
+						onClick={ () => void save() }
 					>
 						{ __( 'Save changes', 'woocommerce' ) }
 					</Button>
@@ -133,10 +89,9 @@ function SettingsForm( {
 						{ error.message }
 					</Notice>
 				) ) }
-				{ saveError && (
-					<Notice status="error" isDismissible={ false }>
-						{ saveError.message ||
-							__( 'Unable to save settings.', 'woocommerce' ) }
+				{ notice && (
+					<Notice status={ notice.status } onRemove={ clearNotice }>
+						{ notice.message }
 					</Notice>
 				) }
 				<DataForm
@@ -144,7 +99,7 @@ function SettingsForm( {
 					fields={ definition.fields }
 					form={ definition.form }
 					validity={ validity }
-					onChange={ onChange }
+					onChange={ edit }
 				/>
 			</div>
 		</Page>
