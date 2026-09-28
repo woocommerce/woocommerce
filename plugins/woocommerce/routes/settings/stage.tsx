@@ -10,6 +10,7 @@ import type { Form } from '@wordpress/dataviews';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { useNavigate, useParams, useSearch } from '@wordpress/route';
+import { useMemo } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 
 /**
@@ -78,6 +79,16 @@ function SettingsForm( {
 	);
 	const { view } = useSearch( { strict: false } ) as { view?: string };
 	const navigate = useNavigate();
+	// Resolve the body once per screen, so a filter returning a new component can't remount it on every render.
+	const Body = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce.experimentalPaymentSettings.body',
+				null,
+				screen.id
+			) as ComponentType< BodyProps > | null,
+		[ screen.id ]
+	);
 
 	if ( loadError ) {
 		return (
@@ -117,11 +128,6 @@ function SettingsForm( {
 			onChange={ onChange }
 		/>
 	);
-	const Body = applyFilters(
-		'woocommerce.experimentalPaymentSettings.body',
-		null,
-		screen.id
-	) as ComponentType< BodyProps > | null;
 
 	return (
 		<Page
