@@ -292,6 +292,7 @@ body {
    WooCommerce — Single product
    ========================================================================== */
 
+/* @todo remove once https://github.com/woocommerce/woocommerce/pull/69150 ships. */
 .wp-block-product-specifications-item__value p {
 	margin: 0
 }
@@ -323,6 +324,7 @@ body {
    WooCommerce — Cart
    ========================================================================== */
 
+/* @todo remove once https://github.com/woocommerce/woocommerce/pull/69150 ships. */
 .wp-block-woocommerce-cart-order-summary-heading-block textarea {
 	padding-inline-start: 0;
 }
