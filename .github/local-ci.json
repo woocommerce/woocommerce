@@ -39,5 +39,6 @@
     }
   ],
 
-  "lockfile": "pnpm-lock.yaml"
+  "lockfile": "pnpm-lock.yaml",
+  "$note": "scratch: touched to prove a config change forces full CI"
 }
