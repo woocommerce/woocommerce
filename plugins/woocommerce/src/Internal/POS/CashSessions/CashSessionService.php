@@ -106,8 +106,11 @@ class CashSessionService {
 		}
 		$opening_amount = $this->parse_amount( (string) $params['opening_amount'], $precision );
 
-		if ( null !== $this->data_store->find_open_session_by_device( $device_id ) ) {
-			return $this->resolve_open_conflict( $request_id, $hash, $device_id );
+		// Open decision: one open session per device and per drawer, so paid in/out for one physical drawer
+		// cannot split across two counts. The unique keys on the table enforce both against races.
+		$drawer_busy = null !== $drawer_key && null !== $this->data_store->find_open_session_by_drawer( $drawer_key );
+		if ( $drawer_busy || null !== $this->data_store->find_open_session_by_device( $device_id ) ) {
+			return $this->resolve_open_conflict( $request_id, $hash, $device_id, $drawer_key );
 		}
 
 		$actor = $this->get_actor();
@@ -131,7 +134,7 @@ class CashSessionService {
 			);
 			if ( null === $session_id ) {
 				$this->rollback();
-				return $this->resolve_open_conflict( $request_id, $hash, $device_id );
+				return $this->resolve_open_conflict( $request_id, $hash, $device_id, $drawer_key );
 			}
 
 			$movement_id = $this->data_store->insert_movement(
@@ -719,17 +722,18 @@ class CashSessionService {
 	}
 
 	/**
-	 * Decide why an open cannot go ahead: a concurrent retry, an open session on the device, or a race in progress.
+	 * Decide why an open cannot go ahead: a concurrent retry, an open session on the device or drawer, or a race in progress.
 	 *
 	 * The request ID is looked up again first, so a retry racing its own original gets a replay, not a conflict.
 	 *
-	 * @param string $request_id Request ID.
-	 * @param string $hash       Payload hash.
-	 * @param string $device_id  Device ID.
+	 * @param string      $request_id Request ID.
+	 * @param string      $hash       Payload hash.
+	 * @param string      $device_id  Device ID.
+	 * @param string|null $drawer_key Drawer key, if the open names a drawer.
 	 * @return array{created: bool, session: array<string, mixed>}
 	 * @throws CashSessionException When the open cannot be replayed.
 	 */
-	private function resolve_open_conflict( string $request_id, string $hash, string $device_id ): array {
+	private function resolve_open_conflict( string $request_id, string $hash, string $device_id, ?string $drawer_key ): array {
 		$existing = $this->data_store->find_session_by_open_request( $request_id );
 		if ( null !== $existing ) {
 			return $this->replay_open( $existing, $hash );
@@ -737,6 +741,15 @@ class CashSessionService {
 		$open = $this->data_store->find_open_session_by_device( $device_id );
 		if ( null !== $open ) {
 			throw $this->already_open( (int) $open['id'] );
+		}
+		$open = null === $drawer_key ? null : $this->data_store->find_open_session_by_drawer( $drawer_key );
+		if ( null !== $open ) {
+			throw new CashSessionException(
+				'woocommerce_rest_cash_drawer_already_open',
+				__( 'This drawer already has an open cash session on another device.', 'woocommerce' ),
+				409,
+				array( 'session_id' => (int) $open['id'] )
+			);
 		}
 		throw CashSessionException::request_in_progress();
 	}

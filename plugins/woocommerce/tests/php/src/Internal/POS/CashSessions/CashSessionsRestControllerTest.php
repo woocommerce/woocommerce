@@ -304,6 +304,39 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow one open session per drawer and report the existing one.
+	 */
+	public function test_duplicate_open_for_drawer(): void {
+		$first = $this->open_session(
+			array(
+				'device_id' => 'ipad-1',
+				'drawer_id' => 'Front counter',
+			)
+		)->get_data();
+
+		$response = $this->open_session(
+			array(
+				'device_id' => 'ipad-2',
+				'drawer_id' => 'FRONT counter',
+			)
+		);
+		$this->assert_error( $response, 409, 'woocommerce_rest_cash_drawer_already_open' );
+		$this->assertSame( $first['id'], $response->get_data()['data']['session_id'] );
+
+		$this->close_session( $first['id'], 1, '0' );
+		$this->assertSame(
+			201,
+			$this->open_session(
+				array(
+					'device_id' => 'ipad-2',
+					'drawer_id' => 'Front counter',
+				)
+			)->get_status(),
+			'The drawer can open again after close'
+		);
+	}
+
+	/**
 	 * @testdox Should keep the trimmed drawer spelling and match drawer names case-insensitively.
 	 */
 	public function test_drawer_name_binding_and_filter(): void {

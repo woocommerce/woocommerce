@@ -61,6 +61,24 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow only one open session per drawer at the database level and release it on close.
+	 */
+	public function test_open_drawer_is_unique(): void {
+		$drawer = array( 'drawer_key' => str_repeat( 'a', 64 ) );
+		$first  = $this->sut->insert_session( array_merge( $this->session_row( 'device-1', 'aaaaaaaa-0000-4000-8000-000000000001' ), $drawer ) );
+
+		$this->assertNull(
+			$this->sut->insert_session( array_merge( $this->session_row( 'device-2', 'aaaaaaaa-0000-4000-8000-000000000002' ), $drawer ) ),
+			'A second open session for the same drawer should be rejected'
+		);
+		$this->assertSame( $first, (int) $this->sut->find_open_session_by_drawer( $drawer['drawer_key'] )['id'] );
+
+		$this->sut->close_session( $first, 1, $this->close_fields() );
+		$this->assertNull( $this->sut->find_open_session_by_drawer( $drawer['drawer_key'] ) );
+		$this->assertGreaterThan( 0, $this->sut->insert_session( array_merge( $this->session_row( 'device-2', 'aaaaaaaa-0000-4000-8000-000000000003' ), $drawer ) ) );
+	}
+
+	/**
 	 * @testdox Should reject a second movement for the same source or the same request in one session.
 	 */
 	public function test_movement_source_and_request_are_unique(): void {
@@ -199,7 +217,21 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 		$session_id = $this->sut->insert_session( $this->session_row( 'device-1', 'aaaaaaaa-0000-4000-8000-000000000001' ) );
 		$this->assertTrue( $this->sut->bump_revision( $session_id ) );
 
-		$fields = array(
+		$fields = $this->close_fields();
+		$this->assertFalse( $this->sut->close_session( $session_id, 1, $fields ), 'A stale revision should not close' );
+		$this->assertTrue( $this->sut->close_session( $session_id, 2, $fields ) );
+		$this->assertFalse( $this->sut->close_session( $session_id, 2, $fields ), 'A closed session cannot close again' );
+		$this->assertFalse( $this->sut->bump_revision( $session_id ), 'A closed session revision cannot change' );
+		$this->assertNull( $this->sut->find_open_session_by_device( 'device-1' ) );
+	}
+
+	/**
+	 * Build closing column values.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function close_fields(): array {
+		return array(
 			'counted_amount'     => 0,
 			'expected_amount'    => 0,
 			'variance'           => 0,
@@ -210,11 +242,6 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 			'close_request_id'   => 'cccccccc-0000-4000-8000-000000000001',
 			'close_request_hash' => str_repeat( 'a', 64 ),
 		);
-		$this->assertFalse( $this->sut->close_session( $session_id, 1, $fields ), 'A stale revision should not close' );
-		$this->assertTrue( $this->sut->close_session( $session_id, 2, $fields ) );
-		$this->assertFalse( $this->sut->close_session( $session_id, 2, $fields ), 'A closed session cannot close again' );
-		$this->assertFalse( $this->sut->bump_revision( $session_id ), 'A closed session revision cannot change' );
-		$this->assertNull( $this->sut->find_open_session_by_device( 'device-1' ) );
 	}
 
 	/**

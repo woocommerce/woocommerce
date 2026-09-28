@@ -11,7 +11,8 @@ use RuntimeException;
  * Storage for POS cash sessions, their accounting movements and drawer audit events.
  *
  * Tables use the site prefix, so each site in a network has its own data. Unique keys enforce one open
- * session per device, one movement per order/refund source per site, and one record per request ID.
+ * session per device and per drawer, one movement per order/refund source per site, and one record per
+ * request ID.
  * Insert methods return null when a unique key rejects the row; callers re-read to decide why.
  *
  * @since 11.3.0
@@ -89,6 +90,7 @@ CREATE TABLE $sessions (
 	open_device_hash char(64) NULL,
 	drawer_name varchar(128) NULL,
 	drawer_key char(64) NULL,
+	open_drawer_key char(64) NULL,
 	status varchar(20) NOT NULL,
 	revision int(10) unsigned NOT NULL DEFAULT 1,
 	currency char(3) NOT NULL,
@@ -110,6 +112,7 @@ CREATE TABLE $sessions (
 	PRIMARY KEY  (id),
 	UNIQUE KEY open_request_id (open_request_id),
 	UNIQUE KEY open_device_hash (open_device_hash),
+	UNIQUE KEY open_drawer_key (open_drawer_key),
 	KEY device_id (device_id),
 	KEY drawer_key (drawer_key),
 	KEY status (status)
@@ -162,13 +165,14 @@ CREATE TABLE $drawer_events (
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $row Column values; status, revision and open_device_hash are set here.
+	 * @param array<string, mixed> $row Column values; status, revision and the open-session keys are set here.
 	 * @return int|null New session ID, or null when a unique key rejected the row.
 	 */
 	public function insert_session( array $row ): ?int {
 		$row['status']           = CashSessionStatus::OPEN;
 		$row['revision']         = 1;
 		$row['open_device_hash'] = self::device_hash( (string) $row['device_id'] );
+		$row['open_drawer_key']  = $row['drawer_key'] ?? null;
 
 		return $this->insert( $this->get_sessions_table(), $row );
 	}
@@ -263,6 +267,21 @@ CREATE TABLE $drawer_events (
 	}
 
 	/**
+	 * Find the open session of a drawer.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $drawer_key Drawer key from DrawerName::key().
+	 * @return array<string, mixed>|null
+	 */
+	public function find_open_session_by_drawer( string $drawer_key ): ?array {
+		global $wpdb;
+		$table = $this->get_sessions_table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is trusted.
+		return $this->row_or_null( $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE open_drawer_key = %s", $drawer_key ), ARRAY_A ) );
+	}
+
+	/**
 	 * Query sessions, newest first.
 	 *
 	 * @since 11.3.0
@@ -326,6 +345,7 @@ CREATE TABLE $drawer_events (
 
 		$fields['status']           = CashSessionStatus::CLOSED;
 		$fields['open_device_hash'] = null;
+		$fields['open_drawer_key']  = null;
 
 		$updated = $wpdb->update(
 			$this->get_sessions_table(),
