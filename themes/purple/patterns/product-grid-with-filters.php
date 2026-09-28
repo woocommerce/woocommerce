@@ -106,7 +106,7 @@
 <!-- /wp:accordion --></div>
 <!-- /wp:woocommerce/product-filter-status -->
 
-<!-- wp:woocommerce/product-filter-active {"metadata":{"blockVisibility":{"viewport":{"mobile":false,"tablet":false}}}} -->
+<!-- wp:woocommerce/product-filter-active -->
 <div class="wp-block-woocommerce-product-filter-active"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
 <!-- /wp:woocommerce/product-filter-removable-chips -->
