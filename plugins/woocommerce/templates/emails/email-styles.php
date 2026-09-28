@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 11.0.0
+ * @version 11.3.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -361,7 +361,13 @@ body {
 		color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 		border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 	<?php } ?>
-	word-break: break-all;
+	/*
+	 * Break a word only when it is too long for the cell, like a long email address, so it can't squash the other address column.
+	 * "anywhere" is used because "overflow-wrap: break-word" still lets a long word widen a table cell.
+	 * "word-break: break-word" does the same as "anywhere" and is needed because Gmail removes "overflow-wrap".
+	 */
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 <?php if ( $email_improvements_enabled ) : ?>
