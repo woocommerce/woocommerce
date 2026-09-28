@@ -70,11 +70,12 @@ class TelemetryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'value', $data['existing'], 'Existing tracker data must be preserved.' );
 		$this->assertSame(
 			array(
-				'products_with_commodity_code'      => $before['products_with_commodity_code'] + 1,
-				'products_with_country_of_origin'   => $before['products_with_country_of_origin'] + 2,
-				'products_with_customs_description' => $before['products_with_customs_description'] + 1,
-				'variations_with_commodity_code'    => $before['variations_with_commodity_code'] + 1,
-				'variations_with_country_of_origin' => $before['variations_with_country_of_origin'] + 1,
+				'products_with_commodity_code'        => $before['products_with_commodity_code'] + 1,
+				'products_with_country_of_origin'     => $before['products_with_country_of_origin'] + 2,
+				'products_with_customs_description'   => $before['products_with_customs_description'] + 1,
+				'variations_with_commodity_code'      => $before['variations_with_commodity_code'] + 1,
+				'variations_with_country_of_origin'   => $before['variations_with_country_of_origin'] + 1,
+				'variations_with_customs_description' => $before['variations_with_customs_description'] + 1,
 			),
 			$snapshot,
 			'Only published products and variations with non-empty values should be counted, once per field.'
