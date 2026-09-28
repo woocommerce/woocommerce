@@ -53,11 +53,10 @@ final class ClassicEditorFields {
 
 			woocommerce_wp_text_input(
 				$this->get_field_args( 'customs_description', $loop ) + array(
-					'value'             => $product->get_customs_description( 'edit' ) ?? '',
-					'label'             => __( 'Customs description', 'woocommerce' ),
-					'description'       => $this->get_help_text( __( 'A plain-text description for customs forms, up to 35 characters. Emoji and special symbols are not allowed.', 'woocommerce' ), $parent_desc ),
-					'placeholder'       => $parent_desc ?? '',
-					'custom_attributes' => array( 'maxlength' => 35 ),
+					'value'       => $product->get_customs_description( 'edit' ) ?? '',
+					'label'       => __( 'Customs description', 'woocommerce' ),
+					'description' => $this->get_help_text( __( 'A plain-text description for customs forms, up to 35 characters. Emoji and special symbols are not allowed.', 'woocommerce' ), $parent_desc ),
+					'placeholder' => $parent_desc ?? '',
 				),
 				$product
 			);

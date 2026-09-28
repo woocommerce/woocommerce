@@ -160,14 +160,6 @@ class WC_Meta_Box_Product_Data_Customs_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Limits the description input to the server's 35-character maximum.
-	 */
-	public function test_description_renders_maxlength(): void {
-		$html = $this->render_customs_fields( $this->create_product( false ) );
-		$this->assertStringContainsString( 'maxlength="35"', $html, 'The description must be limited to 35 characters.' );
-	}
-
-	/**
 	 * Renders the shared customs controls.
 	 *
 	 * @param WC_Product      $product Product being edited.

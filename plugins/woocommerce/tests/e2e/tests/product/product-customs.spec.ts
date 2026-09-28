@@ -33,7 +33,13 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 			const code = page.locator( '#_customs_commodity_code' );
 			const country = page.locator( '#_customs_country_of_origin' );
 			const description = page.locator( '#_customs_description' );
-			await expect( description ).toHaveAttribute( 'maxlength', '35' );
+			// Each 𝐀 is one code point but two UTF-16 units, so this checks the limit counts like the backend.
+			await description.fill( '𝐀'.repeat( 36 ) );
+			await expect( description ).toHaveValue( '𝐀'.repeat( 35 ) );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_customs_description_error' )
+			).toBeHidden();
+			await description.clear();
 			await code.pressSequentially( '12AB' );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )

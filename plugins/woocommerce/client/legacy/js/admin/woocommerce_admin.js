@@ -390,6 +390,7 @@
 
 			// Customs descriptions allow only letters, digits, spaces, punctuation and printable ASCII symbols, so emoji
 			// and symbols such as ™ are dropped. RegExp() keeps the legacy ES5 parser from rejecting the u flag.
+			// The 35-character limit counts code points like the backend's mb_strlen(); maxlength would count UTF-16 units.
 			.on(
 				'input',
 				'input[type=text][name*=_customs_description]',
@@ -399,18 +400,22 @@
 						'[^\\x20-\\x7E\\p{L}\\p{Mn}\\p{Mc}\\p{N}\\p{P}\\s]|[\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]',
 						'gu'
 					);
-					var cleaned = value.replace( disallowed, '' );
+					var stripped = value.replace( disallowed, '' );
+					var cleaned = Array.from( stripped ).slice( 0, 35 ).join( '' );
 
 					if ( cleaned !== value ) {
-						var caret = value
-							.slice( 0, this.selectionStart )
-							.replace( disallowed, '' ).length;
+						var caret = Math.min(
+							value
+								.slice( 0, this.selectionStart )
+								.replace( disallowed, '' ).length,
+							cleaned.length
+						);
 						$( this ).val( cleaned );
 						this.setSelectionRange( caret, caret );
 					}
 
 					$( document.body ).triggerHandler(
-						cleaned !== value
+						stripped !== value
 							? 'wc_add_error_tip'
 							: 'wc_remove_error_tip',
 						[ $( this ), 'i18n_customs_description_error' ]
