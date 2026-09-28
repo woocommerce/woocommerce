@@ -354,27 +354,33 @@
 				}
 			)
 
-			// Commodity codes allow the punctuation merchants copy them with, such as 0901.21.0010.
-			// Digits past the 14th are dropped as they are typed or pasted. Too-short codes are only
-			// flagged on change, so the tip doesn't show while the merchant is still typing.
+			// Commodity codes allow any punctuation and spacing merchants copy them with, such as 0901.21.0010,
+			// matching the backend. Digits past the 14th are dropped as they are typed or pasted. Too-short codes
+			// are only flagged on change, so the tip doesn't show while the merchant is still typing.
 			.on(
 				'input',
 				'input[type=text][name*=_customs_commodity_code]',
 				function () {
 					var value = $( this ).val();
-					var digits = 0;
-					var trimmed = value.replace( /[0-9]/g, function ( digit ) {
-						return ++digits > 14 ? '' : digit;
-					} );
+					var trimDigits = function ( text ) {
+						var digits = 0;
+						return text.replace( /[0-9]/g, function ( digit ) {
+							return ++digits > 14 ? '' : digit;
+						} );
+					};
+					var trimmed = trimDigits( value );
 
 					if ( trimmed !== value ) {
-						var caret = this.selectionStart;
+						var caret = trimDigits(
+							value.slice( 0, this.selectionStart )
+						).length;
 						$( this ).val( trimmed );
 						this.setSelectionRange( caret, caret );
 					}
 
 					$( document.body ).triggerHandler(
-						trimmed !== value || /[^0-9.\s\-]/.test( trimmed )
+						trimmed !== value ||
+							new RegExp( '[^0-9\\p{P}\\s]', 'u' ).test( trimmed )
 							? 'wc_add_error_tip'
 							: 'wc_remove_error_tip',
 						[ $( this ), 'i18n_commodity_code_error' ]
@@ -389,18 +395,16 @@
 				'input[type=text][name*=_customs_description]',
 				function () {
 					var value = $( this ).val();
-					var cleaned = value.replace(
-						new RegExp(
-							'[^\\x20-\\x7E\\p{L}\\p{Mn}\\p{Mc}\\p{N}\\p{P}\\s]|[\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]',
-							'gu'
-						),
-						''
+					var disallowed = new RegExp(
+						'[^\\x20-\\x7E\\p{L}\\p{Mn}\\p{Mc}\\p{N}\\p{P}\\s]|[\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]',
+						'gu'
 					);
+					var cleaned = value.replace( disallowed, '' );
 
 					if ( cleaned !== value ) {
-						var caret =
-							this.selectionStart -
-							( value.length - cleaned.length );
+						var caret = value
+							.slice( 0, this.selectionStart )
+							.replace( disallowed, '' ).length;
 						$( this ).val( cleaned );
 						this.setSelectionRange( caret, caret );
 					}
@@ -414,16 +418,20 @@
 				}
 			)
 
-			// Keep only the digits that will be stored, and flag a code shorter than 6 digits.
+			// Remove the punctuation and spacing the backend removes. Letters and symbols are kept so the
+			// code stays visibly invalid, and a code with them or with fewer than 6 digits is flagged.
 			.on(
 				'change',
 				'input[type=text][name*=_customs_commodity_code]',
 				function () {
-					var cleaned = $( this ).val().replace( /[^0-9]/g, '' );
+					var cleaned = $( this )
+						.val()
+						.replace( new RegExp( '[\\p{P}\\s]', 'gu' ), '' );
 					$( this ).val( cleaned );
 
 					$( document.body ).triggerHandler(
-						cleaned && cleaned.length < 6
+						/[^0-9]/.test( cleaned ) ||
+							( cleaned && cleaned.length < 6 )
 							? 'wc_add_error_tip'
 							: 'wc_remove_error_tip',
 						[ $( this ), 'i18n_commodity_code_error' ]

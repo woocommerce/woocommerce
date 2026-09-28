@@ -39,7 +39,7 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
 			).toBeVisible();
 			await code.blur();
-			await expect( code ).toHaveValue( '12' );
+			await expect( code ).toHaveValue( '12AB' );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
 			).toBeVisible();
@@ -54,6 +54,16 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 			await expect(
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
 			).toBeVisible();
+
+			await code.fill( '0901/21,0010' );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
+			).toBeHidden();
+			await code.blur();
+			await expect( code ).toHaveValue( '0901210010' );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
+			).toBeHidden();
 
 			await description.pressSequentially( 'Cotton 👕' );
 			await expect( description ).toHaveValue( 'Cotton ' );
