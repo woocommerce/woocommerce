@@ -59,6 +59,15 @@ function SettingsForm( {
 			hasPadding
 			actions={
 				<>
+					{ screen.classicUrl && (
+						<Button
+							variant="tertiary"
+							size="compact"
+							href={ screen.classicUrl }
+						>
+							{ __( 'Use classic settings', 'woocommerce' ) }
+						</Button>
+					) }
 					<Button
 						variant="secondary"
 						size="compact"

@@ -10,13 +10,32 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
+// A minimal gateway whose classic settings section redirects to the example screen.
+add_action(
+	'plugins_loaded',
+	static function () {
+		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+			return;
+		}
+		require_once __DIR__ . '/class-payment-settings-example-gateway.php';
+		add_filter(
+			'woocommerce_payment_gateways',
+			static function ( $gateways ) {
+				$gateways[] = 'Payment_Settings_Example_Gateway';
+				return $gateways;
+			}
+		);
+	}
+);
+
 // The screen, entity and endpoint used by the example.
 add_filter(
 	'woocommerce_experimental_payment_settings_screens',
 	static function ( $screens ) {
 		$screens['example'] = array(
-			'title'     => 'Example gateway settings',
-			'rest_path' => '/payment-settings-example/v1/settings',
+			'title'           => 'Example gateway settings',
+			'rest_path'       => '/payment-settings-example/v1/settings',
+			'classic_section' => 'payment_settings_example',
 		);
 		return $screens;
 	}

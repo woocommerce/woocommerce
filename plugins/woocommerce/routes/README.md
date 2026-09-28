@@ -18,3 +18,5 @@ A screen is experimental: every part of this can change in any release. See `plu
 3. Set the layout with the `get_entity_view_config_woo_settings_{id}` filter.
 
 The screen opens at `admin.php?page=wc-payment-settings-wp-admin&p=/settings/{id}`.
+
+Add `classic_section` with the gateway's classic settings section (its `section` query argument) to redirect that page to the screen. Only GET requests redirect, other query arguments are passed to the route, and adding `wc_classic_settings=1` keeps the classic page. The screen then shows a "Use classic settings" link.

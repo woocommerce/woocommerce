@@ -37,6 +37,11 @@ class PaymentSettingsScreen {
 	private const RENDER_FUNCTION = 'woocommerce_routes_wc_payment_settings_wp_admin_render_page';
 
 	/**
+	 * Query argument that keeps a classic settings section from redirecting to its screen.
+	 */
+	public const CLASSIC_MARKER = 'wc_classic_settings';
+
+	/**
 	 * Handle of the script that passes the current screen to the route.
 	 */
 	private const DATA_SCRIPT_HANDLE = 'wc-payment-settings-screen';
@@ -81,6 +86,64 @@ class PaymentSettingsScreen {
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
 		add_action( 'wc-payment-settings-wp-admin_init', array( $this, 'handle_page_init' ) );
+		add_action( 'admin_init', array( $this, 'handle_admin_init' ) );
+	}
+
+	/**
+	 * Redirect a classic settings section to the screen that replaces it.
+	 *
+	 * @internal
+	 */
+	public function handle_admin_init(): void {
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads which page is requested.
+		$url = $this->get_classic_redirect_url( wp_unslash( $_GET ), $method );
+		if ( null !== $url ) {
+			wp_safe_redirect( $url );
+			exit;
+		}
+	}
+
+	/**
+	 * Get the screen URL for a classic settings section request, or null when it shouldn't redirect.
+	 *
+	 * Only GET requests redirect, so saving the classic page still works. Other query arguments
+	 * are passed to the screen's route.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array  $query  The request's query arguments, unslashed.
+	 * @param string $method The request method.
+	 * @return string|null
+	 */
+	public function get_classic_redirect_url( array $query, string $method ): ?string {
+		if ( 'GET' !== $method || isset( $query[ self::CLASSIC_MARKER ] ) ) {
+			return null;
+		}
+		if ( 'wc-settings' !== ( $query['page'] ?? null ) || 'checkout' !== ( $query['tab'] ?? null ) || ! isset( $query['section'] ) || ! is_string( $query['section'] ) ) {
+			return null;
+		}
+
+		$screen = $this->screens->get_screen_for_classic_section( $query['section'] );
+		if ( null === $screen ) {
+			return null;
+		}
+
+		$args = array();
+		foreach ( array_diff_key( $query, array_flip( array( 'page', 'tab', 'section' ) ) ) as $key => $value ) {
+			if ( is_string( $key ) && is_scalar( $value ) ) {
+				$args[ sanitize_key( $key ) ] = sanitize_text_field( (string) $value );
+			}
+		}
+
+		$route = '/settings/' . $screen['id'] . ( $args ? '?' . http_build_query( $args ) : '' );
+		return add_query_arg(
+			array(
+				'page' => self::PAGE_SLUG,
+				'p'    => rawurlencode( $route ),
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
@@ -121,12 +184,21 @@ class PaymentSettingsScreen {
 			self::DATA_SCRIPT_HANDLE,
 			'window.wcPaymentSettingsScreen = ' . wp_json_encode(
 				array(
-					'id'     => $screen['id'],
-					'title'  => $screen['title'],
-					'entity' => array(
+					'id'         => $screen['id'],
+					'title'      => $screen['title'],
+					'entity'     => array(
 						'kind'    => PaymentSettingsScreens::ENTITY_KIND,
 						'name'    => $screen['id'],
 						'baseURL' => $screen['rest_path'],
+					),
+					'classicUrl' => null === $screen['classic_section'] ? null : add_query_arg(
+						array(
+							'page'               => 'wc-settings',
+							'tab'                => 'checkout',
+							'section'            => $screen['classic_section'],
+							self::CLASSIC_MARKER => '1',
+						),
+						admin_url( 'admin.php' )
 					),
 				)
 			) . ';',
@@ -219,7 +291,7 @@ class PaymentSettingsScreen {
 	/**
 	 * Get the screen named in the route, such as `p=/settings/woopayments`.
 	 *
-	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null
+	 * @return array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}|null
 	 */
 	private function get_requested_screen(): ?array {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only selects which screen to load.
