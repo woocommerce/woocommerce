@@ -1,9 +1,10 @@
 # Live test runbook
 
 Run this for any change to `receipt.js`, `action.yml`, the `ci.yml` receipt
-step or its `if:` guards, or `.github/local-ci.json`. It proves the consumer
-end to end in real CI without touching trunk. Budget: ~30 minutes, mostly
-waiting. Everything created here is deleted at the end.
+step or its `if:` guards, or `.github/local-ci.json`. It is the action's only
+test: it proves the consumer end to end in real CI without touching trunk.
+Budget: ~30 minutes, mostly waiting. Everything created here is deleted at
+the end.
 
 ## Preconditions
 

@@ -12,20 +12,19 @@ logs the reason. Receipts apply to `pull_request` events only; merge queue
 runs and pushes to trunk run everything.
 
 - `action.yml` — composite action; `receipt.js` — the decision (`decide()`)
-  and the API reads (`lookup()`); `test.js` — unit tests, run by
-  `pr-check-local-actions.yml`.
+  and the API reads (`lookup()`).
 - Contract: `.github/local-ci.json` (read from the base branch).
 - Kill switch: repository variable `LOCAL_CI_RECEIPTS_DISABLED=1`, effective
   on the next *new* run (re-runs keep old variables).
 
 ## Testing
 
-Two layers. The unit tests (`node .github/actions/local-ci-receipt/test.js`,
-one second, no network) pin the decision logic. The **live test** proves the
-whole chain against real GitHub — it is the only test that sees what GitHub
-actually sends, which is how the `author_association` problem was found —
-and it is **required** for any change to `receipt.js`, `action.yml`, the
-`ci.yml` step or its two `if:` guards, or `.github/local-ci.json`.
+This action is tested live, against real GitHub, not with unit tests: the
+only test that sees what GitHub actually sends is a real pull request, which
+is how the `author_association` problem was found. The **live test is
+required** for any change to `receipt.js`, `action.yml`, the `ci.yml` step or
+its two `if:` guards, or `.github/local-ci.json`. `pr-check-local-actions.yml`
+still validates `.github/local-ci.json` on every change to it.
 
 The live test uses a scratch branch as a stand-in for trunk, so nothing
 touches trunk. It takes about 30 minutes, mostly waiting for CI, and needs
