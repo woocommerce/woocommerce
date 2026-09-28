@@ -24,9 +24,9 @@ class Telemetry implements RegisterHooksInterface {
 		'product/_customs_commodity_code'              => 'products_with_commodity_code',
 		'product/_customs_country_of_origin'           => 'products_with_country_of_origin',
 		'product/_customs_description'                 => 'products_with_customs_description',
-		'product_variation/_customs_commodity_code'    => 'variations_with_commodity_code',
+'product_variation/_customs_commodity_code'    => 'variations_with_commodity_code',
 		'product_variation/_customs_country_of_origin' => 'variations_with_country_of_origin',
-	);
+		'product_variation/_customs_description'       => 'variations_with_customs_description',
 
 	/**
 	 * Registers the periodic snapshot filter.
