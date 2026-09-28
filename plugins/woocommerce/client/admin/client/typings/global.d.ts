@@ -114,7 +114,6 @@ declare global {
 		wcAdminFeatures: DeprecatedWcAdminFeatureFlags & {
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
-			'settings-ui': boolean;
 			'store-alerts': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;

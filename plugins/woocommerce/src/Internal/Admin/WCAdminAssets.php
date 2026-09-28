@@ -9,7 +9,6 @@ use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
-use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 
 /**
  * WCAdminAssets Class.
@@ -253,10 +252,8 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
-			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
 		// Preload our assets.
@@ -318,7 +315,6 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
-			'wc-settings-ui',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -336,7 +332,6 @@ class WCAdminAssets {
 			'wc-customer-effort-score',
 			'wc-experimental',
 			'wc-navigation',
-			'wc-settings-ui',
 			WC_ADMIN_APP,
 		);
 
@@ -378,6 +373,10 @@ class WCAdminAssets {
 			}
 		}
 
+		// The Settings UI was removed in 11.4.0. Extensions still list its handles as dependencies, so they stay registered without a file.
+		wp_register_script( 'wc-settings-ui', false, array(), WC_VERSION, true );
+		wp_register_style( 'wc-settings-ui', false, array(), WC_VERSION );
+
 		// Register the CSS styles.
 		$styles = array(
 			array(
@@ -398,10 +397,6 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-onboarding',
-			),
-			array(
-				'handle'       => 'wc-settings-ui',
-				'dependencies' => array( 'wp-components' ),
 			),
 		);
 
@@ -428,46 +423,6 @@ class WCAdminAssets {
 			);
 			wp_style_add_data( $handle, 'rtl', 'replace' );
 		}
-	}
-
-	/**
-	 * Get extension script handles that must load before the settings embed app mounts.
-	 *
-	 * @return array
-	 */
-	private function get_settings_ui_script_dependencies(): array {
-		try {
-			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
-				return array();
-			}
-
-			$context = SettingsUIRequestContext::get_current();
-			if ( ! $context || $context->has_script_handles_failed() ) {
-				return array();
-			}
-
-			$dependencies = array_merge(
-				array( 'wc-settings-ui' ),
-				$context->get_script_handles()
-			);
-
-			return array_values( array_unique( $dependencies ) );
-		} catch ( \Throwable $e ) {
-			return array();
-		}
-	}
-
-	/**
-	 * Enqueue the Settings UI package style when its runtime dependency resolves.
-	 *
-	 * @param array $dependencies Resolved Settings UI script dependencies.
-	 */
-	private function enqueue_settings_ui_style( array $dependencies ): void {
-		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
-			return;
-		}
-
-		wp_enqueue_style( 'wc-settings-ui' );
 	}
 
 	/**

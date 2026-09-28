@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve legacy form names and typed visibility comparisons in the Settings UI.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove the deleted experimental Settings UI package from the dependency extraction package list.
+
