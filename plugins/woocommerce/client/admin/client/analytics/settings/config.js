@@ -114,10 +114,9 @@ const baseConfig = {
 			},
 		],
 		helpText: __(
-			'Orders where the customer paid nothing are left out of report totals \u2014 a 100% off coupon, ' +
-				'a gift redemption, or a basket of entirely free items. An order that mixes paid and free items ' +
-				'still counts in full. Your net sales stay the same; order counts, items sold, and average order ' +
-				'value change.',
+			'Orders that are completely free are excluded from the totals in your reports. ' +
+				'This will impact your order counts, number of items sold, and average order value. ' +
+				'Net sales are not impacted.',
 			'woocommerce'
 		),
 		defaultValue: [],
