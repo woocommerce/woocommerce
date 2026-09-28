@@ -476,14 +476,19 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $prices_no_tax, array_values( $variation_prices['price'] ) );
 
+		// Verify that the cached raw prices are not tax-adjusted while the customer is VAT-exempt.
+		// At this point display prices have tax removed (9.09, ...), so raw prices diverge and the assertion is meaningful.
+		$prices_with_tax = array( '10.00', '15.00', '16.00', '17.00', '18.00', '19.00' );
+		$raw_prices      = $product->get_variation_prices( false );
+
+		$this->assertSame( $prices_with_tax, array_values( $raw_prices['price'] ), 'Cached raw prices must not be tax-adjusted.' );
+
 		// Verify that a normal customer gets prices with tax included.
 		// This indirectly proves that the customer's VAT exemption influences the cache key.
 		WC()->customer->set_is_vat_exempt( false );
-
-		$prices_with_tax  = array( '10.00', '15.00', '16.00', '17.00', '18.00', '19.00' );
 		$variation_prices = $product->get_variation_prices( true );
 
-		$this->assertEquals( $prices_with_tax, array_values( $variation_prices['price'] ) );
+		$this->assertSame( $prices_with_tax, array_values( $variation_prices['price'] ) );
 
 		// Clean up.
 		WC_Tax::_delete_tax_rate( $tax_id );
@@ -623,6 +628,8 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox taxes_influence_price returns true even when customer is VAT exempt, because exempt prices differ from non-exempt.
 	 */
 	public function test_taxes_influence_price_returns_true_for_vat_exempt() {
+		$this->setExpectedDeprecated( 'WC_Product_Variable_Data_Store_CPT::taxes_influence_price' );
+
 		add_filter( 'wc_tax_enabled', '__return_true' );
 		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
 		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
@@ -665,6 +672,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param bool $expected         Expected return value from taxes_influence_price.
 	 */
 	public function test_taxes_influence_price_filter_overrides_default( bool $taxable_product, bool $tax_has_rates, bool $expected_default, bool $filter_returns, bool $expected ) {
+		$this->setExpectedDeprecated( 'WC_Product_Variable_Data_Store_CPT::taxes_influence_price' );
+		$this->setExpectedDeprecated( 'woocommerce_variable_product_taxes_influence_price' );
+
 		add_filter( 'wc_tax_enabled', '__return_true' );
 		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
@@ -708,15 +718,16 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
 		$product        = $this->get_variation_product_fixture();
 		$transient_name = 'wc_var_prices_' . $product->get_id();
-		delete_transient( $transient_name );
 
 		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
 
 		delete_transient( $transient_name );
 		$data_store->read_price_data( $product, $for_display );
-		$expected_hashes = array( $extended_data_store->get_price_hash( $product, $for_display ) );
+
+		// Both display and raw hashes are always cached — prime_price_data_cache computes both in a single pass.
+		$expected_hashes = array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
 		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
-		$this->assertEquals( $expected_hashes, $actual_hashes );
+		$this->assertSame( $expected_hashes, $actual_hashes );
 
 		remove_filter( 'wc_tax_enabled', '__return_true' );
 		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
@@ -753,17 +764,15 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
 		$product        = $this->get_variation_product_fixture();
 		$transient_name = 'wc_var_prices_' . $product->get_id();
-		delete_transient( $transient_name );
 
 		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
 
+		delete_transient( $transient_name );
 		$data_store->read_price_data( $product, true );
+
+		$expected_hashes = array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
 		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
-		$expected_hashes =
-			$hook_modifies_prices ?
-			array( $extended_data_store->get_price_hash( $product, true ) ) :
-			array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
-		$this->assertEquals( $expected_hashes, $actual_hashes );
+		$this->assertSame( $expected_hashes, $actual_hashes );
 
 		remove_all_filters( 'woocommerce_variation_prices_array' );
 		remove_filter( 'wc_tax_enabled', '__return_true' );
@@ -2039,5 +2048,71 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', $capture_filter );
 
 		$product->delete();
+	}
+
+	/**
+	 * @testdox read_price_data does not trigger a second aggregation pass for the raw variant after the display variant is primed.
+	 */
+	public function test_read_price_data_no_double_aggregation(): void {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+
+		$product        = $this->get_variation_product_fixture();
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+
+		delete_transient( $transient_name );
+
+		$aggregation_count = 0;
+		$count_aggregation = function ( $price ) use ( &$aggregation_count ) {
+			++$aggregation_count;
+			return $price;
+		};
+		add_filter( 'woocommerce_variation_prices_price', $count_aggregation );
+
+		// First call primes both display and raw hashes in a single pass.
+		$data_store->read_price_data( $product, true );
+		$hashes_after_first_call = $this->get_keys_for_json_encoded_transient( $transient_name );
+		$aggregation_after_first = $aggregation_count;
+
+		$this->assertSame( count( $product->get_visible_children() ), $aggregation_after_first, 'First call must aggregate exactly once (one filter invocation per variation).' );
+
+		// Second call must reuse the cache — no re-aggregation.
+		$data_store->read_price_data( $product, false );
+		$hashes_after_second_call = $this->get_keys_for_json_encoded_transient( $transient_name );
+
+		$this->assertSame( $hashes_after_first_call, $hashes_after_second_call, 'Hashes must not change after the second call.' );
+		$this->assertSame( $aggregation_after_first, $aggregation_count, 'Second call must not trigger re-aggregation.' );
+
+		remove_filter( 'woocommerce_variation_prices_price', $count_aggregation );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * @testdox read_price_data excludes variations with empty prices from the result.
+	 */
+	public function test_read_price_data_excludes_empty_price_variations(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_children();
+
+		// Clear the price on the first variation.
+		$empty_variation = wc_get_product( $child_ids[0] );
+		$empty_variation->set_price( '' );
+		$empty_variation->set_regular_price( '' );
+		$empty_variation->save();
+
+		delete_transient( 'wc_var_prices_' . $product->get_id() );
+		$prices = ( new WC_Product_Variable_Data_Store_CPT() )->read_price_data( $product, false );
+
+		$this->assertCount( count( $child_ids ) - 1, $prices['price'], 'Only priced variations must be in the result.' );
+		$this->assertArrayNotHasKey( $child_ids[0], $prices['price'], 'Empty-price variation must be excluded from price array.' );
+		$this->assertArrayNotHasKey( $child_ids[0], $prices['regular_price'], 'Empty-price variation must be excluded from regular_price array.' );
+		$this->assertArrayNotHasKey( $child_ids[0], $prices['sale_price'], 'Empty-price variation must be excluded from sale_price array.' );
+
+		$product->delete( true );
 	}
 }
