@@ -4,10 +4,10 @@
   "host": "github.com",
   "repository": "woocommerce/woocommerce",
   "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
-  "baseBranch": "trunk",
+  "baseBranch": "test/local-ci-base",
   "receiptPrefix": "local-ci/v1: ",
 
-  "enabled": false,
+  "enabled": true,
   "rollout": { "authors": [ "MrJnrman" ], "label": "local-ci" },
 
   "plan": {
