@@ -1309,6 +1309,70 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_payment_gateway_details keeps each KOMOJU gateway's own title and description.
+	 *
+	 * KOMOJU registers a legacy gateway plus one gateway per payment method. Overriding them with the
+	 * suggestion details would make all the rows identical and hide the legacy gateway's deprecation notice.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_komoju_gateway_titles() {
+		// Arrange.
+		$plugin_slug     = 'komoju-japanese-payments';
+		$legacy_gateway  = new FakePaymentGateway(
+			'komoju',
+			array(
+				'enabled'            => false,
+				'method_title'       => 'KOMOJU',
+				'method_description' => 'Deprecated — will be removed in a future version.',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'komoju-japanese-payments/index.php',
+			),
+		);
+		$konbini_gateway = new FakePaymentGateway(
+			'komoju_konbini',
+			array(
+				'enabled'            => true,
+				'method_title'       => 'KOMOJU - Konbini',
+				'method_description' => 'Konbini payments powered by KOMOJU',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'komoju-japanese-payments/index.php',
+			),
+		);
+
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::KOMOJU,
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'KOMOJU Payments',
+			'description' => 'Easily add popular Japanese payment methods.',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/komoju-icon.png',
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$legacy_details  = $this->sut->get_payment_gateway_details( $legacy_gateway, 0, 'JP' );
+		$konbini_details = $this->sut->get_payment_gateway_details( $konbini_gateway, 1, 'JP' );
+
+		// Assert.
+		$this->assertSame( 'KOMOJU', $legacy_details['title'], 'The legacy gateway should keep its own title' );
+		$this->assertSame( 'Deprecated — will be removed in a future version.', $legacy_details['description'], 'The legacy gateway should keep its deprecation notice' );
+		$this->assertSame( 'KOMOJU - Konbini', $konbini_details['title'], 'The payment method gateway should keep its own title' );
+		$this->assertSame( 'Konbini payments powered by KOMOJU', $konbini_details['description'], 'The payment method gateway should keep its own description' );
+
+		// Other suggestion details still apply.
+		$this->assertSame( 'http://example.com/komoju-icon.png', $konbini_details['icon'], 'Icon should be filled from suggestion' );
+		$this->assertSame( ExtensionSuggestions::KOMOJU, $konbini_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
 	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
 	 *
 	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
