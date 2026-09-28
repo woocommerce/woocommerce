@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * The user-entered cash drawer name from the POS app settings.
  *
- * The trimmed spelling is kept for display and history. Comparisons use a case-insensitive key,
+ * The sanitized spelling is kept for display and history. Comparisons use a case-insensitive key,
  * so "Front counter" and "front counter" identify the same drawer within a site.
  *
  * @since 11.3.0
@@ -20,17 +20,17 @@ use RuntimeException;
 final class DrawerName {
 
 	/**
-	 * Maximum length in characters after trimming.
+	 * Maximum length in characters after sanitization.
 	 */
 	public const MAX_LENGTH = 128;
 
 	/**
-	 * Trim a drawer name and validate it.
+	 * Sanitize a drawer name and validate it.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $value Name as entered.
-	 * @return string Trimmed display spelling.
+	 * @return string Sanitized display spelling.
 	 * @throws InvalidArgumentException When the name is blank, too long or not valid UTF-8.
 	 */
 	public static function normalize( string $value ): string {
@@ -39,6 +39,7 @@ final class DrawerName {
 		if ( null === $trimmed ) {
 			throw new InvalidArgumentException( 'The drawer name is not valid UTF-8.' );
 		}
+		$trimmed = trim( (string) preg_replace( '/[\x00-\x1F\x7F]/', '', sanitize_text_field( $trimmed ) ) );
 		if ( '' === $trimmed ) {
 			throw new InvalidArgumentException( 'The drawer name cannot be blank.' );
 		}

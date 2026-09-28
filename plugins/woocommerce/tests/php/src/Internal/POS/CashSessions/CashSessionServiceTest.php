@@ -74,6 +74,84 @@ class CashSessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject trailing newlines in UUIDs before writing to storage.
+	 *
+	 * @testWith ["open", "request_id"]
+	 *           ["close", "request_id"]
+	 *           ["movement", "request_id"]
+	 *           ["event", "request_id"]
+	 *           ["event", "correlation_id"]
+	 *
+	 * @param string $operation Operation to call.
+	 * @param string $field     Invalid UUID field.
+	 */
+	public function test_rejects_uuid_trailing_newline( string $operation, string $field ): void {
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$this->data_store->expects( $this->never() )->method( 'insert_session' );
+		$this->data_store->expects( $this->never() )->method( 'insert_movement' );
+		$this->data_store->expects( $this->never() )->method( 'insert_drawer_event' );
+		$params           = array(
+			'open'     => $this->open_params(),
+			'close'    => $this->close_params(),
+			'movement' => $this->paid_in_params(),
+			'event'    => $this->drawer_event_params(),
+		)[ $operation ];
+		$params[ $field ] = self::REQUEST_ID . "\n";
+		$calls            = array(
+			'open'     => fn() => $this->sut->open_session( $params ),
+			'close'    => fn() => $this->sut->close_session( self::SESSION_ID, $params ),
+			'movement' => fn() => $this->sut->record_movement( self::SESSION_ID, $params ),
+			'event'    => fn() => $this->sut->record_drawer_event( self::SESSION_ID, $params ),
+		);
+
+		$this->assert_error( $this->catch_error( $calls[ $operation ] ), 400, 'rest_invalid_param' );
+		$this->assertSame( array(), $this->transaction->calls );
+	}
+
+	/**
+	 * @testdox Should translate amount and drawer validation errors before returning REST error data.
+	 *
+	 * @testWith ["opening_amount", "bad", "woocommerce_rest_cash_invalid_amount"]
+	 *           ["opening_amount", "1.001", "woocommerce_rest_cash_invalid_amount"]
+	 *           ["opening_amount", "999999999999999999999", "woocommerce_rest_cash_invalid_amount"]
+	 *           ["drawer_id", "", "woocommerce_rest_cash_invalid_drawer"]
+	 *
+	 * @param string $field Invalid field.
+	 * @param string $value Invalid value.
+	 * @param string $code  Expected error code.
+	 */
+	public function test_translates_value_validation_errors( string $field, string $value, string $code ): void {
+		add_filter( 'gettext_woocommerce', static fn( $translation ) => 'Translated: ' . $translation );
+		$params           = $this->open_params();
+		$params[ $field ] = $value;
+
+		$error = $this->catch_error( fn() => $this->sut->open_session( $params ) );
+
+		$this->assert_error( $error, 400, $code );
+		$this->assertStringStartsWith( 'Translated: ', $error->to_wp_error()->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should translate timestamp validation errors before returning REST error data.
+	 *
+	 * @testWith ["2026-09-25T12:00:00"]
+	 *           ["2026-02-30T12:00:00Z"]
+	 *
+	 * @param string $timestamp Invalid timestamp.
+	 */
+	public function test_translates_timestamp_validation_errors( string $timestamp ): void {
+		add_filter( 'gettext_woocommerce', static fn( $translation ) => 'Translated: ' . $translation );
+		$this->data_store->method( 'get_session' )->willReturn( $this->session_row() );
+		$params                = $this->drawer_event_params();
+		$params['occurred_at'] = $timestamp;
+
+		$error = $this->catch_error( fn() => $this->sut->record_drawer_event( self::SESSION_ID, $params ) );
+
+		$this->assert_error( $error, 400, 'woocommerce_rest_cash_invalid_timestamp' );
+		$this->assertStringStartsWith( 'Translated: ', $error->to_wp_error()->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should replay an open whose insert lost the race to the same request.
 	 */
 	public function test_open_insert_conflict_replays_same_request(): void {

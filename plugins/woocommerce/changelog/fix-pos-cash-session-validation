@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve validation, translated errors, and drawer event responses for POS cash sessions.

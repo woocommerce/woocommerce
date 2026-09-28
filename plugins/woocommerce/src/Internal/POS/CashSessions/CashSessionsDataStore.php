@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\CashSessionStatus;
+
 use RuntimeException;
 
 /**

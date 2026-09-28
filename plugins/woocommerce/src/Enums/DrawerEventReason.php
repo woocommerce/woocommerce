@@ -1,14 +1,10 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\POS\CashSessions;
-
-defined( 'ABSPATH' ) || exit;
+namespace Automattic\WooCommerce\Enums;
 
 /**
  * Why the cash drawer was opened.
- *
- * Kept under the cash sessions namespace instead of `src/Enums` while the API contract is a draft.
  *
  * @since 11.3.0
  */
@@ -53,24 +49,4 @@ final class DrawerEventReason {
 	 * An observation not linked to an app action.
 	 */
 	public const UNKNOWN = 'unknown';
-
-	/**
-	 * All values.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return string[]
-	 */
-	public static function get_all(): array {
-		return array(
-			self::CASH_SALE,
-			self::CASH_REFUND,
-			self::NO_SALE,
-			self::TEST,
-			self::PAID_IN,
-			self::PAID_OUT,
-			self::COUNT,
-			self::UNKNOWN,
-		);
-	}
 }

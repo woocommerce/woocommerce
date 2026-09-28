@@ -18,7 +18,15 @@ class DrawerNameTest extends WC_Unit_Test_Case {
 	public function test_normalize_trims_and_keeps_spelling(): void {
 		$this->assertSame( 'Front counter', DrawerName::normalize( "  Front counter \t\n" ) );
 		$this->assertSame( 'Front counter', DrawerName::normalize( "\u{00A0}Front counter\u{3000}" ), 'Unicode spaces should be trimmed' );
-		$this->assertSame( 'Front  counter', DrawerName::normalize( 'Front  counter' ), 'Inner whitespace should be kept' );
+		$this->assertSame( 'Front counter', DrawerName::normalize( 'Front  counter' ), 'Whitespace should be normalized' );
+	}
+
+	/**
+	 * @testdox Should remove markup and control characters before building a drawer key.
+	 */
+	public function test_normalize_sanitizes_name(): void {
+		$this->assertSame( 'Café counter', DrawerName::normalize( "<b>Café</b> counter\x01\x7f" ) );
+		$this->assertSame( DrawerName::key( 'Café counter' ), DrawerName::key( DrawerName::normalize( '<b>Café</b> counter' ) ) );
 	}
 
 	/**
@@ -26,6 +34,8 @@ class DrawerNameTest extends WC_Unit_Test_Case {
 	 *
 	 * @testWith [""]
 	 *           ["   "]
+	 *           ["<b></b>"]
+	 *           ["\u0001"]
 	 *           [" \t"]
 	 *
 	 * @param string $value Test value.
