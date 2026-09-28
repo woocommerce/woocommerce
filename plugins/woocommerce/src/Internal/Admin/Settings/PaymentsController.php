@@ -169,6 +169,7 @@ class PaymentsController {
 	 *
 	 * Matching is by integration name: a gateway counts as compatible when a registered
 	 * Checkout block payment method integration has the same name as the gateway ID.
+	 * Integrations registered only on the front end are not visible here, so their gateways are listed too.
 	 *
 	 * @return string[] The list of gateway IDs.
 	 */
