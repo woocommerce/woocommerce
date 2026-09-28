@@ -1,0 +1,34 @@
+{
+	"name": "@woocommerce/payment-settings",
+	"version": "0.0.0",
+	"description": "Experimental settings screen for payment gateways, built with WordPress DataForm and wp-build.",
+	"private": true,
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "pnpm build:project",
+		"build:project": "pnpm prepare:core && wp-build",
+		"clean": "rm -rf build",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:lang:types": "tsc --noEmit",
+		"prepare:core": "pnpm clean && rm -rf ../../../plugins/woocommerce/assets/client/payment-settings && mkdir -p ../../../plugins/woocommerce/assets/client/payment-settings && ln -s ../../../plugins/woocommerce/assets/client/payment-settings build",
+		"watch:build": "pnpm prepare:core && wp-build --watch"
+	},
+	"devDependencies": {
+		"@types/react": "18.3.x",
+		"@wordpress/build": "catalog:tooling",
+		"typescript": "5.7.x"
+	},
+	"wpPlugin": {
+		"name": "woocommerce_payment_settings",
+		"scriptGlobal": false,
+		"packageNamespace": "woocommerce-payment-settings",
+		"handlePrefix": "wc-payment-settings",
+		"pages": [
+			{
+				"id": "wc-payment-settings",
+				"capability": "manage_woocommerce"
+			}
+		]
+	}
+}

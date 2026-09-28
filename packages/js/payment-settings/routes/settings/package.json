@@ -1,0 +1,15 @@
+{
+	"name": "@woocommerce-payment-settings/settings-route",
+	"private": true,
+	"dependencies": {
+		"@wordpress/admin-ui": "2.11.0",
+		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/route": "0.22.0",
+		"react": "18.3.1",
+		"react-dom": "18.3.1"
+	},
+	"route": {
+		"path": "/settings/$page",
+		"page": "wc-payment-settings"
+	}
+}
