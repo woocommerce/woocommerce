@@ -443,8 +443,9 @@ CREATE TABLE $drawer_events (
 			$wpdb->prepare( "SELECT session_id, type, CAST(SUM(amount) AS CHAR) AS total FROM $table WHERE session_id IN ($placeholders) GROUP BY session_id, type", $session_ids ),
 			ARRAY_A
 		);
-		if ( ! is_array( $rows ) ) {
-			throw new RuntimeException( 'Could not read cash movement totals: ' . esc_html( $wpdb->last_error ) );
+		// A failed query returns an empty array, which must not be read as a session without movements.
+		if ( ! is_array( $rows ) || '' !== $this->last_query_error() ) {
+			throw new RuntimeException( 'Could not read cash movement totals: ' . esc_html( $this->last_query_error() ) );
 		}
 
 		$sums = array();
@@ -557,20 +558,35 @@ CREATE TABLE $drawer_events (
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Table, WHERE and ORDER BY are built from trusted fragments with placeholders.
 		$count_sql = "SELECT COUNT(*) FROM $table WHERE $where";
 		$total     = $wpdb->get_var( empty( $args ) ? $count_sql : $wpdb->prepare( $count_sql, $args ) );
-		$rows      = $wpdb->get_results(
+		if ( null === $total || '' !== $this->last_query_error() ) {
+			throw new RuntimeException( 'Could not count cash session records: ' . esc_html( $this->last_query_error() ) );
+		}
+		$rows = $wpdb->get_results(
 			$wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY $order_by LIMIT %d OFFSET %d", array_merge( $args, array( $per_page, $offset ) ) ),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		if ( null === $total || ! is_array( $rows ) ) {
-			throw new RuntimeException( 'Could not query cash session records: ' . esc_html( $wpdb->last_error ) );
+		if ( ! is_array( $rows ) || '' !== $this->last_query_error() ) {
+			throw new RuntimeException( 'Could not query cash session records: ' . esc_html( $this->last_query_error() ) );
 		}
 
 		return array(
 			'rows'  => $rows,
 			'total' => (int) $total,
 		);
+	}
+
+	/**
+	 * Error of the last query, empty when it succeeded. wpdb resets it at the start of every query.
+	 *
+	 * @phpstan-impure
+	 *
+	 * @return string
+	 */
+	private function last_query_error(): string {
+		global $wpdb;
+		return (string) $wpdb->last_error;
 	}
 
 	/**

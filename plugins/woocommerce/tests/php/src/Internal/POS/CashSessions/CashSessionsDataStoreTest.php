@@ -137,6 +137,37 @@ class CashSessionsDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should throw when a movement read query fails instead of returning an empty result.
+	 *
+	 * @testWith ["SUM(amount)"]
+	 *           ["ORDER BY"]
+	 *
+	 * @param string $marker Text that identifies the query to break.
+	 */
+	public function test_failed_movement_read_throws( string $marker ): void {
+		global $wpdb;
+		$session_id = $this->sut->insert_session( $this->session_row( 'device-1', 'aaaaaaaa-0000-4000-8000-000000000001' ) );
+		$this->sut->insert_movement( $this->movement_row( $session_id, null, null ) );
+		$table = $this->sut->get_movements_table();
+		add_filter(
+			'query',
+			fn( $query ) => false !== strpos( $query, $marker ) ? str_replace( "FROM $table", "FROM {$table}_missing", $query ) : $query
+		);
+
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$this->expectException( RuntimeException::class );
+			if ( 'SUM(amount)' === $marker ) {
+				$this->sut->get_movement_sums( array( $session_id ) );
+			} else {
+				$this->sut->query_movements( $session_id, 1, 10 );
+			}
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
+	}
+
+	/**
 	 * @testdox Should close only an open session at the expected revision and release the device.
 	 */
 	public function test_close_session_checks_status_and_revision(): void {
