@@ -351,7 +351,7 @@ const entries = {
 
 		// Blocks
 		'product-image-gallery':
-			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
+			'./assets/js/blocks/product-elements-blocks/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
 	},
