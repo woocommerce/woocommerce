@@ -1002,16 +1002,19 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox show_shipping() in the classic cart still requires an address field whose hidden flag is not exactly true.
 	 *
-	 * @testWith [ "yes" ]
-	 *           [ 1 ]
+	 * @testWith [ "postcode", "yes" ]
+	 *           [ "postcode", 1 ]
+	 *           [ "state", "yes" ]
+	 *           [ "state", 1 ]
 	 *
-	 * @param mixed $hidden Hidden flag the locale sets on the postcode.
+	 * @param string $field  Address field the locale flags as hidden.
+	 * @param mixed  $hidden Hidden flag the locale sets on the field.
 	 */
-	public function test_show_shipping_requires_a_field_whose_hidden_flag_is_not_exactly_true( $hidden ): void {
-		$this->hide_us_address_field_in_locale( 'postcode', $hidden );
-		$this->add_product_for_a_us_address_missing( 'postcode' );
+	public function test_show_shipping_requires_a_field_whose_hidden_flag_is_not_exactly_true( string $field, $hidden ): void {
+		$this->hide_us_address_field_in_locale( $field, $hidden );
+		$this->add_product_for_a_us_address_missing( $field );
 
-		$this->assertFalse( WC()->cart->show_shipping(), 'The classic checkout only treats hidden => true as hidden, so the postcode stays required.' );
+		$this->assertFalse( WC()->cart->show_shipping(), "The classic checkout only treats hidden => true as hidden, so the {$field} stays required." );
 	}
 
 	/**
