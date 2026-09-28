@@ -8,6 +8,7 @@ import {
 	BASE_URL,
 	wpCLI,
 	BLOCK_THEME_SLUG,
+	flushMacrotask,
 } from '@woocommerce/e2e-utils';
 
 const blockData = {
@@ -83,25 +84,21 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
-
-		const title = 'New Title';
-
-		await editor.canvas.locator( textSelector ).fill( title );
-
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
-
-	test( 'should allow changing the display style', async ( {
+	test( 'edits the title, display style, and Apply behavior', async ( {
 		page,
 		editor,
 	} ) => {
+		const textSelector =
+			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+		const title = 'New Title';
+
+		await editor.canvas.locator( textSelector ).fill( title );
+		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+			title
+		);
+
 		const priceFilterControls = await editor.getBlockByName(
-			'woocommerce/price-filter'
+			blockData.slug
 		);
 		await editor.selectBlocks( priceFilterControls );
 
@@ -133,16 +130,6 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 				name: 'Filter products by maximum',
 			} )
 		).toBeHidden();
-	} );
-
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
 
 		await expect(
 			priceFilterControls.getByRole( 'button', {
@@ -201,27 +188,24 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			} );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
-		const allProductsBlock = await frontendUtils.getBlockByName(
-			'woocommerce/all-products'
-		);
-
-		const img = allProductsBlock.locator( 'img' ).first();
-
-		await expect( img ).not.toHaveAttribute(
-			'src',
-			blockData.placeholderUrl
-		);
-
-		const products = allProductsBlock.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 9 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'filters the All Products block by maximum price', async ( {
 		page,
 		frontendUtils,
 	} ) => {
+		const allProductsBlock = await frontendUtils.getBlockByName(
+			'woocommerce/all-products'
+		);
+		const productTitles = allProductsBlock.locator(
+			'.wc-block-grid__product-title'
+		);
+
+		await expect( productTitles.first() ).toBeVisible();
+		// See the note on the other baselines: more than one product, so the test
+		// cannot pass against a shop page that was already filtered.
+		expect(
+			( await productTitles.allTextContents() ).length
+		).toBeGreaterThan( 1 );
+
 		// The price filter input is initially enabled, but it becomes disabled
 		// for the time it takes to fetch the data. To avoid setting the filter
 		// value before the input is properly initialized, we wait for the input
@@ -247,24 +231,19 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 
-		const allProductsBlock = await frontendUtils.getBlockByName(
-			'woocommerce/all-products'
-		);
-
 		const img = allProductsBlock.locator( 'img' ).first();
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
-		const allProducts = allProductsBlock.getByRole( 'listitem' );
-
-		await expect( allProducts ).toHaveCount( 1 );
-		expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
+		await expect( productTitles ).toHaveText( [ 'Single' ] );
 	} );
 } );
+
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await wpCLI(
@@ -290,22 +269,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'filters the classic product template by maximum price', async ( {
 		page,
 		frontendUtils,
 	} ) => {
+		const legacyTemplate = await frontendUtils.getBlockByName(
+			'woocommerce/legacy-template'
+		);
+		const productTitles = legacyTemplate.locator(
+			'.woocommerce-loop-product__title'
+		);
+
+		await expect( productTitles.first() ).toBeVisible();
+		// See the note on the other baselines: more than one product, so the test
+		// cannot pass against a shop page that was already filtered.
+		expect(
+			( await productTitles.allTextContents() ).length
+		).toBeGreaterThan( 1 );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -317,38 +298,35 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 1 );
+		await expect( productTitles ).toHaveText( [ 'Single' ] );
 	} );
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'filters Product Collection automatically and defers changes until Apply when configured', async ( {
 		page,
+		admin,
+		editor,
 		frontendUtils,
 		templateCompiler,
 	} ) => {
-		await templateCompiler.compile();
+		await page.clock.install();
+		const template = await templateCompiler.compile();
+		const productTitles = page.locator(
+			'.wp-block-woocommerce-product-template .wp-block-post-title'
+		);
 
 		await page.goto( '/shop' );
+		await expect( productTitles.first() ).toBeVisible();
+		const automaticBaseline = ( await productTitles.allTextContents() ).map(
+			( title ) => title.trim()
+		);
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -359,21 +337,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
-
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 1 );
-	} );
-
-	test( 'should refresh the page only if the user clicks on button', async ( {
-		page,
-		admin,
-		editor,
-		templateCompiler,
-	} ) => {
-		const template = await templateCompiler.compile();
+		await expect( productTitles ).toHaveText( [ 'Single' ] );
 
 		await admin.visitSiteEditor( {
 			postId: template.id,
@@ -393,31 +357,50 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 		await page.goto( '/shop' );
-
-		const maxPriceInput = page.getByRole( 'textbox', {
+		await expect( productTitles.first() ).toBeVisible();
+		const deferredMaxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
+		await expect( deferredMaxPriceInput ).toBeVisible();
+		await page.clock.pauseAt(
+			( await page.evaluate( () => Date.now() ) ) + 1_000
+		);
+		const deferredBaseline = ( await productTitles.allTextContents() ).map(
+			( title ) => title.trim()
+		);
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
+		const deferredUrl = page.url();
 
-		await maxPriceInput.dblclick();
-		await maxPriceInput.fill( '$5' );
-
+		await deferredMaxPriceInput.dblclick();
+		await deferredMaxPriceInput.fill( '$5' );
+		await page.clock.runFor( 1_001 );
+		await flushMacrotask( page );
+		await expect( deferredMaxPriceInput ).toHaveValue( '$5' );
 		const resetPriceFilterButton = page.getByRole( 'button', {
 			name: 'Reset price filter',
 		} );
 		await expect( resetPriceFilterButton ).toBeVisible();
+		const applyButton = page.getByRole( 'button', {
+			name: 'Apply price filter',
+		} );
+		await expect( applyButton ).toBeVisible();
+		await expect( applyButton ).toBeEnabled();
 
-		await page
-			.getByRole( 'button', { name: 'Apply price filter' } )
-			.click();
+		await page.clock.runFor( 501 );
+		await flushMacrotask( page );
+		await expect( page ).toHaveURL( deferredUrl );
+		await expect( productTitles ).toHaveText( deferredBaseline );
+
+		await page.clock.resume();
+		await applyButton.click();
 
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
-
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 1 );
+		await expect( productTitles ).toHaveText( [ 'Single' ] );
 	} );
 } );

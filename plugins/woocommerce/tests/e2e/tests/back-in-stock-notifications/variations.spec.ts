@@ -6,6 +6,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_EMAIL_ELEMENTS,
 	BIS_EMAIL_LINKS,
+	BIS_FEATURE_OPTION,
 	bisEmailBody,
 	bisEmailSubject,
 	bisFormLocator,
@@ -24,15 +25,24 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — variable products and variations',
-	{ tag: [ tags.SERVICES ] },
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
-			await resetBISOptions( request, baseURL! );
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
 		} );
 
 		test.describe( 'Single opt-in', () => {
@@ -55,12 +65,7 @@ test.describe(
 
 				// Before a variation is picked the form is rendered but
 				// hidden, and still points at the parent product.
-				//
-				// Asserted on the `hidden` class rather than on visibility:
-				// that class is the contract `back-in-stock-form.js` drives,
-				// while whether it actually hides the form depends on the
-				// theme's stylesheet.
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 				await expect( targetProduct ).toHaveValue(
 					String( variableProduct.id )
 				);
@@ -71,7 +76,7 @@ test.describe(
 					variableProduct.outOfStockVariation
 				);
 
-				await expect( form ).not.toContainClass( 'hidden' );
+				await expect( form ).toBeVisible();
 				await expect(
 					form.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
@@ -88,7 +93,7 @@ test.describe(
 					variableProduct.inStockVariation!
 				);
 
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 			} );
 
 			test( 'signing up for an out-of-stock variation confirms the variation by name', async ( {

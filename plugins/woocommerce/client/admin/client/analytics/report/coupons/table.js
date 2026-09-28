@@ -195,7 +195,9 @@ class CouponsReportTable extends Component {
 	}
 
 	getCouponType( discountType ) {
+		// Extension types use their wc_get_coupon_types() label; core types keep the shorter labels below.
 		const couponTypes = {
+			...getAdminSetting( 'couponTypes', {} ),
 			percent: __( 'Percentage', 'woocommerce' ),
 			fixed_cart: __( 'Fixed cart', 'woocommerce' ),
 			fixed_product: __( 'Fixed product', 'woocommerce' ),

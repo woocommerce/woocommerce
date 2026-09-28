@@ -668,15 +668,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
 			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
-			<div style="
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 12px;
-			height: 40px;
-			width: 100%;
-			">
-				<h3> <?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?>  </h3>
+			<div class="woocommerce-email-listing-placeholder" role="status">
+				<p><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></p>
 			</div>
 		</div>
 		<div>

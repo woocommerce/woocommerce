@@ -283,6 +283,48 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Feature definition initialization is safe when a translation callback checks a feature.
+	 */
+	public function test_feature_definition_initialization_is_reentrant_safe() {
+		$reflection_class = new \ReflectionClass( $this->sut );
+
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $this->sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $this->sut, array() );
+
+		$reentrant_feature_enabled = null;
+		$translation_count         = 0;
+
+		$gettext_filter = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
+			unset( $text, $domain ); // Avoid parameter not used PHPCS errors.
+
+			++$translation_count;
+
+			if ( null === $reentrant_feature_enabled ) {
+				$reentrant_feature_enabled = $this->sut->feature_is_enabled( 'order_withdrawal' );
+			}
+
+			return $translation;
+		};
+
+		add_filter( 'gettext', $gettext_filter, 10, 3 );
+
+		try {
+			$this->sut->get_features( true, false );
+		} finally {
+			remove_filter( 'gettext', $gettext_filter, 10 );
+		}
+
+		$this->assertFalse( $reentrant_feature_enabled );
+		$this->assertGreaterThan( 0, $translation_count );
+		$this->assertNotNull( $this->sut->get_feature_definition( 'order_withdrawal' ) );
+	}
+
+	/**
 	 * @testdox 'change_feature_enable' does nothing and returns false for an invalid feature id.
 	 */
 	public function test_change_feature_enable_for_non_existing_feature() {
@@ -319,6 +361,53 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$result = $this->sut->feature_is_enabled( 'mature1' );
 		$this->assertEquals( $expected_new_enabled, $result );
+	}
+
+	/**
+	 * @testdox The Block Email Editor setting is visible and persists enablement.
+	 */
+	public function test_block_email_editor_setting_is_visible_and_persists_enablement(): void {
+		$feature_option_name = 'woocommerce_feature_block_email_editor_enabled';
+
+		// setUp() registers this class's own dummy features on this hook. Detach them so the
+		// real controller below sees only the built-in definitions. _restore_hooks() puts the
+		// callback back after the test, the same way the rollback puts the option row back.
+		remove_action( 'woocommerce_register_feature_definitions', array( $this, 'register_dummy_features' ), 11 );
+
+		// `change_feature_enable` reports whether `update_option` wrote anything, so it
+		// returns false when the option already reads `yes`. Start from no option at
+		// all, so the assertion below measures the transition rather than whatever an
+		// earlier test may have committed.
+		delete_option( $feature_option_name );
+
+		$real_sut = new FeaturesController();
+		$real_sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+		$all_settings = $real_sut->add_feature_settings( array(), 'features' );
+		$settings     = array_values(
+			array_filter(
+				$all_settings,
+				function ( $candidate ) use ( $feature_option_name ) {
+					return ( $candidate['id'] ?? null ) === $feature_option_name;
+				}
+			)
+		);
+		$this->assertCount( 1, $settings, 'The Block Email Editor feature should have exactly one settings row.' );
+		$setting = $settings[0];
+
+		$this->assertSame( $feature_option_name, $setting['id'], 'The setting should use the feature enable option.' );
+		$this->assertSame( 'Block Email Editor (alpha)', $setting['title'], 'The setting should use the built-in feature title.' );
+		$this->assertSame( 'checkbox', $setting['type'], 'The setting should render as a checkbox.' );
+		$this->assertSame( 'no', $setting['default'], 'The Block Email Editor feature should be disabled by default.' );
+		$this->assertStringContainsString(
+			'Enable the block-based email editor',
+			$setting['desc'],
+			'The setting should carry the feature description a merchant reads next to the checkbox.'
+		);
+
+		$this->assertTrue( $real_sut->change_feature_enable( 'block_email_editor', true ), 'Enabling the built-in Block Email Editor feature should update its option.' );
+		$this->assertSame( 'yes', get_option( $feature_option_name ), 'Enabling the feature should persist the expected option value.' );
+		$this->assertTrue( $real_sut->feature_is_enabled( 'block_email_editor' ), 'The real feature controller should report the enabled feature as enabled.' );
 	}
 
 	/**

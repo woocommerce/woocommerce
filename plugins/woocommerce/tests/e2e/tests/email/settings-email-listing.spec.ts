@@ -45,6 +45,13 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 
 		await expect( listViewLocator ).toBeVisible();
 
+		// The listing's DataViews styles ship in its lazy chunk. Without them
+		// the table falls back to the browser default (border-collapse:
+		// separate) and renders as plain, unstyled rows.
+		await expect(
+			listViewLocator.locator( '.dataviews-view-table' )
+		).toHaveCSS( 'border-collapse', 'collapse' );
+
 		// Check that "New order" email type exists within the list view
 		await expect( listViewLocator.getByText( /New order/ ) ).toBeVisible();
 
@@ -145,5 +152,35 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		await expect( popup.locator( 'body' ) ).toContainText(
 			'All Rights Reserved'
 		);
+	} );
+
+	test( 'Email listing assets load only where the listing renders', async ( {
+		page,
+		baseURL,
+	} ) => {
+		// The chunk's stylesheet link is its durable footprint: webpack removes
+		// the chunk script element once it has run. On these pages the listing
+		// fill never registers, because its slot element is not rendered, so no
+		// code path can request the chunk at all.
+		const listingAssets = () =>
+			page.locator( 'link[href*="settings-email-listing"]' );
+
+		// Other settings tabs run the same settings-embed script but never
+		// fetch the listing chunk.
+		await setBlockEmailEditorFeatureFlag( baseURL, 'yes' );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=general' );
+		await expect(
+			page.locator( 'script[src*="settings-embed"]' )
+		).toHaveCount( 1 );
+		await expect( listingAssets() ).toHaveCount( 0 );
+
+		// With the block email editor off there is no listing slot, so the
+		// Emails tab does not fetch the chunk either.
+		await setBlockEmailEditorFeatureFlag( baseURL, 'no' );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
+		await expect(
+			page.locator( '#wc_settings_email_listing_slotfill' )
+		).toHaveCount( 0 );
+		await expect( listingAssets() ).toHaveCount( 0 );
 	} );
 } );

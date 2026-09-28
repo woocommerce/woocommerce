@@ -8,11 +8,15 @@ const COUPON_CODE = "SAVE'10";
 const BILLING_EMAIL = "o'brien@example.com";
 
 describe( 'createCheckoutPlaceOrderApi', () => {
-	let $form;
+	let $allNotices;
+	let $checkoutFields;
 	let $couponForm;
+	let $form;
 	let $removeCouponLink;
 	let $termsCheckbox;
 	let $termsRow;
+	let $updateOrderReviewNotices;
+	let $checkoutNotices;
 	let capturedApi;
 	let capturedAjaxRequests;
 	let jQueryMock;
@@ -25,6 +29,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	// Fire a handler that checkout.js delegated off document.body, with `this`
 	// bound to the element that would have matched the selector.
 	let triggerDelegatedBodyEvent;
+	// Fire a handler that checkout.js bound directly on the checkout form, with
+	// `this` bound to the form the way jQuery would.
+	let triggerFormEvent;
 
 	beforeEach( () => {
 		capturedApi = null;
@@ -81,9 +88,24 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			termsChecked = checked;
 		};
 
+		$checkoutFields = {
+			trigger: jest.fn( () => $checkoutFields ),
+		};
+		$allNotices = {
+			remove: jest.fn(),
+		};
+		$updateOrderReviewNotices = {
+			remove: jest.fn(),
+		};
+		$checkoutNotices = {
+			remove: jest.fn(),
+		};
+
 		$form = {
 			addClass: jest.fn( () => $form ),
+			removeClass: jest.fn( () => $form ),
 			block: jest.fn( () => $form ),
+			unblock: jest.fn( () => $form ),
 			data: jest.fn(),
 			is: jest.fn( () => false ),
 			length: 1,
@@ -92,7 +114,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 					return $termsCheckbox;
 				}
 				if ( selector === '.input-text, select, input:checkbox' ) {
-					return { trigger: jest.fn() };
+					return $checkoutFields;
 				}
 				if ( selector === '.woocommerce-invalid:visible' ) {
 					// Visible invalid fields only (e.g. the terms row). Hidden
@@ -130,13 +152,27 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				}
 				return { length: 0, trigger: jest.fn() };
 			} ),
+			prepend: jest.fn(),
 			serialize: jest.fn( () => serializedCheckoutData ),
 			trigger: jest.fn(),
 			triggerHandler: jest.fn( () => true ),
 		};
 
-		// Add methods to $form for checkout.js initialization
-		$form.on = jest.fn( () => $form );
+		// Add methods to $form for checkout.js initialization. Direct bindings
+		// are recorded so a test can fire them; delegated ones are ignored.
+		const formEventHandlers = {};
+		$form.on = jest.fn( ( event, selectorOrHandler ) => {
+			if ( typeof selectorOrHandler === 'function' ) {
+				formEventHandlers[ event ] = selectorOrHandler;
+			}
+			return $form;
+		} );
+		triggerFormEvent = ( event ) => {
+			if ( ! formEventHandlers[ event ] ) {
+				throw new Error( 'No direct ' + event + ' handler on form.checkout' );
+			}
+			return formEventHandlers[ event ].call( $form );
+		};
 		$form.attr = jest.fn( () => $form );
 
 		// Default mock for unhandled selectors - provides all common jQuery methods
@@ -290,6 +326,23 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				return $form;
 			}
 			if (
+				selectorOrCallback ===
+				'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
+			) {
+				return $allNotices;
+			}
+			if (
+				selectorOrCallback ===
+				'.woocommerce-NoticeGroup-updateOrderReview'
+			) {
+				return $updateOrderReviewNotices;
+			}
+			if (
+				selectorOrCallback === '.woocommerce-NoticeGroup-checkout'
+			) {
+				return $checkoutNotices;
+			}
+			if (
 				selectorOrCallback === 'form.checkout_coupon' ||
 				selectorOrCallback === $couponForm
 			) {
@@ -348,6 +401,10 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			return parts.join( '&' ).split( '%20' ).join( '+' );
 		} );
 		jQueryMock.ajaxSetup = jest.fn();
+		jQueryMock.isEmptyObject = jest.fn( ( value ) => {
+			return Object.keys( value ).length === 0;
+		} );
+		jQueryMock.scroll_to_notices = jest.fn();
 
 		global.window.jQuery = jQueryMock;
 		global.window.$ = jQueryMock;
@@ -572,6 +629,248 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( new URLSearchParams( request.data ).get( 'coupon' ) ).toBe(
 				COUPON_CODE
 			);
+		} );
+	} );
+	// update_order_review keeps `result` as the legacy "a notice was rendered" signal, so
+	// notices are rendered for every result and only `has_errors` clears the existing ones,
+	// revalidates the form fields, and scrolls. Responses without the flag fall back to `result`.
+	describe( 'Checkout update notices', () => {
+		beforeEach( () => {
+			jest.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			jest.clearAllTimers();
+			jest.useRealTimers();
+		} );
+
+		const sendCheckoutUpdateResponse = ( response, args ) => {
+			mockBody.trigger( 'update_checkout', [
+				args || { update_shipping_method: false },
+			] );
+			jest.runOnlyPendingTimers();
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'update_order_review' )
+			);
+			expect( request ).toBeDefined();
+
+			request.success( response );
+		};
+
+		test( 'should render successful notices without validating checkout fields', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				has_errors: false,
+				messages:
+					'<div class="woocommerce-message">Coupon applied.</div>',
+			} );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">'
+				)
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Coupon applied.' )
+			);
+			expect( $updateOrderReviewNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should preserve failure notice replacement and field validation', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				has_errors: true,
+				messages:
+					'<ul class="woocommerce-error"><li>Invalid address.</li></ul>',
+			} );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Invalid address.' )
+			);
+			expect( $allNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				1,
+				'validate'
+			);
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				2,
+				'blur'
+			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		test( 'should leave notices and fields unchanged for message-free success', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				has_errors: false,
+				messages: '',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should ignore a non-boolean error flag and use the result', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				has_errors: 'false',
+				messages: '',
+			} );
+
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should keep firing updated_checkout when the shipping method is gone', () => {
+			// The refreshed fragment can drop the method that triggered the update, so
+			// the element the focus restore points at is no longer in the document.
+			expect(
+				document.getElementById( 'shipping_method_0_flat_rate1' )
+			).toBeNull();
+
+			expect( () =>
+				sendCheckoutUpdateResponse(
+					{
+						result: 'success',
+						has_errors: false,
+						messages: '',
+					},
+					{
+						update_shipping_method: false,
+						current_target: {
+							id: 'shipping_method_0_flat_rate1',
+						},
+					}
+				)
+			).not.toThrow();
+
+			expect( mockBody.trigger ).toHaveBeenCalledWith(
+				'updated_checkout',
+				expect.anything()
+			);
+		} );
+
+		test( 'should clear a stale place-order notice when rendering a non-error one', () => {
+			// A failed place order leaves `.woocommerce-NoticeGroup-checkout` on the page.
+			// The next non-error notice supersedes it, but must leave every other notice.
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				has_errors: false,
+				messages:
+					'<div class="woocommerce-message">Coupon applied.</div>',
+			} );
+
+			expect( $checkoutNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Coupon applied.' )
+			);
+		} );
+
+		test( 'should ignore messages on a response that reports no notice', () => {
+			// A third-party callback can answer this endpoint before Core does. Trunk
+			// rendered nothing for a `success` result, so neither do we.
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				messages:
+					'<div class="woocommerce-message">Third-party notice.</div>',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $checkoutNotices.remove ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should fall back to the result when the error flag has nothing to show', () => {
+			// A callback that answers before Core can report an error without carrying the
+			// notice for it. Trunk ignored that response, so acting on the flag alone would
+			// mark every required field invalid with nothing on the page to explain why.
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				has_errors: true,
+				messages: '',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should focus the shipping method that triggered a notice-free update', () => {
+			const shippingInput = document.createElement( 'input' );
+			shippingInput.id = 'shipping_method_0_flat_rate1';
+			document.body.appendChild( shippingInput );
+			const focus = jest.spyOn( shippingInput, 'focus' );
+
+			try {
+				sendCheckoutUpdateResponse(
+					{
+						result: 'success',
+						has_errors: false,
+						messages: '',
+					},
+					{
+						update_shipping_method: false,
+						current_target: { id: shippingInput.id },
+					}
+				);
+
+				expect( focus ).toHaveBeenCalledTimes( 1 );
+			} finally {
+				shippingInput.remove();
+			}
+		} );
+
+		test( 'should treat a response without the error flag as a failure', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				messages:
+					'<ul class="woocommerce-error"><li>Invalid address.</li></ul>',
+			} );
+
+			expect( $allNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				1,
+				'validate'
+			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
+		} );
+	} );
+
+	describe( 'Place order error notices', () => {
+		test( 'should render a failed place order inside the shared notices wrapper', () => {
+			global.window.wc_checkout_params.i18n_checkout_error =
+				'Something went wrong.';
+
+			triggerFormEvent( 'submit' );
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'wc-ajax=checkout' )
+			);
+			expect( request ).toBeDefined();
+
+			request.error( {}, 'error', 'Internal Server Error' );
+
+			expect( $form.prepend ).toHaveBeenCalledTimes( 1 );
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">'
+				)
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Something went wrong.' )
+			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
 } );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show each guest order's billing name in Analytics when orders share an email address.

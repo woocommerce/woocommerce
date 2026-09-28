@@ -467,6 +467,18 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The database update queues the rebuild.
+	 */
+	public function test_database_update_queues_the_rebuild(): void {
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+
+		wc_update_11201_migrate_tax_lookup_order_items();
+
+		$this->assertTrue( $batch_processor->is_enqueued( OrderTaxLookupMigrator::class ), 'The database update should hand the rebuild to the batch processing controller.' );
+	}
+
+	/**
 	 * @testdox The tool is disabled on a store with nothing to rebuild.
 	 */
 	public function test_tool_is_disabled_with_nothing_to_rebuild(): void {

@@ -14,6 +14,12 @@ export interface ProductResponseItemBaseData {
 	value: string;
 	display?: string;
 	/**
+	 * Machine-readable name for the entry, never translated, so it is safe to
+	 * match on. Entity-encoded like every other value here, so a bare `&`
+	 * arrives as `&amp;`. Added in WooCommerce 11.2.0.
+	 */
+	raw_key?: string;
+	/**
 	 * Truthy marks the entry hidden. Always a string: the Store API runs every
 	 * `item_data` value through `wp_kses_post()`, which string-coerces, so a
 	 * boolean set by an extension arrives as `"1"` or `""`. Test it for

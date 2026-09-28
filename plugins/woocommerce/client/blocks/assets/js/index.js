@@ -5,6 +5,7 @@ import '../css/editor.scss';
 import '../css/style.scss';
 import './filters/block-list-block';
 import './filters/get-block-attributes';
+import './filters/hide-incompatible-template-parts';
 import './filters/unregister-block-types';
 import './plugins/shop-page-rendering-mode';
 import './base/components/notice-banner/style.scss';
