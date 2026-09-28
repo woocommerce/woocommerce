@@ -517,11 +517,6 @@ class PushTokensDataStore {
 			$query_args['paged']   = $page;
 			$query_args['orderby'] = 'ID';
 			$query_args['order']   = 'ASC';
-		} else {
-			$query_args['orderby'] = array(
-				'modified' => 'DESC',
-				'ID'       => 'DESC',
-			);
 		}
 
 		if ( null !== $device_uuid ) {
@@ -585,6 +580,17 @@ class PushTokensDataStore {
 					)
 				);
 			}
+		}
+
+		if ( ! $paginate ) {
+			/**
+			 * Sorted on the GMT date because WP_Query can only order by the local
+			 * `post_modified`, which runs backwards across a daylight saving change.
+			 */
+			usort(
+				$tokens,
+				fn ( PushToken $a, PushToken $b ) => array( $b->get_last_confirmed_at_gmt(), $b->get_id() ) <=> array( $a->get_last_confirmed_at_gmt(), $a->get_id() )
+			);
 		}
 
 		$result = $paginate
