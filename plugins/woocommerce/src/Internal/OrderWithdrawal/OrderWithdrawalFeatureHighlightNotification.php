@@ -121,6 +121,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 
 		try {
 			if ( $this->has_note_been_created( self::ENABLED_CREATED_OPTION, self::ENABLED_NOTE_NAME ) ) {
+				$this->dismiss_note( self::NOTE_NAME );
 				return;
 			}
 
@@ -129,6 +130,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 			}
 
 			$this->get_enabled_note()->save();
+			$this->dismiss_note( self::NOTE_NAME );
 		} catch ( Exception $exception ) {
 			delete_option( self::ENABLED_CREATED_OPTION );
 			wc_get_logger()->error(
@@ -138,6 +140,32 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 					'exception' => $exception,
 				)
 			);
+		}
+	}
+
+	/**
+	 * Dismiss notes with the given name.
+	 *
+	 * @param string $note_name Note name stored in the data store.
+	 */
+	private function dismiss_note( string $note_name ): void {
+		/**
+		 * Data store instance.
+		 *
+		 * @var NotesDataStore $data_store
+		 */
+		$data_store = Notes::load_data_store();
+		$note_ids   = $data_store->get_notes_with_name( $note_name );
+
+		foreach ( $note_ids as $note_id ) {
+			$note = Notes::get_note( $note_id );
+
+			if ( ! $note instanceof Note || Note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
+				continue;
+			}
+
+			$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
+			$note->save();
 		}
 	}
 

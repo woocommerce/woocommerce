@@ -156,6 +156,23 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Should dismiss the feature highlight notification when the enabled notification is created.
+	 */
+	public function test_possibly_add_enabled_note_dismisses_feature_highlight_notification(): void {
+		$this->sut->possibly_add_note();
+
+		$this->sut->possibly_add_enabled_note( 'order_withdrawal', true );
+
+		$feature_highlight_note = Notes::get_note_by_name( OrderWithdrawalFeatureHighlightNotification::NOTE_NAME );
+		$enabled_note           = Notes::get_note_by_name( OrderWithdrawalFeatureHighlightNotification::ENABLED_NOTE_NAME );
+
+		$this->assertInstanceOf( Note::class, $feature_highlight_note, 'The feature highlight notification should exist.' );
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_ACTIONED, $feature_highlight_note->get_status(), 'The feature highlight notification should be dismissed.' );
+		$this->assertInstanceOf( Note::class, $enabled_note, 'The enabled notification should be created.' );
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $enabled_note->get_status(), 'The enabled notification should remain visible.' );
+	}
+
+	/**
 	 * @testdox Should not add the enabled notification for unrelated or disabled features.
 	 * @testWith ["order_withdrawal", false]
 	 *           ["other_feature", true]
