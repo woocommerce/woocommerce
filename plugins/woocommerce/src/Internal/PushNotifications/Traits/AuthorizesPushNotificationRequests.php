@@ -101,7 +101,7 @@ trait AuthorizesPushNotificationRequests {
 	 *
 	 * @since 11.3.0
 	 */
-	public function authorize_wpcom_or_allowed_user_while_enabled( WP_REST_Request $request ) {
+	public function authorize_wpcom_always_or_push_user_when_enabled( WP_REST_Request $request ) {
 		if ( ! $this->is_signed_with_blog_token() && ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return new WP_Error(
 				'rest_no_route',
