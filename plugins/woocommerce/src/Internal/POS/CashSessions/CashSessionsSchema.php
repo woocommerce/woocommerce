@@ -5,6 +5,12 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\CashMovementDirection;
+use Automattic\WooCommerce\Enums\CashMovementType;
+use Automattic\WooCommerce\Enums\CashSessionStatus;
+use Automattic\WooCommerce\Enums\DrawerEventReason;
+use Automattic\WooCommerce\Enums\DrawerEventType;
+
 /**
  * Route arguments, response schemas and response formatting for the cash sessions REST API.
  *
@@ -22,7 +28,7 @@ class CashSessionsSchema {
 	/**
 	 * UUID pattern in either case; the WordPress "uuid" format only accepts lowercase, and iOS sends uppercase.
 	 */
-	private const UUID_PATTERN = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
+	private const UUID_PATTERN = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z';
 
 	/**
 	 * Arguments for listing sessions.
@@ -45,7 +51,7 @@ class CashSessionsSchema {
 				'status'    => array(
 					'description' => __( 'Only sessions with this status.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => CashSessionStatus::get_all(),
+					'enum'        => array( CashSessionStatus::OPEN, CashSessionStatus::CLOSED ),
 				),
 			),
 			$this->get_pagination_args()
@@ -141,13 +147,13 @@ class CashSessionsSchema {
 			'type'           => array(
 				'description' => __( 'Drawer event type. open_requested is only the command; opened needs hardware feedback.', 'woocommerce' ),
 				'type'        => 'string',
-				'enum'        => DrawerEventType::get_all(),
+				'enum'        => array( DrawerEventType::OPEN_REQUESTED, DrawerEventType::OPENED, DrawerEventType::OPEN_FAILED ),
 				'required'    => true,
 			),
 			'reason'         => array(
 				'description' => __( 'Why the drawer was opened.', 'woocommerce' ),
 				'type'        => 'string',
-				'enum'        => DrawerEventReason::get_all(),
+				'enum'        => array( DrawerEventReason::CASH_SALE, DrawerEventReason::CASH_REFUND, DrawerEventReason::NO_SALE, DrawerEventReason::TEST, DrawerEventReason::PAID_IN, DrawerEventReason::PAID_OUT, DrawerEventReason::COUNT, DrawerEventReason::UNKNOWN ),
 				'required'    => true,
 			),
 			'occurred_at'    => $this->timestamp_arg( __( 'When the event happened on the device.', 'woocommerce' ), true ),
@@ -176,6 +182,8 @@ class CashSessionsSchema {
 				'description' => __( 'Current page.', 'woocommerce' ),
 				'type'        => 'integer',
 				'minimum'     => 1,
+				// The draft has no page cap; keep offsets safe even on 32-bit PHP at 100 items per page.
+				'maximum'     => 1000000,
 				'default'     => 1,
 			),
 			'per_page' => array(
@@ -205,7 +213,7 @@ class CashSessionsSchema {
 				'drawer_id'          => array( 'type' => array( 'string', 'null' ) ),
 				'status'             => array(
 					'type' => 'string',
-					'enum' => CashSessionStatus::get_all(),
+					'enum' => array( CashSessionStatus::OPEN, CashSessionStatus::CLOSED ),
 				),
 				'revision'           => array( 'type' => 'integer' ),
 				'currency'           => array( 'type' => 'string' ),
@@ -244,11 +252,11 @@ class CashSessionsSchema {
 				'session_id'       => array( 'type' => 'integer' ),
 				'type'             => array(
 					'type' => 'string',
-					'enum' => CashMovementType::get_all(),
+					'enum' => array( CashMovementType::OPENING_FLOAT, CashMovementType::CASH_SALE, CashMovementType::CASH_REFUND, CashMovementType::PAID_IN, CashMovementType::PAID_OUT ),
 				),
 				'direction'        => array(
 					'type' => 'string',
-					'enum' => array( 'in', 'out' ),
+					'enum' => array( CashMovementDirection::IN, CashMovementDirection::OUT ),
 				),
 				'amount'           => array( 'type' => 'string' ),
 				'reason'           => array( 'type' => 'string' ),
@@ -270,7 +278,7 @@ class CashSessionsSchema {
 	 * @return array<string, mixed>
 	 */
 	public function get_drawer_event_schema(): array {
-		$nullable_id = array( 'type' => array( 'integer', 'null' ) );
+		$optional_id = array( 'type' => 'integer' );
 		return $this->object_schema(
 			'pos_cash_drawer_event',
 			array(
@@ -279,17 +287,17 @@ class CashSessionsSchema {
 				'request_id'       => array( 'type' => 'string' ),
 				'type'             => array(
 					'type' => 'string',
-					'enum' => DrawerEventType::get_all(),
+					'enum' => array( DrawerEventType::OPEN_REQUESTED, DrawerEventType::OPENED, DrawerEventType::OPEN_FAILED ),
 				),
 				'reason'           => array(
 					'type' => 'string',
-					'enum' => DrawerEventReason::get_all(),
+					'enum' => array( DrawerEventReason::CASH_SALE, DrawerEventReason::CASH_REFUND, DrawerEventReason::NO_SALE, DrawerEventReason::TEST, DrawerEventReason::PAID_IN, DrawerEventReason::PAID_OUT, DrawerEventReason::COUNT, DrawerEventReason::UNKNOWN ),
 				),
 				'drawer_id'        => array( 'type' => 'string' ),
-				'order_id'         => $nullable_id,
-				'refund_id'        => $nullable_id,
-				'movement_id'      => $nullable_id,
-				'correlation_id'   => array( 'type' => array( 'string', 'null' ) ),
+				'order_id'         => $optional_id,
+				'refund_id'        => $optional_id,
+				'movement_id'      => $optional_id,
+				'correlation_id'   => array( 'type' => 'string' ),
 				'occurred_at'      => array( 'type' => 'string' ),
 				'created_by'       => array( 'type' => 'integer' ),
 				'created_by_name'  => array( 'type' => 'string' ),
@@ -357,7 +365,7 @@ class CashSessionsSchema {
 			'id'               => (int) $row['id'],
 			'session_id'       => (int) $row['session_id'],
 			'type'             => (string) $row['type'],
-			'direction'        => $outgoing ? 'out' : 'in',
+			'direction'        => $outgoing ? CashMovementDirection::OUT : CashMovementDirection::IN,
 			'amount'           => CashMoney::format( (int) $row['amount'], $precision ),
 			'reason'           => (string) $row['reason'],
 			'order_id'         => null === $row['order_id'] ? null : (int) $row['order_id'],
@@ -380,21 +388,25 @@ class CashSessionsSchema {
 	public function format_drawer_event( array $row ): array {
 		$nullable_int = fn( $value ) => null === $value ? null : (int) $value;
 
-		return array(
-			'id'               => (int) $row['id'],
-			'session_id'       => (int) $row['session_id'],
-			'request_id'       => (string) $row['request_id'],
-			'type'             => (string) $row['type'],
-			'reason'           => (string) $row['reason'],
-			'drawer_id'        => (string) $row['drawer_name'],
-			'order_id'         => $nullable_int( $row['order_id'] ),
-			'refund_id'        => $nullable_int( $row['refund_id'] ),
-			'movement_id'      => $nullable_int( $row['movement_id'] ),
-			'correlation_id'   => null === $row['correlation_id'] ? null : (string) $row['correlation_id'],
-			'occurred_at'      => CashTimestamp::format( (string) $row['occurred_at_gmt'] ),
-			'created_by'       => (int) $row['created_by'],
-			'created_by_name'  => (string) $row['created_by_name'],
-			'date_created_gmt' => CashTimestamp::format( (string) $row['date_created_gmt'] ),
+		// Optional references are omitted, as required by the draft OpenAPI DrawerEvent schema.
+		return array_filter(
+			array(
+				'id'               => (int) $row['id'],
+				'session_id'       => (int) $row['session_id'],
+				'request_id'       => (string) $row['request_id'],
+				'type'             => (string) $row['type'],
+				'reason'           => (string) $row['reason'],
+				'drawer_id'        => (string) $row['drawer_name'],
+				'order_id'         => $nullable_int( $row['order_id'] ),
+				'refund_id'        => $nullable_int( $row['refund_id'] ),
+				'movement_id'      => $nullable_int( $row['movement_id'] ),
+				'correlation_id'   => null === $row['correlation_id'] ? null : (string) $row['correlation_id'],
+				'occurred_at'      => CashTimestamp::format( (string) $row['occurred_at_gmt'] ),
+				'created_by'       => (int) $row['created_by'],
+				'created_by_name'  => (string) $row['created_by_name'],
+				'date_created_gmt' => CashTimestamp::format( (string) $row['date_created_gmt'] ),
+			),
+			static fn( $value ) => null !== $value
 		);
 	}
 
@@ -429,7 +441,7 @@ class CashSessionsSchema {
 	}
 
 	/**
-	 * Drawer name argument. Length is checked after trimming by DrawerName.
+	 * Drawer name argument. Length is checked after sanitization by DrawerName.
 	 *
 	 * @return array<string, mixed>
 	 */

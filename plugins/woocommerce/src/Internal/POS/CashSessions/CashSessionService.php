@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\CashMovementType;
+use Automattic\WooCommerce\Enums\CashSessionStatus;
+
 // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exceptions become REST error data, never HTML output.
 
 use InvalidArgumentException;
@@ -89,8 +92,8 @@ class CashSessionService {
 	 * @throws Throwable Rethrown after rolling back.
 	 */
 	public function open_session( array $params ): array {
-		$request_id = strtolower( (string) $params['request_id'] );
-		$device_id  = (string) $params['device_id'];
+		$request_id = $this->normalize_uuid( (string) $params['request_id'] );
+		$device_id  = $this->normalize_device( (string) $params['device_id'] );
 		$drawer     = isset( $params['drawer_id'] ) ? $this->normalize_drawer( (string) $params['drawer_id'] ) : null;
 		$drawer_key = null === $drawer ? null : $this->drawer_key( $drawer );
 		$hash       = self::payload_hash(
@@ -205,7 +208,7 @@ class CashSessionService {
 			$query['opened_by'] = get_current_user_id();
 		}
 		if ( isset( $filters['device_id'] ) ) {
-			$query['device_id'] = (string) $filters['device_id'];
+			$query['device_id'] = $this->normalize_device( (string) $filters['device_id'] );
 		}
 		if ( isset( $filters['drawer_id'] ) ) {
 			$query['drawer_key'] = $this->drawer_key( $this->normalize_drawer( (string) $filters['drawer_id'] ) );
@@ -234,7 +237,7 @@ class CashSessionService {
 	 * @throws Throwable Rethrown after rolling back.
 	 */
 	public function close_session( int $session_id, array $params ): array {
-		$request_id        = strtolower( (string) $params['request_id'] );
+		$request_id        = $this->normalize_uuid( (string) $params['request_id'] );
 		$expected_revision = (int) $params['expected_revision'];
 		$note              = sanitize_textarea_field( (string) ( $params['note'] ?? '' ) );
 		$hash              = self::payload_hash(
@@ -328,7 +331,7 @@ class CashSessionService {
 	 * @throws Throwable Rethrown after rolling back.
 	 */
 	public function record_movement( int $session_id, array $params ): array {
-		$request_id = strtolower( (string) $params['request_id'] );
+		$request_id = $this->normalize_uuid( (string) $params['request_id'] );
 		$type       = (string) $params['type'];
 		$session    = $this->data_store->get_session( $session_id );
 		if ( null === $session ) {
@@ -438,7 +441,7 @@ class CashSessionService {
 		$session = $this->get_session_row( $session_id );
 		$this->check_session_access( $session );
 
-		$request_id  = strtolower( (string) $params['request_id'] );
+		$request_id  = $this->normalize_uuid( (string) $params['request_id'] );
 		$drawer      = isset( $params['drawer_id'] ) ? $this->normalize_drawer( (string) $params['drawer_id'] ) : null;
 		$occurred_at = $this->parse_timestamp( (string) $params['occurred_at'] );
 		$references  = array(
@@ -446,7 +449,7 @@ class CashSessionService {
 			'refund_id'   => isset( $params['refund_id'] ) ? (int) $params['refund_id'] : null,
 			'movement_id' => isset( $params['movement_id'] ) ? (int) $params['movement_id'] : null,
 		);
-		$correlation = isset( $params['correlation_id'] ) ? strtolower( (string) $params['correlation_id'] ) : null;
+		$correlation = isset( $params['correlation_id'] ) ? $this->normalize_uuid( (string) $params['correlation_id'] ) : null;
 		$hash        = self::payload_hash(
 			array_merge(
 				$references,
@@ -567,7 +570,7 @@ class CashSessionService {
 	 */
 	public static function compute_totals( array $sums ): array {
 		$totals = array();
-		foreach ( CashMovementType::get_all() as $type ) {
+		foreach ( array( CashMovementType::OPENING_FLOAT, CashMovementType::CASH_SALE, CashMovementType::CASH_REFUND, CashMovementType::PAID_IN, CashMovementType::PAID_OUT ) as $type ) {
 			$totals[ $type ] = (int) ( $sums[ $type ] ?? 0 );
 		}
 
@@ -978,6 +981,20 @@ class CashSessionService {
 	}
 
 	/**
+	 * Validate a UUID before lookup or storage and normalize its case.
+	 *
+	 * @param string $value Client UUID.
+	 * @return string
+	 * @throws CashSessionException When the UUID is malformed.
+	 */
+	private function normalize_uuid( string $value ): string {
+		if ( ! preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iD', $value ) ) {
+			throw CashSessionException::invalid( 'rest_invalid_param', __( 'The request or correlation ID must be a valid UUID.', 'woocommerce' ) );
+		}
+		return strtolower( $value );
+	}
+
+	/**
 	 * Parse a client amount at a precision.
 	 *
 	 * @param string $value     Decimal string.
@@ -989,8 +1006,10 @@ class CashSessionService {
 	private function parse_amount( string $value, int $precision, int $max = CashMoney::MAX_AMOUNT_MINOR_UNITS ): int {
 		try {
 			return CashMoney::parse( $value, $precision, $max );
-		} catch ( InvalidArgumentException | OverflowException $e ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', $e->getMessage() );
+		} catch ( OverflowException $e ) {
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'The amount is too large.', 'woocommerce' ) );
+		} catch ( InvalidArgumentException $e ) {
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'Enter a nonnegative amount with no more decimal places than the currency allows.', 'woocommerce' ) );
 		}
 	}
 
@@ -1005,7 +1024,7 @@ class CashSessionService {
 		try {
 			return CashMoney::canonical( $value );
 		} catch ( InvalidArgumentException $e ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', $e->getMessage() );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_amount', __( 'The amount must be a nonnegative decimal string such as "10.50".', 'woocommerce' ) );
 		}
 	}
 
@@ -1020,7 +1039,7 @@ class CashSessionService {
 		try {
 			return CashTimestamp::to_gmt( $value );
 		} catch ( InvalidArgumentException $e ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_timestamp', $e->getMessage() );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_timestamp', __( 'Enter a valid RFC 3339 date and time with an explicit offset, such as "2026-09-25T12:32:10Z".', 'woocommerce' ) );
 		}
 	}
 
@@ -1044,6 +1063,21 @@ class CashSessionService {
 	}
 
 	/**
+	 * Sanitize a device identifier before hashing, storage or filtering.
+	 *
+	 * @param string $value Device identifier.
+	 * @return string
+	 * @throws CashSessionException When the sanitized identifier is empty or too long.
+	 */
+	private function normalize_device( string $value ): string {
+		$value = trim( (string) preg_replace( '/[\x00-\x1F\x7F]/', '', sanitize_text_field( $value ) ) );
+		if ( ! preg_match( '/^.{1,128}$/uD', $value ) ) {
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_device', __( 'The device ID must contain between 1 and 128 characters.', 'woocommerce' ) );
+		}
+		return $value;
+	}
+
+	/**
 	 * Normalize a drawer name.
 	 *
 	 * @param string $value Drawer name.
@@ -1054,7 +1088,7 @@ class CashSessionService {
 		try {
 			return DrawerName::normalize( $value );
 		} catch ( InvalidArgumentException $e ) {
-			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_drawer', $e->getMessage() );
+			throw CashSessionException::invalid( 'woocommerce_rest_cash_invalid_drawer', __( 'Enter a nonblank drawer name of up to 128 valid UTF-8 characters.', 'woocommerce' ) );
 		}
 	}
 

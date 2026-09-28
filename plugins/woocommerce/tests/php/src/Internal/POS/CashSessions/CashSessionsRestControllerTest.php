@@ -72,6 +72,123 @@ class CashSessionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit absent optional drawer event references in creation, replay and list responses.
+	 */
+	public function test_drawer_event_omits_absent_references(): void {
+		$session_id = $this->open_session( array( 'drawer_id' => 'Front counter' ) )->get_data()['id'];
+		$params     = array(
+			'request_id'  => wp_generate_uuid4(),
+			'occurred_at' => self::device_time( time() ),
+		);
+		$created    = $this->record_drawer_event( $session_id, $params );
+		$replayed   = $this->record_drawer_event( $session_id, $params );
+		$listed     = $this->request( 'GET', self::BASE . "/$session_id/drawer-events" );
+
+		$this->assertSame( 201, $created->get_status() );
+		$this->assertSame( 200, $replayed->get_status() );
+		$this->assertSame( $created->get_data(), $replayed->get_data() );
+		$this->assertSame( array( $created->get_data() ), $listed->get_data() );
+		foreach ( array( 'order_id', 'refund_id', 'movement_id', 'correlation_id' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $created->get_data() );
+		}
+	}
+
+	/**
+	 * @testdox Should return a parameter error for UUIDs ending with a newline.
+	 */
+	public function test_uuid_trailing_newline_returns_400(): void {
+		$this->assert_error( $this->open_session( array( 'request_id' => wp_generate_uuid4() . "\n" ) ), 400, 'rest_invalid_param' );
+		$this->assertSame( 0, $this->count_rows( 'sessions' ) );
+
+		$session_id = $this->open_session( array( 'drawer_id' => 'Front counter' ) )->get_data()['id'];
+		$this->assert_error( $this->record_drawer_event( $session_id, array( 'correlation_id' => wp_generate_uuid4() . "\n" ) ), 400, 'rest_invalid_param' );
+		$this->assertSame( 0, $this->count_rows( 'drawer_events' ) );
+	}
+
+	/**
+	 * @testdox Should reject huge pages on every collection route instead of repeating page one.
+	 *
+	 * @testWith ["9999999999999999999"]
+	 *           ["1000001"]
+	 *
+	 * @param string $page Out-of-range page.
+	 */
+	public function test_rejects_page_overflow( string $page ): void {
+		$session_id = $this->open_session( array( 'drawer_id' => 'Front counter' ) )->get_data()['id'];
+		$this->record_drawer_event( $session_id, array() );
+
+		foreach ( array( self::BASE, self::BASE . "/$session_id/movements", self::BASE . "/$session_id/drawer-events" ) as $route ) {
+			$this->assert_error( $this->request( 'GET', $route, array( 'page' => $page ) ), 400, 'rest_invalid_param' );
+			$last_page = $this->request(
+				'GET',
+				$route,
+				array(
+					'page'     => 1000000,
+					'per_page' => 100,
+				)
+			);
+			$this->assertSame( 200, $last_page->get_status() );
+			$this->assertSame( array(), $last_page->get_data() );
+		}
+	}
+
+	/**
+	 * @testdox Should sanitize device and drawer identifiers consistently for storage, retries, filters and events.
+	 */
+	public function test_sanitizes_device_and_drawer_identifiers(): void {
+		$params = array(
+			'request_id' => wp_generate_uuid4(),
+			'device_id'  => "<b>ipad-1</b>\x01\x7f",
+			'drawer_id'  => "<b>Café</b> counter\x01\x7f",
+		);
+		$opened = $this->open_session( $params );
+		$this->assertSame( 201, $opened->get_status() );
+		$data = $opened->get_data();
+		$this->assertSame( 'ipad-1', $data['device_id'] );
+		$this->assertSame( 'Café counter', $data['drawer_id'] );
+		$this->assertSame( 200, $this->open_session( $params )->get_status() );
+		$this->assertSame(
+			200,
+			$this->open_session(
+				array_merge(
+					$params,
+					array(
+						'device_id' => 'ipad-1',
+						'drawer_id' => 'Café counter',
+					)
+				)
+			)->get_status()
+		);
+
+		$listed = $this->request(
+			'GET',
+			self::BASE,
+			array(
+				'device_id' => $params['device_id'],
+				'drawer_id' => $params['drawer_id'],
+			)
+		);
+		$this->assertSame( array( $data ), $listed->get_data() );
+		$event = $this->record_drawer_event( $data['id'], array( 'drawer_id' => $params['drawer_id'] ) );
+		$this->assertSame( 201, $event->get_status() );
+		$this->assertSame( 'Café counter', $event->get_data()['drawer_id'] );
+	}
+
+	/**
+	 * @testdox Should reject a device identifier that becomes empty after sanitization.
+	 *
+	 * @testWith ["<b></b>"]
+	 *           ["\u0001"]
+	 *           ["   "]
+	 *
+	 * @param string $device_id Unsafe device identifier.
+	 */
+	public function test_rejects_empty_sanitized_device( string $device_id ): void {
+		$this->assert_error( $this->open_session( array( 'device_id' => $device_id ) ), 400, 'woocommerce_rest_cash_invalid_device' );
+		$this->assertSame( 0, $this->count_rows( 'sessions' ) );
+	}
+
+	/**
 	 * @testdox Should run writes inside a transaction.
 	 */
 	public function test_writes_use_a_transaction(): void {

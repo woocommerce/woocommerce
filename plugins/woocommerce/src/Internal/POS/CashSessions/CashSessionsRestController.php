@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\POS\CashSessions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\CashMovementType;
+
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Utilities\StringUtil;
