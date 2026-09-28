@@ -1888,7 +1888,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 *
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
-				$state_enabled = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
 				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
