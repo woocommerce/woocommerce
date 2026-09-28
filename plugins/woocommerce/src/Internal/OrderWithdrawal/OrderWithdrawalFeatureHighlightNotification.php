@@ -22,8 +22,6 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	public const ENABLED_CREATED_OPTION = 'woocommerce_order_withdrawal_enabled_inbox_notification_created';
 
 	private const COMING_SOON_OPTION    = 'woocommerce_coming_soon';
-	private const ENDPOINT_OPTION       = 'woocommerce_myaccount_order_withdrawal_endpoint';
-	private const ENDPOINT_SLUG         = 'withdraw-order';
 	private const FEATURES_SETTINGS_URL = 'admin.php?page=wc-settings&tab=advanced&section=features';
 	private const DOCUMENTATION_URL     = 'https://woocommerce.com/document/customer-order-withdrawal/';
 
@@ -233,7 +231,7 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 * Get the configured public order withdrawal page URL.
 	 */
 	private function get_order_withdrawal_page_url(): string {
-		$endpoint    = (string) get_option( self::ENDPOINT_OPTION, self::ENDPOINT_SLUG );
+		$endpoint    = (string) get_option( OrderWithdrawalController::ENDPOINT_OPTION, OrderWithdrawalController::ENDPOINT_SLUG );
 		$account_url = wc_get_page_permalink( 'myaccount' );
 
 		return wc_get_endpoint_url( $endpoint, '', $account_url ? $account_url : home_url( '/' ) );

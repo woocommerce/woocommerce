@@ -15,10 +15,11 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 final class OrderWithdrawalController implements RegisterHooksInterface {
 
-	private const FEATURE_ID      = 'order_withdrawal';
-	private const ENDPOINT_KEY    = 'order-withdrawal';
-	private const ENDPOINT_SLUG   = 'withdraw-order';
-	private const ENDPOINT_OPTION = 'woocommerce_myaccount_order_withdrawal_endpoint';
+	private const FEATURE_ID   = 'order_withdrawal';
+	private const ENDPOINT_KEY = 'order-withdrawal';
+
+	public const ENDPOINT_SLUG   = 'withdraw-order';
+	public const ENDPOINT_OPTION = 'woocommerce_myaccount_order_withdrawal_endpoint';
 
 	/**
 	 * Form processor.
