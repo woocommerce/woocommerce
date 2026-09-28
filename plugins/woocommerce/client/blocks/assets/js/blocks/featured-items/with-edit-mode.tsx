@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
 import type { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { usePreviewMode } from '@woocommerce/base-hooks';
@@ -141,75 +140,80 @@ export const withEditMode =
 
 		if ( editMode && canEditItem ) {
 			return (
-				<Placeholder
-					{ ...props.blockProps }
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ clsx( props.blockProps.className, className ) }
-				>
-					<HStack alignment="center">
-						{ isDeleted ? (
-							<Icon
-								icon={ info }
-								className="wc-blocks-featured-items__orange-info-icon"
-							/>
-						) : (
-							<Icon icon={ info } />
-						) }
-						<Text>
-							{ isDeleted
-								? getInvalidItemDescription( name )
-								: description }
-						</Text>
-					</HStack>
-					<div className={ `${ className }__selection` }>
-						{ name === BLOCK_NAMES.featuredCategory && (
-							<ProductCategoryControl
-								selected={
-									selectedOptions?.categoryId
-										? [ selectedOptions.categoryId ]
-										: []
-								}
-								onChange={ (
-									value: ProductCategoryResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										categoryId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-								isSingle
-							/>
-						) }
-						{ name === BLOCK_NAMES.featuredProduct && (
-							<ProductControl
-								selected={
-									selectedOptions?.productId
-										? [ selectedOptions.productId ]
-										: []
-								}
-								showVariations
-								onChange={ (
-									value: ProductResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										productId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-							/>
-						) }
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Placeholder>
+				<div { ...props.blockProps }>
+					<Placeholder
+						icon={ <Icon icon={ icon } /> }
+						label={ label }
+						className={ className }
+					>
+						<HStack alignment="center">
+							{ isDeleted ? (
+								<Icon
+									icon={ info }
+									className="wc-blocks-featured-items__orange-info-icon"
+								/>
+							) : (
+								<Icon icon={ info } />
+							) }
+							<Text>
+								{ isDeleted
+									? getInvalidItemDescription( name )
+									: description }
+							</Text>
+						</HStack>
+						<div className={ `${ className }__selection` }>
+							{ name === BLOCK_NAMES.featuredCategory && (
+								<ProductCategoryControl
+									selected={
+										selectedOptions?.categoryId
+											? [ selectedOptions.categoryId ]
+											: []
+									}
+									onChange={ (
+										value: ProductCategoryResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											categoryId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+									isSingle
+								/>
+							) }
+							{ name === BLOCK_NAMES.featuredProduct && (
+								<ProductControl
+									selected={
+										selectedOptions?.productId
+											? [ selectedOptions.productId ]
+											: []
+									}
+									showVariations
+									onChange={ (
+										value: ProductResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											productId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+								/>
+							) }
+							<Button variant="primary" onClick={ onDone }>
+								{ __( 'Done', 'woocommerce' ) }
+							</Button>
+						</div>
+					</Placeholder>
+				</div>
 			);
 		}
 

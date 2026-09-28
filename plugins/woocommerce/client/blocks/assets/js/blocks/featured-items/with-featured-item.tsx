@@ -322,14 +322,15 @@ export const withFeaturedItem =
 		};
 
 		const renderNoItem = () => (
-			<Placeholder
-				{ ...props.blockProps }
-				className={ clsx( props.blockProps.className, className ) }
-				icon={ <Icon icon={ icon } /> }
-				label={ label }
-			>
-				{ isLoading ? <Spinner /> : renderNoItemContent() }
-			</Placeholder>
+			<div { ...props.blockProps }>
+				<Placeholder
+					className={ className }
+					icon={ <Icon icon={ icon } /> }
+					label={ label }
+				>
+					{ isLoading ? <Spinner /> : renderNoItemContent() }
+				</Placeholder>
+			</div>
 		);
 
 		const renderItem = () => {
