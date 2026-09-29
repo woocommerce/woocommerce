@@ -867,39 +867,15 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	}
 
 	/**
-	 * Report contexts that keep counting free orders unless asked otherwise.
-	 *
-	 * A coupon that discounts an order to nothing is the subject of the Coupons
-	 * report, not noise in it: leaving those orders out would remove the record
-	 * of the coupon that created them.
-	 *
-	 * @return array
-	 */
-	protected static function get_free_order_including_contexts() {
-		/**
-		 * Filters the report contexts that include free orders by default.
-		 *
-		 * @since 11.2.0
-		 * @param array $contexts Report context prefixes.
-		 */
-		return apply_filters( 'woocommerce_analytics_free_order_including_contexts', array( 'coupons' ) );
-	}
-
-	/**
 	 * Whether free orders are left out of the report being built.
 	 *
-	 * The store-wide setting applies, except on the reports listed above.
+	 * Applies to every report, in the same way the excluded statuses setting
+	 * does. Nothing is carved out.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return bool
 	 */
 	protected function should_exclude_free_orders( $query_args ) {
-		foreach ( self::get_free_order_including_contexts() as $context ) {
-			if ( 0 === strpos( (string) $this->context, $context ) ) {
-				return false;
-			}
-		}
-
 		$excluded = \WC_Admin_Settings::get_option( 'woocommerce_analytics_excluded_orders', array() );
 
 		return is_array( $excluded ) && in_array( 'zero_total', $excluded, true );

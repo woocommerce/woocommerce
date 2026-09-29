@@ -131,17 +131,11 @@ const baseConfig = {
 				),
 			},
 		],
-		helpText: interpolateComponents( {
-			mixedString: __(
-				'Orders that are completely free are excluded from the totals in your reports. ' +
-					'Net sales are not impacted. Free orders cannot be excluded from ' +
-					'{{strong}}Coupons{{/strong}} reports.',
-				'woocommerce'
-			),
-			components: {
-				strong: <strong />,
-			},
-		} ),
+		helpText: __(
+			'Orders that are completely free are excluded from the totals in your reports. ' +
+				'Net sales are not impacted.',
+			'woocommerce'
+		),
 		defaultValue: [],
 	},
 	woocommerce_actionable_order_statuses: {
