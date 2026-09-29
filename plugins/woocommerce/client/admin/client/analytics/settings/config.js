@@ -133,7 +133,7 @@ const baseConfig = {
 		],
 		helpText: __(
 			'Orders that are completely free are excluded from the totals in your reports. ' +
-				'Net sales are not impacted.',
+				'This mainly affects order counts and average order value.',
 			'woocommerce'
 		),
 		defaultValue: [],
