@@ -1824,9 +1824,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Customs formatting callbacks can change the normalized commodity code.
+	 * @testdox Customs formatting callbacks can change the commodity code before it is validated.
 	 */
-	public function test_customs_formatting_callback_receives_normalized_code(): void {
+	public function test_customs_formatting_callback_can_change_code(): void {
 		$received_code = null;
 		add_filter(
 			'woocommerce_product_importer_formatting_callbacks',
@@ -1844,7 +1844,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-filtered,Customs product,0901%210010\n" );
 
-		$this->assertSame( '0901210010', $received_code, 'Formatting callbacks should receive the validated code without losing digits.' );
+		$this->assertSame( '0901%210010', $received_code, 'Formatting callbacks should receive the raw cell value.' );
 		$this->assertEmpty( $result['failed'], 'A valid formatting callback result should be imported.' );
 		$this->assertCount( 1, $result['imported'], 'The filtered customs row should create one product.' );
 		$this->assertSame( '020110', wc_get_product( $result['imported'][0] )->get_customs_commodity_code( 'edit' ), 'The formatting callback result should still be honored and validated.' );
@@ -1899,50 +1899,34 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Invalid customs rows create no placeholders or terms and do not stop following valid rows.
+	 * @testdox Invalid customs rows are not saved and do not stop following valid rows.
 	 */
-	public function test_invalid_customs_has_no_parser_side_effects(): void {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
-		$result = $this->import_customs_csv(
-			"ID,Type,SKU,Name,Categories,Parent,commodity_code\n424242,simple,customs-invalid,Invalid customs,Rejected customs category,customs-missing-parent,ABC123\n,simple,customs-valid,Valid customs,,,010121\n"
-		);
+	public function test_invalid_customs_row_does_not_stop_import(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-invalid,Invalid customs,ABC123\nsimple,customs-valid,Valid customs,010121\n" );
 
 		$this->assertCount( 1, $result['failed'], 'The invalid row should be reported.' );
 		$this->assertCount( 1, $result['imported'], 'The following valid row should still import.' );
-		$this->assertSame( 0, wc_get_product_id_by_sku( 'customs-invalid' ), 'An invalid row must not create its ID placeholder.' );
-		$this->assertSame( 0, wc_get_product_id_by_sku( 'customs-missing-parent' ), 'An invalid row must not create a parent placeholder.' );
-		$this->assertNull( term_exists( 'Rejected customs category', 'product_cat' ), 'An invalid row must not create taxonomy terms.' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'customs-invalid' ), 'The invalid row must not be saved.' );
 	}
 
 	/**
-	 * @testdox Invalid import filter results are rejected before converting a product into a variation.
-	 * @testWith [false]
-	 *           [true]
-	 *
-	 * @param bool $invalid_shape Whether the filter returns a non-array value.
+	 * @testdox Invalid customs values added by the process item data filter reject the row.
 	 */
-	public function test_filtered_invalid_customs_does_not_convert_product_type( bool $invalid_shape ): void {
+	public function test_filtered_invalid_customs_rejects_row(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Original product' );
 		$product->save();
-		$category_ids = $product->get_category_ids();
 		add_filter(
 			'woocommerce_product_import_process_item_data',
-			static function ( $data ) use ( $invalid_shape ) {
-				if ( $invalid_shape ) {
-					return null;
-				}
-
+			static function ( $data ) {
 				$data['customs_country_of_origin'] = 'XX';
 				return $data;
 			}
 		);
 
-		$result = $this->import_customs_csv( "ID,Type,Name,country_of_origin\n{$product->get_id()},variation,Changed product,US\n", array( 'update_existing' => true ) );
+		$result = $this->import_customs_csv( "ID,Name,country_of_origin\n{$product->get_id()},Changed product,US\n", array( 'update_existing' => true ) );
 
 		$this->assertCount( 1, $result['failed'], 'Invalid filtered customs data should reject the row.' );
-		$this->assertSame( 'product', get_post_type( $product->get_id() ), 'Validation must run before variation conversion writes.' );
-		$this->assertSame( $category_ids, wc_get_product( $product->get_id() )->get_category_ids(), 'The original product categories should remain attached.' );
 		$this->assertSame( 'Original product', wc_get_product( $product->get_id() )->get_name(), 'The original product name should remain unchanged.' );
 	}
 
@@ -1987,8 +1971,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 							'Type'                => 'type',
 							'SKU'                 => 'sku',
 							'Name'                => 'name',
-							'Categories'          => 'category_ids',
-							'Parent'              => 'parent_id',
 							'commodity_code'      => 'customs_commodity_code',
 							'country_of_origin'   => 'customs_country_of_origin',
 							'customs_description' => 'customs_description',

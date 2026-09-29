@@ -56,13 +56,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
-	 * Customs errors keyed by parsed row index.
-	 *
-	 * @var array<int, WP_Error>
-	 */
-	private $customs_validation_errors = array();
-
-	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -752,6 +745,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse a customs field.
+	 *
+	 * Skips wc_clean(), which would drop digits from codes such as "0901%210010" and encode a lone "<".
+	 * The product setters validate the value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string
+	 */
+	public function parse_customs_field( $value ) {
+		return $this->unescape_data( $value );
+	}
+
+	/**
 	 * Parse download file urls, we should allow shortcodes here.
 	 *
 	 * Allow shortcodes if present, otherwise esc_url the value.
@@ -902,8 +911,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'cogs_value'        => array( $this, 'parse_cogs_field' ),
 		);
 
-		// Already normalized by CustomsDataValidator; wc_clean() would encode a lone '<' and drop %xx sequences.
-		$data_formatting['customs_description'] = array( $this, 'parse_skip_field' );
+		foreach ( CustomsDataValidator::FIELDS as $customs_field ) {
+			$data_formatting[ $customs_field ] = array( $this, 'parse_customs_field' );
+		}
 
 		/**
 		 * Match special column names by prefix.
@@ -1172,8 +1182,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			$this->parsing_raw_data_index = $row_index;
 
-			$data       = array();
-			$raw_values = array();
+			$data = array();
 
 			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
 
@@ -1195,27 +1204,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$value = wp_check_invalid_utf8( $value, true );
 				}
 
-				if ( is_string( $value ) && in_array( $mapped_keys[ $id ], CustomsDataValidator::FIELDS, true ) ) {
-					$value = $this->unescape_data( $value );
-				}
-
-				$raw_values[ $id ]           = $value;
-				$data[ $mapped_keys[ $id ] ] = $value;
-			}
-
-			// Parsing other columns can create placeholders and terms before the product is saved.
-			try {
-				$customs_data = CustomsDataValidator::normalize_fields( $data );
-			} catch ( WC_Data_Exception $exception ) {
-				// Keep the invalid customs values so a subclass that processes this stub still fails the row.
-				$stub = array_intersect_key( $data, array_flip( array_merge( array( 'id', 'sku', 'name', 'global_unique_id' ), CustomsDataValidator::FIELDS ) ) );
-				$this->customs_validation_errors[ count( $this->parsed_data ) ] = new WP_Error( $exception->getErrorCode(), $exception->getMessage(), array( 'row' => $this->get_row_id( $stub ) ) );
-				$this->parsed_data[] = $stub;
-				continue;
-			}
-
-			foreach ( $raw_values as $id => $value ) {
-				$value                       = array_key_exists( $mapped_keys[ $id ], $customs_data ) ? (string) $customs_data[ $mapped_keys[ $id ] ] : $value;
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
@@ -1426,17 +1414,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-			if ( isset( $this->customs_validation_errors[ $parsed_data_key ] ) ) {
-				$data['failed'][] = $this->customs_validation_errors[ $parsed_data_key ];
-				++$index;
-
-				if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
-					$this->file_position = $this->file_positions[ $index ];
-					break;
-				}
-				continue;
-			}
-
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
