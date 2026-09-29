@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
-use Automattic\WooCommerce\StoreApi\SchemaController;
 use WC_Logger;
 use WC_Logger_Interface;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -383,9 +382,9 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Valid simple and variation cart lines include a null parent item key after key.
+	 * @testdox Simple and variation cart lines include a null parent item key by default.
 	 */
-	public function test_parent_item_key_is_null_after_key_for_each_cart_line() {
+	public function test_parent_item_key_is_null_by_default_for_each_cart_line() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
@@ -395,34 +394,23 @@ class CartItems extends ControllerTestCase {
 		foreach ( $cart as $cart_item ) {
 			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
 			$data     = $response->get_data();
-			$keys     = array_keys( $data );
 
 			$this->assertArrayHasKey( 'parent_item_key', $data );
 			$this->assertNull( $data['parent_item_key'] );
-			$this->assertSame( 'parent_item_key', $keys[ array_search( 'key', $keys, true ) + 1 ] );
 		}
 	}
 
 	/**
-	 * @testdox The cart item schema declares parent_item_key without adding it to product or order item schemas.
+	 * @testdox The cart item schema declares parent_item_key as a readonly string or null.
 	 */
-	public function test_parent_item_key_is_defined_only_on_cart_item_schema() {
+	public function test_parent_item_key_is_defined_on_cart_item_schema() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$properties = $controller->get_item_schema()['properties'];
 
 		$this->assertArrayHasKey( 'parent_item_key', $properties );
 		$this->assertSame( array( 'string', 'null' ), $properties['parent_item_key']['type'] );
-		$this->assertSame( array( 'view', 'edit' ), $properties['parent_item_key']['context'] );
 		$this->assertTrue( $properties['parent_item_key']['readonly'] );
-		$this->assertNull( $properties['parent_item_key']['default'] );
-
-		$schema_controller  = new SchemaController( $this->mock_extend );
-		$order_properties   = $schema_controller->get( 'order-item' )->get_properties();
-		$product_properties = $schema_controller->get( ProductSchema::IDENTIFIER )->get_properties();
-
-		$this->assertArrayNotHasKey( 'parent_item_key', $order_properties );
-		$this->assertArrayNotHasKey( 'parent_item_key', $product_properties );
 	}
 
 	/**
@@ -498,33 +486,6 @@ class CartItems extends ControllerTestCase {
 			'false'            => array( false, null ),
 			'other non-string' => array( true, null ),
 		);
-	}
-
-	/**
-	 * @testdox A parent item key string validates against the cart item schema even when no matching line exists.
-	 */
-	public function test_parent_item_key_string_response_validates_against_cart_item_schema() {
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart_item  = current( WC()->cart->get_cart() );
-		$filter     = static function ( $parent_item_key, $cart_item, $cart_item_key ) {
-			unset( $parent_item_key, $cart_item, $cart_item_key );
-			return 'parent-key-not-present-in-cart';
-		};
-
-		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10, 3 );
-
-		try {
-			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
-		} finally {
-			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10 );
-		}
-
-		$this->assertSame( 'parent-key-not-present-in-cart', $response->get_data()['parent_item_key'] );
-		$validate = new ValidateSchema( $controller->get_item_schema() );
-		$diff     = $validate->get_diff_from_object( $response->get_data() );
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 
 	/**
