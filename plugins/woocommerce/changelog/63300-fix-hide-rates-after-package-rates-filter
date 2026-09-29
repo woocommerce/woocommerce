@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep paid shipping rates available when an extension removes free shipping and "Hide shipping rates when free shipping is available" is on.

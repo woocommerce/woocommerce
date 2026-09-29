@@ -70,6 +70,55 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox paid rates stay available when a `woocommerce_package_rates` callback removes free shipping.
+	 */
+	public function test_hide_rates_when_free_runs_after_package_rates_filter() {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$shipping_methods_hook = fn () => array( new WC_Shipping_Flat_Rate( 1 ), new WC_Shipping_Free_Shipping( 1 ) );
+		$seen_rate_ids         = array();
+		$remove_free_shipping  = function ( $rates ) use ( &$seen_rate_ids ) {
+			$seen_rate_ids = array_keys( $rates );
+			unset( $rates['free_shipping:1'] );
+			return $rates;
+		};
+
+		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		add_filter( 'woocommerce_package_rates', $remove_free_shipping );
+
+		$result = $this->sut->calculate_shipping_for_package( $this->get_hide_rates_test_package() );
+
+		remove_filter( 'woocommerce_package_rates', $remove_free_shipping );
+		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+
+		$this->assertContains( 'flat_rate:1', $seen_rate_ids, 'The filter should receive paid rates.' );
+		$this->assertSame( array( 'flat_rate:1' ), array_keys( $result['rates'] ) );
+	}
+
+	/**
+	 * @testdox paid rates are still hidden when free shipping survives the `woocommerce_package_rates` filter.
+	 */
+	public function test_hide_rates_when_free_hides_paid_rates_after_filter() {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$shipping_methods_hook = fn () => array( new WC_Shipping_Flat_Rate( 1 ), new WC_Shipping_Free_Shipping( 1 ) );
+		$add_custom_rate       = function ( $rates ) {
+			$rates['custom_rate:1'] = new WC_Shipping_Rate( 'custom_rate:1', 'Custom rate', '3', array(), 'unregistered_method' );
+			return $rates;
+		};
+
+		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		add_filter( 'woocommerce_package_rates', $add_custom_rate );
+
+		$result = $this->sut->calculate_shipping_for_package( $this->get_hide_rates_test_package() );
+
+		remove_filter( 'woocommerce_package_rates', $add_custom_rate );
+		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+
+		$this->assertSame( array( 'free_shipping:1' ), array_keys( $result['rates'] ) );
+	}
+
+	/**
 	 * @testdox package rates filter doesn't cause errors when accessing non-existent rates with arithmetic operations
 	 *
 	 * @dataProvider provide_test_package_rates_filter_error_handling
@@ -364,6 +413,23 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 			'subtotal'      => 10,
 			'total'         => 10,
 			'rates'         => array(),
+		);
+	}
+
+	/**
+	 * Get a package for the hide-rates-when-free tests.
+	 *
+	 * @return array
+	 */
+	private function get_hide_rates_test_package(): array {
+		return array(
+			'contents'      => array(),
+			'contents_cost' => 10,
+			'destination'   => array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '00000',
+			),
 		);
 	}
 
