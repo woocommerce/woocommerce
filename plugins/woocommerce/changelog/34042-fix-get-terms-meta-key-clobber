@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Stop get_terms() from discarding a caller's own term meta filter on product categories.
+Fix product category lists filtered by custom data showing no categories or leaving some out.
