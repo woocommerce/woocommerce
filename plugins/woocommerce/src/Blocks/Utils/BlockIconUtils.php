@@ -45,7 +45,7 @@ final class BlockIconUtils {
 		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
 		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
-		 * Anything invalid, including an empty string, falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
+		 * Anything invalid, including an empty string, falls back to the default. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
 		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
@@ -214,15 +214,15 @@ final class BlockIconUtils {
 	/**
 	 * Checks that a fill or stroke value cannot reference anything outside the icon.
 	 *
-	 * `url()` and `src()` are the only paint syntax that can load or reference a resource, so any color syntax is fine without them.
-	 * Allowing only plain characters rules out CSS escapes and quotes that could disguise either function, and stops declaration injection.
+	 * `url()` and `src()` can load or reference a resource directly, and `var()` can resolve to either from page CSS, so all three are rejected.
+	 * Allowing only plain characters rules out CSS escapes and quotes that could disguise these functions, and stops declaration injection.
 	 *
 	 * @param string $paint Decoded paint value.
 	 * @return bool Whether the value is safe.
 	 */
 	private static function is_safe_paint( string $paint ): bool {
 		return 1 === preg_match( '/\A[a-z0-9#%.,+\/()\x20\t\r\n\f-]+\z/i', $paint )
-			&& 1 !== preg_match( '/(?:url|src)\(/i', $paint );
+			&& 1 !== preg_match( '/(?:url|src|var)\(/i', $paint );
 	}
 
 	/**

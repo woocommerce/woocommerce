@@ -235,7 +235,6 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 				'color-mix'           => 'color-mix(in srgb, red 40%, blue)',
 				'light-dark'          => 'light-dark(#000, #fff)',
 				'relative color'      => 'rgb(from red r g b / 50%)',
-				'CSS variable'        => 'var(--wp--preset--color--primary)',
 				'calc function'       => 'calc(1 + 1)',
 			)
 		);
@@ -272,6 +271,9 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 				'mixed case src'        => 'SrC(https://example.com/icon.svg#shape)',
 				'CSS escaped src'       => 's\\72 c(#shape)',
 				'URL inside a function' => 'color-mix(in srgb, url(#shape), red)',
+				'CSS variable'          => 'var(--wp--preset--color--primary)',
+				'mixed case variable'   => 'VaR(--paint)',
+				'variable in function'  => 'color-mix(in srgb, var(--paint), red)',
 				'quoted value'          => "'red'",
 				'declaration injection' => 'red;stroke:url(https://example.com/icon.svg#shape)',
 			)

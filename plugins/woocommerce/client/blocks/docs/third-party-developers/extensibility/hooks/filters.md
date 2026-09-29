@@ -568,7 +568,7 @@ apply_filters( 'woocommerce_blocks_decorative_icon_svg', string $default_svg, st
 
 ### Description
 
-Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`. Anything invalid, including an empty string, falls back to the default. Fill and stroke accept any CSS color, but not `url()`, `src()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes. Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
+Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`. Anything invalid, including an empty string, falls back to the default. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes. Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 
 ### Parameters
 
