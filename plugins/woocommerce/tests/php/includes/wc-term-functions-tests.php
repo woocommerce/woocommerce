@@ -321,8 +321,9 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @dataProvider provider_term_meta_filter_args
 	 *
 	 * @param array $filter_args The meta filter arguments to pass to get_terms().
+	 * @param array $expected    Names of the expected terms, in order.
 	 */
-	public function test_product_cat_honors_caller_term_meta_filter( array $filter_args ): void {
+	public function test_product_cat_honors_caller_term_meta_filter( array $filter_args, array $expected ): void {
 		$second    = wp_insert_term( 'Category A', 'product_cat' );
 		$first     = wp_insert_term( 'Category B', 'product_cat' );
 		$unmatched = wp_insert_term( 'Category C', 'product_cat' );
@@ -332,6 +333,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
 		add_term_meta( $first['term_id'], 'wc_test_marker', 'yes' );
 		add_term_meta( $second['term_id'], 'wc_test_marker', 'yes' );
+		update_term_meta( $unmatched['term_id'], 'order', 0 );
 		update_term_meta( $first['term_id'], 'order', 1 );
 		update_term_meta( $second['term_id'], 'order', 2 );
 
@@ -340,7 +342,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				array(
 					'taxonomy'   => 'product_cat',
 					'hide_empty' => false,
-					'fields'     => 'ids',
+					'fields'     => 'names',
 					'include'    => array( $second['term_id'], $first['term_id'], $unmatched['term_id'] ),
 				),
 				$filter_args
@@ -348,8 +350,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame(
-			array( (int) $first['term_id'], (int) $second['term_id'] ),
-			array_map( 'intval', $terms ),
+			$expected,
+			$terms,
 			'Only the categories matching the meta filter should be returned, in order meta sequence.'
 		);
 	}
@@ -366,11 +368,13 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				),
+				array( 'Category B', 'Category A' ),
 			),
 			'meta_key only'           => array(
 				array(
 					'meta_key' => 'wc_test_marker', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				),
+				array( 'Category B', 'Category A' ),
 			),
 			'nested meta_query'       => array(
 				array(
@@ -381,6 +385,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 						),
 					),
 				),
+				array( 'Category B', 'Category A' ),
 			),
 			'both forms combined'     => array(
 				array(
@@ -389,11 +394,12 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						array(
 							'key'     => 'order',
-							'value'   => 2,
+							'value'   => 1,
 							'compare' => '<=',
 						),
 					),
 				),
+				array( 'Category B' ),
 			),
 		);
 	}
@@ -416,6 +422,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		add_term_meta( $unordered['term_id'], 'wc_test_flag', 'yes' );
 		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
 		add_term_meta( $second['term_id'], 'wc_test_flag', 'no' );
+		add_term_meta( $second['term_id'], 'wc_test_missing', 'yes' );
 
 		$query = new WP_Term_Query(
 			array_merge(
@@ -475,7 +482,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 					'meta_key'     => 'wc_test_missing', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_compare' => 'NOT EXISTS', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
 				),
-				array( 'Category A', 'Category B', 'Category C' ),
+				array( 'Category A', 'Category B' ),
 			),
 			'compare only, no key'  => array(
 				array( 'meta_compare' => 'EXISTS' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
@@ -494,7 +501,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 						),
 					),
 				),
-				array( 'Category A', 'Category B', 'Category C' ),
+				array( 'Category A', 'Category B' ),
 			),
 		);
 	}
