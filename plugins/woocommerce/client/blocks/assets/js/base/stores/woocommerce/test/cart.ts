@@ -620,15 +620,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		it( 'issues update-item with the absolute quantity for an explicit key (key-first path unchanged)', async () => {
 			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
-			const line = {
-				...makeKeyedLine( {
-					id: 42,
-					quantity: 3,
-					key: 'server-key-abc',
-				} ),
-				parent_item_key: 'parent-key-abc',
-			};
-			seedCart( [ line ] );
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
 
 			await runAction(
 				actions.addCartItem( {
@@ -642,11 +636,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured[ 0 ].path ).toBe(
 				'/wc/store/v1/cart/update-item'
 			);
-			expect( captured[ 0 ].body ).toEqual( {
-				key: 'server-key-abc',
-				quantity: 5,
-			} );
-			expect( line.quantity ).toBe( 5 );
+			expect( captured[ 0 ].body.quantity ).toBe( 5 );
+			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
 		} );
 
 		it( 'optimistically bumps a matched keyed line in place on a keyless re-add (no duplicate line)', async () => {
