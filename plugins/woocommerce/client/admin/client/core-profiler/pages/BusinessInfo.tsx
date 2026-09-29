@@ -391,7 +391,7 @@ export const BusinessInfo = ( {
 									<TrackedLink
 										message={ __(
 											// translators: {{Link}} is a placeholder for a html element.
-											'Opt in to receive tips, discounts, and recommendations from Woo. You can opt out at any time. We track email opens and clicks for measurement and optimization purposes. See our {{Link}}Privacy Policy{{/Link}} for details.',
+											'Get tips, discounts, and recommendations from Woo. You can opt out at any time. We track email opens and clicks to improve our emails. See our {{Link}}Privacy Policy{{/Link}} for details.',
 											'woocommerce'
 										) }
 										eventName="coreprofiler_business_info_privacy_policy_click"
