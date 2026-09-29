@@ -362,12 +362,20 @@ body {
 		border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 	<?php } ?>
 	/*
-	 * Break a word only when it is too long for the cell, like a long email address, so it can't squash the other address column.
+	 * Break a word only when it is too long for the cell, so it can't squash the other address column.
 	 * "anywhere" is used because "overflow-wrap: break-word" still lets a long word widen a table cell.
 	 * "word-break: break-word" does the same as "anywhere" and is needed because Gmail removes "overflow-wrap".
 	 */
 	overflow-wrap: anywhere;
 	word-break: break-word;
+}
+
+/*
+ * Some clients, like Outlook on Windows, support neither value above, so a long email address would still widen the cell there.
+ * "break-all" works in those clients, and it is safe for an email address because it has no words to keep whole.
+ */
+.address-email {
+	word-break: break-all;
 }
 
 <?php if ( $email_improvements_enabled ) : ?>
