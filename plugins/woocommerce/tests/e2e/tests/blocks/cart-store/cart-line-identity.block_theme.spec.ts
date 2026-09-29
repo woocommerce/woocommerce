@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
 import { test as base, expect, guestFile, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
@@ -12,7 +11,6 @@ import {
 	CART_LINE_IDENTITY_PLUGIN,
 	PRODUCT_X,
 	cartLineRows,
-	cartLineQuantities,
 	productButton,
 	readCartLineQuantities,
 	seedMetaLine,
@@ -51,39 +49,10 @@ import {
 const test = base.extend< {
 	addToCartWithOptionsPage: AddToCartWithOptionsPage;
 } >( {
-	addToCartWithOptionsPage: async (
-		{ page, admin, editor },
-		provideFixture
-	) => {
-		await provideFixture(
-			new AddToCartWithOptionsPage( { page, admin, editor } )
-		);
+	addToCartWithOptionsPage: async ( { page, admin, editor }, use ) => {
+		await use( new AddToCartWithOptionsPage( { page, admin, editor } ) );
 	},
 } );
-
-/**
- * Waits for the ProductButton's add request before the flow continues.
- */
-const addToCartAndWaitForBatchResponse = async (
-	page: Page,
-	addToCart: () => Promise< void >
-) => {
-	const batchResponse = page.waitForResponse( ( response ) => {
-		const request = response.request();
-		return (
-			response.url().includes( '/wc/store/v1/batch' ) &&
-			request.method() === 'POST' &&
-			request
-				.postDataJSON()
-				.requests.some(
-					( batchRequest: { path: string } ) =>
-						batchRequest.path === '/wc/store/v1/cart/add-item'
-				)
-		);
-	} );
-	await addToCart();
-	await batchResponse;
-};
 
 test.describe( 'Add to cart respects cart-line identity', () => {
 	test.describe( 'with a meta-differentiated line present', () => {
@@ -111,9 +80,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await frontendUtils.goToShop();
 
 			// Keyless add of X through the ProductButton.
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			// No error notice (in particular no "cannot update bundle
 			// item" / store error) appears on the archive.
@@ -124,9 +91,6 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			// Persisted cart: exactly two lines for X — the meta line still at
 			// quantity 1 plus a new standalone line at quantity 1.
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 2 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1, 1 ] );
@@ -141,23 +105,16 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 
 			// ...and as a standalone line (qty 1) via a plain ProductButton add.
 			await frontendUtils.goToShop();
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 2 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1, 1 ] );
 
 			// Add X again through the ProductButton.
 			await frontendUtils.goToShop();
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			await expect(
 				page.locator( '.wc-block-components-notice-banner.is-error' )
@@ -166,9 +123,6 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			// The standalone line becomes quantity 2; the meta line stays at 1.
 			// No new line is created (still two lines total).
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 2 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1, 2 ] );
@@ -191,18 +145,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await seedMetaLine( page, PRODUCT_X.id );
 
 			await frontendUtils.goToShop();
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			await expect(
 				page.locator( '.wc-block-components-notice-banner.is-error' )
 			).toHaveCount( 0 );
 
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 2 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1, 1 ] );
@@ -220,20 +169,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await frontendUtils.goToShop();
 
 			// First add creates the standalone line at quantity 1.
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			// Second add increments the same line.
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			// One line, quantity 2 — not two lines.
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 1 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 2 ] );
@@ -245,9 +187,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 		} ) => {
 			await frontendUtils.goToShop();
 
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 
 			await expect(
 				page.locator( '.wc-block-components-notice-banner.is-error' )
@@ -255,9 +195,6 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 
 			// A single new standalone line at quantity 1.
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 1 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1 ] );
@@ -286,9 +223,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await frontendUtils.goToShop();
 
 			// First add succeeds: a single line for the product.
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 			await frontendUtils.goToCart();
 			await expect( cartLineRows( page, PRODUCT_X.name ) ).toHaveCount(
 				1
@@ -296,9 +231,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 
 			// Second add is rejected by the server.
 			await frontendUtils.goToShop();
-			await addToCartAndWaitForBatchResponse( page, () =>
-				productButton( page, PRODUCT_X.id ).click()
-			);
+			await productButton( page, PRODUCT_X.id ).click();
 
 			// The server error surfaces as an error notice.
 			await expect(
@@ -388,9 +321,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			miniCartUtils,
 		} ) => {
 			await frontendUtils.goToShop();
-			await addToCartAndWaitForBatchResponse( page, () =>
-				frontendUtils.addToCart( PRODUCT_X.name )
-			);
+			await frontendUtils.addToCart( PRODUCT_X.name );
 			await miniCartUtils.openMiniCart();
 
 			const quantity = page.getByLabel(
@@ -429,9 +360,6 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 
 			// No extra line was created: exactly one line for the product.
 			await frontendUtils.goToCart();
-			await expect(
-				cartLineQuantities( page, PRODUCT_X.name )
-			).toHaveCount( 1 );
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1 ] );
