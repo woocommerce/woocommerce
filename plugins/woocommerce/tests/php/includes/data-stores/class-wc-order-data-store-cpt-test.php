@@ -1697,4 +1697,58 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox Malformed date and customer args return no orders instead of a fatal error.
+	 *
+	 * @dataProvider malformed_query_arg_provider
+	 * @param string $query_var The query var.
+	 * @param mixed  $value     The malformed value.
+	 */
+	public function test_malformed_query_arg_returns_no_orders( string $query_var, $value ): void {
+		$order = WC_Helper_Order::create_order( 1 );
+		$order->set_date_created( '2000-01-01T10:00:00' );
+		$order->set_date_paid( '2000-01-01T10:00:00' );
+		$order->save();
+
+		$valid_values = array(
+			'date_created' => '2000-01-01',
+			'date_paid'    => '2000-01-01',
+			'customer'     => 1,
+		);
+
+		$this->assertSame(
+			array( $order->get_id() ),
+			wc_get_orders(
+				array(
+					$query_var => $valid_values[ $query_var ],
+					'return'   => 'ids',
+				)
+			),
+			'A valid value should match the order'
+		);
+
+		$queried_orders = wc_get_orders(
+			array(
+				$query_var => $value,
+				'return'   => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_orders, 'A malformed value should not match any order' );
+	}
+
+	/**
+	 * Data provider for test_malformed_query_arg_returns_no_orders.
+	 *
+	 * @return array
+	 */
+	public function malformed_query_arg_provider(): array {
+		return array(
+			'date, array'               => array( 'date_created', array( '2000-01-01' ) ),
+			'date, object'              => array( 'date_paid', new stdClass() ),
+			'customer, object'          => array( 'customer', new stdClass() ),
+			'customer, object in array' => array( 'customer', array( 1, new stdClass() ) ),
+		);
+	}
 }

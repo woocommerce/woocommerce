@@ -521,7 +521,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					return $query_part;
 				}
 				$meta_query[] = $query_part;
-			} elseif ( is_email( $value ) ) {
+			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
 			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
