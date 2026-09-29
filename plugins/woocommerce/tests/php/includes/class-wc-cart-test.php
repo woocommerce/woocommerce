@@ -1175,6 +1175,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			function ( $fields ) use ( &$calls ) {
 				++$calls;
 				$fields['shipping_postcode']['required'] = true;
+				// The AE locale also hides the postcode, and show_shipping() skips a hidden field, so show it.
+				$fields['shipping_postcode']['hidden'] = false;
 				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
 				if ( $calls <= 30 ) {
 					WC()->cart->calculate_totals();
