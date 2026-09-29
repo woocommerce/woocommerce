@@ -161,7 +161,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		$tax_rows = array();
 
 		foreach ( $tax_rows_orders as $tax_row ) {
-			$key = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$key = gmdate( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 
 			if ( ! isset( $tax_rows[ $key ] ) ) {
 				$tax_rows[ $key ] = (object) array(
@@ -181,7 +181,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		}
 
 		foreach ( $tax_rows_partial_refunds as $tax_row ) {
-			$key = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$key = gmdate( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 
 			if ( ! isset( $tax_rows[ $key ] ) ) {
 				$tax_rows[ $key ] = (object) array(
@@ -200,7 +200,7 @@ class WC_Report_Taxes_By_Date extends WC_Admin_Report {
 		}
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {
-			$key              = date( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
+			$key              = gmdate( ( 'month' === $this->chart_groupby ) ? 'Ym' : 'Ymd', strtotime( $tax_row->post_date ) );
 			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,

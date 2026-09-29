@@ -8,64 +8,32 @@
 declare(strict_types=1);
 
 /**
- * Test subclass to inject report data.
- */
-class WC_Report_Taxes_By_Date_Mock extends WC_Report_Taxes_By_Date {
-	/**
-	 * Sequenced return data for get_order_report_data calls.
-	 *
-	 * @var array
-	 */
-	public $mock_query_results = array();
-
-	/**
-	 * Current call index.
-	 *
-	 * @var int
-	 */
-	private $call_index = 0;
-
-	/**
-	 * Override get_order_report_data to return mock data.
-	 *
-	 * @param array $args Query arguments.
-	 * @return array
-	 */
-	public function get_order_report_data( $args ) {
-		if ( isset( $this->mock_query_results[ $this->call_index ] ) ) {
-			$data = $this->mock_query_results[ $this->call_index ];
-			++$this->call_index;
-			return $data;
-		}
-
-		++$this->call_index;
-		return array();
-	}
-}
-
-/**
  * Tests for the WC_Report_Taxes_By_Date class.
  */
 class WC_Tests_Report_Taxes_By_Date extends WC_Unit_Test_Case {
 
 	/**
-	 * Load the necessary files.
+	 * Load the necessary files including the mock subclass.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-report-taxes-by-date.php';
+
+		// Mock must be included after the parent class is loaded so the class declaration succeeds.
+		include_once __DIR__ . '/class-wc-report-taxes-by-date-mock.php';
 	}
 
 	/**
-	 * Test that partial refunds occurring on dates without orders do not trigger fatal error.
+	 * Test that partial refunds occurring on dates without orders do not trigger fatal error,
+	 * and that the refund row values are reflected in the rendered table.
 	 */
 	public function test_output_report_with_partial_refund_on_uninitialized_date(): void {
 		$report                = new WC_Report_Taxes_By_Date_Mock();
 		$report->chart_groupby = 'day';
 
-		// Call 0: $tax_rows_orders - order on 2026-09-01 (index 0).
+		// Call 0: $tax_rows_orders — order on 2026-09-01.
 		$order_row = (object) array(
 			'post_date'           => '2026-09-01 10:00:00',
 			'total_orders'        => 1,
@@ -75,10 +43,10 @@ class WC_Tests_Report_Taxes_By_Date extends WC_Unit_Test_Case {
 			'total_shipping'      => 10.0,
 		);
 
-		// Call 1: $tax_rows_full_refunds - none.
+		// Call 1: $tax_rows_full_refunds — none.
 		$full_refunds = array();
 
-		// Call 2: $tax_rows_partial_refunds - partial refund on 2026-09-02 (index 0).
+		// Call 2: $tax_rows_partial_refunds — partial refund on 2026-09-02 (no order on that date).
 		$partial_refund_row = (object) array(
 			'post_date'           => '2026-09-02 12:00:00',
 			'total_orders'        => 0,
@@ -98,7 +66,15 @@ class WC_Tests_Report_Taxes_By_Date extends WC_Unit_Test_Case {
 		$report->output_report();
 		$output = ob_get_clean();
 
+		// Report must produce HTML output without fatal errors.
 		$this->assertNotEmpty( $output );
 		$this->assertStringContainsString( '<table class="widefat">', $output );
+
+		// The order date (2026-09-01) and refund date (2026-09-02) must both appear in the output.
+		$this->assertStringContainsString( '2026-09-01', $output );
+		$this->assertStringContainsString( '2026-09-02', $output );
+
+		// Refund tax amount (−5) must appear, confirming the refund row was processed.
+		$this->assertStringContainsString( '-5', $output );
 	}
 }
