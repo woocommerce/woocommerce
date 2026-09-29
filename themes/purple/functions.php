@@ -105,6 +105,7 @@ if ( ! function_exists( 'purple_styles' ) ) :
 	 * @return void
 	 */
 	function purple_styles() {
+		$theme_version = wp_get_theme( get_template() )->get( 'Version' );
 
 		// Register theme stylesheet. Use the template (parent) directory and
 		// version so the file still resolves when a child theme is active.
@@ -112,11 +113,29 @@ if ( ! function_exists( 'purple_styles' ) ) :
 			'purple-style',
 			get_template_directory_uri() . '/style.css',
 			array(),
-			wp_get_theme( get_template() )->get( 'Version' )
+			$theme_version
 		);
 
 		// Enqueue theme stylesheet.
 		wp_enqueue_style( 'purple-style' );
+
+		// WooCommerce may not be installed. Skip versioned sheets entirely then.
+		if ( defined( 'WC_VERSION' ) ) {
+			$woocommerce_version_stylesheets = array(
+				'11.2' => 'assets/css/woocommerce-11.2.css',
+				'11.1' => 'assets/css/woocommerce-11.1.css',
+			);
+			foreach ( $woocommerce_version_stylesheets as $version => $relative_path ) {
+				if ( version_compare( WC_VERSION, $version, '<=' ) ) {
+					wp_enqueue_style(
+						'purple-woocommerce-' . str_replace( '.', '-', $version ),
+						get_template_directory_uri() . '/' . $relative_path,
+						array(),
+						$theme_version
+					);
+				}
+			}
+		}
 	}
 
 endif;

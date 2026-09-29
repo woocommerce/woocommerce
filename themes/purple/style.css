@@ -271,38 +271,6 @@ body {
 	font-style: normal;
 }
 
-/* ==========================================================================
-   WooCommerce — Catalog
-   @todo remove once https://github.com/woocommerce/woocommerce/pull/68024 ships.
-   ========================================================================== */
-.woocommerce.wc-block-catalog-sorting,
-.woocommerce.wc-block-catalog-sorting .components-disabled,
-.woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
-	align-items: center;
-	display: flex;
-	gap: 0.3em;
-	margin-bottom: 0;
-}
-.woocommerce.wc-block-catalog-sorting label,
-.woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting label.orderby-label {
-	margin: 0;
-}
-
-/* ==========================================================================
-   WooCommerce — Single product
-   ========================================================================== */
-
-/* @todo remove once https://github.com/woocommerce/woocommerce/pull/69150 ships. */
-.wp-block-product-specifications-item__value p {
-	margin: 0
-}
-
-/* Checkbox alignment for reviews form
- * @todo remove once https://github.com/woocommerce/woocommerce/pull/68696 ships.
- */
-.wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
-	align-items: flex-start;
-}
 
 /* Closed accordion panels are server-rendered without [hidden] (the
  * Interactivity API only applies it after hydration), so they flash open
@@ -319,11 +287,6 @@ body {
 /* ==========================================================================
    WooCommerce — Cart
    ========================================================================== */
-
-/* @todo remove once https://github.com/woocommerce/woocommerce/pull/69150 ships. */
-.wp-block-woocommerce-cart-order-summary-heading-block textarea {
-	padding-inline-start: 0;
-}
 
 .wc-block-cart-item__quantity {
 	margin-top: var(--wp--preset--spacing--20);
