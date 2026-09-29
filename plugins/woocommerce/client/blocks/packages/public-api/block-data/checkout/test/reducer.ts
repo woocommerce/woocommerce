@@ -160,6 +160,21 @@ describe( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
+	it( 'should not replace an active processing owner', () => {
+		const initialState = {
+			...defaultState,
+			status: STATUS.PROCESSING,
+			processingOwner: 'cart' as const,
+		};
+
+		expect(
+			reducer(
+				initialState,
+				actions.__internalSetBeforeProcessing( 'checkout' )
+			)
+		).toBe( initialState );
+	} );
+
 	it( 'should handle SET_AFTER_PROCESSING', () => {
 		const expectedState = {
 			...defaultState,

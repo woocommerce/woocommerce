@@ -254,7 +254,11 @@ const CheckoutProcessor = ( {
 		window.localStorage.removeItem(
 			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 		);
-		if ( processingOwner === providerId && currentRedirectUrl.current ) {
+		if (
+			checkoutIsComplete &&
+			processingOwner === providerId &&
+			currentRedirectUrl.current
+		) {
 			window.location.href = currentRedirectUrl.current;
 		}
 	}, [ checkoutIsComplete, processingOwner, providerId ] );

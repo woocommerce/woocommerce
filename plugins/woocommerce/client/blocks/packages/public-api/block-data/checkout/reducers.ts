@@ -63,6 +63,9 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			break;
 
 		case types.SET_BEFORE_PROCESSING:
+			if ( state.status !== STATUS.IDLE ) {
+				break;
+			}
 			newState = {
 				...state,
 				status: STATUS.BEFORE_PROCESSING,
