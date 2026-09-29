@@ -54,6 +54,13 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			};
 			break;
 
+		case types.SET_PROCESSING_OWNER:
+			newState = {
+				...state,
+				processingOwner: action.processingOwner,
+			};
+			break;
+
 		case types.SET_BEFORE_PROCESSING:
 			newState = {
 				...state,

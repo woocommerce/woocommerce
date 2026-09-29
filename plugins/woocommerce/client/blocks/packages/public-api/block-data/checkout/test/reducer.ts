@@ -64,6 +64,20 @@ describe( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
+	it( 'should handle SET_PROCESSING_OWNER', () => {
+		const expectedState = {
+			...defaultState,
+			processingOwner: 'checkout',
+		};
+
+		expect(
+			reducer(
+				defaultState,
+				actions.__internalSetProcessingOwner( 'checkout' )
+			)
+		).toEqual( expectedState );
+	} );
+
 	it( 'should handle SET_HAS_ERROR when status is PROCESSING', () => {
 		const initialState = { ...defaultState, status: STATUS.PROCESSING };
 

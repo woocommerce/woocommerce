@@ -9,6 +9,8 @@ import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
  */
 import { STATUS, checkoutData } from './constants';
 
+export type CheckoutProcessingOwner = 'cart' | 'checkout';
+
 export type CheckoutState = {
 	additionalFields: OrderFormValues; // Additional fields values that are collected on Checkout.
 	calculatingCount: number; // If any of the totals, taxes, shipping, etc need to be calculated, the count will be increased here
@@ -22,7 +24,7 @@ export type CheckoutState = {
 	redirectUrl: string; // This is the url that checkout will redirect to when it's ready.
 	shouldCreateAccount: boolean; // Should a user account be created?
 	status: STATUS; // Status of the checkout
-	processingOwnerId: string | null; // ID of the provider responsible for processing checkout.
+	processingOwner: CheckoutProcessingOwner | null; // Provider responsible for processing checkout.
 	useShippingAsBilling: boolean; // Should the billing form be hidden and inherit the shipping address?
 	editingBillingAddress: boolean; // Is the billing address being edited?
 	editingShippingAddress: boolean; // Is the shipping address being edited?
@@ -61,7 +63,7 @@ export const defaultState: CheckoutState = {
 	redirectUrl: '',
 	shouldCreateAccount: false,
 	status: STATUS.IDLE,
-	processingOwnerId: null,
+	processingOwner: null,
 	useShippingAsBilling: billingMatchesShipping,
 	editingBillingAddress: ! hasBillingAddress,
 	editingShippingAddress: ! hasShippingAddress,

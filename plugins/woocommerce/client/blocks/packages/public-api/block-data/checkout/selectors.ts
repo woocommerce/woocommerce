@@ -61,6 +61,10 @@ export const getCheckoutStatus = ( state: CheckoutState ) => {
 	return state.status;
 };
 
+export const getProcessingOwner = ( state: CheckoutState ) => {
+	return state.processingOwner;
+};
+
 export const hasError = ( state: CheckoutState ) => {
 	return state.hasError;
 };

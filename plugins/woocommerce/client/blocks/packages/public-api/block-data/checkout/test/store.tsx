@@ -13,6 +13,16 @@ const wait = ( timeout = 0 ) =>
 	new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
 
 describe( 'Checkout store', () => {
+	describe( 'processingOwner', () => {
+		it( 'sets and returns the processing owner', () => {
+			dispatch( store ).__internalSetProcessingOwner( 'checkout' );
+			expect( select( store ).getProcessingOwner() ).toBe( 'checkout' );
+
+			dispatch( store ).__internalSetProcessingOwner( null );
+			expect( select( store ).getProcessingOwner() ).toBeNull();
+		} );
+	} );
+
 	describe( 'isCalculating', () => {
 		it( 'correctly infers isCalculating from number of calculating items', () => {
 			dispatch( store ).__internalStartCalculation();

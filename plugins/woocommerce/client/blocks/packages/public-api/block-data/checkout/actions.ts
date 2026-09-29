@@ -8,6 +8,7 @@ import deprecated from '@wordpress/deprecated';
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
+import type { CheckoutProcessingOwner } from './default-state';
 
 // Thunks are functions that can be dispatched, similar to actions creators.
 export * from './thunks';
@@ -38,6 +39,18 @@ export const __internalSetProcessing = () => ( {
  */
 export const __internalSetAfterProcessing = () => ( {
 	type: types.SET_AFTER_PROCESSING,
+} );
+
+/**
+ * Set the provider responsible for processing checkout.
+ *
+ * @param processingOwner Provider responsible for processing checkout.
+ */
+export const __internalSetProcessingOwner = (
+	processingOwner: CheckoutProcessingOwner | null
+) => ( {
+	type: types.SET_PROCESSING_OWNER,
+	processingOwner,
 } );
 
 /**
