@@ -119,13 +119,16 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Two lists answer "is this collection", and they differ on purpose. The canonical
-	 * `woocommerce_local_pickup_methods` list keeps `legacy_local_pickup`, because an order placed
-	 * years ago with a method that is no longer registered must still be taxed at the shop rather
-	 * than at the customer's address. The registered list is built from the methods a store has
-	 * loaded right now, so it cannot answer for those orders.
+	 * Two lists answer "is this collection" and they do not agree. The canonical
+	 * `woocommerce_local_pickup_methods` list names `legacy_local_pickup` so that an order placed
+	 * with the pre-zones method is still taxed at the shop. The registered list is built from the
+	 * methods that declare `local-pickup` support, and the legacy class never declares it, so it is
+	 * missing there even on a store where it is loaded and enabled.
 	 *
-	 * @testdox The canonical list keeps a method the registered list has never heard of.
+	 * This records the divergence rather than blessing it. The two lists are read by different
+	 * callers, so the same order can be taxed as collection and still asked for a delivery address.
+	 *
+	 * @testdox The canonical list names a method the registered list leaves out.
 	 */
 	public function test_the_canonical_list_keeps_a_method_the_registered_list_does_not(): void {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
@@ -133,7 +136,7 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 		$registered = LocalPickupUtils::get_local_pickup_method_ids();
 
 		$this->assertContains( 'legacy_local_pickup', $canonical, 'An order placed with the legacy method still has to be recognised.' );
-		$this->assertNotContains( 'legacy_local_pickup', $registered, 'But nothing registers that method today, so the registered list cannot name it.' );
+		$this->assertNotContains( 'legacy_local_pickup', $registered, 'The registered list leaves it out, because that class never declares local-pickup support.' );
 		$this->assertContains( 'pickup_location', $canonical, 'The block method joins the canonical list through the filter.' );
 		$this->assertContains( 'pickup_location', $registered, 'And it is registered, so it is in the other list as well.' );
 	}
