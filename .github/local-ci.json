@@ -33,8 +33,8 @@
           "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
         }
       },
-      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation; with 8 jobs in flight that oversubscribes the machine. CI's 4-core runners give jest 3 workers, so 2 here is close to parity.",
-      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=2" ]
+      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. The pool runs up to 4 jobs, so 4 workers each fills 16 cores without oversubscribing; measured on admin-library (1648 tests): 2 workers 62 s, 4 workers 38 s, 8 workers 32 s.",
+      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=4" ]
     }
   ],
 
