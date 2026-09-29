@@ -4,7 +4,7 @@
 const { setupServer } = require( 'msw/node' );
 const { http, HttpResponse } = require( 'msw' );
 
-// Create the MSW server instance for tests
+// Create MSW server instance for testing
 const server = setupServer();
 
 // Setup MSW for all tests
