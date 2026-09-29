@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate orders when Cart and Checkout blocks appear on the same page.
