@@ -15,6 +15,13 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	use ImageAttachmentTrait;
 
 	/**
+	 * Term ID of "Clothing", a top-level category whose only product sits in "Hoodies".
+	 *
+	 * @var int
+	 */
+	private int $clothing_id;
+
+	/**
 	 * Term ID of "Hoodies", a child of "Clothing" with one product.
 	 *
 	 * @var int
@@ -31,9 +38,9 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$clothing_id      = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
-		$this->hoodies_id = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $clothing_id ) )['term_id'];
-		$music_id         = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
+		$this->clothing_id = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
+		$this->hoodies_id  = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $this->clothing_id ) )['term_id'];
+		$music_id          = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
 		wp_insert_term( 'Empty', 'product_cat' );
 
 		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $this->hoodies_id ), 'product_cat' );
@@ -127,5 +134,42 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	public function test_has_empty(): void {
 		$this->assertStringNotContainsString( '>Empty<', $this->render_product_categories() );
 		$this->assertStringContainsString( '>Empty<', $this->render_product_categories( '{"hasEmpty":true}' ) );
+	}
+
+	/**
+	 * @testdox Should render a child at the top level when its parent has no product count.
+	 */
+	public function test_child_with_missing_parent_renders_at_top_level(): void {
+		delete_term_meta( $this->clothing_id, 'product_count_product_cat' );
+		delete_transient( 'wc_term_counts' );
+		clean_term_cache( array( $this->clothing_id, $this->hoodies_id ), 'product_cat' );
+
+		$markup = $this->render_product_categories();
+
+		$this->assertStringNotContainsString( '>Clothing<', $markup, 'The zero-count parent should not be rendered.' );
+		$this->assertStringContainsString( '>Hoodies<', $markup, 'The child should remain visible.' );
+		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $markup, 'The child should be rendered at the top level.' );
+	}
+
+	/**
+	 * @testdox Should render an orphaned grandchild in children-only mode without warnings.
+	 */
+	public function test_children_only_renders_orphaned_grandchild(): void {
+		$caps_id = (int) wp_insert_term( 'Caps', 'product_cat', array( 'parent' => $this->hoodies_id ) )['term_id'];
+		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $caps_id ), 'product_cat' );
+		wc_recount_all_terms();
+
+		delete_term_meta( $this->hoodies_id, 'product_count_product_cat' );
+		delete_transient( 'wc_term_counts' );
+		clean_term_cache( array( $this->clothing_id, $this->hoodies_id, $caps_id ), 'product_cat' );
+
+		$this->go_to( get_term_link( $this->clothing_id, 'product_cat' ) );
+		$this->assertTrue( is_product_category(), 'The request should be a product category archive.' );
+
+		$markup = $this->render_product_categories( '{"showChildrenOnly":true}' );
+
+		$this->assertStringNotContainsString( '>Hoodies<', $markup, 'The zero-count parent should not be rendered.' );
+		$this->assertStringContainsString( '>Caps<', $markup, 'The grandchild should remain visible.' );
+		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $markup, 'The grandchild should be rendered at the top level.' );
 	}
 }
