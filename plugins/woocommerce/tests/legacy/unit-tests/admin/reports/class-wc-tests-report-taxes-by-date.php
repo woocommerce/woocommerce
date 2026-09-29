@@ -70,9 +70,10 @@ class WC_Tests_Report_Taxes_By_Date extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $output );
 		$this->assertStringContainsString( '<table class="widefat">', $output );
 
-		// The order date (2026-09-01) and refund date (2026-09-02) must both appear in the output.
-		$this->assertStringContainsString( '2026-09-01', $output );
-		$this->assertStringContainsString( '2026-09-02', $output );
+		// The order date (2026-09-01) and refund date (2026-09-02) must both appear in the output,
+		// formatted exactly as output_report() renders them via date_i18n().
+		$this->assertStringContainsString( date_i18n( get_option( 'date_format' ), strtotime( '2026-09-01' ) ), $output );
+		$this->assertStringContainsString( date_i18n( get_option( 'date_format' ), strtotime( '2026-09-02' ) ), $output );
 
 		// Refund tax amount (−5) must appear, confirming the refund row was processed.
 		$this->assertStringContainsString( '-5', $output );
