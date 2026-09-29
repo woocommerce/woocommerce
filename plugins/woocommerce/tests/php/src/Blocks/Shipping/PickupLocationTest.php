@@ -149,6 +149,17 @@ class PickupLocationTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( 'Downtown', 'Airport' ), $names, 'Each option should carry its own location name.' );
+
+		$labels = array_map(
+			static function ( $rate ) {
+				return $rate->get_label();
+			},
+			array_values( $rates )
+		);
+
+		$this->assertStringContainsString( 'Downtown', $labels[0], 'The first option should name its own branch to the shopper.' );
+		$this->assertStringContainsString( 'Airport', $labels[1], 'And the second should name its own.' );
+		$this->assertNotSame( $labels[0], $labels[1], 'Two options a shopper cannot tell apart are no better than one.' );
 	}
 
 	/**
