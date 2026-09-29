@@ -3,7 +3,7 @@
  * Plugin Name: WC Email Template Sync Test Helper
  * Description: E2E test fixture for RSM-146. Option-driven filters and REST endpoints used by Playwright tests. Dormant unless its driving options are set.
  * Version: 1.0.0
- * Requires PHP: 8.1
+ * Requires PHP: 7.4
  * Author: WooCommerce
  *
  * @package WC_Email_Template_Sync_Test_Helper

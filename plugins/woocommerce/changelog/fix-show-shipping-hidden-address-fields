@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Charge shipping in the classic checkout when an extension hides a required state or postcode field.
