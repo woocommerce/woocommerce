@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- backcompat nomenclature.
+// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps -- backcompat nomenclature.
 
 /**
  * Tests the rate WC_Shipping_Flat_Rate emits for a package.
@@ -12,7 +12,11 @@ declare( strict_types = 1 );
  *
  * Every expected value here is taken from what the settings screen promises the merchant, in
  * includes/shipping/flat-rate/includes/settings-flat-rate.php, rather than from reading the
- * implementation. Behaviour the screen does not describe is deliberately left untested.
+ * implementation. Behaviour the screen does not describe is deliberately left untested. The one
+ * exception is the pre-2.5.0 slug key, which no screen mentions; that test pins the outcome a
+ * merchant upgrading from that era sees rather than either mechanism behind it.
+ *
+ * The sibling file holds the name this class would otherwise take, hence the suffix here.
  */
 class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 
@@ -59,11 +63,13 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		// Released on the way out as well as in, so the dead terms this file creates are not
-		// still memoized for whatever test file runs next in the same process.
-		WC()->shipping()->shipping_classes = array();
-
-		parent::tearDown();
+		try {
+			// Released on the way out as well as in, so the dead terms this file creates are not
+			// still memoized for whatever test file runs next in the same process.
+			WC()->shipping()->shipping_classes = array();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -138,11 +144,16 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	 * Create a product that ships.
 	 *
 	 * @param string $shipping_class Shipping class slug, or an empty string for none.
+	 * @param float  $weight         Product weight, or zero for none.
 	 * @return WC_Product_Simple
 	 */
-	private function shippable_product( string $shipping_class = '' ): WC_Product_Simple {
+	private function shippable_product( string $shipping_class = '', float $weight = 0 ): WC_Product_Simple {
 		$product = new WC_Product_Simple();
 		$product->set_regular_price( '10' );
+
+		if ( $weight > 0 ) {
+			$product->set_weight( (string) $weight );
+		}
 
 		if ( '' !== $shipping_class ) {
 			$term = wp_insert_term( $shipping_class, 'product_shipping_class' );
@@ -449,5 +460,121 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 		$rate = $this->rate_for( $package );
 
 		$this->assertEquals( 1, $rate->get_cost(), 'A blank no-class cost should leave the method cost alone.' );
+	}
+
+	/**
+	 * Each class cost field carries the same placeholder description as the method cost, so the
+	 * placeholders have to mean "this class" there. A shopper buying three of one class and one
+	 * of another must not be charged for four of each.
+	 *
+	 * @testdox A placeholder in a class cost counts only the items in that class.
+	 *
+	 * @testWith ["[qty]", 3]
+	 *           ["[cost]", 30]
+	 *           ["[weight]", 6]
+	 *
+	 * @param string $class_cost Cost formula saved against the class.
+	 * @param float  $expected   Expected rate cost.
+	 */
+	public function test_a_class_cost_placeholder_counts_only_that_class( string $class_cost, float $expected ): void {
+		$scoped = $this->shippable_product( 'flat-rate-scoped', 2 );
+		$other  = $this->shippable_product( 'flat-rate-other', 4 );
+
+		$this->method_with(
+			array(
+				'cost' => '0',
+				'class_cost_' . $scoped->get_shipping_class_id() => $class_cost,
+				'class_cost_' . $other->get_shipping_class_id() => '',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $scoped,
+					'quantity'   => 3,
+					'line_total' => 30.0,
+				),
+				array(
+					'product'    => $other,
+					'quantity'   => 1,
+					'line_total' => 70.0,
+				),
+			),
+			100.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals(
+			$expected,
+			$rate->get_cost(),
+			$class_cost . ' in a class cost should see three units worth 30.00 weighing 6, not the whole package.'
+		);
+	}
+
+	/**
+	 * The method cost field documents [weight] alongside the other placeholders.
+	 *
+	 * @testdox The [weight] placeholder is the total weight of the items being shipped.
+	 */
+	public function test_weight_placeholder_is_the_total_weight_of_the_package(): void {
+		$this->method_with( array( 'cost' => '[weight]' ) );
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product( '', 2 ),
+					'quantity'   => 3,
+					'line_total' => 30.0,
+				),
+			),
+			30.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 6, $rate->get_cost(), 'Three units weighing 2 each should give a weight of 6.' );
+	}
+
+	/**
+	 * A merchant can put a shipping class on a virtual product. Nothing is shipped for it, so its
+	 * class must not add a delivery charge.
+	 *
+	 * @testdox A shipping class on a virtual product adds no cost.
+	 */
+	public function test_a_class_on_a_virtual_product_adds_nothing(): void {
+		$virtual = new WC_Product_Simple();
+		$virtual->set_regular_price( '10' );
+		$virtual->set_virtual( true );
+		$term = wp_insert_term( 'flat-rate-downloadable', 'product_shipping_class' );
+		$this->assertNotWPError( $term, 'The test fixture should be able to create a shipping class.' );
+		$virtual->set_shipping_class_id( (int) $term['term_id'] );
+		$virtual->save();
+		WC()->shipping()->shipping_classes = array();
+
+		$this->method_with(
+			array(
+				'cost' => '1',
+				'class_cost_' . $virtual->get_shipping_class_id() => '9',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+				array(
+					'product'    => $virtual,
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			20.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 1, $rate->get_cost(), 'A class on something that is not shipped should not be charged for.' );
 	}
 }
