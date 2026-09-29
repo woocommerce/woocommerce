@@ -85,7 +85,9 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 
 		WC()->cart->calculate_totals();
 
-		$this->assertEquals( $price, WC()->cart->get_subtotal(), 'The cart should be worth what the test set up.' );
+		// Asserted as a count rather than a subtotal, because the subtotal is tax-mode dependent
+		// and one test here runs with prices including tax.
+		$this->assertCount( 1, WC()->cart->get_cart(), 'The cart should hold the fixture product.' );
 	}
 
 	/**
@@ -268,10 +270,7 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$product = new WC_Product_Simple();
-		$product->set_regular_price( '110' );
-		$product->save();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->cart_holding( 110.0 );
 		$this->apply_coupon( 'eleven-off', array( 'coupon_amount' => '11' ) );
 
 		// The shopper sees 110.00 and hands over 11.00 of it, so 99.00 is what they spent.
@@ -335,9 +334,21 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->is_offered(), 'No requirement should offer free shipping before the filter runs.' );
 
-		add_filter( 'woocommerce_shipping_free_shipping_is_available', '__return_false' );
+		$seen = array();
+		add_filter(
+			'woocommerce_shipping_free_shipping_is_available',
+			function ( $is_available, $package, $method ) use ( &$seen ) {
+				$seen = array( $is_available, $package, $method );
+				return false;
+			},
+			10,
+			3
+		);
 
 		$this->assertFalse( $this->is_offered(), 'The filter should be able to withdraw the method.' );
+		$this->assertTrue( $seen[0], 'The filter should be handed the decision the method reached.' );
+		$this->assertSame( 'US', $seen[1]['destination']['country'], 'The filter should be handed the package.' );
+		$this->assertSame( $this->sut, $seen[2], 'The filter should be handed the method itself.' );
 	}
 
 	/**
@@ -375,7 +386,7 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	 * The Minimum order amount field defaults to 0, so a merchant who picks the minimum rule and
 	 * leaves the amount alone is asking for no floor at all, not an unreachable one.
 	 *
-	 * @testdox A minimum of zero is met by any cart.
+	 * @testdox A minimum of zero is met by the smallest cart.
 	 */
 	public function test_a_minimum_of_zero_is_met_by_any_cart(): void {
 		$this->method_with(
@@ -451,5 +462,79 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
 
 		$this->assertTrue( $this->is_offered(), 'The qualifying coupon should count even when it is not the only one.' );
+	}
+
+	/**
+	 * The settings screen hides the minimum order amount field when the rule is the coupon alone,
+	 * so a minimum left behind from an earlier rule must not quietly keep applying.
+	 *
+	 * @testdox A coupon rule ignores the minimum order amount entirely.
+	 */
+	public function test_a_coupon_rule_ignores_the_minimum(): void {
+		$this->method_with(
+			array(
+				'requires'   => 'coupon',
+				'min_amount' => '500',
+			)
+		);
+		$this->cart_holding( 100.0 );
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+
+		$this->assertTrue( $this->is_offered(), 'The coupon alone should decide, whatever the minimum says.' );
+	}
+
+	/**
+	 * The mirror of the tax-inclusive case. On a store that shows prices without tax, the amount
+	 * the shopper is shown spending never included the tax, so the coupon's tax must not come off
+	 * the minimum a second time.
+	 *
+	 * @testdox On a tax-exclusive store only the discount itself comes off the minimum.
+	 */
+	public function test_on_a_tax_exclusive_store_only_the_discount_comes_off(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_cart', 'excl' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '90',
+			)
+		);
+		$this->cart_holding( 100.0 );
+		$this->apply_coupon( 'ten-off', array( 'coupon_amount' => '10' ) );
+
+		$this->assertTrue(
+			$this->is_offered(),
+			'A 100.00 cart shown without tax, less a 10.00 coupon, leaves exactly the 90.00 minimum.'
+		);
+	}
+
+	/**
+	 * The shopper holds the qualifying coupon first and a plain one after it. Whether free
+	 * shipping is granted must not depend on which coupon happens to be looked at last.
+	 *
+	 * @testdox A qualifying coupon still counts when a plain coupon is applied after it.
+	 */
+	public function test_a_qualifying_coupon_counts_whatever_order_it_was_applied_in(): void {
+		$this->method_with( array( 'requires' => 'coupon' ) );
+		$this->cart_holding( 100.0 );
+
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+		$this->apply_coupon( 'plain-after', array( 'free_shipping' => 'no' ) );
+
+		$this->assertTrue( $this->is_offered(), 'A later coupon that grants nothing should not undo the one that does.' );
 	}
 }
