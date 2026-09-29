@@ -92,9 +92,9 @@ export const hydrateInteractivityRegions = async (
 			if ( ! region.isConnected || hydratedRegions.has( region ) ) {
 				return;
 			}
-			hydratedRegions.add( region );
 			fixTemplateContents( region );
 			render( toVdom( region ), getRegionRootFragment( region ) );
+			hydratedRegions.add( region );
 		} );
 	} catch {
 		// The Interactivity API runtime is not available, e.g. there are no
