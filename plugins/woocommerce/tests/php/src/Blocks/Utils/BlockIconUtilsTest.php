@@ -133,7 +133,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty, invalid, or text-bearing changed markup falls back to the exact default.
+	 * @testdox Empty, invalid, or text-bearing changed markup, or markup with disallowed elements, falls back to the exact default.
 	 * @dataProvider provide_invalid_svg_replacements
 	 *
 	 * @param string $replacement Filter replacement.
@@ -168,11 +168,14 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 			'encoded text'          => array( '<svg>&lt;path/&gt;</svg>' ),
 			'CDATA'                 => array( '<svg><![CDATA[<path/>]]></svg>' ),
 			'unclosed group'        => array( '<svg><g></svg>' ),
+			'use element'           => array( '<svg viewBox="0 0 24 24"><use href="https://example.com/icon.svg#shape"/></svg>' ),
+			'clip path'             => array( '<svg viewBox="0 0 24 24"><g clip-path="url(#clip)"><path d="M1 1h22v22H1z" fill="currentColor"/></g><defs><clipPath id="clip"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>' ),
+			'mask'                  => array( '<svg viewBox="0 0 24 24"><mask id="mask"><rect width="24" height="24" fill="white"/></mask><path d="M1 1h22v22H1z" fill="currentColor"/></svg>' ),
 		);
 	}
 
 	/**
-	 * @testdox Unsafe attributes and elements are stripped from otherwise valid SVG.
+	 * @testdox Unsafe attributes are stripped from otherwise valid SVG.
 	 * @dataProvider provide_stripped_markup
 	 *
 	 * @param string $replacement Filter replacement.
@@ -187,7 +190,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Provides otherwise valid SVGs carrying markup the sanitizer removes.
+	 * Provides otherwise valid SVGs carrying attributes the sanitizer removes.
 	 *
 	 * @return array<string, array{string, string}>
 	 */
@@ -195,7 +198,6 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 		return array(
 			'event attribute' => array( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" onload="alert(1)"/></svg>', 'onload' ),
 			'external href'   => array( '<svg class="fixture-icon"><path d="M0 0h2v2H0z" href="https://example.com/icon.svg#shape"/></svg>', 'href' ),
-			'use element'     => array( '<svg class="fixture-icon"><use href="https://example.com/icon.svg#shape"/></svg>', '<use' ),
 		);
 	}
 

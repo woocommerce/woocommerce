@@ -45,7 +45,7 @@ final class BlockIconUtils {
 		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
 		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
-		 * Anything invalid, including an empty string, falls back to the default. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes. `BlockIconUtils` lists the accepted elements and attributes.
+		 * Anything invalid falls back to the default: an empty string, or any element outside the list in `BlockIconUtils`. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes.
 		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
@@ -58,6 +58,10 @@ final class BlockIconUtils {
 		$filtered_svg = apply_filters( 'woocommerce_blocks_decorative_icon_svg', $default_svg, $icon_name, $block_name, $block_attributes );
 
 		if ( ! is_string( $filtered_svg ) || $default_svg === $filtered_svg ) {
+			return $default_svg;
+		}
+
+		if ( ! self::has_only_allowed_elements( $filtered_svg ) ) {
 			return $default_svg;
 		}
 
@@ -138,6 +142,28 @@ final class BlockIconUtils {
 				$presentation_attributes
 			),
 		);
+	}
+
+	/**
+	 * Checks that the replacement uses only allowed elements, before `wp_kses()` runs.
+	 *
+	 * `wp_kses()` drops a disallowed tag but keeps its children, so the shapes inside a `<clipPath>` or `<mask>` would be painted as visible shapes.
+	 *
+	 * @param string $svg Unsanitized replacement markup.
+	 * @return bool Whether every element is allowed.
+	 */
+	private static function has_only_allowed_elements( string $svg ): bool {
+		$allowed_svg_html = self::get_allowed_svg_html();
+		$processor        = new WP_HTML_Tag_Processor( $svg );
+		$processor->change_parsing_namespace( 'svg' );
+
+		while ( $processor->next_token() ) {
+			if ( '#tag' === $processor->get_token_type() && ! array_key_exists( strtolower( (string) $processor->get_token_name() ), $allowed_svg_html ) ) {
+				return false;
+			}
+		}
+
+		return ! $processor->paused_at_incomplete_token();
 	}
 
 	/**
