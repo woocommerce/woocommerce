@@ -1065,6 +1065,23 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Whether a failed update check is likely to succeed if retried: a rate limit, a server error,
+	 * or a network error. Anything else is not, e.g. a 401 or 403 for a rejected connection, or no
+	 * usable local credentials.
+	 *
+	 * @param array|WP_Error $request       The update-check response.
+	 * @param int            $response_code The HTTP status code, 0 when there is none.
+	 * @return bool
+	 */
+	private static function is_temporary_failure( $request, int $response_code ): bool {
+		if ( is_wp_error( $request ) ) {
+			return 'authentication' !== $request->get_error_code();
+		}
+
+		return 429 === $response_code || $response_code >= 500;
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
 	 * The call is cached based on the payload (product ids, file ids, installed versions).
@@ -1137,17 +1154,21 @@ class WC_Helper_Updater {
 
 		$response_code = (int) wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $response_code ) {
-			// Leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
-			if ( 429 === $response_code && is_array( $request ) ) {
-				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
-			} else {
-				WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+			$data['errors'][] = 'http-error';
+
+			// On an outage, leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
+			if ( self::is_temporary_failure( $request, $response_code ) ) {
+				if ( 429 === $response_code && is_array( $request ) ) {
+					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+				} else {
+					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+				}
+
+				return self::get_cached_products( $cached_data );
 			}
-
-			return self::get_cached_products( $cached_data );
+		} else {
+			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 		}
-
-		$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
 		return $data['products'];
@@ -1291,6 +1312,21 @@ class WC_Helper_Updater {
 	 */
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
+		self::expire_updates_cache();
+	}
+
+	/**
+	 * Forces a fresh update check while keeping the cached products, so they are still served if that check fails.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function expire_updates_cache(): void {
+		$data = get_transient( '_woocommerce_helper_updates' );
+		if ( is_array( $data ) && isset( $data['hash'] ) ) {
+			$data['hash'] = '';
+			set_transient( '_woocommerce_helper_updates', $data, 12 * HOUR_IN_SECONDS );
+		}
+
 		delete_transient( '_woocommerce_helper_updates_count' );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );

@@ -1290,7 +1290,8 @@ class WC_Helper {
 		do_action( 'woocommerce_helper_subscriptions_refresh' );
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		// Keep the cached updates so they're still listed if the forced check fails.
+		WC_Helper_Updater::expire_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 
 		// A manual refresh resets any rate-limit backoff so the subsequent
