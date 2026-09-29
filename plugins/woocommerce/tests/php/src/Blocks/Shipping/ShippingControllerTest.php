@@ -505,6 +505,107 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A shopper can clear a field they already filled in, and what they had typed before is not a
+	 * reason to keep showing delivery.
+	 *
+	 * @testdox Clearing part of the address hides delivery again.
+	 */
+	public function test_clearing_part_of_the_address_hides_delivery_again(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->customer_enters_a_full_address();
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+		$this->assertSame(
+			array( 'flat_rate:1', 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'Delivery should be on offer while the address is complete.'
+		);
+
+		WC()->customer->set_shipping_postcode( '' );
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+		$this->assertSame(
+			array( 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'Once the postcode is taken back out, delivery should be hidden again.'
+		);
+	}
+
+	/**
+	 * What makes an address complete is the country's business. In a country that asks for neither a
+	 * postcode nor a state, the shopper has finished as soon as the city is in.
+	 *
+	 * @testdox In a country that asks for no postcode, a city is enough to bring delivery back.
+	 */
+	public function test_a_country_that_asks_for_no_postcode_needs_no_postcode(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		WC()->customer->set_shipping_country( 'AE' );
+		WC()->customer->set_shipping_city( 'Dubai' );
+
+		$this->assertTrue(
+			WC()->customer->has_full_shipping_address(),
+			'The UAE asks for neither a postcode nor a state, so this address should count as complete.'
+		);
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1', 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'Nothing should be held back for fields this country never asks for.'
+		);
+	}
+
+	/**
+	 * Stores change what their countries ask for through `woocommerce_get_country_locale`, and that
+	 * has to move what counts as a finished address here too.
+	 *
+	 * @testdox A field an extension made optional no longer holds delivery back.
+	 */
+	public function test_a_field_an_extension_made_optional_no_longer_holds_delivery_back(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_city( 'Beverly Hills' );
+		WC()->customer->set_shipping_state( 'CA' );
+
+		$this->assertFalse(
+			WC()->customer->has_full_shipping_address(),
+			'Ordinarily the US asks for a postcode, or this test would prove nothing.'
+		);
+
+		add_filter(
+			'woocommerce_get_country_locale',
+			static function ( $locale ) {
+				$locale['US']['postcode']['required'] = false;
+				return $locale;
+			}
+		);
+		// The locale is cached on first read, and the filter is attached after that read here.
+		WC()->countries->locale = array();
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1', 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'With the postcode made optional, the address is finished and delivery should show.'
+		);
+	}
+
+	/**
 	 * The classic cart hides the whole shipping section through `WC_Cart::show_shipping()` instead,
 	 * because there pickup is one of the shipping methods rather than a separate choice.
 	 *
