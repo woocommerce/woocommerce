@@ -606,6 +606,82 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A locale can hide a field outright. A shopper is never shown it, so it cannot be something
+	 * they have left unfinished, whatever the same locale says about it being required.
+	 *
+	 * @testdox A field the locale hides does not hold delivery back, even when marked required.
+	 *
+	 * @dataProvider provider_locales_that_hide_the_postcode
+	 *
+	 * @param callable $hide_the_postcode Attaches the filter that hides it.
+	 * @param string   $why               Which locale entry is doing the hiding.
+	 */
+	public function test_a_field_the_locale_hides_does_not_hold_delivery_back( callable $hide_the_postcode, string $why ): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_city( 'Beverly Hills' );
+		WC()->customer->set_shipping_state( 'CA' );
+
+		$this->assertFalse(
+			WC()->customer->has_full_shipping_address(),
+			'Ordinarily the US asks for a postcode, or this test would prove nothing.'
+		);
+
+		$hide_the_postcode();
+		// The locale is cached on first read, and the filter is attached after that read here.
+		WC()->countries->locale = array();
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1', 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'A field the shopper is never shown cannot be one they have left empty: ' . $why
+		);
+	}
+
+	/**
+	 * The two places a hidden flag can come from. They have separate filters, because
+	 * `WC_Countries::get_country_locale()` rebuilds its default entry after the country one.
+	 *
+	 * @return array
+	 */
+	public function provider_locales_that_hide_the_postcode(): array {
+		return array(
+			'hidden for this country'  => array(
+				static function () {
+					add_filter(
+						'woocommerce_get_country_locale',
+						static function ( $locale ) {
+							$locale['US']['postcode']['hidden']   = true;
+							$locale['US']['postcode']['required'] = true;
+							return $locale;
+						}
+					);
+				},
+				'the US locale hides it',
+			),
+			'hidden for every country' => array(
+				static function () {
+					add_filter(
+						'woocommerce_get_country_locale_default',
+						static function ( $fields ) {
+							$fields['postcode']['hidden']   = true;
+							$fields['postcode']['required'] = true;
+							return $fields;
+						}
+					);
+				},
+				'the default locale hides it',
+			),
+		);
+	}
+
+	/**
 	 * The classic cart hides the whole shipping section through `WC_Cart::show_shipping()` instead,
 	 * because there pickup is one of the shipping methods rather than a separate choice.
 	 *
