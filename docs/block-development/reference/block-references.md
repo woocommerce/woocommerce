@@ -1326,7 +1326,7 @@ Display active filters as removable chips.
 - **Name:** woocommerce/product-filter-removable-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-active
-- **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
+- **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
 ## Availability Filter - woocommerce/product-filter-status
