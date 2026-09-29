@@ -10,10 +10,10 @@ declare( strict_types = 1 );
 /**
  * Tests whether a cart asks the shopper for shipping at all.
  *
- * The expectations come from the Shipping settings screen: "Ship to all countries you sell to",
- * whose "Disable shipping & shipping calculations" option is the supported way to switch shipping
- * off, and from a product's own Virtual checkbox, described as "Enable this option to hide the
- * shipping fields for this product".
+ * The expectations come from the General settings screen, whose "Shipping location(s)" select
+ * offers "Disable shipping & shipping calculations" as the supported way to switch shipping off,
+ * and from a product's Virtual checkbox, described as "Virtual products are intangible and are not
+ * shipped."
  */
 class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 
