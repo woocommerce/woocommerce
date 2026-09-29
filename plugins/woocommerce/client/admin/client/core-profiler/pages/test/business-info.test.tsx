@@ -541,7 +541,7 @@ describe( 'BusinessInfo', () => {
 		it( 'should link to the privacy policy and record a Tracks event when it is clicked', () => {
 			render( <BusinessInfo { ...props } /> );
 			const link = screen.getByRole( 'link', {
-				name: /Privacy Policy/i,
+				name: 'Privacy Policy (opens in a new tab)',
 			} );
 			expect( link ).toHaveAttribute(
 				'href',
