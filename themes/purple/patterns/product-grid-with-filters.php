@@ -25,7 +25,7 @@
 // TODO: Remove the Product Filters spacing override in theme.json once WooCommerce
 // PR #67870 ships: https://github.com/woocommerce/woocommerce/pull/67870.
 ?>
-<!-- wp:woocommerce/product-filters {"style":{"position":{"type":"sticky","top":"var(--wp--preset--spacing--10)"},"@mobile":{"spacing":{"margin":{"top":"0"}}},"@tablet":{"spacing":{"margin":{"top":"0"}}}}} -->
+<!-- wp:woocommerce/product-filters {"style":{"position":{"type":"sticky","top":"var(--wp--preset--spacing--10)"}}} -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"},"@mobile":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}},"@tablet":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}}} -->
 <div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
@@ -123,8 +123,8 @@
 
 <!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"fontSize":"small","metadata":{"blockVisibility":{"viewport":{"desktop":false}}}} -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled has-small-font-size">
-<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
-<div class="wp-block-woocommerce-product-filter-active" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:woocommerce/product-filter-removable-chips -->
+<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
+<div class="wp-block-woocommerce-product-filter-active" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
 <!-- /wp:woocommerce/product-filter-removable-chips -->
 
@@ -141,8 +141,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"88%"} -->
-<div class="wp-block-column" style="flex-basis:88%">
-<!-- wp:woocommerce/product-collection {"queryId":27,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
+<div class="wp-block-column" style="flex-basis:88%"><!-- wp:woocommerce/product-collection {"queryId":27,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide">
 <!-- wp:group {"className":"alignwide","style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group alignwide" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-results-count {"metadata":{"blockVisibility":{"viewport":{"mobile":false}}}} /-->
