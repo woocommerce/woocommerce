@@ -65,7 +65,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 */
 	public function handle_get_block_templates( $templates, $query, $template_type ) {
 		if (
-			'wp_template' === $template_type && get_post_field( 'post_name', wc_get_page_id( 'shop' ) ) === $query['slug'] && wp_is_block_theme()
+			'wp_template' === $template_type && isset( $query['slug'] ) && get_post_field( 'post_name', wc_get_page_id( 'shop' ) ) === $query['slug'] && wp_is_block_theme()
 		) {
 			// Query without the page slug to preserve customized WooCommerce templates' precedence.
 			$catalog_templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ), 'wp_template' );
