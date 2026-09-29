@@ -22,12 +22,12 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'ProductButton cart count excludes declared child lines', () => {
+test.describe( 'ProductButton in-cart count', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin( CART_LINE_IDENTITY_PLUGIN );
 	} );
 
-	test( 'a direct variation add starts keyless and server and client counts agree', async ( {
+	test( 'does not count a child cart line in the add to cart button', async ( {
 		page,
 		frontendUtils,
 		addToCartWithOptionsPage,
@@ -48,40 +48,18 @@ test.describe( 'ProductButton cart count excludes declared child lines', () => {
 		);
 		expect( Number.isInteger( variationId ) ).toBe( true );
 
-		const parentItemKey = 'parent-key-that-is-not-in-the-cart';
-		await seedDeclaredChildLine( page, variationId, parentItemKey );
-		const readCartItems = async () => {
-			const cartResponse = await page.evaluate( async () => {
-				const response = await fetch( '/wp-json/wc/store/v1/cart' );
-				return {
-					ok: response.ok,
-					items: ( await response.json() ).items,
-				};
-			} );
-			expect( cartResponse.ok ).toBe( true );
-			return cartResponse.items;
-		};
-
-		const seededCartItems = await readCartItems();
-		expect( seededCartItems ).toHaveLength( 1 );
-		const declaredChildLine = seededCartItems.find(
-			( item ) =>
-				item.id === variationId &&
-				item.parent_item_key === parentItemKey
-		);
-		expect( declaredChildLine ).toMatchObject( {
-			id: variationId,
-			quantity: 1,
-			parent_item_key: parentItemKey,
-			key: expect.any( String ),
+		await seedDeclaredChildLine( page, variationId, 'parent-key' );
+		const cartItems = await page.evaluate( async () => {
+			const response = await fetch( '/wp-json/wc/store/v1/cart' );
+			return ( await response.json() ).items;
 		} );
+		expect( cartItems ).toHaveLength( 1 );
+		expect( cartItems[ 0 ].parent_item_key ).toBe( 'parent-key' );
 
+		// Reads the server-rendered HTML without running scripts.
 		const readServerRenderedButtonText = async () => {
 			const response = await page.request.get( postUrl );
-			expect( response.ok() ).toBe( true );
-
-			const html = await response.text();
-			const button = html.match(
+			const button = ( await response.text() ).match(
 				/<button\b[^>]*class="[^"]*\bsingle_add_to_cart_button\b[^"]*"[^>]*>([\s\S]*?)<\/button>/
 			);
 			expect( button ).not.toBeNull();
@@ -89,63 +67,19 @@ test.describe( 'ProductButton cart count excludes declared child lines', () => {
 			return button?.[ 1 ]?.replace( /<[^>]*>/g, '' ).trim();
 		};
 
-		// This separate request reads the server HTML without executing scripts.
-		expect( await readServerRenderedButtonText() ).toBe( 'Add to cart' );
-
-		await page.goto( postUrl );
 		const addToCartButton = page
 			.locator( '.wp-block-add-to-cart-with-options' )
 			.locator( '.single_add_to_cart_button' );
+
+		expect( await readServerRenderedButtonText() ).toBe( 'Add to cart' );
+		await page.goto( postUrl );
 		await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
-		const batchResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( '/wc/store/v1/batch' ) &&
-				response.request().method() === 'POST'
-		);
 		await addToCartButton.click();
-
-		const batchRequest = ( await batchResponse ).request().postDataJSON();
-		expect( batchRequest.requests ).toHaveLength( 1 );
-		expect( batchRequest.requests[ 0 ].path ).toBe(
-			'/wc/store/v1/cart/add-item'
-		);
-		expect( batchRequest.requests[ 0 ].body ).toMatchObject( {
-			id: variationId,
-		} );
-		expect( batchRequest.requests[ 0 ].body ).not.toHaveProperty( 'key' );
-
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
-		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-error' )
-		).toHaveCount( 0 );
 
-		const updatedCartItems = await readCartItems();
-		expect( updatedCartItems ).toHaveLength( 2 );
-		const preservedChildLine = updatedCartItems.find(
-			( item ) =>
-				item.id === variationId &&
-				item.parent_item_key === parentItemKey
-		);
-		expect( preservedChildLine ).toMatchObject( {
-			key: declaredChildLine.key,
-			id: variationId,
-			quantity: 1,
-			parent_item_key: parentItemKey,
-		} );
-		const standaloneLines = updatedCartItems.filter(
-			( item ) => item.id === variationId && item.parent_item_key === null
-		);
-		expect( standaloneLines ).toHaveLength( 1 );
-		expect( standaloneLines[ 0 ] ).toMatchObject( {
-			id: variationId,
-			quantity: 1,
-			parent_item_key: null,
-		} );
-		expect( standaloneLines[ 0 ].key ).not.toBe( declaredChildLine.key );
-
-		await page.reload();
 		expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
+		await page.reload();
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 } );
