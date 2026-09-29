@@ -1,0 +1,373 @@
+<?php
+declare( strict_types = 1 );
+
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- backcompat nomenclature.
+
+/**
+ * Tests when WC_Shipping_Free_Shipping offers itself to the shopper.
+ *
+ * Every expected value here is taken from what the settings screen promises the merchant, in
+ * init_form_fields() of the method itself, rather than from reading is_available(). The five
+ * "Free shipping requires" options, the minimum order amount ("Customers will need to spend this
+ * amount to get free shipping") and the coupon discount rule ("Apply minimum order rule before
+ * coupon discount") are the contract; the mechanism behind them is not.
+ */
+class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Shipping zone holding the method under test.
+	 *
+	 * @var WC_Shipping_Zone
+	 */
+	private $zone;
+
+	/**
+	 * Instance id of the free shipping method in that zone.
+	 *
+	 * @var int
+	 */
+	private $instance_id;
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var WC_Shipping_Free_Shipping
+	 */
+	private $sut;
+
+	/**
+	 * Set up test case.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->zone = new WC_Shipping_Zone();
+		$this->zone->set_zone_name( 'Free shipping' );
+		$this->zone->add_location( 'US', 'country' );
+		$this->zone->save();
+
+		$this->instance_id = $this->zone->add_shipping_method( 'free_shipping' );
+	}
+
+	/**
+	 * Save instance settings and build the method that reads them.
+	 *
+	 * @param array $settings Instance settings to store.
+	 */
+	private function method_with( array $settings ): void {
+		update_option(
+			'woocommerce_free_shipping_' . $this->instance_id . '_settings',
+			array_merge(
+				array(
+					'title'            => 'Free shipping',
+					'requires'         => '',
+					'min_amount'       => '0',
+					'ignore_discounts' => 'no',
+				),
+				$settings
+			)
+		);
+
+		$this->sut = new WC_Shipping_Free_Shipping( $this->instance_id );
+	}
+
+	/**
+	 * Put a product worth the given amount in the cart.
+	 *
+	 * @param float $price Product price.
+	 */
+	private function cart_holding( float $price ): void {
+		$product = new WC_Product_Simple();
+		$product->set_regular_price( (string) $price );
+		$product->save();
+
+		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1 ), 'The fixture product should reach the cart.' );
+
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( $price, WC()->cart->get_subtotal(), 'The cart should be worth what the test set up.' );
+	}
+
+	/**
+	 * Apply a coupon to the cart.
+	 *
+	 * @param string $code Coupon code.
+	 * @param array  $meta Coupon meta, for example free_shipping or coupon_amount.
+	 */
+	private function apply_coupon( string $code, array $meta ): void {
+		WC_Helper_Coupon::create_coupon( $code, $meta );
+
+		$this->assertTrue( WC()->cart->apply_coupon( $code ), 'The fixture coupon should apply, or a test expecting no free shipping proves nothing.' );
+
+		WC()->cart->calculate_totals();
+	}
+
+	/**
+	 * Whether the method currently offers itself.
+	 *
+	 * @return bool
+	 */
+	private function is_offered(): bool {
+		return $this->sut->is_available( array( 'destination' => array( 'country' => 'US' ) ) );
+	}
+
+	/**
+	 * @testdox With no requirement the method is always offered.
+	 */
+	public function test_no_requirement_is_always_offered(): void {
+		$this->method_with( array( 'requires' => '' ) );
+		$this->cart_holding( 1.0 );
+
+		$this->assertTrue( $this->is_offered(), 'No requirement should mean nothing to satisfy.' );
+	}
+
+	/**
+	 * "Customers will need to spend this amount to get free shipping" reads as the amount being
+	 * enough, so spending exactly it qualifies and a cent less does not.
+	 *
+	 * @testdox A minimum order amount is met exactly, exceeded, or missed by a cent.
+	 *
+	 * @testWith [50.00, true]
+	 *           [50.01, true]
+	 *           [49.99, false]
+	 *
+	 * @param float $cart_total Value of the cart.
+	 * @param bool  $expected   Whether free shipping should be offered.
+	 */
+	public function test_minimum_order_amount_boundary( float $cart_total, bool $expected ): void {
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '50',
+			)
+		);
+		$this->cart_holding( $cart_total );
+
+		$this->assertSame( $expected, $this->is_offered(), 'A cart of ' . $cart_total . ' against a 50.00 minimum.' );
+	}
+
+	/**
+	 * The option reads "A valid free shipping coupon", so both halves matter.
+	 *
+	 * @testdox A coupon requirement is met only by a valid coupon that grants free shipping.
+	 */
+	public function test_coupon_requirement_needs_a_free_shipping_coupon(): void {
+		$this->method_with( array( 'requires' => 'coupon' ) );
+		$this->cart_holding( 100.0 );
+
+		$this->apply_coupon( 'plain-discount', array( 'free_shipping' => 'no' ) );
+		$this->assertFalse( $this->is_offered(), 'A coupon that does not grant free shipping should not qualify.' );
+
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+		$this->assertTrue( $this->is_offered(), 'A coupon that grants free shipping should qualify.' );
+	}
+
+	/**
+	 * The option says "A valid free shipping coupon", so a coupon that has stopped being valid
+	 * since it was applied, an expired one for instance, must stop qualifying too.
+	 *
+	 * @testdox A free shipping coupon that is no longer valid stops qualifying.
+	 */
+	public function test_an_invalid_free_shipping_coupon_does_not_qualify(): void {
+		$this->method_with( array( 'requires' => 'coupon' ) );
+		$this->cart_holding( 100.0 );
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+
+		$this->assertTrue( $this->is_offered(), 'The coupon should qualify while it is valid.' );
+
+		$coupon = new WC_Coupon( 'ships-free' );
+		$coupon->set_date_expires( time() - DAY_IN_SECONDS );
+		$coupon->save();
+
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( $this->is_offered(), 'An expired coupon should no longer qualify.' );
+	}
+
+	/**
+	 * @testdox Removing the free shipping coupon withdraws free shipping again.
+	 */
+	public function test_removing_the_coupon_withdraws_free_shipping(): void {
+		$this->method_with( array( 'requires' => 'coupon' ) );
+		$this->cart_holding( 100.0 );
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+
+		$this->assertTrue( $this->is_offered(), 'The coupon should qualify while it is applied.' );
+
+		WC()->cart->remove_coupon( 'ships-free' );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( $this->is_offered(), 'Removing the coupon should withdraw free shipping.' );
+	}
+
+	/**
+	 * "A minimum order amount OR coupon" against "A minimum order amount AND coupon".
+	 *
+	 * @testdox Either is satisfied by one condition, both needs the two together.
+	 *
+	 * @testWith ["either", false, false, false]
+	 *           ["either", true, false, true]
+	 *           ["either", false, true, true]
+	 *           ["either", true, true, true]
+	 *           ["both", false, false, false]
+	 *           ["both", true, false, false]
+	 *           ["both", false, true, false]
+	 *           ["both", true, true, true]
+	 *
+	 * @param string $requires     The requirement setting.
+	 * @param bool   $meets_amount Whether the cart reaches the minimum.
+	 * @param bool   $has_coupon   Whether a free shipping coupon is applied.
+	 * @param bool   $expected     Whether free shipping should be offered.
+	 */
+	public function test_either_and_both_combine_the_two_conditions( string $requires, bool $meets_amount, bool $has_coupon, bool $expected ): void {
+		$this->method_with(
+			array(
+				'requires'   => $requires,
+				'min_amount' => '50',
+			)
+		);
+		$this->cart_holding( $meets_amount ? 60.0 : 10.0 );
+
+		if ( $has_coupon ) {
+			$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+		}
+
+		$this->assertSame(
+			$expected,
+			$this->is_offered(),
+			sprintf(
+				'%s with the minimum %s and a free shipping coupon %s.',
+				$requires,
+				$meets_amount ? 'met' : 'missed',
+				$has_coupon ? 'applied' : 'absent'
+			)
+		);
+	}
+
+	/**
+	 * The minimum is measured against what the shopper is shown. On a store that displays prices
+	 * with tax, a coupon takes its tax portion off the displayed amount too, so the amount the
+	 * shopper sees themselves spending is what has to reach the minimum.
+	 *
+	 * @testdox On a tax-inclusive store the coupon's tax also comes off the minimum.
+	 */
+	public function test_the_minimum_follows_the_tax_inclusive_amount_the_shopper_sees(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$product = new WC_Product_Simple();
+		$product->set_regular_price( '110' );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->apply_coupon( 'eleven-off', array( 'coupon_amount' => '11' ) );
+
+		// The shopper sees 110.00 and hands over 11.00 of it, so 99.00 is what they spent.
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '99',
+			)
+		);
+
+		$this->assertTrue(
+			$this->is_offered(),
+			'The 99.00 the shopper actually spent should meet a 99.00 minimum, not the lower amount left after tax is stripped out.'
+		);
+
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '100',
+			)
+		);
+
+		$this->assertFalse(
+			$this->is_offered(),
+			'A 110.00 tax-inclusive cart less an 11.00 coupon leaves 99.00 for the shopper, short of the 100.00 minimum.'
+		);
+	}
+
+	/**
+	 * A shopper who lands exactly on the minimum has met it. Floating point subtraction can put
+	 * the result a hair below, and the rounding to the store's price decimals is what stops that
+	 * from quietly denying free shipping.
+	 *
+	 * @testdox A discounted cart landing exactly on the minimum still qualifies.
+	 */
+	public function test_a_discounted_cart_landing_exactly_on_the_minimum_qualifies(): void {
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '35.77',
+			)
+		);
+		$this->cart_holding( 40.0 );
+		$this->apply_coupon( 'four-twenty-three-off', array( 'coupon_amount' => '4.23' ) );
+
+		$this->assertTrue(
+			$this->is_offered(),
+			'40.00 less 4.23 is exactly the 35.77 minimum, whatever the binary subtraction leaves behind.'
+		);
+	}
+
+	/**
+	 * `woocommerce_shipping_free_shipping_is_available` is a public extension point. Pin that it
+	 * is honoured rather than pinning an outcome an extension is meant to be able to change.
+	 *
+	 * @testdox An extension can override availability through the filter.
+	 */
+	public function test_the_availability_filter_is_honoured(): void {
+		$this->method_with( array( 'requires' => '' ) );
+		$this->cart_holding( 10.0 );
+
+		$this->assertTrue( $this->is_offered(), 'No requirement should offer free shipping before the filter runs.' );
+
+		add_filter( 'woocommerce_shipping_free_shipping_is_available', '__return_false' );
+
+		$this->assertFalse( $this->is_offered(), 'The filter should be able to withdraw the method.' );
+	}
+
+	/**
+	 * The checkbox reads "Apply minimum order rule before coupon discount", described as making
+	 * free shipping "available based on pre-discount order amount". Unchecked, the discount
+	 * counts against the minimum; checked, it does not.
+	 *
+	 * @testdox The coupon discount counts against the minimum unless the pre-discount rule is on.
+	 *
+	 * @testWith ["no", false]
+	 *           ["yes", true]
+	 *
+	 * @param string $ignore_discounts The setting value.
+	 * @param bool   $expected         Whether free shipping should be offered.
+	 */
+	public function test_discount_counts_against_the_minimum_unless_ignored( string $ignore_discounts, bool $expected ): void {
+		$this->method_with(
+			array(
+				'requires'         => 'min_amount',
+				'min_amount'       => '50',
+				'ignore_discounts' => $ignore_discounts,
+			)
+		);
+		$this->cart_holding( 55.0 );
+		$this->apply_coupon( 'ten-off', array( 'coupon_amount' => '10' ) );
+
+		$this->assertSame(
+			$expected,
+			$this->is_offered(),
+			'A 55.00 cart discounted by 10.00 against a 50.00 minimum, with the pre-discount rule ' . $ignore_discounts . '.'
+		);
+	}
+}
