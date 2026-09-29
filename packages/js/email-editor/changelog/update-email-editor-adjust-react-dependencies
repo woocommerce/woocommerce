@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: update
 
 Move react and react-dom to peer dependencies and accept React 19.
