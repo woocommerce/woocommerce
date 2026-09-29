@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-// @ts-expect-error: WordPress does not provide types for this package.
-import ServerSideRender from '@wordpress/server-side-render';
 import {
 	formatPrice,
 	getCurrencyFromPriceResponse,
@@ -28,7 +26,6 @@ type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		align: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
-		blockAttributes?: BlockAttributes;
 	};
 
 export const Block = ( props: Props ): ReactElement | null => {
@@ -51,27 +48,8 @@ export const Block = ( props: Props ): ReactElement | null => {
 	const isNumeric =
 		props.badgeContent === 'amount' || props.badgeContent === 'percentage';
 
-	if (
-		isNumeric &&
-		product.type === 'variable' &&
-		product.id &&
-		props.blockAttributes
-	) {
-		return (
-			<ServerSideRender
-				block="woocommerce/product-sale-badge"
-				attributes={ props.blockAttributes }
-				urlQueryArgs={ { post_id: product.id } }
-			/>
-		);
-	}
-
 	let label = props.saleText ?? __( 'Sale', 'woocommerce' );
-	if (
-		isNumeric &&
-		product.type !== 'variable' &&
-		product.type !== 'grouped'
-	) {
+	if ( isNumeric && product.type !== 'grouped' ) {
 		const prices = 'prices' in product ? product.prices : undefined;
 		const regular = Number( prices?.regular_price );
 		const price = Number( prices?.price );
@@ -84,7 +62,18 @@ export const Block = ( props: Props ): ReactElement | null => {
 							discount,
 							getCurrencyFromPriceResponse( prices )
 					  );
-			label = `${ props.prefix ?? '' }${ value }${ props.suffix ?? '' }`;
+			// Parent prices are independent minima, so the editor preview may differ from the largest variation discount.
+			const preview =
+				product.type === 'variable'
+					? sprintf(
+							/* translators: %s: approximate discount for a variable product in the editor. */
+							__( 'Up to %s', 'woocommerce' ),
+							value
+					  )
+					: value;
+			label = `${ props.prefix ?? '' }${ preview }${
+				props.suffix ?? ''
+			}`;
 		}
 	}
 

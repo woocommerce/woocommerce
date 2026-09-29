@@ -113,7 +113,6 @@ const Edit = ( {
 			<div { ...wrapperProps }>
 				<Block
 					{ ...blockAttrs }
-					blockAttributes={ attributes }
 					isDescendentOfSingleProductTemplate={
 						isDescendentOfSingleProductTemplate
 					}
