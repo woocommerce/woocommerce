@@ -86,6 +86,128 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Product Sale Badge displays the configured content for a simple sale product.
+	 * @dataProvider provider_product_sale_badge_content
+	 * @param array  $attributes Badge attributes.
+	 * @param string $expected Expected badge text.
+	 */
+	public function test_product_sale_badge_content( array $attributes, string $expected ): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '20' );
+		$product->set_sale_price( '15' );
+		$product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+	}
+
+	/**
+	 * Sale badge content options.
+	 *
+	 * @return array<string, array{array, string}>
+	 */
+	public function provider_product_sale_badge_content(): array {
+		return array(
+			'default'    => array( array(), 'Sale' ),
+			'custom'     => array(
+				array( 'saleText' => 'Special offer' ),
+				'Special offer',
+			),
+			'percentage' => array(
+				array(
+					'badgeContent' => 'percentage',
+					'prefix'       => 'Save ',
+					'suffix'       => ' off',
+				),
+				'Save 25% off',
+			),
+			'amount'     => array(
+				array(
+					'badgeContent' => 'amount',
+					'prefix'       => 'Save ',
+				),
+				'Save $5.00',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Variable product badge uses each variation's own regular price for the largest discount.
+	 */
+	public function test_variable_product_sale_badge_displays_maximum_discount(): void {
+		$product    = \WC_Helper_Product::create_variation_product();
+		$variations = $product->get_children();
+
+		$first = wc_get_product( $variations[0] );
+		$first->set_sale_price( '5' );
+		$first->save();
+
+		$second = wc_get_product( $variations[1] );
+		$second->set_sale_price( '9' );
+		$second->save();
+
+		foreach (
+			array(
+				'percentage' => 'Up to 50%',
+				'amount'     => 'Up to $6.00',
+			) as $mode => $expected
+		) {
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"' . $mode . '"} /--><!-- /wp:woocommerce/single-product -->' );
+			$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+		}
+	}
+
+	/**
+	 * @testdox Discount amount reflects prices shown with tax on the storefront.
+	 */
+	public function test_discount_amount_includes_displayed_tax(): void {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+		$tax_id = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$simple = \WC_Helper_Product::create_simple_product();
+			$simple->set_regular_price( '100' );
+			$simple->set_sale_price( '80' );
+			$simple->save();
+
+			$variable  = \WC_Helper_Product::create_variation_product();
+			$variation = wc_get_product( $variable->get_children()[0] );
+			$variation->set_regular_price( '100' );
+			$variation->set_sale_price( '80' );
+			$variation->save();
+
+			foreach (
+				array(
+					$simple->get_id()   => '$24.00',
+					$variable->get_id() => 'Up to $24.00',
+				) as $product_id => $expected
+			) {
+				$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"amount"} /--><!-- /wp:woocommerce/single-product -->' );
+				$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+			}
+		} finally {
+			\WC_Tax::_delete_tax_rate( $tax_id );
+			remove_filter( 'wc_tax_enabled', '__return_true' );
+		}
+	}
+
+	/**
 	 * Alignment values for the Sale Badge.
 	 *
 	 * @return array<string, array{string}>
