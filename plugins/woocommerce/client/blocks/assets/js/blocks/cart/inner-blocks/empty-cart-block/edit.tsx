@@ -81,6 +81,7 @@ const defaultTemplate = [
 				...( ( { timeFrame, ...rest } ) => rest )(
 					newArrivals.attributes.query
 				),
+				isProductCollectionBlock: true,
 				postType: 'product',
 				perPage: 4,
 				woocommerceStockStatus: [ 'instock' ],
