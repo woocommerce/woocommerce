@@ -22,6 +22,7 @@ export const config = {
 export const store = createReduxStore( STORE_KEY, config );
 register( store );
 export type CheckoutStoreDescriptor = typeof store;
+export type { CheckoutProcessingOwner } from './default-state';
 
 subscribe( pushChanges, store );
 

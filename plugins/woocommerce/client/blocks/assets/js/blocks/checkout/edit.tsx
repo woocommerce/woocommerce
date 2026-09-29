@@ -138,7 +138,7 @@ export const Edit = ( {
 				} }
 			>
 				<SlotFillProvider>
-					<CheckoutProvider>
+					<CheckoutProvider providerId="checkout">
 						<SidebarLayout
 							className={ clsx( 'wc-block-checkout', {
 								'has-dark-controls': hasDarkControls,

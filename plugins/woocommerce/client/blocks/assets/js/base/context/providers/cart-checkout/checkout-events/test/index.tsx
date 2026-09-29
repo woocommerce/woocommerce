@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
-import { dispatch } from '@wordpress/data';
+import { act, render, renderHook } from '@testing-library/react';
+import { dispatch, select } from '@wordpress/data';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 
 /**
  * Internal dependencies
  */
-import { CheckoutEventsProvider } from '../index';
+import { CheckoutEventsProvider, useCheckoutEventsContext } from '../index';
 
 // Mock the registry functions
 jest.mock( '@woocommerce/blocks-registry', () => ( {
@@ -42,6 +42,7 @@ describe( 'CheckoutEventsContext', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		dispatch( checkoutStore ).__internalSetIdle();
+		dispatch( checkoutStore ).__internalSetProcessingOwner( null );
 
 		// Mock the payment store dispatch action
 		mockSetRegisteredExpressPaymentMethods = jest.fn();
@@ -74,6 +75,25 @@ describe( 'CheckoutEventsContext', () => {
 				supportsStyle: [],
 			},
 		} );
+	} );
+
+	it( 'sets the processing owner on submit', () => {
+		const setBeforeProcessing = jest
+			.spyOn( dispatch( checkoutStore ), '__internalSetBeforeProcessing' )
+			.mockImplementation( jest.fn() );
+		const { result } = renderHook( useCheckoutEventsContext, {
+			wrapper: ( { children } ) => (
+				<CheckoutEventsProvider redirectUrl="local" providerId="cart">
+					{ children }
+				</CheckoutEventsProvider>
+			),
+		} );
+
+		act( () => result.current.onSubmit() );
+
+		expect( select( checkoutStore ).getProcessingOwner() ).toBe( 'cart' );
+		expect( setBeforeProcessing ).toHaveBeenCalled();
+		setBeforeProcessing.mockRestore();
 	} );
 
 	it( 'onCheckoutValidation observers are called when the checkout is in the "beforeProcessing" state', async () => {

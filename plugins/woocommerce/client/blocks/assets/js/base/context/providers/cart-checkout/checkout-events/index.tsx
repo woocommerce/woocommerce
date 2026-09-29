@@ -35,6 +35,7 @@ import {
  * Internal dependencies
  */
 import type { EventListenerRegistrationFunction } from '@woocommerce/blocks-checkout-events/event-emitter';
+import type { CheckoutProcessingOwner } from '@woocommerce/block-data/checkout';
 import { reducer as emitReducer } from './event-emit';
 import { emitterCallback, noticeContexts } from '../../../event-emit';
 import { useStoreEvents } from '../../../hooks/use-store-events';
@@ -82,13 +83,16 @@ export const useCheckoutEventsContext = () => {
  * @param {Object} props             Incoming props for the provider.
  * @param {Object} props.children    The children being wrapped.
  * @param {string} props.redirectUrl Initialize what the checkout will redirect to after successful submit.
+ * @param {string} props.providerId  Identifier for the provider.
  */
 export const CheckoutEventsProvider = ( {
 	children,
 	redirectUrl,
+	providerId = 'checkout',
 }: {
 	children: React.ReactNode;
 	redirectUrl: string;
+	providerId?: CheckoutProcessingOwner;
 } ): JSX.Element => {
 	const paymentMethods = getPaymentMethods();
 	const expressPaymentMethods = getExpressPaymentMethods();
@@ -159,6 +163,7 @@ export const CheckoutEventsProvider = ( {
 		__internalEmitValidateEvent,
 		__internalEmitAfterProcessingEvents,
 		__internalSetBeforeProcessing,
+		__internalSetProcessingOwner,
 	} = useDispatch( checkoutStore );
 
 	const {
@@ -343,8 +348,14 @@ export const CheckoutEventsProvider = ( {
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
+		void __internalSetProcessingOwner( providerId );
 		void __internalSetBeforeProcessing();
-	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
+	}, [
+		dispatchCheckoutEvent,
+		providerId,
+		__internalSetBeforeProcessing,
+		__internalSetProcessingOwner,
+	] );
 
 	const checkoutEventHandlers = {
 		onSubmit,

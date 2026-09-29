@@ -19,14 +19,21 @@ import CheckoutProcessor from './checkout-processor';
  *
  * @param {Object} props               Incoming props for the provider.
  * @param {Object} props.children      The children being wrapped.
- *                                     component.
  * @param {string} [props.redirectUrl] Initialize what the checkout will
  *                                     redirect to after successful
  *                                     submit.
+ * @param {string} [props.providerId]  Identifier for the provider.
  */
-export const CheckoutProvider = ( { children, redirectUrl } ) => {
+export const CheckoutProvider = ( {
+	children,
+	redirectUrl,
+	providerId = 'checkout',
+} ) => {
 	return (
-		<CheckoutEventsProvider redirectUrl={ redirectUrl }>
+		<CheckoutEventsProvider
+			redirectUrl={ redirectUrl }
+			providerId={ providerId }
+		>
 			<ShippingDataProvider>
 				<PaymentEventsProvider>
 					{ children }

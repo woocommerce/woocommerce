@@ -176,7 +176,7 @@ const Block = ( {
 			<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
 			{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
 			<SlotFillProvider>
-				<CheckoutProvider>
+				<CheckoutProvider providerId="checkout">
 					<SidebarLayout
 						className={ clsx( 'wc-block-checkout', {
 							'has-dark-controls': attributes.hasDarkControls,
