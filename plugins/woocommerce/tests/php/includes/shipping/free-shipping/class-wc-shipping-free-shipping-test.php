@@ -370,4 +370,86 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 			'A 55.00 cart discounted by 10.00 against a 50.00 minimum, with the pre-discount rule ' . $ignore_discounts . '.'
 		);
 	}
+
+	/**
+	 * The Minimum order amount field defaults to 0, so a merchant who picks the minimum rule and
+	 * leaves the amount alone is asking for no floor at all, not an unreachable one.
+	 *
+	 * @testdox A minimum of zero is met by any cart.
+	 */
+	public function test_a_minimum_of_zero_is_met_by_any_cart(): void {
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '0',
+			)
+		);
+		$this->cart_holding( 1.0 );
+
+		$this->assertTrue( $this->is_offered(), 'A minimum of zero should let any cart through.' );
+	}
+
+	/**
+	 * The pre-discount checkbox is offered for every rule that involves the minimum, not just the
+	 * minimum on its own, so it has to behave the same way under those too.
+	 *
+	 * @testdox The pre-discount rule applies under either and both, not only under the minimum alone.
+	 *
+	 * @testWith ["either", "no", false]
+	 *           ["either", "yes", true]
+	 *           ["both", "no", false]
+	 *           ["both", "yes", true]
+	 *
+	 * @param string $requires         The requirement setting.
+	 * @param string $ignore_discounts Whether the minimum is applied before the discount.
+	 * @param bool   $expected         Whether free shipping should be offered.
+	 */
+	public function test_the_pre_discount_rule_applies_under_either_and_both( string $requires, string $ignore_discounts, bool $expected ): void {
+		$this->method_with(
+			array(
+				'requires'         => $requires,
+				'min_amount'       => '50',
+				'ignore_discounts' => $ignore_discounts,
+			)
+		);
+		$this->cart_holding( 55.0 );
+
+		// The coupon has to discount either way, so the pre-discount rule has something to act on.
+		// Under "either" it must not grant free shipping, or it would satisfy the rule on its own
+		// and the minimum would never be consulted. Under "both" it must grant it, or the coupon
+		// half of the rule fails and the minimum never gets to decide anything.
+		$this->apply_coupon(
+			'ten-off',
+			array(
+				'coupon_amount' => '10',
+				'free_shipping' => 'both' === $requires ? 'yes' : 'no',
+			)
+		);
+
+		$this->assertSame(
+			$expected,
+			$this->is_offered(),
+			sprintf( 'A 55.00 cart less 10.00 against a 50.00 minimum under %s, pre-discount rule %s.', $requires, $ignore_discounts )
+		);
+	}
+
+	/**
+	 * A shopper can hold several coupons at once. Only one of them has to grant free shipping,
+	 * and one that does not must not mask one that does.
+	 *
+	 * @testdox A free shipping coupon still qualifies alongside coupons that do not grant it.
+	 */
+	public function test_one_qualifying_coupon_among_several_is_enough(): void {
+		$this->method_with( array( 'requires' => 'coupon' ) );
+		$this->cart_holding( 100.0 );
+
+		$this->apply_coupon( 'plain-one', array( 'free_shipping' => 'no' ) );
+		$this->apply_coupon( 'plain-two', array( 'free_shipping' => 'no' ) );
+
+		$this->assertFalse( $this->is_offered(), 'Two coupons that grant nothing should still grant nothing.' );
+
+		$this->apply_coupon( 'ships-free', array( 'free_shipping' => 'yes' ) );
+
+		$this->assertTrue( $this->is_offered(), 'The qualifying coupon should count even when it is not the only one.' );
+	}
 }
