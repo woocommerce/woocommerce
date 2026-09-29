@@ -15,6 +15,11 @@ namespace Automattic\WooCommerce\Internal\Tax;
 class CartPricingContext {
 
 	/**
+	 * Template name of the mini-cart.
+	 */
+	private const MINI_CART_TEMPLATE = 'cart/mini-cart.php';
+
+	/**
 	 * Stack of dispatch IDs for Store API requests and hydrated routes.
 	 *
 	 * @var int[]
@@ -36,6 +41,13 @@ class CartPricingContext {
 	private $calculation_depth = 0;
 
 	/**
+	 * Calculation depths saved when mini-cart renders started, restored when each render ends.
+	 *
+	 * @var int[]
+	 */
+	private $mini_cart_depths = array();
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
@@ -45,6 +57,7 @@ class CartPricingContext {
 		$this->dispatch_stack    = array();
 		$this->dispatch_contexts = array();
 		$this->calculation_depth = 0;
+		$this->mini_cart_depths  = array();
 		// Register the route context only after a route matches, and clear it right after the callback.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
@@ -56,8 +69,9 @@ class CartPricingContext {
 		// so both can happen outside the cart and checkout pages.
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_calculation_start' ), PHP_INT_MIN, 0 );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_calculation_end' ), PHP_INT_MAX, 0 );
-		add_action( 'woocommerce_before_mini_cart', array( $this, 'handle_calculation_start' ), PHP_INT_MIN, 0 );
-		add_action( 'woocommerce_after_mini_cart', array( $this, 'handle_calculation_end' ), PHP_INT_MAX, 0 );
+		// The template part hooks fire around the mini-cart even when a theme override drops the mini-cart hooks.
+		add_action( 'woocommerce_before_template_part', array( $this, 'handle_template_part_start' ), PHP_INT_MIN, 1 );
+		add_action( 'woocommerce_after_template_part', array( $this, 'handle_template_part_end' ), PHP_INT_MAX, 1 );
 	}
 
 	/**
@@ -81,7 +95,7 @@ class CartPricingContext {
 	}
 
 	/**
-	 * Start a cart totals calculation or a mini-cart render.
+	 * Start a cart totals calculation.
 	 *
 	 * @since 11.3.0
 	 * @internal
@@ -98,6 +112,39 @@ class CartPricingContext {
 	 */
 	public function handle_calculation_end(): void {
 		$this->calculation_depth = max( 0, $this->calculation_depth - 1 );
+	}
+
+	/**
+	 * Start a mini-cart render.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param mixed $template_name Template name.
+	 */
+	public function handle_template_part_start( $template_name ): void {
+		if ( self::MINI_CART_TEMPLATE !== $template_name ) {
+			return;
+		}
+
+		$this->mini_cart_depths[] = $this->calculation_depth;
+		++$this->calculation_depth;
+	}
+
+	/**
+	 * End a mini-cart render, restoring the calculation depth from before it started.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param mixed $template_name Template name.
+	 */
+	public function handle_template_part_end( $template_name ): void {
+		if ( self::MINI_CART_TEMPLATE !== $template_name || empty( $this->mini_cart_depths ) ) {
+			return;
+		}
+
+		$this->calculation_depth = (int) array_pop( $this->mini_cart_depths );
 	}
 
 	/**

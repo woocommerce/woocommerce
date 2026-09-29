@@ -295,7 +295,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 		// The instance hooked at boot differs from the SUT in tests, so keep only the SUT hooked.
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
-		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
 
 		// WC_Cart::needs_shipping() only checks products when a shipping method exists, so count nesting rather than calls.
 		$depth          = 0;
@@ -400,69 +400,117 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Leaves the taxable address unchanged when local pickup uses the store address.
+	 * @testdox Uses the billing address when a local pickup choice is left in the session of a cart without shipping.
 	 *
-	 * The session keeps a chosen shipping method until it is saved for a cart without shippable products,
+	 * The session keeps the chosen shipping method until it is saved for a cart without shippable products,
 	 * so a local pickup choice can outlive the removal of the last shippable item within a request.
 	 */
-	public function test_leaves_address_unchanged_when_local_pickup_uses_store_address(): void {
+	public function test_uses_billing_address_when_local_pickup_is_left_in_session(): void {
 		$this->add_product_to_cart( true );
-		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+		$this->choose_local_pickup_in_us();
 		$this->set_checkout_context();
-		$base_location = wc_get_base_location();
 
 		$result = $this->customer->get_taxable_address();
 
-		$this->assertSame(
-			array(
-				$base_location['country'],
-				$base_location['state'],
-				WC()->countries->get_base_postcode(),
-				WC()->countries->get_base_city(),
-			),
-			$result,
-			'Local pickup should use the store address for taxes.'
-		);
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A local pickup choice left in the session should not replace the billing address.' );
 	}
 
 	/**
-	 * @testdox Uses the billing address for local pickup when base tax for local pickup is disabled.
+	 * @testdox Uses the billing address for totals once the last shippable item is removed with local pickup chosen.
+	 *
+	 * Removing an item recalculates the totals before the session drops the local pickup choice.
 	 */
-	public function test_uses_billing_address_for_local_pickup_without_base_tax(): void {
+	public function test_uses_billing_address_for_totals_after_last_shippable_item_is_removed_with_local_pickup(): void {
+		$this->create_billing_country_tax_rate();
 		$this->add_product_to_cart( true );
-		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
-		add_filter( 'woocommerce_apply_base_tax_for_local_pickup', '__return_false' );
+		$shippable_item_key = $this->add_product_to_cart( false );
+		$this->choose_local_pickup_in_us();
 		$this->set_checkout_context();
 
-		$result = $this->customer->get_taxable_address();
+		WC()->cart->remove_cart_item( $shippable_item_key );
 
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'Local pickup without base tax should fall through to the billing address.' );
+		$this->assertEquals( 2.0, WC()->cart->get_total_tax(), 'Cart totals should include the billing country tax without waiting for the next request.' );
+	}
+
+	/**
+	 * @testdox Uses the local pickup location for totals when a cart product needs shipping.
+	 *
+	 * Only the pickup location's postcode has a tax rate, so no other address can produce the expected tax.
+	 */
+	public function test_uses_local_pickup_location_for_totals_when_product_needs_shipping(): void {
+		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'US', '10.0000', '90001' );
+		$this->add_product_to_cart( false );
+		$this->choose_local_pickup_in_us();
+		$this->set_checkout_context();
+
+		$taxable_address = $this->customer->get_taxable_address();
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $taxable_address, 'A cart product that needs shipping should keep the local pickup location as the taxable address.' );
+		$this->assertEquals( 1.0, WC()->cart->get_total_tax(), 'Cart totals should include the local pickup location tax.' );
 	}
 
 	/**
 	 * Add a product to the cart.
 	 *
 	 * @param bool $virtual Whether the product is virtual.
+	 * @return string The cart item key.
 	 */
-	private function add_product_to_cart( bool $virtual ): void {
+	private function add_product_to_cart( bool $virtual ): string {
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_virtual( $virtual );
 		$product->save();
 
-		WC()->cart->add_to_cart( $product->get_id() );
+		return (string) WC()->cart->add_to_cart( $product->get_id() );
+	}
+
+	/**
+	 * Choose local pickup at a US location, which the Blocks local pickup filter uses as the taxable address.
+	 */
+	private function choose_local_pickup_in_us(): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'US store',
+					'address' => array(
+						'address_1' => '1 Main St',
+						'city'      => 'Los Angeles',
+						'state'     => 'CA',
+						'postcode'  => '90001',
+						'country'   => 'US',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+			)
+		);
+		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:0' ) );
 	}
 
 	/**
 	 * Enable taxes with a 20% standard rate for the billing country only.
 	 */
 	private function create_billing_country_tax_rate(): void {
+		$this->create_tax_rate( 'GB', '20.0000' );
+	}
+
+	/**
+	 * Enable taxes with a standard rate for a country, optionally limited to a postcode.
+	 *
+	 * @param string $country  Country code.
+	 * @param string $rate     Tax rate percentage.
+	 * @param string $postcode Postcode the rate is limited to, or empty for the whole country.
+	 */
+	private function create_tax_rate( string $country, string $rate, string $postcode = '' ): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		\WC_Tax::_insert_tax_rate(
+		$tax_rate_id = \WC_Tax::_insert_tax_rate(
 			array(
-				'tax_rate_country'  => 'GB',
+				'tax_rate_country'  => $country,
 				'tax_rate_state'    => '',
-				'tax_rate'          => '20.0000',
-				'tax_rate_name'     => 'VAT',
+				'tax_rate'          => $rate,
+				'tax_rate_name'     => 'Tax',
 				'tax_rate_priority' => '1',
 				'tax_rate_compound' => '0',
 				'tax_rate_shipping' => '1',
@@ -470,6 +518,10 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 				'tax_rate_class'    => '',
 			)
 		);
+
+		if ( '' !== $postcode ) {
+			\WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
+		}
 	}
 
 	/**

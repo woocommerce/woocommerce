@@ -176,6 +176,68 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Is active only while a theme mini-cart override without the mini-cart hooks renders.
+	 */
+	public function test_is_active_only_during_mini_cart_override_without_mini_cart_hooks(): void {
+		$this->add_product_to_cart();
+		$during        = null;
+		$after         = null;
+		$mini_cart     = '';
+		$override_file = wp_tempnam( 'mini-cart-without-hooks.php' );
+		file_put_contents( $override_file, '<p>Theme mini-cart</p>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in a temp file.
+		$override = function ( $template, $template_name ) use ( $override_file ) {
+			return 'cart/mini-cart.php' === $template_name ? $override_file : $template;
+		};
+		$probe    = function ( $template_name ) use ( &$during ): void {
+			if ( 'cart/mini-cart.php' === $template_name ) {
+				$during = $this->sut->is_active();
+			}
+		};
+		add_filter( 'wc_get_template', $override, 10, 2 );
+		add_action( 'woocommerce_before_template_part', $probe );
+
+		try {
+			$this->dispatch_test_route(
+				'/wc/store/v1/products',
+				function ( $request ) use ( &$after, &$mini_cart ) {
+					unset( $request ); // Avoid parameter not used PHPCS errors.
+					ob_start();
+					woocommerce_mini_cart();
+					$mini_cart = (string) ob_get_clean();
+					$after     = $this->sut->is_active();
+					return rest_ensure_response( array( 'ok' => true ) );
+				}
+			);
+		} finally {
+			wp_delete_file( $override_file );
+		}
+
+		$this->assertStringContainsString( 'Theme mini-cart', $mini_cart, 'The theme override should be rendered.' );
+		$this->assertTrue( $during, 'A mini-cart override render should price the cart.' );
+		$this->assertFalse( $after, 'The route should decide again once the mini-cart override is rendered.' );
+	}
+
+	/**
+	 * @testdox Ignores template parts other than the mini-cart.
+	 */
+	public function test_ignores_other_template_parts(): void {
+		$is_active = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$is_active ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				$this->sut->handle_template_part_start( 'cart/cart.php' );
+				$is_active = $this->sut->is_active();
+				$this->sut->handle_template_part_end( 'cart/cart.php' );
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertFalse( $is_active, 'Other template parts should not price the cart.' );
+	}
+
+	/**
 	 * @testdox Recovers from an unbalanced calculation end.
 	 */
 	public function test_recovers_from_unbalanced_calculation_end(): void {

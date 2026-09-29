@@ -37,7 +37,8 @@ class NonShippingCartTaxLocation {
 	 */
 	final public function init( CartPricingContext $cart_pricing_context ): void {
 		$this->cart_pricing_context = $cart_pricing_context;
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 10, 2 );
+		// Should run after the Blocks local pickup filter, which can apply a pickup choice left in the session after the last shippable item is removed.
+		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
 	}
 
 	/**
@@ -64,10 +65,6 @@ class NonShippingCartTaxLocation {
 		}
 
 		if ( ! $this->cart_pricing_context->is_active() ) {
-			return $taxable_address;
-		}
-
-		if ( $this->is_address_resolved_for_local_pickup() ) {
 			return $taxable_address;
 		}
 
@@ -98,19 +95,6 @@ class NonShippingCartTaxLocation {
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
 		);
-	}
-
-	/**
-	 * Determine whether the incoming address is already the store or pickup address chosen for local pickup.
-	 *
-	 * The tax option still reads "shipping" in that case, so without this check the billing address would replace it.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return bool True when local pickup has replaced the customer's address for tax.
-	 */
-	private function is_address_resolved_for_local_pickup(): bool {
-		return LocalPickupTaxRule::applies_to_shipping_methods( wc_get_chosen_shipping_method_ids() );
 	}
 
 	/**
