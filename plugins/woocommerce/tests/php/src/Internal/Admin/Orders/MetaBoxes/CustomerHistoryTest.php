@@ -769,14 +769,17 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		\WC_Helper_Reports::reset_stats_dbs();
 
 		$new_customer_fired = 0;
-		$callback           = static function () use ( &$new_customer_fired ) {
+		$new_customer_id    = null;
+		$callback           = static function ( $customer_id ) use ( &$new_customer_fired, &$new_customer_id ) {
 			++$new_customer_fired;
+			$new_customer_id = $customer_id;
 		};
 		add_action( 'woocommerce_analytics_new_customer', $callback );
 
 		try {
 			ob_start();
 			try {
+				$this->sut->output( $order );
 				$this->sut->output( $order );
 				$output = (string) ob_get_contents();
 			} finally {
@@ -789,6 +792,17 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 			$new_customers_after_render = $new_customer_fired;
 
 			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+			$this->assertSame( 1, $new_customer_fired, 'The first import should fire the new-customer action once.' );
+			$this->assertSame( (int) CustomersDataStore::get_existing_customer_id_from_order( $order ), $new_customer_id, 'The action should receive the analytics customer ID linked to the order.' );
+
+			ob_start();
+			try {
+				$this->sut->output( $order );
+				$this->sut->output( $order );
+			} finally {
+				ob_end_clean();
+			}
+			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
 			$customers_after_import = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
@@ -799,8 +813,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template.' );
 		$this->assertSame( 0, $customers_after_render, 'Rendering customer history should not create an analytics customer.' );
 		$this->assertSame( 0, $new_customers_after_render, 'Rendering customer history should not fire the new-customer action.' );
-		$this->assertSame( 1, $customers_after_import, 'Importing the order should create one analytics customer.' );
-		$this->assertSame( 1, $new_customer_fired, 'Importing the order should fire the new-customer action once.' );
+		$this->assertSame( 1, $customers_after_import, 'Repeated views and imports should reuse the analytics customer.' );
+		$this->assertSame( 1, $new_customer_fired, 'Repeated views and imports should not fire the new-customer action again.' );
 	}
 
 	/**

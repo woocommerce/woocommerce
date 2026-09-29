@@ -40,30 +40,25 @@ class PTKPatternsStore {
 		// - The WooCommerce plugin is deactivated.
 		// - The `woocommerce_allow_tracking` option is disabled.
 		//
-		// We also want to re-fetch the patterns and update the cache when:
-		// - The `woocommerce_allow_tracking` option changes to enabled.
-		// - The WooCommerce plugin is activated (if `woocommerce_allow_tracking` is enabled).
-		// - The WooCommerce plugin is updated.
+		// Cancel any old fetch jobs when tracking is enabled or the plugin is updated.
 		add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 		add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 		add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
-		// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
+		// Keep the callback for fetch jobs that were already scheduled.
 		add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
 	}
 
 	/**
-	 * Resets the cached patterns when the `woocommerce_allow_tracking` option is disabled.
-	 * Resets and fetch the patterns from the PTK when it is enabled (if the scheduler
-	 * is initialized, it's done asynchronously via a scheduled action).
+	 * Resets the cached patterns when tracking is disabled and cancels old fetch jobs otherwise.
 	 *
 	 * @return void
 	 */
 	public function flush_or_fetch_patterns() {
 		if ( $this->allowed_tracking_is_enabled() ) {
-			$this->schedule_fetch_patterns();
+			$this->cancel_fetch_patterns_when_ready();
 			return;
 		}
 
@@ -71,49 +66,35 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an async action to fetch the PTK patterns when the scheduler is initialized.
+	 * Cancel old pattern fetch actions when Action Scheduler is initialized.
 	 *
 	 * @return void
 	 */
-	private function schedule_fetch_patterns() {
+	private function cancel_fetch_patterns_when_ready() {
+		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
+			return;
+		}
+
 		if ( did_action( 'action_scheduler_init' ) ) {
-			$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
+			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
 		} else {
 			add_action(
 				'action_scheduler_init',
 				function () {
-					$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
+					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
 				}
 			);
 		}
 	}
 
 	/**
-	 * Ensure a recurring fetch patterns action is scheduled.
+	 * Cancel old fetch pattern actions.
 	 * This is called by the `action_scheduler_ensure_recurring_actions` hook.
 	 *
 	 * @return void
 	 */
 	public function ensure_recurring_fetch_patterns_if_enabled() {
-		if ( ! $this->allowed_tracking_is_enabled() ) {
-			return;
-		}
-
-		$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
-	}
-
-	/**
-	 * Schedule an action if it's not already pending.
-	 *
-	 * @param string $action The action name to schedule.
-	 * @return void
-	 */
-	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
-			return;
-		}
-
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
+		$this->cancel_fetch_patterns_when_ready();
 	}
 
 	/**
@@ -124,9 +105,8 @@ class PTKPatternsStore {
 	public function get_patterns() {
 		$patterns = get_option( self::OPTION_NAME );
 
-		// If the current data doesn't exist or is invalid, schedule fetching the patterns from the PTK.
+		// Return no patterns when the cache is missing or invalid.
 		if ( false === $patterns || ! $this->ptk_client->is_valid_schema( $patterns ) ) {
-			$this->schedule_fetch_patterns();
 			return array();
 		}
 
@@ -163,7 +143,7 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Re-fetch the patterns when the WooCommerce plugin is updated.
+	 * Cancel old fetch jobs when the WooCommerce plugin is updated.
 	 *
 	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
 	 * @param array       $options Array of bulk item update data.
@@ -174,7 +154,7 @@ class PTKPatternsStore {
 		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
 				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
-					$this->schedule_fetch_patterns();
+					$this->cancel_fetch_patterns_when_ready();
 				}
 			}
 		}
@@ -189,22 +169,7 @@ class PTKPatternsStore {
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
 
-		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
-			return;
-		}
-
-		// Unschedule any existing fetch_patterns actions.
-		// Defer unscheduling until Action Scheduler is ready to avoid errors during early initialization.
-		if ( did_action( 'action_scheduler_init' ) ) {
-			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-		} else {
-			add_action(
-				'action_scheduler_init',
-				function () {
-					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-				}
-			);
-		}
+		$this->cancel_fetch_patterns_when_ready();
 	}
 
 	/**

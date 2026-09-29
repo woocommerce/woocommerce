@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Tests related to filtering for WC_Query.
@@ -524,6 +525,55 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->do_product_request( array( 'Color' => array( 'Blue' ) ), array( 'Color' => 'or' ) )
 		);
 		$this->assert_counters( 'Color', array( 'Blue' ), 'or' );
+	}
+
+	/**
+	 * Create a variable product with a single, in-stock, published Red variation.
+	 *
+	 * @return array Product and variation ids, as returned by create_variable_product.
+	 */
+	private function create_variable_product_with_red_variation() {
+		return $this->create_variable_product(
+			array(
+				'variation_attributes'     => array( 'Color' => array( 'Red' ) ),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'Color' => 'Red' ),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Disabling a variation removes its product from lookup table filtering and its term from the widget counts.
+	 */
+	public function test_lookup_filtering_excludes_disabled_variations() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+		$products = array(
+			$this->create_variable_product_with_red_variation(),
+			$this->create_variable_product_with_red_variation(),
+		);
+
+		$this->assertEqualsCanonicalizing(
+			array( $products[0]['id'], $products[1]['id'] ),
+			$this->do_product_request( array( 'Color' => array( 'Red' ) ) )
+		);
+		\WC_Query::reset_chosen_attributes();
+
+		$variation = wc_get_product( $products[0]['variation_ids'][0] );
+		$variation->set_status( ProductStatus::PRIVATE );
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $variation ) {
+				$variation->save();
+			}
+		);
+
+		$this->assertSame( array( $products[1]['id'] ), $this->do_product_request( array( 'Color' => array( 'Red' ) ) ) );
+		$this->assert_counters( 'Color', array( 'Red' ), 'or' );
 	}
 
 	/**

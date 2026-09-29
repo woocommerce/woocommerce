@@ -37,6 +37,9 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 	// Change defaults. Invalid values will be changed later @see wc_change_pre_get_terms.
 	// These are in place so we know if a specific order was requested.
 	switch ( $orderby ) {
+		case 'id':
+			$defaults['orderby'] = 'term_id';
+			break;
 		case 'menu_order':
 		case 'name_num':
 		case 'parent':

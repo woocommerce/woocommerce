@@ -2697,11 +2697,11 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Test for errors when providing the wrong validation rules schema.
+	 * @testdox Invalid validation schemas report the keyword and its allowed values.
 	 */
 	public function test_invalid_validation_rules_schema() {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: The properties must match schema: {properties}' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: At "/type": The value must be one of: "array", "boolean", "integer", "null", "number", "object", "string"; The data (string) must match the type: array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => 'namespace/test-id',

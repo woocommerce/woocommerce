@@ -159,7 +159,7 @@ cartPages.forEach( ( { name, slug } ) => {
 		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 		async ( { page, products, tax } ) => {
 			await test.step( 'empty cart is displayed', async () => {
-				page.goto( slug );
+				await page.goto( slug );
 				await checkCartContent( isClassicCart( page ), page, [], tax );
 			} );
 

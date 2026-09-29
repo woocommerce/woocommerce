@@ -8,6 +8,11 @@
 class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * A variable product and a variation that references it by CSV ID.
+	 */
+	private const MARKER_CSV = "ID,Type,SKU,Name,Parent\n4242,variable,marker-parent,Marker parent,\n4243,variation,marker-variation,Marker variation,id:4242\n";
+
+	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
@@ -466,6 +471,165 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( get_post( $blocked_id ) );
 		$this->assertNull( get_post( $queued_id ) );
+	}
+
+	/**
+	 * @testdox The last import batch should clear mapping markers before handing over to cleanup.
+	 */
+	public function test_last_import_batch_clears_markers_before_cleanup(): void {
+		global $wpdb;
+
+		$response     = $this->dispatch_import_request( '0' );
+		$parent_id    = wc_get_product_id_by_sku( 'marker-parent' );
+		$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
+
+		$this->assertSame( 'cleanup:0', $response['data']['position'] );
+		$this->assertSame( 1, $response['data']['imported'] );
+		$this->assertSame( 1, $response['data']['imported_variations'] );
+		$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
+		$this->assertSame( 0, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_original_id'" ) );
+	}
+
+	/**
+	 * @testdox A resumed request should leave the markers of the run in progress alone.
+	 */
+	public function test_resumed_request_keeps_the_markers_of_the_run_in_progress(): void {
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0' );
+
+			// A batch size of one leaves the second row for a resumed request.
+			$this->assertIsNumeric( $response['data']['position'] );
+
+			$parent_id = wc_get_product_id_by_sku( 'marker-parent' );
+			$this->assertSame( 1, $response['data']['imported'] );
+			$this->assertSame( '4242', get_post_meta( $parent_id, '_original_id', true ) );
+
+			$response     = $this->dispatch_import_request( (string) $response['data']['position'] );
+			$variation_id = wc_get_product_id_by_sku( 'marker-variation' );
+
+			$this->assertSame( 1, $response['data']['imported_variations'] );
+			$this->assertSame( $parent_id, wp_get_post_parent_id( $variation_id ) );
+		} finally {
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+	}
+
+	/**
+	 * @testdox Retrying an abandoned run with the same CSV should skip rows without a SKU that the abandoned run imported.
+	 */
+	public function test_retrying_an_abandoned_run_does_not_duplicate_rows_without_a_sku(): void {
+		$csv = "ID,Type,SKU,Name,Parent\n5001,simple,,Retry first,\n5002,simple,,Retry second,\n";
+
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0', $csv );
+		} finally {
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+
+		// The run is abandoned here, before the second row and the cleanup requests.
+		$this->assertIsNumeric( $response['data']['position'] );
+		$this->assertSame( 1, $response['data']['imported'] );
+
+		$response = $this->dispatch_import_request( '0', $csv );
+
+		$first_products = wc_get_products(
+			array(
+				'name'   => 'Retry first',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( 1, $response['data']['skipped'], 'The row the abandoned run imported should be skipped.' );
+		$this->assertSame( 1, $response['data']['imported'], 'Only the row the abandoned run did not reach should be imported.' );
+		$this->assertCount( 1, $first_products, 'The retry should not duplicate the product.' );
+	}
+
+	/**
+	 * Filter callback that shrinks the import batch to a single row.
+	 *
+	 * @return int
+	 */
+	public function return_one(): int {
+		return 1;
+	}
+
+	/**
+	 * Run one import request against the test CSV and return the decoded response.
+	 *
+	 * The AJAX wp_die() handler throws an Error because dispatch_ajax() catches Exception.
+	 *
+	 * @param string $position Import position to request.
+	 * @param string $csv      CSV contents to import.
+	 * @return array
+	 */
+	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV ): array {
+		$nonce = wp_create_nonce( 'wc-product-import' );
+		$file  = $this->write_import_csv( $csv );
+
+		$_REQUEST['security'] = $nonce;
+		$_POST['security']    = $nonce;
+		$_POST['file']        = $file;
+		$_POST['position']    = $position;
+		$_POST['mapping']     = array(
+			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent' ),
+			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id' ),
+		);
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
+
+		ob_start();
+
+		try {
+			WC_Product_CSV_Importer_Controller::dispatch_ajax();
+		} catch ( Error $e ) {
+			$this->assertSame( 'wp_die', $e->getMessage() );
+		} finally {
+			$response = (string) ob_get_clean();
+
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
+
+			wp_delete_file( $file );
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
+		}
+
+		$decoded = json_decode( $response, true );
+		$this->assertIsArray( $decoded, $response );
+		$this->assertTrue( $decoded['success'], $response );
+		$this->assertSame( 0, $decoded['data']['failed'], $response );
+
+		return $decoded;
+	}
+
+	/**
+	 * Filter callback returning a wp_die() handler that throws instead of exiting.
+	 *
+	 * @return callable
+	 */
+	public function get_throwing_die_handler(): callable {
+		return function () {
+			throw new Error( 'wp_die' );
+		};
+	}
+
+	/**
+	 * Write the test CSV to the uploads directory, the only place the importer accepts a file from.
+	 *
+	 * @param string $csv CSV contents to write.
+	 * @return string
+	 */
+	private function write_import_csv( string $csv ): string {
+		$uploads = wp_upload_dir();
+		$path    = trailingslashit( $uploads['basedir'] ) . 'wc-product-import-marker-test.csv';
+
+		file_put_contents( $path, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
+
+		return $path;
 	}
 
 	/**

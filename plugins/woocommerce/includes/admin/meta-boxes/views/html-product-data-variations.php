@@ -50,7 +50,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 							<?php /* translators: WooCommerce attribute label */ ?>
 							<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
 							<?php if ( $attribute->is_taxonomy() ) : ?>
-								<?php foreach ( $attribute->get_terms() as $option ) : ?>
+								<?php foreach ( (array) $attribute->get_terms() as $option ) : ?>
 									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 									<?php /* phpcs:enable */ ?>

@@ -78,6 +78,7 @@
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
+- [woocommerce_valid_order_statuses_for_payment](#woocommerce_valid_order_statuses_for_payment)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
 
 ---
@@ -1613,7 +1614,7 @@ apply_filters( 'woocommerce_should_register_blocks', bool $should_register )
 
 ### Description
 
-Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation. Product and variation descriptions rendered through do_blocks are already handled on demand (see the woocommerce_short_description hook in Bootstrap), so this filter is only needed to opt back in when an extension renders WooCommerce blocks some other way in one of those contexts.
+Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation. Product and variation descriptions rendered through do_blocks and emails rendered by the email editor are already handled on demand (see the woocommerce_short_description and woocommerce_email_editor_render_start hooks in Bootstrap), so this filter is only needed to opt back in when an extension renders WooCommerce blocks some other way in one of those contexts.
 
 ### Parameters
 
@@ -1912,7 +1913,7 @@ Runs after the legacy order-received filter so callbacks can customize the final
 Filter the title shown after a checkout is complete.
 
 ```php
-apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_Order|false $order )
+apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_Order $order )
 ```
 
 ### Parameters
@@ -1920,7 +1921,7 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
 | $title | string | The title. |
-| $order | \WC_Order, false | The order created during checkout, or false if order data is not available. |
+| $order | \WC_Order | The order created during checkout. |
 
 ### Source
 
@@ -1951,6 +1952,32 @@ apply_filters( 'woocommerce_use_block_notices_in_classic_theme', bool $use_block
 ### Source
 
 - [Blocks/Domain/Services/Notices.php](../../../../../../src/Blocks/Domain/Services/Notices.php)
+
+---
+
+## woocommerce_valid_order_statuses_for_payment
+
+
+Filter the valid order statuses for payment.
+
+```php
+apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_order_statuses, \WC_Order $order )
+```
+
+### Description
+
+The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $valid_order_statuses | array | Array of valid order statuses for payment. |
+| $order | \WC_Order | Order object. |
+
+### Source
+
+- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
 
 ---
 

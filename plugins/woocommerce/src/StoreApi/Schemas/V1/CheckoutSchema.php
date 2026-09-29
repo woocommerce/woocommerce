@@ -366,20 +366,10 @@ class CheckoutSchema extends AbstractSchema {
 				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
-			if ( 'select' === $field['type'] ) {
-				$field_schema['enum'] = array_map(
-					function ( $option ) {
-						return $option['value'];
-					},
-					$field['options']
-				);
-				if ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) {
-					$field_schema['enum'][] = '';
-				}
-			}
+			$field_schema = $this->additional_fields_controller->prepare_field_value_schema( $field_schema, $field );
 
-			if ( 'checkbox' === $field['type'] ) {
-				$field_schema['type'] = 'boolean';
+			if ( 'select' === $field['type'] && ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) ) {
+				$field_schema['enum'][] = '';
 			}
 
 			if ( 'checkbox' === $field['type'] && true === $field['required'] ) {

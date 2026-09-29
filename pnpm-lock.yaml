@@ -1312,6 +1312,9 @@ importers:
       '@wordpress/rich-text':
         specifier: catalog:wp-min
         version: 7.33.2(@types/react@18.3.28)(react@18.3.1)
+      '@wordpress/ui':
+        specifier: catalog:wp-bundled
+        version: 0.17.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
       '@wordpress/url':
         specifier: catalog:wp-min
         version: 4.33.1
@@ -1324,12 +1327,6 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
-      react:
-        specifier: 18.3.x
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.x
-        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@testing-library/dom':
         specifier: ^10.4.x
@@ -1412,6 +1409,12 @@ importers:
       prettier:
         specifier: npm:wp-prettier@3.0.3
         version: wp-prettier@3.0.3
+      react:
+        specifier: 18.3.x
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.x
+        version: 18.3.1(react@18.3.1)
       rimraf:
         specifier: 5.0.5
         version: 5.0.5

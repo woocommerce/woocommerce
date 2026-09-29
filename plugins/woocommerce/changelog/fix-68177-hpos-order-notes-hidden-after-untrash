@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore order notes when an HPOS order is untrashed, instead of leaving them permanently hidden.

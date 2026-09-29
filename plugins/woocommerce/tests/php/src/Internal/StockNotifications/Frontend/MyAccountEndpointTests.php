@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountView;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
@@ -109,7 +110,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 */
 	private function make_endpoint( ?NotificationManagementService $service = null ): MyAccountEndpoint {
 		$endpoint = new MyAccountEndpoint();
-		$endpoint->init( $service ?? wc_get_container()->get( NotificationManagementService::class ) );
+		$endpoint->init( $service ?? wc_get_container()->get( NotificationManagementService::class ), new MyAccountView() );
 
 		return $endpoint;
 	}

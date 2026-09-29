@@ -301,14 +301,13 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		await expect( preservedLowStock ).toHaveValue( '2' );
 		await expect( editedHoldStock ).toHaveValue( '61' );
 
-		const [ holdStockOption, lowStockOption ] = await Promise.all( [
-			wpCLI(
-				'wp option get woocommerce_hold_stock_minutes --skip-plugins'
-			),
-			wpCLI(
-				'wp option get woocommerce_notify_low_stock_amount --skip-plugins'
-			),
-		] );
+		// One at a time: overlapping wp-env processes can corrupt its cache (see `wpCLI`).
+		const holdStockOption = await wpCLI(
+			'wp option get woocommerce_hold_stock_minutes --skip-plugins'
+		);
+		const lowStockOption = await wpCLI(
+			'wp option get woocommerce_notify_low_stock_amount --skip-plugins'
+		);
 		expect( holdStockOption.stdout.trim() ).toBe( '61' );
 		expect( lowStockOption.stdout.trim() ).toBe( '2' );
 	} );
