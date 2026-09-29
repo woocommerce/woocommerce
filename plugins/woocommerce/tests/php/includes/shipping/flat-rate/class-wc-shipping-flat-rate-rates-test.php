@@ -356,4 +356,98 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $expected, $rate->get_cost(), 'Per class should charge both 4 and 8, per order only the 8.' );
 	}
+
+	/**
+	 * The Cost field defaults to 0, so a shop that never touches it is offering free delivery
+	 * rather than no delivery.
+	 *
+	 * @testdox A cost of zero offers the shopper a rate priced zero.
+	 */
+	public function test_a_cost_of_zero_offers_a_free_rate(): void {
+		$this->method_with( array( 'cost' => '0' ) );
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			10.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 0, $rate->get_cost(), 'A cost of zero should be a free rate, not no rate.' );
+	}
+
+	/**
+	 * Each class cost field shows "N/A" as its placeholder, so a class the merchant left blank
+	 * adds nothing rather than falling back to some other class's cost.
+	 *
+	 * @testdox A class left blank adds nothing, while the classes that were filled in still charge.
+	 */
+	public function test_a_blank_class_cost_adds_nothing(): void {
+		$charged = $this->shippable_product( 'flat-rate-charged' );
+		$blank   = $this->shippable_product( 'flat-rate-blank' );
+
+		$this->method_with(
+			array(
+				'cost' => '1',
+				'class_cost_' . $charged->get_shipping_class_id() => '6',
+				'class_cost_' . $blank->get_shipping_class_id() => '',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $charged,
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+				array(
+					'product'    => $blank,
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			20.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 7, $rate->get_cost(), 'Only the class with a cost should add to the method cost.' );
+	}
+
+	/**
+	 * The no-class cost field is blank by default, so an unclassified item costs nothing extra
+	 * until the merchant says otherwise.
+	 *
+	 * @testdox With the no-class cost left blank an unclassified item adds nothing.
+	 */
+	public function test_a_blank_no_class_cost_adds_nothing(): void {
+		// A class has to exist somewhere in the store before any class costs are considered.
+		$this->shippable_product( 'flat-rate-somewhere' );
+
+		$this->method_with(
+			array(
+				'cost'          => '1',
+				'no_class_cost' => '',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			10.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 1, $rate->get_cost(), 'A blank no-class cost should leave the method cost alone.' );
+	}
 }
