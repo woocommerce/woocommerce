@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Move react and react-dom to peer dependencies and accept React 19.
+Move react and react-dom from direct dependencies to peer and dev dependencies.
