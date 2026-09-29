@@ -43,7 +43,9 @@ final class OrderWithdrawalEndpoint {
 	 */
 	public function get_url(): string {
 		$account_url = wc_get_page_permalink( 'myaccount' );
+		$query_vars  = WC()->query->get_query_vars();
+		$endpoint    = ! empty( $query_vars[ self::ENDPOINT_KEY ] ) ? self::ENDPOINT_KEY : $this->get_slug();
 
-		return wc_get_endpoint_url( $this->get_slug(), '', $account_url ? $account_url : home_url( '/' ) );
+		return wc_get_endpoint_url( $endpoint, '', $account_url ? $account_url : home_url( '/' ) );
 	}
 }
