@@ -1218,20 +1218,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * Add a product to the cart and give the customer a US shipping address without a postcode, with shipping costs hidden until an address is entered.
 	 */
 	private function add_product_for_an_address_without_postcode(): void {
-		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
-		$customer->set_shipping_country( 'US' );
-		$customer->set_shipping_state( 'NY' );
-		$customer->set_shipping_city( 'New York' );
-		$customer->set_shipping_postcode( '' );
+		$this->add_product_for_a_us_address_missing( 'postcode' );
 		$this->clear_checkout_fields();
 	}
 
@@ -1272,6 +1259,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fields = new ReflectionProperty( WC_Checkout::class, 'fields' );
 		$fields->setAccessible( true );
 		$fields->setValue( WC()->checkout(), null );
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart does not wait for an address field that the country locale hides.
+	 *
+	 * @testWith [ "postcode" ]
+	 *           [ "state" ]
+	 *
+	 * @param string $field Address field the locale hides while it stays required.
+	 */
+	public function test_show_shipping_skips_an_address_field_the_locale_hides( string $field ): void {
+		$this->hide_us_address_field_in_locale( $field, true );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->show_shipping(), "A hidden {$field} should not hold back shipping." );
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), "A hidden {$field} should let shipping be calculated." );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), "A hidden {$field} should still charge the flat rate." );
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart still requires an address field whose hidden flag is not exactly true.
+	 *
+	 * @testWith [ "postcode", "yes" ]
+	 *           [ "postcode", 1 ]
+	 *           [ "state", "yes" ]
+	 *           [ "state", 1 ]
+	 *
+	 * @param string $field  Address field the locale flags as hidden.
+	 * @param mixed  $hidden Hidden flag the locale sets on the field.
+	 */
+	public function test_show_shipping_requires_a_field_whose_hidden_flag_is_not_exactly_true( string $field, $hidden ): void {
+		$this->hide_us_address_field_in_locale( $field, $hidden );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		$this->assertFalse( WC()->cart->show_shipping(), "The classic checkout only treats hidden => true as hidden, so the {$field} stays required." );
+	}
+
+	/**
+	 * Hide a US address field in the country locale while leaving it required.
+	 *
+	 * @param string $field  Address field key, without the type prefix.
+	 * @param mixed  $hidden Value for the hidden flag.
+	 */
+	private function hide_us_address_field_in_locale( string $field, $hidden ): void {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $field, $hidden ) {
+				$locale['US'][ $field ]['hidden'] = $hidden;
+				return $locale;
+			}
+		);
+		WC()->countries->locale = array();
+	}
+
+	/**
+	 * Add a product to the cart and give the customer a US shipping address without the given field, with shipping costs hidden until an address is entered.
+	 *
+	 * @param string $missing_field Address field to leave empty: 'postcode' or 'state'.
+	 */
+	private function add_product_for_a_us_address_missing( string $missing_field ): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_city( 'New York' );
+		$customer->set_shipping_state( 'state' === $missing_field ? '' : 'NY' );
+		$customer->set_shipping_postcode( 'postcode' === $missing_field ? '' : '10001' );
 	}
 
 	/**
