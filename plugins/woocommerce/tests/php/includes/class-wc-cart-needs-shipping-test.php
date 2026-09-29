@@ -91,14 +91,18 @@ class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Records a deliberate decision rather than a rule from a screen. `needs_shipping()` counts
+	 * Records what happens today, which is not the same as endorsing it. `needs_shipping()` counts
 	 * instances through `wc_get_shipping_method_count( true )`, whose first argument is
-	 * `$include_legacy` and not `$enabled_only`, so a switched-off instance still counts.
+	 * `$include_legacy` and not `$enabled_only`, so a switched-off instance still counts and the
+	 * shopper is asked for a shipping method the store cannot offer.
 	 *
-	 * woocommerce#56507 proposed changing this and was closed on the grounds that stores disable
-	 * methods conditionally, by user type for example, and would otherwise find orders unplaceable;
-	 * a merchant who really wants shipping off has the setting above. If that is revisited, this
-	 * test is the thing to edit deliberately.
+	 * woocommerce#56507 reported that and was closed as not planned, on the grounds that it is an
+	 * edge case and that a merchant who wants shipping off has the setting above. Two things are
+	 * worth knowing before relying on that. The reason given was that stores disable methods
+	 * conditionally by user type, but this count reads `is_enabled` straight from the zone methods
+	 * table behind a transient, so conditional availability, which happens later in
+	 * `is_available()`, cannot reach it. And the test below shows the rule is not applied
+	 * consistently in the first place.
 	 *
 	 * @testdox A method that exists but is switched off still makes the cart ask about shipping.
 	 */
@@ -110,9 +114,11 @@ class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A method that predates shipping zones is counted only while it is switched on, which is the
-	 * opposite of the zone instance above. The count has separate branches for the two, and only
-	 * the zone branch ignores the switch.
+	 * A method that predates shipping zones is counted only while it is switched on, the opposite of
+	 * the zone instance above: the count has separate branches and only the zone branch ignores the
+	 * switch. This is not only about old methods. Block Local Pickup declares `local-pickup` and not
+	 * `shipping-zones`, so it is counted here too, which means switching off Local Pickup is obeyed
+	 * while switching off every zone method is not.
 	 *
 	 * @testdox A switched-off method from before shipping zones does not make the cart ask.
 	 *
@@ -140,11 +146,12 @@ class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A merchant can mark a product virtual while it is already in a shopper's cart. The page the
-	 * shopper has open keeps the product as it was when they added it; the next one they load picks
-	 * the change up.
+	 * A merchant can mark a product virtual while it is already in a shopper's cart. The cart holds
+	 * the product as it was when it was added, so the change is seen only once the cart is read
+	 * again. This records the mechanism rather than a promise: what a real page load does is more
+	 * than the re-read below, and no screen describes the gap.
 	 *
-	 * @testdox A product made virtual while in the cart stops the asking on the next page load.
+	 * @testdox A product made virtual while in the cart is only noticed when the cart is read again.
 	 */
 	public function test_a_product_made_virtual_while_in_the_cart_stops_the_asking(): void {
 		$this->zone_offers_a_flat_rate();
