@@ -145,11 +145,13 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $shipping_class Shipping class slug, or an empty string for none.
 	 * @param float  $weight         Product weight, or zero for none.
+	 * @param bool   $virtual        Whether the product is virtual, so nothing is shipped for it.
 	 * @return WC_Product_Simple
 	 */
-	private function shippable_product( string $shipping_class = '', float $weight = 0 ): WC_Product_Simple {
+	private function shippable_product( string $shipping_class = '', float $weight = 0, bool $virtual = false ): WC_Product_Simple {
 		$product = new WC_Product_Simple();
 		$product->set_regular_price( '10' );
+		$product->set_virtual( $virtual );
 
 		if ( $weight > 0 ) {
 			$product->set_weight( (string) $weight );
@@ -347,15 +349,17 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 				'class_cost_' . $heavy->get_shipping_class_id() => '8',
 			)
 		);
+		// The dearer class is listed first, so simply taking the last class would not be mistaken
+		// for taking the most expensive one.
 		$package = $this->package_of(
 			array(
 				array(
-					'product'    => $light,
+					'product'    => $heavy,
 					'quantity'   => 1,
 					'line_total' => 10.0,
 				),
 				array(
-					'product'    => $heavy,
+					'product'    => $light,
 					'quantity'   => 1,
 					'line_total' => 10.0,
 				),
@@ -427,7 +431,7 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 
 		$rate = $this->rate_for( $package );
 
-		$this->assertEquals( 7, $rate->get_cost(), 'Only the class with a cost should add to the method cost.' );
+		$this->assertEquals( 7, $rate->get_cost(), 'The class carrying a cost should add it; the blank one should not turn into some other value.' );
 	}
 
 	/**
@@ -459,7 +463,7 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 
 		$rate = $this->rate_for( $package );
 
-		$this->assertEquals( 1, $rate->get_cost(), 'A blank no-class cost should leave the method cost alone.' );
+		$this->assertEquals( 1, $rate->get_cost(), 'A blank no-class cost should not turn into some other value.' );
 	}
 
 	/**
@@ -508,14 +512,14 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			$expected,
 			$rate->get_cost(),
-			$class_cost . ' in a class cost should see three units worth 30.00 weighing 6, not the whole package.'
+			$class_cost . ' in a class cost should see only that class, not the whole package.'
 		);
 	}
 
 	/**
 	 * The method cost field documents [weight] alongside the other placeholders.
 	 *
-	 * @testdox The [weight] placeholder is the total weight of the items being shipped.
+	 * @testdox The [weight] placeholder is the total weight of the package.
 	 */
 	public function test_weight_placeholder_is_the_total_weight_of_the_package(): void {
 		$this->method_with( array( 'cost' => '[weight]' ) );
@@ -542,14 +546,7 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	 * @testdox A shipping class on a virtual product adds no cost.
 	 */
 	public function test_a_class_on_a_virtual_product_adds_nothing(): void {
-		$virtual = new WC_Product_Simple();
-		$virtual->set_regular_price( '10' );
-		$virtual->set_virtual( true );
-		$term = wp_insert_term( 'flat-rate-downloadable', 'product_shipping_class' );
-		$this->assertNotWPError( $term, 'The test fixture should be able to create a shipping class.' );
-		$virtual->set_shipping_class_id( (int) $term['term_id'] );
-		$virtual->save();
-		WC()->shipping()->shipping_classes = array();
+		$virtual = $this->shippable_product( 'flat-rate-downloadable', 0, true );
 
 		$this->method_with(
 			array(
