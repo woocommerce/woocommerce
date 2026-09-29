@@ -1,4 +1,0 @@
-Significance: minor
-Type: added
-
-Send the package version on every event as `package_version`, so Tracks data can be attributed to the package release that emitted it. The published copy has `PACKAGE_VERSION` stamped from `composer.json` at build time.
