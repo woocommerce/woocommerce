@@ -1,15 +1,14 @@
 :where(.wp-block-woocommerce-product-filter-chips) {
 	font-size: 0.8em;
+
+	> .components-disabled {
+		display: contents;
+	}
 }
 
-:where(.wc-block-product-filter-chips__fieldset) {
-	display: contents;
-}
-
+:where(.wc-block-product-filter-chips__fieldset),
 :where(.wc-block-product-filter-chips__items) {
-	display: flex;
-	flex-wrap: wrap;
-	gap: $gap-smallest;
+	display: contents;
 }
 
 .wc-block-product-filter-chips__item {
@@ -101,8 +100,10 @@
 	padding: 0;
 	font: inherit;
 	color: inherit;
+	text-align: start;
 	text-decoration: underline;
 	cursor: pointer;
+	width: 100%;
 
 	&:hover,
 	&:focus {
@@ -112,10 +113,6 @@
 
 // Swatch style — color circles only, no text labels.
 .is-style-swatch {
-	.wc-block-product-filter-chips__items {
-		gap: $gap-small;
-	}
-
 	.wc-block-product-filter-chips__item {
 		background: transparent;
 		padding: 2px;
