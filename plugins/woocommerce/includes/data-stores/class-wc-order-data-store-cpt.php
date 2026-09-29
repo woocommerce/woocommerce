@@ -1156,6 +1156,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Check whether none of the requested statuses are registered. WP_Query drops the status clause in that case,
 	 * which would return every order. Runs on the final query args so changes made by query filters are respected.
+	 * Statuses from wc_get_order_statuses() also count as known, so queries that run before they are registered
+	 * on `init` (e.g. during upgrades) still find orders.
 	 *
 	 * @param array $wp_query_args Final WP_Query args.
 	 * @return bool
@@ -1170,7 +1172,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			: (array) $wp_query_args['post_status'];
 
 		$requested_statuses = array_map( 'sanitize_key', array_filter( $statuses, 'is_string' ) );
-		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
+		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati(), array_keys( wc_get_order_statuses() ) );
 
 		return ! array_intersect( $requested_statuses, $known_statuses );
 	}

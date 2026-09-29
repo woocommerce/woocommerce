@@ -1089,6 +1089,35 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries with default statuses still find orders before order statuses are registered, as during upgrades.
+	 */
+	public function test_cpt_order_queries_find_orders_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$this->toggle_cot_feature_and_usage( false );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertEqualsCanonicalizing( $order_ids, $queried_order_ids, 'Default order statuses should count as known even before they are registered, so early queries such as the HPOS new-shop check still find orders.' );
+	}
+
+	/**
 	 * Provides filters that can change the WP_Query args of CPT order queries.
 	 *
 	 * @return array<string, array{string}>
