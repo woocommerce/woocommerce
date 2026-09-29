@@ -1156,10 +1156,11 @@ class WC_Helper_Updater {
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $request );
-		if ( 200 !== $response_code ) {
+		$products      = 200 === $response_code ? json_decode( wp_remote_retrieve_body( $request ), true ) : null;
+		if ( ! is_array( $products ) ) {
 			$data['errors'][] = 'http-error';
 
-			// On an outage, leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
+			// On an outage (including a 200 that isn't JSON), leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
 			if ( self::is_temporary_failure( $request, $response_code ) ) {
 				if ( 429 === $response_code && is_array( $request ) ) {
 					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
@@ -1170,7 +1171,7 @@ class WC_Helper_Updater {
 				return self::get_cached_products( $cached_data, $hash );
 			}
 		} else {
-			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
+			$data['products'] = $products;
 		}
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );

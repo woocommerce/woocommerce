@@ -330,9 +330,10 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 *
 	 * @testWith [500]
 	 *           [408]
+	 *           [200]
 	 *           [0]
 	 *
-	 * @param int $status HTTP status of the response, or 0 for a transport error.
+	 * @param int $status HTTP status of the response (with a non-JSON body), or 0 for a transport error.
 	 */
 	public function test_update_check_preserves_cache_when_request_fails( int $status ): void {
 		$cached_data = array(
@@ -359,7 +360,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 						'code'    => $status,
 						'message' => get_status_header_desc( $status ),
 					),
-					'body'     => '',
+					'body'     => '<html><body>Bad gateway</body></html>',
 				);
 		};
 		add_filter( 'pre_http_request', $http_mock );
