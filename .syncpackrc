@@ -601,6 +601,16 @@
 			"pinVersion": "^3.21.0"
 		},
 		{
+			"label": "classic-assets is on the same Stylelint major as block-library",
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"@woocommerce/classic-assets"
+			],
+			"pinVersion": "^16.8.2"
+		},
+		{
 			"dependencies": [
 				"stylelint"
 			],

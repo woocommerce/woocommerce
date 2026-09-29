@@ -2,7 +2,7 @@
 # configs in client/blocks and packages/js/email-editor. Read the notes before
 # "aligning" any of these with the preset.
 {
-	"extends": "@wordpress/stylelint-config/scss",
+	"extends": "@wordpress/stylelint-config/scss-stylistic",
 
 	# Vendored upstream file; 159 violations we do not own. This is the single
 	# authoritative exclusion, so a direct `stylelint` run skips it too.
@@ -31,16 +31,15 @@
 		# change and belongs in its own PR.
 		"declaration-property-unit-allowed-list": null,
 
-		# 57 hits, all comments; the preset only checks those and already
-		# ignores URLs. Off because the rule is on its way out and nothing else
-		# here enforces a column limit: stylelint 16 deleted it with the rest
-		# of the stylistic rules (client/blocks is already there), client/admin
+		# 59 hits, all comments; the preset only checks those and already
+		# ignores URLs. Off because nothing else here enforces a column limit:
+		# client/blocks does not load the stylistic rules at all, client/admin
 		# and packages/js/email-editor both switch it off, .markdownlint.json
 		# sets MD013 to 9999, and there is no PHPCS LineLength override. Two of
 		# the hits could not comply anyway: a stylelint-disable directive has to
 		# stay on one line, and our longest suppressed rule name puts it at 80
 		# characters before the "--" justification starts.
-		"max-line-length": null,
+		"@stylistic/max-line-length": null,
 
 		# 30927 hits. Satisfying it means reordering the legacy cascade, which
 		# changes rendering. Not realistically fixable here.
