@@ -328,12 +328,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A failed update check should keep the cached products, without their forced auto-update, and back off for a short window.
 	 *
-	 * @testWith ["server-error"]
-	 *           ["transport-error"]
+	 * @testWith [500]
+	 *           [408]
+	 *           [0]
 	 *
-	 * @param string $failure Kind of failure the update-check request returns.
+	 * @param int $status HTTP status of the response, or 0 for a transport error.
 	 */
-	public function test_update_check_preserves_cache_when_request_fails( string $failure ): void {
+	public function test_update_check_preserves_cache_when_request_fails( int $status ): void {
 		$cached_data = array(
 			'hash'     => 'a-stale-hash',
 			'updated'  => time(),
@@ -349,14 +350,14 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
 
 		$requests  = 0;
-		$http_mock = static function () use ( $failure, &$requests ) {
+		$http_mock = static function () use ( $status, &$requests ) {
 			++$requests;
-			return 'transport-error' === $failure
+			return 0 === $status
 				? new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' )
 				: array(
 					'response' => array(
-						'code'    => 500,
-						'message' => 'Internal Server Error',
+						'code'    => $status,
+						'message' => get_status_header_desc( $status ),
 					),
 					'body'     => '',
 				);
@@ -454,7 +455,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				: array(
 					'response' => array(
 						'code'    => $status,
-						'message' => 'Forbidden',
+						'message' => get_status_header_desc( $status ),
 					),
 					'body'     => '',
 				);
@@ -495,11 +496,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			),
 		);
 		ksort( $payload );
-		$products = array( 123 => array( 'version' => '1.2.3' ) );
+		$hash     = md5( wp_json_encode( $payload ) );
+		$products = array(
+			123 => array(
+				'version'    => '1.2.3',
+				'autoupdate' => true,
+			),
+		);
 		set_transient(
 			'_woocommerce_helper_updates',
 			array(
-				'hash'     => md5( wp_json_encode( $payload ) ),
+				'hash'     => $hash,
 				'updated'  => time(),
 				'products' => $products,
 				'errors'   => array(),
@@ -524,7 +531,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 1, $update_checks, 'A refresh should force a fresh update check' );
-		$this->assertSame( $products, $result, 'A failed check after a refresh should serve the cached products' );
+		$this->assertSame( $products, $result, 'A failed check after a refresh should serve the cached products, keeping the forced auto-update made for this payload' );
+		$this->assertSame( $hash, get_transient( '_woocommerce_helper_updates' )['hash'], 'A refresh should keep the hash of the cached payload' );
 	}
 
 	/**

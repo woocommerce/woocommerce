@@ -1014,8 +1014,8 @@ class WC_Helper_Updater {
 	/**
 	 * Validates cached update data and checks if it matches the expected hash.
 	 *
-	 * Ensures the cached data is properly structured and corresponds to the current
-	 * payload to prevent fatal errors and avoid stale cache returns.
+	 * Ensures the cached data is properly structured, corresponds to the current
+	 * payload, and was not expired by a refresh, to avoid fatal errors and stale cache returns.
 	 *
 	 * @since 10.3.6
 	 *
@@ -1024,7 +1024,7 @@ class WC_Helper_Updater {
 	 * @return bool True if the data is valid and hash matches, false otherwise.
 	 */
 	private static function should_use_cached_update_data( $data, $hash ) {
-		if ( ! is_array( $data ) ) {
+		if ( ! is_array( $data ) || ! empty( $data['expired'] ) ) {
 			return false;
 		}
 
@@ -1042,19 +1042,23 @@ class WC_Helper_Updater {
 	/**
 	 * Extract the products from a cached update-check payload.
 	 *
-	 * Used on the paths that serve the previous cache rather than a fresh
-	 * response — while backing off, and when the update check fails. The cache was
-	 * made for another payload, so its server-side `autoupdate` decisions are dropped.
+	 * Used while backing off and when the update check fails. The server-side `autoupdate`
+	 * decisions are kept only when the cache was made for the current payload.
 	 *
-	 * @param mixed $data The data retrieved from the transient, of any shape.
+	 * @param mixed  $data The data retrieved from the transient, of any shape.
+	 * @param string $hash The hash of the current payload.
 	 * @return array The cached products, or an empty array when there are none.
 	 */
-	private static function get_cached_products( $data ) {
+	private static function get_cached_products( $data, string $hash ) {
 		if ( ! is_array( $data ) || ! isset( $data['products'] ) || ! is_array( $data['products'] ) ) {
 			return array();
 		}
 
 		$products = $data['products'];
+		if ( isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) ) {
+			return $products;
+		}
+
 		foreach ( $products as $product_id => $product ) {
 			if ( is_array( $product ) ) {
 				unset( $products[ $product_id ]['autoupdate'] );
@@ -1065,9 +1069,8 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Whether a failed update check is likely to succeed if retried: a rate limit, a server error,
-	 * or a network error. Anything else is not, e.g. a 401 or 403 for a rejected connection, or no
-	 * usable local credentials.
+	 * Whether a failed update check may succeed if retried. Only a rejected connection is not:
+	 * a 401 or 403, or a WP_Error for missing local credentials.
 	 *
 	 * @param array|WP_Error $request       The update-check response.
 	 * @param int            $response_code The HTTP status code, 0 when there is none.
@@ -1078,7 +1081,7 @@ class WC_Helper_Updater {
 			return 'authentication' !== $request->get_error_code();
 		}
 
-		return 429 === $response_code || $response_code >= 500;
+		return ! in_array( $response_code, array( 401, 403 ), true );
 	}
 
 	/**
@@ -1115,7 +1118,7 @@ class WC_Helper_Updater {
 		 * button clears it. Return the last cached products, if any.
 		 */
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
-			return self::get_cached_products( $data );
+			return self::get_cached_products( $data, $hash );
 		}
 
 		$cached_data = $data;
@@ -1164,7 +1167,7 @@ class WC_Helper_Updater {
 					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
 				}
 
-				return self::get_cached_products( $cached_data );
+				return self::get_cached_products( $cached_data, $hash );
 			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
@@ -1186,7 +1189,7 @@ class WC_Helper_Updater {
 			return $count;
 		}
 
-		// Don't fetch any new data since this function in high-frequency.
+		// This runs often, so it only counts from cached data; a cache expired by a refresh triggers one update check here.
 		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
 			return 0;
 		}
@@ -1323,7 +1326,7 @@ class WC_Helper_Updater {
 	public static function expire_updates_cache(): void {
 		$data = get_transient( '_woocommerce_helper_updates' );
 		if ( is_array( $data ) && isset( $data['hash'] ) ) {
-			$data['hash'] = '';
+			$data['expired'] = true;
 			set_transient( '_woocommerce_helper_updates', $data, 12 * HOUR_IN_SECONDS );
 		}
 
