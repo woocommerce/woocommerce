@@ -520,11 +520,6 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
-			"woocommerce/product-filter-removable-chips": {
-				"typography": {
-					"fontSize": "inherit"
-				}
-			},
 			"woocommerce/product-filter-status": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
