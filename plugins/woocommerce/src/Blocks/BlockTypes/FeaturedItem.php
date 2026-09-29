@@ -302,7 +302,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => trim( $classes ) . ' wp-block-woocommerce-' . $this->block_name,
+				'class' => $classes,
 				'style' => $styles,
 				'id'    => $attributes['anchor'] ?? '',
 			)
