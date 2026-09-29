@@ -675,8 +675,8 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			$expected,
-			$method->invoke( $sut, array( 'COMMODITY_CODE', 'Country_Of_Origin', 'customs_description' ) ),
-			'Machine-name headers should map to the customs setters.'
+			$method->invoke( $sut, array( 'CUSTOMS_COMMODITY_CODE', 'Customs_Country_Of_Origin', 'customs_description' ) ),
+			'Canonical customs headers should map to the customs setters.'
 		);
 
 		// The controller has loaded the mappings; an empty list skips the en_US early return.

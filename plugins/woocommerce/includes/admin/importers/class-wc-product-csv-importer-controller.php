@@ -821,9 +821,6 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Commodity code (HS code)', 'woocommerce' ) => 'customs_commodity_code',
 			__( 'Country of origin', 'woocommerce' )       => 'customs_country_of_origin',
 			__( 'Customs description', 'woocommerce' )     => 'customs_description',
-			'commodity_code'                               => 'customs_commodity_code',
-			'country_of_origin'                            => 'customs_country_of_origin',
-			'customs_description'                          => 'customs_description',
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
