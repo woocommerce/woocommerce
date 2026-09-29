@@ -280,10 +280,10 @@ The Cart Item object of the filters above has the following keys:
 -   _images_ `array` - The item images array.
 -   _item_data_ `array` - The item data array.
 -   _key_ `string` - The item key.
--   _parent_item_key_ `string | null` - The declared parent cart item key, or `null` when none is declared. See the [parent-item extension guide](../../../../apis/store-api/extending-store-api/extend-store-api-parent-item.md).
 -   _low_stock_remaining_ `number` - The low stock remaining.
 -   _name_ `string` - The item name.
 -   _permalink_ `string` - The item permalink.
+-   _parent_item_key_ `string | null` - The parent cart item key, or `null` if the item has no parent.
 -   _prices_ `object` - The item prices object with the following keys:
     -   _currency_code_ `string` - The currency code.
     -   _currency_decimal_separator_ `string` - The currency decimal separator.

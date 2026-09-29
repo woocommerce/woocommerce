@@ -777,7 +777,7 @@ Returns a cart item from the state.
 
 -   `object`: The cart item with the following keys:
     -   _key_ `string`: The cart item key.
-    -   _parent_item_key_ `string | null`: The declared parent cart item key, or `null` when none is declared (read-only; see the [parent-item guide](../../../apis/store-api/extending-store-api/extend-store-api-parent-item.md)).
+    -   _parent_item_key_ `string | null`: The parent cart item key, or `null` if the item has no parent.
     -   _id_ `number`: The cart item id.
     -   _catalog_visibility_ `string`: The catalog visibility.
     -   _quantity_limits_ `object`: The quantity limits.
