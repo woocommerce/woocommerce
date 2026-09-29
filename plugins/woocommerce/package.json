@@ -19,7 +19,7 @@
 		"build:project:admin": "pnpm --filter='@woocommerce/admin-library' build",
 		"build:project:blocks": "pnpm --filter='@woocommerce/block-library' build",
 		"build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' build",
-		"build:project:payment-settings": "pnpm --filter='@woocommerce/payment-settings' build",
+		"build:project:routes": "rm -rf build assets/client/routes && mkdir -p assets/client/routes && ln -s assets/client/routes build && wp-build",
 		"build:project:packages": "XDEBUG_MODE=off composer install --quiet",
 		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -116,7 +116,7 @@
 		"watch:build:project:admin": "pnpm --filter='@woocommerce/admin-library' watch:build",
 		"watch:build:project:blocks": "pnpm --filter='@woocommerce/block-library' watch:build",
 		"watch:build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' watch:build",
-		"watch:build:project:payment-settings": "pnpm --filter='@woocommerce/payment-settings' watch:build",
+		"watch:build:project:routes": "rm -rf build assets/client/routes && mkdir -p assets/client/routes && ln -s assets/client/routes build && wp-build --watch",
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
@@ -1333,6 +1333,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
+		"@wordpress/build": "catalog:tooling",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "11.9.0",
 		"@wordpress/stylelint-config": "^21.36.0",
@@ -1361,11 +1362,23 @@
 		"node": "^24.15.0"
 	},
 	"browserslist": [
-		"> 0.1%"
+		"extends @wordpress/browserslist-config"
 	],
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*"
+	},
+	"wpPlugin": {
+		"name": "woocommerce_routes",
+		"scriptGlobal": false,
+		"packageNamespace": "woocommerce",
+		"handlePrefix": "wc-routes",
+		"pages": [
+			{
+				"id": "wc-payment-settings",
+				"capability": "manage_woocommerce"
+			}
+		]
 	}
 }
