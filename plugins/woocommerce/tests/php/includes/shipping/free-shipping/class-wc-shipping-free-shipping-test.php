@@ -105,6 +105,30 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Switch taxes on at ten percent and choose how prices are stored and shown.
+	 *
+	 * @param string $prices_include_tax Whether catalog prices already include tax.
+	 * @param string $display            Whether the cart shows prices including tax.
+	 */
+	private function taxes_at_ten_percent( string $prices_include_tax, string $display ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_tax_display_cart', $display );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+	}
+
+	/**
 	 * Whether the method currently offers itself.
 	 *
 	 * @return bool
@@ -254,24 +278,14 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	 * @testdox On a tax-inclusive store the coupon's tax also comes off the minimum.
 	 */
 	public function test_the_minimum_follows_the_tax_inclusive_amount_the_shopper_sees(): void {
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_tax_display_cart', 'incl' );
-
-		WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => '',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '10.0000',
-				'tax_rate_name'     => 'Tax',
-				'tax_rate_priority' => '1',
-				'tax_rate_shipping' => '0',
-				'tax_rate_order'    => '1',
-			)
-		);
+		$this->taxes_at_ten_percent( 'yes', 'incl' );
 
 		$this->cart_holding( 110.0 );
 		$this->apply_coupon( 'eleven-off', array( 'coupon_amount' => '11' ) );
+
+		// Without this the test would read the same whether tax applied or not, and would go on
+		// passing if the tax setup ever stopped working.
+		$this->assertEquals( 1.0, WC()->cart->get_discount_tax(), 'The coupon should carry 1.00 of tax for the minimum to have to account for.' );
 
 		// The shopper sees 110.00 and hands over 11.00 of it, so 99.00 is what they spent.
 		$this->method_with(
@@ -491,21 +505,7 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	 * @testdox On a tax-exclusive store only the discount itself comes off the minimum.
 	 */
 	public function test_on_a_tax_exclusive_store_only_the_discount_comes_off(): void {
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-		update_option( 'woocommerce_tax_display_cart', 'excl' );
-
-		WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => '',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '10.0000',
-				'tax_rate_name'     => 'Tax',
-				'tax_rate_priority' => '1',
-				'tax_rate_shipping' => '0',
-				'tax_rate_order'    => '1',
-			)
-		);
+		$this->taxes_at_ten_percent( 'no', 'excl' );
 
 		$this->method_with(
 			array(
@@ -516,6 +516,7 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 		$this->cart_holding( 100.0 );
 		$this->apply_coupon( 'ten-off', array( 'coupon_amount' => '10' ) );
 
+		$this->assertEquals( 1.0, WC()->cart->get_discount_tax(), 'The coupon should carry 1.00 of tax, which must not come off a figure shown without tax.' );
 		$this->assertTrue(
 			$this->is_offered(),
 			'A 100.00 cart shown without tax, less a 10.00 coupon, leaves exactly the 90.00 minimum.'
@@ -536,5 +537,48 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 		$this->apply_coupon( 'plain-after', array( 'free_shipping' => 'no' ) );
 
 		$this->assertTrue( $this->is_offered(), 'A later coupon that grants nothing should not undo the one that does.' );
+	}
+
+	/**
+	 * Storing prices with tax and showing them without is a normal configuration, and the two
+	 * options are independent. What the shopper is shown is the display setting, so that is what
+	 * the minimum follows.
+	 *
+	 * @testdox Prices stored with tax but shown without are measured without tax.
+	 */
+	public function test_prices_stored_with_tax_but_shown_without_are_measured_without_tax(): void {
+		$this->taxes_at_ten_percent( 'yes', 'excl' );
+
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '90',
+			)
+		);
+		$this->cart_holding( 110.0 );
+		$this->apply_coupon( 'eleven-off', array( 'coupon_amount' => '11' ) );
+
+		$this->assertEquals( 1.0, WC()->cart->get_discount_tax(), 'The coupon should carry 1.00 of tax.' );
+		$this->assertTrue(
+			$this->is_offered(),
+			'A 110.00 price stored with tax shows as 100.00, and the shopper hands over 10.00 of that, so 90.00 meets the 90.00 minimum. Taking the coupon tax off as well would leave 89.00 and wrongly deny it.'
+		);
+	}
+
+	/**
+	 * The minimum is a price, so its pennies count. A cart a penny short is a penny short.
+	 *
+	 * @testdox A cart one penny under a fractional minimum does not qualify.
+	 */
+	public function test_a_penny_under_a_fractional_minimum_does_not_qualify(): void {
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '35.77',
+			)
+		);
+		$this->cart_holding( 35.76 );
+
+		$this->assertFalse( $this->is_offered(), 'A minimum of 35.77 should not be satisfied by 35.76.' );
 	}
 }
