@@ -21,27 +21,6 @@ type InCartQuantityTarget = {
 };
 
 /**
- * Check whether a cart entry is a plain object.
- *
- * @param value Cart entry to inspect.
- * @return Whether the entry is a plain object.
- */
-const isPlainObject = (
-	value: unknown
-): value is Record< string, unknown > => {
-	if (
-		typeof value !== 'object' ||
-		value === null ||
-		Array.isArray( value )
-	) {
-		return false;
-	}
-
-	const prototype = Object.getPrototypeOf( value );
-	return prototype === Object.prototype || prototype === null;
-};
-
-/**
  * Sum eligible cart-line quantities for a product or variation.
  *
  * When selected attributes are provided, variation lines must match them.
@@ -57,19 +36,11 @@ export const getInCartQuantity = (
 	let quantity = 0;
 
 	for ( const item of items ) {
-		if ( ! isPlainObject( item ) || typeof item.id !== 'number' ) {
-			continue;
-		}
-
-		if (
-			'parent_item_key' in item &&
-			typeof item.parent_item_key === 'string' &&
-			item.parent_item_key !== ''
-		) {
-			continue;
-		}
-
 		if ( item.id !== target.id ) {
+			continue;
+		}
+
+		if ( 'parent_item_key' in item && item.parent_item_key ) {
 			continue;
 		}
 
@@ -81,9 +52,7 @@ export const getInCartQuantity = (
 			continue;
 		}
 
-		if ( typeof item.quantity === 'number' ) {
-			quantity += item.quantity;
-		}
+		quantity += item.quantity;
 	}
 
 	return quantity;

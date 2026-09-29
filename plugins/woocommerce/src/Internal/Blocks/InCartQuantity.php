@@ -13,8 +13,8 @@ final class InCartQuantity {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<int, mixed> $cart_items Store API cart-item lines.
-	 * @param int               $product_id Product or variation ID to count.
+	 * @param array<int, array<string, mixed>> $cart_items Store API cart-item lines.
+	 * @param int                              $product_id Product or variation ID to count.
 	 *
 	 * @return int|float The sum of eligible cart-item quantities.
 	 */
@@ -22,19 +22,11 @@ final class InCartQuantity {
 		$total = 0;
 
 		foreach ( $cart_items as $item ) {
-			if ( ! is_array( $item ) || ! isset( $item['id'] ) || ! is_int( $item['id'] ) || $item['id'] !== $product_id ) {
+			if ( $product_id !== $item['id'] || '' !== ( $item['parent_item_key'] ?? '' ) ) {
 				continue;
 			}
 
-			$parent_item_key = $item['parent_item_key'] ?? null;
-			if ( is_string( $parent_item_key ) && '' !== $parent_item_key ) {
-				continue;
-			}
-
-			$quantity = $item['quantity'] ?? null;
-			if ( is_int( $quantity ) || is_float( $quantity ) ) {
-				$total += $quantity;
-			}
+			$total += $item['quantity'];
 		}
 
 		return $total;

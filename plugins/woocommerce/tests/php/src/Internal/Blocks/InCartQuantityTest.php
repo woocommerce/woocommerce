@@ -115,37 +115,10 @@ class InCartQuantityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return zero for empty, child-only, and unusable cart entries without diagnostics.
+	 * @testdox Should return zero for an empty cart.
 	 */
-	public function test_returns_zero_for_empty_or_unusable_cart_entries_without_diagnostics(): void {
+	public function test_returns_zero_for_an_empty_cart(): void {
 		$this->assertSame( 0, InCartQuantity::for_product( array(), 10 ), 'An empty cart should have zero quantity' );
-
-		$items = array(
-			array(
-				'id'              => 10,
-				'quantity'        => 3,
-				'parent_item_key' => 'parent-a',
-			),
-			array(),
-			'not-an-array',
-			array(
-				'quantity' => 5,
-			),
-			array(
-				'id'       => '10',
-				'quantity' => 7,
-			),
-			array(
-				'id'       => 10,
-				'quantity' => '9',
-			),
-		);
-
-		$this->assertSame(
-			0,
-			InCartQuantity::for_product( $items, 10 ),
-			'Invalid lines and non-numeric quantities should not contribute or cause PHP diagnostics'
-		);
 	}
 
 	/**

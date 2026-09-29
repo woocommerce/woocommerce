@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { CartItem } from '@woocommerce/types';
 import type { OptimisticCartItem } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -84,22 +83,6 @@ describe( 'getInCartQuantity', () => {
 		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 10 );
 	} );
 
-	it( 'ignores placeholders, non-plain objects, missing or non-numeric IDs, and non-numeric quantities', () => {
-		const invalidLines = [
-			[],
-			Object.assign( new Date(), {
-				id: 10,
-				quantity: 8,
-				type: 'simple',
-			} ),
-			{ quantity: 7, type: 'simple' },
-			{ id: '10', quantity: 6, type: 'simple' },
-			{ id: 10, quantity: '5', type: 'simple' },
-		] as unknown as ReadonlyArray< CartItem | OptimisticCartItem >;
-
-		expect( getInCartQuantity( invalidLines, { id: 10 } ) ).toBe( 0 );
-	} );
-
 	it( 'matches simple and variation lines by ID when no selection is provided', () => {
 		const items = [
 			makeCartItem( 10, 3 ),
@@ -170,12 +153,8 @@ describe( 'getInCartQuantity', () => {
 		).toBe( 0 );
 	} );
 
-	it( 'preserves fractional quantities and ignores non-numeric quantities', () => {
-		const items = [
-			makeCartItem( 10, 1.5 ),
-			makeCartItem( 10, 2 ),
-			makeCartItem( 10, '3' as unknown as number ),
-		];
+	it( 'preserves fractional quantities', () => {
+		const items = [ makeCartItem( 10, 1.5 ), makeCartItem( 10, 2 ) ];
 
 		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 3.5 );
 	} );
