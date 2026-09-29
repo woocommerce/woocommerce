@@ -137,6 +137,27 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render nothing when count filtering removes all categories.
+	 */
+	public function test_all_categories_filtered_out(): void {
+		$this->assertStringContainsString( '>Hoodies<', $this->render_product_categories() );
+
+		$categories = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+			)
+		);
+		foreach ( $categories as $category ) {
+			delete_term_meta( $category->term_id, 'product_count_product_cat' );
+		}
+		delete_transient( 'wc_term_counts' );
+		clean_term_cache( array_column( $categories, 'term_id' ), 'product_cat' );
+
+		$this->assertSame( '', $this->render_product_categories(), 'The block should be empty when every category has a zero product count.' );
+	}
+
+	/**
 	 * @testdox Should render a child at the top level when its parent has no product count.
 	 */
 	public function test_child_with_missing_parent_renders_at_top_level(): void {
