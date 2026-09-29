@@ -1,7 +1,3 @@
-:where(.wp-block-woocommerce-product-filter-removable-chips) {
-	font-size: 0.875em;
-}
-
 .wc-block-product-filter-removable-chips {
 	&.is-vertical {
 		.wc-block-product-filter-removable-chips__items {
@@ -56,7 +52,7 @@
 			transparent
 		);
 		border-radius: 2px;
-		font-size: inherit;
+		font-size: 0.875em;
 		display: flex;
 		gap: $gap-smaller;
 		align-items: center;

@@ -9,9 +9,6 @@
 	"apiVersion": 3,
 	"ancestor": [ "woocommerce/product-filter-active" ],
 	"supports": {
-		"typography": {
-			"fontSize": true
-		},
 		"layout": {
 			"allowSwitching": false,
 			"allowInheriting": false,
