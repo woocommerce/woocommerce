@@ -329,13 +329,8 @@ class ProductButton extends AbstractBlock {
 	 */
 	private function get_in_cart_quantity_by_product_id( int $product_id ) {
 		$woocommerce_state = wp_interactivity_state( 'woocommerce' );
-		$cart_items        = $woocommerce_state['cart']['items'] ?? array();
 
-		if ( ! is_array( $cart_items ) ) {
-			$cart_items = array();
-		}
-
-		return InCartQuantity::for_product( $cart_items, $product_id );
+		return InCartQuantity::for_product( $woocommerce_state['cart']['items'] ?? array(), $product_id );
 	}
 
 	/**
