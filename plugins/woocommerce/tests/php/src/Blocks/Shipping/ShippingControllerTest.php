@@ -365,16 +365,19 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A branch address in a different state, so taxing at one is visibly not taxing at the other.
+	 * A branch in a state of its own, different from both the shopper's and the shop base's, so
+	 * that taxing at the branch is visibly not taxing at either of the other two. Tax tables are
+	 * usually keyed on country and state, so a branch sharing the base's state would leave the
+	 * difference showing only in the postcode.
 	 *
 	 * @return array
 	 */
 	private function a_branch_address(): array {
 		return array(
 			'country'  => 'US',
-			'state'    => 'CA',
-			'postcode' => '90210',
-			'city'     => 'Beverly Hills',
+			'state'    => 'WA',
+			'postcode' => '98101',
+			'city'     => 'Seattle',
 		);
 	}
 
@@ -449,7 +452,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		$this->shopper_chose( 'pickup_location:0' );
 
 		$this->assertSame(
-			array( 'US', 'CA', '90210', 'Beverly Hills' ),
+			array( 'US', 'WA', '98101', 'Seattle' ),
 			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
 			'Tax should be worked out where the order is collected.'
 		);
@@ -480,9 +483,10 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Without a country there is nothing to work a tax rate out from, so what arrived stands. For a
-	 * collected order that is the shop base address, which `WC_Customer::get_taxable_address()` has
-	 * already substituted by this point.
+	 * Without a country there is nothing to work a tax rate out from, so whatever arrived stands.
+	 * This calls the filter directly, so what arrives here is the shopper's own address; in a real
+	 * request `WC_Customer::get_taxable_address()` has already substituted the shop base for a
+	 * collected order, and the filter declines to refine that in the same way.
 	 *
 	 * @testdox A branch saved without a country leaves the tax location as it arrived.
 	 *
@@ -560,7 +564,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_based_on', 'shipping' );
 
 		$this->assertSame(
-			array( 'US', 'CA', '90210', 'Beverly Hills' ),
+			array( 'US', 'WA', '98101', 'Seattle' ),
 			WC()->customer->get_taxable_address(),
 			'A shopper collecting from the branch should be taxed at the branch, not at their own address.'
 		);
