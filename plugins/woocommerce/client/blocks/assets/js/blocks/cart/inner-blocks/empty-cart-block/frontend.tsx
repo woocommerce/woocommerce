@@ -37,7 +37,7 @@ const FrontendBlock = ( {
 		// powered blocks they contain (e.g. Product Collection with its Add
 		// to Cart button) must be hydrated manually.
 		if ( containerRef.current ) {
-			hydrateInteractivityRegions( containerRef.current );
+			void hydrateInteractivityRegions( containerRef.current );
 		}
 	}, [ isCartEmpty ] );
 	if ( isCartEmpty ) {
