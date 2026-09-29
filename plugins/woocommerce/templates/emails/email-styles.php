@@ -373,9 +373,15 @@ body {
 /*
  * Some clients, like Outlook on Windows, support neither value above, so a long email address would still widen the cell there.
  * "break-all" works in those clients, and it is safe for an email address because it has no words to keep whole.
+ * The email is a block element because Outlook on Windows ignores "word-break" on inline elements like a span.
  */
 .address-email {
 	word-break: break-all;
+}
+
+/* Hook output after the email usually starts with a <br>, which would leave an empty line after the block element. */
+.address-email + br {
+	display: none;
 }
 
 <?php if ( $email_improvements_enabled ) : ?>

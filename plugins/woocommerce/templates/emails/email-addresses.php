@@ -53,7 +53,7 @@ $display_section_divider = (bool) apply_filters( 'woocommerce_email_body_display
 					<br/><?php echo wc_make_phone_clickable( $order->get_billing_phone() ); ?>
 				<?php endif; ?>
 				<?php if ( $order->get_billing_email() ) : ?>
-					<br/><span class="address-email"><?php echo esc_html( $order->get_billing_email() ); ?></span>
+					<div class="address-email"><?php echo esc_html( $order->get_billing_email() ); ?></div>
 				<?php endif; ?>
 				<?php
 				/**
