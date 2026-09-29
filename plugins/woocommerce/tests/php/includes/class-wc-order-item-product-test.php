@@ -731,28 +731,119 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 * @testdox Should remove the recorded variation attribute meta when set_product() switches to an unrelated simple product.
 	 */
-	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
-		$parent = new WC_Product_Variable();
-		$parent->set_name( 'Dummy Variable Product' );
+	public function test_set_product_removes_recorded_variation_attribute_meta_when_switching_to_simple_product(): void {
+		WC_Helper_Product::create_variation_product();
+		$item = $this->create_saved_item( $this->get_variation_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+
+		$this->assertSame( 'red', $item->get_meta( 'pa_colour' ), 'Precondition: set_variation() stores the attribute with the attribute_ prefix stripped.' );
+
+		$item = $this->switch_product_and_reload( $item, $this->product );
+
+		foreach ( array( 'pa_size', 'pa_colour', 'pa_number', '_variation_attribute_meta' ) as $key ) {
+			$this->assertSame( array(), $item->get_meta( $key, false ), "The {$key} meta should be removed after switching to a simple product." );
+		}
+	}
+
+	/**
+	 * @testdox Should replace the previous variation's attribute meta when set_product() switches to a sibling variation.
+	 */
+	public function test_set_product_replaces_attribute_meta_when_switching_to_sibling_variation(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$item   = $this->create_saved_item( $this->get_variation_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		// Drop an attribute from the parent so the sibling no longer carries it.
+		$attributes = $parent->get_attributes();
+		unset( $attributes['pa_number'] );
+		$parent->set_attributes( $attributes );
 		$parent->save();
 
-		$variation = WC_Helper_Product::create_product_variation_object(
-			$parent->get_id(),
-			'VARIATION SKU ' . wp_generate_uuid4(),
-			10,
-			array( 'color' => 'blue' )
-		);
+		$item = $this->switch_product_and_reload( $item, $this->get_variation_by_sku( 'DUMMY SKU VARIABLE SMALL' ) );
 
+		$this->assertSame( 'small', $item->get_meta( 'pa_size' ), 'The new variation attribute should be stored.' );
+		$this->assertSame( array(), $item->get_meta( 'pa_number', false ), 'An attribute only the previous variation had should be removed.' );
+		$this->assertEqualsCanonicalizing( array( 'pa_size', 'pa_colour' ), array_keys( $item->get_meta( '_variation_attribute_meta' ) ), 'The hidden list should name only the new variation\'s attributes.' );
+	}
+
+	/**
+	 * @testdox Should keep edited attribute meta, later rows with the same key, attribute meta missing from the hidden list, and custom meta when set_product() switches products.
+	 */
+	public function test_set_product_keeps_meta_it_did_not_add_or_that_was_edited(): void {
+		WC_Helper_Product::create_variation_product();
+		$item = $this->create_saved_item( $this->get_variation_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		// Leave pa_number out of the hidden list, like attribute meta on items saved before the list existed.
+		$recorded = $item->get_meta( '_variation_attribute_meta' );
+		unset( $recorded['pa_number'] );
+		$item->update_meta_data( '_variation_attribute_meta', $recorded );
+		$item->update_meta_data( 'pa_colour', 'crimson' );
+		// Rows a plugin adds later with the same key and the recorded value.
+		$item->add_meta_data( 'pa_size', $recorded['pa_size'] );
+		$item->add_meta_data( 'pa_colour', $recorded['pa_colour'] );
+		$item->add_meta_data( 'gift_note', 'Happy birthday' );
+		$item->save();
+		$item     = new WC_Order_Item_Product( $item->get_id() );
+		$size_ids = wp_list_pluck( $item->get_meta( 'pa_size', false ), 'id' );
+
+		$item = $this->switch_product_and_reload( $item, $this->product );
+
+		$this->assertSame( array( end( $size_ids ) ), array_values( wp_list_pluck( $item->get_meta( 'pa_size', false ), 'id' ) ), 'Only the attribute row WooCommerce added should be removed, not a later row with the same value.' );
+		$this->assertSame( array( 'crimson', $recorded['pa_colour'] ), array_values( wp_list_pluck( $item->get_meta( 'pa_colour', false ), 'value' ) ), 'Edited attribute meta and a later row holding the recorded value should both be kept.' );
+		$this->assertSame( '0', $item->get_meta( 'pa_number' ), 'Attribute meta missing from the hidden list should be kept.' );
+		$this->assertSame( 'Happy birthday', $item->get_meta( 'gift_note' ), 'Unrelated custom meta should be kept.' );
+	}
+
+	/**
+	 * @testdox Should keep meta set through set_variation() before set_product() on a new item.
+	 */
+	public function test_set_product_keeps_variation_meta_set_before_first_product(): void {
+		WC_Helper_Product::create_variation_product();
 		$item = new WC_Order_Item_Product();
-		$item->set_product( $variation );
+		$item->set_variation( array( 'engraving' => 'Hi' ) );
+		$item->set_product( $this->get_variation_by_sku( 'DUMMY SKU VARIABLE SMALL' ) );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
 
-		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Precondition: set_variation() writes the variation attribute as display meta with the attribute_ prefix stripped.' );
+		$item = new WC_Order_Item_Product( $item->get_id() );
 
-		$item->set_product( $this->product );
+		$this->assertSame( 'Hi', $item->get_meta( 'engraving' ), 'Meta set before the item had a product should be kept.' );
+	}
 
-		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
-		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+	/**
+	 * Creates a saved line item for the given product and reloads it from the database.
+	 *
+	 * @param WC_Product $product Product to set on the item.
+	 * @return WC_Order_Item_Product
+	 */
+	private function create_saved_item( WC_Product $product ): WC_Order_Item_Product {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		return new WC_Order_Item_Product( $item->get_id() );
+	}
+
+	/**
+	 * Switches the item to another product, saves it, and reloads it from the database.
+	 *
+	 * @param WC_Order_Item_Product $item    Item to update.
+	 * @param WC_Product            $product Product to switch to.
+	 * @return WC_Order_Item_Product
+	 */
+	private function switch_product_and_reload( WC_Order_Item_Product $item, WC_Product $product ): WC_Order_Item_Product {
+		$item->set_product( $product );
+		$item->save();
+
+		return new WC_Order_Item_Product( $item->get_id() );
+	}
+
+	/**
+	 * Loads a variation created by WC_Helper_Product::create_variation_product() by its SKU.
+	 *
+	 * @param string $sku Variation SKU.
+	 * @return WC_Product_Variation
+	 */
+	private function get_variation_by_sku( string $sku ): WC_Product_Variation {
+		return wc_get_product( wc_get_product_id_by_sku( $sku ) );
 	}
 }

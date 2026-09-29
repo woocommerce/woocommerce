@@ -1683,6 +1683,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
 		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+		$this->assertSame( array(), $reloaded->get_meta( 'color', false ), 'The old variation attribute meta should be removed.' );
 	}
 
 	/**
@@ -1722,8 +1723,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
 		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should remain unchanged.' );
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The variation attribute meta should be kept.' );
 		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
+		$this->assertNotContains( '_variation_attribute_meta', wp_list_pluck( $response_item['meta_data'], 'key' ), 'The response should not expose the hidden variation attribute list.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
 	}
@@ -1913,6 +1916,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should be synchronized with the parent product.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should be synchronized with the parent product.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Demoting to the variation\'s own parent should keep the attribute meta.' );
 	}
 
 	/**

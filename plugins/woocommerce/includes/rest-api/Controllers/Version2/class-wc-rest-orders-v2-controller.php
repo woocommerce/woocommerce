@@ -215,7 +215,18 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_order_item_data( $item ) {
-		$data           = $item->get_data();
+		$data = $item->get_data();
+
+		// Leave out the internal record kept by WC_Order_Item_Product::set_variation().
+		$data['meta_data'] = array_values(
+			array_filter(
+				$data['meta_data'],
+				function ( $meta ) {
+					return '_variation_attribute_meta' !== $meta->key;
+				}
+			)
+		);
+
 		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
 		// Format decimal values.

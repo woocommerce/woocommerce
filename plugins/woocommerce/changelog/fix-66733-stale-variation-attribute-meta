@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the previous variation's attributes from an order line item when its product is changed.

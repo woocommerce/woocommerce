@@ -20,6 +20,11 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
+	 * Hidden meta key recording the attribute meta written by set_variation(), as key => value pairs.
+	 */
+	private const VARIATION_ATTRIBUTE_META_KEY = '_variation_attribute_meta';
+
+	/**
 	 * Legacy values.
 	 *
 	 * @deprecated 4.4.0 For legacy actions.
@@ -237,10 +242,40 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_variation( $data = array() ) {
 		if ( is_array( $data ) ) {
+			$written = array();
 			foreach ( $data as $key => $value ) {
-				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+				$meta_key = str_replace( 'attribute_', '', $key );
+				$this->add_meta_data( $meta_key, $value, true );
+				$written[ $meta_key ] = $value;
+			}
+			if ( $written ) {
+				$recorded = $this->get_meta( self::VARIATION_ATTRIBUTE_META_KEY, true, 'edit' );
+				// Re-add rather than update, so the record stays after the attribute rows and does not shift their positions in item meta.
+				$this->add_meta_data( self::VARIATION_ATTRIBUTE_META_KEY, array_replace( is_array( $recorded ) ? $recorded : array(), $written ), true );
 			}
 		}
+	}
+
+	/**
+	 * Remove the attribute meta recorded by set_variation(), keeping rows whose value has changed since.
+	 */
+	private function remove_recorded_variation_meta(): void {
+		$recorded = $this->get_meta( self::VARIATION_ATTRIBUTE_META_KEY, true, 'edit' );
+		if ( is_array( $recorded ) ) {
+			$this->maybe_read_meta_data();
+			foreach ( $recorded as $key => $value ) {
+				// set_variation() re-adds its rows last and meta is read by ID, so the first row with the key is ours.
+				foreach ( (array) $this->meta_data as $meta ) {
+					if ( (string) $key === $meta->key && null !== $meta->value ) {
+						if ( $value === $meta->value ) {
+							$meta->value = null;
+						}
+						break;
+					}
+				}
+			}
+		}
+		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_KEY );
 	}
 
 	/**
@@ -253,6 +288,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
+		// Switching to the current variation or its parent keeps the attribute meta; see the REST partial updates.
+		if ( $this->get_product_id( 'edit' ) && ! in_array( $product->get_id(), array( (int) $this->get_variation_id( 'edit' ), (int) $this->get_product_id( 'edit' ) ), true ) ) {
+			$this->remove_recorded_variation_meta();
+		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
@@ -260,10 +299,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
-			// Any variation attribute meta written by a previous set_variation() call is left in
-			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
-			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
-			// risks deleting real data. Removing that stale display meta is tracked in #66733.
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
