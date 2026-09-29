@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { act, render, renderHook } from '@testing-library/react';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 
@@ -77,7 +77,7 @@ describe( 'CheckoutEventsContext', () => {
 		} );
 	} );
 
-	it( 'sets the processing owner on submit', () => {
+	it( 'claims processing on submit', () => {
 		const setBeforeProcessing = jest
 			.spyOn( dispatch( checkoutStore ), '__internalSetBeforeProcessing' )
 			.mockImplementation( jest.fn() );
@@ -91,8 +91,7 @@ describe( 'CheckoutEventsContext', () => {
 
 		act( () => result.current.onSubmit() );
 
-		expect( select( checkoutStore ).getProcessingOwner() ).toBe( 'cart' );
-		expect( setBeforeProcessing ).toHaveBeenCalled();
+		expect( setBeforeProcessing ).toHaveBeenCalledWith( 'cart' );
 		setBeforeProcessing.mockRestore();
 	} );
 

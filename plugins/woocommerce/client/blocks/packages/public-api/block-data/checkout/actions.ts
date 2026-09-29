@@ -21,10 +21,15 @@ export const __internalSetIdle = () => ( {
 } );
 
 /**
- * Set the checkout status to `before_processing`
+ * Set the checkout status to `before_processing`.
+ *
+ * @param processingOwner Provider responsible for processing checkout.
  */
-export const __internalSetBeforeProcessing = () => ( {
+export const __internalSetBeforeProcessing = (
+	processingOwner?: CheckoutProcessingOwner
+) => ( {
 	type: types.SET_BEFORE_PROCESSING,
+	processingOwner,
 } );
 
 /**

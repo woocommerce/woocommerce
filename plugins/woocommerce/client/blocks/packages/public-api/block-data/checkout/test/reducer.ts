@@ -145,14 +145,18 @@ describe( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
-	it( 'should handle SET_BEFORE_PROCESSING', () => {
+	it( 'should handle SET_BEFORE_PROCESSING and set the processing owner', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.BEFORE_PROCESSING,
+			processingOwner: 'checkout',
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetBeforeProcessing() )
+			reducer(
+				defaultState,
+				actions.__internalSetBeforeProcessing( 'checkout' )
+			)
 		).toEqual( expectedState );
 	} );
 

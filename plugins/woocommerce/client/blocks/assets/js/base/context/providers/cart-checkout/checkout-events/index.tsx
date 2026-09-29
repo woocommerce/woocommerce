@@ -163,7 +163,6 @@ export const CheckoutEventsProvider = ( {
 		__internalEmitValidateEvent,
 		__internalEmitAfterProcessingEvents,
 		__internalSetBeforeProcessing,
-		__internalSetProcessingOwner,
 	} = useDispatch( checkoutStore );
 
 	const {
@@ -355,14 +354,8 @@ export const CheckoutEventsProvider = ( {
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		void __internalSetProcessingOwner( providerId );
-		void __internalSetBeforeProcessing();
-	}, [
-		dispatchCheckoutEvent,
-		providerId,
-		__internalSetBeforeProcessing,
-		__internalSetProcessingOwner,
-	] );
+		void __internalSetBeforeProcessing( providerId );
+	}, [ dispatchCheckoutEvent, providerId, __internalSetBeforeProcessing ] );
 
 	const checkoutEventHandlers = {
 		onSubmit,

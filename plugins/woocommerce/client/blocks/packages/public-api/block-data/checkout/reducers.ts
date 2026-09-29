@@ -67,6 +67,8 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 				...state,
 				status: STATUS.BEFORE_PROCESSING,
 				hasError: false,
+				processingOwner:
+					action.processingOwner ?? state.processingOwner,
 			};
 			break;
 
