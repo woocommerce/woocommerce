@@ -2026,9 +2026,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				return OrderStatus::COMPLETED;
 			}
 		};
-		$store             = new WC_Order_Data_Store_CPT();
+		$sut               = new WC_Order_Data_Store_CPT();
 
-		$result = $store->query(
+		$result = $sut->query(
 			array(
 				'status'   => $stringable_status,
 				'return'   => 'ids',
@@ -2150,7 +2150,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->set_date_paid( '2024-07-04T12:00:00' );
 		$order->save();
 
-		$store = new class() extends WC_Order_Data_Store_CPT {
+		$sut = new class() extends WC_Order_Data_Store_CPT {
 			/**
 			 * Normalize the extension's custom date shape before using the parent parser.
 			 *
@@ -2168,7 +2168,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			}
 		};
 
-		$result = $store->query(
+		$result = $sut->query(
 			array(
 				'date_paid' => array( 'date' => '2024-07-04' ),
 				'limit'     => -1,

@@ -1215,7 +1215,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @since 3.0.0
 		 *
 		 * @param array                   $wp_query_args WP_Query arguments.
-		 * @param array                   $query_vars    Original WC_Order_Query arguments.
+		 * @param array                   $query_vars    Processed WC_Order_Query arguments.
 		 * @param WC_Order_Data_Store_CPT $data_store   Current order data store.
 		 */
 		$wp_query_args = apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );

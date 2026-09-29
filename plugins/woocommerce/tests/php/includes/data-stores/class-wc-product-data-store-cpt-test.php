@@ -779,6 +779,64 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Malformed product dates match no products and mark the query as invalid.
+	 *
+	 * @dataProvider provider_malformed_product_dates
+	 *
+	 * @param string $date_key   Product date query key.
+	 * @param mixed  $date_value Malformed date value.
+	 */
+	public function test_malformed_date_args_match_no_products( string $date_key, $date_value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertContains(
+			$product->get_id(),
+			wc_get_products(
+				array(
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $capture, 1 );
+
+		try {
+			$result = wc_get_products(
+				array(
+					$date_key => $date_value,
+					'return'  => 'ids',
+					'limit'   => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $capture, 1 );
+		}
+
+		$this->assertSame( array(), $result, 'An unusable date filter must not return every product.' );
+		$this->assertNotNull( $captured, 'The public filter must receive the failed query.' );
+		$this->assertSame( 'woocommerce_data_store_invalid_date', $captured['errors'][0]->get_error_code() );
+	}
+
+	/**
+	 * Malformed date values for post columns and product metadata.
+	 *
+	 * @return array<string, array{0: string, 1: mixed}>
+	 */
+	public function provider_malformed_product_dates(): array {
+		return array(
+			'created array'    => array( 'date_created', array( 'invalid' ) ),
+			'created object'   => array( 'date_created', new stdClass() ),
+			'sale from array'  => array( 'date_on_sale_from', array( 'invalid' ) ),
+			'sale from object' => array( 'date_on_sale_from', new stdClass() ),
+		);
+	}
+
+	/**
 	 * @testdox The public product query filter can replace a failed query with valid arguments.
 	 */
 	public function test_product_filter_can_replace_failed_query(): void {

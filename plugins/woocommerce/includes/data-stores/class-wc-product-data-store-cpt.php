@@ -2533,7 +2533,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * @since 3.2.0
 		 *
 		 * @param array                     $wp_query_args WP_Query arguments.
-		 * @param array                     $query_vars    Original WC_Product_Query arguments.
+		 * @param array                     $query_vars    Processed WC_Product_Query arguments.
 		 * @param WC_Product_Data_Store_CPT $data_store   Current product data store.
 		 */
 		$wp_query_args = apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
