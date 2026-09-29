@@ -336,6 +336,18 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A direct null date query returns only an invalid-date error.
+	 */
+	public function test_parse_date_for_wp_query_rejects_null_without_a_date_clause(): void {
+		$result = $this->sut->parse_date_for_wp_query( null, 'post_date' );
+
+		$this->assertSame( array( 'errors' ), array_keys( $result ), 'A null date must not produce a date clause.' );
+		$this->assertCount( 1, $result['errors'] );
+		$this->assertInstanceOf( WP_Error::class, $result['errors'][0] );
+		$this->assertSame( 'woocommerce_data_store_invalid_date', $result['errors'][0]->get_error_code() );
+	}
+
+	/**
 	 * @testdox A date Stringable whose conversion throws fails the query closed.
 	 */
 	public function test_parse_date_for_wp_query_handles_throwing_stringable(): void {
