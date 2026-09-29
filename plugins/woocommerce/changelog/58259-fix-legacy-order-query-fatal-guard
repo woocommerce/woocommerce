@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors when order queries get malformed dates, statuses, or customers, or product queries get malformed dates.

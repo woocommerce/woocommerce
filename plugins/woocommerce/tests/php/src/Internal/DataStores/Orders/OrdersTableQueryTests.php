@@ -156,6 +156,54 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Date args that cannot be used as a string return no orders instead of a fatal error.
+	 *
+	 * @dataProvider malformed_date_arg_provider
+	 * @param string $date_key   The date query var.
+	 * @param mixed  $date_value The malformed value.
+	 */
+	public function test_malformed_date_arg_returns_no_orders( string $date_key, $date_value ): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_created( '2000-01-01T10:00:00' );
+		$order->set_date_paid( '2000-01-01T10:00:00' );
+		$order->save();
+
+		$this->assertSame(
+			array( $order->get_id() ),
+			wc_get_orders(
+				array(
+					$date_key => '2000-01-01',
+					'return'  => 'ids',
+				)
+			),
+			'A valid date should match the order'
+		);
+
+		$queried_orders = wc_get_orders(
+			array(
+				$date_key => $date_value,
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_orders, 'A malformed date should not match any order' );
+	}
+
+	/**
+	 * Data provider for test_malformed_date_arg_returns_no_orders.
+	 *
+	 * @return array
+	 */
+	public function malformed_date_arg_provider(): array {
+		return array(
+			'local key, array'  => array( 'date_created', array( '2000-01-01' ) ),
+			'local key, object' => array( 'date_created', new \stdClass() ),
+			'GMT key, array'    => array( 'date_paid_gmt', array( '2000-01-01' ) ),
+			'GMT key, object'   => array( 'date_paid_gmt', new \stdClass() ),
+		);
+	}
+
+	/**
 	 * @testDox 'suppress_filters' arg is honored in queries.
 	 */
 	public function test_query_suppress_filters() {
