@@ -133,7 +133,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty, invalid, or text-bearing changed markup, or markup with disallowed elements, falls back to the exact default.
+	 * @testdox Empty, invalid, shape-less, or text-bearing changed markup, or markup with disallowed elements, falls back to the exact default.
 	 * @dataProvider provide_invalid_svg_replacements
 	 *
 	 * @param string $replacement Filter replacement.
@@ -168,6 +168,8 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 			'encoded text'          => array( '<svg>&lt;path/&gt;</svg>' ),
 			'CDATA'                 => array( '<svg><![CDATA[<path/>]]></svg>' ),
 			'unclosed group'        => array( '<svg><g></svg>' ),
+			'no shapes'             => array( '<svg viewBox="0 0 24 24"></svg>' ),
+			'group without shapes'  => array( '<svg viewBox="0 0 24 24"><g fill="red"></g></svg>' ),
 			'use element'           => array( '<svg viewBox="0 0 24 24"><use href="https://example.com/icon.svg#shape"/></svg>' ),
 			'clip path'             => array( '<svg viewBox="0 0 24 24"><g clip-path="url(#clip)"><path d="M1 1h22v22H1z" fill="currentColor"/></g><defs><clipPath id="clip"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>' ),
 			'mask'                  => array( '<svg viewBox="0 0 24 24"><mask id="mask"><rect width="24" height="24" fill="white"/></mask><path d="M1 1h22v22H1z" fill="currentColor"/></svg>' ),

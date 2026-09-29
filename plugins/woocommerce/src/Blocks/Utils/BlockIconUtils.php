@@ -45,7 +45,7 @@ final class BlockIconUtils {
 		 * Filters the decorative icon SVG of the Mini-Cart, Cart Link, and Customer Account blocks on the frontend.
 		 *
 		 * Return one static SVG of shapes with flat colors; `currentColor` inherits the control color, and WooCommerce re-adds the block's root classes and `aria-hidden`.
-		 * Anything invalid falls back to the default: an empty string, or any element outside the list in `BlockIconUtils`. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes.
+		 * Anything invalid falls back to the default: an empty string, an SVG with no shapes, or any element outside the list in `BlockIconUtils`. Fill and stroke accept static CSS colors, but not `url()`, `src()`, `var()`, quotes, or backslash escapes.
 		 * Customer Account calls it only for logged-out visitors or when avatars are off, and never for text-only blocks. Editor previews, avatars, and the dropdown caret are never filtered.
 		 *
 		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
@@ -167,7 +167,7 @@ final class BlockIconUtils {
 	}
 
 	/**
-	 * Validates that sanitized markup is one complete, static SVG tree.
+	 * Validates that sanitized markup is one complete, static SVG tree with at least one shape.
 	 *
 	 * @param string $svg Sanitized SVG markup.
 	 * @return bool Whether the markup is valid.
@@ -179,6 +179,7 @@ final class BlockIconUtils {
 		$stack       = array();
 		$root_count  = 0;
 		$root_closed = false;
+		$shape_count = 0;
 
 		while ( $processor->next_token() ) {
 			$token_type = $processor->get_token_type();
@@ -217,6 +218,10 @@ final class BlockIconUtils {
 				++$root_count;
 			}
 
+			if ( 'svg' !== $tag_name && 'g' !== $tag_name ) {
+				++$shape_count;
+			}
+
 			foreach ( array( 'fill', 'stroke' ) as $paint_attribute ) {
 				$paint = $processor->get_attribute( $paint_attribute );
 				if ( null !== $paint && ( ! is_string( $paint ) || ! self::is_safe_paint( $paint ) ) ) {
@@ -234,7 +239,7 @@ final class BlockIconUtils {
 			$stack[] = $tag_name;
 		}
 
-		return ! $processor->paused_at_incomplete_token() && 1 === $root_count && $root_closed && empty( $stack );
+		return ! $processor->paused_at_incomplete_token() && 1 === $root_count && $root_closed && empty( $stack ) && $shape_count > 0;
 	}
 
 	/**
