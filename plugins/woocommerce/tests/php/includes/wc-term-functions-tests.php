@@ -376,6 +376,14 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				),
 				array( 'Category B', 'Category A' ),
 			),
+			'meta_compare !='         => array(
+				array(
+					'meta_key'     => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value'   => 'no', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_compare' => '!=', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				),
+				array( 'Category B', 'Category A' ),
+			),
 			'nested meta_query'       => array(
 				array(
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -401,6 +409,41 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				),
 				array( 'Category B' ),
 			),
+		);
+	}
+
+	/**
+	 * @testdox The legacy menu_order argument keeps a caller's term meta filter, even with an explicit orderby on a taxonomy WooCommerce doesn't sort.
+	 */
+	public function test_legacy_menu_order_arg_honors_caller_term_meta_filter(): void {
+		$second    = wp_insert_term( 'Tag A', 'product_tag' );
+		$first     = wp_insert_term( 'Tag B', 'product_tag' );
+		$unmatched = wp_insert_term( 'Tag C', 'product_tag' );
+
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
+		update_term_meta( $unmatched['term_id'], 'order', 0 );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_tag',
+				'hide_empty' => false,
+				'fields'     => 'names',
+				'include'    => array( $second['term_id'], $first['term_id'], $unmatched['term_id'] ),
+				'orderby'    => 'name',
+				'menu_order' => 'ASC',
+				'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		$this->assertSame(
+			array( 'Tag B', 'Tag A' ),
+			$terms,
+			'Only the tags matching the meta filter should be returned, in order meta sequence rather than by name.'
 		);
 	}
 
