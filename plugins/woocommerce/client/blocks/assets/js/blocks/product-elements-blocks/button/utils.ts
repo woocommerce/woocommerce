@@ -10,7 +10,7 @@ import type {
 /**
  * Internal dependencies
  */
-import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
+import { doesCartItemMatchAttributes } from '../../../base/utils/variations/does-cart-item-match-attributes';
 
 /** Product ID and optional selected attributes used to count cart lines. */
 type InCartQuantityTarget = {
