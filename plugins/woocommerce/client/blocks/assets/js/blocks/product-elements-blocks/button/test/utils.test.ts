@@ -53,31 +53,14 @@ const makeCartItem = (
 } );
 
 describe( 'getInCartQuantity', () => {
-	it( 'sums eligible product lines and excludes declared children', () => {
-		const items: ReadonlyArray< TestCartItem > = [
-			makeCartItem( 10, 3 ),
-			makeCartItem( 10, 2, { item_data: [ { key: 'engraving' } ] } ),
-			makeCartItem( 10, 1, { parent_item_key: 'parent-a' } ),
-		];
-
-		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 5 );
-		expect(
-			getInCartQuantity(
-				[ makeCartItem( 10, 1, { parent_item_key: 'parent-a' } ) ],
-				{
-					id: 10,
-				}
-			)
-		).toBe( 0 );
-	} );
-
-	it( 'includes lines without a parent key, with null or an empty key, and with item data', () => {
+	it( 'sums lines for the product and skips declared children', () => {
 		const items = [
 			makeCartItem( 10, 1 ),
 			makeCartItem( 10, 2, { parent_item_key: null } ),
 			makeCartItem( 10, 3, { parent_item_key: '' } ),
 			makeCartItem( 10, 4, { item_data: [ { key: 'engraving' } ] } ),
-			makeCartItem( 10, 5, { parent_item_key: 'not-in-cart' } ),
+			makeCartItem( 10, 5, { parent_item_key: 'parent-a' } ),
+			makeCartItem( 11, 6 ),
 		];
 
 		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 10 );

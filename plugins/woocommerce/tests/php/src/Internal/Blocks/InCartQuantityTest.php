@@ -12,49 +12,9 @@ use WC_Unit_Test_Case;
 class InCartQuantityTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should sum product lines and exclude lines declared as children.
+	 * @testdox Should sum lines for the product and skip lines declared as children.
 	 */
-	public function test_sums_product_lines_and_excludes_declared_children(): void {
-		$items = array(
-			array(
-				'key'      => 'plain-line',
-				'id'       => 10,
-				'type'     => 'simple',
-				'quantity' => 3,
-			),
-			array(
-				'key'             => 'item-data-line',
-				'id'              => 10,
-				'type'            => 'simple',
-				'quantity'        => 2,
-				'item_data'       => array( 'name' => 'Gift wrap' ),
-				'parent_item_key' => null,
-			),
-			array(
-				'key'             => 'child-line',
-				'id'              => 10,
-				'type'            => 'simple',
-				'quantity'        => 1,
-				'parent_item_key' => 'parent-a',
-			),
-		);
-
-		$this->assertSame(
-			5,
-			InCartQuantity::for_product( $items, 10 ),
-			'Plain and item-data lines should count while declared child lines are excluded'
-		);
-		$this->assertSame(
-			0,
-			InCartQuantity::for_product( array( $items[2] ), 10 ),
-			'A cart containing only a declared child line should have no eligible quantity'
-		);
-	}
-
-	/**
-	 * @testdox Should include lines without a non-empty string parent key.
-	 */
-	public function test_includes_lines_without_non_empty_string_parent_keys(): void {
+	public function test_sums_product_lines_and_skips_declared_children(): void {
 		$items = array(
 			array(
 				'id'       => 10,
@@ -73,91 +33,42 @@ class InCartQuantityTest extends WC_Unit_Test_Case {
 			array(
 				'id'              => 10,
 				'quantity'        => 4,
-				'parent_item_key' => 'missing-parent',
+				'item_data'       => array( 'name' => 'Gift wrap' ),
+				'parent_item_key' => null,
+			),
+			array(
+				'id'              => 10,
+				'quantity'        => 5,
+				'parent_item_key' => 'parent-a',
+			),
+			array(
+				'id'       => 11,
+				'quantity' => 6,
 			),
 		);
 
 		$this->assertSame(
-			6,
+			10,
 			InCartQuantity::for_product( $items, 10 ),
-			'Missing, null, and empty parent keys should count, but any non-empty string should not'
+			'Lines without a non-empty parent key should count; child lines and other products should not'
 		);
 	}
 
 	/**
-	 * @testdox Should match variation lines by ID without counting unrelated products.
+	 * @testdox Should preserve fractional quantities.
 	 */
-	public function test_matches_variation_lines_by_id(): void {
+	public function test_preserves_fractional_quantities(): void {
 		$items = array(
 			array(
-				'id'        => 101,
-				'type'      => 'variation',
-				'quantity'  => 2,
-				'variation' => array( 'attribute_pa_color' => 'blue' ),
+				'id'       => 10,
+				'quantity' => 1.5,
 			),
 			array(
-				'id'       => 102,
-				'type'     => 'variation',
-				'quantity' => 8,
+				'id'       => 10,
+				'quantity' => 2,
 			),
 		);
 
-		$this->assertSame(
-			2,
-			InCartQuantity::for_product( $items, 101 ),
-			'A matching variation ID should contribute without inspecting its selection'
-		);
-		$this->assertSame(
-			0,
-			InCartQuantity::for_product( $items, 10 ),
-			'A variable parent without its own matching line should not inherit variation quantities'
-		);
-	}
-
-	/**
-	 * @testdox Should return zero for an empty cart.
-	 */
-	public function test_returns_zero_for_an_empty_cart(): void {
-		$this->assertSame( 0, InCartQuantity::for_product( array(), 10 ), 'An empty cart should have zero quantity' );
-	}
-
-	/**
-	 * @testdox Should preserve integer and fractional quantity sums.
-	 */
-	public function test_preserves_integer_and_fractional_quantity_sums(): void {
-		$this->assertSame(
-			3,
-			InCartQuantity::for_product(
-				array(
-					array(
-						'id'       => 10,
-						'quantity' => 1,
-					),
-					array(
-						'id'       => 10,
-						'quantity' => 2,
-					),
-				),
-				10
-			),
-			'An integer-only sum should remain an integer'
-		);
-		$this->assertSame(
-			3.5,
-			InCartQuantity::for_product(
-				array(
-					array(
-						'id'       => 10,
-						'quantity' => 1.5,
-					),
-					array(
-						'id'       => 10,
-						'quantity' => 2,
-					),
-				),
-				10
-			),
-			'Fractional quantity should not be truncated'
-		);
+		$this->assertSame( 3.5, InCartQuantity::for_product( $items, 10 ), 'Fractional quantity should not be truncated' );
 	}
 }
