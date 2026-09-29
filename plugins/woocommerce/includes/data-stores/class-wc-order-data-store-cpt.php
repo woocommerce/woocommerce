@@ -951,8 +951,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				: (array) $query_vars['post_status'];
 
 			// Drop entries that can't be used as strings — arrays would cause a TypeError in
-			// strtolower(), and non-Stringable objects would fatal on trunk too. Keep strings
-			// and objects with __toString(), which trunk's concat handled natively.
+			// strtolower(), and non-Stringable objects would fatal on trunk too.
 			$statuses = array_filter(
 				$statuses,
 				static function ( $s ) {
@@ -975,16 +974,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
-
-		// WP_Query omits the status clause when none of the requested statuses are registered, which would return all orders.
-		if ( ! empty( $query_vars['post_status'] ) ) {
-			$requested_statuses = array_map( 'sanitize_key', array_unique( $query_vars['post_status'] ) );
-			$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
-
-			if ( ! array_intersect( $requested_statuses, $known_statuses ) ) {
-				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_invalid_order_status' );
-			}
-		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
@@ -1135,7 +1124,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) ) {
+		if ( ! empty( $args['errors'] ) || $this->has_only_unknown_statuses( $args ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
@@ -1162,6 +1151,28 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $orders;
+	}
+
+	/**
+	 * Check whether none of the requested statuses are registered. WP_Query drops the status clause in that case,
+	 * which would return every order. Runs on the final query args so changes made by query filters are respected.
+	 *
+	 * @param array $wp_query_args Final WP_Query args.
+	 * @return bool
+	 */
+	private function has_only_unknown_statuses( array $wp_query_args ): bool {
+		if ( empty( $wp_query_args['post_status'] ) ) {
+			return false;
+		}
+
+		$statuses = is_string( $wp_query_args['post_status'] )
+			? explode( ',', $wp_query_args['post_status'] )
+			: (array) $wp_query_args['post_status'];
+
+		$requested_statuses = array_map( 'sanitize_key', array_filter( $statuses, 'is_string' ) );
+		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
+
+		return ! array_intersect( $requested_statuses, $known_statuses );
 	}
 
 	/**
