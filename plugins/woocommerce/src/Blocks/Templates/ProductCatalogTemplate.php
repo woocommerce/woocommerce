@@ -26,6 +26,31 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'handle_get_block_templates' ), 20, 3 );
+		add_filter( 'get_post_metadata', array( $this, 'handle_get_post_metadata' ), 10, 4 );
+	}
+
+	/**
+	 * Use the Product Catalog template for the Shop page without changing its saved template.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $value    Short-circuited metadata value, or null.
+	 * @param int    $post_id  Post ID.
+	 * @param string $meta_key Metadata key.
+	 * @param bool   $single   Whether to return a single value.
+	 * @return mixed
+	 */
+	public function handle_get_post_metadata( $value, $post_id, $meta_key, $single ) {
+		if (
+			null === $value &&
+			'_wp_page_template' === $meta_key &&
+			wp_is_block_theme() &&
+			wc_get_page_id( 'shop' ) === $post_id
+		) {
+			return $single ? self::SLUG : array( self::SLUG );
+		}
+
+		return $value;
 	}
 
 	/**
