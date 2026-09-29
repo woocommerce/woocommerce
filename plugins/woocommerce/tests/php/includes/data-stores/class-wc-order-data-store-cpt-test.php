@@ -1719,7 +1719,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param array $expected_warnings Expected PHP warnings.
 	 */
 	public function test_inert_status_values_do_not_trigger_malformed_status_error( $status, $expected_warnings ): void {
-		$captured = array();
+		OrderHelper::create_order();
+
+		$captured = null;
 		$warnings = array();
 		$capture  = static function ( $args ) use ( &$captured ) {
 			$captured = $args;
@@ -1736,7 +1738,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		try {
-			wc_get_orders(
+			$result = wc_get_orders(
 				array(
 					'status' => $status,
 					'return' => 'ids',
@@ -1748,6 +1750,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 10 );
 		}
 
+		$this->assertSame( array(), $result, 'Inert statuses must not return every order.' );
+		$this->assertNotNull( $captured, 'The public query filter must receive the status sentinel.' );
+		$this->assertSame( array( '' ), $captured['post_status'] ?? null, 'Inert statuses must retain the unknown-status sentinel.' );
 		$error_codes = array_map( static fn( $error ) => $error->get_error_code(), $captured['errors'] ?? array() );
 		$this->assertNotContains( 'woocommerce_order_query_invalid_status', $error_codes );
 		$this->assertSame( $expected_warnings, $warnings );
@@ -1807,16 +1812,18 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
 
-		$result = wc_get_orders(
-			array(
-				$date_key => array( 'foo' ),
-				'return'  => 'ids',
-				'limit'   => -1,
-				'status'  => 'any',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		try {
+			$result = wc_get_orders(
+				array(
+					$date_key => array( 'foo' ),
+					'return'  => 'ids',
+					'limit'   => -1,
+					'status'  => 'any',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		}
 
 		$this->assertSame(
 			array(),
@@ -1839,16 +1846,18 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
 
-		$result = wc_get_orders(
-			array(
-				'customer' => new stdClass(),
-				'return'   => 'ids',
-				'limit'    => -1,
-				'status'   => 'any',
-			)
-		);
-
-		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		try {
+			$result = wc_get_orders(
+				array(
+					'customer' => new stdClass(),
+					'return'   => 'ids',
+					'limit'    => -1,
+					'status'   => 'any',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		}
 
 		$this->assertSame( array(), $result, 'An unusable customer must not return orders.' );
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
@@ -1871,7 +1880,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			static function ( $severity, $message ) use ( &$diagnostics ) {
 				$diagnostics[] = $message;
 				return true;
-			}
+			},
+			E_DEPRECATED | E_WARNING | E_NOTICE
 		);
 
 		try {
@@ -2164,15 +2174,17 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
 
-		$result = wc_get_orders(
-			array(
-				'status' => new stdClass(),
-				'return' => 'ids',
-				'limit'  => -1,
-			)
-		);
-
-		remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		try {
+			$result = wc_get_orders(
+				array(
+					'status' => new stdClass(),
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		}
 
 		$this->assertSame(
 			array(),
