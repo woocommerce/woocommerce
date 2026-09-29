@@ -149,11 +149,12 @@
 		box-sizing: border-box;
 		color: inherit;
 		width: 100%;
-		padding: 0 48px 16px 48px;
+		padding: 0 48px 16px;
 		z-index: 1;
 
 		&.is-layout-flex {
 			flex: 1;
+			padding-block-start: 16px;
 		}
 	}
 
