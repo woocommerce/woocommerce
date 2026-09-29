@@ -35,7 +35,7 @@ export const CheckoutProvider = ( {
 			providerId={ providerId }
 		>
 			<ShippingDataProvider>
-				<PaymentEventsProvider>
+				<PaymentEventsProvider providerId={ providerId }>
 					{ children }
 					{ /* If the current user is an admin, we let BlockErrorBoundary render
 								the error, or we simply die silently. */ }
@@ -46,7 +46,7 @@ export const CheckoutProvider = ( {
 					>
 						<PluginArea scope="woocommerce-checkout" />
 					</BlockErrorBoundary>
-					<CheckoutProcessor />
+					<CheckoutProcessor providerId={ providerId } />
 				</PaymentEventsProvider>
 			</ShippingDataProvider>
 		</CheckoutEventsProvider>

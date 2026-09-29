@@ -22,6 +22,21 @@ describe( 'Checkout Store Reducer', () => {
 		);
 	} );
 
+	it( 'should clear the processing owner when setting idle', () => {
+		const initialState = {
+			...defaultState,
+			processingOwner: 'checkout' as const,
+		};
+		const expectedState = {
+			...defaultState,
+			processingOwner: null,
+		};
+
+		expect( reducer( initialState, actions.__internalSetIdle() ) ).toEqual(
+			expectedState
+		);
+	} );
+
 	it( 'should handle SET_REDIRECT_URL', () => {
 		const expectedState = {
 			...defaultState,
@@ -79,7 +94,11 @@ describe( 'Checkout Store Reducer', () => {
 	} );
 
 	it( 'should handle SET_HAS_ERROR when status is PROCESSING', () => {
-		const initialState = { ...defaultState, status: STATUS.PROCESSING };
+		const initialState = {
+			...defaultState,
+			status: STATUS.PROCESSING,
+			processingOwner: 'checkout' as const,
+		};
 
 		const expectedState = {
 			...defaultState,

@@ -42,7 +42,7 @@ describe( 'CheckoutEventsContext', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		dispatch( checkoutStore ).__internalSetIdle();
-		dispatch( checkoutStore ).__internalSetProcessingOwner( null );
+		dispatch( checkoutStore ).__internalSetProcessingOwner( 'checkout' );
 
 		// Mock the payment store dispatch action
 		mockSetRegisteredExpressPaymentMethods = jest.fn();
@@ -94,6 +94,22 @@ describe( 'CheckoutEventsContext', () => {
 		expect( select( checkoutStore ).getProcessingOwner() ).toBe( 'cart' );
 		expect( setBeforeProcessing ).toHaveBeenCalled();
 		setBeforeProcessing.mockRestore();
+	} );
+
+	it( 'does not process checkout events owned by another provider', async () => {
+		const callback = jest.fn();
+		checkoutEvents.onCheckoutValidation( callback );
+		render(
+			<CheckoutEventsProvider redirectUrl="local" providerId="cart">
+				<div />
+			</CheckoutEventsProvider>
+		);
+
+		await act( () =>
+			dispatch( checkoutStore ).__internalSetBeforeProcessing()
+		);
+
+		expect( callback ).not.toHaveBeenCalled();
 	} );
 
 	it( 'onCheckoutValidation observers are called when the checkout is in the "beforeProcessing" state', async () => {

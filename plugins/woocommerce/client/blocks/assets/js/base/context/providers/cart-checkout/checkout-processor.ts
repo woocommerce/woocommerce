@@ -31,6 +31,7 @@ import {
 	responseTypes,
 } from '@woocommerce/types';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
+import type { CheckoutProcessingOwner } from '@woocommerce/block-data/checkout';
 
 /**
  * Internal dependencies
@@ -45,7 +46,11 @@ import { useCheckoutAddress } from '../../hooks/use-checkout-address';
  *
  * Subscribes to checkout context and triggers processing via the API.
  */
-const CheckoutProcessor = () => {
+const CheckoutProcessor = ( {
+	providerId = 'checkout',
+}: {
+	providerId?: CheckoutProcessingOwner;
+} ) => {
 	const { onCheckoutValidation } = checkoutEvents;
 
 	const {
@@ -60,6 +65,7 @@ const CheckoutProcessor = () => {
 		orderNotes,
 		redirectUrl,
 		shouldCreateAccount,
+		processingOwner,
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
@@ -74,6 +80,7 @@ const CheckoutProcessor = () => {
 			orderNotes: store.getOrderNotes(),
 			redirectUrl: store.getRedirectUrl(),
 			shouldCreateAccount: store.getShouldCreateAccount(),
+			processingOwner: store.getProcessingOwner(),
 		};
 	}, [] );
 
@@ -137,6 +144,7 @@ const CheckoutProcessor = () => {
 		shippingErrorStatus.hasError;
 
 	const paidAndWithoutErrors =
+		processingOwner === providerId &&
 		! checkoutHasError &&
 		! checkoutWillHaveError &&
 		( isPaymentReady || ! cartNeedsPayment ) &&
@@ -145,6 +153,7 @@ const CheckoutProcessor = () => {
 	// Determine if checkout has an error.
 	useEffect( () => {
 		if (
+			processingOwner === providerId &&
 			checkoutWillHaveError !== checkoutHasError &&
 			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
 			! isExpressPaymentMethodActive
@@ -152,6 +161,8 @@ const CheckoutProcessor = () => {
 			void __internalSetHasError( checkoutWillHaveError );
 		}
 	}, [
+		processingOwner,
+		providerId,
 		checkoutWillHaveError,
 		checkoutHasError,
 		checkoutIsProcessing,
@@ -168,6 +179,9 @@ const CheckoutProcessor = () => {
 	}, [ billingAddress, shippingAddress, redirectUrl ] );
 
 	const checkValidation = useCallback( () => {
+		if ( processingOwner !== providerId ) {
+			return true;
+		}
 		if ( hasValidationErrors() ) {
 			// If there is a shipping rates validation error, return the error message to be displayed.
 			if (
@@ -207,7 +221,13 @@ const CheckoutProcessor = () => {
 		}
 
 		return true;
-	}, [ hasValidationErrors, hasPaymentError, shippingErrorStatus.hasError ] );
+	}, [
+		processingOwner,
+		providerId,
+		hasValidationErrors,
+		hasPaymentError,
+		shippingErrorStatus.hasError,
+	] );
 
 	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
 	useEffect( () => {
@@ -234,10 +254,10 @@ const CheckoutProcessor = () => {
 		window.localStorage.removeItem(
 			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 		);
-		if ( currentRedirectUrl.current ) {
+		if ( processingOwner === providerId && currentRedirectUrl.current ) {
 			window.location.href = currentRedirectUrl.current;
 		}
-	}, [ checkoutIsComplete ] );
+	}, [ checkoutIsComplete, processingOwner, providerId ] );
 
 	// POST to the Store API and process and display any errors, or set order complete
 	const processOrder = useCallback( async () => {

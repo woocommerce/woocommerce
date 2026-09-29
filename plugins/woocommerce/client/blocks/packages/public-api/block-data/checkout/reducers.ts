@@ -17,10 +17,11 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 	switch ( action.type ) {
 		case types.SET_IDLE:
 			newState =
-				state.status !== STATUS.IDLE
+				state.status !== STATUS.IDLE || state.processingOwner !== null
 					? {
 							...state,
 							status: STATUS.IDLE,
+							processingOwner: null,
 					  }
 					: state;
 			break;
@@ -76,17 +77,18 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			};
 			break;
 
-		case types.SET_HAS_ERROR:
+		case types.SET_HAS_ERROR: {
+			const returnsToIdle =
+				state.status === STATUS.PROCESSING ||
+				state.status === STATUS.BEFORE_PROCESSING;
 			newState = {
 				...state,
 				hasError: action.hasError,
-				status:
-					state.status === STATUS.PROCESSING ||
-					state.status === STATUS.BEFORE_PROCESSING
-						? STATUS.IDLE
-						: state.status,
+				status: returnsToIdle ? STATUS.IDLE : state.status,
+				processingOwner: returnsToIdle ? null : state.processingOwner,
 			};
 			break;
+		}
 
 		case types.INCREMENT_CALCULATING:
 			newState = {

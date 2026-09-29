@@ -175,6 +175,7 @@ export const CheckoutEventsProvider = ( {
 		checkoutOrderId,
 		checkoutOrderNotes,
 		checkoutCustomerId,
+		processingOwner,
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
@@ -186,8 +187,11 @@ export const CheckoutEventsProvider = ( {
 			checkoutOrderId: store.getOrderId(),
 			checkoutOrderNotes: store.getOrderNotes(),
 			checkoutCustomerId: store.getCustomerId(),
+			processingOwner: store.getProcessingOwner(),
 		};
 	} );
+
+	const ownsProcessing = processingOwner === providerId;
 
 	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
 		void __internalSetRedirectUrl( redirectUrl );
@@ -295,13 +299,14 @@ export const CheckoutEventsProvider = ( {
 	// Emit CHECKOUT_VALIDATE event and set the error state based on the response of
 	// the registered callbacks
 	useEffect( () => {
-		if ( isCheckoutBeforeProcessing ) {
+		if ( isCheckoutBeforeProcessing && ownsProcessing ) {
 			void __internalEmitValidateEvent( {
 				setValidationErrors,
 			} );
 		}
 	}, [
 		isCheckoutBeforeProcessing,
+		ownsProcessing,
 		setValidationErrors,
 		__internalEmitValidateEvent,
 	] );
@@ -313,8 +318,9 @@ export const CheckoutEventsProvider = ( {
 	// and set checkout errors according to the callback responses
 	useEffect( () => {
 		if (
-			checkoutStatus === previousStatus &&
-			checkoutHasError === previousHasError
+			! ownsProcessing ||
+			( checkoutStatus === previousStatus &&
+				checkoutHasError === previousHasError )
 		) {
 			return;
 		}
@@ -336,6 +342,7 @@ export const CheckoutEventsProvider = ( {
 		checkoutCustomerId,
 		checkoutOrderNotes,
 		isCheckoutAfterProcessing,
+		ownsProcessing,
 		isCheckoutBeforeProcessing,
 		previousStatus,
 		previousHasError,

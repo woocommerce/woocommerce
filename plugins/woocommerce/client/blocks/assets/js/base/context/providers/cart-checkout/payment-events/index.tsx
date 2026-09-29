@@ -16,6 +16,7 @@ import {
 	validationStore,
 } from '@woocommerce/block-data';
 import deprecated from '@wordpress/deprecated';
+import type { CheckoutProcessingOwner } from '@woocommerce/block-data/checkout';
 
 /**
  * Internal dependencies
@@ -43,19 +44,23 @@ export const usePaymentEventsContext = () => {
  *
  * This provides the api interface (via the context hook) for payment status and data.
  *
- * @param {Object} props          Incoming props for provider
- * @param {Object} props.children The wrapped components in this provider.
+ * @param {Object} props            Incoming props for provider.
+ * @param {Object} props.children   The wrapped components in this provider.
+ * @param {string} props.providerId Identifier for the provider.
  */
 export const PaymentEventsProvider = ( {
 	children,
+	providerId = 'checkout',
 }: {
 	children: React.ReactNode;
+	providerId?: CheckoutProcessingOwner;
 } ): JSX.Element => {
 	const {
 		isProcessing: checkoutIsProcessing,
 		isIdle: checkoutIsIdle,
 		isCalculating: checkoutIsCalculating,
 		hasError: checkoutHasError,
+		processingOwner,
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
@@ -63,6 +68,7 @@ export const PaymentEventsProvider = ( {
 			isIdle: store.isIdle(),
 			hasError: store.hasError(),
 			isCalculating: store.isCalculating(),
+			processingOwner: store.getProcessingOwner(),
 		};
 	} );
 	const { isPaymentReady } = useSelect( ( select ) => {
@@ -96,6 +102,7 @@ export const PaymentEventsProvider = ( {
 	// flip payment to processing if checkout processing is complete and there are no errors
 	useEffect( () => {
 		if (
+			processingOwner === providerId &&
 			checkoutIsProcessing &&
 			! checkoutHasError &&
 			! checkoutIsCalculating
@@ -115,6 +122,8 @@ export const PaymentEventsProvider = ( {
 		checkoutIsProcessing,
 		checkoutHasError,
 		checkoutIsCalculating,
+		processingOwner,
+		providerId,
 		__internalSetPaymentProcessing,
 		__internalEmitPaymentProcessingEvent,
 		setValidationErrors,
