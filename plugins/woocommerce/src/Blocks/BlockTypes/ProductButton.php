@@ -92,8 +92,9 @@ class ProductButton extends AbstractBlock {
 		}
 
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$woocommerce_state = wp_interactivity_state( 'woocommerce' );
 
-		$number_of_items_in_cart  = $this->get_in_cart_quantity_by_product_id( $product->get_id() );
+		$number_of_items_in_cart  = InCartQuantity::for_product( $woocommerce_state['cart']['items'] ?? array(), $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
@@ -319,18 +320,6 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
-	}
-
-	/**
-	 * Get the quantity of a product from the published Store API cart.
-	 *
-	 * @param int $product_id The product ID.
-	 * @return int|float The product quantity in the cart.
-	 */
-	private function get_in_cart_quantity_by_product_id( int $product_id ) {
-		$woocommerce_state = wp_interactivity_state( 'woocommerce' );
-
-		return InCartQuantity::for_product( $woocommerce_state['cart']['items'] ?? array(), $product_id );
 	}
 
 	/**
