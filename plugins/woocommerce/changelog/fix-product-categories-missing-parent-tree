@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep child product categories visible when their parent is missing, and avoid warnings in children-only lists.
