@@ -36,6 +36,7 @@ import type {
 	emitAfterProcessingEventsType,
 	CheckoutPutData,
 } from './types';
+import type { CheckoutProcessingOwner } from './default-state';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { CheckoutPutAbortController } from '../utils/clear-put-requests';
 import { CART_STORE_KEY } from '../cart';
@@ -52,7 +53,8 @@ export interface CheckoutThunkArgs {
  * and change the status to AFTER_PROCESSING
  */
 export const __internalProcessCheckoutResponse = (
-	response: CheckoutResponse
+	response: CheckoutResponse,
+	processingOwner?: CheckoutProcessingOwner
 ) => {
 	return ( { dispatch }: CheckoutThunkArgs ) => {
 		const paymentResult = getPaymentResultFromCheckoutResponse( response );
@@ -64,7 +66,9 @@ export const __internalProcessCheckoutResponse = (
 		void wpDispatch( paymentStore ).__internalSetPaymentResult(
 			paymentResult
 		);
-		void dispatch.__internalSetAfterProcessing();
+		void dispatch.__internalSetAfterProcessing(
+			processingOwner ?? undefined
+		);
 	};
 };
 
@@ -75,7 +79,7 @@ export const __internalProcessCheckoutResponse = (
 export const __internalEmitValidateEvent: emitValidateEventType = ( {
 	setValidationErrors,
 } ) => {
-	return ( { dispatch, registry }: CheckoutThunkArgs ) => {
+	return ( { select, dispatch, registry }: CheckoutThunkArgs ) => {
 		const { createErrorNotice } = registry.dispatch( noticesStore );
 		removeNoticesByStatus( 'error' );
 		void checkoutEventsEmitter
@@ -88,7 +92,9 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 					responses.length === 0 ||
 					responses.every( isSuccessResponse )
 				) {
-					void dispatch.__internalSetProcessing();
+					if ( select.isBeforeProcessing() ) {
+						void dispatch.__internalSetProcessing();
+					}
 					return;
 				}
 				// If any observer returned a response, by this point we know that it's either failure or error due to

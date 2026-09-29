@@ -76,6 +76,8 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			newState = {
 				...state,
 				status: STATUS.AFTER_PROCESSING,
+				processingOwner:
+					action.processingOwner ?? state.processingOwner,
 			};
 			break;
 

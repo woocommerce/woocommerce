@@ -326,7 +326,10 @@ const CheckoutProcessor = ( {
 				return response.json();
 			} )
 			.then( ( responseJson: CheckoutResponseSuccess ) => {
-				void __internalProcessCheckoutResponse( responseJson );
+				void __internalProcessCheckoutResponse(
+					responseJson,
+					providerId
+				);
 				setIsProcessingOrder( false );
 			} )
 			.catch( ( errorResponse: ApiResponse< CheckoutResponseError > ) => {
@@ -344,7 +347,10 @@ const CheckoutProcessor = ( {
 								receiveCartContents( response.data.cart );
 							}
 							processErrorResponse( response );
-							void __internalProcessCheckoutResponse( response );
+							void __internalProcessCheckoutResponse(
+								response,
+								providerId
+							);
 						} );
 				} catch {
 					let errorMessage = __(
@@ -386,6 +392,7 @@ const CheckoutProcessor = ( {
 		receiveCartContents,
 		__internalSetHasError,
 		__internalProcessCheckoutResponse,
+		providerId,
 		useBillingAsShipping,
 	] );
 

@@ -171,6 +171,21 @@ describe( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
+	it( 'should restore the processing owner when setting after processing', () => {
+		const expectedState = {
+			...defaultState,
+			status: STATUS.AFTER_PROCESSING,
+			processingOwner: 'checkout' as const,
+		};
+
+		expect(
+			reducer(
+				defaultState,
+				actions.__internalSetAfterProcessing( 'checkout' )
+			)
+		).toEqual( expectedState );
+	} );
+
 	it( 'should handle INCREMENT_CALCULATING', () => {
 		const expectedState = {
 			...defaultState,

@@ -40,10 +40,15 @@ export const __internalSetProcessing = () => ( {
 } );
 
 /**
- * Set the checkout status to `after_processing`
+ * Set the checkout status to `after_processing`.
+ *
+ * @param processingOwner Provider responsible for processing checkout.
  */
-export const __internalSetAfterProcessing = () => ( {
+export const __internalSetAfterProcessing = (
+	processingOwner?: CheckoutProcessingOwner
+) => ( {
 	type: types.SET_AFTER_PROCESSING,
+	processingOwner,
 } );
 
 /**
