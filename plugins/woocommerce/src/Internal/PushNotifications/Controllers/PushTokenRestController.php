@@ -64,6 +64,14 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
+	 * The token list is registered whatever the module's state. The write
+	 * endpoints are only registered while it is enabled, because the apps read
+	 * the 404 for a missing route as push notifications being unavailable.
+	 * Once the apps read that from {@see PushNotificationStatusRestController}
+	 * instead, the write endpoints can be registered unconditionally again and
+	 * left to their permission callbacks. Registering a second handler on an
+	 * existing route adds to it.
+	 *
 	 * @since 10.6.0
 	 *
 	 * @return void
@@ -78,7 +86,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'index' ),
 					'permission_callback' => array( $this, 'authorize_as_from_wpcom' ),
 					'args'                => array(
-						'page'     => array(
+						'page'        => array(
 							'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 							'type'              => 'integer',
 							'default'           => 1,
@@ -86,7 +94,7 @@ class PushTokenRestController extends RestApiControllerBase {
 							'sanitize_callback' => 'absint',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
-						'per_page' => array(
+						'per_page'    => array(
 							'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 							'type'              => 'integer',
 							'default'           => 10,
@@ -95,13 +103,21 @@ class PushTokenRestController extends RestApiControllerBase {
 							'sanitize_callback' => 'absint',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
+						'user_id'     => array(
+							'description'       => __( 'Limit results to tokens belonging to this user.', 'woocommerce' ),
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'device_uuid' => array(
+							'description'       => __( 'Limit results to tokens registered by this device.', 'woocommerce' ),
+							'type'              => 'string',
+							'maxLength'         => PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH,
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
 					),
-				),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
-					'args'                => $this->get_args( 'create' ),
-					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 				),
 				'schema' => fn () => array_merge(
 					$this->get_base_schema(),
@@ -117,6 +133,23 @@ class PushTokenRestController extends RestApiControllerBase {
 							),
 						),
 					)
+				),
+			)
+		);
+
+		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
+			return;
+		}
+
+		register_rest_route(
+			$this->route_namespace,
+			$this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
+					'args'                => $this->get_args( 'create' ),
+					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
 				),
 			)
 		);
@@ -137,9 +170,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Returns all push tokens for roles that can receive push notifications,
-	 * along with when each token was registered and when the app last
-	 * confirmed it.
+	 * Returns push tokens for roles that can receive push notifications,
+	 * along with when each token was registered, when the app last confirmed
+	 * it, and the username and email of the account it belongs to. Optionally
+	 * limited to one user, one device, or both.
 	 *
 	 * @since 10.8.0
 	 *
@@ -150,6 +184,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	public function index( WP_REST_Request $request ) {
 		$page     = (int) $request->get_param( 'page' );
 		$per_page = (int) $request->get_param( 'per_page' );
+		$filters  = array(
+			'user_id'     => $request->get_param( 'user_id' ),
+			'device_uuid' => $request->get_param( 'device_uuid' ),
+		);
 
 		try {
 			/**
@@ -162,19 +200,15 @@ class PushTokenRestController extends RestApiControllerBase {
 				->get_tokens_for_roles(
 					PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
 					$page,
-					$per_page
+					$per_page,
+					$filters
 				);
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
 
 		$response = new WP_REST_Response(
-			array(
-				'tokens' => array_map(
-					fn ( $token ) => $token->to_rest_format(),
-					$result['tokens']
-				),
-			),
+			array( 'tokens' => $this->prepare_tokens_for_response( $result['tokens'] ) ),
 			WP_Http::OK
 		);
 
@@ -182,6 +216,59 @@ class PushTokenRestController extends RestApiControllerBase {
 		$response->header( 'X-WP-TotalPages', (string) $result['total_pages'] );
 
 		return $response;
+	}
+
+	/**
+	 * Formats tokens for the index response.
+	 *
+	 * The account fields are added here rather than in
+	 * {@see PushToken::to_rest_format()}, so the users for a whole page are
+	 * loaded in one query rather than one per token.
+	 *
+	 * Requesting three named columns rather than user objects skips loading
+	 * usermeta, and keeps WP_User_Query's result cache on.
+	 *
+	 * @param PushToken[] $tokens The tokens to format.
+	 * @return array[]
+	 */
+	private function prepare_tokens_for_response( array $tokens ): array {
+		$user_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( fn ( PushToken $token ) => $token->get_user_id(), $tokens )
+				)
+			)
+		);
+
+		if ( ! $user_ids ) {
+			return array();
+		}
+
+		$users = array_column(
+			get_users(
+				array(
+					'include' => $user_ids,
+					'fields'  => array( 'ID', 'user_login', 'user_email' ),
+				)
+			),
+			null,
+			'ID'
+		);
+
+		return array_map(
+			function ( PushToken $token ) use ( $users ) {
+				$user = $users[ $token->get_user_id() ] ?? null;
+
+				return array_merge(
+					$token->to_rest_format(),
+					array(
+						'user_login' => $user ? $user->user_login : null,
+						'user_email' => $user ? $user->user_email : null,
+					)
+				);
+			},
+			$tokens
+		);
 	}
 
 	/**
@@ -308,6 +395,18 @@ class PushTokenRestController extends RestApiControllerBase {
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
+					'user_login'            => array(
+						'description' => __( 'The username of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'user_email'            => array(
+						'description' => __( 'The email address of the account the token belongs to. Null when the user no longer exists.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 					'token'                 => array(
 						'description' => __( 'The push token issued by Apple or Google.', 'woocommerce' ),
 						'type'        => 'string',
@@ -355,6 +454,13 @@ class PushTokenRestController extends RestApiControllerBase {
 					),
 					'last_confirmed_at_gmt' => array(
 						'description' => __( 'The date the app last registered this token, as GMT. The app re-sends the token periodically, not only when the token value changes, so this shows how recently the app read the token from the device. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'last_sent_at_gmt'      => array(
+						'description' => __( 'The date a notification for this token was last sent to WordPress.com, as GMT. This records that WordPress.com accepted the payload, not that the device received it. Null when no send has been recorded, which also covers a send whose record failed.', 'woocommerce' ),
 						'type'        => array( 'string', 'null' ),
 						'format'      => 'date-time',
 						'context'     => array( 'view' ),

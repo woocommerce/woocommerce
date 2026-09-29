@@ -233,4 +233,75 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 		$this->assertTrue( wc_is_stock_amount_integer(), 'Should return true when intval is applied to stock amount filter.' );
 	}
+
+	/**
+	 * @testdox Saving an unchanged hold stock value should preserve the pending cancellation action.
+	 */
+	public function test_unchanged_hold_stock_value_preserves_pending_cancellation_action(): void {
+		$scheduled_time = time() + ( 2 * HOUR_IN_SECONDS );
+
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		as_schedule_single_action( $scheduled_time, 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+
+		wc_format_option_hold_stock_minutes( '60', array(), '60' );
+
+		$this->assertSame(
+			$scheduled_time,
+			as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' ),
+			'An unchanged hold stock value should not delay the existing cancellation action.'
+		);
+	}
+
+	/**
+	 * @testdox Saving an unchanged hold stock value should recreate a missing cancellation action.
+	 */
+	public function test_unchanged_hold_stock_value_recreates_missing_cancellation_action(): void {
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+
+		$expected_time = time() + HOUR_IN_SECONDS;
+		wc_format_option_hold_stock_minutes( '60', array(), '60' );
+
+		$this->assertEqualsWithDelta(
+			$expected_time,
+			as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' ),
+			1,
+			'An unchanged hold stock value should recreate a missing cancellation action.'
+		);
+	}
+
+	/**
+	 * @testdox Saving a changed hold stock value should replace the cancellation action at the new interval.
+	 */
+	public function test_changed_hold_stock_value_replaces_cancellation_action(): void {
+		$scheduled_time = time() + ( 2 * HOUR_IN_SECONDS );
+
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		as_schedule_single_action( $scheduled_time, 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+
+		$expected_time = time() + ( 30 * MINUTE_IN_SECONDS );
+		wc_format_option_hold_stock_minutes( '30', array(), '30' );
+		$next_scheduled_time = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' );
+
+		$this->assertNotSame( $scheduled_time, $next_scheduled_time, 'A changed hold stock value should replace the existing cancellation action.' );
+		$this->assertEqualsWithDelta( $expected_time, $next_scheduled_time, 1, 'The replacement action should use the new hold stock interval.' );
+	}
+
+	/**
+	 * @testdox Saving a blank hold stock value should remove the cancellation action when the option is missing.
+	 */
+	public function test_blank_hold_stock_value_removes_cancellation_action_when_option_is_missing(): void {
+		delete_option( 'woocommerce_hold_stock_minutes' );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		as_schedule_single_action( time() + HOUR_IN_SECONDS, 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+
+		wc_format_option_hold_stock_minutes( '', array(), '' );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders' ),
+			'A blank hold stock value should remove the cancellation action.'
+		);
+	}
 }

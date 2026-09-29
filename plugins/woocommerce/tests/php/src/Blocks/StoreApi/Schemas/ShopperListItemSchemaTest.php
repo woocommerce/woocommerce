@@ -133,7 +133,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			$product->set_catalog_visibility( $overrides['catalog_visibility'] );
 			$product->save();
 		}
-		$post_overrides = array_intersect_key( $overrides, array_flip( array( 'post_status', 'post_password' ) ) );
+		$post_overrides = array_intersect_key( $overrides, array_flip( array( 'post_status', 'post_password', 'post_parent' ) ) );
 		if ( ! empty( $post_overrides ) ) {
 			// `wp_update_post` silently rewrites `future` back to `publish` when post_date is in the past,
 			// so a future date is needed to actually persist the status.
@@ -158,7 +158,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, string>, 1: bool}>
+	 * @return array<string, array{0: array<string, string|int>, 1: bool}>
 	 */
 	public function provider_is_live_cases(): array {
 		return array(
@@ -166,6 +166,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			// tombstone deliberately-saved OOS / catalog-hidden items.
 			'OOS, publish'              => array( array( 'stock_status' => 'outofstock' ), true ),
 			'catalog_visibility=hidden' => array( array( 'catalog_visibility' => 'hidden' ), true ),
+			'missing parent post'       => array( array( 'post_parent' => 987654321 ), true ),
 			// Tombstone cases.
 			'draft'                     => array( array( 'post_status' => 'draft' ), false ),
 			'pending'                   => array( array( 'post_status' => 'pending' ), false ),
