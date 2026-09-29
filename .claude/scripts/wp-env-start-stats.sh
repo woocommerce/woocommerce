@@ -136,6 +136,11 @@ classify() {
   # cause as the parse-error rule at the top, but kept down here so it can only take jobs
   # that nothing else matched.
   elif grep -qaE  'PHP Fatal error: +Uncaught ' "$s"; then echo plugin-code
+  # WooCommerce never loaded, so WP-CLI has no `wc` command for the blocks seed script to
+  # call. On 2026-09-28 two branches hit this on all three attempts while sibling jobs in
+  # the same runs died on a PHP fatal -- one broken commit, reported two ways depending on
+  # which job reached it first.
+  elif grep -qaF  "Error: 'wc' is not a registered wp command" "$s"; then echo plugin-code
   else echo unclassified
   fi
 }
