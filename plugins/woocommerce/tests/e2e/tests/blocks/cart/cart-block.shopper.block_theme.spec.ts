@@ -137,9 +137,9 @@ test.describe( 'Shopper → Cart block', () => {
 		).toBeVisible();
 
 		// Add a product to cart.
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
 		await addToCartButton.click();
 
 		await expect(
