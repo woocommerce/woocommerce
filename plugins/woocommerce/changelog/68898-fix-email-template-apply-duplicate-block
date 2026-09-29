@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Email editor: applying a template update no longer duplicates a block or restores a block the merchant deleted.

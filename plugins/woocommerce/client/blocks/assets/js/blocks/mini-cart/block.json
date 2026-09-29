@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/mini-cart",
-	"version": "1.0.0",
 	"title": "Mini-Cart",
 	"icon": "miniCartAlt",
 	"description": "Display a button for shoppers to quickly view their cart.",

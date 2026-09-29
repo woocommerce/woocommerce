@@ -19,7 +19,7 @@
 	"sideEffects": [
 		"*.css",
 		"*.scss",
-		"./assets/js/atomic/blocks/**",
+		"./assets/js/blocks/product-elements-blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/middleware/**",
 		"./packages/public-api/types/**",
