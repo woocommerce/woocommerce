@@ -1,5 +1,5 @@
 Significance: patch
 Type: dev
-Comment: Cover the rate flat rate emits from its cost and shipping class settings; no production change.
+Comment: Cover the rate flat rate emits from its cost settings; no production change.
 
 
