@@ -29,6 +29,7 @@ import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import { GeolocationCountrySelect } from '../components/geolocation-country-select/geolocation-country-select';
 
 /** These are some store names that are known to be set by default and not likely to be used as actual names */
@@ -385,10 +386,20 @@ export const BusinessInfo = ( {
 							<CheckboxControl
 								__nextHasNoMarginBottom
 								className="core-profiler__checkbox"
-								label={ __(
-									'Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox.',
-									'woocommerce'
-								) }
+								// @ts-expect-error - Type definition is not correct. Label can be a string or JSX.Element.
+								label={
+									<TrackedLink
+										message={ __(
+											// translators: {{Link}} is a placeholder for a html element.
+											'Get tips, discounts, and recommendations from Woo. You can opt out at any time. We track email opens and clicks to improve our emails. See our {{Link}}Privacy Policy{{/Link}} for details.',
+											'woocommerce'
+										) }
+										eventName="coreprofiler_business_info_privacy_policy_click"
+										targetUrl="https://automattic.com/privacy/"
+										linkType="external"
+										target="_blank"
+									/>
+								}
 								checked={ isOptInMarketing }
 								onChange={ ( isChecked ) => {
 									setIsOptInMarketing( isChecked );
