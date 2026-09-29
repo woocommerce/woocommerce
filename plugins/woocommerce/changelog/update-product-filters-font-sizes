@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Let the Filter products button inherit its font size and add font-size controls for active filter chips.
+Let the Filter products button inherit its surrounding font size.
