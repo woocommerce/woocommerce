@@ -80,10 +80,8 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		foreach ( explode( ' ', (string) $processor->get_attribute( 'class' ) ) as $class ) {
 			if ( in_array( $class, $layout_classes, true ) || 0 === strpos( $class, $container_prefix ) ) {
 				$classes[] = $class;
+				$processor->remove_class( $class );
 			}
-		}
-		foreach ( $classes as $class ) {
-			$processor->remove_class( $class );
 		}
 
 		// Legacy blocks render their title and description outside the inner-block container.
