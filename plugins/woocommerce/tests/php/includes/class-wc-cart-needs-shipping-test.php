@@ -169,6 +169,21 @@ class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * An extension can also answer for a single product rather than for the whole cart, which is how
+	 * things like bookings and service products drop out of shipping.
+	 *
+	 * @testdox An extension can say a single product needs no shipping.
+	 */
+	public function test_an_extension_can_say_a_single_product_needs_no_shipping(): void {
+		$this->zone_offers_a_flat_rate();
+		$this->assertTrue( WC()->cart->needs_shipping(), 'The cart should ask about shipping to begin with.' );
+
+		add_filter( 'woocommerce_product_needs_shipping', '__return_false' );
+
+		$this->assertFalse( WC()->cart->needs_shipping(), 'With nothing in the cart needing shipping, there is nothing to ask.' );
+	}
+
+	/**
 	 * @testdox An extension can decide for itself whether the cart asks about shipping.
 	 */
 	public function test_an_extension_can_decide_whether_the_cart_asks(): void {
