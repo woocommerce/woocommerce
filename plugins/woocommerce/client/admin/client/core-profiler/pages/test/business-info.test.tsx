@@ -338,7 +338,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const continueButton = screen.getByRole( 'button', {
@@ -352,7 +352,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -422,7 +422,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -438,7 +438,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -458,7 +458,7 @@ describe( 'BusinessInfo', () => {
 			} );
 			userEvent.type( emailInput, 'invalid email' );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			expect(
@@ -470,7 +470,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -491,7 +491,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -525,7 +525,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt in to receive tips, discounts, and recommendations from Woo./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
