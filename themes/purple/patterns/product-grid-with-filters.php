@@ -16,7 +16,7 @@
 <!-- wp:group {"metadata":{"name":"Product grid with filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70);margin-bottom:0">
 <!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
-<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%"} -->
+<div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%","style":{"@mobile":{"spacing":{"blockGap":"0"}},"@tablet":{"spacing":{"blockGap":"0"}}}} -->
 <div class="wp-block-column" style="flex-basis:22%">
 <!-- wp:heading {"level":3,"metadata":{"blockVisibility":{"viewport":{"mobile":false,"tablet":false}}},"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--50);font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e( 'Filter by:', 'purple' );?></h3>
@@ -119,15 +119,12 @@
 <!-- /wp:buttons -->
 <!-- /wp:woocommerce/product-filter-clear-button --></div>
 <!-- /wp:woocommerce/product-filter-active --></div>
-<!-- /wp:woocommerce/product-filters --></div>
-<!-- /wp:column -->
+<!-- /wp:woocommerce/product-filters -->
 
-<!-- wp:column {"width":"88%"} -->
-<div class="wp-block-column" style="flex-basis:88%">
 <!-- wp:woocommerce/product-filters {"showFilterDrawer":false,"fontSize":"small","metadata":{"blockVisibility":{"viewport":{"desktop":false}}}} -->
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters is-filter-drawer-disabled has-small-font-size">
-<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} -->
-<div class="wp-block-woocommerce-product-filter-active" style="margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-filter-removable-chips -->
+<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
+<div class="wp-block-woocommerce-product-filter-active" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
 <!-- /wp:woocommerce/product-filter-removable-chips -->
 
@@ -140,8 +137,11 @@
 <!-- /wp:woocommerce/product-filter-clear-button --></div>
 <!-- /wp:woocommerce/product-filter-active -->
 </div>
-<!-- /wp:woocommerce/product-filters -->
+<!-- /wp:woocommerce/product-filters --></div>
+<!-- /wp:column -->
 
+<!-- wp:column {"width":"88%"} -->
+<div class="wp-block-column" style="flex-basis:88%">
 <!-- wp:woocommerce/product-collection {"queryId":27,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide">
 <!-- wp:group {"className":"alignwide","style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|50"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
