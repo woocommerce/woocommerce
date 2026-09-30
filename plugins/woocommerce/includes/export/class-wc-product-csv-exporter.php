@@ -236,7 +236,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$this->row_data           = array();
 		$this->rows_outside_query = 0;
 		$variable_products        = array();
-		$product_types            = isset( $args['type'] ) && is_array( $args['type'] ) ? $args['type'] : array();
+		$product_types            = isset( $args['type'] ) ? (array) $args['type'] : array();
 		$include_variations       = empty( $product_types ) || in_array( ProductType::VARIATION, $product_types, true );
 		$include_variables        = empty( $product_types ) || in_array( ProductType::VARIABLE, $product_types, true );
 
