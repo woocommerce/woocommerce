@@ -1,5 +1,6 @@
 {
 	"extends": "@wordpress/stylelint-config",
+	"reportNeedlessDisables": true,
 	"customSyntax": "postcss-scss",
 	"rules": {
 		"selector-class-pattern": null,
