@@ -3077,6 +3077,60 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A rejected checkout update nonce should ask for one reload, then show the expired notice.
+	 */
+	public function test_update_order_review_reloads_once_for_rejected_nonce(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			unset( WC()->session->reload_checkout_for_nonce );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( array( 'reload' => true ), $response, 'The first rejected nonce should only ask the checkout to reload.' );
+			$this->assertTrue( WC()->session->get( 'reload_checkout_for_nonce' ), 'The session should remember that a reload was requested.' );
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The second rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'A second rejected nonce should not reload again.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'A second rejected nonce should show the expired notice.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A checkout update with a valid nonce should clear the pending nonce reload flag.
+	 */
+	public function test_update_order_review_valid_nonce_clears_reload_flag(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertNull( WC()->session->get( 'reload_checkout_for_nonce' ), 'A valid nonce should let a later stale page reload again.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
