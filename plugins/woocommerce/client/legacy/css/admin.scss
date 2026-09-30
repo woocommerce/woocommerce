@@ -9443,6 +9443,7 @@ table.bar_chart {
 .woocommerce-progress-form-wrapper,
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {
+
 	@media screen and (min-width: 782px) {
 		max-width: 710px;
 		margin: 40px auto;
@@ -9633,6 +9634,7 @@ table.bar_chart {
 		}
 
 		@media screen and (min-width: 782px) {
+
 			.woocommerce-exporter-options th,
 			.woocommerce-importer-options th {
 				width: 35%;
