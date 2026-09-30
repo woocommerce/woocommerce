@@ -2794,6 +2794,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
 
 		try {
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 			unset( WC()->session->reload_checkout_for_nonce );
 
 			$_POST = array(
@@ -2814,6 +2815,36 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			unset( WC()->session->reload_checkout_for_nonce );
 			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A rejected checkout update nonce should show the expired notice when the guest has no session to remember the reload.
+	 */
+	public function test_update_order_review_skips_reload_without_session(): void {
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_session = WC()->session;
+
+		try {
+			wp_set_current_user( 0 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+
+			$this->assertFalse( WC()->session->has_session(), 'The guest should start without a cookie-backed session.' );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'Without a session the checkout should not be asked to reload.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'Without a session the expired notice should show.' );
+		} finally {
+			WC()->session = $original_session;
+			$_POST        = $original_post;
 		}
 	}
 
