@@ -68,7 +68,7 @@
 			"isIgnored": true
 		},
 		{
-			"label": "Packages already moved to Stylelint 16 (see #69239)",
+			"label": "Packages already moved to Stylelint 16",
 			"dependencies": [
 				"stylelint"
 			],
