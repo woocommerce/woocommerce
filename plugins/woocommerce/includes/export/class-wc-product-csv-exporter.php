@@ -64,11 +64,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_ids_to_export = array();
 
 	/**
-	 * Variation rows on this page that the paginated query did not return.
+	 * Rows on this page that the paginated query did not return.
 	 *
 	 * @var int
 	 */
-	protected $variation_rows_outside_query = 0;
+	protected $rows_outside_query = 0;
 
 	/**
 	 * Constructor.
@@ -232,13 +232,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		$products = wc_get_products( $args );
 
-		$this->total_rows                   = $products->total;
-		$this->row_data                     = array();
-		$this->variation_rows_outside_query = 0;
-		$variable_products                  = array();
-		$product_types                      = isset( $args['type'] ) && is_array( $args['type'] ) ? $args['type'] : array();
-		$include_variations                 = empty( $product_types ) || in_array( ProductType::VARIATION, $product_types, true );
-		$include_variables                  = empty( $product_types ) || in_array( ProductType::VARIABLE, $product_types, true );
+		$this->total_rows         = $products->total;
+		$this->row_data           = array();
+		$this->rows_outside_query = 0;
+		$variable_products        = array();
+		$product_types            = isset( $args['type'] ) && is_array( $args['type'] ) ? $args['type'] : array();
+		$include_variations       = empty( $product_types ) || in_array( ProductType::VARIATION, $product_types, true );
+		$include_variables        = empty( $product_types ) || in_array( ProductType::VARIABLE, $product_types, true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
@@ -287,7 +287,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				foreach ( $variations as $variation ) {
 					$this->row_data[] = $this->generate_row_data( $variation );
-					++$this->variation_rows_outside_query;
+					++$this->rows_outside_query;
 				}
 			}
 		}
@@ -309,7 +309,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			return 100;
 		}
 
-		$exported = parent::get_total_exported() - $this->variation_rows_outside_query;
+		$exported = parent::get_total_exported() - $this->rows_outside_query;
 
 		return (int) floor( ( max( 0, $exported ) / $this->total_rows ) * 100 );
 	}
