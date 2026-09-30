@@ -119,6 +119,15 @@ pnpm test:php:ci --cell 8.3 -- --filter WC_Tests_Product   # extra arguments go 
 - Cells ignore `.wp-env.test.override.json`, as CI does; a per-cell `.wp-env.test-<cell>.override.json` is honoured.
 - `--jobs` (default 2) sets how many cells run at a time. Run one invocation at a time.
 
+What to expect (16-core Mac, Docker at 16 CPU / 16 GB; the core suite, about 16,300 tests):
+
+| Step | Time |
+|---|---|
+| First start of a cell (image build, WordPress download) | 1–1.5 min |
+| Start of a warm cell | under 10 s |
+| Full core cell | 5–6.5 min (CI: 15–18 min) |
+| Two cells in parallel | about the slower cell, not the sum |
+
 ## Troubleshooting Tests
 
 | Problem | Solution |
