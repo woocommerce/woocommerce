@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate or missing products in the POS catalog when products share a creation date or are added while it builds.
