@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -36,6 +37,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
+			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
@@ -142,6 +147,42 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete an unpaid non-zero order without payment.
+	 *
+	 * @dataProvider unpaid_non_zero_order_status_provider
+	 * @param string $status Order status to test.
+	 */
+	public function test_process_order_without_payment_rejects_unpaid_non_zero_order( string $status ): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( $status );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete an unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( $status, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * Provides unpaid order statuses observed in the affected checkout paths.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function unpaid_non_zero_order_status_provider(): array {
+		return array(
+			'failed order'    => array( OrderStatus::FAILED ),
+			'cancelled order' => array( OrderStatus::CANCELLED ),
+		);
 	}
 
 	/**

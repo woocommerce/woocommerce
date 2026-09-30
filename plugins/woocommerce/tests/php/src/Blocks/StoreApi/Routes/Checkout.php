@@ -2515,6 +2515,56 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout refuses to complete a failed non-zero order when a filter says it does not need payment.
+	 */
+	public function test_checkout_rejects_unpaid_non_zero_order_when_failed_status_is_not_payable(): void {
+		$order_id = 0;
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment',
+			function ( $statuses ) {
+				return array_diff( $statuses, array( OrderStatus::FAILED ) );
+			}
+		);
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( &$order_id ) {
+				$order->set_status( OrderStatus::FAILED );
+				$order->save();
+				$order_id = $order->get_id();
+			}
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'address_1'  => 'test',
+					'city'       => 'test',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'email'      => 'testaccount@test.com',
+				),
+				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => '3000',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
+		$this->assertSame( 'This order cannot be completed without payment. Please try again.', $response->get_data()['message'] );
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::FAILED, $order->get_status(), 'The order should remain failed.' );
+		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.
