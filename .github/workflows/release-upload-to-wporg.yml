@@ -162,7 +162,7 @@ jobs:
   commit:
     name: Commit release to WordPress.org
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    timeout-minutes: 10
+    timeout-minutes: 60
     needs: [get-and-validate-release-asset]
     if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:

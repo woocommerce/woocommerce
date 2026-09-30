@@ -49,15 +49,17 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 						chartMode: 'item-comparison',
 						path: [ 'select_customer' ],
 						settings: {
-							type: 'customerNames',
 							param: 'customers',
 							getLabels: getCustomerLabels,
 							labels: {
+								button: __( 'Single Customer', 'woocommerce' ),
+							},
+							searchProps: {
+								type: 'customerNames',
 								placeholder: __(
 									'Type to search for a customer',
 									'woocommerce'
 								),
-								button: __( 'Single Customer', 'woocommerce' ),
 							},
 						},
 					},

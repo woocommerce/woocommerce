@@ -34,14 +34,11 @@
 			"jquery"
 		],
 		"paths": {
-			"@woocommerce/atomic-blocks": [
-				"assets/js/base/atomic/blocks"
+			"@woocommerce/product-elements": [
+				"assets/js/blocks/product-elements-blocks"
 			],
-			"@woocommerce/atomic-blocks/*": [
-				"assets/js/base/atomic/blocks/*"
-			],
-			"@woocommerce/atomic-utils": [
-				"assets/js/atomic/utils"
+			"@woocommerce/product-elements/*": [
+				"assets/js/blocks/product-elements-blocks/*"
 			],
 			"@woocommerce/base-components/*": [
 				"assets/js/base/components/*"
@@ -174,6 +171,9 @@
 			],
 			"@woocommerce/utils": [
 				"assets/js/utils"
+			],
+			"@woocommerce/utils/*": [
+				"assets/js/utils/*"
 			],
 			"@woocommerce/e2e-utils": [
 				"../../tests/e2e/utils/blocks"

@@ -72,7 +72,7 @@ class ProductUtil {
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param WC_Product|int $product_or_id The product or the product id.
+	 * @param \WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {
