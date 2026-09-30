@@ -143,7 +143,6 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * Test: get_status_widget
 	 */
 	public function test_status_widget_content() {
-		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
@@ -159,19 +158,43 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
+		$this->assertDoesNotMatchRegularExpression( '/page\=wc-reports/', $widget_output, 'No status widget link should point to legacy Reports while Analytics is enabled.' );
 	}
 
 	/**
-	 * Test: get_status_widget with woo admin disabled.
+	 * Ways Analytics can be turned off, each of which must bring back the legacy report links.
+	 *
+	 * @return array<string, array{callable}>
 	 */
-	public function test_status_widget_with_woo_admin_disabled() {
+	public function provide_analytics_disabled_setups(): array {
+		return array(
+			'woocommerce_admin_disabled filter' => array(
+				function () {
+					add_filter( 'woocommerce_admin_disabled', '__return_true' );
+				},
+			),
+			'analytics feature turned off'      => array(
+				function () {
+					update_option( 'woocommerce_analytics_enabled', 'no' );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should use the legacy status widget reports filter when Analytics is disabled.
+	 * @dataProvider provide_analytics_disabled_setups
+	 *
+	 * @param callable $disable_analytics Turns Analytics off.
+	 */
+	public function test_status_widget_with_analytics_disabled( callable $disable_analytics ) {
 		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
-		add_filter( 'woocommerce_admin_disabled', '__return_true' );
+		$disable_analytics();
 
 		$this->expectOutputRegex( '/50\.00 worth in the/' );
 
@@ -182,8 +205,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
-
-		remove_filter( 'woocommerce_admin_disabled', '__return_true' );
+		$this->assertDoesNotMatchRegularExpression( '/page\=wc-admin/', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
 	}
 
 	/**
