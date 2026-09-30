@@ -454,7 +454,7 @@ function wc_attributes_array_filter_variation( $attribute ) {
 function wc_is_attribute_in_product_name( $attribute, $name, $product = null ) {
 	$attributes_area = $name;
 
-	if ( $product instanceof WC_Product && $product->is_type( ProductType::VARIATION ) ) {
+	if ( $product instanceof WC_Product_Variation && $product->is_type( ProductType::VARIATION ) ) {
 		// The raw parent title, as the name is built from it without the `woocommerce_product_title` filter.
 		$parent_name = $product->get_parent_data()['title'] ?? '';
 
