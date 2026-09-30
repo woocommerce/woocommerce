@@ -79,6 +79,19 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Prepare the current page and count its rows the way file generation does.
+	 *
+	 * @param WC_Product_CSV_Exporter $exporter Exporter instance.
+	 */
+	private function export_current_page( WC_Product_CSV_Exporter $exporter ): void {
+		$exporter->prepare_data_to_export();
+
+		$export_rows = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'export_rows' );
+		$export_rows->setAccessible( true );
+		$export_rows->invoke( $exporter );
+	}
+
+	/**
 	 * Export the current page and return the product IDs, sorted.
 	 *
 	 * @param WC_Product_CSV_Exporter $exporter Exporter instance.
@@ -229,6 +242,57 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 			$this->get_sorted_exported_ids( $exporter ),
 			'Simple products in the category and variations of parents in the category should be exported, without the variable parent.'
 		);
+	}
+
+	/**
+	 * @testdox Variation rows outside the paginated query still let the export finish at 100%.
+	 */
+	public function test_variation_rows_outside_the_query_still_finish_the_export(): void {
+		$fixture = $this->create_categorized_variation_product( 'Export Progress Category' );
+
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$simple_product->set_category_ids( array( $fixture['category_id'] ) );
+		$simple_product->save();
+
+		$variation_exporter = new WC_Product_CSV_Exporter();
+		$variation_exporter->set_product_types_to_export( array( ProductType::SIMPLE, ProductType::VARIATION ) );
+		$variation_exporter->set_product_category_to_export( array( $fixture['category_slug'] ) );
+		$this->export_current_page( $variation_exporter );
+
+		$this->assertSame( 100, $variation_exporter->get_percent_complete() );
+	}
+
+	/**
+	 * @testdox Variation rows outside the query do not finish the export before the last page.
+	 */
+	public function test_variation_rows_outside_the_query_do_not_finish_before_the_last_page(): void {
+		$fixture = $this->create_categorized_variation_product( 'Export Paged Progress Category' );
+
+		$first_simple = WC_Helper_Product::create_simple_product();
+		$first_simple->set_category_ids( array( $fixture['category_id'] ) );
+		$first_simple->save();
+
+		$second_simple = WC_Helper_Product::create_simple_product();
+		$second_simple->set_category_ids( array( $fixture['category_id'] ) );
+		$second_simple->save();
+
+		$first_page = new WC_Product_CSV_Exporter();
+		$first_page->set_limit( 1 );
+		$first_page->set_page( 1 );
+		$first_page->set_product_types_to_export( array( ProductType::SIMPLE, ProductType::VARIATION ) );
+		$first_page->set_product_category_to_export( array( $fixture['category_slug'] ) );
+		$this->export_current_page( $first_page );
+
+		$this->assertSame( 50, $first_page->get_percent_complete() );
+
+		$second_page = new WC_Product_CSV_Exporter();
+		$second_page->set_limit( 1 );
+		$second_page->set_page( 2 );
+		$second_page->set_product_types_to_export( array( ProductType::SIMPLE, ProductType::VARIATION ) );
+		$second_page->set_product_category_to_export( array( $fixture['category_slug'] ) );
+		$this->export_current_page( $second_page );
+
+		$this->assertSame( 100, $second_page->get_percent_complete() );
 	}
 
 	/**
