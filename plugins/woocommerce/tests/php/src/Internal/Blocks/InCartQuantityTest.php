@@ -71,4 +71,24 @@ class InCartQuantityTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 3.5, InCartQuantity::for_product( $items, 10 ), 'Fractional quantity should not be truncated' );
 	}
+
+	/**
+	 * @testdox Should skip empty cart entries without raising a warning.
+	 */
+	public function test_skips_empty_cart_entries_without_a_warning(): void {
+		$items = array(
+			array(),
+			array(
+				'id'       => 10,
+				'quantity' => 2,
+			),
+			array(
+				'id'       => 10,
+				'quantity' => 3,
+			),
+		);
+
+		$this->assertSame( 5, InCartQuantity::for_product( $items, 10 ), 'Empty entries should not affect eligible line quantities' );
+		$this->assertSame( 0, InCartQuantity::for_product( array( array() ), 10 ), 'An empty entry alone should not match a product' );
+	}
 }

@@ -10,6 +10,7 @@ final class InCartQuantity {
 
 	/**
 	 * Sum the matching cart-item quantities, excluding declared child lines.
+	 * An entry without an id key, such as the `[]` placeholder, matches nothing.
 	 *
 	 * @since 11.3.0
 	 *
@@ -22,7 +23,7 @@ final class InCartQuantity {
 		$total = 0;
 
 		foreach ( $cart_items as $item ) {
-			if ( $product_id !== $item['id'] || '' !== ( $item['parent_item_key'] ?? '' ) ) {
+			if ( ( $item['id'] ?? null ) !== $product_id || '' !== ( $item['parent_item_key'] ?? '' ) ) {
 				continue;
 			}
 
