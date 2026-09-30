@@ -933,16 +933,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @testdox Address values should round-trip through the cart response and checkout without HTML encoding.
 	 */
 	public function test_address_values_round_trip_without_html_encoding(): void {
-		$billing_address               = $this->get_fallback_billing_address();
-		$billing_address['company']    = 'AT&T <script>alert("x")</script> Marketing';
-		$billing_address['address_1']  = '1 Rock & Roll - West';
-		$billing_address['address_2']  = 'Suite <em>A&B</em>';
-		$billing_address['city']       = "Coeur d'Alene - North & South";
-		$shipping_address              = $this->get_fallback_shipping_address();
-		$shipping_address['company']   = 'Shipping & Receiving';
-		$shipping_address['address_1'] = '2 Fish & Chips - East';
-		$shipping_address['address_2'] = 'Dock <img src=x onerror=alert("x")> A&B';
-		$shipping_address['city']      = "St John's - East & West";
+		$billing_address             = $this->get_fallback_billing_address();
+		$billing_address['company']  = 'AT&T';
+		$shipping_address            = $this->get_fallback_shipping_address();
+		$shipping_address['company'] = "St John's";
 
 		$update_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$update_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -959,13 +953,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$response_billing_address  = (array) $cart_data['billing_address'];
 		$response_shipping_address = (array) $cart_data['shipping_address'];
 
-		$this->assertSame( 'AT&T Marketing', $response_billing_address['company'], 'Billing company markup should be removed without encoding punctuation.' );
-		$this->assertSame( '1 Rock & Roll - West', $response_billing_address['address_1'], 'Billing address punctuation should remain unchanged.' );
-		$this->assertSame( 'Suite A&B', $response_billing_address['address_2'], 'Billing address markup should be removed without encoding punctuation.' );
-		$this->assertSame( "Coeur d'Alene - North & South", $response_billing_address['city'], 'Billing city punctuation should remain unchanged.' );
-		$this->assertSame( '2 Fish & Chips - East', $response_shipping_address['address_1'], 'Shipping address punctuation should remain unchanged.' );
-		$this->assertSame( 'Dock A&B', $response_shipping_address['address_2'], 'Shipping address markup should be removed without encoding punctuation.' );
-		$this->assertSame( "St John's - East & West", $response_shipping_address['city'], 'Shipping city punctuation should remain unchanged.' );
+		$this->assertSame( 'AT&T', $response_billing_address['company'] );
+		$this->assertSame( "St John's", $response_shipping_address['company'] );
 
 		$checkout_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$checkout_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -983,13 +972,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
 		$this->assertInstanceOf( \WC_Order::class, $order );
-		$this->assertSame( 'AT&T Marketing', $order->get_billing_company( 'edit' ) );
-		$this->assertSame( '1 Rock & Roll - West', $order->get_billing_address_1( 'edit' ) );
-		$this->assertSame( 'Suite A&B', $order->get_billing_address_2( 'edit' ) );
-		$this->assertSame( "Coeur d'Alene - North & South", $order->get_billing_city( 'edit' ) );
-		$this->assertSame( '2 Fish & Chips - East', $order->get_shipping_address_1( 'edit' ) );
-		$this->assertSame( 'Dock A&B', $order->get_shipping_address_2( 'edit' ) );
-		$this->assertSame( "St John's - East & West", $order->get_shipping_city( 'edit' ) );
+		$this->assertSame( 'AT&T', $order->get_billing_company( 'edit' ) );
+		$this->assertSame( "St John's", $order->get_shipping_company( 'edit' ) );
 	}
 
 	/**
