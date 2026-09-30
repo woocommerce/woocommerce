@@ -165,8 +165,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			}
 		}
 
-		// For update requests, this will recalculate cart totals and sync draft orders with the current cart.
-		if ( $this->is_update_request( $request ) ) {
+		// For successful update requests, recalculate cart totals and sync draft orders with the current cart.
+		if ( $this->is_update_request( $request ) && ! is_wp_error( $response ) ) {
 			$this->cart_updated( $request );
 		}
 

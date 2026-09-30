@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prepare order-item deletion queries with an integer placeholder.

@@ -119,10 +119,8 @@ class StockNotifications implements RegisterHooksInterface {
 		$container->get( NotificationsProcessor::class );
 		$container->get( PrivacyEraser::class );
 		$container->get( DataRetentionController::class );
-		$container->get( EmailActionController::class );
+		$container->get( Telemetry::class );
 
-		$container->get( ProductPageIntegration::class );
-		$container->get( FormHandlerService::class );
 		$container->get( NotificationManagementService::class );
 		$container->get( MyAccountEndpoint::class );
 
@@ -132,6 +130,13 @@ class StockNotifications implements RegisterHooksInterface {
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );
+		}
+
+		// Frontend only.
+		if ( ! is_admin() || wp_doing_ajax() ) {
+			$container->get( EmailActionController::class );
+			$container->get( ProductPageIntegration::class );
+			$container->get( FormHandlerService::class );
 		}
 	}
 

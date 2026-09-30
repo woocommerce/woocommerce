@@ -1715,29 +1715,31 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Whether the current user can view this product: it is published, or they can edit it.
-	 * A variation additionally requires its parent to be viewable.
+	 * A variation additionally requires its parent product to be viewable.
 	 *
 	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_viewable() {
-		$parent_id = $this->get_parent_id();
+		$parent_id          = $this->get_parent_id();
+		$has_product_parent = $parent_id && in_array( get_post_type( $parent_id ), array( 'product', 'product_variation' ), true );
 
 		return ( ProductStatus::PUBLISH === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) )
-			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) || current_user_can( 'edit_post', $parent_id ) );
+			&& ( ! $has_product_parent || ProductStatus::PUBLISH === get_post_status( $parent_id ) || current_user_can( 'edit_post', $parent_id ) );
 	}
 
 	/**
-	 * Whether this product is publicly viewable: the product and its parent (if it has one) are published.
+	 * Whether this product is publicly viewable: the product and its parent product (if it has one) are published.
 	 *
 	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_publicly_viewable() {
-		$parent_id = $this->get_parent_id();
+		$parent_id          = $this->get_parent_id();
+		$has_product_parent = $parent_id && in_array( get_post_type( $parent_id ), array( 'product', 'product_variation' ), true );
 
 		return ProductStatus::PUBLISH === $this->get_status()
-			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) );
+			&& ( ! $has_product_parent || ProductStatus::PUBLISH === get_post_status( $parent_id ) );
 	}
 
 	/**
