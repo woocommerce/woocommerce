@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,10 +23,22 @@ $attribute_keys  = array_keys( $attributes );
 $variations_json = wp_json_encode( $available_variations );
 $variations_attr = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
 
+/**
+ * Fires before the add to cart form of a variable product.
+ *
+ * @since 1.2.1
+ */
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
-<form class="variations_form cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // WPCS: XSS ok. ?>">
-	<?php do_action( 'woocommerce_before_variations_form' ); ?>
+<form class="variations_form cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WooCommerce.Commenting.CommentHooks.MissingHookComment -- $variations_attr is already escaped for an HTML attribute by wc_esc_json() or _wp_specialchars(). A hook docblock for woocommerce_add_to_cart_form_action cannot end on the line above this inline call without leaving content before a closing PHP tag. ?>">
+	<?php
+	/**
+	 * Fires at the top of the variations form, inside the form element.
+	 *
+	 * @since 2.4.0
+	 */
+	do_action( 'woocommerce_before_variations_form' );
+	?>
 
 	<?php if ( empty( $available_variations ) && false !== $available_variations ) : ?>
 		<p class="stock out-of-stock"><?php echo esc_html( apply_filters( 'woocommerce_out_of_stock_message', __( 'This product is currently out of stock and unavailable.', 'woocommerce' ) ) ); ?></p>
@@ -35,7 +47,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			<tbody>
 				<?php foreach ( $attributes as $attribute_name => $options ) : ?>
 					<tr>
-						<th class="label"><label for="<?php echo esc_attr( sanitize_title( $attribute_name ) ); ?>"><?php echo wc_attribute_label( $attribute_name ); // WPCS: XSS ok. ?></label></th>
+						<th class="label"><label for="<?php echo esc_attr( sanitize_title( $attribute_name ) ); ?>"><?php echo wc_attribute_label( $attribute_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Attribute names are sanitized on save; the filter output may carry markup by design. ?></label></th>
 						<td class="value">
 							<?php
 								wc_dropdown_variation_attribute_options(
@@ -62,18 +74,16 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
 		<?php
 		// Reset snapshot for cases where a theme/plugin loads the variation form later, like quick-view modals.
-		if ( \Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() ) :
-			?>
-			<script type="text/template" class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
-			<?php
-		endif;
 		?>
+		<template class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></template>
 		<?php do_action( 'woocommerce_after_variations_table' ); ?>
 
 		<div class="single_variation_wrap">
 			<?php
 				/**
 				 * Hook: woocommerce_before_single_variation.
+				 *
+				 * @since 2.1.0
 				 */
 				do_action( 'woocommerce_before_single_variation' );
 
@@ -88,14 +98,28 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 				/**
 				 * Hook: woocommerce_after_single_variation.
+				 *
+				 * @since 2.1.0
 				 */
 				do_action( 'woocommerce_after_single_variation' );
 			?>
 		</div>
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_after_variations_form' ); ?>
+	<?php
+	/**
+	 * Fires at the bottom of the variations form, inside the form element.
+	 *
+	 * @since 2.4.0
+	 */
+	do_action( 'woocommerce_after_variations_form' );
+	?>
 </form>
 
 <?php
+/**
+ * Fires after the add to cart form of a variable product.
+ *
+ * @since 1.2.1
+ */
 do_action( 'woocommerce_after_add_to_cart_form' );

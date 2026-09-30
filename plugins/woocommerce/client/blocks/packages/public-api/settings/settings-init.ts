@@ -57,9 +57,11 @@ export interface WooCommerceSharedSettings {
 		}
 	>;
 	currency: WooCommerceSiteCurrency;
+	currentSiteId: number;
 	currentUserId: number;
 	currentUserIsAdmin: boolean;
 	homeUrl: string;
+	isMultisite: boolean;
 	locale: WooCommerceSiteLocale;
 	orderStatuses: Record< string, string > | never[];
 	placeholderImgSrc: string;
@@ -93,9 +95,13 @@ const defaults: WooCommerceSharedSettings = {
 		priceFormat: '%1$s%2$s',
 		thousandSeparator: ',',
 	},
+	// Not 1: that is a real blog ID, and a multisite child that never received
+	// the payload would impersonate the main site and write into its storage.
+	currentSiteId: 0,
 	currentUserId: 0,
 	currentUserIsAdmin: false,
 	homeUrl: '',
+	isMultisite: false,
 	locale: {
 		siteLocale: 'en_US',
 		userLocale: 'en_US',

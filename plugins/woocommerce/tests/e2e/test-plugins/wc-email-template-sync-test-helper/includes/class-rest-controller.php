@@ -189,8 +189,8 @@ class REST_Controller {
 	}
 
 	/**
-	 * Delete the woo_email post for the given email type, clear template manager state +
-	 * transient, then regenerate synchronously.
+	 * Delete the woo_email post for the given email type, clear template manager state,
+	 * then recreate a published post from the file template synchronously.
 	 *
 	 * @param WP_REST_Request $request The REST request. Expects `email_id` route parameter.
 	 * @return WP_REST_Response
@@ -207,18 +207,36 @@ class REST_Controller {
 
 		$manager->delete_email_template( $email_id );
 
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
+		$email = $manager->get_email_by_id( $email_id );
+		if ( ! $email instanceof \WC_Email ) {
+			return new WP_REST_Response(
+				array( 'error' => "Unknown email_id {$email_id}" ),
+				404
+			);
+		}
 
 		$generator = new \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-		$new_post_id = (int) $generator->generate_email_template_if_not_exists( $email_id );
 
-		if ( $new_post_id <= 0 ) {
+		try {
+			$new_post_id = $generator->create_draft( $email );
+		} catch ( \Exception $e ) {
 			return new WP_REST_Response(
-				array( 'error' => "Failed to regenerate woo_email post for {$email_id}" ),
+				array( 'error' => "Failed to regenerate woo_email post for {$email_id}: " . $e->getMessage() ),
 				500
 			);
 		}
+
+		wp_update_post(
+			array(
+				'ID'          => $new_post_id,
+				'post_status' => 'publish',
+			)
+		);
+
+		// The Integration transition_post_status hook writes the mapping on publish
+		// in this live environment; save it explicitly as well so this endpoint's
+		// callers can rely on the mapping regardless of hook registration order.
+		$manager->save_email_template_post_id( $email_id, $new_post_id );
 
 		return new WP_REST_Response( array( 'post_id' => $new_post_id ), 200 );
 	}

@@ -119,7 +119,7 @@ class Renderer {
 	public function handle_rendering( $block_content, $block ) {
 		$query                  = $block['attrs']['query'] ?? array();
 		$product_reference_type = $query['productReferenceType'] ?? null;
-		$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context;
+		$is_cart_reference      = empty( $query['productReference'] ) && ( self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context );
 
 		if ( $this->should_prevent_render() ) {
 			// For cart-referencing collections (e.g., cross-sells in the
@@ -131,6 +131,7 @@ class Renderer {
 				return $this->render_empty_placeholder();
 			}
 
+			$this->reset_render_state();
 			return '';
 		}
 
@@ -165,7 +166,7 @@ class Renderer {
 			class="wp-block-woocommerce-product-collection"
 			data-wp-interactive="woocommerce/product-collection"
 			data-wp-router-region="<?php echo esc_attr( 'wc-product-collection-' . $query_id ); ?>"
-			data-wp-watch--cart-reference="callbacks.refreshCartReference"
+			data-wp-watch---cart-reference="callbacks.refreshCartReference"
 			data-product-reference-type="<?php echo esc_attr( self::REFERENCE_TYPE_CART ); ?>"
 		></div>
 		<?php
@@ -241,11 +242,11 @@ class Renderer {
 				// For cart-referencing collections, add callback to refresh on drawer open.
 				$query                  = $block['attrs']['query'] ?? array();
 				$product_reference_type = $query['productReferenceType'] ?? null;
-				$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context;
+				$is_cart_reference      = empty( $query['productReference'] ) && ( self::REFERENCE_TYPE_CART === $product_reference_type || $this->has_cart_reference_context );
 				if ( $is_cart_reference ) {
 					wp_enqueue_script_module( 'woocommerce/product-collection-cart-reference' );
 					$p->set_attribute( 'data-product-reference-type', self::REFERENCE_TYPE_CART );
-					$p->set_attribute( 'data-wp-watch--cart-reference', 'callbacks.refreshCartReference' );
+					$p->set_attribute( 'data-wp-watch---cart-reference', 'callbacks.refreshCartReference' );
 				}
 			}
 

@@ -47,9 +47,8 @@ export function getRegisteredInnerBlocks(
 	main: string
 ): Record< string, RegisteredBlockComponent > {
 	deprecated( 'getRegisteredInnerBlocks', {
-		version: '2.8.0',
+		version: '4.4.0',
 		alternative: 'getRegisteredBlockComponents',
-		plugin: 'WooCommerce Blocks',
 	} );
 	return getRegisteredBlockComponents( main );
 }

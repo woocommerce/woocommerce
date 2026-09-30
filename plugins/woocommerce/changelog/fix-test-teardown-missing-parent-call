@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Call the parent setup and teardown from unit test classes that override them, so the per-test database transaction is opened and rolled back and test data no longer leaks between tests.

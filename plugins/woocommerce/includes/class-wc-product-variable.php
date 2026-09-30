@@ -11,7 +11,6 @@
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -195,7 +194,7 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $min_price !== $max_price ) {
 				$price = wc_format_price_range( $min_price, $max_price );
-			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+			} elseif ( $min_reg_price === $max_reg_price && $this->is_on_sale() ) {
 				$price = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
 			} else {
 				$price = wc_price( $min_price );
@@ -437,24 +436,20 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
-		$variation_featured_id    = (int) $variation->get_image_id();
-		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
-		$parent_featured_id       = (int) $this->get_image_id();
-		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$variation_featured_id           = (int) $variation->get_image_id();
+		$variation_featured_is_inherited = ! $variation->get_image_id( 'edit' ) && (int) ( $variation->get_parent_data()['image_id'] ?? 0 ) === $variation_featured_id;
+		$variation_featured_valid        = ! $variation_featured_is_inherited && $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id              = (int) $this->get_image_id();
+		$parent_featured_valid           = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
-		$variation_gallery_image_ids = array();
+		$variation_gallery_image_ids = array_values(
+			array_filter(
+				array_map( 'intval', $variation->get_gallery_image_ids() ),
+				'wp_attachment_is_image'
+			)
+		);
 		$variation_gallery_html      = '';
 
-		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_image_ids = array_values(
-				array_filter(
-					array_map( 'intval', $variation->get_gallery_image_ids() ),
-					'wp_attachment_is_image'
-				)
-			);
-		}
-
-		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_featured_valid ) {
 			$selected_image_id = $variation_featured_id;
 		} elseif ( ! empty( $variation_gallery_image_ids ) ) {

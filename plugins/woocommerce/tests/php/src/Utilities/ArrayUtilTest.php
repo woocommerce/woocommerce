@@ -194,8 +194,8 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$actual = ArrayUtil::select( $items, 'foo' );
-		$this->assertEquals( array( 1, 3 ), $actual, ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$actual = ArrayUtil::select( $items, 'foo', ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$this->assertSame( array( 1, 3 ), $actual );
 	}
 
 	/**

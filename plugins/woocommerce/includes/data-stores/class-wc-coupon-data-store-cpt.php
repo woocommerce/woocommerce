@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -217,10 +219,22 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
 
-		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
+		/*
+		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
+		 * published, otherwise the coupon will remain available for use.
+		 *
+		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status`
+		 * listener. The `doing_action( 'save_post' )` branch above writes the status with $wpdb
+		 * directly, so that write fires no transition. Core already transitioned the post to the
+		 * status it saved just before `save_post`, but the CRUD can write a different one here (a
+		 * `save_post` callback setting the coupon to draft, say), and this covers the difference.
+		 *
+		 * The edit context is the code that was written to `post_title` above, and the one the
+		 * hooks invalidate from. The view context would run it through the
+		 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
+		 */
 		if ( 'publish' !== $coupon->get_status() ) {
-			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
+			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
 		}
 
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
@@ -251,8 +265,17 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
 
-			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
+			/*
+			 * The `deleted_post` listener of CouponCodeLookupInvalidator covers this for the core
+			 * data store, but it only invalidates published coupons, the only status that store
+			 * caches. A custom data store that resolves further statuses caches those too and skips
+			 * the read-time check, so this delete is what keeps its force deletes covered.
+			 *
+			 * The edit context is the code that was written to `post_title`, and the one the hooks
+			 * invalidate from. The view context would run it through the
+			 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
+			 */
+			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
@@ -547,7 +570,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		global $wpdb;
 		return $wpdb->get_var(
 			$this->get_tentative_usage_query_for_user( $coupon_id, $user_aliases )
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The interpolated subquery is returned by a helper that prepares all values.
 	}
 
 	/**
@@ -630,14 +653,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon_usage_key,
 			'',
 			$usage_limit
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The embedded subqueries and outer values are prepared before interpolation.
 
 		/**
 		 * In some cases, specifically when there is a combined index on post_id,meta_key, the insert statement above could end up in a deadlock.
 		 * We will try to insert 3 times before giving up to recover from deadlock.
 		 */
 		for ( $count = 0; $count < 3; $count++ ) {
-			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+			$result = $wpdb->query( $insert_statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The statement is prepared before entering the deadlock-retry loop.
 			if ( false !== $result ) {
 				// Clear meta cache.
 				$this->refresh_coupon_data( $coupon );
@@ -670,7 +693,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'_coupon_held_' . time(),
 				$coupon_id,
 			)
-		);  // WPCS: unprepared SQL ok.
+		);  // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The coupon ID and aliases are prepared; only the trusted postmeta table name is interpolated.
 	}
 
 	/**
@@ -712,7 +735,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$user_aliases,
 				array( $coupon->get_id() )
 			)
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The placeholder list is generated locally and all values are prepared.
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
 		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
@@ -728,13 +751,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon_used_by_meta_key,
 			$user_alias,
 			$limit_per_user
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The embedded subqueries and outer values are prepared before interpolation.
 
 		// This query can potentially be deadlocked if a combined index on post_id and meta_key is present and there is
 		// high concurrency, in which case DB will abort the query which has done less work to resolve deadlock.
 		// We will try up to 3 times before giving up.
 		for ( $count = 0; $count < 3; $count++ ) {
-			$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+			$result = $wpdb->query( $insert_statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The statement is prepared before entering the deadlock-retry loop.
 			if ( false !== $result ) {
 				// Clear meta cache.
 				$this->refresh_coupon_data( $coupon );
@@ -776,7 +799,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				),
 				$user_aliases
 			)
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The placeholder list is generated locally and all values are prepared.
 	}
 
 	/**

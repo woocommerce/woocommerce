@@ -60,7 +60,7 @@ class Flex_Layout_Renderer {
 		// MS Outlook doesn't support style attribute in divs so we conditionally wrap the buttons in a table and repeat styles.
 		$output_html = sprintf(
 			'<!--[if mso | IE]><table align="%2$s" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%"><tr><td style="%1$s" ><![endif]-->
-      <div style="%1$s"><table class="layout-flex-wrapper" style="display:inline-block"><tbody><tr>',
+      <div style="%1$s"><table class="layout-flex-wrapper" style="display:inline-block;vertical-align:top"><tbody><tr>',
 			esc_attr( $styles ),
 			esc_attr( $justify )
 		);

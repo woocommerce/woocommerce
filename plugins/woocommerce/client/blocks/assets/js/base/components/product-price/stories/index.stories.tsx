@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { currencyControl } from '@woocommerce/storybook-controls';
 
 /**
@@ -37,7 +37,7 @@ export default {
 	},
 } as Meta< ProductPriceProps >;
 
-const Template: Story< ProductPriceProps > = ( args ) => (
+const Template: StoryFn< ProductPriceProps > = ( args ) => (
 	<ProductPrice { ...args } />
 );
 

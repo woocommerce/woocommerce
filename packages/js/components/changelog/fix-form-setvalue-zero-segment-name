@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Form setValue dropping a write whose name yields no path segments, such as an empty string.

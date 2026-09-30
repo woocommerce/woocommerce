@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix the Blocks E2E template search helper to wait for the requested result instead of comparing card counts; test-only, no merchant-facing change.

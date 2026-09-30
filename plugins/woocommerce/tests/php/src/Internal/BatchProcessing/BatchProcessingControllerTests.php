@@ -172,7 +172,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 		$this->sut->enqueue_processor( get_class( $second_processor ) );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
@@ -196,7 +195,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	public function test_remove_processor_when_no_others_remain_enqueued() {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
@@ -561,7 +559,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
@@ -582,7 +579,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 			}
 		);
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
-		do_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->test_process ) );
 
 		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
@@ -609,7 +606,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 			}
 		);
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
-		do_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->test_process ) );
 
 		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
@@ -624,7 +621,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 		$this->sut->enqueue_processor( get_class( $second_processor ) );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
@@ -655,7 +651,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 			false
 		);
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_scheduled( 'Processor\\A' ), 'A valid processor should be scheduled by the watchdog.' );
@@ -685,7 +680,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	public function test_remove_processor_sweeps_ghost_actions_when_queue_empties(): void {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		// A leftover single-batch action for a processor that is no longer enqueued, e.g. from the historical corruption bug.
@@ -729,7 +723,6 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 		$this->sut->enqueue_processor( get_class( $second_processor ) );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::WATCHDOG_ACTION_NAME );
 
 		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );

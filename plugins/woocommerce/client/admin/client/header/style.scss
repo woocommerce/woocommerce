@@ -16,7 +16,7 @@
 }
 
 // Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
-// Help) that we proxy via the floating header's gear / ? icons. Applied via
+// Help) that we proxy via the header's gear / ? icons. Applied via
 // the server-rendered body class so the hide is immediate — no flash before
 // React mounts. The parent #screen-meta-links container is left alone so
 // third-party .screen-meta-toggle siblings remain visible. Visually-hidden
@@ -30,10 +30,11 @@
 }
 
 .woocommerce-layout__header {
+	--woocommerce-admin-header-height: #{$header-height};
+
 	// Background matches the wp-admin body grey so the bar reads as
 	// infrastructure rather than content. Needs to be explicit (not inherited)
-	// because `position: fixed` lets page content scroll behind the bar — a
-	// transparent background would show that content through. Bottom border
+	// so the header is consistent across WooCommerce Admin pages. Bottom border
 	// anchors the bar visually against the page below. Settings-page tweaks
 	// (drop the border so the bar reads as one strip with the tab nav)
 	// live in the legacy admin.scss alongside the rest of that page's overrides.
@@ -41,14 +42,8 @@
 	border-bottom: $header-border-width solid $wp-admin-border;
 	box-sizing: border-box;
 	padding: 0;
-	position: fixed;
-	width: calc(100% - 160px);
-	top: $adminbar-height;
+	position: relative;
 	z-index: 1001; /* on top of #wp-content-editor-tools */
-
-	&.is-scrolled {
-		box-shadow: $header-scroll-shadow;
-	}
 
 	.woocommerce-layout__header-wrapper {
 		display: flex;
@@ -58,12 +53,6 @@
 
 	@include breakpoint("<782px") {
 		flex-flow: row wrap;
-		top: $adminbar-height-mobile;
-		width: 100%;
-	}
-
-	@include breakpoint("782px-960px") {
-		width: calc(100% - 36px);
 	}
 
 	.woocommerce-layout__header-breadcrumbs-wrapper {
@@ -191,7 +180,8 @@
 		}
 		&:focus-visible,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
-			box-shadow: inset -1px -1px 0 $gray-700,
+			box-shadow:
+				inset -1px -1px 0 $gray-700,
 				inset 1px 1px 0 $gray-700;
 		}
 
@@ -205,6 +195,8 @@
 	// taller by any naturally-sized child (Finish setup widget, plugin fills, etc.).
 	// Inner activity-panel and meta-icon items also collapse so they fit cleanly.
 	&.is-chrome-only {
+		--woocommerce-admin-header-height: #{$adminbar-height};
+
 		.woocommerce-layout__header-wrapper {
 			height: $adminbar-height;
 			min-height: $adminbar-height;
@@ -234,8 +226,12 @@
 // Firefox 121+). Older browsers fall through to the JS-driven class
 // path above and still work — they just get the small flash.
 body:has(.wrap > h1.wp-heading-inline) {
-	#wpbody {
-		margin-top: $adminbar-height;
+	.woocommerce-layout__header {
+		--woocommerce-admin-header-height: #{$adminbar-height};
+
+		#wpbody {
+			margin-top: $adminbar-height;
+		}
 	}
 
 	.woocommerce-layout__header-heading {
@@ -256,32 +252,9 @@ body:has(.wrap > h1.wp-heading-inline) {
 	}
 }
 
-.folded .woocommerce-layout__header {
-	width: calc(100% - 36px);
-
-	@include breakpoint("<782px") {
-		width: 100%;
-	}
-}
-
-.is-wp-toolbar-disabled .woocommerce-layout__header {
-	top: 0;
-}
-
-.has-woocommerce-navigation .woocommerce-layout__header {
-	left: 0;
-	width: 100%;
-}
-
 .woocommerce-admin-page {
 	#contextual-help-link-wrap,
 	#screen-options-link-wrap {
 		margin-top: -1px;
-	}
-}
-
-.wp-responsive-open {
-	.woocommerce-layout__header {
-		margin-left: 2px;
 	}
 }

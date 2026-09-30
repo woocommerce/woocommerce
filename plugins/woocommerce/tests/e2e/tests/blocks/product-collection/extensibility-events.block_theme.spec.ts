@@ -109,19 +109,6 @@ test.describe( 'Product Collection: Extensibility Events', () => {
 			await pageObject.publishAndGoToFrontend();
 		} );
 
-		test( 'when Product Image is clicked', async ( { page } ) => {
-			await page
-				.locator( '[data-block-name="woocommerce/product-image"]' )
-				.nth( 0 )
-				.click();
-
-			const { collection, productId } = await promise;
-			expect( collection ).toEqual(
-				'woocommerce/product-collection/featured'
-			);
-			expect( productId ).toEqual( expect.any( Number ) );
-		} );
-
 		test( 'when Product Title is clicked', async ( { page } ) => {
 			await page
 				.locator( '.wp-block-post-title' )

@@ -158,7 +158,7 @@ global $woocommerce;
 $order = new WC_Order( $order_id );
 
     // Mark as on-hold (we're awaiting the cheque)
-    $order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));
+    $order->update_status(\Automattic\WooCommerce\Enums\OrderStatus::ON_HOLD, __( 'Awaiting cheque payment', 'woocommerce' ));
 
     // Remove cart
     $woocommerce->cart->empty_cart();
@@ -204,7 +204,7 @@ Updating the order status can be done using functions in the order class. You sh
 
 ```php
 $order = new WC_Order( $order_id );
-$order->update_status('on-hold', __('Awaiting cheque payment', 'woothemes'));
+$order->update_status(\Automattic\WooCommerce\Enums\OrderStatus::ON_HOLD, __('Awaiting cheque payment', 'woothemes'));
 ```
 
 The above example updates the status to On-Hold and adds a note informing the owner that it is awaiting a Cheque. You can add notes without updating the order status; this is used for adding a debug message:

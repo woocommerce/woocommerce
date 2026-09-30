@@ -111,6 +111,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 * There is a valid session if $data is not empty, and the ID matches the logged in user ID.
 		 *
 		 * If the user object has been updated since the session was created (based on date_modified) we should not load the session - data should be reloaded.
+		 *
+		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
+		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
 		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
 			foreach ( $this->session_keys as $session_key ) {

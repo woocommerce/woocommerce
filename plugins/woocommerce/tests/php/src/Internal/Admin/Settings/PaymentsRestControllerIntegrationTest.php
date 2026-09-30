@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\CorePayPalGatewayTrait;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
@@ -32,6 +33,8 @@ use WC_Gateway_Paypal;
  * @class PaymentsRestController
  */
 class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
+	use CorePayPalGatewayTrait;
+
 	/**
 	 * Endpoint.
 	 *
@@ -1921,43 +1924,12 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Load the WC core PayPal gateway but not enable it.
+	 * The payment providers service the core PayPal gateway helpers must invalidate.
+	 *
+	 * @return PaymentsProviders
 	 */
-	private function load_core_paypal_pg() {
-		// Make sure the WC core PayPal gateway is loaded.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'no',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->providers_service->clear_cache();
-	}
-
-	/**
-	 * Enable the WC core PayPal gateway.
-	 */
-	private function enable_core_paypal_pg() {
-		// Enable the WC core PayPal gateway.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'yes',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->providers_service->clear_cache();
+	protected function get_payments_providers_service(): PaymentsProviders {
+		return $this->providers_service;
 	}
 
 	/**
@@ -1986,8 +1958,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Hook into the payment gateways initialization to mock the gateways.
 		add_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
 		// Reinitialize the WC gateways.
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 
 		$this->providers_service->clear_cache();
 
@@ -2090,11 +2061,10 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			remove_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
 		}
 		// Reinitialize the WC gateways.
-		WC()->payment_gateways()->payment_gateways = array();
 		if ( isset( $this->providers_service ) ) {
 			$this->load_core_paypal_pg();
 		} else {
-			WC()->payment_gateways()->init();
+			self::reload_payment_gateways();
 		}
 	}
 

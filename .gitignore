@@ -116,6 +116,7 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+**/.claude/launch.json
 .claude/docs/plans/
 .claude/docs/analysis/
 .claude/docs/research/

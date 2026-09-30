@@ -229,7 +229,7 @@ class HandlerRegistry {
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 
-				// Check for explicit user choice first
+				// Check for explicit user choice first.
 				$reference_type = $query['productReferenceType'] ?? null;
 
 				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
@@ -261,7 +261,7 @@ class HandlerRegistry {
 				$reference_type    = $request->get_param( 'productReferenceType' );
 
 				// Handle explicit cart reference type in editor preview.
-				if ( Renderer::REFERENCE_TYPE_CART === $reference_type ) {
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_reference ) ) {
 					// In editor, we can't access the actual cart, so return empty for preview.
 					// The block will show a placeholder or sample data.
 					$collection_args['upsellsProductReferences'] = array();
@@ -357,7 +357,7 @@ class HandlerRegistry {
 				$product_reference = $request->get_param( 'productReference' );
 				$reference_type    = $request->get_param( 'productReferenceType' );
 
-				if ( Renderer::REFERENCE_TYPE_CART === $reference_type ) {
+				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_reference ) ) {
 					// In editor, we can't access the actual cart, so return empty for preview.
 					$collection_args['crossSellsProductReferences'] = array();
 					return $collection_args;

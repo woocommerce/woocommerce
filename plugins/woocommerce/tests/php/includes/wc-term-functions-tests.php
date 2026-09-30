@@ -32,6 +32,13 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->terms['tag1'] = wp_insert_term( 'Tag 1', 'product_tag' );
 		$this->terms['tag2'] = wp_insert_term( 'Tag 2', 'product_tag' );
 
+		$this->terms['brand_parent'] = wp_insert_term( 'Parent brand', 'product_brand' );
+		$this->terms['brand_child']  = wp_insert_term(
+			'Child brand',
+			'product_brand',
+			array( 'parent' => $this->terms['brand_parent']['term_id'] )
+		);
+
 		$this->products['product1'] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -54,6 +61,10 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				'tag_ids'      => array( $this->terms['tag1']['term_id'], $this->terms['tag2']['term_id'] ),
 			)
 		);
+
+		wp_set_object_terms( $this->products['product1']->get_id(), array( $this->terms['brand_child']['term_id'] ), 'product_brand' );
+		wp_set_object_terms( $this->products['product2']->get_id(), array( $this->terms['brand_child']['term_id'] ), 'product_brand' );
+		wp_set_object_terms( $this->products['product3']->get_id(), array( $this->terms['brand_parent']['term_id'] ), 'product_brand' );
 	}
 
 	/**
@@ -76,12 +87,41 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honor the attribute's Term ID default without overriding explicit query ordering.
+	 */
+	public function test_attribute_term_id_ordering(): void {
+		global $wc_product_attributes;
+
+		$original_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_attribute( 'id_sort_test', array( 'Zebra', 'Apple', 'Mango' ) );
+		$taxonomy            = $attribute['attribute_taxonomy'];
+		try {
+			wc_update_attribute( $attribute['attribute_id'], array( 'order_by' => 'id' ) );
+			$product_id = $this->products['product1']->get_id();
+			wp_set_object_terms( $product_id, $attribute['term_ids'], $taxonomy );
+
+			$args = array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'names',
+			);
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), get_terms( $args ), 'Default queries should honor the saved Term ID setting.' );
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), wc_get_product_terms( $product_id, $taxonomy, array( 'fields' => 'names' ) ), 'Product term queries should use the same default ordering.' );
+			$this->assertSame( array( 'Apple', 'Mango', 'Zebra' ), get_terms( array_merge( $args, array( 'orderby' => 'name' ) ) ), 'An explicit ordering should override the attribute default.' );
+			$this->assertSame( array( 'Mango', 'Apple', 'Zebra' ), get_terms( array_merge( $args, array( 'order' => 'DESC' ) ) ), 'Descending order should use term IDs too.' );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $original_attributes;
+		}
+	}
+
+	/**
 	 * @testdox Term product counts with default settings.
 	 */
 	public function test_term_count_baseline(): void {
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -92,6 +132,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 3, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_child']['term_id'] ] );
 	}
 
 	/**
@@ -106,7 +148,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -117,6 +159,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 1, $term_counts[ $this->terms['brand_child']['term_id'] ] );
 	}
 
 	/**
@@ -130,7 +174,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -141,6 +185,28 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 1, $term_counts[ $this->terms['brand_child']['term_id'] ] );
+
+		delete_option( 'woocommerce_hide_out_of_stock_items' );
+	}
+
+	/**
+	 * @testdox Recounting terms for one product updates its brand and brand ancestors.
+	 */
+	public function test_recount_terms_by_product_includes_brands(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		wp_set_object_terms(
+			$this->products['product1']->get_id(),
+			ProductStockStatus::OUT_OF_STOCK,
+			'product_visibility',
+			true
+		);
+
+		_wc_recount_terms_by_product( $this->products['product1']->get_id() );
+
+		$this->assertSame( '1', get_term_meta( $this->terms['brand_parent']['term_id'], 'product_count_product_brand', true ) );
+		$this->assertSame( '0', get_term_meta( $this->terms['brand_child']['term_id'], 'product_count_product_brand', true ) );
 
 		delete_option( 'woocommerce_hide_out_of_stock_items' );
 	}

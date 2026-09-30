@@ -240,7 +240,6 @@ export const CheckoutEventsProvider = ( {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutBeforeProcessing', {
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return onCheckoutValidation( ...args );
 		};
@@ -252,9 +251,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutValidationBeforeProcessing = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutValidationBeforeProcessing', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutValidation( ...args );
@@ -267,9 +265,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithSuccess = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutSuccess > ) {
 			deprecated( 'onCheckoutAfterProcessingWithSuccess', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutSuccess',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutSuccess( ...args );
@@ -282,9 +279,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithError = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutFail > ) {
 			deprecated( 'onCheckoutAfterProcessingWithError', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutFail',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutFail( ...args );

@@ -699,19 +699,7 @@ class WCEmailTemplateChangeSummary {
 	 * @since 10.9.0
 	 */
 	public static function diff_records_three_way( array $core_records, array $base_records, array $post_records ): array {
-		$core_to_base = self::lcs_matches( $core_records, $base_records );
-		$post_to_base = self::lcs_matches( $post_records, $base_records );
-
-		// Invert into base-keyed lookups so a single iteration over base records
-		// can decide each block's fate against both sides.
-		$base_to_core = array();
-		foreach ( $core_to_base as $pair ) {
-			$base_to_core[ $pair[1] ] = $pair[0];
-		}
-		$base_to_post = array();
-		foreach ( $post_to_base as $pair ) {
-			$base_to_post[ $pair[1] ] = $pair[0];
-		}
+		$alignment = self::align_to_base( $core_records, $base_records, $post_records );
 
 		$matched_core_indices = array();
 		$matched_post_indices = array();
@@ -726,8 +714,8 @@ class WCEmailTemplateChangeSummary {
 
 		// Pass 1: classify each base-anchored block by what changed relative to base.
 		foreach ( $base_records as $b_idx => $base ) {
-			$core_idx = $base_to_core[ $b_idx ] ?? null;
-			$post_idx = $base_to_post[ $b_idx ] ?? null;
+			$core_idx = $alignment[ $b_idx ]['core'];
+			$post_idx = $alignment[ $b_idx ]['post'];
 
 			if ( null !== $core_idx ) {
 				$matched_core_indices[ $core_idx ] = true;
@@ -862,6 +850,44 @@ class WCEmailTemplateChangeSummary {
 			'copy_changes'       => $copy_changes,
 			'structural_changes' => $structural_changes,
 		);
+	}
+
+	/**
+	 * Match each base block to its counterpart in core and in the post. A core
+	 * block and a post block are the same logical block only when both match
+	 * the same base block. `null` means that side no longer has the block.
+	 *
+	 * Public so {@see WCEmailTemplateSelectiveApplier} pairs blocks exactly the
+	 * way the change summary shown to the merchant does.
+	 *
+	 * @internal
+	 *
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side (current canonical).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $base_records Base side (canonical at last system write).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side (merchant's current post_content).
+	 *
+	 * @return array<int, array{core:?int, post:?int}> Keyed by base record index; values are core and post record indices.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function align_to_base( array $core_records, array $base_records, array $post_records ): array {
+		$base_to_core = array();
+		foreach ( self::lcs_matches( $core_records, $base_records ) as $pair ) {
+			$base_to_core[ $pair[1] ] = $pair[0];
+		}
+		$base_to_post = array();
+		foreach ( self::lcs_matches( $post_records, $base_records ) as $pair ) {
+			$base_to_post[ $pair[1] ] = $pair[0];
+		}
+
+		$alignment = array();
+		foreach ( array_keys( $base_records ) as $b_idx ) {
+			$alignment[ $b_idx ] = array(
+				'core' => $base_to_core[ $b_idx ] ?? null,
+				'post' => $base_to_post[ $b_idx ] ?? null,
+			);
+		}
+		return $alignment;
 	}
 
 	/**

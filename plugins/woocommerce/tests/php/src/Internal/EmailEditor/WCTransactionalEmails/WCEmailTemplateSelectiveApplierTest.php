@@ -402,6 +402,57 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Three-way: when the merchant deleted one block and core edited another, apply updates the right block and adds no duplicate.
+	 *
+	 * @testWith [[], ["OLD BLOCK A", "MERCHANT EDITED C"]]
+	 *           [[{"path": [0], "decision": "use_core"}], ["NEW CORE A", "MERCHANT EDITED C"]]
+	 *
+	 * @param array<int, array{path:array<int>, decision:string}> $choices  Choices sent to apply.
+	 * @param string[]                                            $expected Paragraph texts expected in the merged content, in order.
+	 */
+	public function test_apply_selectively_three_way_merchant_deletion_and_core_edit( array $choices, array $expected ): void {
+		$email_id = 'sa_three_way_deletion_and_edit';
+		$this->register_fixture_email( $email_id );
+
+		$this->use_canonical_content( $email_id, $this->paragraphs( array( 'NEW CORE A', 'OLD BLOCK B', 'OLD BLOCK C' ) ) );
+		$post_id = $this->create_woo_email_post( $email_id, $this->paragraphs( array( 'OLD BLOCK A', 'MERCHANT EDITED C' ) ) );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$this->paragraphs( array( 'OLD BLOCK A', 'OLD BLOCK B', 'OLD BLOCK C' ) )
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, $choices );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected, $this->paragraph_texts( $result['merged_content'] ) );
+	}
+
+	/**
+	 * @testdox Three-way: a block the merchant deleted is not re-added when core adds a new block elsewhere.
+	 */
+	public function test_apply_selectively_three_way_does_not_restore_merchant_deleted_block(): void {
+		$email_id = 'sa_three_way_deletion_and_addition';
+		$this->register_fixture_email( $email_id );
+
+		$this->use_canonical_content( $email_id, $this->paragraphs( array( 'Thanks for your order.', 'Here are the details.', 'See you soon.', 'PS from core.' ) ) );
+		$post_id = $this->create_woo_email_post( $email_id, $this->paragraphs( array( 'Thanks for your order.', 'See you soon.' ) ) );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$this->paragraphs( array( 'Thanks for your order.', 'Here are the details.', 'See you soon.' ) )
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame(
+			array( 'Thanks for your order.', 'See you soon.', 'PS from core.' ),
+			$this->paragraph_texts( $result['merged_content'] )
+		);
+	}
+
+	/**
 	 * @testdox Should stamp _wc_email_template_last_core_render with current canonical (not merged content) after apply.
 	 *
 	 * Per the three-way diff design: base = "what core looked like the last time we synced".
@@ -1001,6 +1052,7 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Email Registered fixture email instance.
 	 */
 	private function register_fixture_email( string $email_id ): \WC_Email {
+
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();
@@ -1084,6 +1136,38 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		$this->posts_manager->save_email_template_post_id( $email_id, $post_id );
 
 		return (int) $post_id;
+	}
+
+	/**
+	 * Build block markup with one paragraph block per text.
+	 *
+	 * @param string[] $texts Paragraph texts.
+	 * @return string Serialized block markup.
+	 */
+	private function paragraphs( array $texts ): string {
+		return implode(
+			"\n\n",
+			array_map(
+				static fn( string $text ): string => "<!-- wp:paragraph -->\n<p>{$text}</p>\n<!-- /wp:paragraph -->",
+				$texts
+			)
+		);
+	}
+
+	/**
+	 * Extract the text of each top-level paragraph block, in order.
+	 *
+	 * @param string $content Serialized block markup.
+	 * @return string[] Paragraph texts.
+	 */
+	private function paragraph_texts( string $content ): array {
+		$texts = array();
+		foreach ( parse_blocks( $content ) as $block ) {
+			if ( 'core/paragraph' === $block['blockName'] ) {
+				$texts[] = trim( wp_strip_all_tags( (string) $block['innerHTML'] ) );
+			}
+		}
+		return $texts;
 	}
 
 	/**

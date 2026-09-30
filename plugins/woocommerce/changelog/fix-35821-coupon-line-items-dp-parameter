@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect dp parameter when formatting coupon line item discount and discount_tax values in REST API.

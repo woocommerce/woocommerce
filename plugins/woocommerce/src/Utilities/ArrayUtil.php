@@ -371,7 +371,7 @@ class ArrayUtil {
 	/**
 	 * Get the unique truthy values of an array, reindexed.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 *
 	 * @param array $items The array to process.
 	 * @return array The unique truthy values, with sequential integer keys.

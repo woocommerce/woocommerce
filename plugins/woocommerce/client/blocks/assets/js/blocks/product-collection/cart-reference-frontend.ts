@@ -50,6 +50,7 @@ let lastCartSignature: string | undefined;
  * navigated to while the drawer is open.
  */
 let pendingRefreshUrl: string | undefined;
+let pendingPageUrl: string | undefined;
 
 /**
  * URL of the last completed refresh navigation. Deduplicating on the URL
@@ -108,6 +109,7 @@ const cartReferenceStorePart = {
 					woocommerceState.cart?.items
 				);
 				if ( settledSignature !== lastCartSignature ) {
+					const previousSignature = lastCartSignature;
 					lastCartSignature = settledSignature;
 
 					// A unique query value bypasses server/edge caches (and
@@ -115,17 +117,30 @@ const cartReferenceStorePart = {
 					// always reflects the current cart. No `force`: the URL
 					// is unique, so there is never a stale entry to bypass,
 					// and a concurrent navigation to it shares one request.
-					const url = new URL( window.location.href );
+					const pageUrl =
+						window.location.href === pendingRefreshUrl
+							? pendingPageUrl ?? window.location.href
+							: window.location.href;
+					const url = new URL( pageUrl );
 					url.searchParams.set(
 						'wc-cache-bust',
 						Math.random().toString( 36 ).slice( 2 )
 					);
 					pendingRefreshUrl = url.href;
+					pendingPageUrl = pageUrl;
 
-					const { actions: routerActions } = yield import(
-						'@wordpress/interactivity-router'
-					);
-					yield routerActions.prefetch( pendingRefreshUrl );
+					try {
+						const { actions: routerActions } = yield import(
+							'@wordpress/interactivity-router'
+						);
+						yield routerActions.prefetch( url.href );
+					} catch {
+						if ( pendingRefreshUrl === url.href ) {
+							lastCartSignature = previousSignature;
+							pendingRefreshUrl = undefined;
+						}
+						return;
+					}
 				}
 			}
 
@@ -140,13 +155,22 @@ const cartReferenceStorePart = {
 
 			// The URL carries a cache-busting query value; remember the
 			// canonical address to restore after the router swap.
-			const restoreUrl = window.location.href;
+			const restoreUrl = pendingPageUrl;
 
 			try {
 				const {
 					actions: routerActions,
 				}: typeof import('@wordpress/interactivity-router') =
 					yield import( '@wordpress/interactivity-router' );
+				if (
+					window.location.href !== restoreUrl ||
+					pendingRefreshUrl !== url
+				) {
+					if ( lastNavigatedUrl === url ) {
+						lastNavigatedUrl = undefined;
+					}
+					return;
+				}
 				// This is a background region refresh, not a user-initiated
 				// page navigation: suppress the loading animation and the
 				// screen-reader page-load announcement.
@@ -157,13 +181,18 @@ const cartReferenceStorePart = {
 				} );
 			} catch {
 				// Release the claim so reopening the drawer can retry.
-				lastNavigatedUrl = undefined;
+				if ( lastNavigatedUrl === url ) {
+					lastNavigatedUrl = undefined;
+				}
 				return;
 			}
 
-			// Skip the URL restore if a newer refresh superseded this one
-			// while the navigation was in flight; its own cycle restores.
-			if ( pendingRefreshUrl !== url ) {
+			// A cancelled router navigation resolves normally. Only restore
+			// the address if this refresh actually reached its destination.
+			if ( window.location.href !== url ) {
+				if ( lastNavigatedUrl === url ) {
+					lastNavigatedUrl = undefined;
+				}
 				return;
 			}
 

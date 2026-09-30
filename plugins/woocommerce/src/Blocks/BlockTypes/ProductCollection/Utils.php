@@ -118,7 +118,7 @@ class Utils {
 	/**
 	 * Get the unique product IDs of the items currently in the cart.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 *
 	 * @return int[] Product IDs, or an empty array when the cart is unavailable.
 	 */
@@ -149,7 +149,7 @@ class Utils {
 	 * When the cart is unavailable this still returns a cart location, with
 	 * an empty product list.
 	 *
-	 * @since 11.1.0
+	 * @since 11.3.0
 	 *
 	 * @return array The cart location context.
 	 */

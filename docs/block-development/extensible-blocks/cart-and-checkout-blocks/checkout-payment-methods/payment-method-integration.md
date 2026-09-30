@@ -46,7 +46,7 @@ The options you feed the configuration instance should be an object in this shap
 const options = {
 	name: 'my_payment_method',
 	title: 'My Mayment Method',
-	description: 'A setence or two about your payment method',
+	description: 'A sentence or two about your payment method',
 	gatewayId: 'gateway-id',
 	label: <ReactNode />,
 	content: <ReactNode />,

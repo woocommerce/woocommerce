@@ -298,6 +298,32 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report refunded_by as null when no user issued the refund.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_refunds_get_endpoint_reports_null_refunded_by_when_no_user_issued_the_refund(): void {
+		$order = $this->create_test_order();
+
+		// A refund with no recorded user, as a gateway webhook or cron run produces.
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 5 );
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_refunded_by( 0 );
+		$refund->save();
+		$this->created_refunds[] = $refund->get_id();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/refunds/' . $refund->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNull(
+			$response->get_data()['refunded_by'],
+			'An unattributed refund reports a null refunded_by rather than an object for user 1.'
+		);
+	}
+
+	/**
 	 * Test POST /wc/v4/refunds endpoint creates refund.
 	 */
 	public function test_refunds_create_endpoint(): void {
@@ -3657,6 +3683,55 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * @testdox Duplicate tax IDs within a line return 400 duplicate_tax_id and create no refund.
+	 */
+	public function test_refunds_create_rejects_duplicate_tax_ids(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// $100 net + $10 tax = $110 line total.
+		list( $order, $item ) = $this->create_order_with_exact_line( 1, 100.00, 100.00, 110.00, array( $tax_rate_id => 10.00 ) );
+
+		// Validation and the amount calculation sum both entries (gross 60), but the
+		// internal conversion keys taxes by ID, so one entry would silently overwrite
+		// the other and store only 55. The request must be rejected instead.
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+						array(
+							'id'           => $tax_rate_id,
+							'refund_total' => 5.00,
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'duplicate_tax_id', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A refund with inconsistent tax accounting must never be created.' );
 	}
 
 	/**
