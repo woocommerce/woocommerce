@@ -1,11 +1,17 @@
 /**
+ * External dependencies
+ */
+import tseslint from '@typescript-eslint/eslint-plugin';
+
+/**
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
 
 /*
- * Routes match Gutenberg's routes: the preset's rules at full strength, so the
- * warnings it relaxed for the rest of the monorepo are errors here.
+ * Routes are new code, so they start on stricter settings than the rest of the
+ * monorepo: the preset's relaxed warnings are errors here, and TypeScript gets
+ * typescript-eslint's strict and stylistic type-checked rules.
  */
 const escalateWarnings = ( config ) =>
 	config.rules
@@ -20,8 +26,25 @@ const escalateWarnings = ( config ) =>
 		  }
 		: config;
 
+// Only the rule sets: the preset already registers the plugin and parser.
+const rulesOf = ( configs ) =>
+	Object.assign( {}, ...configs.map( ( config ) => config.rules ?? {} ) );
+
 export default [
 	...woocommerce.map( escalateWarnings ),
+	{
+		files: [ '**/*.ts', '**/*.tsx' ],
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+		rules: {
+			...rulesOf( tseslint.configs[ 'flat/strict-type-checked' ] ),
+			...rulesOf( tseslint.configs[ 'flat/stylistic-type-checked' ] ),
+		},
+	},
 	{
 		linterOptions: {
 			reportUnusedDisableDirectives: 'error',

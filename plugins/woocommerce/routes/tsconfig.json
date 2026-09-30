@@ -7,10 +7,17 @@
 		"noEmit": true,
 		"skipLibCheck": true,
 		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
+		"exactOptionalPropertyTypes": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
 		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true
+		"noFallthroughCasesInSwitch": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
 	},
 	"include": [ "**/*.ts", "**/*.tsx" ],
 	"exclude": [ "node_modules" ]
