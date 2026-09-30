@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep price separators as plain text in the Store API and block settings.
