@@ -228,7 +228,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$this->total_rows   = $products->total;
 		$this->row_data     = array();
 		$variable_products  = array();
-		$include_variations = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
+		$product_types      = isset( $args['type'] ) && is_array( $args['type'] ) ? $args['type'] : array();
+		$include_variations = empty( $product_types ) || in_array( ProductType::VARIATION, $product_types, true );
+		$include_variables  = empty( $product_types ) || in_array( ProductType::VARIABLE, $product_types, true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
@@ -246,8 +248,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		// Variations are not assigned categories, so a category filter only matches their parent.
 		// When variation is requested without variable products, those parents are not in the result
 		// above. Load them once, on the first page, and append their variations below.
-		$export_types = isset( $args['type'] ) ? (array) $args['type'] : array();
-		if ( $include_variations && isset( $args['type'] ) && ! in_array( ProductType::VARIABLE, $export_types, true ) && ! empty( $args['category'] ) && 1 === $this->get_page() ) {
+		if ( $include_variations && ! $include_variables && ! empty( $args['category'] ) && 1 === $this->get_page() ) {
 			$category_parent_ids = wc_get_products(
 				array(
 					'status'   => isset( $args['status'] ) ? $args['status'] : array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
@@ -260,10 +261,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$variable_products   = array_unique( array_merge( $variable_products, array_map( 'absint', (array) $category_parent_ids ) ) );
 		}
 
-		// If variable products were identified (either through include or category filters), fetch their variations.
+		// If variable products were identified, fetch their variations.
 		if ( ! empty( $variable_products ) ) {
 			foreach ( $variable_products as $parent_id ) {
-				$products = wc_get_products(
+				$variations = wc_get_products(
 					array(
 						'parent' => $parent_id,
 						'type'   => array( ProductType::VARIATION ),
@@ -272,12 +273,12 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					)
 				);
 
-				if ( ! $products ) {
+				if ( ! is_array( $variations ) ) {
 					continue;
 				}
 
-				foreach ( $products as $product ) {
-					$this->row_data[] = $this->generate_row_data( $product );
+				foreach ( $variations as $variation ) {
+					$this->row_data[] = $this->generate_row_data( $variation );
 				}
 			}
 		}
