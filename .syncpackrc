@@ -68,6 +68,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "Packages already moved to Stylelint 16 (see #69239)",
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"@woocommerce/classic-assets"
+			],
+			"pinVersion": "^16.9.0"
+		},
+		{
 			"label": "internal-build generates version-constrained vendored types for these dependencies",
 			"dependencies": [
 				"@wordpress/core-data",
@@ -599,16 +609,6 @@
 				"**"
 			],
 			"pinVersion": "^3.21.0"
-		},
-		{
-			"label": "classic-assets is on the same Stylelint major as block-library",
-			"dependencies": [
-				"stylelint"
-			],
-			"packages": [
-				"@woocommerce/classic-assets"
-			],
-			"pinVersion": "^16.9.0"
 		},
 		{
 			"dependencies": [
