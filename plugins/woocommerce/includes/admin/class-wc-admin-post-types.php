@@ -897,6 +897,10 @@ class WC_Admin_Post_Types {
 			$post_states['wc_page_for_terms'] = __( 'Terms and Conditions Page', 'woocommerce' );
 		}
 
+		if ( wc_get_page_id( 'refund_returns' ) === $post->ID ) {
+			$post_states['wc_page_for_refund_returns'] = __( 'Refund and Returns Policy Page', 'woocommerce' );
+		}
+
 		return $post_states;
 	}
 
