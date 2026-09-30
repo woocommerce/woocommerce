@@ -258,15 +258,14 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		// are not part of the result set by default. Here, we collect the relevant variable product (parent) IDs
 		// so that we can later fetch and append the associated variations to the export list.
 		if ( $include_variations && ! $include_variables && ! empty( $args['category'] ) && 1 === $this->get_page() ) {
-			$category_parent_ids = wc_get_products(
-				array(
-					'status'   => isset( $args['status'] ) ? $args['status'] : array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
-					'type'     => ProductType::VARIABLE,
-					'category' => $args['category'],
-					'limit'    => -1,
-					'return'   => 'ids',
-				)
-			);
+			$parent_args             = $args;
+			$parent_args['type']     = ProductType::VARIABLE;
+			$parent_args['limit']    = -1;
+			$parent_args['page']     = 1;
+			$parent_args['return']   = 'ids';
+			$parent_args['paginate'] = false;
+
+			$category_parent_ids = wc_get_products( $parent_args );
 			$variable_products   = array_unique( array_merge( $variable_products, array_map( 'absint', (array) $category_parent_ids ) ) );
 		}
 
