@@ -119,6 +119,36 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * ShippingController re-adds the pickup ids at priority 10, so a filter that runs before it
+	 * cannot take them out. It can still win by running later.
+	 *
+	 * @testdox An earlier filter cannot drop local pickup from the collection list.
+	 */
+	public function test_an_earlier_filter_cannot_drop_local_pickup(): void {
+		$order = $this->order_shipped_by( 'local_pickup' );
+
+		$this->assertFalse( $order->needs_shipping_address(), 'Local pickup should not want a delivery address to begin with.' );
+
+		$empty_it = static function () {
+			return array();
+		};
+
+		add_filter( 'woocommerce_order_hide_shipping_address', $empty_it, 5 );
+		$this->assertFalse(
+			$order->needs_shipping_address(),
+			'A filter running before the controller should not be able to turn collection back into delivery.'
+		);
+		remove_filter( 'woocommerce_order_hide_shipping_address', $empty_it, 5 );
+
+		add_filter( 'woocommerce_order_hide_shipping_address', $empty_it, 20 );
+		$this->assertTrue(
+			$order->needs_shipping_address(),
+			'Running after the controller, the same filter does have the last word.'
+		);
+		remove_filter( 'woocommerce_order_hide_shipping_address', $empty_it, 20 );
+	}
+
+	/**
 	 * Two lists answer "is this collection" and they do not agree. The canonical
 	 * `woocommerce_local_pickup_methods` list names `legacy_local_pickup` so that an order placed
 	 * with the pre-zones method is still taxed at the shop. The registered list is built from the

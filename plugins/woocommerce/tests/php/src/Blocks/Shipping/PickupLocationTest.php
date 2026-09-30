@@ -327,8 +327,8 @@ class PickupLocationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A shopper's stored choice points at a rate id. Switching a different branch off must not
-	 * silently move that choice to another branch.
+	 * Rate ids are the array positions of the saved locations, so what an id means depends on the
+	 * array holding still. Switching a branch off leaves it in place and the others keep their ids.
 	 *
 	 * @testdox Switching one location off does not change which option the others are.
 	 */
