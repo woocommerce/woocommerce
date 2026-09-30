@@ -751,10 +751,11 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Extensions add their own entries to a package's rates through `woocommerce_package_rates`, and
-	 * anything that is not a rate cannot be a collection option.
+	 * This filter checks `instanceof WC_Shipping_Rate` before reading the rate, so an entry an
+	 * extension added that is not a rate is dropped. The sibling filter above has no such check,
+	 * so the guard is local to this method.
 	 *
-	 * @testdox Only things that are actually rates survive the hiding.
+	 * @testdox A non-rate entry in the rates array does not survive the hiding.
 	 */
 	public function test_only_real_rates_survive_the_hiding(): void {
 		$this->shopper_is_on_the_block_checkout();
