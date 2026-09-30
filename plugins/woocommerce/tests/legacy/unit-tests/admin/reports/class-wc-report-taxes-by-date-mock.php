@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin\Reports
  */
 
+declare(strict_types=1);
+
 if ( ! class_exists( 'WC_Report_Taxes_By_Date', false ) ) {
 	require_once dirname( __DIR__, 5 ) . '/includes/admin/reports/class-wc-admin-report.php';
 	require_once dirname( __DIR__, 5 ) . '/includes/admin/reports/class-wc-report-taxes-by-date.php';
@@ -34,7 +36,7 @@ class WC_Report_Taxes_By_Date_Mock extends WC_Report_Taxes_By_Date {
 	 * @param array $args Query arguments.
 	 * @return array
 	 */
-	public function get_order_report_data( $args ) {
+	public function get_order_report_data( $args = array() ) {
 		if ( isset( $this->mock_query_results[ $this->call_index ] ) ) {
 			$data = $this->mock_query_results[ $this->call_index ];
 			++$this->call_index;
