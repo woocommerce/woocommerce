@@ -2530,6 +2530,9 @@ importers:
       '@woocommerce/classic-assets':
         specifier: workspace:*
         version: link:client/legacy
+      '@woocommerce/settings-route':
+        specifier: workspace:*
+        version: link:routes/settings
     devDependencies:
       '@babel/cli':
         specifier: catalog:tooling
