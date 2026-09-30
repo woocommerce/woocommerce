@@ -360,8 +360,13 @@ class WC_Install {
 			'wc_update_11202_reset_refund_returning_customer_markers',
 			'wc_update_11203_normalize_stock_notification_emails',
 		),
+		'11.2.0-1' => array(
+			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
+			'wc_update_1130_delete_unpublished_variation_lookup_rows',
 		),
 	);
 
