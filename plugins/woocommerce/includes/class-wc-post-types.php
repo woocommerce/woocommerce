@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Post types Class.
@@ -370,32 +371,37 @@ class WC_Post_Types {
 				'woocommerce_register_post_type_product',
 				array(
 					'labels'              => array(
-						'name'                  => __( 'Products', 'woocommerce' ),
-						'singular_name'         => __( 'Product', 'woocommerce' ),
-						'all_items'             => __( 'All Products', 'woocommerce' ),
-						'menu_name'             => _x( 'Products', 'Admin menu name', 'woocommerce' ),
-						'add_new'               => __( 'Add New', 'woocommerce' ),
-						'add_new_item'          => __( 'Add new product', 'woocommerce' ),
-						'edit'                  => __( 'Edit', 'woocommerce' ),
-						'edit_item'             => __( 'Edit product', 'woocommerce' ),
-						'new_item'              => __( 'New product', 'woocommerce' ),
-						'view_item'             => __( 'View product', 'woocommerce' ),
-						'view_items'            => __( 'View products', 'woocommerce' ),
-						'search_items'          => __( 'Search products', 'woocommerce' ),
-						'not_found'             => __( 'No products found', 'woocommerce' ),
-						'not_found_in_trash'    => __( 'No products found in trash', 'woocommerce' ),
-						'parent'                => __( 'Parent product', 'woocommerce' ),
-						'featured_image'        => __( 'Product image', 'woocommerce' ),
-						'set_featured_image'    => __( 'Set product image', 'woocommerce' ),
-						'remove_featured_image' => __( 'Remove product image', 'woocommerce' ),
-						'use_featured_image'    => __( 'Use as product image', 'woocommerce' ),
-						'insert_into_item'      => __( 'Insert into product', 'woocommerce' ),
-						'uploaded_to_this_item' => __( 'Uploaded to this product', 'woocommerce' ),
-						'filter_items_list'     => __( 'Filter products', 'woocommerce' ),
-						'items_list_navigation' => __( 'Products navigation', 'woocommerce' ),
-						'items_list'            => __( 'Products list', 'woocommerce' ),
-						'item_link'             => __( 'Product Link', 'woocommerce' ),
-						'item_link_description' => __( 'A link to a product.', 'woocommerce' ),
+						'name'                     => __( 'Products', 'woocommerce' ),
+						'singular_name'            => __( 'Product', 'woocommerce' ),
+						'all_items'                => __( 'All Products', 'woocommerce' ),
+						'menu_name'                => _x( 'Products', 'Admin menu name', 'woocommerce' ),
+						'add_new'                  => __( 'Add New', 'woocommerce' ),
+						'add_new_item'             => __( 'Add new product', 'woocommerce' ),
+						'edit'                     => __( 'Edit', 'woocommerce' ),
+						'edit_item'                => __( 'Edit product', 'woocommerce' ),
+						'new_item'                 => __( 'New product', 'woocommerce' ),
+						'view_item'                => __( 'View product', 'woocommerce' ),
+						'view_items'               => __( 'View products', 'woocommerce' ),
+						'search_items'             => __( 'Search products', 'woocommerce' ),
+						'not_found'                => __( 'No products found', 'woocommerce' ),
+						'not_found_in_trash'       => __( 'No products found in trash', 'woocommerce' ),
+						'parent'                   => __( 'Parent product', 'woocommerce' ),
+						'featured_image'           => __( 'Product image', 'woocommerce' ),
+						'set_featured_image'       => __( 'Set product image', 'woocommerce' ),
+						'remove_featured_image'    => __( 'Remove product image', 'woocommerce' ),
+						'use_featured_image'       => __( 'Use as product image', 'woocommerce' ),
+						'insert_into_item'         => __( 'Insert into product', 'woocommerce' ),
+						'uploaded_to_this_item'    => __( 'Uploaded to this product', 'woocommerce' ),
+						'filter_items_list'        => __( 'Filter products', 'woocommerce' ),
+						'items_list_navigation'    => __( 'Products navigation', 'woocommerce' ),
+						'items_list'               => __( 'Products list', 'woocommerce' ),
+						'item_link'                => __( 'Product Link', 'woocommerce' ),
+						'item_link_description'    => __( 'A link to a product.', 'woocommerce' ),
+						'item_published'           => __( 'Product published.', 'woocommerce' ),
+						'item_published_privately' => __( 'Product published privately.', 'woocommerce' ),
+						'item_reverted_to_draft'   => __( 'Product reverted to draft.', 'woocommerce' ),
+						'item_scheduled'           => __( 'Product scheduled.', 'woocommerce' ),
+						'item_updated'             => __( 'Product updated.', 'woocommerce' ),
 					),
 					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
 					'public'              => true,
@@ -798,14 +804,18 @@ class WC_Post_Types {
 	}
 
 	/**
-	 * Disable Gutenberg for products.
+	 * Disable Gutenberg for products, unless the product description block editor feature is enabled.
 	 *
 	 * @param bool   $can_edit Whether the post type can be edited or not.
 	 * @param string $post_type The post type being checked.
 	 * @return bool
 	 */
 	public static function gutenberg_can_edit_post_type( $can_edit, $post_type ) {
-		return 'product' === $post_type ? false : $can_edit;
+		if ( 'product' !== $post_type ) {
+			return $can_edit;
+		}
+
+		return FeaturesUtil::feature_is_enabled( 'product_description_block_editor' ) ? $can_edit : false;
 	}
 
 	/**

@@ -555,6 +555,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 			}
 
+			// Product sidebar fields and layout in the block editor.
+			if ( 'product' === $screen_id && $post instanceof WP_Post && use_block_editor_for_post( $post ) ) {
+				wp_enqueue_script( 'wc-admin-product-block-editor', WC()->plugin_url() . '/assets/js/admin/product-block-editor' . $suffix . '.js', array( 'wp-block-editor', 'wp-components', 'wp-core-data', 'wp-data', 'wp-dom-ready', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-preferences' ), $version, true );
+				wp_set_script_translations( 'wc-admin-product-block-editor', 'woocommerce' );
+				wp_localize_script(
+					'wc-admin-product-block-editor',
+					'woocommerce_admin_product_block_editor',
+					array(
+						'visibility_options' => wc_get_product_visibility_options(),
+					)
+				);
+			}
+
 			// Meta boxes.
 			/* phpcs:disable */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
@@ -593,6 +606,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 					'i18n_scheduled_sale_end_before_start' => esc_js( __( 'The sale end date cannot be earlier than the sale start date.', 'woocommerce' ) ),
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
+					'i18n_variations_save_error'          => esc_js( __( 'Variations could not be saved. Please try again.', 'woocommerce' ) ),
 					'i18n_generate_variations'            => esc_js( __( 'Generate variations', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),

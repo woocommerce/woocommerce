@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
@@ -63,6 +64,7 @@ class WC_Admin_Post_Types {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ), 5 );
+		add_action( 'add_meta_boxes_product', array( $this, 'prepare_block_editor_product_fields' ) );
 
 		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
@@ -818,6 +820,66 @@ class WC_Admin_Post_Types {
 					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 				</p>
 			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * In the block editor, catalog visibility, featured and the gallery are edited in the editor sidebar.
+	 * Their values are posted through hidden fields in the Product data meta box: without them, `_featured`
+	 * would never be posted and saving the product would unset the featured flag.
+	 *
+	 * @param WP_Post $post The product being edited.
+	 */
+	public function prepare_block_editor_product_fields( $post ) {
+		if ( ! use_block_editor_for_post( $post ) ) {
+			return;
+		}
+
+		// The gallery meta box stays when gallery videos are enabled, as the sidebar gallery only handles images.
+		if ( ! ProductMediaGallery::is_feature_enabled() ) {
+			remove_meta_box( 'woocommerce-product-images', 'product', 'side' );
+		}
+
+		add_action( 'woocommerce_product_data_panels', array( $this, 'output_block_editor_product_fields' ) );
+		add_filter( 'get_user_option_closedpostboxes_product', array( $this, 'close_block_editor_meta_boxes' ) );
+	}
+
+	/**
+	 * Load the meta boxes below the block editor closed, so they show as a short list of headers
+	 * and the product description stays visible. An expanded box would fill the whole meta boxes pane.
+	 *
+	 * @return string[] IDs of the meta boxes to show closed.
+	 */
+	public function close_block_editor_meta_boxes() {
+		global $wp_meta_boxes;
+
+		$ids = array();
+		foreach ( array( 'normal', 'advanced' ) as $context ) {
+			foreach ( (array) ( $wp_meta_boxes['product'][ $context ] ?? array() ) as $meta_boxes ) {
+				$ids = array_merge( $ids, array_keys( array_filter( (array) $meta_boxes ) ) );
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Output the hidden fields the block editor sidebar writes to.
+	 */
+	public function output_block_editor_product_fields() {
+		global $product_object;
+
+		if ( ! $product_object instanceof WC_Product ) {
+			return;
+		}
+		?>
+		<div id="woocommerce-product-block-editor-fields" hidden>
+			<input type="hidden" name="_visibility" value="<?php echo esc_attr( $product_object->get_catalog_visibility( 'edit' ) ); ?>" />
+			<input type="hidden" name="_featured" value="yes" <?php disabled( ! $product_object->get_featured( 'edit' ) ); ?> />
+			<?php if ( ! ProductMediaGallery::is_feature_enabled() ) : ?>
+				<input type="hidden" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', $product_object->get_gallery_image_ids( 'edit' ) ) ); ?>" />
+			<?php endif; ?>
 		</div>
 		<?php
 	}

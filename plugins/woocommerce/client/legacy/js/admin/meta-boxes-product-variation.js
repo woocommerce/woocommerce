@@ -673,6 +673,15 @@ jQuery( function ( $ ) {
 				postForm.data( 'callerid', this.id );
 			} );
 
+			// The block editor saves through the REST API and never submits form#post.
+			if ( $( 'body' ).hasClass( 'block-editor-page' ) && wp.hooks ) {
+				wp.hooks.addFilter(
+					'editor.preSavePost',
+					'woocommerce/save-variations',
+					this.save_on_block_editor_save
+				);
+			}
+
 			$( '.wc-metaboxes-wrapper' ).on(
 				'change',
 				'#field_to_edit',
@@ -948,6 +957,44 @@ jQuery( function ( $ ) {
 					wc_meta_boxes_product_variations_ajax.save_on_submit_done
 				);
 			}
+		},
+
+		/**
+		 * Save pending variation changes before the block editor saves the product.
+		 *
+		 * @param {Object} edits   Post edits about to be saved.
+		 * @param {Object} options Save options.
+		 * @return {Object|Promise} The edits, once variations are saved.
+		 */
+		save_on_block_editor_save: function ( edits, options ) {
+			var need_update = $( '#variable_product_options' ).find(
+				'.woocommerce_variations .variation-needs-update'
+			);
+
+			if (
+				( options && ( options.isAutosave || options.isPreview ) ) ||
+				0 === need_update.length
+			) {
+				return edits;
+			}
+
+			return new Promise( function ( resolve, reject ) {
+				$( '#variable_product_options' ).trigger(
+					'woocommerce_variations_save_variations_on_submit'
+				);
+				wc_meta_boxes_product_variations_ajax.save_changes(
+					function () {
+						resolve( edits );
+					},
+					function () {
+						reject(
+							new Error(
+								woocommerce_admin_meta_boxes_variations.i18n_variations_save_error
+							)
+						);
+					}
+				);
+			} );
 		},
 
 		/**
