@@ -77,6 +77,67 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CSV exports include the MPN header and saved product or variation value.
+	 * @testWith ["simple"]
+	 *           ["variation"]
+	 *
+	 * @param string $type Product type.
+	 */
+	public function test_mpn_csv_export( string $type ): void {
+		$class   = WC_Product_Factory::get_product_classname( 0, $type );
+		$product = new $class();
+		$product->set_name( 'MPN test product' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_regular_price( '10' );
+		if ( ProductType::VARIATION === $type ) {
+			$parent = new WC_Product_Variable();
+			$parent->save();
+			$product->set_parent_id( $parent->get_id() );
+		}
+		$product->set_mpn( 'PART-CSV' );
+		$product->save();
+
+		$csv  = $this->export_mpn_csv( $product );
+		$rows = array_map( 'str_getcsv', explode( "\n", trim( $csv ) ) );
+
+		$this->assertSame( array( 'ID', 'MPN' ), $rows[0] );
+		$this->assertSame( array( (string) $product->get_id(), 'PART-CSV' ), $rows[1] );
+	}
+
+	/**
+	 * Export the ID and MPN columns for a single product or variation.
+	 *
+	 * @param WC_Product $product Product to export.
+	 * @return string
+	 */
+	private function export_mpn_csv( WC_Product $product ): string {
+		$sut = new WC_Product_CSV_Exporter();
+		$sut->set_product_ids_to_export( array( $product->get_id() ) );
+		$sut->set_column_names(
+			array(
+				'id'  => 'ID',
+				'mpn' => 'MPN',
+			)
+		);
+		$sut->set_columns_to_export( array( 'id', 'mpn' ) );
+		add_filter(
+			'woocommerce_product_export_product_query_args',
+			static function ( $args ) use ( $product ) {
+				$args['type'] = $product->get_type();
+				return $args;
+			}
+		);
+		$sut->prepare_data_to_export();
+
+		$headers = new ReflectionMethod( $sut, 'export_column_headers' );
+		$headers->setAccessible( true );
+		$data = new ReflectionMethod( $sut, 'get_csv_data' );
+		$data->setAccessible( true );
+
+		return $headers->invoke( $sut ) . $data->invoke( $sut );
+	}
+
+	/**
 	 * @testdox variations should use draft status from parent product
 	 */
 	public function test_get_column_value_published() {
