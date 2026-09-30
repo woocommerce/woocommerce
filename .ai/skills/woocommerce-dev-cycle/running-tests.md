@@ -102,6 +102,19 @@ wp-env destroy
 wp-env start
 ```
 
+### Reproducing a CI PHP unit job
+
+CI runs the core plugin's PHP suite in several cells (PHP × WordPress version, plus HPOS off), each in its own wp-env. To run a cell the way CI runs it, from the repository root:
+
+```bash
+pnpm test:php:ci --list                       # the cells CI would run, with their ports
+pnpm test:php:ci --cell 8.3                   # one cell
+pnpm test:php:ci --cell 8.3 --cell 7.4        # two cells in parallel
+pnpm test:php:ci --cell 8.3 -- --filter WC_Tests_Product   # extra arguments go to phpunit
+```
+
+Each cell is its own wp-env instance (generated, gitignored `plugins/woocommerce/.wp-env.test-<cell>.json`) and stays up between runs, so a rerun costs only the phpunit time. `--fresh` starts a cell as CI does (`--update`); use it after a WordPress release, since a warm `latest` cell keeps the core it downloaded. When a version appears in two cells (8.5 and its HPOS-off twin), select by index from `--list`. Cells ignore `.wp-env.test.override.json`, as CI does; a per-cell `.wp-env.test-<cell>.override.json` is honoured. `--jobs` (default 2) limits parallel cells; run one invocation at a time.
+
 ## Troubleshooting Tests
 
 | Problem | Solution |
