@@ -254,8 +254,9 @@ class WCAdminAssets {
 
 		if ( PageController::is_settings_page() ) {
 			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$design_tokens_handle = $this->enqueue_design_tokens();
 			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
-			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+			$this->register_style( 'settings-embed', 'style', array( 'wp-components', $design_tokens_handle ) );
 			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
@@ -403,6 +404,9 @@ class WCAdminAssets {
 				'handle'       => 'wc-settings-ui',
 				'dependencies' => array( 'wp-components' ),
 			),
+			array(
+				'handle' => 'wc-design-tokens',
+			),
 		);
 
 		$css_file_version = self::get_file_version( 'css' );
@@ -455,6 +459,23 @@ class WCAdminAssets {
 		} catch ( \Throwable $e ) {
 			return array();
 		}
+	}
+
+	/**
+	 * Enqueue the WordPress Design System tokens stylesheet.
+	 *
+	 * Uses the `wp-theme` style registered by WordPress 7.1+ or the Gutenberg plugin when available,
+	 * and falls back to the copy of the tokens bundled with WooCommerce otherwise.
+	 *
+	 * @return string The handle of the enqueued tokens stylesheet.
+	 */
+	private function enqueue_design_tokens(): string {
+		// @todo Remove the bundled fallback (and the `design-tokens` wp-admin-script) once WP 7.1 is the minimum supported version.
+		$handle = wp_style_is( 'wp-theme', 'registered' ) ? 'wp-theme' : 'wc-design-tokens';
+
+		wp_enqueue_style( $handle );
+
+		return $handle;
 	}
 
 	/**
