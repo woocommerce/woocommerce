@@ -38,7 +38,7 @@ class CheckoutLink {
 
 		// maybe flush rewrite rules if it was not previously in the option.
 		if ( ! isset( $rules[ $regex ] ) ) {
-			flush_rewrite_rules();
+			\WC_Post_Types::flush_rewrite_rules();
 		}
 	}
 

@@ -3,12 +3,18 @@
  */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { BusinessInfo } from '../BusinessInfo';
 import { CoreProfilerStateMachineContext } from '../..';
+
+jest.mock( '@woocommerce/tracks', () => ( {
+	...jest.requireActual( '@woocommerce/tracks' ),
+	recordEvent: jest.fn(),
+} ) );
 
 describe( 'BusinessInfo', () => {
 	let props: {
@@ -332,7 +338,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const continueButton = screen.getByRole( 'button', {
@@ -346,7 +352,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -416,7 +422,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -432,7 +438,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -452,7 +458,7 @@ describe( 'BusinessInfo', () => {
 			} );
 			userEvent.type( emailInput, 'invalid email' );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			expect(
@@ -464,7 +470,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -485,7 +491,7 @@ describe( 'BusinessInfo', () => {
 			props.context.businessInfo.location = 'AW';
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -519,7 +525,7 @@ describe( 'BusinessInfo', () => {
 			props.context.onboardingProfile.is_store_country_set = true;
 			render( <BusinessInfo { ...props } /> );
 			const checkbox = screen.getByRole( 'checkbox', {
-				name: /Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox./i,
+				name: /Get tips, discounts, and recommendations from Woo./i,
 			} );
 			userEvent.click( checkbox );
 			const emailInput = screen.getByRole( 'textbox', {
@@ -530,6 +536,22 @@ describe( 'BusinessInfo', () => {
 				name: /Continue/i,
 			} );
 			expect( continueButton ).not.toBeDisabled();
+		} );
+
+		it( 'should link to the privacy policy and record a Tracks event when it is clicked', () => {
+			render( <BusinessInfo { ...props } /> );
+			const link = screen.getByRole( 'link', {
+				name: 'Privacy Policy (opens in a new tab)',
+			} );
+			expect( link ).toHaveAttribute(
+				'href',
+				'https://automattic.com/privacy/'
+			);
+			userEvent.click( link );
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_business_info_privacy_policy_click',
+				{}
+			);
 		} );
 	} );
 } );

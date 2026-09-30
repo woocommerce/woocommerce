@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -124,6 +125,13 @@ class FeaturesController {
 	private bool $registered_additional_features_via_class_calls = false;
 
 	/**
+	 * Flag indicating if hardcoded feature definitions are currently being initialized.
+	 *
+	 * @var bool
+	 */
+	private bool $initializing_feature_definitions = false;
+
+	/**
 	 * Flag indicating if we are currently delaying plugin normalization.
 	 *
 	 * @var bool
@@ -168,8 +176,6 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
-		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
-		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
 		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
@@ -261,9 +267,7 @@ class FeaturesController {
 	 * @return array[]
 	 */
 	private function get_feature_definitions() {
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		if ( ! $this->registered_additional_features_via_class_calls ) {
 			// This needs to be set to true *before* additional feature definition calls are made,
@@ -281,6 +285,23 @@ class FeaturesController {
 		}
 
 		return $this->features;
+	}
+
+	/**
+	 * Initialize hardcoded feature definitions if they have not been initialized yet.
+	 */
+	private function maybe_init_feature_definitions(): void {
+		if ( ! empty( $this->features ) || $this->initializing_feature_definitions ) {
+			return;
+		}
+
+		$this->initializing_feature_definitions = true;
+
+		try {
+			$this->init_feature_definitions();
+		} finally {
+			$this->initializing_feature_definitions = false;
+		}
 	}
 
 	/**
@@ -467,17 +488,6 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
-			'abandoned_cart_recovery'              => array(
-				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
-				'description'                  => __(
-					'Send a reminder email to shoppers who didn\'t finish checking out.',
-					'woocommerce'
-				),
-				'skip_compatibility_checks'    => false,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-			),
 			'email_improvements'                   => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
@@ -622,30 +632,6 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'agentic_checkout'                     => array(
-				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
-			'dual_code_graphql_api'                => array(
-				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
-				'description'                  => __(
-					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
 			PushNotifications::FEATURE_NAME        => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(
@@ -708,6 +694,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
+			),
+			StockNotifications::FEATURE_NAME       => array(
+				'name'                         => __( 'Back in Stock Notifications', 'woocommerce' ),
+				'description'                  => __(
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
+					'woocommerce'
+				),
+				'option_key'                   => StockNotifications::ENABLE_OPTION_NAME,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			BlockEditorUnifiedAssets::FEATURE_NAME => array(
 				'name'                         => __( 'Unified block editor assets', 'woocommerce' ),
@@ -807,9 +805,7 @@ class FeaturesController {
 			return;
 		}
 
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		/**
 		 * The action for registering features.
@@ -2142,58 +2138,6 @@ class FeaturesController {
 				}
 			);
 		}
-	}
-
-	/**
-	 * Flag a one-shot transient when the merchant turns on Abandoned cart recovery.
-	 *
-	 * `change_feature_enable` fires this action mid-request before the post-save
-	 * redirect, so the actual notice has to render on the next page load. We
-	 * stash a transient here and `maybe_render_abandoned_cart_recovery_enabled_notice`
-	 * picks it up the next time `woocommerce_settings_advanced` fires.
-	 *
-	 * @param string $feature_id Feature being toggled.
-	 * @param bool   $is_enabled True when turned on, false when turned off.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function flag_abandoned_cart_recovery_enabled_notice( $feature_id, $is_enabled ): void {
-		if ( 'abandoned_cart_recovery' === $feature_id && $is_enabled ) {
-			set_transient( 'wc_abandoned_cart_recovery_enabled_notice', 'yes', MINUTE_IN_SECONDS );
-		}
-	}
-
-	/**
-	 * Render a success notice after the merchant enables Abandoned cart recovery,
-	 * pointing them straight at the email settings page where they actually
-	 * configure it.
-	 *
-	 * Hooks into `woocommerce_settings_advanced` at priority 1, which fires
-	 * inside the settings template right after `WC_Admin_Settings::show_messages()`
-	 * (the "Your settings have been saved." notice) and before the form fields.
-	 * That places our notice in the same visual slot below the tabs, alongside
-	 * the standard save confirmation.
-	 *
-	 * `WC_Admin_Settings::add_message()` would be the cleaner API but escapes
-	 * its input via `esc_html()`, which strips the link tag. Direct echo here
-	 * keeps the markup intact while still matching the surrounding notice style.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function maybe_render_abandoned_cart_recovery_enabled_notice(): void {
-		if ( 'yes' !== get_transient( 'wc_abandoned_cart_recovery_enabled_notice' ) ) {
-			return;
-		}
-		delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
-
-		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_customer_abandoned_cart_recovery' );
-
-		printf(
-			'<div id="wc-abandoned-cart-recovery-enabled-notice" class="updated inline"><p><strong>%1$s <a href="%2$s">%3$s</a></strong></p></div>',
-			esc_html__( 'Abandoned cart recovery is enabled.', 'woocommerce' ),
-			esc_url( $settings_url ),
-			esc_html__( 'Configure the recovery email →', 'woocommerce' )
-		);
 	}
 
 	/**

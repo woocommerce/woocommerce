@@ -68,7 +68,10 @@ const COMPATIBILITY_OVERRIDES = {
 	},
 	CZ: { pattern: '(?:CZ-)?[0-9]{3}\\s?[0-9]{2}' },
 	DE: { pattern: '(?:0[1-9]|[1-9][0-9])[0-9]{3}' },
-	DK: { pattern: '(?:DK-)?(?:[1-24-9]\\d{3}|3[0-8]\\d{2})' },
+	DK: {
+		pattern: '(?:DK[- ]?)?(?:[1-24-9]\\d{3}|3[0-8]\\d{2})',
+		flags: 'i',
+	},
 	ES: { pattern: '[0-9]{5}' },
 	FI: { pattern: '[0-9]{5}' },
 	FR: { pattern: '[0-9]{5}', flags: 'i' },

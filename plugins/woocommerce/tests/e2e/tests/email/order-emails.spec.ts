@@ -118,3 +118,50 @@ test( 'Merchant can resend order details to customer', async ( {
 		new RegExp( `Details for order #${ order.id }` )
 	);
 } );
+
+test( 'Zero cost shipping method keeps its title in the order email', async ( {
+	baseURL,
+	page,
+	restApi,
+} ) => {
+	const methodName = 'Shipping TBD';
+	const billingEmail = faker.internet.exampleEmail();
+
+	await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
+
+	const { data: order } = await restApi.post( `${ WC_API_PATH }/orders`, {
+		status: 'processing',
+		billing: { email: billingEmail },
+		shipping_lines: [
+			{
+				method_id: 'flat_rate',
+				method_title: methodName,
+				total: '0.00',
+			},
+		],
+	} );
+
+	try {
+		const emailRow = await expectEmail(
+			page,
+			billingEmail,
+			/order has been received/
+		);
+		await emailRow.getByRole( 'button', { name: 'View log' } ).click();
+
+		const shippingRow = page
+			.locator( '#wp-mail-logging-modal-content-body-content' )
+			.locator( 'iframe' )
+			.contentFrame()
+			.locator( 'tr.order-totals-shipping' );
+
+		await expect( shippingRow.locator( 'td' ) ).toContainText( methodName );
+		await expect( shippingRow.locator( 'td' ) ).not.toContainText(
+			'Free!'
+		);
+	} finally {
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+			force: true,
+		} );
+	}
+} );

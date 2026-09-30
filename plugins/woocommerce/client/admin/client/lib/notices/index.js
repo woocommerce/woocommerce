@@ -67,6 +67,12 @@ export function createNoticesFromResponse( response ) {
 		Object.keys( response.errors ).forEach( ( errorKey ) => {
 			createNotice( 'error', response.errors[ errorKey ].join( ' ' ) );
 		} );
+	} else if ( response instanceof Error ) {
+		// A thrown Error (e.g. the PluginError rejected by @woocommerce/data's
+		// plugin actions) is always a failure, even though it carries no code.
+		if ( response.message ) {
+			createNotice( 'error', response.message );
+		}
 	} else if ( response.message ) {
 		// Handle generic messages.
 		createNotice( response.code ? 'error' : 'success', response.message );

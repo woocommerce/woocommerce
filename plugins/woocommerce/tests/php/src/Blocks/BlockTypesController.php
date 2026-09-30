@@ -93,4 +93,75 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		$answer = $this->block_types_controller->block_should_have_data_attributes( 'child-of-woo/block-name' );
 		$this->assertTrue( $answer );
 	}
+
+	/**
+	 * @testdox register_block_patterns() registers the patterns referenced by the installed Cart page.
+	 */
+	public function test_register_block_patterns_registers_installed_cart_page_patterns(): void {
+		$registry = \WP_Block_Patterns_Registry::get_instance();
+
+		// The default Cart page created at install references these patterns
+		// (see WC_Install::get_cart_block_content()). Registering them here rather than
+		// in the Cart block type means the page can still resolve the references when
+		// the Cart block itself is not registered.
+		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message', 'woocommerce/cart-cross-sells-message' );
+
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
+		}
+
+		$this->block_types_controller->register_block_patterns();
+
+		foreach ( $slugs as $slug ) {
+			$this->assertTrue(
+				$registry->is_registered( $slug ),
+				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
+			);
+		}
+	}
+
+	/**
+	 * @testdox Should use the WooCommerce version when a bundled block.json omits one.
+	 */
+	public function test_block_json_style_without_version_uses_woocommerce_version(): void {
+		$metadata = array(
+			'name' => 'woocommerce/product-filter-chips',
+			'file' => WC_ABSPATH . 'assets/client/blocks/product-filter-chips/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( 'wc-' . WC_VERSION, $result['version'] );
+	}
+
+	/**
+	 * @testdox Should keep a version a bundled block.json already declares.
+	 */
+	public function test_block_json_keeps_explicit_version(): void {
+		$metadata = array(
+			'name'    => 'woocommerce/mini-cart',
+			'file'    => WC_ABSPATH . 'assets/client/blocks/mini-cart/block.json',
+			'version' => '1.0.0',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( '1.0.0', $result['version'] );
+	}
+
+	/**
+	 * @testdox Should leave block metadata from outside WooCommerce unchanged.
+	 */
+	public function test_block_json_outside_woocommerce_keeps_omitted_version(): void {
+		$metadata = array(
+			'name' => 'example/block',
+			'file' => '/tmp/example/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertArrayNotHasKey( 'version', $result );
+	}
 }

@@ -1254,7 +1254,7 @@ const { actions } = store< Store >(
 					dismissible: true,
 				} );
 
-				// Emmits console.error for troubleshooting.
+				// Emits console.error for troubleshooting.
 				// eslint-disable-next-line no-console
 				console.error( error );
 			},

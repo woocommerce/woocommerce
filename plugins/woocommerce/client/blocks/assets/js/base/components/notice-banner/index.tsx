@@ -53,6 +53,13 @@ const NoticeBanner = ( {
 
 	return (
 		<div
+			role={
+				status === 'error' ||
+				status === 'warning' ||
+				status === 'success'
+					? 'alert'
+					: 'status'
+			}
 			className={ clsx(
 				className,
 				'wc-block-components-notice-banner',

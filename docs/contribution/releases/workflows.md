@@ -46,7 +46,7 @@ These workflows are triggered automatically by GitHub events such as pull reques
 
 | Workflow | Trigger | What it does |
 | -------- | ------- | ------------ |
-| [Release: Release events proxy](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-release-events-proxy.yml) | Release published or prereleased | Delegates to [`release-new-release-published`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-new-release-published.yml) to run post-release actions: sends Slack notifications, updates the global changelog for stable releases, and calls *Generate Number of Commits and Contributors* for beta releases. |
+| [Release: Release events proxy](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-release-events-proxy.yml) | Release published or prereleased | Delegates to [`release-new-release-published`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/release-new-release-published.yml) to run post-release actions: sends Slack notifications, updates the global changelog for stable releases, bumps the minimum [security-support](/docs/contribution/releases/security-support) version when the release is the first of a new major version, and calls *Generate Number of Commits and Contributors* for beta releases. |
 | [Release checks run](https://github.com/woocommerce/woocommerce/blob/trunk/.github/workflows/tests-on-release.yml) | Release published or edited | Runs the CI test suite against published releases. Also runs nightly on a schedule. |
 
 ## Manual workflows

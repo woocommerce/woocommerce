@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/email-editor",
-	"version": "2.4.0",
+	"version": "2.4.1",
 	"description": "Gutenberg based email editor that is used in WooCommerce emails.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -112,12 +112,15 @@
 		"@wordpress/priority-queue": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
+		"@wordpress/ui": "catalog:wp-bundled",
 		"@wordpress/url": "catalog:wp-min",
 		"clsx": "2.1.x",
 		"deepmerge": "^4.3.1",
-		"lodash": "^4.18.1",
-		"react": "18.3.x",
-		"react-dom": "18.3.x"
+		"lodash": "^4.18.1"
+	},
+	"peerDependencies": {
+		"react": "^18.3.0",
+		"react-dom": "^18.3.0"
 	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.x",
@@ -147,6 +150,8 @@
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"prettier": "npm:wp-prettier@3.0.3",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"ts-jest": "29.1.x",
