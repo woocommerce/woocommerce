@@ -33,9 +33,8 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should not use the global post as the selection when a searchable page setting is empty.
 	 */
 	public function test_empty_page_search_does_not_select_global_post(): void {
-		$page_id = self::factory()->post->create( array( 'post_title' => 'Unrelated global post' ) );
-		$this->go_to( get_permalink( $page_id ) );
-		the_post();
+		$GLOBALS['post'] = self::factory()->post->create_and_get( array( 'post_title' => 'Unrelated global post' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the global-post fallback; parent teardown restores it.
+
 		$fields = array(
 			array(
 				'id'    => 'empty_page',
