@@ -3827,7 +3827,7 @@ importers:
         specifier: 1.69.5
         version: 1.69.5
       stylelint:
-        specifier: ^16.8.2
+        specifier: ^16.9.0
         version: 16.26.1(typescript@5.7.3)
 
   tools/code-analyzer:

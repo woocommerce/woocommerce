@@ -608,7 +608,7 @@
 			"packages": [
 				"@woocommerce/classic-assets"
 			],
-			"pinVersion": "^16.8.2"
+			"pinVersion": "^16.9.0"
 		},
 		{
 			"dependencies": [
