@@ -1,6 +1,6 @@
 # Marking a cart item as a child of another cart item
 
-A Store API cart-item response can identify a child cart item with the readonly `parent_item_key` field. The field contains the key of the parent cart item, or `null` when the cart item has no parent. WooCommerce uses it to leave child cart items out of the in-cart quantity shown on a product's add to cart button. This guide shows how an extension can retain a parent key while adding a child cart item and expose that relationship in the response.
+A Store API cart-item response can identify a child cart item with the readonly `parent_item_key` field. A non-empty value declares a parent cart item key; `null` means no parent was declared, not necessarily that the line has no parent. The interactive ProductButton block (PHP-rendered with the Interactivity API), including the one in Add to Cart with Options, excludes declared child lines from its in-cart quantity; undeclared child lines that match its product still count. The legacy React ProductButton and Mini-Cart item count do not use this declaration. This guide shows how an extension can retain a parent key while adding a child cart item and expose that relationship in the response.
 
 ## Filter contract
 
