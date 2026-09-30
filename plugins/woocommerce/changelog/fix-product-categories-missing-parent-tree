@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep child product categories visible when their parent is missing, and avoid warnings in children-only lists.
+Fix PHP warnings in the Product Categories List block when listed categories only have hidden or out-of-stock products.

@@ -190,18 +190,17 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return array
 	 */
 	protected function build_category_tree( $categories, $children_only ) {
-		$parent_id = $children_only ? get_queried_object_id() : 0;
-		$term_ids  = array_flip( array_column( $categories, 'term_id' ) );
-
 		$categories_by_parent = [];
-		foreach ( $categories as $category ) {
-			// Show children at the top level when their parent is absent from the query result.
-			$parent = isset( $term_ids[ $category->parent ] ) ? $category->parent : $parent_id;
 
-			$categories_by_parent[ 'cat-' . $parent ][] = $category;
+		foreach ( $categories as $category ) {
+			if ( ! isset( $categories_by_parent[ 'cat-' . $category->parent ] ) ) {
+				$categories_by_parent[ 'cat-' . $category->parent ] = [];
+			}
+			$categories_by_parent[ 'cat-' . $category->parent ][] = $category;
 		}
 
-		$tree = $categories_by_parent[ 'cat-' . $parent_id ] ?? [];
+		$parent_id = $children_only ? get_queried_object_id() : 0;
+		$tree      = $categories_by_parent[ 'cat-' . $parent_id ] ?? []; // these are top level categories. So all parents.
 		unset( $categories_by_parent[ 'cat-' . $parent_id ] );
 
 		foreach ( $tree as $category ) {

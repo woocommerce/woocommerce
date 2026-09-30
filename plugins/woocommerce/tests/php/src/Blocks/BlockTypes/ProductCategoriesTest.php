@@ -15,13 +15,6 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	use ImageAttachmentTrait;
 
 	/**
-	 * Term ID of "Clothing", a top-level category whose only product sits in "Hoodies".
-	 *
-	 * @var int
-	 */
-	private int $clothing_id;
-
-	/**
 	 * Term ID of "Hoodies", a child of "Clothing" with one product.
 	 *
 	 * @var int
@@ -38,9 +31,9 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->clothing_id = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
-		$this->hoodies_id  = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $this->clothing_id ) )['term_id'];
-		$music_id          = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
+		$clothing_id      = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
+		$this->hoodies_id = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $clothing_id ) )['term_id'];
+		$music_id         = (int) wp_insert_term( 'Music', 'product_cat' )['term_id'];
 		wp_insert_term( 'Empty', 'product_cat' );
 
 		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $this->hoodies_id ), 'product_cat' );
@@ -137,60 +130,28 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render nothing when count filtering removes all categories.
+	 * @testdox Should render nothing, without warnings, when the current category's children have no visible products.
+	 * @testWith ["hidden", "instock", "no"]
+	 *           ["visible", "outofstock", "yes"]
+	 *
+	 * @param string $catalog_visibility Catalog visibility of the only product.
+	 * @param string $stock_status       Stock status of the only product.
+	 * @param string $hide_out_of_stock  Value of the woocommerce_hide_out_of_stock_items option.
 	 */
-	public function test_all_categories_filtered_out(): void {
-		$this->assertStringContainsString( '>Hoodies<', $this->render_product_categories() );
-
-		$categories = get_terms(
+	public function test_children_only_without_visible_products( string $catalog_visibility, string $stock_status, string $hide_out_of_stock ): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', $hide_out_of_stock );
+		$accessories_id = (int) wp_insert_term( 'Accessories', 'product_cat' )['term_id'];
+		$scarves_id     = (int) wp_insert_term( 'Scarves', 'product_cat', array( 'parent' => $accessories_id ) )['term_id'];
+		WC_Helper_Product::create_simple_product(
+			true,
 			array(
-				'taxonomy'   => 'product_cat',
-				'hide_empty' => false,
+				'category_ids'       => array( $scarves_id ),
+				'catalog_visibility' => $catalog_visibility,
+				'stock_status'       => $stock_status,
 			)
 		);
-		foreach ( $categories as $category ) {
-			delete_term_meta( $category->term_id, 'product_count_product_cat' );
-		}
-		delete_transient( 'wc_term_counts' );
-		clean_term_cache( array_column( $categories, 'term_id' ), 'product_cat' );
+		$this->go_to( get_term_link( $accessories_id, 'product_cat' ) );
 
-		$this->assertSame( '', $this->render_product_categories(), 'The block should be empty when every category has a zero product count.' );
-	}
-
-	/**
-	 * @testdox Should render a child at the top level when its parent has no product count.
-	 */
-	public function test_child_with_missing_parent_renders_at_top_level(): void {
-		delete_term_meta( $this->clothing_id, 'product_count_product_cat' );
-		delete_transient( 'wc_term_counts' );
-		clean_term_cache( array( $this->clothing_id, $this->hoodies_id ), 'product_cat' );
-
-		$markup = $this->render_product_categories();
-
-		$this->assertStringNotContainsString( '>Clothing<', $markup, 'The zero-count parent should not be rendered.' );
-		$this->assertStringContainsString( '>Hoodies<', $markup, 'The child should remain visible.' );
-		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $markup, 'The child should be rendered at the top level.' );
-	}
-
-	/**
-	 * @testdox Should render an orphaned grandchild in children-only mode without warnings.
-	 */
-	public function test_children_only_renders_orphaned_grandchild(): void {
-		$caps_id = (int) wp_insert_term( 'Caps', 'product_cat', array( 'parent' => $this->hoodies_id ) )['term_id'];
-		wp_set_object_terms( WC_Helper_Product::create_simple_product()->get_id(), array( $caps_id ), 'product_cat' );
-		wc_recount_all_terms();
-
-		delete_term_meta( $this->hoodies_id, 'product_count_product_cat' );
-		delete_transient( 'wc_term_counts' );
-		clean_term_cache( array( $this->clothing_id, $this->hoodies_id, $caps_id ), 'product_cat' );
-
-		$this->go_to( get_term_link( $this->clothing_id, 'product_cat' ) );
-		$this->assertTrue( is_product_category(), 'The request should be a product category archive.' );
-
-		$markup = $this->render_product_categories( '{"showChildrenOnly":true}' );
-
-		$this->assertStringNotContainsString( '>Hoodies<', $markup, 'The zero-count parent should not be rendered.' );
-		$this->assertStringContainsString( '>Caps<', $markup, 'The grandchild should remain visible.' );
-		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $markup, 'The grandchild should be rendered at the top level.' );
+		$this->assertSame( '', $this->render_product_categories( '{"showChildrenOnly":true}' ) );
 	}
 }
