@@ -436,8 +436,10 @@ class PushTokensDataStore {
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
-	 * flat array (cached per-request). When $page and $per_page are
-	 * provided, returns a paginated result with total counts.
+	 * flat array (cached per-request), most recently registered first. When
+	 * $page and $per_page are provided, returns a paginated result with total
+	 * counts, ordered by ID so a re-registration cannot move a token between
+	 * pages.
 	 *
 	 * The eligible-user lookup is restricted to users that actually own
 	 * push tokens, so the role check runs against a handful of IDs instead
@@ -578,6 +580,17 @@ class PushTokensDataStore {
 					)
 				);
 			}
+		}
+
+		if ( ! $paginate ) {
+			/**
+			 * Sorted on the GMT date because WP_Query can only order by the local
+			 * `post_modified`, which runs backwards across a daylight saving change.
+			 */
+			usort(
+				$tokens,
+				fn ( PushToken $a, PushToken $b ) => array( $b->get_last_confirmed_at_gmt(), $b->get_id() ) <=> array( $a->get_last_confirmed_at_gmt(), $a->get_id() )
+			);
 		}
 
 		$result = $paginate
