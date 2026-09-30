@@ -254,7 +254,7 @@ class WCAdminAssets {
 
 		if ( PageController::is_settings_page() ) {
 			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
-			$design_tokens_handle = $this->enqueue_design_tokens();
+			$design_tokens_handle     = $this->enqueue_design_tokens();
 			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components', $design_tokens_handle ) );
 			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
@@ -470,7 +470,7 @@ class WCAdminAssets {
 	 * @return string The handle of the enqueued tokens stylesheet.
 	 */
 	private function enqueue_design_tokens(): string {
-		// @todo Remove the bundled fallback (and the `design-tokens` wp-admin-script) once WP 7.1 is the minimum supported version.
+		// The bundled fallback (and the `design-tokens` wp-admin-script) can be removed once WP 7.1 is the minimum supported version.
 		$handle = wp_style_is( 'wp-theme', 'registered' ) ? 'wp-theme' : 'wc-design-tokens';
 
 		wp_enqueue_style( $handle );
