@@ -42,7 +42,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 				esc_url( $clear_url )
 			);
 			?>
-			<div id="selected-product-export-notice" class="notice notice-info inline">
+			<div id="selected-product-export-notice" class="notice notice-info">
 				<p><?php echo wp_kses_post( $notice ); ?></p>
 			</div>
 			<?php
