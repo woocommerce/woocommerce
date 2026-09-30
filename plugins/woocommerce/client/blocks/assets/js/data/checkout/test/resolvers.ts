@@ -2,6 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -32,17 +33,21 @@ jest.mock( '../../cart', () => ( {
 	CART_STORE_KEY: 'wc/store/cart',
 } ) );
 
-let mockPreloadedCheckoutData: Record< string, unknown > = {};
 jest.mock( '@woocommerce/settings', () => {
 	const actual = jest.requireActual( '@woocommerce/settings' );
-	return {
-		...actual,
-		getSetting: ( name: string, ...rest: unknown[] ) =>
-			name === 'checkoutData'
-				? mockPreloadedCheckoutData
-				: actual.getSetting( name, ...rest ),
-	};
+	return { ...actual, getSetting: jest.fn( actual.getSetting ) };
 } );
+
+const { getSetting: actualGetSetting } = jest.requireActual(
+	'@woocommerce/settings'
+);
+
+const setPreloadedCheckoutData = ( data: Record< string, unknown > ) => {
+	( getSetting as jest.Mock ).mockImplementation(
+		( name: string, ...rest: unknown[] ) =>
+			name === 'checkoutData' ? data : actualGetSetting( name, ...rest )
+	);
+};
 
 const setCartHashCookie = ( present: boolean ) => {
 	if ( present ) {
@@ -65,7 +70,7 @@ describe( 'getCheckoutData resolver', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		setCartHashCookie( true );
-		mockPreloadedCheckoutData = {};
+		setPreloadedCheckoutData( {} );
 		( isEditor as jest.Mock ).mockReturnValue( false );
 	} );
 
@@ -97,7 +102,7 @@ describe( 'getCheckoutData resolver', () => {
 	} );
 
 	it( 'skips the request when checkout data was preloaded without a draft order', async () => {
-		mockPreloadedCheckoutData = { order_id: 0, customer_id: 0 };
+		setPreloadedCheckoutData( { order_id: 0, customer_id: 0 } );
 		const dispatch = makeDispatch();
 
 		await getCheckoutData()( {
