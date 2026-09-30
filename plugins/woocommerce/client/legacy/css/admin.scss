@@ -2281,8 +2281,20 @@ ul.wc_coupon_list_block {
 	}
 }
 
+// The order screens are registered as embedded WooCommerce Admin pages, so they
+// get even 20px gutters from `.woocommerce-admin-page` / `.woocommerce-embed-page`.
+// This screen isn't embedded, so it falls back to WordPress' lopsided `.wrap`
+// margins. Drop the 2px start margin so both gutters come from `#wpcontent`.
+body.woocommerce_page_wc-customer-stock-notifications {
+
+	.wrap {
+		margin-inline-start: 0;
+	}
+}
+
 body.post-type-shop_order,
-body.woocommerce_page_wc-orders {
+body.woocommerce_page_wc-orders,
+body.woocommerce_page_wc-customer-stock-notifications {
 
 	.order_actions {
 		display: flex;
@@ -2305,17 +2317,20 @@ body.woocommerce_page_wc-orders {
 				padding: 16px 12px;
 			}
 
-			// Save row: keep the legacy trash link in its usual position while
-			// clearing old button margins that overflow under WP 7.0 sizing.
+			// Save row: pin the submit button to the end so it stays there when the
+			// trash link is absent (the create screen) or hidden (no delete
+			// permission), and let the trash link push itself to the start. Old
+			// button margins that overflow under WP 7.0 sizing are cleared.
 			&.wide:has(.save_order) {
 				display: flex;
 				align-items: center;
-				justify-content: space-between;
+				justify-content: flex-end;
 				gap: 8px;
 
 				#delete-action {
 					line-height: 40px;
 					text-align: left;
+					margin-inline-end: auto;
 					float: none;
 
 					&:not(:has(*)) {
@@ -2325,7 +2340,6 @@ body.woocommerce_page_wc-orders {
 
 				.save_order {
 					flex-shrink: 0;
-					margin: 0 0 0 auto;
 					float: none;
 				}
 			}
@@ -2343,6 +2357,10 @@ body.woocommerce_page_wc-orders {
 					flex: 1;
 					min-width: 0; // prevent flex blow-out on long option labels.
 					width: auto;
+					// WordPress caps selects at 400px on small screens. The order
+					// screens escape that through `.meta-box-sortables select`,
+					// which screens without sortable meta boxes never match.
+					max-width: 100%;
 					box-sizing: border-box;
 					float: none;
 				}
@@ -9182,7 +9200,8 @@ table.bar_chart {
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
-	&.woocommerce_page_wc-orders {
+	&.woocommerce_page_wc-orders,
+	&.woocommerce_page_wc-customer-stock-notifications {
 
 		.postbox,
 		#postdivrich {
