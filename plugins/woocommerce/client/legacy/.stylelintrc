@@ -30,7 +30,7 @@
 		# change and belongs in its own PR.
 		"declaration-property-unit-allowed-list": null,
 
-		# 59 hits, all comments; the preset only checks those and already
+		# 57 hits, all comments; the preset only checks those and already
 		# ignores URLs. Off because nothing else here enforces a column limit:
 		# client/blocks does not load the stylistic rules at all, client/admin
 		# and packages/js/email-editor both switch it off, .markdownlint.json
