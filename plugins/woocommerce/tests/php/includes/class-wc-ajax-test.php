@@ -3049,6 +3049,19 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Percentage order fees are rounded to the store's price decimals.
+	 */
+	public function test_add_order_fee_percentage_is_rounded_to_price_decimals(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '12.345%' );
+
+		// 12.345% of the net 100 is 12.345, which rounds half up to 12.35. Before
+		// rounding was applied the full 12.345 reached the fee line.
+		$this->assertEquals( 12.35, (float) $fee->get_total(), 'Percentage fee should be rounded to the price decimals.' );
+	}
+
+	/**
 	 * @testdox Fixed-amount order fees added via AJAX are stored as posted and taxed.
 	 */
 	public function test_add_order_fee_fixed_amount_is_stored_as_posted(): void {
