@@ -183,7 +183,7 @@ class WC_Admin_Notices {
 								/* translators: 1: The PHP version the server is currently running. 2: URL of the announcement post. */
 								__( 'WooCommerce 11.6, planned for release in <b>February 2027</b>, will require PHP 8.1 or newer to work. Your server is currently running PHP %1$s, so this change will impact your store. Please contact your hosting provider to upgrade to PHP 8.1 or newer (at least PHP 8.3 is recommended). <b><a href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ),
 								phpversion(),
-								esc_url( 'https://developer.woocommerce.com/2026/09/08/from-php-7-4-to-8-1/' )
+								esc_url( 'https://developer.woocommerce.com/2026/09/29/php-8-1-requirement/' )
 							)
 						)
 					)
