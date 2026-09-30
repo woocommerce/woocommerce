@@ -5,10 +5,13 @@
  * @package WooCommerce\Tests\Admin\Reports
  */
 
+if ( ! class_exists( 'WC_Report_Taxes_By_Date', false ) ) {
+	require_once dirname( __DIR__, 5 ) . '/includes/admin/reports/class-wc-admin-report.php';
+	require_once dirname( __DIR__, 5 ) . '/includes/admin/reports/class-wc-report-taxes-by-date.php';
+}
+
 /**
  * Test subclass to inject report data.
- *
- * Must be included only after class-wc-report-taxes-by-date.php has been loaded.
  */
 class WC_Report_Taxes_By_Date_Mock extends WC_Report_Taxes_By_Date {
 	/**
