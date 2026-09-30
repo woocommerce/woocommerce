@@ -47,8 +47,8 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 				'width' => '3px',
 			),
 			'typography' => array(
-				'letterSpacing' => '2px',
-				'fontWeight'    => '600',
+				'textTransform'  => 'uppercase',
+				'textDecoration' => 'underline',
 			),
 			'dimensions' => array( 'aspectRatio' => '16/9' ),
 			'shadow'     => '2px 3px 4px #000000',
@@ -62,7 +62,7 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $tags->next_tag() );
 		$this->assertSame( 'featured-anchor', $tags->get_attribute( 'id' ) );
 		$this->assertFalse( $tags->has_class( 'is-layout-flex' ) );
-		foreach ( array( 'color:#123456', 'border-style:dashed', 'letter-spacing:2px', 'font-weight:600', 'aspect-ratio:16/9', 'min-height:unset', 'box-shadow:2px 3px 4px #000000', 'margin-top:20px' ) as $style ) {
+		foreach ( array( 'color:#123456', 'border-style:dashed', 'text-transform:uppercase', 'text-decoration:underline', 'aspect-ratio:16/9', 'min-height:unset', 'box-shadow:2px 3px 4px #000000', 'margin-top:20px' ) as $style ) {
 			$this->assertStringContainsString( $style, $tags->get_attribute( 'style' ) );
 		}
 		$this->assertStringNotContainsString( 'gap:', $tags->get_attribute( 'style' ) );
@@ -93,8 +93,6 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 				'textColor'       => 'vivid-red',
 				'backgroundColor' => 'black',
 				'gradient'        => 'vivid-cyan-blue-to-vivid-purple',
-				'fontSize'        => 'large',
-				'fontFamily'      => 'system-font',
 				'borderColor'     => 'white',
 				'align'           => 'wide',
 				'className'       => 'custom-featured',
@@ -105,7 +103,7 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 		}
 		$tags = new WP_HTML_Tag_Processor( $this->render_item( $kind, $attributes ) );
 		$this->assertTrue( $tags->next_tag() );
-		foreach ( array( 'has-vivid-red-color', 'has-black-background-color', 'has-vivid-cyan-blue-to-vivid-purple-gradient-background', 'has-large-font-size', 'has-system-font-font-family', 'has-white-border-color', 'alignwide', 'custom-featured' ) as $class ) {
+		foreach ( array( 'has-vivid-red-color', 'has-black-background-color', 'has-vivid-cyan-blue-to-vivid-purple-gradient-background', 'has-white-border-color', 'alignwide', 'custom-featured' ) as $class ) {
 			$this->assertTrue( $tags->has_class( $class ), $class . ' should be rendered by Core block supports.' );
 		}
 	}
