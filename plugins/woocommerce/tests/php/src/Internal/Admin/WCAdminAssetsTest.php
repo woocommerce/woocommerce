@@ -99,47 +99,41 @@ class WCAdminAssetsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Design tokens use the bundled stylesheet when the wp-theme style is not registered.
+	 * @testdox Design tokens handle is the bundled stylesheet when the wp-theme style is not registered.
 	 */
-	public function test_enqueue_design_tokens_uses_bundled_style_without_wp_theme(): void {
+	public function test_get_design_tokens_handle_uses_bundled_style_without_wp_theme(): void {
 		wp_deregister_style( 'wp-theme' );
 		wp_register_style( 'wc-design-tokens', 'https://example.com/tokens.css', array(), '1.0' );
 
-		$handle = $this->invoke_enqueue_design_tokens();
+		$handle = $this->invoke_get_design_tokens_handle();
 
 		$this->assertSame( 'wc-design-tokens', $handle );
-		$this->assertTrue( wp_style_is( 'wc-design-tokens', 'enqueued' ) );
-		$this->assertFalse( wp_style_is( 'wp-theme', 'enqueued' ) );
 
-		wp_dequeue_style( 'wc-design-tokens' );
 		wp_deregister_style( 'wc-design-tokens' );
 	}
 
 	/**
-	 * @testdox Design tokens use the wp-theme style when it is registered.
+	 * @testdox Design tokens handle is the wp-theme style when it is registered.
 	 */
-	public function test_enqueue_design_tokens_uses_wp_theme_when_registered(): void {
+	public function test_get_design_tokens_handle_uses_wp_theme_when_registered(): void {
 		wp_register_style( 'wp-theme', 'https://example.com/wp-theme.css', array(), '1.0' );
 		wp_register_style( 'wc-design-tokens', 'https://example.com/tokens.css', array(), '1.0' );
 
-		$handle = $this->invoke_enqueue_design_tokens();
+		$handle = $this->invoke_get_design_tokens_handle();
 
 		$this->assertSame( 'wp-theme', $handle );
-		$this->assertTrue( wp_style_is( 'wp-theme', 'enqueued' ) );
-		$this->assertFalse( wp_style_is( 'wc-design-tokens', 'enqueued' ) );
 
-		wp_dequeue_style( 'wp-theme' );
 		wp_deregister_style( 'wp-theme' );
 		wp_deregister_style( 'wc-design-tokens' );
 	}
 
 	/**
-	 * Invokes the private enqueue_design_tokens() method.
+	 * Invokes the private get_design_tokens_handle() method.
 	 *
 	 * @return string
 	 */
-	private function invoke_enqueue_design_tokens(): string {
-		$method = new \ReflectionMethod( WCAdminAssets::class, 'enqueue_design_tokens' );
+	private function invoke_get_design_tokens_handle(): string {
+		$method = new \ReflectionMethod( WCAdminAssets::class, 'get_design_tokens_handle' );
 		$method->setAccessible( true );
 
 		return $method->invoke( WCAdminAssets::get_instance() );
