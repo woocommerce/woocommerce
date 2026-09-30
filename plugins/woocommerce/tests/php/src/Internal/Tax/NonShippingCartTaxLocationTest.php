@@ -448,7 +448,8 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $taxable_address, 'A cart product that needs shipping should keep the local pickup location as the taxable address.' );
-		$this->assertEquals( 1.0, WC()->cart->get_total_tax(), 'Cart totals should include the local pickup location tax.' );
+		// Shipping methods left enabled by other tests can add shipping tax, so check the item tax only.
+		$this->assertEquals( 1.0, WC()->cart->get_cart_contents_tax(), 'Cart item tax should use the local pickup location rate.' );
 	}
 
 	/**
