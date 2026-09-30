@@ -90,6 +90,16 @@ describe( 'getInCartQuantity', () => {
 					},
 				],
 			} ),
+			makeCartItem( 21, 7, {
+				type: 'variation',
+				variation: [
+					{
+						attribute: 'Color',
+						value: 'Green',
+						raw_attribute: 'attribute_pa_color',
+					},
+				],
+			} ),
 			makeCartItem( 21, 100, {
 				type: 'variation',
 				parent_item_key: 'parent-a',
@@ -119,6 +129,12 @@ describe( 'getInCartQuantity', () => {
 				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
 			} )
 		).toBe( 2 );
+		expect(
+			getInCartQuantity( items, {
+				id: 21,
+				selectedAttributes: [ { attribute: 'Color', value: 'green' } ],
+			} )
+		).toBe( 7 );
 		expect(
 			getInCartQuantity( items, {
 				id: 22,
