@@ -63,7 +63,7 @@ curl --header "Nonce: 12345" --request GET "https://example-store.com/wp-json/wc
 }
 ```
 
-The `__experimentalCart` field is only present when the request is made with `__experimental_calc_totals=true`; otherwise it is omitted. It mirrors the [Cart API](cart.md) response so the client can hydrate both checkout and cart state from a single request (used by CDN-cached checkout pages).
+When the session has an existing order, the `__experimentalCart` field is only present when the request is made with `__experimental_calc_totals=true`. Without an existing order, the response always includes it, and the parameter makes sure its totals are freshly calculated. It mirrors the [Cart API](cart.md) response so the client can hydrate both checkout and cart state from a single request (used by CDN-cached checkout pages).
 
 ## Update checkout data
 

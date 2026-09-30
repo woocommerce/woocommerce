@@ -211,6 +211,9 @@ class Checkout extends AbstractCartRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$this->order = $this->get_draft_order();
 
+		// Clients opt-in to fresh totals and a cart payload via this param, mirroring the PUT flow.
+		$calc_totals = true === $request->get_param( '__experimental_calc_totals' );
+
 		if ( $this->order ) {
 			$this->create_or_update_draft_order( $request );
 
@@ -219,13 +222,17 @@ class Checkout extends AbstractCartRoute {
 				'payment_result' => new PaymentResult(),
 			];
 
-			// Clients opt-in to fresh totals and a cart payload via this param, mirroring the PUT flow.
-			if ( true === $request->get_param( '__experimental_calc_totals' ) ) {
+			if ( $calc_totals ) {
 				$this->cart_controller->calculate_totals();
 				$response['cart'] = $this->cart_controller->get_cart_instance();
 			}
 
 			return $this->prepare_item_for_response( (object) $response, $request );
+		}
+
+		// The no-order response always embeds the cart, so only its totals need refreshing.
+		if ( $calc_totals ) {
+			$this->cart_controller->calculate_totals();
 		}
 
 		return $this->build_draft_route_response( $request );

@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
 import type {
 	ApiErrorResponse,
 	CartResponse,
@@ -64,7 +65,14 @@ export const getCheckoutData =
 			return;
 		}
 
-		if ( select( STORE_KEY ).getOrderId() > 0 ) {
+		// GET /checkout doesn't create a draft order, so a server-hydrated page
+		// can still have order ID 0; the preloaded payload is the real signal.
+		const isHydrated =
+			Object.keys(
+				getSetting< Record< string, unknown > >( 'checkoutData', {} )
+			).length > 0;
+
+		if ( isHydrated || select( STORE_KEY ).getOrderId() > 0 ) {
 			return;
 		}
 

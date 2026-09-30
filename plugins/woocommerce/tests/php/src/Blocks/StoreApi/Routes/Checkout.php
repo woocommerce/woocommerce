@@ -2156,6 +2156,32 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * GET with `__experimental_calc_totals` and no draft order recalculates the embedded cart's totals.
+	 */
+	public function test_get_without_draft_order_calc_totals_recalculates_cart() {
+		$calculated = 0;
+		$counter    = function () use ( &$calculated ) {
+			++$calculated;
+		};
+		add_action( 'woocommerce_after_calculate_totals', $counter );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_param( '__experimental_calc_totals', true );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		remove_action( 'woocommerce_after_calculate_totals', $counter );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 0, $data['order_id'] );
+		$this->assertGreaterThan( 0, $calculated, 'Cart totals should be recalculated.' );
+		$this->assertArrayHasKey( '__experimentalCart', $data );
+		$this->assertCount( 2, $data['__experimentalCart']->items );
+	}
+
+	/**
 	 * GET should not fire `woocommerce_store_api_checkout_update_order_meta` (only PATCH/POST do).
 	 */
 	public function test_get_does_not_fire_update_order_meta_action() {

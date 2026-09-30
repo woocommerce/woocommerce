@@ -32,6 +32,18 @@ jest.mock( '../../cart', () => ( {
 	CART_STORE_KEY: 'wc/store/cart',
 } ) );
 
+let mockPreloadedCheckoutData: Record< string, unknown > = {};
+jest.mock( '@woocommerce/settings', () => {
+	const actual = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...actual,
+		getSetting: ( name: string, ...rest: unknown[] ) =>
+			name === 'checkoutData'
+				? mockPreloadedCheckoutData
+				: actual.getSetting( name, ...rest ),
+	};
+} );
+
 const setCartHashCookie = ( present: boolean ) => {
 	if ( present ) {
 		document.cookie = 'woocommerce_cart_hash=abc123';
@@ -53,6 +65,7 @@ describe( 'getCheckoutData resolver', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		setCartHashCookie( true );
+		mockPreloadedCheckoutData = {};
 		( isEditor as jest.Mock ).mockReturnValue( false );
 	} );
 
@@ -77,6 +90,20 @@ describe( 'getCheckoutData resolver', () => {
 			// @ts-expect-error partial dispatch for test
 			dispatch,
 			select: makeSelect( 5 ),
+		} );
+
+		expect( apiFetch ).not.toHaveBeenCalled();
+		expect( dispatch.receiveCheckoutData ).not.toHaveBeenCalled();
+	} );
+
+	it( 'skips the request when checkout data was preloaded without a draft order', async () => {
+		mockPreloadedCheckoutData = { order_id: 0, customer_id: 0 };
+		const dispatch = makeDispatch();
+
+		await getCheckoutData()( {
+			// @ts-expect-error partial dispatch for test
+			dispatch,
+			select: makeSelect( 0 ),
 		} );
 
 		expect( apiFetch ).not.toHaveBeenCalled();
