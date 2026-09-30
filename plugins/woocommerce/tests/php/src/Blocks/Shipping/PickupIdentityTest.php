@@ -24,7 +24,9 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 	private $original_checkout_page_id;
 
 	/**
-	 * Local pickup is only registered while the checkout is the block one.
+	 * Local pickup is only registered while the checkout is the block one, and it is registered on
+	 * woocommerce_load_shipping_methods, which fires once. Anything that loaded the methods earlier
+	 * in the process did so against the old page, so the methods have to be loaded again here.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -41,17 +43,28 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 				)
 			)
 		);
+
+		$this->reload_shipping_methods();
 	}
 
 	/**
-	 * Put the checkout page back.
+	 * Put the checkout page back, and the shipping methods with it.
 	 */
 	public function tearDown(): void {
 		try {
 			update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
+			$this->reload_shipping_methods();
 		} finally {
 			parent::tearDown();
 		}
+	}
+
+	/**
+	 * Rebuild the registered shipping methods against the checkout page currently set.
+	 */
+	private function reload_shipping_methods(): void {
+		WC()->shipping()->unregister_shipping_methods();
+		WC()->shipping()->load_shipping_methods();
 	}
 
 	/**
