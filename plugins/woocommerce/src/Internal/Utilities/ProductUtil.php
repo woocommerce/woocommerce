@@ -26,25 +26,19 @@ class ProductUtil {
 	/**
 	 * Get a product ID from a product, post, or numeric value.
 	 *
-	 * Passing false uses the global product post, matching the product factory.
-	 *
 	 * @since 11.3.0
-	 * @param mixed $product Product reference or false to use the global post.
-	 * @return int|float|string|false Product ID, or false when no ID is available.
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
 	 */
-	public function get_product_id( $product ) {
-		global $post;
-
-		if ( false === $product && isset( $post, $post->ID ) && 'product' === get_post_type( $post->ID ) ) {
-			return absint( $post->ID );
-		} elseif ( is_numeric( $product ) ) {
-			return $product;
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
 		} elseif ( $product instanceof \WC_Product ) {
 			return $product->get_id();
-		} elseif ( ! empty( $product->ID ) ) {
-			return $product->ID;
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
 		} else {
-			return false;
+			return 0;
 		}
 	}
 

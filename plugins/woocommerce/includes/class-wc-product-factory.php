@@ -128,10 +128,16 @@ class WC_Product_Factory {
 	 * Get the product ID from a product reference.
 	 *
 	 * @since 3.0.0
-	 * @param mixed $product Product reference or false to use the global post.
-	 * @return int|float|string|false Product ID, or false when no ID is available.
+	 * @param mixed $product Product instance, post instance, numeric or false to use global $post.
+	 * @return int Product ID, or 0 when no ID is available.
 	 */
-	private function get_product_id( $product ) {
+	private function get_product_id( $product ): int {
+		global $post;
+
+		if ( false === $product && isset( $post, $post->ID ) && 'product' === get_post_type( $post->ID ) ) {
+			$product = $post;
+		}
+
 		return wc_get_container()->get( ProductUtil::class )->get_product_id( $product );
 	}
 }

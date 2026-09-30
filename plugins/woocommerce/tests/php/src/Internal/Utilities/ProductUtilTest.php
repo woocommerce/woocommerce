@@ -25,20 +25,32 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $product->get_id(), $sut->get_product_id( $product ) );
 		$this->assertSame( $product->get_id(), $sut->get_product_id( get_post( $product->get_id() ) ) );
-		$this->assertSame( (string) $product->get_id(), $sut->get_product_id( (string) $product->get_id() ) );
+		$this->assertSame( $product->get_id(), $sut->get_product_id( (string) $product->get_id() ) );
 	}
 
 	/**
-	 * @testdox get_product_id uses the current product post when passed false.
+	 * @testdox get_product_id returns 0 for values without a product ID.
 	 */
-	public function test_get_product_id_uses_global_product_for_false(): void {
+	public function test_get_product_id_returns_zero_without_id(): void {
+		$sut = wc_get_container()->get( ProductUtil::class );
+
+		$this->assertSame( 0, $sut->get_product_id( null ) );
+		$this->assertSame( 0, $sut->get_product_id( 'abc' ) );
+		$this->assertSame( 0, $sut->get_product_id( array( 'ID' => 1 ) ) );
+		$this->assertSame( 0, $sut->get_product_id( (object) array( 'id' => 1 ) ) );
+	}
+
+	/**
+	 * @testdox get_product_id ignores the global post when passed false.
+	 */
+	public function test_get_product_id_ignores_global_post_for_false(): void {
 		$product  = \WC_Helper_Product::create_simple_product();
 		$sut      = wc_get_container()->get( ProductUtil::class );
 		$old_post = $GLOBALS['post'] ?? null;
 
 		try {
 			$GLOBALS['post'] = get_post( $product->get_id() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored in finally.
-			$this->assertSame( $product->get_id(), $sut->get_product_id( false ) );
+			$this->assertSame( 0, $sut->get_product_id( false ) );
 		} finally {
 			$GLOBALS['post'] = $old_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the prior global.
 		}

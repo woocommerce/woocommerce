@@ -93,11 +93,7 @@ class ScheduledSaleRun {
 		$this->product_util = wc_get_container()->get( ProductUtil::class );
 
 		foreach ( $entries as $entry ) {
-			if ( false === $entry ) {
-				continue;
-			}
-
-			$product_id = (int) $this->product_util->get_product_id( $entry );
+			$product_id = $this->product_util->get_product_id( $entry );
 			if ( $product_id > 0 ) {
 				$this->product_ids[ $product_id ] = $product_id;
 			}
