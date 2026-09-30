@@ -58,10 +58,11 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Create a variable product assigned to a product category.
 	 *
-	 * @return array{product: WC_Product_Variable, category_slug: string}
+	 * @param string $category_name Product category name.
+	 * @return array{product: WC_Product_Variable, category_slug: string, category_id: int}
 	 */
-	private function create_categorized_variation_product(): array {
-		$term = wp_insert_term( 'Export Test Category', 'product_cat' );
+	private function create_categorized_variation_product( string $category_name = 'Export Test Category' ): array {
+		$term = wp_insert_term( $category_name, 'product_cat' );
 		$this->assertIsArray( $term, 'Failed to create product category for export test.' );
 
 		$product = WC_Helper_Product::create_variation_product();
@@ -73,7 +74,21 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		return array(
 			'product'       => $product,
 			'category_slug' => $category->slug,
+			'category_id'   => (int) $category->term_id,
 		);
+	}
+
+	/**
+	 * Export the current page and return the product IDs, sorted.
+	 *
+	 * @param WC_Product_CSV_Exporter $exporter Exporter instance.
+	 * @return int[]
+	 */
+	private function get_sorted_exported_ids( WC_Product_CSV_Exporter $exporter ): array {
+		$exported_ids = array_map( 'intval', wp_list_pluck( $this->get_exported_data( $exporter ), 'id' ) );
+		sort( $exported_ids );
+
+		return $exported_ids;
 	}
 
 	/**
@@ -160,6 +175,98 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 				'Variations should not be auto-included when the type filter is variable only.'
 			);
 		}
+	}
+
+	/**
+	 * @testdox Exporting variable products and variations with a category filter includes both.
+	 */
+	public function test_category_export_with_variable_and_variation_types_includes_both(): void {
+		$included = $this->create_categorized_variation_product( 'Export Variable And Variation Category' );
+		$this->create_categorized_variation_product( 'Export Other Variable Category' );
+
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_product_types_to_export( array( ProductType::VARIABLE, ProductType::VARIATION ) );
+		$exporter->set_product_category_to_export( array( $included['category_slug'] ) );
+		$exporter->prepare_data_to_export();
+
+		$expected_ids = array_merge(
+			array( $included['product']->get_id() ),
+			array_map( 'intval', $included['product']->get_children( 'edit' ) )
+		);
+		sort( $expected_ids );
+
+		$this->assertSame(
+			$expected_ids,
+			$this->get_sorted_exported_ids( $exporter ),
+			'Selecting variable products and variations should export categorized parents and their variations.'
+		);
+	}
+
+	/**
+	 * @testdox Exporting simple products and variations with a category filter skips the variable parent.
+	 */
+	public function test_category_export_with_simple_and_variation_types_skips_variable_parent(): void {
+		$included = $this->create_categorized_variation_product( 'Export Simple And Variation Category' );
+		$this->create_categorized_variation_product( 'Export Unrelated Simple Category' );
+
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$simple_product->set_category_ids( array( $included['category_id'] ) );
+		$simple_product->save();
+
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_product_types_to_export( array( ProductType::SIMPLE, ProductType::VARIATION ) );
+		$exporter->set_product_category_to_export( array( $included['category_slug'] ) );
+		$exporter->prepare_data_to_export();
+
+		$expected_ids = array_merge(
+			array( $simple_product->get_id() ),
+			array_map( 'intval', $included['product']->get_children( 'edit' ) )
+		);
+		sort( $expected_ids );
+
+		$this->assertSame(
+			$expected_ids,
+			$this->get_sorted_exported_ids( $exporter ),
+			'Simple products in the category and variations of parents in the category should be exported, without the variable parent.'
+		);
+	}
+
+	/**
+	 * @testdox Variations matched by category are exported once, with the first page.
+	 */
+	public function test_category_export_does_not_repeat_variations_on_later_pages(): void {
+		$fixture = $this->create_categorized_variation_product( 'Export Paged Category' );
+
+		$first_simple = WC_Helper_Product::create_simple_product();
+		$first_simple->set_category_ids( array( $fixture['category_id'] ) );
+		$first_simple->save();
+
+		$second_simple = WC_Helper_Product::create_simple_product();
+		$second_simple->set_category_ids( array( $fixture['category_id'] ) );
+		$second_simple->save();
+
+		$variation_ids = array_map( 'intval', $fixture['product']->get_children( 'edit' ) );
+		$simple_ids    = array( $first_simple->get_id(), $second_simple->get_id() );
+		sort( $simple_ids );
+
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_limit( 1 );
+		$exporter->set_product_types_to_export( array( ProductType::SIMPLE, ProductType::VARIATION ) );
+		$exporter->set_product_category_to_export( array( $fixture['category_slug'] ) );
+
+		$exporter->set_page( 1 );
+		$exporter->prepare_data_to_export();
+		$page_one_ids = $this->get_sorted_exported_ids( $exporter );
+
+		$exporter->set_page( 2 );
+		$exporter->prepare_data_to_export();
+		$page_two_ids = $this->get_sorted_exported_ids( $exporter );
+
+		$expected_page_one = array_merge( array( $simple_ids[0] ), $variation_ids );
+		sort( $expected_page_one );
+
+		$this->assertSame( $expected_page_one, $page_one_ids, 'The first page should include the first simple product and every matching variation.' );
+		$this->assertSame( array( $simple_ids[1] ), $page_two_ids, 'A later page should not export the variations again.' );
 	}
 
 	/**
