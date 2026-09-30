@@ -216,9 +216,9 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Slug filters are safely prepared when NO_BACKSLASH_ESCAPES is enabled.
+	 * @testdox Slug filters containing double quotes are safely prepared when NO_BACKSLASH_ESCAPES is enabled.
 	 */
-	public function test_slug_filter_is_prepared_with_no_backslash_escapes(): void {
+	public function test_slug_filter_with_double_quote_is_prepared_with_no_backslash_escapes(): void {
 		global $wpdb;
 
 		$fixtures = new FixtureData();
@@ -233,12 +233,14 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 		try {
 			$wpdb->query( "SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'" );
 			$this->assertSame( 'NO_BACKSLASH_ESCAPES', $wpdb->get_var( 'SELECT @@SESSION.sql_mode' ), 'The test requires NO_BACKSLASH_ESCAPES.' );
-			$matching_ids = $this->get_product_ids_for_slug_filter( $product->get_slug() . '") AND ("1"="1' );
+			$matching_ids = $this->get_product_ids_for_slug_filter( $product->get_slug() . '"' );
+			$last_error   = $wpdb->last_error;
 		} finally {
 			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $sql_mode ) );
 		}
 
-		$this->assertNotContains( $product->get_id(), $matching_ids, 'The slug value must not alter the query predicate.' );
+		$this->assertSame( '', $last_error, 'The slug filter query should remain valid SQL.' );
+		$this->assertNotContains( $product->get_id(), $matching_ids, 'The slug value must be matched literally.' );
 	}
 
 	/**
