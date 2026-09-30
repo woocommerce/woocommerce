@@ -131,11 +131,21 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	 * @return WC_Shipping_Rate
 	 */
 	private function rate_for( array $package ): WC_Shipping_Rate {
-		$this->sut->calculate_shipping( $package );
-
-		$this->assertCount( 1, $this->sut->rates, 'The method should offer the shopper a rate.' );
+		$this->assertCount( 1, $this->rates_for( $package ), 'The method should offer the shopper a rate.' );
 
 		return current( $this->sut->rates );
+	}
+
+	/**
+	 * The rates the method offers for a package, however many that is.
+	 *
+	 * @param array $package Package to calculate against.
+	 * @return array
+	 */
+	private function rates_for( array $package ): array {
+		$this->sut->calculate_shipping( $package );
+
+		return $this->sut->rates;
 	}
 
 	/**
@@ -257,16 +267,10 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Class costs were keyed by slug before 2.5.0 and zone instances only arrived in 2.6.0, so
-	 * that older data lives in the method's store-wide settings. A zone instance that has never
-	 * saved its own value for the class must still charge it, or a store upgrading from that era
-	 * silently stops charging.
-	 *
-	 * Two mechanisms deliver this today, either of which suffices: the class cost field seeds its
-	 * default from the slug-keyed value, and the lookup in calculate_shipping() falls back to the
-	 * slug key. This pins the outcome the merchant sees rather than either mechanism, so it fails
-	 * only when both are gone. That is deliberate: which of the two survives is not a promise
-	 * made to anyone.
+	 * Class costs moved from slug keys to term id keys in 2.5.0, and both paths still read the
+	 * slug key so the old values keep working: the field seeds its default from it and
+	 * calculate_shipping() passes it as the fallback. Pinning the charged amount rather than
+	 * either path means this fails only when both are gone.
 	 *
 	 * @testdox A class cost saved under the pre-2.5.0 slug key is still charged.
 	 */
@@ -392,6 +396,28 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 		$rate = $this->rate_for( $package );
 
 		$this->assertEquals( 0, $rate->get_cost(), 'A cost of zero should be a free rate, not no rate.' );
+	}
+
+	/**
+	 * calculate_shipping() only adds a rate once something sets a cost, so a method with nothing
+	 * filled in anywhere offers none at all rather than a free one.
+	 *
+	 * @testdox With no cost and no shipping classes in the store, the method offers no rate at all.
+	 */
+	public function test_a_method_with_nothing_filled_in_offers_no_rate(): void {
+		$this->method_with( array( 'cost' => '' ) );
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			10.0
+		);
+
+		$this->assertSame( array(), $this->rates_for( $package ), 'A blank cost is not a free rate.' );
 	}
 
 	/**
