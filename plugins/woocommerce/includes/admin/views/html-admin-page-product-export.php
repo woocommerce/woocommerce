@@ -25,8 +25,6 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 }
 ?>
 <div class="wrap woocommerce">
-	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
-
 	<?php
 	if ( $is_exporting_product_ids ) {
 		$clear_url = remove_query_arg( 'product_ids' );
