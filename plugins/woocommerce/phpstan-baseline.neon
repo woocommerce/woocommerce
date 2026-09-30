@@ -10273,18 +10273,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Class WP_Error referenced with incorrect case\: WP_ERROR\.$#'
 			identifier: class.nameCase
 			count: 1
