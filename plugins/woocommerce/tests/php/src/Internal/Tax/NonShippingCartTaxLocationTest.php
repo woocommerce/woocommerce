@@ -104,6 +104,26 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the taxable address unchanged when the filter is applied without a customer.
+	 *
+	 * Third-party code can apply woocommerce_customer_taxable_address with only the address argument.
+	 */
+	public function test_leaves_address_unchanged_when_filter_is_applied_without_customer(): void {
+		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
+		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+
+		// The instance hooked at boot differs from the SUT in tests, so keep only the SUT hooked.
+		remove_all_filters( 'woocommerce_customer_taxable_address' );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulates a third-party call without the customer argument.
+		$result = apply_filters( 'woocommerce_customer_taxable_address', $taxable_address );
+
+		$this->assertSame( $taxable_address, $result, 'The taxable address should remain unchanged when no customer is passed.' );
+	}
+
+	/**
 	 * @testdox Leaves the taxable address unchanged when the cart is empty.
 	 */
 	public function test_leaves_address_unchanged_for_empty_cart(): void {

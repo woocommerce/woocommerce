@@ -50,7 +50,11 @@ class NonShippingCartTaxLocation {
 	 * @param mixed $customer        The customer whose taxable address is being determined.
 	 * @return mixed The taxable address.
 	 */
-	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer ) {
+	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer=null ) {
+		if ( null === $customer ) {
+			return $taxable_address;
+		}
+
 		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
 			return $taxable_address;
 		}
