@@ -465,9 +465,8 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Each class cost field carries the same placeholder description as the method cost, so the
-	 * placeholders have to mean "this class" there. A shopper buying three of one class and one
-	 * of another must not be charged for four of each.
+	 * find_shipping_classes() groups the package by class and each class cost is evaluated against
+	 * its own group, so the placeholders there count that class rather than the whole package.
 	 *
 	 * @testdox A placeholder in a class cost counts only the items in that class.
 	 *
