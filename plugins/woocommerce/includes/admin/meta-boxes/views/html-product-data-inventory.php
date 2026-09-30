@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		woocommerce_wp_text_input(
 			array(
-				'id'          => '_wc_mpn',
+				'id'          => '_mpn',
 				'value'       => $product_object->get_mpn( 'edit' ), // @phpstan-ignore variable.undefined (The including meta box supplies $product_object.)
 				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
 				'desc_tip'    => true,
