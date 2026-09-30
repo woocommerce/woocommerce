@@ -122,6 +122,8 @@ const cartReferenceStorePart = {
 							? pendingPageUrl ?? window.location.href
 							: window.location.href;
 					const url = new URL( pageUrl );
+					// Fetching markup must not repeat a classic add-to-cart action.
+					url.searchParams.delete( 'add-to-cart' );
 					url.searchParams.set(
 						'wc-cache-bust',
 						Math.random().toString( 36 ).slice( 2 )

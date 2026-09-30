@@ -89,6 +89,23 @@ describe( 'cart reference refresh', () => {
 		expect( mockNavigate ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'does not replay a classic add-to-cart action when fetching markup', async () => {
+		window.history.replaceState(
+			{},
+			'',
+			'/shop/?add-to-cart=1&orderby=price'
+		);
+		await refresh();
+		mockCart.items = [ { id: 1, quantity: 1 } ];
+		mockMiniCart.isOpen = true;
+		await refresh();
+		const requestUrl = new URL( mockPrefetch.mock.calls[ 0 ][ 0 ] );
+		expect( requestUrl.searchParams.has( 'add-to-cart' ) ).toBe( false );
+		expect( requestUrl.searchParams.get( 'orderby' ) ).toBe( 'price' );
+		expect( mockNavigate.mock.calls[ 0 ][ 0 ] ).toBe( requestUrl.href );
+		expect( window.location.search ).toBe( '?add-to-cart=1&orderby=price' );
+	} );
+
 	it( 'does not refresh for a reordered cart', async () => {
 		mockCart.items = [
 			{ id: 1, quantity: 1 },

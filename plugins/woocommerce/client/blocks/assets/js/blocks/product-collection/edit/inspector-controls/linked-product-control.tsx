@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { FC, Dispatch, SetStateAction } from 'react';
 import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
@@ -35,7 +36,7 @@ const REFERENCE_TYPE_PRODUCT = 'product';
 const REFERENCE_TYPE_CART = 'cart';
 const REFERENCE_TYPE_ORDER = 'order';
 
-const ProductButton: React.FC< {
+const ProductButton: FC< {
 	isOpen: boolean;
 	onToggle: () => void;
 	product: ProductResponseItem | null;
@@ -98,10 +99,10 @@ const ProductButton: React.FC< {
 	);
 };
 
-const LinkedProductPopoverContent: React.FC< {
+const LinkedProductPopoverContent: FC< {
 	query: ProductCollectionQuery;
 	setAttributes: ProductCollectionSetAttributes;
-	setIsDropdownOpen: React.Dispatch< React.SetStateAction< boolean > >;
+	setIsDropdownOpen: Dispatch< SetStateAction< boolean > >;
 } > = ( { query, setAttributes, setIsDropdownOpen } ) => (
 	<ProductControl
 		selected={ query?.productReference as SelectedOption }

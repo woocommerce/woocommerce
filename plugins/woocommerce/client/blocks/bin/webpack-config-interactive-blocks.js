@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Webpack loads this configuration as CommonJS. */
 /**
  * External dependencies
  */
