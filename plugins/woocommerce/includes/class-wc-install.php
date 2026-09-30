@@ -362,9 +362,7 @@ class WC_Install {
 		),
 		'11.3.0'   => array(
 			'wc_update_1130_repair_hpos_order_dates_from_posts',
-		),
-		'11.3.0-1' => array(
-			'wc_update_11301_add_mpn_to_product_lookup_table',
+			'wc_update_1130_add_mpn_to_product_lookup_table',
 		),
 	);
 

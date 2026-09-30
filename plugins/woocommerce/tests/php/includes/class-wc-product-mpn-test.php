@@ -68,7 +68,7 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 		$sut->save();
 		$empty = $this->create_product( ProductType::SIMPLE );
 
-		foreach ( array( null, 'wc_update_product_lookup_tables_column', 'wc_update_11301_add_mpn_to_product_lookup_table', 'wc_update_11301_add_mpn_to_product_lookup_table' ) as $callback ) {
+		foreach ( array( null, 'wc_update_product_lookup_tables_column', 'wc_update_1130_add_mpn_to_product_lookup_table', 'wc_update_1130_add_mpn_to_product_lookup_table' ) as $callback ) {
 			if ( $callback ) {
 				call_user_func( $callback, 'mpn' );
 			}
@@ -90,7 +90,7 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '', $this->get_lookup_mpn( $sut->get_id() ) );
 
 		update_option( 'woocommerce_schema_version', '1130' );
-		wc_update_11301_add_mpn_to_product_lookup_table();
+		wc_update_1130_add_mpn_to_product_lookup_table();
 		$this->assertSame( 'PRE-UPGRADE', $this->get_lookup_mpn( $sut->get_id() ) );
 	}
 
@@ -104,18 +104,26 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 	 * @param string $type Product type.
 	 */
 	public function test_mpn_rest_round_trip( string $version, string $type ): void {
-		$sut    = $this->create_product( $type );
-		$route  = ProductType::VARIATION === $type ? "/wc/$version/products/{$sut->get_parent_id()}/variations/{$sut->get_id()}" : "/wc/$version/products/{$sut->get_id()}";
 		$server = $this->create_product_rest_server();
-		foreach ( array( 'PART-123', '0', null, '' ) as $mpn ) {
+		$cases  = array(
+			'update'  => array( array( 'mpn' => 'PART-123' ), 'PART-123' ),
+			'zero'    => array( array( 'mpn' => '0' ), '0' ),
+			'omitted' => array( array(), 'ORIGINAL' ),
+			'clear'   => array( array( 'mpn' => '' ), '' ),
+		);
+
+		foreach ( $cases as $case => list( $params, $expected_mpn ) ) {
+			$sut = $this->create_product( $type );
+			$sut->set_mpn( 'ORIGINAL' );
+			$sut->save();
+
+			$route   = ProductType::VARIATION === $type ? "/wc/$version/products/{$sut->get_parent_id()}/variations/{$sut->get_id()}" : "/wc/$version/products/{$sut->get_id()}";
 			$request = new WP_REST_Request( 'PUT', $route );
-			if ( null !== $mpn ) {
-				$request->set_param( 'mpn', $mpn );
-			}
-			$this->assertSame( 200, $server->dispatch( $request )->get_status() );
+			$request->set_body_params( $params );
+			$this->assertSame( 200, $server->dispatch( $request )->get_status(), $case );
 			$response = $server->dispatch( new WP_REST_Request( 'GET', $route ) );
-			$this->assertSame( $mpn ?? '0', $response->get_data()['mpn'], 'A subsequent REST read must return the persisted MPN.' );
-			$this->assertSame( $mpn ?? '0', wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+			$this->assertSame( $expected_mpn, $response->get_data()['mpn'], $case );
+			$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ), $case );
 		}
 	}
 

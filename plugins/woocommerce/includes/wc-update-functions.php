@@ -4177,7 +4177,7 @@ function wc_update_1130_repair_hpos_order_dates_from_posts() {
  *
  * @since 11.3.0
  */
-function wc_update_11301_add_mpn_to_product_lookup_table(): void {
+function wc_update_1130_add_mpn_to_product_lookup_table(): void {
 	global $wpdb;
 
 	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
