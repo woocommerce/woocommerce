@@ -482,16 +482,6 @@ $payments-header-row-height: 38px;
 		}
 	}
 
-	.more-payment-options-link {
-		padding: 0;
-		text-decoration: none;
-
-		img {
-			height: $grid-unit-20;
-			margin-right: $grid-unit-05;
-		}
-	}
-
 	.more-payment-options {
 		padding: 25px 54px;
 	}
@@ -591,7 +581,10 @@ $payments-header-row-height: 38px;
 		box-shadow: none;
 		border-radius: 3px;
 
-		a {
+		// External links style themselves via the `components-external-link`
+		// component (underlined text, un-underlined trailing icon), so exclude
+		// them here to avoid underlining the icon.
+		a:not(.components-external-link) {
 			outline: none;
 			text-decoration: underline;
 		}
