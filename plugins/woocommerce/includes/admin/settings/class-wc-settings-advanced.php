@@ -167,7 +167,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'class'    => 'wc-page-search',
 					'css'      => 'min-width:300px;',
 					'type'     => 'single_select_page_with_search',
-					'args'     => array( 'exclude' => array() ),
+					'args'     => array(
+						'exclude' => array_values(
+							array_filter(
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'checkout' ),
+									wc_get_page_id( 'shop' ),
+									wc_get_page_id( 'myaccount' ),
+								),
+								static fn ( $page_id ) => $page_id > 0
+							)
+						),
+					),
 					'desc_tip' => true,
 					'autoload' => false,
 				),

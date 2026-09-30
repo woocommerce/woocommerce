@@ -123,6 +123,25 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The return-policy page search excludes assigned commerce pages.
+	 */
+	public function test_refund_policy_page_excludes_commerce_pages(): void {
+		$page_ids = $this->factory->post->create_many( 4, array( 'post_type' => 'page' ) );
+		foreach ( array( 'cart', 'checkout', 'shop', 'myaccount' ) as $index => $role ) {
+			update_option( 'woocommerce_' . $role . '_page_id', $page_ids[ $index ] );
+		}
+
+		$settings = ( new WC_Settings_Advanced() )->get_settings_for_section( '' );
+		$by_id    = array_column( $settings, null, 'id' );
+		$this->assertSame( $page_ids, $by_id['woocommerce_refund_returns_page_id']['args']['exclude'] );
+
+		update_option( 'woocommerce_cart_page_id', '' );
+		$settings = ( new WC_Settings_Advanced() )->get_settings_for_section( '' );
+		$by_id    = array_column( $settings, null, 'id' );
+		$this->assertSame( array_slice( $page_ids, 1 ), $by_id['woocommerce_refund_returns_page_id']['args']['exclude'], 'Unset pages must not exclude unrelated page IDs.' );
+	}
+
+	/**
 	 * @testdox Saving Page setup reassigns or clears the selected refund and returns policy page.
 	 */
 	public function test_save_reassigns_refund_returns_page(): void {
