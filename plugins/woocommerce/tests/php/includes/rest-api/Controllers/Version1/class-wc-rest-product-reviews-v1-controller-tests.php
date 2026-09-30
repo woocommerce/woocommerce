@@ -675,6 +675,18 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a review populates the verified-owner meta at creation time.
+	 */
+	public function test_create_item_populates_verified_meta(): void {
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$response = $this->create_review( $product_id, 'Great product, would buy again.', 5 );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '0', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta is populated at creation time.' );
+	}
+
+	/**
 	 * Creates a product review through the controller.
 	 *
 	 * @param int      $product_id ID of the product being reviewed.

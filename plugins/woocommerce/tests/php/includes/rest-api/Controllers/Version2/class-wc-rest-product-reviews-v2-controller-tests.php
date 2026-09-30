@@ -87,6 +87,29 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 	}
 
 	/**
+	 * @testdox Creating a review populates the verified-owner meta at creation time.
+	 */
+	public function test_create_item_populates_verified_meta(): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product_id . '/reviews' );
+		$request->set_body_params(
+			array(
+				'review' => 'Great product, would buy again.',
+				'name'   => 'Jane Smith',
+				'email'  => 'jane.smith@example.org',
+				'rating' => 5,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '0', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta is populated at creation time.' );
+	}
+
+	/**
 	 * @testdox Creating a review as a shop manager strips markup that user role cannot post.
 	 */
 	public function test_create_item_strips_disallowed_markup_for_shop_manager() {
