@@ -735,4 +735,51 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Malformed date args return no products instead of a fatal error.
+	 *
+	 * @dataProvider malformed_date_arg_provider
+	 * @param string $date_key   The date query var.
+	 * @param mixed  $date_value The malformed value.
+	 */
+	public function test_malformed_date_arg_returns_no_products( string $date_key, $date_value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->set_date_on_sale_from( '2000-01-01T10:00:00' );
+		$product->save();
+
+		$this->assertSame(
+			array( $product->get_id() ),
+			wc_get_products(
+				array(
+					$date_key => '2000-01-01',
+					'return'  => 'ids',
+				)
+			),
+			'A valid date should match the product'
+		);
+
+		$queried_products = wc_get_products(
+			array(
+				$date_key => $date_value,
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_products, 'A malformed date should not match any product' );
+	}
+
+	/**
+	 * Data provider for test_malformed_date_arg_returns_no_products.
+	 *
+	 * @return array
+	 */
+	public function malformed_date_arg_provider(): array {
+		return array(
+			'post column, array'  => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, object' => array( 'date_created', new stdClass() ),
+			'sale date, array'    => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+		);
+	}
 }
