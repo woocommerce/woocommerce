@@ -1739,6 +1739,28 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A Stringable customer email still matches the order, as it did before the malformed customer guard.
+	 */
+	public function test_stringable_customer_email_matches_order(): void {
+		$order = WC_Helper_Order::create_order( 1 );
+		$order->set_billing_email( 'stringable@example.com' );
+		$order->save();
+
+		// A named class, because WP_Query serializes its query vars and anonymous classes cannot be serialized.
+		$email = new WC_Order_Data_Store_CPT_Test_Stringable( 'stringable@example.com' );
+
+		$this->assertSame(
+			array( $order->get_id() ),
+			wc_get_orders(
+				array(
+					'customer' => $email,
+					'return'   => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
 	 * Data provider for test_malformed_query_arg_returns_no_orders.
 	 *
 	 * @return array
@@ -1750,5 +1772,34 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'customer, object'          => array( 'customer', new stdClass() ),
 			'customer, object in array' => array( 'customer', array( 1, new stdClass() ) ),
 		);
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
+/**
+ * A Stringable value for customer query tests.
+ */
+class WC_Order_Data_Store_CPT_Test_Stringable {
+	/**
+	 * The string value.
+	 *
+	 * @var string
+	 */
+	private $value;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $value The string value.
+	 */
+	public function __construct( string $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->value;
 	}
 }
