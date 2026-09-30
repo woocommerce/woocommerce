@@ -60,18 +60,6 @@ run() {
 
 field() { printf '%s' "$1" | cut -f"$2"; }
 
-# Install as CI does for a unit:php job.
-if [[ $list -eq 0 ]]; then
-	run composer install --working-dir="$project_dir" --quiet &
-	composer_pid=$!
-	pnpm_status=0
-	run pnpm install --filter="$project" --frozen-lockfile --ignore-scripts || pnpm_status=$?
-	composer_status=0
-	wait "$composer_pid" || composer_status=$?
-	[[ $pnpm_status -eq 0 && $composer_status -eq 0 ]] || exit 1
-	run pnpm --filter=@woocommerce/admin-library build:project:feature-config
-fi
-
 # Cells, one per line: index, name, command, start, port, slug, env (k=v;k=v).
 run pnpm utils ci-jobs --event pull_request --json >/dev/null
 mv jobs.json "$tmp/jobs.json"
@@ -109,7 +97,7 @@ if [[ ${#cell_rows[@]} -eq 0 ]]; then
 fi
 
 if [[ $list -eq 1 ]]; then
-	printf '%s\n' "${cell_rows[@]}" | awk -F'\t' '{ printf "%2d  %-60s  port %s  %s\n", $1, $2, $5, $7 }'
+	printf '%s\n' "${cell_rows[@]}" | awk -F'\t' '{ printf "%2d  %-88s  port %s  %s\n", $1, $2, $5, $7 }'
 	exit 0
 fi
 
@@ -137,14 +125,24 @@ else
 	done
 fi
 
+# Install as CI does for a unit:php job.
+run composer install --working-dir="$project_dir" --quiet &
+composer_pid=$!
+pnpm_status=0
+run pnpm install --filter="$project" --frozen-lockfile --ignore-scripts || pnpm_status=$?
+composer_status=0
+wait "$composer_pid" || composer_status=$?
+[[ $pnpm_status -eq 0 && $composer_status -eq 0 ]] || exit 1
+run pnpm --filter=@woocommerce/admin-library build:project:feature-config
+
 # A fresh CI database has no leftover scheduled actions; phpunit never drops these tables.
 truncate_action_scheduler() {
-	local config="$1" table
-	WC_TEST_ENV_CONFIG="$config" pnpm --filter="$project" --silent wp-env:test run cli wp db tables 'wp_actionscheduler_*' --all-tables-with-prefix --format=csv 2>/dev/null \
-		| tr -d '\r' | tr ',' '\n' | grep -E '^wp_actionscheduler_' \
-		| while IFS= read -r table; do
-			WC_TEST_ENV_CONFIG="$config" pnpm --filter="$project" --silent wp-env:test run cli wp db query "TRUNCATE TABLE \`$table\`" >/dev/null
-		done
+	local config="$1" tables sql
+	tables="$(WC_TEST_ENV_CONFIG="$config" pnpm --filter="$project" --silent wp-env:test run cli wp db tables 'wp_actionscheduler_*' --all-tables-with-prefix --format=csv | tr -d '\r')" || return 1
+	# shellcheck disable=SC2016 # SQL identifier quotes, not shell
+	sql="$(printf '%s' "$tables" | tr ',' '\n' | { grep -E '^wp_actionscheduler_[a-z_]+$' || true; } | sed 's/.*/TRUNCATE TABLE `&`;/' | tr '\n' ' ')"
+	[[ -n "$sql" ]] || return 0
+	WC_TEST_ENV_CONFIG="$config" pnpm --filter="$project" --silent wp-env:test run cli wp db query "$sql" >/dev/null
 }
 
 cell_env() {
@@ -200,10 +198,14 @@ run_group() {
 		log="$tmp/cell-$index.log"
 		envs=()
 		while IFS= read -r line; do envs+=( "$line" ); done < <( cell_env "$(field "$row" 7)" )
-		truncate_action_scheduler "$config"
 		start_at=$(date +%s)
 		rc=0
-		CI=true WC_TEST_ENV_CONFIG="$config" env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" "$command" ${phpunit_args[@]+"${phpunit_args[@]}"} > "$log" 2>&1 || rc=$?
+		if truncate_action_scheduler "$config" > "$log" 2>&1; then
+			CI=true WC_TEST_ENV_CONFIG="$config" env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" "$command" ${phpunit_args[@]+"${phpunit_args[@]}"} >> "$log" 2>&1 || rc=$?
+		else
+			rc=$?
+			echo "could not reset the Action Scheduler tables" >> "$log"
+		fi
 		printf '%s\t%s\t%s\t%s\n' "$index" "$rc" "$(( $(date +%s) - start_at ))" "$log" >> "$tmp/results.tsv"
 		if [[ $rc -ne 0 ]]; then
 			echo "FAIL  $name (exit $rc), last lines of $log:" >&2
@@ -227,10 +229,18 @@ wait
 echo
 echo "Results (logs in $tmp):"
 failed=0
-while IFS=$'\t' read -r index rc secs log; do
+for index in "${selected[@]}"; do
 	row="${cell_rows[$(( index - 1 ))]}"
+	result="$(grep -E "^$index	" "$tmp/results.tsv" || true)"
+	if [[ -z "$result" ]]; then
+		printf '%-5s %-88s  %s\n' FAIL "$(field "$row" 2)" "no result recorded"
+		failed=1
+		continue
+	fi
+	rc="$(field "$result" 2)"; secs="$(field "$result" 3)"; log="$(field "$result" 4)"
 	summary="$(grep -aE '^(OK|Tests:|FAILURES|ERRORS)' "$log" | sed "s/$(printf '\033')\[[0-9;]*m//g" | tail -1 || true)"
-	printf '%-5s %-60s %4ss  %s\n' "$([[ $rc -eq 0 ]] && echo PASS || echo FAIL)" "$(field "$row" 2)" "$secs" "$summary"
+	[[ -n "$summary" ]] || summary="$(tail -n 1 "$log")"
+	printf '%-5s %-88s %4ss  %s\n' "$([[ $rc -eq 0 ]] && echo PASS || echo FAIL)" "$(field "$row" 2)" "$secs" "$summary"
 	[[ $rc -eq 0 ]] || failed=1
-done < <( sort -n "$tmp/results.tsv" )
+done
 exit $failed
