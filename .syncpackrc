@@ -73,7 +73,8 @@
 				"stylelint"
 			],
 			"packages": [
-				"@woocommerce/admin-library"
+				"@woocommerce/admin-library",
+				"@woocommerce/email-editor"
 			],
 			"pinVersion": "^16.9.0"
 		},
