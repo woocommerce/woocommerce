@@ -6,7 +6,7 @@ declare( strict_types = 1 );
 /**
  * Tests when WC_Shipping_Free_Shipping offers itself to the shopper.
  *
- * Every expected value here is taken from what the settings screen promises the merchant, in
+ * Most expected values here are taken from what the settings screen promises the merchant, in
  * init_form_fields() of the method itself, rather than from reading is_available(). The five
  * "Free shipping requires" options, the minimum order amount ("Customers will need to spend this
  * amount to get free shipping") and the coupon discount rule ("Apply minimum order rule before
@@ -129,12 +129,80 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Add a fee to the cart, the way an extension does.
+	 *
+	 * @param float $amount Fee amount.
+	 */
+	private function fee_of( float $amount ): void {
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			static function ( $cart ) use ( $amount ) {
+				$cart->add_fee( 'Handling', $amount );
+			}
+		);
+
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( $amount, WC()->cart->get_fee_total(), 'The fixture fee should reach the cart.' );
+	}
+
+	/**
 	 * Whether the method currently offers itself.
 	 *
 	 * @return bool
 	 */
 	private function is_offered(): bool {
 		return $this->sut->is_available( array( 'destination' => array( 'country' => 'US' ) ) );
+	}
+
+	/**
+	 * The threshold reads get_displayed_subtotal(), which is built from the line items, so a fee
+	 * added through woocommerce_cart_calculate_fees sits outside it.
+	 *
+	 * @testdox A cart fee does not count towards the minimum.
+	 */
+	public function test_a_cart_fee_does_not_count_towards_the_minimum(): void {
+		$this->cart_holding( 90.0 );
+		$this->fee_of( 15.0 );
+
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '100',
+			)
+		);
+
+		$this->assertFalse(
+			$this->is_offered(),
+			'The shopper pays 105.00 but spends 90.00 on goods, and 90.00 does not reach a 100.00 minimum.'
+		);
+	}
+
+	/**
+	 * is_available() decides from the cart and never reads the package it is given, so a package
+	 * holding part of a qualifying cart is still offered the rate.
+	 *
+	 * @testdox The minimum is judged on the cart, not on the package being priced.
+	 */
+	public function test_the_minimum_is_judged_on_the_cart_not_the_package(): void {
+		$this->cart_holding( 100.0 );
+
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '100',
+			)
+		);
+
+		$half = array(
+			'destination'   => array( 'country' => 'US' ),
+			'contents_cost' => 50.0,
+		);
+
+		$this->assertTrue(
+			$this->sut->is_available( $half ),
+			'A shopper who spent 100.00 has met a 100.00 minimum, whichever part of their order is being priced.'
+		);
 	}
 
 	/**
@@ -271,9 +339,8 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The minimum is measured against what the shopper is shown. On a store that displays prices
-	 * with tax, a coupon takes its tax portion off the displayed amount too, so the amount the
-	 * shopper sees themselves spending is what has to reach the minimum.
+	 * The threshold is compared against get_displayed_subtotal(), which carries tax when the store
+	 * displays prices that way, and the discount taken off it drops its tax portion to match.
 	 *
 	 * @testdox On a tax-inclusive store the coupon's tax also comes off the minimum.
 	 */
