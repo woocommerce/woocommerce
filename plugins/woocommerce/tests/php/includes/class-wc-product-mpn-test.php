@@ -59,29 +59,35 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Lookup regeneration and migration preserve full metadata and consistently truncate long multibyte lookup values.
+	 * @testdox Lookup regeneration restores truncated multibyte lookup values without changing the full MPN.
 	 */
-	public function test_mpn_lookup_regeneration_and_migration(): void {
+	public function test_mpn_lookup_regeneration(): void {
+		global $wpdb;
+
 		$sut = $this->create_product( ProductType::SIMPLE );
 		$mpn = str_repeat( '部', 101 );
 		$sut->set_mpn( $mpn );
 		$sut->save();
 		$empty = $this->create_product( ProductType::SIMPLE );
 
-		foreach ( array( null, 'wc_update_product_lookup_tables_column', 'wc_update_1130_add_mpn_to_product_lookup_table', 'wc_update_1130_add_mpn_to_product_lookup_table' ) as $callback ) {
-			if ( $callback ) {
-				call_user_func( $callback, 'mpn' );
-			}
-			$this->assertSame( $mpn, wc_get_product( $sut->get_id() )->get_mpn(), 'The lookup limit must not truncate the source value.' );
-			$this->assertSame( str_repeat( '部', 100 ), $this->get_lookup_mpn( $sut->get_id() ) );
-			$this->assertSame( '', $this->get_lookup_mpn( $empty->get_id() ), 'Absent metadata must produce an empty lookup value, never NULL.' );
-		}
+		$this->assertSame( str_repeat( '部', 100 ), $this->get_lookup_mpn( $sut->get_id() ) );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array( 'mpn' => 'STALE' ),
+			array( 'product_id' => $sut->get_id() )
+		);
+
+		wc_update_product_lookup_tables_column( 'mpn' );
+
+		$this->assertSame( $mpn, wc_get_product( $sut->get_id() )->get_mpn(), 'The lookup limit must not truncate the source value.' );
+		$this->assertSame( str_repeat( '部', 100 ), $this->get_lookup_mpn( $sut->get_id() ) );
+		$this->assertSame( '', $this->get_lookup_mpn( $empty->get_id() ), 'Absent metadata must produce an empty lookup value, never NULL.' );
 	}
 
 	/**
-	 * @testdox An older schema can still save products before the MPN lookup column is available.
+	 * @testdox The MPN schema upgrade leaves existing values untouched and subsequent saves populate the lookup.
 	 */
-	public function test_mpn_save_before_schema_upgrade(): void {
+	public function test_mpn_schema_upgrade_does_not_backfill_existing_values(): void {
 		$sut = $this->create_product( ProductType::SIMPLE );
 		update_option( 'woocommerce_schema_version', '920' );
 		$sut->set_mpn( 'PRE-UPGRADE' );
@@ -91,7 +97,14 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_schema_version', '1130' );
 		wc_update_1130_add_mpn_to_product_lookup_table();
-		$this->assertSame( 'PRE-UPGRADE', $this->get_lookup_mpn( $sut->get_id() ) );
+		wc_update_1130_add_mpn_to_product_lookup_table();
+		$this->assertSame( 'PRE-UPGRADE', wc_get_product( $sut->get_id() )->get_mpn() );
+		$this->assertSame( '', $this->get_lookup_mpn( $sut->get_id() ), 'The schema upgrade must not backfill pre-existing MPN metadata.' );
+
+		$sut->set_mpn( 'POST-UPGRADE' );
+		$sut->save();
+		$this->assertSame( 'POST-UPGRADE', wc_get_product( $sut->get_id() )->get_mpn() );
+		$this->assertSame( 'POST-UPGRADE', $this->get_lookup_mpn( $sut->get_id() ) );
 	}
 
 	/**

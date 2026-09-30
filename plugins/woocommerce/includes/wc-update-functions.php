@@ -4119,7 +4119,7 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 }
 
 /**
- * Add and populate the MPN lookup column for existing stores.
+ * Add the MPN lookup column and index for existing stores.
  *
  * @since 11.3.0
  */
@@ -4133,6 +4133,4 @@ function wc_update_1130_add_mpn_to_product_lookup_table(): void {
 	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
 	}
-
-	wc_update_product_lookup_tables_column( 'mpn' );
 }
