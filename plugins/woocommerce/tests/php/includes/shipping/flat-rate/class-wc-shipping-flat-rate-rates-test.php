@@ -10,11 +10,9 @@ declare( strict_types = 1 );
  * arguments passed in by hand. These go through calculate_shipping() instead, so they pin what a
  * merchant's saved setting actually charges the shopper.
  *
- * Every expected value here is taken from what the settings screen promises the merchant, in
+ * Most expected values are taken from what the settings screen promises the merchant, in
  * includes/shipping/flat-rate/includes/settings-flat-rate.php, rather than from reading the
- * implementation. Behaviour the screen does not describe is deliberately left untested. The one
- * exception is the pre-2.5.0 slug key, which no screen mentions; that test pins the outcome a
- * merchant upgrading from that era sees rather than either mechanism behind it.
+ * implementation.
  *
  * The sibling file holds the name this class would otherwise take, hence the suffix here.
  */
@@ -171,10 +169,10 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The screen calls [qty] "number of items". A shopper is not shipped the items that do not
-	 * ship, so a virtual product in the same cart must not raise the price of delivery.
+	 * get_package_item_qty() re-checks needs_shipping() rather than trusting the package, so an
+	 * item that does not need shipping is not counted even when the package contains one.
 	 *
-	 * @testdox The [qty] placeholder counts the items being shipped, not the virtual ones.
+	 * @testdox The [qty] placeholder skips an item that does not need shipping.
 	 */
 	public function test_qty_placeholder_counts_only_shippable_items(): void {
 		$virtual = new WC_Product_Simple();
@@ -540,10 +538,10 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A merchant can put a shipping class on a virtual product. Nothing is shipped for it, so its
-	 * class must not add a delivery charge.
+	 * find_shipping_classes() makes the same re-check, so a class sitting on an item that is not
+	 * shipped contributes nothing to the rate.
 	 *
-	 * @testdox A shipping class on a virtual product adds no cost.
+	 * @testdox A shipping class on an item that does not need shipping adds no cost.
 	 */
 	public function test_a_class_on_a_virtual_product_adds_nothing(): void {
 		$virtual = $this->shippable_product( 'flat-rate-downloadable', 0, true );
