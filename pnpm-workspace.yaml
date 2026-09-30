@@ -117,6 +117,9 @@ patchedDependencies:
     '@wordpress/edit-site@5.15.0': bin/patches/@wordpress__edit-site@5.15.0.patch
     '@wordpress/e2e-test-utils-playwright@1.33.2': bin/patches/@wordpress__e2e-test-utils-playwright@1.33.2.patch
     '@wordpress/env@11.9.0': bin/patches/@wordpress__env@11.9.0.patch
+    # 0.17.0 maps the stylelint plugins' require path to CJS builds that import a
+    # missing file. Point it at the working ESM sources, as 1.0.0+ does upstream.
+    '@wordpress/theme@0.17.0': bin/patches/@wordpress__theme@0.17.0.patch
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
