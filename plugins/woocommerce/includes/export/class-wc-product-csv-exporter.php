@@ -253,9 +253,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$this->row_data[] = $this->generate_row_data( $product );
 		}
 
-		// Variations are not assigned categories, so a category filter only matches their parent.
-		// When variation is requested without variable products, those parents are not in the result
-		// above. Load them once, on the first page, and append their variations below.
+		// Product variations themselves do not have categories; their parent variable products do.
+		// If exporting only variations filtered by category (without variable products included), their parents
+		// are not part of the result set by default. Here, we collect the relevant variable product (parent) IDs 
+		// so that we can later fetch and append the associated variations to the export list.
 		if ( $include_variations && ! $include_variables && ! empty( $args['category'] ) && 1 === $this->get_page() ) {
 			$category_parent_ids = wc_get_products(
 				array(
