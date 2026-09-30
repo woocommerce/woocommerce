@@ -60,7 +60,7 @@ class BlocksSharedState {
 	 *
 	 * Thin wrapper around the neutral {@see HydrationUtil::should_hydrate()} so block
 	 * render callbacks keep a Blocks-layer entry point while the decision and the
-	 * `woocommerce_should_hydrate` filter live in core.
+	 * `woocommerce_embed_personalized_data` filter live in core.
 	 *
 	 * @since 11.1.0
 	 *

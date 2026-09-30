@@ -60,20 +60,20 @@ if ( req.url ~ "\\?add-to-cart=" ) {
 }
 ```
 
-## Serving cacheable HTML with the `woocommerce_should_hydrate` filter (experimental)
+## Serving cacheable HTML with the `woocommerce_embed_personalized_data` filter (experimental)
 
 Several WooCommerce blocks bake per-customer data into their server-rendered HTML (the Mini-Cart badge and totals, the Product Button cart count, and the Cart and Checkout block pages). Out of the box this is safe because either the page carries no-cache headers (Cart, Checkout, My Account) or the cache layer is expected to bypass on the WooCommerce cart/session cookies, as described above.
 
-For cache setups that want to go further, WooCommerce exposes the `woocommerce_should_hydrate` filter. Blocks that know how to recover their data on the client (via the Store API) consult it before rendering; when it returns `false` they emit neutral, anonymous markup instead of per-customer data, and load the real data client-side after the cached HTML paints.
+For cache setups that want to go further, WooCommerce exposes the `woocommerce_embed_personalized_data` filter. Blocks that know how to recover their data on the client (via the Store API) consult it before rendering; when it returns `false` they emit neutral, anonymous markup instead of per-customer data, and load the real data client-side after the cached HTML paints.
 
 ```php
 /**
- * @param bool   $default         Whether the output should be hydrated with per-user data.
+ * @param bool   $default         Whether to embed per-user data in the output.
  *                                True when the request is personalized (logged-in user or non-empty cart).
  * @param string $store_namespace Block or IAPI store namespace making the decision (e.g. `woocommerce/mini-cart`).
  * @return bool                   Return false to emit neutral output that is safe to store in a shared cache.
  */
-apply_filters( 'woocommerce_should_hydrate', $default, $store_namespace );
+apply_filters( 'woocommerce_embed_personalized_data', $default, $store_namespace );
 ```
 
 There is no setting for this; the filter is the only opt-in surface, and it is intended for cache integrations (CDNs, page caches, hosts) that know the caching policy applied to the request. The default is request-aware and matches existing behavior: hydrate when the request is personalized anyway (logged-in user, or a session with a non-empty cart — requests a policy-following cache layer bypasses on the cart/session cookies), emit neutral output otherwise. With no filter registered, nothing changes.
@@ -89,7 +89,7 @@ Cache setups that serve the same cached HTML to all visitors regardless of cooki
 
 ```php
 add_filter(
-	'woocommerce_should_hydrate',
+	'woocommerce_embed_personalized_data',
 	fn( $default ) => is_user_logged_in() ? $default : false
 );
 ```

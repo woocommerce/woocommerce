@@ -143,7 +143,7 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox woocommerce_should_hydrate filter overrides the default and receives the namespace.
+	 * @testdox woocommerce_embed_personalized_data filter overrides the default and receives the namespace.
 	 */
 	public function test_should_hydrate_filter_overrides_default(): void {
 		wp_set_current_user( 0 );
@@ -156,17 +156,17 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 			$received_namespace = $store_namespace;
 			return true;
 		};
-		add_filter( 'woocommerce_should_hydrate', $filter, 10, 2 );
+		add_filter( 'woocommerce_embed_personalized_data', $filter, 10, 2 );
 
 		$this->assertTrue( BlocksSharedState::should_hydrate( 'woocommerce/cart' ) );
 		$this->assertFalse( $received_default );
 		$this->assertSame( 'woocommerce/cart', $received_namespace );
 
-		remove_filter( 'woocommerce_should_hydrate', $filter, 10 );
+		remove_filter( 'woocommerce_embed_personalized_data', $filter, 10 );
 	}
 
 	/**
-	 * @testdox woocommerce_should_hydrate filter can force neutral output for personalized requests.
+	 * @testdox woocommerce_embed_personalized_data filter can force neutral output for personalized requests.
 	 */
 	public function test_should_hydrate_filter_can_force_neutral(): void {
 		wp_set_current_user( 0 );
@@ -174,11 +174,11 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id() );
 
 		$filter = fn() => false;
-		add_filter( 'woocommerce_should_hydrate', $filter );
+		add_filter( 'woocommerce_embed_personalized_data', $filter );
 
 		$this->assertFalse( BlocksSharedState::should_hydrate() );
 
-		remove_filter( 'woocommerce_should_hydrate', $filter );
+		remove_filter( 'woocommerce_embed_personalized_data', $filter );
 		WC()->cart->empty_cart();
 		$product->delete( true );
 	}

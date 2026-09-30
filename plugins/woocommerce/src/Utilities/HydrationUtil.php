@@ -24,14 +24,14 @@ class HydrationUtil {
 	 * anyway (logged-in user, or a session with a non-empty cart), and emit
 	 * neutral output otherwise. This matches the current behavior of the
 	 * Interactivity API blocks, so out of the box nothing changes; the
-	 * `woocommerce_should_hydrate` filter is the opt-in surface for cache
+	 * `woocommerce_embed_personalized_data` filter is the opt-in surface for cache
 	 * integrations (CDNs, page caches, hosts) that know the caching policy
 	 * applied to the request.
 	 *
 	 * Returns false when the output should remain cacheable. When false,
 	 * callers should emit neutral, anonymous output and load per-user data on
 	 * the client. Third-party blocks hydrating per-user data can route through
-	 * this method and the `woocommerce_should_hydrate` filter to stay
+	 * this method and the `woocommerce_embed_personalized_data` filter to stay
 	 * cache-aware.
 	 *
 	 * @since 11.1.0
@@ -48,7 +48,7 @@ class HydrationUtil {
 		$default = is_user_logged_in() || ( $cart instanceof \WC_Cart && ! $cart->is_empty() );
 
 		/**
-		 * Filters whether server-rendered WooCommerce output should hydrate with per-user data.
+		 * Filters whether server-rendered WooCommerce output embeds per-user data.
 		 *
 		 * Return false to keep the output neutral so the response stays safe to
 		 * store in a shared cache; per-user data is then loaded on the client.
@@ -67,6 +67,6 @@ class HydrationUtil {
 		 * @param bool   $default         Default value, true when the request is personalized (logged-in user or non-empty cart).
 		 * @param string $store_namespace Block or IAPI store namespace making the decision.
 		 */
-		return (bool) apply_filters( 'woocommerce_should_hydrate', $default, $store_namespace );
+		return (bool) apply_filters( 'woocommerce_embed_personalized_data', $default, $store_namespace );
 	}
 }
