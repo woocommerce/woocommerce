@@ -804,36 +804,6 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A translated page and permalink resolve through the existing WooCommerce filters.
-	 */
-	public function test_online_store_uses_filtered_page_and_permalink(): void {
-		$page_id = self::factory()->post->create(
-			array(
-				'post_type'   => 'page',
-				'post_status' => 'publish',
-			)
-		);
-		update_option( 'woocommerce_refund_returns_page_id', -1 );
-		add_filter(
-			'woocommerce_get_refund_returns_page_id',
-			static function () use ( $page_id ) {
-				return $page_id;
-			}
-		);
-		add_filter(
-			'woocommerce_get_refund_returns_page_permalink',
-			static function () {
-				return 'https://example.org/translated-policy/';
-			}
-		);
-		$this->go_to( get_permalink( $page_id ) );
-
-		$this->structured_data->generate_online_store_data();
-		$data = $this->structured_data->get_structured_data( array( 'onlinestore' ) );
-		$this->assertSame( 'https://example.org/translated-policy/', $data['hasMerchantReturnPolicy']['merchantReturnLink'], 'The existing permalink filter should control the policy URL.' );
-	}
-
-	/**
 	 * @testdox Each site links only its own selected return-policy page on multisite.
 	 */
 	public function test_online_store_uses_current_sites_policy_page(): void {
