@@ -777,7 +777,7 @@ Returns a cart item from the state.
 
 -   `object`: The cart item with the following keys:
     -   _key_ `string`: The cart item key.
-    -   _parent_item_key_ `string | null`: The parent cart item key, or `null` if the item has no parent.
+    -   _parent_item_key_ `string | null`: The declared parent cart item key, or `null` if no parent key was declared.
     -   _id_ `number`: The cart item id.
     -   _catalog_visibility_ `string`: The catalog visibility.
     -   _quantity_limits_ `object`: The quantity limits.
