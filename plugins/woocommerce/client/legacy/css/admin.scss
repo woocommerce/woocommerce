@@ -9584,7 +9584,7 @@ table.bar_chart {
 		.form-table.woocommerce-exporter-options td {
 			vertical-align: middle;
 			line-height: 1.75em;
-			padding: 0 24px 24px 0;
+			padding: 0 0 24px;
 
 			label {
 				color: #555;
@@ -9635,10 +9635,10 @@ table.bar_chart {
 
 		@media screen and (min-width: 783px) {
 
-			.woocommerce-exporter-options th,
-			.woocommerce-importer-options th {
+			.form-table.woocommerce-exporter-options th,
+			.form-table.woocommerce-importer-options th {
 				width: 35%;
-				padding-right: 0;
+				padding-right: 24px;
 			}
 		}
 
