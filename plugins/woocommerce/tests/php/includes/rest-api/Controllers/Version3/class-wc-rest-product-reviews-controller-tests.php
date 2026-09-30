@@ -610,8 +610,10 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'reviewer'       => 'Jane Smith',
 			'reviewer_email' => 'jane.smith@example.org',
 			'rating'         => 5,
-			'verified'       => $include_verified ? true : null,
 		);
+		if ( $include_verified ) {
+			$body['verified'] = true;
+		}
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
 		$request->set_body_params( $body );
