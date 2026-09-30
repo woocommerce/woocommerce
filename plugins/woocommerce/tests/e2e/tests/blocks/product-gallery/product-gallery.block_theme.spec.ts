@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Locator } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -133,6 +133,125 @@ test.describe( `${ blockData.name }`, () => {
 				expect( newViewerImageId ).toBe( secondImageThumbnailId );
 				expect( newActiveThumbnailId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
+		} );
+
+		test( 'keeps the active thumbnail in view after switching variations', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			// Enough gallery images to overflow the strip, Green's image deep
+			// in the list with enough images after it for the strip to scroll
+			// it to the top. `wpCLI` output ends with the command's own output.
+			const lastLine = ( output: { stdout: string } ) =>
+				output.stdout.trim().split( '\n' ).pop()?.trim() ?? '';
+			const hoodieProductId = lastLine(
+				await wpCLI(
+					'post list --post_type=product --field=ID --name="Hoodie" --format=ids'
+				)
+			);
+			const greenImageId = lastLine(
+				await wpCLI(
+					'post list --post_type=attachment --field=ID --name="hoodie-green-1.jpg" --format=ids'
+				)
+			);
+			const attachmentIds = lastLine(
+				await wpCLI(
+					'post list --post_type=attachment --post_mime_type=image --field=ID --format=ids'
+				)
+			)
+				.split( /\s+/ )
+				.filter( ( id ) => /^\d+$/.test( id ) && id !== greenImageId );
+
+			expect( hoodieProductId ).toMatch( /^\d+$/ );
+			expect( greenImageId ).toMatch( /^\d+$/ );
+
+			expect( attachmentIds.length ).toBeGreaterThan( 16 );
+
+			const galleryIds = [
+				...attachmentIds.slice( 0, -5 ),
+				greenImageId,
+				...attachmentIds.slice( -5 ),
+			];
+			await wpCLI(
+				`post meta update ${ hoodieProductId } _product_image_gallery "${ galleryIds.join(
+					','
+				) }"`
+			);
+
+			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editor.insertBlock( {
+				name: 'woocommerce/add-to-cart-with-options',
+			} );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( '/product/hoodie/' );
+
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'frontend',
+			} );
+			const scrollableContainer = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
+			const activeThumbnail = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail:not([hidden])',
+				{
+					has: page.locator(
+						'.wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+					),
+				}
+			);
+
+			await expect( thumbnailsBlock ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
+			const parentThumbnailIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			expect( parentThumbnailIds ).toContain( greenImageId );
+			expect(
+				parentThumbnailIds.indexOf( greenImageId )
+			).toBeGreaterThan( 10 );
+
+			const addToCartBlock = page.locator(
+				'.wp-block-add-to-cart-with-options'
+			);
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Logo' } )
+				.getByRole( 'radio', { name: 'No', exact: true } )
+				.click();
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Green', exact: true } )
+				.click();
+
+			await expect( async () => {
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					greenImageId
+				);
+				expect( await pageObject.getViewerImageId() ).toBe(
+					greenImageId
+				);
+			} ).toPass( { timeout: 3_000 } );
+
+			// The order is kept; the strip only scrolls to the selected slot.
+			expect( await pageObject.getVisibleThumbnailImageIds() ).toEqual(
+				parentThumbnailIds
+			);
+
+			await expect( async () => {
+				const containerBox = await scrollableContainer.boundingBox();
+				const thumbnailBox = await activeThumbnail.boundingBox();
+
+				expect( containerBox ).not.toBeNull();
+				expect( thumbnailBox ).not.toBeNull();
+				// Start-aligned: the selected thumbnail is the first visible one.
+				expect(
+					Math.abs( thumbnailBox!.y - containerBox!.y )
+				).toBeLessThanOrEqual( 1 );
+			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
 

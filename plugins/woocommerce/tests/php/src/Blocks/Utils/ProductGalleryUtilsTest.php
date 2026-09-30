@@ -138,7 +138,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that variation gallery data falls back to the variation's own gallery when the variation featured image is stale.
+	 * @testdox Should fall back to the variation gallery when the variation featured image is stale.
 	 */
 	public function test_get_product_variation_gallery_data_falls_back_to_variation_gallery_when_featured_is_stale() {
 		$variable_product     = \WC_Helper_Product::create_variation_product();
@@ -170,32 +170,29 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Variation has only its own featured image (no gallery) → the
-	 * variation featured replaces the parent's hero, parent gallery extras
-	 * stay.
+	 * @testdox Should append a variation featured image that is not in the parent set to the lineup and select it.
 	 */
-	public function test_get_product_variation_gallery_data_case_3_single_image_appends_parent_gallery_extras() {
+	public function test_get_product_variation_gallery_data_case_3_single_image_is_appended_to_parent_gallery() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra_a = $this->create_image_attachment( 'Parent Gallery A', 'parent-gallery-a.jpg' );
 		$parent_gallery_extra_b = $this->create_image_attachment( 'Parent Gallery B', 'parent-gallery-b.jpg' );
 		$variation_featured_id  = $this->create_image_attachment( 'Variation Featured', 'variation-featured.jpg' );
 
-		$entry = $this->create_variation_gallery_entry(
+		$gallery = $this->create_variation_gallery(
 			$parent_featured_id,
 			array( $parent_gallery_extra_a, $parent_gallery_extra_b ),
 			$variation_featured_id
 		);
 
-		$this->assertSame( $variation_featured_id, $entry['image_id'] );
+		$this->assertSame( array( 'image_id' => $variation_featured_id ), $gallery['entry'] );
 		$this->assertSame(
-			array( $variation_featured_id, $parent_gallery_extra_a, $parent_gallery_extra_b ),
-			$entry['image_ids']
+			array( $parent_featured_id, $parent_gallery_extra_a, $parent_gallery_extra_b, $variation_featured_id ),
+			$gallery['image_ids']
 		);
 	}
 
 	/**
-	 * Variation has its own featured plus gallery images, so the variation's
-	 * images replace the parent's entirely.
+	 * @testdox Should replace the parent set when the variation has its own featured and gallery images.
 	 */
 	public function test_get_product_variation_gallery_data_case_4_multiple_images_replaces_parent_set() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
@@ -204,12 +201,12 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A', 'variation-gallery-a.jpg' );
 		$variation_gallery_id_b = $this->create_image_attachment( 'Variation Gallery B', 'variation-gallery-b.jpg' );
 
-		$entry = $this->create_variation_gallery_entry(
+		$entry = $this->create_variation_gallery(
 			$parent_featured_id,
 			array( $parent_gallery_extra ),
 			$variation_featured_id,
 			array( $variation_gallery_id_a, $variation_gallery_id_b )
-		);
+		)['entry'];
 
 		$this->assertSame( $variation_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -219,9 +216,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * (Edge case - legacy AVI shape): variation has gallery images but no own featured →
-	 * parent featured anchors the set, variation gallery follows. No parent
-	 * gallery extras appear — the variation owns the rest of the lineup.
+	 * @testdox Should anchor a variation gallery without its own featured image on the parent featured image.
 	 */
 	public function test_get_product_variation_gallery_data_case_5_avi_shape_uses_parent_featured_plus_variation_gallery() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
@@ -229,12 +224,12 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A', 'variation-gallery-a.jpg' );
 		$variation_gallery_id_b = $this->create_image_attachment( 'Variation Gallery B', 'variation-gallery-b.jpg' );
 
-		$entry = $this->create_variation_gallery_entry(
+		$entry = $this->create_variation_gallery(
 			$parent_featured_id,
 			array( $parent_gallery_extra ),
 			0,
 			array( $variation_gallery_id_a, $variation_gallery_id_b )
-		);
+		)['entry'];
 
 		$this->assertSame( $parent_featured_id, $entry['image_id'] );
 		$this->assertSame(
@@ -244,57 +239,176 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Variation has no images of its own → full parent gallery
-	 * (featured + extras) is used as a fallback.
+	 * @testdox Should build the lineup from the parent set plus the featured images of variations without their own gallery.
+	 */
+	public function test_get_product_variation_gallery_appends_variation_only_featured_images() {
+		$variable_product     = \WC_Helper_Product::create_variation_product();
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
+		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
+		$own_image_a          = $this->create_image_attachment( 'Own Image A', 'own-a.jpg' );
+		$own_image_b          = $this->create_image_attachment( 'Own Image B', 'own-b.jpg' );
+		$own_gallery_image    = $this->create_image_attachment( 'Own Gallery', 'own-gallery.jpg' );
+
+		$variable_product->set_image_id( $parent_featured_id );
+		$variable_product->set_gallery_image_ids( array( $parent_gallery_extra ) );
+		$variable_product->save();
+
+		$children = $variable_product->get_children();
+		$shared   = wc_get_product( $children[0] );
+		$shared->set_image_id( $parent_gallery_extra );
+		$shared->save();
+		$own_a = wc_get_product( $children[1] );
+		$own_a->set_image_id( $own_image_a );
+		$own_a->save();
+		$own_b = wc_get_product( $children[2] );
+		$own_b->set_image_id( $own_image_b );
+		$own_b->set_gallery_image_ids( array( $own_gallery_image ) );
+		$own_b->save();
+
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( wc_get_product( $variable_product->get_id() ) );
+
+		// Variation B has its own gallery, so its featured image is not part of the lineup.
+		$this->assertSame( array( $parent_featured_id, $parent_gallery_extra, $own_image_a ), $gallery['image_ids'] );
+
+		$this->assertSame( array( 'image_id' => $parent_gallery_extra ), $gallery['variations'][ $shared->get_id() ] );
+		$this->assertSame( array( 'image_id' => $own_image_a ), $gallery['variations'][ $own_a->get_id() ] );
+		$this->assertSame( $own_image_b, $gallery['variations'][ $own_b->get_id() ]['image_id'] );
+		$this->assertSame( array( $own_image_b, $own_gallery_image ), $gallery['variations'][ $own_b->get_id() ]['image_ids'] );
+		// A variation without images keeps the lineup with the parent featured selected.
+		$this->assertSame( array( 'image_id' => $parent_featured_id ), $gallery['variations'][ $children[3] ] );
+	}
+
+	/**
+	 * @testdox Should keep media gallery videos in the lineup of a variable product.
+	 */
+	public function test_get_product_variation_gallery_keeps_videos_in_lineup() {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+
+		$variable_product   = \WC_Helper_Product::create_variation_product();
+		$parent_featured_id = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
+		$own_image_id       = $this->create_image_attachment( 'Own Image', 'own.jpg' );
+		$video_id           = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product Video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+				'guid'           => 'https://example.com/product-video.mp4',
+			)
+		);
+
+		$variable_product->set_image_id( $parent_featured_id );
+		$variable_product->save();
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$variable_product,
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variable_product->get_children()[0] );
+		$variation->set_image_id( $own_image_id );
+		$variation->save();
+
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( wc_get_product( $variable_product->get_id() ) );
+
+		$this->assertSame( array( $parent_featured_id, $video_id, $own_image_id ), $gallery['image_ids'] );
+		$this->assertSame( $own_image_id, $gallery['variations'][ $variation->get_id() ]['image_id'] );
+		$this->assertSame( array( (string) $parent_featured_id, (string) $own_image_id ), ProductGalleryUtils::get_product_variation_image_ids( $variable_product ) );
+
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * @testdox Should use the placeholder when neither the parent nor its variations have images.
+	 */
+	public function test_get_product_variation_gallery_uses_placeholder_without_images() {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( $variable_product );
+
+		$this->assertSame( array( 0 ), $gallery['image_ids'] );
+		$this->assertSame( 0, $gallery['variations'][ $variable_product->get_children()[0] ]['image_id'] );
+	}
+
+	/**
+	 * @testdox Should return empty lineup and entries for non-variable products.
+	 */
+	public function test_get_product_variation_gallery_is_empty_for_simple_products() {
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( \WC_Helper_Product::create_simple_product() );
+
+		$this->assertSame( array(), $gallery['image_ids'] );
+		$this->assertSame( array(), $gallery['variations'] );
+	}
+
+	/**
+	 * @testdox Should keep the lineup with the parent featured image selected when the variation has no images.
 	 */
 	public function test_get_product_variation_gallery_data_case_2_no_variation_images_uses_full_parent_gallery() {
 		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 
-		$entry = $this->create_variation_gallery_entry(
+		$gallery = $this->create_variation_gallery(
 			$parent_featured_id,
 			array( $parent_gallery_extra )
 		);
 
-		$this->assertSame( $parent_featured_id, $entry['image_id'] );
-		$this->assertSame(
-			array( $parent_featured_id, $parent_gallery_extra ),
-			$entry['image_ids']
-		);
+		$this->assertSame( array( 'image_id' => $parent_featured_id ), $gallery['entry'] );
+		$this->assertSame( array( $parent_featured_id, $parent_gallery_extra ), $gallery['image_ids'] );
 	}
 
 	/**
-	 * The variation featured is also present in the parent gallery — output
-	 * must dedup so the image doesn't render twice in a row.
+	 * @testdox Should keep the parent order and only move the selection when the variation featured image is in the parent gallery.
 	 */
-	public function test_get_product_variation_gallery_data_dedups_variation_featured_overlapping_parent_gallery() {
+	public function test_get_product_variation_gallery_data_keeps_parent_order_when_variation_featured_is_in_parent_gallery() {
 		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
-		$shared_id            = $this->create_image_attachment( 'Shared Image', 'shared.jpg' );
 		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
+		$shared_id            = $this->create_image_attachment( 'Shared Image', 'shared.jpg' );
+		$shared_sibling_id    = $this->create_image_attachment( 'Shared Sibling', 'shared-sibling.jpg' );
 
-		$entry = $this->create_variation_gallery_entry(
+		$gallery = $this->create_variation_gallery(
 			$parent_featured_id,
-			array( $shared_id, $parent_gallery_extra ),
+			array( $parent_gallery_extra, $shared_id, $shared_sibling_id ),
 			$shared_id
 		);
 
-		$this->assertSame( $shared_id, $entry['image_id'] );
+		$this->assertSame( array( 'image_id' => $shared_id ), $gallery['entry'] );
 		$this->assertSame(
-			array( $shared_id, $parent_gallery_extra ),
-			$entry['image_ids']
+			array( $parent_featured_id, $parent_gallery_extra, $shared_id, $shared_sibling_id ),
+			$gallery['image_ids']
 		);
 	}
 
 	/**
-	 * Create a variation gallery fixture and return the selected variation entry.
+	 * @testdox Should keep the parent set with its first image selected when the variation featured image is the parent featured image.
+	 */
+	public function test_get_product_variation_gallery_data_keeps_parent_set_when_variation_featured_is_parent_featured() {
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
+		$parent_gallery_extra = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
+
+		$gallery = $this->create_variation_gallery(
+			$parent_featured_id,
+			array( $parent_gallery_extra ),
+			$parent_featured_id
+		);
+
+		$this->assertSame( array( 'image_id' => $parent_featured_id ), $gallery['entry'] );
+		$this->assertSame( array( $parent_featured_id, $parent_gallery_extra ), $gallery['image_ids'] );
+	}
+
+	/**
+	 * Create a variation gallery fixture and return the lineup and the first variation's entry.
 	 *
 	 * @param int   $parent_featured_id    Parent product featured image ID.
 	 * @param int[] $parent_gallery_ids    Parent product gallery image IDs.
 	 * @param int   $variation_featured_id Variation featured image ID.
 	 * @param int[] $variation_gallery_ids Variation gallery image IDs.
-	 * @return array<string, mixed>
+	 * @return array{image_ids: int[], entry: array<string, mixed>}
 	 */
-	private function create_variation_gallery_entry(
+	private function create_variation_gallery(
 		int $parent_featured_id,
 		array $parent_gallery_ids = array(),
 		int $variation_featured_id = 0,
@@ -310,7 +424,12 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variation->set_gallery_image_ids( $variation_gallery_ids );
 		$variation->save();
 
-		return ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+		$gallery = ProductGalleryUtils::get_product_variation_gallery( $variable_product );
+
+		return array(
+			'image_ids' => $gallery['image_ids'],
+			'entry'     => $gallery['variations'][ $variation->get_id() ],
+		);
 	}
 
 	/**

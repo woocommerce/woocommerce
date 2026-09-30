@@ -371,10 +371,11 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
-				$variation_gallery_data = self::get_product_variation_gallery_data( $product );
+				$variation_gallery   = self::get_product_variation_gallery( $product );
+				$variation_image_ids = $variation_gallery['image_ids'];
 
-				foreach ( $variation_gallery_data as $variation_data ) {
-					$variation_image_ids = array_merge( $variation_image_ids, $variation_data['image_ids'] );
+				foreach ( $variation_gallery['variations'] as $variation_data ) {
+					$variation_image_ids = array_merge( $variation_image_ids, $variation_data['image_ids'] ?? array() );
 				}
 			}
 		} catch ( \Exception $e ) {
@@ -383,6 +384,7 @@ class ProductGalleryUtils {
 		}
 
 		$unique_int_ids = array_unique( array_map( 'intval', $variation_image_ids ) );
+		$unique_int_ids = array_filter( $unique_int_ids, 'wp_attachment_is_image' );
 
 		return array_values( array_map( 'strval', $unique_int_ids ) );
 	}
@@ -394,15 +396,35 @@ class ProductGalleryUtils {
 	 * @return array<int, array<string, mixed>> Variation gallery data.
 	 */
 	public static function get_product_variation_gallery_data( $product ) {
-		$variation_gallery_data = array();
+		return self::get_product_variation_gallery( $product )['variations'];
+	}
+
+	/**
+	 * Build the gallery lineup and the per-variation entries in one pass.
+	 *
+	 * The lineup is the parent media gallery, then the featured images of
+	 * variations without a gallery of their own. Entries for those variations
+	 * carry only `image_id`: the gallery keeps the lineup and moves the
+	 * selection. Variations with their own gallery return their `image_ids`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Product $product The variable product.
+	 * @return array{image_ids: int[], variations: array<int, array<string, mixed>>} Both empty for non-variable products.
+	 */
+	public static function get_product_variation_gallery( $product ) {
+		$result = array(
+			'image_ids'  => array(),
+			'variations' => array(),
+		);
 
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.8.0' );
-			return $variation_gallery_data;
+			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '11.3.0' );
+			return $result;
 		}
 
 		if ( ! $product->is_type( 'variable' ) ) {
-			return $variation_gallery_data;
+			return $result;
 		}
 
 		$variations = $product->get_children();
@@ -411,75 +433,96 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
-		// 0 is placeholder image ID.
-		$parent_featured_id = 0;
-		$product_image_id   = (int) $product->get_image_id();
-		if ( $product_image_id && wp_attachment_is_image( $product_image_id ) ) {
-			$parent_featured_id = $product_image_id;
-		}
-
-		$parent_gallery_ids    = array_map( 'intval', $product->get_gallery_image_ids() );
-		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
-		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
+		$lineup           = self::get_parent_media_ids( $product );
+		$variation_images = array();
 
 		foreach ( $variations as $variation_id ) {
-			$variation_id = (int) $variation_id;
-			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );
+			$variation = wc_get_product( (int) $variation_id );
 
-			if ( null !== $entry ) {
-				$variation_gallery_data[ $variation_id ] = $entry;
+			if ( ! $variation instanceof \WC_Product_Variation ) {
+				continue;
+			}
+
+			$featured_id           = (int) $variation->get_image_id();
+			$featured_valid        = $featured_id && wp_attachment_is_image( $featured_id );
+			$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+			$variation_gallery_ids = array_values( array_filter( $variation_gallery_ids, 'wp_attachment_is_image' ) );
+
+			$variation_images[ (int) $variation_id ] = array(
+				'featured_id'    => $featured_id,
+				'featured_valid' => $featured_valid,
+				'gallery_ids'    => $variation_gallery_ids,
+			);
+
+			if ( $featured_valid && empty( $variation_gallery_ids ) && ! in_array( $featured_id, $lineup, true ) ) {
+				$lineup[] = $featured_id;
 			}
 		}
 
-		return $variation_gallery_data;
+		if ( empty( $lineup ) ) {
+			$lineup = array( 0 );
+		}
+
+		foreach ( $variation_images as $variation_id => $images ) {
+			$result['variations'][ $variation_id ] = self::build_variation_gallery_entry(
+				$images['featured_id'],
+				$images['featured_valid'],
+				$images['gallery_ids'],
+				$lineup[0]
+			);
+		}
+
+		$result['image_ids'] = $lineup;
+
+		return $result;
 	}
 
 	/**
-	 * Build the gallery payload for a single variation, or null when the
-	 * post isn't a real variation.
+	 * Get the parent product's media IDs: existing images and videos, in gallery order.
+	 *
+	 * @param \WC_Product $product The variable product.
+	 * @return int[]
+	 */
+	private static function get_parent_media_ids( $product ) {
+		$media_items = ProductMediaGallery::get_product_media_gallery_items(
+			$product,
+			array(
+				'deduplicate'           => true,
+				'resolve_video_posters' => false,
+			)
+		);
+		$media_ids   = array();
+
+		foreach ( $media_items as $media_item ) {
+			$media_id = isset( $media_item['id'] ) ? (int) $media_item['id'] : 0;
+			$is_video = 'video' === ( $media_item['media_type'] ?? '' );
+
+			if ( $media_id && ( $is_video || wp_attachment_is_image( $media_id ) ) ) {
+				$media_ids[] = $media_id;
+			}
+		}
+
+		return array_values( array_unique( $media_ids ) );
+	}
+
+	/**
+	 * Build the gallery payload for a single variation.
 	 *
 	 * Decision tree (variation chosen):
-	 * - no variation images → parent featured + parent gallery
-	 * - own featured only → variation featured + parent gallery extras
+	 * - no variation images → lineup, first image selected
+	 * - own featured only → lineup, variation featured selected
 	 * - own featured + gallery → variation images only
 	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
-	 * @param int   $variation_id          Variation post ID.
-	 * @param int   $parent_featured_id    Parent product's featured image ID (0 if missing/invalid).
-	 * @param int[] $parent_gallery_extras Parent gallery image IDs, with the featured filtered out.
-	 * @return array<string, mixed>|null
+	 * @param int   $featured_id           Variation featured image ID (0 if none).
+	 * @param bool  $featured_valid        Whether it is an existing image attachment.
+	 * @param int[] $variation_gallery_ids Valid variation gallery image IDs.
+	 * @param int   $lineup_first_id       First image of the lineup (0 for the placeholder).
+	 * @return array<string, mixed> `image_ids` is only set when the variation has its own gallery.
 	 */
-	private static function build_variation_gallery_entry( int $variation_id, int $parent_featured_id, array $parent_gallery_extras ): ?array {
-		$variation = wc_get_product( $variation_id );
-
-		if ( ! $variation instanceof \WC_Product_Variation ) {
-			return null;
-		}
-
-		$featured_id    = (int) $variation->get_image_id();
-		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
-
-		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
-		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
-		$variation_gallery_ids = array_values( $variation_gallery_ids );
-
-		// No images from variation - full parent fallback.
+	private static function build_variation_gallery_entry( int $featured_id, bool $featured_valid, array $variation_gallery_ids, int $lineup_first_id ): array {
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {
-			$parent_image_ids = array_values(
-				array_filter( array_merge( array( $parent_featured_id ), $parent_gallery_extras ) )
-			);
-
-			if ( empty( $parent_image_ids ) ) {
-				return array(
-					'image_id'  => 0,
-					'image_ids' => array( 0 ),
-				);
-			}
-
-			return array(
-				'image_id'  => $parent_image_ids[0],
-				'image_ids' => $parent_image_ids,
-			);
+			return array( 'image_id' => $lineup_first_id );
 		}
 
 		// Variation has featured image and gallery - full variation gallery.
@@ -495,15 +538,7 @@ class ProductGalleryUtils {
 			);
 		}
 
-		// Variation has only featured image - variation featured and parent gallery.
-		$image_ids = array_values(
-			array_unique( array_merge( array( $featured_id ), $parent_gallery_extras ) )
-		);
-
-		return array(
-			'image_id'  => $featured_id,
-			'image_ids' => $image_ids,
-		);
+		return array( 'image_id' => $featured_id );
 	}
 
 	/**

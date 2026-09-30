@@ -169,14 +169,15 @@ const scrollImageEverywhereIntoView = (
 	behavior: ScrollBehavior = 'smooth'
 ) => {
 	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId );
+	// Start-aligned so the images after the selected one stay in view.
+	scrollThumbnailIntoView( imageId, 'start' );
 };
 
 /**
  * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores the parent product's gallery from the iAPI
- * config. Also recomputes arrow states and scrolls the active slot into
- * view.
+ * set. Empty input keeps the product's lineup from the iAPI config, with
+ * `selectedImageId` when it is part of it. Also recomputes arrow states
+ * and scrolls the active slot into view.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
@@ -205,7 +206,34 @@ const updateVisibleImageSet = (
 		return;
 	}
 
+	// The watches apply visibility on the next frame; scrolling needs the
+	// final layout now or it clamps to the old scrollable size.
+	syncImageVisibilityNow();
 	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
+};
+
+/** Apply what the image watches will apply, without waiting for them. */
+const syncImageVisibilityNow = () => {
+	const element = getElement()?.ref as HTMLElement | undefined;
+	const galleryContainer = element?.closest( SELECTORS.galleryContainer );
+
+	if ( ! galleryContainer ) {
+		return;
+	}
+
+	galleryContainer
+		.querySelectorAll< HTMLElement >(
+			`${ SELECTORS.largeImageWrapper } [data-image-id]`
+		)
+		.forEach( toggleImageVisibility );
+	galleryContainer
+		.querySelectorAll< HTMLElement >(
+			`${ SELECTORS.thumbnail } [data-image-id]`
+		)
+		.forEach( ( thumbnail ) => {
+			toggleImageVisibility( thumbnail );
+			toggleActiveThumbnailAttributes( thumbnail );
+		} );
 };
 
 /**
@@ -296,11 +324,15 @@ const scrollImageIntoView = (
 };
 
 /**
- * Scrolls the thumbnail into view.
+ * Scrolls the thumbnail strip to the image's thumbnail.
  *
- * @param {number} imageId - The ID of the thumbnail to scroll into view.
+ * @param {number}           imageId - The ID of the thumbnail to scroll into view.
+ * @param {'center'|'start'} align   - Where the thumbnail lands in the strip.
  */
-const scrollThumbnailIntoView = ( imageId: number ) => {
+const scrollThumbnailIntoView = (
+	imageId: number,
+	align: 'center' | 'start' = 'center'
+) => {
 	if ( ! imageId ) {
 		return;
 	}
@@ -319,47 +351,46 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const thumbnailElement = galleryContainer.querySelector(
-		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
-	);
-
-	if ( ! thumbnailElement ) {
-		return;
-	}
-
-	// Find the thumbnail scrollable container
-	const scrollContainer = thumbnailElement.closest(
+	const thumbnail = galleryContainer
+		.querySelector(
+			`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId(
+				imageId
+			) }`
+		)
+		?.closest( SELECTORS.thumbnail );
+	const scrollContainer = thumbnail?.closest(
 		SELECTORS.thumbnailsScrollable
-	);
+	) as HTMLElement | null;
 
-	if ( ! scrollContainer ) {
+	if ( ! thumbnail || ! scrollContainer ) {
 		return;
 	}
 
-	const thumbnail = thumbnailElement.closest( SELECTORS.thumbnail );
-
-	if ( ! thumbnail ) {
-		return;
-	}
-
-	// Calculate the scroll position to center the thumbnail
 	const containerRect = scrollContainer.getBoundingClientRect();
 	const thumbnailRect = thumbnail.getBoundingClientRect();
-
-	const scrollTop =
-		scrollContainer.scrollTop +
-		( thumbnailRect.top - containerRect.top ) -
-		( containerRect.height - thumbnailRect.height ) / 2;
-	const scrollLeft =
-		scrollContainer.scrollLeft +
-		( thumbnailRect.left - containerRect.left ) -
-		( containerRect.width - thumbnailRect.width ) / 2;
+	const isRtl =
+		window.getComputedStyle( scrollContainer ).direction === 'rtl';
+	const centerTop =
+		align === 'center'
+			? ( containerRect.height - thumbnailRect.height ) / 2
+			: 0;
+	const centerLeft =
+		align === 'center'
+			? ( containerRect.width - thumbnailRect.width ) / 2
+			: 0;
+	// In RTL the strip starts at its right edge.
+	const inlineOffset = isRtl
+		? thumbnailRect.right - containerRect.right + centerLeft
+		: thumbnailRect.left - containerRect.left - centerLeft;
 
 	// Use scrollTo to avoid scrolling the entire page which
 	// happens with scrollIntoView.
 	scrollContainer.scrollTo( {
-		top: scrollTop,
-		left: scrollLeft,
+		top:
+			scrollContainer.scrollTop +
+			( thumbnailRect.top - containerRect.top ) -
+			centerTop,
+		left: scrollContainer.scrollLeft + inlineOffset,
 		behavior: 'smooth',
 	} );
 };
@@ -691,9 +722,9 @@ const productGallery = {
 			const variationImageSet =
 				productImageSet.variations?.[ variationId ];
 
-			if ( variationImageSet?.image_ids?.length ) {
+			if ( variationImageSet ) {
 				actions.setImageData(
-					variationImageSet.image_ids,
+					variationImageSet.image_ids ?? [],
 					variationImageSet.image_id
 				);
 				return;
@@ -754,9 +785,9 @@ const productGallery = {
 								currentImageId
 						  );
 
-					if ( variationImageSet?.image_ids?.length ) {
+					if ( variationImageSet ) {
 						actions.setImageData(
-							variationImageSet.image_ids,
+							variationImageSet.image_ids ?? [],
 							currentImageId || variationImageSet.image_id
 						);
 						return;
