@@ -13,7 +13,7 @@
 		border: transparent;
 		display: flex;
 		align-items: center;
-		font-size: 0.875em;
+		font-size: inherit;
 		padding: 0;
 		svg {
 			fill: currentColor;
@@ -24,8 +24,6 @@
 	}
 
 	.wc-block-product-filters__open-overlay {
-		font-size: inherit;
-
 		svg {
 			width: var(--wc-product-filters-overlay-icon-size, 1.5em);
 			height: var(--wc-product-filters-overlay-icon-size, 1.5em);
