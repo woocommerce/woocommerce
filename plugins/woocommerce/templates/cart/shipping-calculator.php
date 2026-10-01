@@ -57,7 +57,7 @@ $show_country_field = apply_filters( 'woocommerce_shipping_calculator_enable_cou
 				</select>
 			</p>
 		<?php elseif ( $has_single_shipping_country ) : ?>
-			<input type="hidden" name="calc_shipping_country" value="<?php echo esc_attr( array_key_first( $shipping_countries ) ); ?>" />
+			<input type="hidden" name="calc_shipping_country" id="calc_shipping_country" class="country_to_state" value="<?php echo esc_attr( array_key_first( $shipping_countries ) ); ?>" />
 		<?php endif; ?>
 
 		<?php if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) ) : ?>

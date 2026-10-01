@@ -80,29 +80,39 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Hiding the country filter should hide the field without removing the required submitted value.
+	 * @testdox Hiding the country field should preserve its submitted value and state synchronization.
 	 */
-	public function test_single_shipping_country_is_submitted_when_filter_hides_field() {
+	public function test_single_shipping_country_is_submitted_when_filter_hides_field(): void {
 		$this->set_shipping_countries( array( 'GR' ) );
+		WC()->customer->set_shipping_country( 'US' );
 		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
 		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
-		$this->assertStringContainsString( '<input type="hidden" name="calc_shipping_country" value="GR" />', $output );
+		$country = new WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $country->next_tag( array( 'tag_name' => 'input' ) ) );
+		$this->assertSame( 'hidden', $country->get_attribute( 'type' ) );
+		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'name' ) );
+		$this->assertSame( 'GR', $country->get_attribute( 'value' ) );
+		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'id' ) );
+		$this->assertTrue( $country->has_class( 'country_to_state' ) );
 	}
 
 	/**
-	 * Extensions should still be able to register the country filter from the before-calculator hook.
+	 * @testdox Extensions should still be able to register the country filter from the before-calculator hook.
 	 */
-	public function test_country_filter_runs_after_before_calculator_hook() {
+	public function test_country_filter_runs_after_before_calculator_hook(): void {
 		$this->set_shipping_countries( array( 'GR' ) );
 		add_action( 'woocommerce_before_shipping_calculator', array( $this, 'disable_country_field_before_calculator' ) );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
 		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
-		$this->assertStringContainsString( '<input type="hidden" name="calc_shipping_country" value="GR" />', $output );
+		$country = new WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $country->next_tag( array( 'tag_name' => 'input' ) ) );
+		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'name' ) );
+		$this->assertSame( 'GR', $country->get_attribute( 'value' ) );
 	}
 
 	/**
