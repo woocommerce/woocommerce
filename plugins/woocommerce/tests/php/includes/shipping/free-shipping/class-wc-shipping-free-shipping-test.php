@@ -206,13 +206,27 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With no requirement the method is always offered.
+	 * The option is worded "No requirement", so neither half of the rule is consulted. The minimum
+	 * here is set out of reach and the coupon in the cart grants no free shipping, so a method that
+	 * started reading either of them would refuse.
+	 *
+	 * @testdox With no requirement neither the minimum nor a coupon is consulted.
 	 */
-	public function test_no_requirement_is_always_offered(): void {
-		$this->method_with( array( 'requires' => '' ) );
-		$this->cart_holding( 1.0 );
+	public function test_no_requirement_consults_neither_the_minimum_nor_a_coupon(): void {
+		$this->method_with(
+			array(
+				'requires'   => '',
+				'min_amount' => '500',
+			)
+		);
 
-		$this->assertTrue( $this->is_offered(), 'No requirement should mean nothing to satisfy.' );
+		$this->cart_holding( 1.0 );
+		$this->apply_coupon( 'no-requirement-plain-discount', array( 'free_shipping' => 'no' ) );
+
+		$this->assertTrue(
+			$this->is_offered(),
+			'A cart far under the stored minimum, holding a coupon that grants nothing, should still be offered free shipping.'
+		);
 	}
 
 	/**
