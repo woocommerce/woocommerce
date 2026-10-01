@@ -125,5 +125,5 @@ runs:
               pnpm ${{ steps.project-filters.outputs.build }} build
             fi
             if [[ '${{ inputs.build-type }}' == 'dependencies' ]]; then
-              pnpm --if-present --workspace-concurrency=Infinity --stream --filter="${{ inputs.build }}^..." '/^build:project:.*$/'
+              pnpm --if-present --stream --filter="${{ inputs.build }}^..." '/^build:project:.*$/'
             fi

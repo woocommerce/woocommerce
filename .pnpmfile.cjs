@@ -124,7 +124,8 @@ function computeReferences(
 		if ( ! consumers.has( depName ) ) {
 			continue;
 		}
-		const resolvedDep = resolved[ depName ];
+		const resolution = resolved[ depName ];
+		const resolvedDep = resolution?.version;
 		if ( ! resolvedDep || ! resolvedDep.startsWith( 'link:' ) ) {
 			continue;
 		}
