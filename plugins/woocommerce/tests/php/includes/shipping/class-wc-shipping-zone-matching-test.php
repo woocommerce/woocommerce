@@ -287,4 +287,38 @@ class WC_Shipping_Zone_Matching_Test extends WC_Unit_Test_Case {
 			'A postcode-only zone matches the postcode in any country.'
 		);
 	}
+
+	/**
+	 * Matching is decided by zone order, not by how specific a zone is: a broad zone placed above a
+	 * narrow one that also matches shadows it, and moving the broad zone below the narrow one hands
+	 * the address back to the narrow zone.
+	 *
+	 * @testdox The zone listed first wins, so a broad zone above a narrow one shadows it.
+	 */
+	public function test_a_broad_zone_above_a_narrow_one_shadows_it(): void {
+		$broad  = $this->zone_with( 'All of the US', 'US', 'country', 1 );
+		$this->zone_with( 'Beverly Hills only', '90210', 'postcode', 2 );
+
+		$destination = array(
+			'country'  => 'US',
+			'state'    => 'CA',
+			'postcode' => '90210',
+		);
+
+		$this->assertSame(
+			'All of the US',
+			$this->matched_zone_name( $destination ),
+			'An address both zones match should land in the one listed first, broad though it is.'
+		);
+
+		// Move the broad zone below the narrow one; the same address now lands in the narrow zone.
+		$broad->set_zone_order( 3 );
+		$broad->save();
+
+		$this->assertSame(
+			'Beverly Hills only',
+			$this->matched_zone_name( $destination ),
+			'With the narrow zone now listed first, it wins, so order decides rather than specificity.'
+		);
+	}
 }
