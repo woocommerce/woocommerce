@@ -104,6 +104,11 @@ class ShowLocalPickupDetailsTest extends \WC_Unit_Test_Case {
 		$shown = $this->controller->show_local_pickup_details( 'Flat rate', $order );
 
 		$this->assertStringContainsString( 'Pickup cost:', $shown, 'A charged pickup should show its cost.' );
+		$this->assertStringContainsString(
+			wc_price( 5, array( 'currency' => $order->get_currency() ) ),
+			$shown,
+			'And the formatted amount, not only the label, so a zero or wrong total is caught.'
+		);
 	}
 
 	/**
