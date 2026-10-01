@@ -30,6 +30,72 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	useStyleProps: () => ( { className: '', style: {} } ),
 } ) );
 
+beforeEach( () => {
+	product.type = 'variable';
+	product.prices.regular_price = '1000';
+	product.prices.price = '900';
+} );
+
+it.each( [
+	[ '', 'Sale' ],
+	[ '0', '0' ],
+] )(
+	'uses the text fallback only for empty custom text (%s)',
+	( saleText, expected ) => {
+		render(
+			<Block
+				productId={ 1 }
+				align={ false }
+				isDescendentOfSingleProductTemplate={ false }
+				badgeContent="text"
+				saleText={ saleText }
+			/>
+		);
+		expect( screen.getByText( expected ) ).toBeInTheDocument();
+	}
+);
+
+it.each< [ string, string, string | null ] >( [
+	[ 'simple', '99600', null ],
+	[ 'simple', '99500', '1%' ],
+	[ 'variable', '99600', null ],
+	[ 'variable', '99500', 'Up to 1%' ],
+] )(
+	'rounds the %s percentage preview at price %s',
+	( type, price, expected ) => {
+		product.type = type;
+		product.prices.regular_price = '100000';
+		product.prices.price = price;
+		const { container } = render(
+			<Block
+				productId={ 1 }
+				align={ false }
+				isDescendentOfSingleProductTemplate={ false }
+				badgeContent="percentage"
+			/>
+		);
+		expect( container.textContent ).toBe(
+			expected === null
+				? ''
+				: `${ expected }Product on sale: ${ expected }`
+		);
+	}
+);
+
+it( 'keeps amount badges for discounts whose percentage rounds to zero', () => {
+	product.prices.regular_price = '100000';
+	product.prices.price = '99600';
+	render(
+		<Block
+			productId={ 1 }
+			align={ false }
+			isDescendentOfSingleProductTemplate={ false }
+			badgeContent="amount"
+		/>
+	);
+	expect( screen.getByText( 'Up to $4.00' ) ).toBeInTheDocument();
+} );
+
 it( 'previews a variable discount using parent prices without rendering on the server', () => {
 	product.prices.price = '900';
 	const { rerender } = render(

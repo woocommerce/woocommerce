@@ -111,6 +111,8 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	public function provider_product_sale_badge_content(): array {
 		return array(
 			'default'    => array( array(), 'Sale' ),
+			'empty'      => array( array( 'saleText' => '' ), 'Sale' ),
+			'zero text'  => array( array( 'saleText' => '0' ), '0' ),
 			'custom'     => array(
 				array( 'saleText' => 'Special offer' ),
 				'Special offer',
@@ -130,6 +132,46 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 				),
 				'Save $5.00',
 			),
+		);
+	}
+
+	/**
+	 * @testdox Percentage badges omit zero-rounded discounts while preserving the rounding boundary.
+	 * @dataProvider provider_percentage_badge_rounding
+	 * @param string $type Product type.
+	 * @param string $sale Sale price.
+	 * @param string $mode Badge content mode.
+	 * @param string $expected Expected badge text, or empty for an omitted badge.
+	 */
+	public function test_percentage_badge_rounding( string $type, string $sale, string $mode, string $expected ): void {
+		$product = 'variable' === $type ? \WC_Helper_Product::create_variation_product() : \WC_Helper_Product::create_simple_product();
+		$priced  = 'variable' === $type ? wc_get_product( $product->get_children()[0] ) : $product;
+		$priced->set_regular_price( '1000' );
+		$priced->set_sale_price( $sale );
+		$priced->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"' . $mode . '"} /--><!-- /wp:woocommerce/single-product -->' );
+
+		if ( '' === $expected ) {
+			$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge', $markup, 'Zero-rounded percentage badges should be omitted.' );
+		} else {
+			$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
+		}
+	}
+
+	/**
+	 * Percentage rounding and unchanged amount-mode cases.
+	 *
+	 * @return array
+	 */
+	public function provider_percentage_badge_rounding(): array {
+		return array(
+			'simple zero'     => array( 'simple', '996', 'percentage', '' ),
+			'simple half'     => array( 'simple', '995', 'percentage', '1%' ),
+			'variable zero'   => array( 'variable', '996', 'percentage', '' ),
+			'variable half'   => array( 'variable', '995', 'percentage', 'Up to 1%' ),
+			'simple amount'   => array( 'simple', '996', 'amount', '$4.00' ),
+			'variable amount' => array( 'variable', '996', 'amount', 'Up to $4.00' ),
 		);
 	}
 

@@ -48,16 +48,20 @@ export const Block = ( props: Props ): ReactElement | null => {
 	const isNumeric =
 		props.badgeContent === 'amount' || props.badgeContent === 'percentage';
 
-	let label = props.saleText ?? __( 'Sale', 'woocommerce' );
+	let label = props.saleText || __( 'Sale', 'woocommerce' );
 	if ( isNumeric && product.type !== 'grouped' ) {
 		const prices = 'prices' in product ? product.prices : undefined;
 		const regular = Number( prices?.regular_price );
 		const price = Number( prices?.price );
 		if ( regular > 0 && price < regular ) {
 			const discount = regular - price;
+			const percentage = Math.round( ( discount / regular ) * 100 );
+			if ( props.badgeContent === 'percentage' && percentage === 0 ) {
+				return null;
+			}
 			const value =
 				props.badgeContent === 'percentage'
-					? `${ Math.round( ( discount / regular ) * 100 ) }%`
+					? `${ percentage }%`
 					: formatPrice(
 							discount,
 							getCurrencyFromPriceResponse( prices )
