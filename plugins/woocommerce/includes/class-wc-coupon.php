@@ -1551,7 +1551,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * guard still applies.  When neither is supplied, this delegates entirely
 	 * to the parent.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @param array  $props   Key/value pairs of properties to set.
 	 * @param string $context Operation context ('set', 'edit', 'view').
 	 * @return bool|WP_Error True on success, WP_Error on failure.
@@ -1562,7 +1562,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		// When only one amount or neither is supplied, the parent sequential
 		// setter calls (and their individual guards) handle everything.
-		if ( ! $has_minimum || ! $has_maximum ) {
+		// While loading from the database, skip the pair check so a stored minimum above the maximum is kept rather than dropped.
+		if ( ! $has_minimum || ! $has_maximum || ! $this->get_object_read() ) {
 			return parent::set_props( $props, $context );
 		}
 

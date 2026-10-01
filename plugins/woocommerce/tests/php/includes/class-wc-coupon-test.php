@@ -608,4 +608,44 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, $coupon->get_maximum_discount() );
 	}
+
+	/**
+	 * @testdox Loading a coupon whose stored minimum exceeds its stored maximum keeps the minimum and drops the maximum.
+	 */
+	public function test_loading_inverted_stored_amounts_keeps_minimum_spend(): void {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'inverted-spend-limits',
+			array(
+				'minimum_amount' => '150',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$this->assertSame( '150', $coupon->get_minimum_amount() );
+		$this->assertSame( '0', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props still rejects an inverted min/max pair on a coupon loaded from the database.
+	 */
+	public function test_set_props_rejects_inverted_pair_on_loaded_coupon(): void {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'loaded-spend-limits',
+			array(
+				'minimum_amount' => '50',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '150',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( '50', $coupon->get_minimum_amount() );
+		$this->assertSame( '100', $coupon->get_maximum_amount() );
+	}
 }
