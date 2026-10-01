@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\AttributeCountQueryGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -267,43 +267,33 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		// Count from the same attribute source as the query generator; Store API still uses taxonomies.
-		$use_lookup_table  = $this->query_clauses instanceof QueryClauses && 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
-		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
-		$transient_key     = $this->get_transient_key(
+		$product_ids         = $this->get_cached_product_ids( $query_vars );
+		$attribute_count_sql = null;
+		if ( $product_ids && $this->query_clauses instanceof AttributeCountQueryGenerator ) {
+			$attribute_count_sql = $this->query_clauses->get_attribute_count_query( $query_vars, $attribute_to_count, $product_ids );
+		}
+
+		$transient_key = $this->get_transient_key(
 			$query_vars,
 			'attribute',
 			array(
-				'taxonomy'          => $attribute_to_count,
-				'use_lookup_table'  => $use_lookup_table,
-				'hide_out_of_stock' => $hide_out_of_stock,
+				'taxonomy' => $attribute_to_count,
+				'query'    => $attribute_count_sql,
 			)
 		);
-		$cached_data       = $this->get_cache( $transient_key );
+		$cached_data   = $this->get_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
 		}
 
-		$results     = array();
-		$product_ids = $this->get_cached_product_ids( $query_vars );
+		$results = array();
 
 		if ( $product_ids ) {
 			global $wpdb;
 
 			$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			if ( $use_lookup_table ) {
-				$lookup_table        = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
-				$in_stock_clause     = $hide_out_of_stock ? ' AND in_stock = 1' : '';
-				$attribute_count_sql = "
-					SELECT COUNT( DISTINCT product_or_parent_id ) as term_count, term_id as term_count_id
-					FROM {$lookup_table}
-					WHERE product_or_parent_id IN ( {$product_ids} )
-					AND taxonomy = '{$taxonomy_escaped}'
-					{$in_stock_clause}
-					GROUP BY term_id
-				";
-			} else {
+			if ( null === $attribute_count_sql ) {
 				$attribute_count_sql = "
 					SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
 					FROM {$wpdb->term_relationships} AS term_relationships
@@ -517,6 +507,7 @@ class FilterData {
 			md5(
 				wp_json_encode(
 					array(
+						'generator'   => get_class( $this->query_clauses ),
 						'query_vars'  => $this->normalize_query_vars( $query_vars ),
 						'params'      => $this->get_params_for_cache(),
 						'extra'       => $extra,
@@ -689,6 +680,7 @@ class FilterData {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
 			wp_json_encode(
 				array(
+					'generator'  => get_class( $this->query_clauses ),
 					'query_vars' => $this->normalize_query_vars( $query_vars ),
 					'params'     => $this->get_params_for_cache(),
 				)
