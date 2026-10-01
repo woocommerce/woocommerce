@@ -17,7 +17,6 @@ add_filter(
 		$screens['example'] = array(
 			'title'     => 'Example gateway settings',
 			'rest_path' => '/payment-settings-example/v1/settings',
-			'scripts'   => array( 'payment-settings-example-body' ),
 		);
 		return $screens;
 	}
@@ -62,12 +61,11 @@ add_action(
 	}
 );
 
-// A script module that adds to the `title` field's definition, and a script that shows one card at a time.
+// A script module that adds to the `title` field's definition.
 add_action(
 	'init',
 	static function () {
 		wp_register_script_module( 'payment-settings-example/fields', plugins_url( 'fields.js', __FILE__ ) );
-		wp_register_script( 'payment-settings-example-body', plugins_url( 'body.js', __FILE__ ), array( 'wp-element', 'wp-hooks' ), '1.0', true );
 	}
 );
 

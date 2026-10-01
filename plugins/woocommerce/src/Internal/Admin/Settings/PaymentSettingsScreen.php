@@ -217,7 +217,7 @@ class PaymentSettingsScreen {
 	}
 
 	/**
-	 * Get the screen named in the route, such as `p=/settings/woopayments?view=general`.
+	 * Get the screen named in the route, such as `p=/settings/woopayments`.
 	 *
 	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null
 	 */

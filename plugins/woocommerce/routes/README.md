@@ -18,5 +18,3 @@ A screen is experimental: every part of this can change in any release. See `plu
 3. Set the layout with the `get_entity_view_config_woo_settings_{id}` filter.
 
 The screen opens at `admin.php?page=wc-payment-settings-wp-admin&p=/settings/{id}`.
-
-To render something other than the whole form, such as tabs, add a component with the `woocommerce.experimentalPaymentSettings.body` JavaScript filter. It receives the screen, its fields and form, the current values, a `view` taken from the route (`/settings/{id}?view=…`), `onChangeView()` to change it, and `renderForm( form )` to render part of the form.
