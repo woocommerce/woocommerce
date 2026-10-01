@@ -425,13 +425,14 @@ class WC_Checkout {
 
 			// The gateway moved this order on but something died before the cart was
 			// emptied, so this submit is a repeat: a new order would charge the shopper twice.
-			if ( $order instanceof WC_Order && $order->has_cart_hash( $cart_hash ) && PaymentRecovery::order_moved_past_payment( $order ) ) {
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( $order_id );
+			if ( $session_order ) {
 				return new WP_Error(
 					self::ORDER_ALREADY_PLACED_ERROR,
 					__( 'This order has already been placed.', 'woocommerce' ),
 					array(
-						'order_id' => $order_id,
-						'redirect' => $order->get_checkout_order_received_url(),
+						'order_id' => $session_order->get_id(),
+						'redirect' => $session_order->get_checkout_order_received_url(),
 					)
 				);
 			}
@@ -1499,6 +1500,13 @@ class WC_Checkout {
 			}
 
 			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
+
+			// Answer a repeat submit before validation: the first order may have taken the last
+			// units, and the stock check would then turn the shopper away from an order they placed.
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( absint( WC()->session->get( 'order_awaiting_payment' ) ) );
+			if ( $session_order ) {
+				$this->send_repeat_submit_response( $session_order );
+			}
 
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );

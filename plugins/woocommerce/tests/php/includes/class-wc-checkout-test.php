@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
@@ -906,6 +907,53 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
 		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build a second order.' );
 		$this->assertStringContainsString( 'No second order was created', $this->latest_note( $order ), 'The merchant should see the repeat submit on the order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit after a card gateway's payment_complete() cleared order_awaiting_payment and the request died.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_after_payment_complete_cleared_the_session(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		// What an exit inside a card gateway's status change leaves: the order paid, the older pointer cleared, the cart full.
+		$order = wc_get_order( $this->leave_session_order_in_status( OrderStatus::PENDING ) );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_died_in_transition' );
+		$this->post_checkout_form( WC_Gateway_COD::ID );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build and charge a second order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit before the stock check, when the first order took the last unit.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_before_the_stock_check(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'        => true,
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$order = wc_get_order( $this->sut->create_order( self::COD_POSTED_DATA ) );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_took_the_last_unit' );
+		$this->post_checkout_form( WC_Gateway_COD::ID );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity(), 'The first order took the last unit.' );
+		$this->assertSame( 'success', $response['result'] ?? null, 'The shopper should be sent to the order, not told the product sold out: ' . wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
 	}
 
 	/**
