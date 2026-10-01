@@ -38,8 +38,8 @@ class Html_Order_Item_Meta_Test extends WC_Unit_Test_Case {
 		$xpath  = new DOMXPath( $document );
 		$fields = array(
 			'order_item_id' => array( $item_id ),
-			'meta_key'      => array(),
-			'meta_value'    => array(),
+			'meta_key'      => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Admin form field name, not a query.
+			'meta_value'    => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Admin form field name, not a query.
 		);
 
 		foreach ( $xpath->query( '//input[starts-with(@name, "meta_key[")]' ) as $input ) {
@@ -49,7 +49,7 @@ class Html_Order_Item_Meta_Test extends WC_Unit_Test_Case {
 
 		foreach ( $xpath->query( '//textarea[starts-with(@name, "meta_value[")]' ) as $textarea ) {
 			preg_match( '/\[(\d+)\]\[(\d+)\]/', $textarea->getAttribute( 'name' ), $ids );
-			$fields['meta_value'][ (int) $ids[1] ][ (int) $ids[2] ] = $textarea->textContent;
+			$fields['meta_value'][ (int) $ids[1] ][ (int) $ids[2] ] = $textarea->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode property.
 		}
 
 		return $fields;
