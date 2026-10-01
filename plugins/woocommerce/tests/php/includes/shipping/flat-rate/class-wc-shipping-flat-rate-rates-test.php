@@ -597,4 +597,119 @@ class WC_Shipping_Flat_Rate_Rates_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 1, $rate->get_cost(), 'A class on something that is not shipped should not be charged for.' );
 	}
+
+	/**
+	 * The class cost fields and the no-class field are separate rows on the same form, and an
+	 * ordinary cart holds both kinds of item, so both charges land on the one rate.
+	 *
+	 * @testdox A cart holding a classified and an unclassified item is charged for both.
+	 */
+	public function test_a_mixed_package_is_charged_for_both_kinds_of_item(): void {
+		$classified = $this->shippable_product( 'flat-rate-mixed' );
+
+		$this->method_with(
+			array(
+				'cost'          => '1',
+				'class_cost_' . $classified->get_shipping_class_id() => '6',
+				'no_class_cost' => '3',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $classified,
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			20.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 10, $rate->get_cost(), 'The base cost, the class cost and the no-class cost should all be charged.' );
+	}
+
+	/**
+	 * A blank class cost adds nothing, so a method whose only field for this package is a blank
+	 * class cost has nothing to charge and offers no rate, the same as one with nothing filled in
+	 * at all. The sibling test keeps its rate through the base cost rather than through the class.
+	 *
+	 * @testdox A blank class cost and no other cost offers no rate.
+	 */
+	public function test_a_blank_class_cost_with_no_other_cost_offers_no_rate(): void {
+		$classified = $this->shippable_product( 'flat-rate-only-blank' );
+
+		$this->method_with(
+			array(
+				'cost' => '',
+				'class_cost_' . $classified->get_shipping_class_id() => '',
+			)
+		);
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $classified,
+					'quantity'   => 1,
+					'line_total' => 10.0,
+				),
+			),
+			10.0
+		);
+
+		$this->assertSame( array(), $this->rates_for( $package ), 'Nothing was filled in for this package, so there is nothing to charge.' );
+	}
+
+	/**
+	 * `[weight]` is substituted into the cost string before `do_shortcode()` runs, so it can stand
+	 * where a shortcode attribute is read rather than only where a number is.
+	 *
+	 * @testdox A percentage fee can take its percentage from the package weight.
+	 */
+	public function test_a_percentage_fee_can_be_driven_by_the_package_weight(): void {
+		$this->method_with( array( 'cost' => '[fee percent="[weight]"]' ) );
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product( '', 10 ),
+					'quantity'   => 1,
+					'line_total' => 200.0,
+				),
+			),
+			200.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 20, $rate->get_cost(), 'Ten percent of a 200.00 package, with the ten coming from the weight.' );
+	}
+
+	/**
+	 * Nothing requires a product to carry a weight, so the percentage can come out as zero. The
+	 * method still offers the rate, priced at nothing, rather than withdrawing itself.
+	 *
+	 * @testdox A weight-driven percentage fee is free when nothing in the package has a weight.
+	 */
+	public function test_a_weight_driven_fee_is_free_without_a_weight(): void {
+		$this->method_with( array( 'cost' => '[fee percent="[weight]"]' ) );
+		$package = $this->package_of(
+			array(
+				array(
+					'product'    => $this->shippable_product(),
+					'quantity'   => 1,
+					'line_total' => 200.0,
+				),
+			),
+			200.0
+		);
+
+		$rate = $this->rate_for( $package );
+
+		$this->assertEquals( 0, $rate->get_cost(), 'No weight means no percentage, which is a free rate rather than no rate.' );
+	}
 }
