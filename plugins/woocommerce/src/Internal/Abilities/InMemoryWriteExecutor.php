@@ -55,6 +55,16 @@ final class InMemoryWriteExecutor {
 			}
 
 			$saved = $subject->save();
+			if ( is_wp_error( $saved ) ) {
+				return self::with_status( $saved );
+			}
+
+			if ( is_a( $class_name, CommitsAfterSave::class, true ) ) {
+				$committed = $class_name::commit( $subject, $input );
+				if ( is_wp_error( $committed ) ) {
+					return self::with_status( $committed );
+				}
+			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return new \WP_Error( 'woocommerce_in_memory_write_save_failed', $exception->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $exception ) {
@@ -68,17 +78,6 @@ final class InMemoryWriteExecutor {
 				)
 			);
 			return new \WP_Error( 'woocommerce_in_memory_write_save_failed', __( 'The change could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		if ( is_wp_error( $saved ) ) {
-			return self::with_status( $saved );
-		}
-
-		if ( is_a( $class_name, CommitsAfterSave::class, true ) ) {
-			$committed = $class_name::commit( $subject, $input );
-			if ( is_wp_error( $committed ) ) {
-				return self::with_status( $committed );
-			}
 		}
 
 		return $class_name::respond( $subject );

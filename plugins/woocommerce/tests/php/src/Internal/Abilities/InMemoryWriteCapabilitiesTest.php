@@ -242,6 +242,33 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a WP_Error without responding when commit() throws, with the subject already saved.
+	 *
+	 * @testWith ["commit-data-throws", 400]
+	 *           ["commit-throws", 500]
+	 *
+	 * @param string $value  Value that makes commit() throw.
+	 * @param int    $status Expected status.
+	 */
+	public function test_commit_exception_returns_wp_error( string $value, int $status ): void {
+		$result = wp_get_ability( TestCommittingOptionWriteDefinition::ABILITY_ID )->execute(
+			array(
+				'name'  => self::OPTION,
+				'value' => $value,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_in_memory_write_save_failed', $result->get_error_code() );
+		$this->assertSame( $status, $result->get_error_data()['status'] );
+		if ( 400 === $status ) {
+			$this->assertSame( 'Invalid data.', $result->get_error_message() );
+		}
+		$this->assertSame( $value, get_option( self::OPTION ) );
+		$this->assertFalse( get_option( TestCommittingOptionWriteDefinition::LOG_OPTION ) );
+	}
+
+	/**
 	 * @testdox Should not commit when the save fails.
 	 */
 	public function test_commit_skipped_when_save_fails(): void {

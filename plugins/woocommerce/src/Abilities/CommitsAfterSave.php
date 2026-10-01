@@ -21,7 +21,8 @@ interface CommitsAfterSave {
 
 	/**
 	 * Run the step that follows the save. The subject is already saved when
-	 * this returns an error.
+	 * this returns an error or throws. The executor returns that error, or a
+	 * WP_Error for the exception, and does not call respond().
 	 *
 	 * @param \WC_Data|InMemorySubject $subject Saved subject.
 	 * @param array                    $input   Ability input.

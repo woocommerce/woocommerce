@@ -28,13 +28,22 @@ class TestCommittingOptionWriteDefinition extends TestOptionWriteDefinition impl
 	}
 
 	/**
-	 * Log the saved value, refusing `uncommittable`.
+	 * Log the saved value, refusing `uncommittable` and throwing on
+	 * `commit-data-throws` and `commit-throws`.
 	 *
 	 * @param TestOptionRecord $subject Saved option.
 	 * @param array            $input   Ability input.
 	 * @return true|\WP_Error
+	 * @throws \WC_Data_Exception When the value is `commit-data-throws`.
+	 * @throws \RuntimeException  When the value is `commit-throws`.
 	 */
 	public static function commit( $subject, array $input ) {
+		if ( 'commit-data-throws' === $input['value'] ) {
+			throw new \WC_Data_Exception( 'test_invalid', 'Invalid data.' );
+		}
+		if ( 'commit-throws' === $input['value'] ) {
+			throw new \RuntimeException( 'Remote is gone.' );
+		}
 		if ( 'uncommittable' === $input['value'] ) {
 			return new \WP_Error( 'test_commit_failed', 'Commit failed.' );
 		}
