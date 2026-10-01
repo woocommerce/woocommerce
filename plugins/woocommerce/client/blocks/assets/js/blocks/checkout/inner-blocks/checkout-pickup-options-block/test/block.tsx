@@ -322,7 +322,9 @@ test( 'shows the pickup cost instead of free once the merchant sets one', async 
 
 	// The amount is rendered in parts ($ then 5.00), so read it off the option's accessible name.
 	expect(
-		await screen.findByRole( 'radio', { name: /New York City.*\$\s*5\.00/ } )
+		await screen.findByRole( 'radio', {
+			name: /New York City.*\$\s*5\.00/,
+		} )
 	).toBeInTheDocument();
 	expect( screen.queryByText( 'free' ) ).not.toBeInTheDocument();
 } );
